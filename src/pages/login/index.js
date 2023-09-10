@@ -3,7 +3,9 @@ import { useState } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
-import Image from 'next/image'
+
+// ** Hooks
+import { useAuth } from 'src/hooks/useAuth'
 
 // ** MUI Imports
 import {
@@ -12,17 +14,12 @@ import {
   Button,
   Checkbox,
   TextField,
-  InputLabel,
+  Grid,
   IconButton,
   Box,
-  FormControl,
-  useMediaQuery,
-  OutlinedInput,
   InputAdornment,
-  Typography,
   CardMedia,
 } from '@mui/material'
-import MuiCard from '@mui/material/Card'
 import MuiFormControlLabel from '@mui/material/FormControlLabel'
 import { styled, useTheme } from '@mui/material/styles'
 
@@ -30,24 +27,11 @@ import { styled, useTheme } from '@mui/material/styles'
 import Icon from 'src/@core/components/icon'
 
 // ** Third Party Imports
+import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useForm, Controller } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { useSession, signIn, signOut, getCsrfToken } from 'next-auth/react'
-
-// ** Hooks
-import { useAuth } from 'src/hooks/useAuth'
-import useBgColor from 'src/@core/hooks/useBgColor'
-import { useSettings } from 'src/@core/hooks/useSettings'
-
-// ** Configs
-import themeConfig from 'src/configs/themeConfig'
 
 // ** Layout Import
 import BlankLayout from 'src/@core/layouts/BlankLayout'
-
-// ** Demo Imports
-import FooterIllustrationsV2 from 'src/views/pages/auth/FooterIllustrationsV2'
 
 // ** Styled Components
 const LinkStyled = styled(Link)(({ theme }) => ({
@@ -63,76 +47,33 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
   }
 }))
 
-const schema = yup.object().shape({
-  email: yup.string().email().required(),
-  password: yup.string().min(5).required()
-})
-
-const defaultValues = {
-  password: 'admin',
-  email: 'admin@materio.com'
-}
-
 const LoginPage = () => {
 
-  const [values, setValues] = useState({
-    password: '',
-    showPassword: false
-  })
+  const [showPassword, setShowPassword] = useState(false)
 
   // ** Hooks
-  const auth = useAuth()
   const theme = useTheme()
-  const bgColors = useBgColor()
-  const { settings } = useSettings()
-  const hidden = useMediaQuery(theme.breakpoints.down('md'))
+  const auth = useAuth()
 
-  // ** Vars
-  const { skin } = settings
+  const validation = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      email: '',
+      password: '',
+      rememberMe: true
+    },
 
-  const {
-    control,
-    setError,
-    handleSubmit,
-    formState: { errors }
-  } = useForm({
-    defaultValues,
-    mode: 'onBlur',
-    resolver: yupResolver(schema)
-  })
+    validationSchema: yup.object({
+      email: yup.string().email().required(),
+      password: yup.string().min(5, 'Must be at least 6 characters').required()
+    }),
+    onSubmit: values => {
 
-  const handleChange = prop => event => {
-    setValues({ ...values, [prop]: event.target.value })
-  }
-
-  const handleClickShowPassword = () => {
-    setValues({ ...values, showPassword: !values.showPassword })
-  }
-
-  const onSubmit = async data => {
-    const { email, password } = data
-    console.log({ email, password })
-    try {
-      const res = await signIn('credentials', {
-        email,
-        password,
-        redirect: false
-      })
-      if (res?.error) {
-        console.log({ autherror: res?.error })
-        throw new Error(res.error)
-
-        // setMessage(res.error)
-      } else {
-        return router.push('/dashboards/analytics/')
-      }
-    } catch (error) {
-      setError('email', {
-        type: 'manual',
-        message: 'Email or Password is invalid'
+      auth.login({ ...values }, (error) => {
+        console.log({ error })
       })
     }
-  }
+  })
 
   return (
     <Box className='content-center'>
@@ -140,52 +81,65 @@ const LoginPage = () => {
         <CardMedia
           component="img"
           image="/images/logos/ArgusLogo.png"
-          alt="Paella dish"
+          alt="ArgusERP"
           sx={{
             height: 60,
             backgroundColor: theme.palette.primary.main,
             objectFit: 'contain',
-            p: 2,
+            p: 4,
           }}
         />
         <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }}>
-          <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
-            <TextField autoFocus fullWidth id='email' label='Email' sx={{ mb: 4 }} />
-            <FormControl fullWidth>
-              <InputLabel htmlFor='auth-login-password'>Password</InputLabel>
-              <OutlinedInput
-                label='Password'
-                value={values.password}
-                id='auth-login-password'
-                onChange={handleChange('password')}
-                type={values.showPassword ? 'text' : 'password'}
-                endAdornment={
-                  <InputAdornment position='end'>
-                    <IconButton
-                      edge='end'
-                      onClick={handleClickShowPassword}
-                      onMouseDown={e => e.preventDefault()}
-                      aria-label='toggle password visibility'
-                    >
-                      <Icon icon={values.showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                    </IconButton>
-                  </InputAdornment>
-                }
+          <Grid container spacing={5}>
+            <Grid item xs={12}>
+              <TextField
+                name='email'
+                size='small'
+                fullWidth
+                label='Email'
+                value={validation.values.email}
+                onChange={validation.handleChange}
+                error={validation.touched.email && validation.errors.email}
+                helperText={validation.touched.email && validation.errors.email}
               />
-            </FormControl>
-            <Box
-              sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
-            >
-              <FormControlLabel control={<Checkbox />} label='Remember Me' />
-              <LinkStyled href='/pages/auth/forgot-password-v1'>Forgot Password?</LinkStyled>
-            </Box>
-            <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 7 }}>
-              Login
-            </Button>
-          </form>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name='password'
+                size='small'
+                fullWidth
+                label='Password'
+                type={showPassword ? 'text' : 'password'}
+                value={validation.values.password}
+                onChange={validation.handleChange}
+                error={validation.touched.password && validation.errors.password}
+                helperText={validation.touched.password && validation.errors.password}
+                InputProps={{
+                  endAdornment:
+                    <InputAdornment position='end'>
+                      <IconButton
+                        edge='end'
+                        onClick={() => setShowPassword(!showPassword)}
+                        onMouseDown={e => e.preventDefault()}
+                      >
+                        <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                      </IconButton>
+                    </InputAdornment>
+                }}
+              />
+            </Grid>
+          </Grid>
+          <Box
+            sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
+          >
+            <FormControlLabel control={<Checkbox />} label='Remember Me' />
+            <LinkStyled href='/pages/auth/forgot-password-v1'>Forgot Password?</LinkStyled>
+          </Box>
+          <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 7 }} onClick={validation.handleSubmit}>
+            Login
+          </Button>
         </CardContent>
       </Card>
-      {/* <FooterIllustrationsV1 /> */}
     </Box>
   )
 }
