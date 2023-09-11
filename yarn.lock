@@ -288,7 +288,7 @@
   "resolved" "https://registry.npmjs.org/@emotion/memoize/-/memoize-0.8.1.tgz"
   "version" "0.8.1"
 
-"@emotion/react@11.10.8":
+"@emotion/react@^11.10.8":
   "integrity" "sha512-ZfGfiABtJ1P1OXqOBsW08EgCDp5fK6C5I8hUJauc/VcJBGSzqAirMnFslhFWnZJ/w5HxPI36XbvMV0l4KZHl+w=="
   "resolved" "https://registry.npmjs.org/@emotion/react/-/react-11.10.8.tgz"
   "version" "11.10.8"
@@ -328,7 +328,7 @@
   "resolved" "https://registry.npmjs.org/@emotion/sheet/-/sheet-1.2.2.tgz"
   "version" "1.2.2"
 
-"@emotion/styled@11.10.8":
+"@emotion/styled@^11.10.8":
   "integrity" "sha512-gow0lF4Uw/QEdX2REMhI8v6wLOabPKJ+4HKNF0xdJ2DJdznN6fxaXpQOx6sNkyBhSUL558Rmcu1Lq/MYlVo4vw=="
   "resolved" "https://registry.npmjs.org/@emotion/styled/-/styled-11.10.8.tgz"
   "version" "11.10.8"
@@ -580,6 +580,13 @@
   "resolved" "https://registry.npmjs.org/@mui/core-downloads-tracker/-/core-downloads-tracker-5.14.8.tgz"
   "version" "5.14.8"
 
+"@mui/icons-material@^5.14.8":
+  "integrity" "sha512-YXcReLydTuNWb1/PxduAH5LgnHNH6spSQBaA0JOz9HD4J+vwst0IanAQgsXy9KKCJSjCsHywE3DB8X+w/b4eeQ=="
+  "resolved" "https://registry.npmjs.org/@mui/icons-material/-/icons-material-5.14.8.tgz"
+  "version" "5.14.8"
+  dependencies:
+    "@babel/runtime" "^7.22.10"
+
 "@mui/lab@5.0.0-alpha.128":
   "integrity" "sha512-jsGP8bbAvnG+cBCveHhF49BHhVNojBvblWrNUuMkkLYS6T239Dela/+UvVnfIn/1hfUUNf/G/RiB42qC6ud7vQ=="
   "resolved" "https://registry.npmjs.org/@mui/lab/-/lab-5.0.0-alpha.128.tgz"
@@ -594,7 +601,7 @@
     "prop-types" "^15.8.1"
     "react-is" "^18.2.0"
 
-"@mui/material@5.12.2":
+"@mui/material@^5.12.2":
   "integrity" "sha512-XOVy6fVC0rI2dEwDq/1s4Te2hewTUe6lznzeVnruyATGkdmM06WnHqkZOoLVIWo9hWwAxpcgTDcAIVpFtt1nrw=="
   "resolved" "https://registry.npmjs.org/@mui/material/-/material-5.12.2.tgz"
   "version" "5.12.2"
