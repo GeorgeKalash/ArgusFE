@@ -60,15 +60,14 @@ const LoginPage = () => {
     initialValues: {
       email: '',
       password: '',
-      rememberMe: true
+      rememberMe: false
     },
-
     validationSchema: yup.object({
       email: yup.string().email().required(),
-      password: yup.string().min(5, 'Must be at least 6 characters').required()
+      password: yup.string().min(5, 'Must be at least 6 characters').required(),
+      rememberMe: yup.boolean()
     }),
     onSubmit: values => {
-
       auth.login({ ...values }, (error) => {
         console.log({ error })
       })
@@ -132,7 +131,16 @@ const LoginPage = () => {
           <Box
             sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
           >
-            <FormControlLabel control={<Checkbox />} label='Remember Me' />
+            <FormControlLabel
+              label='Remember Me'
+              control={
+                <Checkbox
+                  name='rememberMe'
+                  checked={validation.values.rememberMe}
+                  onChange={validation.handleChange}
+                />
+              }
+            />
             <LinkStyled href='/pages/auth/forgot-password-v1'>Forgot Password?</LinkStyled>
           </Box>
           <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 7 }} onClick={validation.handleSubmit}>
