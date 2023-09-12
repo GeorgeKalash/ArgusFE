@@ -77,6 +77,15 @@ export const SettingsProvider = ({ children, pageSettings }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageSettings])
+  useEffect(() => {
+    if (settings.layout === 'horizontal' && settings.mode === 'semi-dark') {
+      saveSettings({ ...settings, mode: 'light' })
+    }
+    if (settings.layout === 'horizontal' && settings.appBar === 'hidden') {
+      saveSettings({ ...settings, appBar: 'fixed' })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.layout])
 
   const saveSettings = updatedSettings => {
     storeSettings(updatedSettings)
