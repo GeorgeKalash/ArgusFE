@@ -52,9 +52,12 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
 
     const initAuth = async () => {
-      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
-      if (storedToken) {
-        setUser(JSON.parse(window.localStorage.getItem('userData')))
+      const userData =
+        window.localStorage.getItem('userData') ?
+          window.localStorage.getItem('userData') : window.sessionStorage.getItem('userData')
+
+      if (userData) {
+        setUser(JSON.parse(userData))
         setLoading(false)
       } else {
         setLoading(false)
@@ -108,12 +111,14 @@ const AuthProvider = ({ children }) => {
         ...signIn3.data.record
       }
 
-      params.rememberMe
-        ? window.localStorage.setItem(authConfig.storageTokenKeyName, signIn3.data.record.accessToken)
-        : null
+      // params.rememberMe
+      //   ? window.localStorage.setItem(authConfig.storageTokenKeyName, signIn3.data.record.accessToken)
+      //   : null
       const returnUrl = router.query.returnUrl
       setUser({ ...loggedUser })
-      params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(loggedUser)) : null
+      params.rememberMe ?
+        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+        : window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
       const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
 
       router.replace(redirectURL)
@@ -125,7 +130,9 @@ const AuthProvider = ({ children }) => {
   const handleLogout = () => {
     setUser(null)
     window.localStorage.removeItem('userData')
-    window.localStorage.removeItem(authConfig.storageTokenKeyName)
+    window.sessionStorage.removeItem('userData')
+
+    // window.localStorage.removeItem(authConfig.storageTokenKeyName)
     router.push('/login')
   }
 
