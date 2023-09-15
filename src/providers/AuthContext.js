@@ -4,9 +4,6 @@ import { createContext, useEffect, useState } from 'react'
 // ** Next Import
 import { useRouter } from 'next/router'
 
-// ** Axios
-import axios from 'axios'
-
 // ** Config
 import authConfig from 'src/configs/auth'
 
@@ -22,7 +19,9 @@ const defaultProvider = {
 const AuthContext = createContext(defaultProvider)
 
 // ** 3rd Party Imports
+import axios from 'axios'
 import SHA1 from 'crypto-js/sha1';
+import jwt from 'jwt-decode';
 
 const encryptePWD = (pwd) => {
 
@@ -49,6 +48,7 @@ const AuthProvider = ({ children }) => {
 
   // ** Hooks
   const router = useRouter()
+
   useEffect(() => {
 
     const initAuth = async () => {
@@ -107,7 +107,7 @@ const AuthProvider = ({ children }) => {
         role: 'admin',
         username: getUS2.data.record.fullName,
         id: 1,
-
+        expiresAt: jwt(signIn3.data.record.accessToken).exp,
         ...signIn3.data.record
       }
 
@@ -136,13 +136,62 @@ const AuthProvider = ({ children }) => {
     router.push('/login')
   }
 
+  const getAccessToken = async () => {
+    return new Promise((resolve) => {
+
+      if (user.expiresAt !== null) {
+
+        var dateNow = new Date()
+
+        if (user.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
+
+          var bodyFormData = new FormData()
+          bodyFormData.append('record', JSON.stringify({ "accessToken": user.accessToken, "refreshToken": user.refreshToken }))
+
+          return axios({
+
+            method: 'POST',
+            url: process.env.NEXT_PUBLIC_AuthURL + 'MA.asmx/' + 'newAT',
+            headers: {
+              'authorization': 'Bearer ' + user.accessToken,
+              "Content-Type": "multipart/form-data",
+            },
+            data: bodyFormData,
+          })
+            .then(res => {
+
+              let newUser = {
+                ...user,
+                accessToken: res.data.record.accessToken,
+                refreshToken: res.data.record.refreshToken,
+                expiresAt: jwt(res.data.record.accessToken).exp,
+              }
+
+              if (window.localStorage.getItem('userData'))
+                window.localStorage.setItem('userData', JSON.stringify(newUser))
+              else
+                window.sessionStorage.setItem('userData', JSON.stringify(newUser))
+
+              resolve(res.data.record.accessToken)
+            })
+            .catch(() => {
+              resolve('error getting new Access Token')
+            })
+        } else
+          resolve(user.accessToken)
+      } else
+        resolve(null)
+    })
+  }
+
   const values = {
     user,
     loading,
     setUser,
     setLoading,
     login: handleLogin,
-    logout: handleLogout
+    logout: handleLogout,
+    getAccessToken
   }
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>

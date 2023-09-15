@@ -22,7 +22,32 @@ import AnalyticsDepositWithdraw from 'src/views/dashboards/analytics/AnalyticsDe
 import AnalyticsSalesByCountries from 'src/views/dashboards/analytics/AnalyticsSalesByCountries'
 import AnalyticsTransactionsCard from 'src/views/dashboards/analytics/AnalyticsTransactionsCard'
 
+import { useEffect, useContext } from 'react'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
+
 const AnalyticsDashboard = () => {
+
+  let { getRequest } = useContext(RequestsContext)
+
+  const getTest = async () => {
+    var parameters = '_recordId=' + '105'
+    getRequest({
+      'extension': ManufacturingRepository.getLBR,
+      'parameters': parameters,
+    })
+      .then((getLBRRes) => {
+        console.log({ getLBRRes })
+      })
+      .catch((error) => {
+        console.log({ error })
+      })
+  }
+
+  useEffect(() => {
+    getTest()
+  }, [])
+
   return (
     <ApexChartWrapper>
       <Grid container spacing={6}>
