@@ -36,6 +36,7 @@ import Spinner from 'src/@core/components/spinner'
 // ** Contexts
 import { AuthProvider } from 'src/providers/AuthContext'
 import { RequestsProvider } from 'src/providers/RequestsContext'
+import { MenuProvider } from 'src/providers/MenuContext'
 import { TabsProvider } from 'src/providers/TabsContext'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
 
@@ -93,9 +94,11 @@ const App = props => {
   const getLayout =
     Component.getLayout ?? (page =>
       <UserLayout contentHeightFixed={contentHeightFixed}>
-        <TabsProvider>
-          {page}
-        </TabsProvider>
+        <MenuProvider>
+          <TabsProvider>
+            {page}
+          </TabsProvider>
+        </MenuProvider>
       </UserLayout>
     )
   const setConfig = Component.setConfig ?? undefined

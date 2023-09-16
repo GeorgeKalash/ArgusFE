@@ -72,30 +72,36 @@ const AuthProvider = ({ children }) => {
 
       const getAC = await axios({
         method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=anthonys`
+        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=react`
       })
 
+      //when fixed from getAC react https://${getAC.data.record.api} needs to be ${getAC.data.record.api}
       const getUS2 = await axios({
         method: 'GET',
         url: `${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.email}`,
         headers: {
-          'accountId': '105',
-          'dbe': '1',
-          'dbs': '2',
+          'accountId': JSON.parse(getAC.data.record.accountId),
+          'dbe': JSON.parse(getAC.data.record.dbe),
+          'dbs': JSON.parse(getAC.data.record.dbs),
         },
       })
 
+
       const signIn3Params = `_email=${params.email}&_password=${encryptePWD(params.password)}&_accountId=${getAC.data.record.accountId}&_userId=${getUS2.data.record.recordId}`
+
+      console.log(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`)
 
       const signIn3 = await axios({
         method: 'GET',
         url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`,
         headers: {
-          'accountId': '105',
-          'dbe': '1',
-          'dbs': '2',
+          'accountId': JSON.parse(getAC.data.record.accountId),
+          'dbe': JSON.parse(getAC.data.record.dbe),
+          'dbs': JSON.parse(getAC.data.record.dbs),
         },
       })
+
+      console.log(signIn3);
 
       const loggedUser = {
         accountId: getAC.data.record.accountId,
@@ -114,15 +120,18 @@ const AuthProvider = ({ children }) => {
       // params.rememberMe
       //   ? window.localStorage.setItem(authConfig.storageTokenKeyName, signIn3.data.record.accessToken)
       //   : null
-      const returnUrl = router.query.returnUrl
+
       setUser({ ...loggedUser })
+
       params.rememberMe ?
         window.localStorage.setItem('userData', JSON.stringify(loggedUser))
         : window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
-      const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
 
+      const returnUrl = router.query.returnUrl
+      const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
       router.replace(redirectURL)
     } catch (error) {
+      console.log({ logError: error })
       if (errorCallback) errorCallback(error)
     }
   }
