@@ -1,15 +1,26 @@
+// ** React Imports
+import { useContext, useState } from 'react'
+
 // ** Next Imports
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 // ** MUI Imports
-import Chip from '@mui/material/Chip'
-import ListItem from '@mui/material/ListItem'
 import { styled } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemButton from '@mui/material/ListItemButton'
+import {
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  Typography,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from '@mui/material'
 
 // ** Configs Import
 import themeConfig from 'src/configs/themeConfig'
@@ -21,6 +32,9 @@ import CanViewNavLink from 'src/layouts/components/acl/CanViewNavLink'
 
 // ** Util Import
 import { handleURLQueries } from 'src/@core/layouts/utils'
+
+// ** Context
+import { MenuContext } from 'src/providers/MenuContext'
 
 // ** Styled Components
 const MenuNavLink = styled(ListItemButton)(({ theme }) => ({
@@ -63,6 +77,11 @@ const VerticalNavLink = ({
 }) => {
   // ** Hooks
   const router = useRouter()
+  const { handleBookmark } = useContext(MenuContext)
+
+  // ** States
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(item.icon ? true : false);
 
   // ** Vars
   const { navCollapsed } = settings
@@ -76,6 +95,24 @@ const VerticalNavLink = ({
     }
   }
 
+  const openDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+  };
+
+  const toggleBookmarked = () => {
+    setIsBookmarked(!isBookmarked)
+    closeDialog();
+  };
+
+  const handleRightClick = (e) => {
+    e.preventDefault();
+    openDialog();
+  };
+
   return (
     <CanViewNavLink navLink={item}>
       <ListItem
@@ -83,6 +120,7 @@ const VerticalNavLink = ({
         className='nav-link'
         disabled={item.disabled || false}
         sx={{ mt: 1.5, px: '0 !important' }}
+        onContextMenu={handleRightClick}
       >
         <MenuNavLink
           component={Link}
@@ -106,7 +144,7 @@ const VerticalNavLink = ({
             pr: navCollapsed && !navHover ? ((collapsedNavWidth - navigationBorderWidth - 24) / 2 - 5) / 4 : 3.5
           }}
         >
-          {isSubToSub ? null : (
+          {/* {isSubToSub ? null : (
             <ListItemIcon
               sx={{
                 color: 'text.primary',
@@ -122,11 +160,11 @@ const VerticalNavLink = ({
             >
               <UserIcon icon={icon} />
             </ListItemIcon>
-          )}
+          )} */}
 
           <MenuItemTextMetaWrapper
             sx={{
-              ...(isSubToSub ? { ml: 9 } : {}),
+              ...(isSubToSub ? { ml: 2 } : {}), //original ml: 9
               ...(navCollapsed && !navHover ? { opacity: 0 } : { opacity: 1 })
             }}
           >
@@ -149,9 +187,49 @@ const VerticalNavLink = ({
               />
             ) : null}
           </MenuItemTextMetaWrapper>
+          {isBookmarked &&
+            <ListItemIcon
+              sx={{
+                color: 'text.primary',
+                transition: 'margin .25s ease-in-out',
+                ...(navCollapsed && !navHover ? { mr: 0 } : { mr: 2.5 }),
+                ...(parent ? { ml: 1.25, mr: 1 } : {}),
+                '& svg': {
+                  fontSize: '0.875rem',
+                  ...(!parent ? { fontSize: '1.5rem' } : {}),
+                  ...(parent && item.icon ? { fontSize: '0.875rem' } : {})
+                }
+              }}
+            >
+              <UserIcon icon={item.icon} />
+            </ListItemIcon>
+          }
         </MenuNavLink>
       </ListItem>
-    </CanViewNavLink>
+      <Dialog
+        open={isDialogOpen}
+        onClose={closeDialog}
+        fullWidth={true}
+        maxWidth="xs"
+      >
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {isBookmarked ?
+              'Remove from favorites ?' : 'Add to favorites ?'
+            }
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleBookmark(item, isBookmarked, toggleBookmarked)} color="primary">
+            OK
+          </Button>
+          <Button onClick={closeDialog} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </CanViewNavLink >
   )
 }
 

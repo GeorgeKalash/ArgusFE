@@ -1,5 +1,5 @@
 // ** React Import
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // ** MUI Imports
 import List from '@mui/material/List'
@@ -53,7 +53,7 @@ const Navigation = props => {
   const [navHover, setNavHover] = useState(false)
   const [groupActive, setGroupActive] = useState([])
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
-  const [filteredMenu, setFilteredMenu] = useState(props.verticalNavItems) //menu
+  const [filteredMenu, setFilteredMenu] = useState([]) //menu
   const menu = props.verticalNavItems //menu
 
   // ** Ref
@@ -163,6 +163,10 @@ const Navigation = props => {
 
     return [filteredItems, newActiveGroups];
   };
+
+  useEffect(() => {
+    setFilteredMenu(props.verticalNavItems)
+  }, [props.verticalNavItems])
 
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 

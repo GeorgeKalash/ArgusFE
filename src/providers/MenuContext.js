@@ -1,13 +1,16 @@
 // ** React Imports
 import { createContext, useContext, useEffect, useState } from 'react'
+
+// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 
 const MenuContext = createContext()
 
 const MenuProvider = ({ children }) => {
 
-    const { getRequest } = useContext(RequestsContext)
+    const { getRequest, postRequest } = useContext(RequestsContext)
 
     const [menu, setMenu] = useState([])
 
@@ -18,7 +21,7 @@ const MenuProvider = ({ children }) => {
             'parameters': parameters,
         })
             .then(async (get2AMRes) => {
-                const builtMenu = await buildMenu(get2AMRes.record.folders, get2AMRes.record.commandLines)
+                const builtMenu = buildMenu(get2AMRes.record.folders, get2AMRes.record.commandLines)
                 setMenu(builtMenu)
             })
             .catch((error) => {
@@ -26,25 +29,20 @@ const MenuProvider = ({ children }) => {
             })
     }
 
-    const buildMenu = async (folders, commandLines, parentId = 0) => {
+    const buildMenu = (folders, commandLines, parentId = 0) => {
         const menu = []
 
         folders
             .filter((folder) => folder.parentId === parentId)
-            .forEach(async (folder) => {
+            .forEach((folder) => {
                 const folderItem = {
                     id: folder.id,
                     title: folder.name,
-
-                    //use later for starred
-                    // badgeContent: 'new',
-                    // badgeColor: 'error',
-                    // icon: folder.iconName,
-                    icon: 'mdi:home-outline',
+                    icon: folder.nextIcon,
                     children: [],
                 }
 
-                folderItem.children = await buildMenu(folders, commandLines, folder.id)
+                folderItem.children = buildMenu(folders, commandLines, folder.id)
 
                 commandLines
                     .filter((commandLine) => commandLine.folderId === folder.id)
@@ -53,7 +51,7 @@ const MenuProvider = ({ children }) => {
                             id: commandLine.id,
                             title: commandLine.name,
                             path: '/' + commandLine.api,
-                            icon: 'mdi:apps',
+                            icon: commandLine.addToBookmarks && 'mdi:star'
                         })
                     })
 
@@ -63,13 +61,54 @@ const MenuProvider = ({ children }) => {
         return menu
     }
 
+    const handleBookmark = (item, isBookmarked, callBack = undefined) => {
+        //TEMP userData later replace with userProvider
+        const userData =
+            window.localStorage.getItem('userData') ?
+                window.localStorage.getItem('userData') : window.sessionStorage.getItem('userData')
+
+        const record = {
+            userId: JSON.parse(userData).userId,
+            commandId: item.id,
+            displayOrder: 1
+        }
+
+        if (isBookmarked) {
+            postRequest({
+                'extension': AccessControlRepository.delBMK,
+                'record': JSON.stringify(record),
+            })
+                .then((delBMKRes) => {
+                    if (typeof callBack === 'function') {
+                        callBack()
+                    }
+                })
+                .catch((error) => {
+                    console.log({ error: error })
+                })
+        } else {
+            postRequest({
+                'extension': AccessControlRepository.setBMK,
+                'record': JSON.stringify(record),
+            })
+                .then((setBMKRes) => {
+                    if (typeof callBack === 'function') {
+                        callBack()
+                    }
+                })
+                .catch((error) => {
+                    console.log({ error: error })
+                })
+        }
+    }
 
     useEffect(() => {
         getMenu()
     }, [])
 
     const values = {
-        menu
+        menu,
+        handleBookmark
     }
 
     return <MenuContext.Provider value={values}>{children}</MenuContext.Provider>
