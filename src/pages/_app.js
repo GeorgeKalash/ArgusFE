@@ -93,13 +93,13 @@ const App = props => {
 
   const getLayout =
     Component.getLayout ?? (page =>
-      <UserLayout contentHeightFixed={contentHeightFixed}>
-        <MenuProvider>
+      <MenuProvider>
+        <UserLayout contentHeightFixed={contentHeightFixed}>
           <TabsProvider>
             {page}
           </TabsProvider>
-        </MenuProvider>
-      </UserLayout>
+        </UserLayout>
+      </MenuProvider>
     )
   const setConfig = Component.setConfig ?? undefined
   const authGuard = Component.authGuard ?? true

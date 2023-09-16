@@ -11,7 +11,7 @@ const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
 
-    let { user } = useContext(AuthContext)
+    const { user } = useContext(AuthContext)
 
     const getRequest = async (body) => {
 
