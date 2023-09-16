@@ -65,53 +65,70 @@ const VerticalNavGroup = props => {
   const { direction, navCollapsed, verticalNavToggleType } = settings
 
   // ** Accordion menu group open toggle
-  const toggleActiveGroup = (item, parent) => {
-    let openGroup = groupActive
+  // const toggleActiveGroup = (item, parent) => {
+  //   let openGroup = groupActive
 
-    // ** If Group is already open and clicked, close the group
-    if (openGroup.includes(item.title)) {
-      openGroup.splice(openGroup.indexOf(item.title), 1)
+  //   // ** If Group is already open and clicked, close the group
+  //   if (openGroup.includes(item.id)) {
+  //     openGroup.splice(openGroup.indexOf(item.id), 1)
 
-      // If clicked Group has open group children, Also remove those children to close those groups
-      if (item.children) {
-        removeChildren(item.children, openGroup, currentActiveGroup)
-      }
-    } else if (parent) {
-      // ** If Group clicked is the child of an open group, first remove all the open groups under that parent
-      if (parent.children) {
-        removeChildren(parent.children, openGroup, currentActiveGroup)
-      }
+  //     // If clicked Group has open group children, Also remove those children to close those groups
+  //     if (item.children) {
+  //       removeChildren(item.children, openGroup, currentActiveGroup)
+  //     }
+  //   } else if (parent) {
+  //     // ** If Group clicked is the child of an open group, first remove all the open groups under that parent
+  //     if (parent.children) {
+  //       removeChildren(parent.children, openGroup, currentActiveGroup)
+  //     }
 
-      // ** After removing all the open groups under that parent, add the clicked group to open group array
-      if (!openGroup.includes(item.title)) {
-        openGroup.push(item.title)
-      }
+  //     // ** After removing all the open groups under that parent, add the clicked group to open group array
+  //     if (!openGroup.includes(item.id)) {
+  //       openGroup.push(item.id)
+  //     }
+  //   } else {
+  //     // ** If clicked on another group that is not active or open, create openGroup array from scratch
+  //     // ** Empty Open Group array
+  //     openGroup = []
+
+  //     // ** push Current Active Group To Open Group array
+  //     if (currentActiveGroup.every(elem => groupActive.includes(elem))) {
+  //       openGroup.push(...currentActiveGroup)
+  //     }
+
+  //     // ** Push current clicked group item to Open Group array
+  //     if (!openGroup.includes(item.id)) {
+  //       openGroup.push(item.id)
+  //     }
+  //   }
+  //   setGroupActive([...openGroup])
+  // }
+
+  const toggleActiveGroup = (item) => {
+    let openGroups = groupActive.slice(); // Create a copy of the active groups array
+
+    // Check if the item's ID is already in the active groups
+    const index = openGroups.indexOf(item.id);
+
+    if (index !== -1) {
+      // If it's in the active groups, remove it to close the group
+      openGroups.splice(index, 1);
     } else {
-      // ** If clicked on another group that is not active or open, create openGroup array from scratch
-      // ** Empty Open Group array
-      openGroup = []
-
-      // ** push Current Active Group To Open Group array
-      if (currentActiveGroup.every(elem => groupActive.includes(elem))) {
-        openGroup.push(...currentActiveGroup)
-      }
-
-      // ** Push current clicked group item to Open Group array
-      if (!openGroup.includes(item.title)) {
-        openGroup.push(item.title)
-      }
+      // If it's not in the active groups, add it to open the group
+      openGroups.push(item.id);
     }
-    setGroupActive([...openGroup])
-  }
+
+    setGroupActive([...openGroups]);
+  };
 
   // ** Menu Group Click
   const handleGroupClick = () => {
     const openGroup = groupActive
     if (verticalNavToggleType === 'collapse') {
-      if (openGroup.includes(item.title)) {
-        openGroup.splice(openGroup.indexOf(item.title), 1)
+      if (openGroup.includes(item.id)) {
+        openGroup.splice(openGroup.indexOf(item.id), 1)
       } else {
-        openGroup.push(item.title)
+        openGroup.push(item.id)
       }
       setGroupActive([...openGroup])
     } else {
@@ -120,9 +137,9 @@ const VerticalNavGroup = props => {
   }
   useEffect(() => {
     if (hasActiveChild(item, currentURL)) {
-      if (!groupActive.includes(item.title)) groupActive.push(item.title)
+      if (!groupActive.includes(item.id)) groupActive.push(item.id)
     } else {
-      const index = groupActive.indexOf(item.title)
+      const index = groupActive.indexOf(item.id)
       if (index > -1) groupActive.splice(index, 1)
     }
     setGroupActive([...groupActive])
@@ -163,7 +180,7 @@ const VerticalNavGroup = props => {
         >
           <ListItemButton
             className={clsx({
-              'Mui-selected': groupActive.includes(item.title) || currentActiveGroup.includes(item.title)
+              'Mui-selected': groupActive.includes(item.id) || currentActiveGroup.includes(item.id)
             })}
             sx={{
               py: 2.25,
@@ -216,7 +233,7 @@ const VerticalNavGroup = props => {
                   '& svg': {
                     color: 'text.primary',
                     transition: 'transform .25s ease-in-out',
-                    ...(groupActive.includes(item.title) && {
+                    ...(groupActive.includes(item.id) && {
                       transform: direction === 'ltr' ? 'rotate(90deg)' : 'rotate(-90deg)'
                     })
                   }
@@ -241,7 +258,7 @@ const VerticalNavGroup = props => {
           <Collapse
             component='ul'
             onClick={e => e.stopPropagation()}
-            in={groupActive.includes(item.title)}
+            in={groupActive.includes(item.id)}
             sx={{
               pl: 0,
               width: '100%',

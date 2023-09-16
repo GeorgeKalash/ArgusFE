@@ -33,6 +33,7 @@ const MenuProvider = ({ children }) => {
             .filter((folder) => folder.parentId === parentId)
             .forEach(async (folder) => {
                 const folderItem = {
+                    id: folder.id,
                     title: folder.name,
 
                     //use later for starred
@@ -49,6 +50,7 @@ const MenuProvider = ({ children }) => {
                     .filter((commandLine) => commandLine.folderId === folder.id)
                     .forEach((commandLine) => {
                         folderItem.children.push({
+                            id: commandLine.id,
                             title: commandLine.name,
                             path: '/' + commandLine.api,
                             icon: 'mdi:apps',
