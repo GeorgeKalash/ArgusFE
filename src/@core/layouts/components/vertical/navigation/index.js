@@ -4,6 +4,8 @@ import { useRef, useState } from 'react'
 // ** MUI Imports
 import List from '@mui/material/List'
 import Box from '@mui/material/Box'
+import TextField from '@mui/material/TextField';
+import SearchIcon from '@mui/icons-material/Search';
 import { createTheme, responsiveFontSizes, styled, ThemeProvider } from '@mui/material/styles'
 
 // ** Third Party Components
@@ -51,6 +53,8 @@ const Navigation = props => {
   const [navHover, setNavHover] = useState(false)
   const [groupActive, setGroupActive] = useState([])
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
+  const [filteredMenu, setFilteredMenu] = useState(props.verticalNavItems) //menu
+  const menu = props.verticalNavItems //menu
 
   // ** Ref
   const shadowRef = useRef(null)
@@ -106,6 +110,60 @@ const Navigation = props => {
       }
     }
   }
+
+  // ** filterMenu
+  const handleSearch = (e) => {
+    const term = e.target.value;
+
+    if (term === '') {
+      setFilteredMenu(menu)
+      setGroupActive([])
+    }
+    else {
+      const [filteredChildren, updatedActiveGroups] = filterMenu(menu, term);
+      setFilteredMenu(filteredChildren)
+      setGroupActive(updatedActiveGroups)
+    }
+  };
+
+  const filterMenu = (items, term, newActiveGroups = []) => {
+
+    const filtered = items.map((item) => {
+      if (item.children) {
+        // Recursively filter children
+        const [filteredChildren, updatedActiveGroups] = filterMenu(item.children, term, newActiveGroups);
+
+        // Keep the folder if any of its children match the search term
+        if (filteredChildren.length > 0) {
+          if (!newActiveGroups.includes(item.id)) {
+            newActiveGroups.push(item.id);
+          }
+
+          return {
+            ...item,
+            children: filteredChildren,
+          };
+        }
+      }
+
+      // Check if the item's title includes the search term
+      if (item.title.toLowerCase().includes(term.toLowerCase())) {
+        if (item.children && item.children.length > 0 && !newActiveGroups.includes(item.id)) {
+          newActiveGroups.push(item.id);
+        }
+
+        return item;
+      }
+
+      return null;
+    });
+
+    // Remove null values and return filtered items
+    const filteredItems = filtered.filter((item) => item !== null);
+
+    return [filteredItems, newActiveGroups];
+  };
+
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 
   return (
@@ -118,6 +176,21 @@ const Navigation = props => {
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
+        {!navCollapsed &&
+          <Box sx={{ display: 'flex', alignItems: 'center', px: 4 }}>
+            <TextField
+              label="Search"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              size="small"
+              onChange={handleSearch}
+              InputProps={{
+                endAdornment: <SearchIcon />,
+              }}
+            />
+          </Box>
+        }
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
           {/* @ts-ignore */}
           <ScrollWrapper
@@ -154,6 +227,7 @@ const Navigation = props => {
                   currentActiveGroup={currentActiveGroup}
                   setCurrentActiveGroup={setCurrentActiveGroup}
                   {...props}
+                  verticalNavItems={filteredMenu}
                 />
               </List>
             )}
