@@ -50,7 +50,7 @@ const MenuProvider = ({ children }) => {
                         folderItem.children.push({
                             id: commandLine.id,
                             title: commandLine.name,
-                            path: '/' + commandLine.api,
+                            path: '/' + commandLine.api.replace(/\.aspx$/, ""),
                             icon: commandLine.addToBookmarks && 'mdi:star'
                         })
                     })
