@@ -52,7 +52,8 @@ const MenuProvider = ({ children }) => {
                             id: commandLine.id,
                             title: commandLine.name,
                             path: '/' + commandLine.api.replace(/\.aspx$/, "").toLowerCase(),
-                            icon: commandLine.addToBookmarks && 'mdi:star'
+
+                            // icon: commandLine.addToBookmarks && 'mdi:star'
                         })
                     })
 

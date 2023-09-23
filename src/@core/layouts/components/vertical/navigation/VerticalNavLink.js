@@ -201,7 +201,8 @@ const VerticalNavLink = ({
                 }
               }}
             >
-              <UserIcon icon={item.icon} />
+              {/* Favorite Icon */}
+              <UserIcon icon='mdi:star' />
             </ListItemIcon>
           }
         </MenuNavLink>
