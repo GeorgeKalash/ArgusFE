@@ -1,5 +1,6 @@
 // ** React Imports
 import { createContext, useContext, useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -82,8 +83,10 @@ const MenuProvider = ({ children }) => {
                     if (typeof callBack === 'function') {
                         callBack()
                     }
+                    toast.success('Removed from favorites')
                 })
                 .catch((error) => {
+                    toast.error(error)
                     console.log({ error: error })
                 })
         } else {
@@ -95,8 +98,10 @@ const MenuProvider = ({ children }) => {
                     if (typeof callBack === 'function') {
                         callBack()
                     }
+                    toast.success('Added to favorites')
                 })
                 .catch((error) => {
+                    toast.error(error)
                     console.log({ error: error })
                 })
         }

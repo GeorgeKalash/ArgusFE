@@ -11,6 +11,7 @@ import * as yup from 'yup'
 // ** Custom Imports
 import CustomTextField from 'src/components/CustomTextField'
 import CustomComboBox from 'src/components/CustomComboBox'
+import CustomLookup from 'src/components/CustomLookup'
 
 const countries = [
     { key: 0, value: 'Lebanon' },
@@ -18,22 +19,48 @@ const countries = [
     { key: 2, value: 'Egypt' },
 ]
 
+const currency = [
+    { key: 0, value: 'LBP' },
+    { key: 1, value: 'USD' },
+    { key: 2, value: 'YEN' },
+]
+
+const getCleanValues = values => {
+    let cleanValues = { ...values }
+
+    if (!cleanValues.currency) {
+        delete cleanValues.currency
+    } else {
+        cleanValues.currency = cleanValues.currency.key
+    }
+    if (!cleanValues.country) {
+        delete cleanValues.country
+    } else {
+        cleanValues.country = cleanValues.country.key
+    }
+
+    return cleanValues
+}
+
 const Users = () => {
 
     const formik = useFormik({
         enableReinitialize: true,
         initialValues: {
-            name: 'John',
+            name: '',
             age: null,
+            currency: null,
             country: null,
         },
         validationSchema: yup.object({
-            name: yup.string('Enter your name').required('name is required'),
-            age: yup.number('Enter your age').required('age is required'),
-            country: yup.number('Select a country').required('country is required'),
+            name: yup.string().required('name is required'),
+            age: yup.number().required('age is required'),
+            currency: yup.object().required('currency is required'),
+            country: yup.object().required('country is required'),
         }),
         onSubmit: values => {
-            console.log({ values })
+            let cleanValues = getCleanValues(values)
+            console.log({ cleanValues })
         }
     })
 
@@ -60,6 +87,20 @@ const Users = () => {
                     onChange={formik.handleChange}
                     error={formik.touched.age && Boolean(formik.errors.age)}
                     helperText={formik.touched.age && formik.errors.age}
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <CustomLookup
+                    name='currency'
+                    label='Currency'
+                    required
+                    valueField='key'
+                    displayField='value'
+                    data={currency}
+                    value={formik.values.currency}
+                    onChange={formik.setFieldValue}
+                    error={formik.touched.currency && Boolean(formik.errors.currency)}
+                    helperText={formik.touched.currency && formik.errors.currency}
                 />
             </Grid>
             <Grid item xs={12}>
