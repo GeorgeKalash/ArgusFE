@@ -24,9 +24,9 @@ const countries = [
 ]
 
 const currency = [
-    { key: 0, value: 'LBP' },
-    { key: 1, value: 'USD' },
-    { key: 2, value: 'YEN' },
+    { key: '0', value: 'LBP' },
+    { key: '1', value: 'USD' },
+    { key: '2', value: 'YEN' },
 ]
 
 const getCleanValues = values => {
@@ -107,6 +107,7 @@ const Users = () => {
                     label='Currency'
                     valueField='key'
                     displayField='value'
+                    searchBy='key'
                     data={currency}
                     value={formik.values.currency}
                     required

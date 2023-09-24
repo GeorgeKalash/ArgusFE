@@ -21,6 +21,7 @@ const CustomLookup = ({
     data = [],
     valueField = 'key',
     displayField = 'value',
+    searchBy,
     onChange,
     onClear,
     error,
@@ -34,6 +35,25 @@ const CustomLookup = ({
 }) => {
 
     const [open, setOpen] = useState(false)
+    const [filterValue, setFilterValue] = useState('')
+
+    const filteredData = data.filter((option) =>
+        option[searchBy].toLowerCase().includes(filterValue.toLowerCase())
+    )
+
+    const handleInput = (value) => {
+        setFilterValue(value)
+
+        const matchingOption = data.find((option) =>
+            option[valueField].toLowerCase() === value.toLowerCase()
+        )
+
+        if (matchingOption) {
+            onChange(name, matchingOption)
+        } else {
+            onChange(name, '')
+        }
+    }
 
     return (
         <Box
@@ -50,6 +70,7 @@ const CustomLookup = ({
                     type={type}
                     variant={variant}
                     label={label}
+                    onChange={(e) => handleInput(e.target.value)}
                     value={value ? value[valueField] : ''}
                     required={required}
                     autoFocus={autoFocus}
@@ -80,7 +101,6 @@ const CustomLookup = ({
                 <TextField
                     size={size}
                     variant={variant}
-                    label={displayField}
                     value={value ? value[displayField] : ''}
                     required={required}
                     disabled={disabled}
@@ -99,7 +119,7 @@ const CustomLookup = ({
                             <Box sx={{ flex: 1 }}>{valueField}</Box>
                             <Box sx={{ flex: 1 }}>{displayField}</Box>
                         </ListItem>
-                        {data.map((option) => (
+                        {filteredData.map((option) => (
                             <ListItem
                                 key={option[valueField]}
                                 onClick={() => onChange(name, option)}
