@@ -3,31 +3,34 @@ import { useState } from 'react'
 
 // ** MUI Imports
 import {
-    Autocomplete,
     Box,
     TextField,
+    InputAdornment,
+    IconButton,
     ListItem,
     Paper,
     List,
 } from '@mui/material'
+import ClearIcon from '@mui/icons-material/Clear'
 
 const CustomLookup = ({
     type = 'text', //any valid HTML5 input type
     name,
     label,
+    value,
+    data = [],
+    valueField = 'key',
+    displayField = 'value',
+    onChange,
+    onClear,
+    error,
+    helperText,
     variant = 'outlined', //outlined, standard, filled
     size = 'small', //small, medium
     required = false,
     autoFocus = false,
     disabled = false,
     readOnly = false,
-    data = [],
-    valueField = 'key',
-    displayField = 'value',
-    helperText,
-    error,
-    value,
-    onChange,
 }) => {
 
     const [open, setOpen] = useState(false)
@@ -38,7 +41,7 @@ const CustomLookup = ({
                 position: 'relative',
                 width: '100%',
                 height: '40px',
-                mb: error && helperText ? 4 : 0
+                mb: error && helperText ? 6 : 0
             }}
         >
             <Box display={'flex'}>
@@ -53,6 +56,18 @@ const CustomLookup = ({
                     disabled={disabled}
                     InputProps={{
                         readOnly: readOnly,
+                        endAdornment: value && (
+                            <InputAdornment position='end'>
+                                <IconButton
+                                    tabIndex={-1}
+                                    edge='end'
+                                    onClick={onClear}
+                                    aria-label='clear input'
+                                >
+                                    <ClearIcon />
+                                </IconButton>
+                            </InputAdornment>
+                        )
                     }}
                     error={error}
                     helperText={helperText}

@@ -8,6 +8,13 @@ const CustomComboBox = ({
     type = 'text', //any valid HTML5 input type
     name,
     label,
+    value,
+    data = [],
+    valueField = 'key',
+    displayField = 'value',
+    onChange,
+    error,
+    helperText,
     variant = 'outlined', //outlined, standard, filled
     size = 'small', //small, medium
     fullWidth = true,
@@ -15,13 +22,6 @@ const CustomComboBox = ({
     autoFocus = false,
     disabled = false,
     readOnly = false,
-    data = [],
-    valueField = 'key',
-    displayField = 'value',
-    helperText,
-    error,
-    value,
-    onChange,
 }) => {
 
     return (

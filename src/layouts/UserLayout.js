@@ -8,7 +8,6 @@ import Layout from 'src/@core/layouts/Layout'
 // ** Navigation Imports
 import VerticalNavItems from 'src/navigation'
 
-
 // ** Component Import
 // Uncomment the below line (according to the layout type) when using server-side menu
 // import ServerSideVerticalNavItems from './components/vertical/ServerSideNavItems'
@@ -19,7 +18,6 @@ import VerticalAppBarContent from './components/vertical/AppBarContent'
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
 import { MenuContext } from 'src/providers/MenuContext'
-
 
 const UserLayout = ({ children, contentHeightFixed }) => {
   // ** Hooks

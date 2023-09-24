@@ -50,7 +50,7 @@ const getCleanValues = values => {
     return cleanValues
 }
 
-const Users = () => {
+const SecurityGroups = () => {
 
     const formik = useFormik({
         enableReinitialize: true,
@@ -148,4 +148,4 @@ const Users = () => {
     )
 }
 
-export default Users
+export default SecurityGroups
