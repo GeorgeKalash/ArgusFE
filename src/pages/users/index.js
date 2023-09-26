@@ -16,6 +16,7 @@ import CustomDatePicker from 'src/components/CustomDatePicker'
 
 // ** Helpers
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { useEffect } from 'react'
 
 const countries = [
     { key: 0, value: 'Lebanon' },
@@ -25,8 +26,8 @@ const countries = [
 
 const currency = [
     { key: '0', value: 'LBP' },
-    { key: '1', value: 'USD' },
-    { key: '2', value: 'YEN' },
+    { key: '11', value: 'USD' },
+    { key: '12', value: 'YEN' },
 ]
 
 const getCleanValues = values => {
@@ -73,6 +74,11 @@ const Users = () => {
             console.log({ cleanValues })
         }
     })
+
+    useEffect(() => {
+        console.log({ formik: formik.values })
+    }, [formik.values])
+
 
     return (
         <Grid container spacing={4}>

@@ -1,9 +1,7 @@
-// ** React Imports
-import { useState } from 'react'
-
 // ** MUI Imports
 import {
     Box,
+    Autocomplete,
     TextField,
     InputAdornment,
     IconButton,
@@ -12,6 +10,13 @@ import {
     List,
 } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
+
+const CustomPaper = (props) => {
+
+    return (
+        <Paper sx={{ position: 'absolute', width: '200%', zIndex: 999, mt: 1, }} {...props} />
+    )
+}
 
 const CustomLookup = ({
     type = 'text', //any valid HTML5 input type
@@ -34,27 +39,6 @@ const CustomLookup = ({
     readOnly = false,
 }) => {
 
-    const [open, setOpen] = useState(false)
-    const [filterValue, setFilterValue] = useState('')
-
-    const filteredData = data.filter((option) =>
-        option[searchBy].toLowerCase().includes(filterValue.toLowerCase())
-    )
-
-    const handleInput = (value) => {
-        setFilterValue(value)
-
-        const matchingOption = data.find((option) =>
-            option[valueField].toLowerCase() === value.toLowerCase()
-        )
-
-        if (matchingOption) {
-            onChange(name, matchingOption)
-        } else {
-            onChange(name, '')
-        }
-    }
-
     return (
         <Box
             sx={{
@@ -65,73 +49,85 @@ const CustomLookup = ({
             }}
         >
             <Box display={'flex'}>
-                <TextField
-                    size={size}
-                    type={type}
-                    variant={variant}
-                    label={label}
-                    onChange={(e) => handleInput(e.target.value)}
-                    value={value ? value[valueField] : ''}
-                    required={required}
-                    autoFocus={autoFocus}
-                    disabled={disabled}
-                    InputProps={{
-                        readOnly: readOnly,
-                        endAdornment: value && (
-                            <InputAdornment position='end'>
-                                <IconButton
-                                    tabIndex={-1}
-                                    edge='end'
-                                    onClick={onClear}
-                                    aria-label='clear input'
-                                >
-                                    <ClearIcon />
-                                </IconButton>
-                            </InputAdornment>
-                        )
+                <Box
+                    sx={{
+                        flex: 1,
+                        '& .MuiAutocomplete-inputRoot': {
+                            borderTopRightRadius: 0,
+                            borderBottomRightRadius: 0,
+                        },
                     }}
-                    error={error}
-                    helperText={helperText}
-                    onFocus={() => setOpen(true)}
-                    onBlur={() => setTimeout(() => {
-                        setOpen(false)
-                    }, 100)}
-                    sx={{ flex: 1 }}
-                />
-                <TextField
-                    size={size}
-                    variant={variant}
-                    value={value ? value[displayField] : ''}
-                    required={required}
-                    disabled={disabled}
-                    InputProps={{
-                        readOnly: true,
+                >
+                    <Autocomplete
+                        name={name}
+                        value={value}
+                        size={size}
+                        options={data}
+                        getOptionLabel={option =>
+                            typeof option === 'object' ?
+                                `${option[valueField]}`
+                                : option
+                        }
+                        isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
+                        onChange={(event, newValue) => onChange(name, newValue)}
+                        PaperComponent={CustomPaper}
+                        renderOption={(props, option) =>
+                            <Box>
+                                {props.id.endsWith('0') && (
+                                    <li className={props.className}>
+                                        <Box sx={{ flex: 1 }}>{valueField}</Box>
+                                        <Box sx={{ flex: 1 }}>{displayField}</Box>
+                                    </li>
+                                )}
+                                <li {...props}>
+                                    <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
+                                    <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
+                                </li>
+                            </Box>
+                        }
+                        renderInput={(params) =>
+                            <TextField
+                                {...params}
+                                type={type}
+                                variant={variant}
+                                label={label}
+                                required={required}
+                                autoFocus={autoFocus}
+                                error={error}
+                                helperText={helperText}
+                            />
+                        }
+                        readOnly={readOnly}
+                        disabled={disabled}
+                        sx={{ flex: 1 }}
+                    />
+                </Box>
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: 'flex',
+                        '& .MuiInputBase-root': {
+                            borderTopLeftRadius: 0,
+                            borderBottomLeftRadius: 0,
+                        },
                     }}
-                    error={error}
-                    helperText={helperText}
-                    sx={{ flex: 1, ml: 2 }}
-                />
+                >
+                    <TextField
+                        size={size}
+                        variant={variant}
+                        value={value ? value[displayField] : ''}
+                        required={required}
+                        disabled={disabled}
+                        InputProps={{
+                            readOnly: true,
+                        }}
+                        error={error}
+                        helperText={helperText}
+                        sx={{ flex: 1 }}
+                    />
+
+                </Box>
             </Box>
-            {open && (
-                <Paper sx={{ position: 'absolute', width: '100%', zIndex: 999, mt: 1 }}>
-                    <List>
-                        <ListItem>
-                            <Box sx={{ flex: 1 }}>{valueField}</Box>
-                            <Box sx={{ flex: 1 }}>{displayField}</Box>
-                        </ListItem>
-                        {filteredData.map((option) => (
-                            <ListItem
-                                key={option[valueField]}
-                                onClick={() => onChange(name, option)}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
-                                <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
-                            </ListItem>
-                        ))}
-                    </List>
-                </Paper>
-            )}
         </Box>
     )
 }
