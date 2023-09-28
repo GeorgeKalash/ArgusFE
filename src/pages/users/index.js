@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 // ** MUI Imports
 import {
-    Button,
     Grid,
+    Box,
+    Button,
 } from '@mui/material'
 
 // ** Third Party Imports
@@ -12,6 +13,8 @@ import * as yup from 'yup'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
+import Window from 'src/components/Shared/Window'
+import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
@@ -311,6 +314,11 @@ const rows = [
     },
 ]
 
+const tabs = [
+    { label: 'User' },
+    { label: 'Defaults' },
+]
+
 const getCleanValues = values => {
     let cleanValues = { ...values }
 
@@ -334,18 +342,35 @@ const getCleanValues = values => {
 
 const Users = () => {
 
-    const formik = useFormik({
-        enableReinitialize: true,
+    const [windowOpen, setWindowOpen] = useState(false)
+    const [activeTab, setActiveTab] = useState(0)
+
+    const users = useFormik({
+        enableReinitialize: false,
+        validateOnChange: false,
         initialValues: {
             name: '',
             age: null,
+        },
+        validationSchema: yup.object({
+            name: yup.string().required('name is required'),
+            age: yup.number().required('age is required'),
+        }),
+        onSubmit: values => {
+            let cleanValues = getCleanValues(values)
+            console.log({ cleanValues })
+        }
+    })
+
+    const securityGrps = useFormik({
+        enableReinitialize: false,
+        validateOnChange: false,
+        initialValues: {
             currency: null,
             country: null,
             dob: formatDateFromApi("/Date(1695513600000)/")
         },
         validationSchema: yup.object({
-            name: yup.string().required('name is required'),
-            age: yup.number().required('age is required'),
             currency: yup.object().required('currency is required'),
             country: yup.object().required('country is required'),
             dob: yup.date().required('Date of birth is required'),
@@ -356,85 +381,113 @@ const Users = () => {
         }
     })
 
-    useEffect(() => {
-        console.log({ formik: formik.values })
-    }, [formik.values])
+    const handleSubmit = () => {
+        if (activeTab === 0)
+            users.handleSubmit()
+        if (activeTab === 1)
+            securityGrps.handleSubmit()
+    }
 
     return (
-        <Grid container spacing={4}>
-            <Grid item xs={12}>
-                <Table isLoading={false} columns={columns} rows={rows} rowId='id' />
+        <>
+            <Grid container spacing={4}>
+                <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+                        <Button onClick={() => setWindowOpen(true)} variant='contained'>Add</Button>
+                    </Box>
+                    <Table isLoading={false} columns={columns} rows={rows} rowId='id' />
+                </Grid>
             </Grid>
-            {/* <Grid item xs={12}>
-                <CustomTextField
-                    name='name'
-                    label='Name'
-                    value={formik.values.name}
-                    required
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <CustomTextField
-                    type='number'
-                    name='age'
-                    label='Age'
-                    value={formik.values.age}
-                    required
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('age', null)}
-                    error={formik.touched.age && Boolean(formik.errors.age)}
-                    helperText={formik.touched.age && formik.errors.age}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <CustomLookup
-                    name='currency'
-                    label='Currency'
-                    valueField='key'
-                    displayField='value'
-                    searchBy='key'
-                    data={currency}
-                    value={formik.values.currency}
-                    required
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('currency', null)}
-                    error={formik.touched.currency && Boolean(formik.errors.currency)}
-                    helperText={formik.touched.currency && formik.errors.currency}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <CustomComboBox
-                    name='country'
-                    label='Country'
-                    valueField='key'
-                    displayField='value'
-                    data={countries}
-                    value={formik.values.country}
-                    required
-                    onChange={formik.setFieldValue}
-                    error={formik.touched.country && Boolean(formik.errors.country)}
-                    helperText={formik.touched.country && formik.errors.country}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <CustomDatePicker
-                    name='dob'
-                    label='Date Of Birth'
-                    value={formik.values.dob}
-                    required
-                    onChange={formik.setFieldValue}
-                    error={formik.touched.dob && Boolean(formik.errors.dob)}
-                    helperText={formik.touched.dob && formik.errors.dob}
-                />
-            </Grid>
-            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button onClick={formik.handleSubmit} variant='outlined'>Submit</Button>
-            </Grid> */}
-        </Grid>
+            {windowOpen &&
+                <Window
+                    Title='Users'
+                    open={windowOpen}
+                    onClose={() => setWindowOpen(false)}
+                    tabs={tabs}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    height={400}
+                >
+                    <CustomTabPanel index={0} value={activeTab}>
+                        <Grid container spacing={4}>
+                            <Grid item xs={12}>
+                                <CustomTextField
+                                    name='name'
+                                    label='Name'
+                                    value={users.values.name}
+                                    required
+                                    onChange={users.handleChange}
+                                    onClear={() => users.setFieldValue('name', '')}
+                                    error={users.touched.name && Boolean(users.errors.name)}
+                                    helperText={users.touched.name && users.errors.name}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <CustomTextField
+                                    type='number'
+                                    name='age'
+                                    label='Age'
+                                    value={users.values.age}
+                                    required
+                                    onChange={users.handleChange}
+                                    onClear={() => users.setFieldValue('age', null)}
+                                    error={users.touched.age && Boolean(users.errors.age)}
+                                    helperText={users.touched.age && users.errors.age}
+                                />
+                            </Grid>
+                        </Grid>
+                    </CustomTabPanel>
+                    <CustomTabPanel index={1} value={activeTab}>
+                        <Grid container spacing={4}>
+                            <Grid item xs={12}>
+                                <CustomLookup
+                                    name='currency'
+                                    label='Currency'
+                                    valueField='key'
+                                    displayField='value'
+                                    searchBy='key'
+                                    data={currency}
+                                    value={securityGrps.values.currency}
+                                    required
+                                    onChange={securityGrps.setFieldValue}
+                                    onClear={() => securityGrps.setFieldValue('currency', null)}
+                                    error={securityGrps.touched.currency && Boolean(securityGrps.errors.currency)}
+                                    helperText={securityGrps.touched.currency && securityGrps.errors.currency}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <CustomComboBox
+                                    name='country'
+                                    label='Country'
+                                    valueField='key'
+                                    displayField='value'
+                                    data={countries}
+                                    value={securityGrps.values.country}
+                                    required
+                                    onChange={securityGrps.setFieldValue}
+                                    error={securityGrps.touched.country && Boolean(securityGrps.errors.country)}
+                                    helperText={securityGrps.touched.country && securityGrps.errors.country}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <CustomDatePicker
+                                    name='dob'
+                                    label='Date Of Birth'
+                                    value={securityGrps.values.dob}
+                                    required
+                                    onChange={securityGrps.setFieldValue}
+                                    error={securityGrps.touched.dob && Boolean(securityGrps.errors.dob)}
+                                    helperText={securityGrps.touched.dob && securityGrps.errors.dob}
+                                />
+                            </Grid>
+                        </Grid>
+                    </CustomTabPanel>
+                    <Grid item xs={12} sx={{ position: 'absolute', bottom: 0, width: '100%', display: 'flex', justifyContent: 'flex-end', p: 4 }}>
+                        <Button onClick={handleSubmit} variant='outlined'>Submit</Button>
+                    </Grid>
+                </Window>
+            }
+        </>
     )
 }
 

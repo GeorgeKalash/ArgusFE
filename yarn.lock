@@ -1403,7 +1403,7 @@
   "resolved" "https://registry.npmjs.org/clipboard-copy/-/clipboard-copy-4.0.1.tgz"
   "version" "4.0.1"
 
-"clsx@^1.2.1", "clsx@1.2.1":
+"clsx@^1.1.1", "clsx@^1.2.1", "clsx@1.2.1":
   "integrity" "sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg=="
   "resolved" "https://registry.npmjs.org/clsx/-/clsx-1.2.1.tgz"
   "version" "1.2.1"
@@ -3781,6 +3781,14 @@
     "html-to-draftjs" "^1.5.0"
     "linkify-it" "^2.2.0"
     "prop-types" "^15.7.2"
+
+"react-draggable@^4.4.6":
+  "integrity" "sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw=="
+  "resolved" "https://registry.npmjs.org/react-draggable/-/react-draggable-4.4.6.tgz"
+  "version" "4.4.6"
+  dependencies:
+    "clsx" "^1.1.1"
+    "prop-types" "^15.8.1"
 
 "react-dropzone@14.2.3":
   "integrity" "sha512-O3om8I+PkFKbxCukfIR3QAGftYXDZfOE2N1mr/7qebQJHs7U+/RSL/9xomJNpRg9kM5h9soQSdf0Gc7OHF5Fug=="
