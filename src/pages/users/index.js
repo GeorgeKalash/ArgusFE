@@ -430,7 +430,7 @@ const Users = () => {
                                     value={users.values.age}
                                     required
                                     onChange={users.handleChange}
-                                    onClear={() => users.setFieldValue('age', null)}
+                                    onClear={() => users.setFieldValue('age', 1)}
                                     error={users.touched.age && Boolean(users.errors.age)}
                                     helperText={users.touched.age && users.errors.age}
                                 />
