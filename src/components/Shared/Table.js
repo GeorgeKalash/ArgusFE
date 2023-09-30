@@ -1,10 +1,64 @@
 import LinearProgress from '@mui/material/LinearProgress'
 import PropTypes from 'prop-types'
-import { DataGrid, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector } from '@mui/x-data-grid'
+import { alpha, styled } from '@mui/material/styles';
+import { DataGrid, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector, gridClasses } from '@mui/x-data-grid'
 import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
 import { IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
+
+const ODD_OPACITY = 0.2;
+
+const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    '& .MuiDataGrid-columnsContainer': {
+        backgroundColor: theme.palette.mode === 'light' ? '#fafafa' : '#1d1d1d',
+    },
+    '& .MuiDataGrid-iconSeparator': {
+        display: 'none',
+    },
+    '& .MuiDataGrid-columnHeader, .MuiDataGrid-cell': {
+        borderRight: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
+    },
+    '& .MuiDataGrid-columnsContainer, .MuiDataGrid-cell': {
+        borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
+    },
+    '& .MuiDataGrid-cell': {
+        color:
+            theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)',
+    },
+    '& .MuiPaginationItem-root': {
+        borderRadius: 0,
+    },
+    [`& .${gridClasses.row}.even`]: {
+        backgroundColor: theme.palette.grey[200],
+        '&:hover, &.Mui-hovered': {
+            backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+            '@media (hover: none)': {
+                backgroundColor: 'transparent',
+            },
+        },
+        '&.Mui-selected': {
+            backgroundColor: alpha(
+                theme.palette.primary.main,
+                ODD_OPACITY + theme.palette.action.selectedOpacity,
+            ),
+            '&:hover, &.Mui-hovered': {
+                backgroundColor: alpha(
+                    theme.palette.primary.main,
+                    ODD_OPACITY +
+                    theme.palette.action.selectedOpacity +
+                    theme.palette.action.hoverOpacity,
+                ),
+                '@media (hover: none)': {
+                    backgroundColor: alpha(
+                        theme.palette.primary.main,
+                        ODD_OPACITY + theme.palette.action.selectedOpacity,
+                    ),
+                },
+            },
+        },
+    },
+}));
 
 const Table = props => {
     const getRowId = (row) => {
@@ -40,7 +94,7 @@ const Table = props => {
                 <>
                     <IconButton
                         size='small'
-                        onClick={() => console.log(params.row)}
+                        onClick={() => props.onEdit(params.row)}
                     >
                         <Icon icon='mdi:application-edit-outline' fontSize={18} />
                     </IconButton>
@@ -58,7 +112,7 @@ const Table = props => {
 
     return (
         <>
-            <DataGrid
+            <StripedDataGrid
                 rows={props.rows}
                 columns={columns}
                 autoHeight
@@ -77,6 +131,9 @@ const Table = props => {
                 getRowId={getRowId}
                 disableRowSelectionOnClick
                 disableColumnMenu
+                getRowClassName={(params) =>
+                    params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+                }
                 {...props}
             />
         </>

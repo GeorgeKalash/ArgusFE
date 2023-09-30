@@ -1,14 +1,16 @@
 // ** MUI Imports
 import {
     Dialog,
-    DialogContent,
     DialogTitle,
+    DialogContent,
+    DialogActions,
     Paper,
     Tabs,
     Tab,
     Box,
     Typography,
     IconButton,
+    Button
 } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 
@@ -30,7 +32,8 @@ function PaperComponent(props) {
 const Window = ({ children, open, onClose, tabs, height = 400,
     activeTab,
     setActiveTab,
-    Title
+    Title,
+    onSave
 }) => {
 
     return (
@@ -69,6 +72,9 @@ const Window = ({ children, open, onClose, tabs, height = 400,
             <DialogContent sx={{ height: height, p: 0 }}>
                 {children}
             </DialogContent>
+            <DialogActions>
+                <Button onClick={onSave} variant='contained'>Submit</Button>
+            </DialogActions>
         </Dialog>
     );
 };

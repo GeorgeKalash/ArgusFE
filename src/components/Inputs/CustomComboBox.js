@@ -9,9 +9,10 @@ const CustomComboBox = ({
     name,
     label,
     value,
-    data = [],
     valueField = 'key',
     displayField = 'value',
+    data = [],
+    getOptionBy,
     onChange,
     error,
     helperText,
@@ -30,9 +31,14 @@ const CustomComboBox = ({
             value={value}
             size={size}
             options={data}
-            getOptionLabel={option => option[displayField]}
-            isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
-            onChange={(event, newValue) => onChange(name, newValue)}
+            getOptionLabel={option => {
+                if (typeof option === 'object')
+                    return option[displayField]
+                else
+                    return option
+            }}
+            isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
+            onChange={onChange}
             fullWidth={fullWidth}
             readOnly={readOnly}
             disabled={disabled}

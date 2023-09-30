@@ -26,9 +26,7 @@ const CustomLookup = ({
     data = [],
     valueField = 'key',
     displayField = 'value',
-    searchBy,
     onChange,
-    onClear,
     error,
     helperText,
     variant = 'outlined', //outlined, standard, filled
