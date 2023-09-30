@@ -22,10 +22,13 @@ const CustomLookup = ({
     type = 'text', //any valid HTML5 input type
     name,
     label,
-    value,
-    data = [],
+    firstValue,
+    secondValue,
+    store = [],
+    setStore,
     valueField = 'key',
     displayField = 'value',
+    onLookup,
     onChange,
     error,
     helperText,
@@ -58,23 +61,23 @@ const CustomLookup = ({
                 >
                     <Autocomplete
                         name={name}
-                        value={value}
+                        value={firstValue}
                         size={size}
-                        options={data}
+                        options={store}
                         getOptionLabel={option =>
                             typeof option === 'object' ?
                                 `${option[valueField]}`
                                 : option
                         }
-                        isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
+                        isOptionEqualToValue={(option, value) => value ? option[valueField] === value[valueField] : ''}
                         onChange={(event, newValue) => onChange(name, newValue)}
                         PaperComponent={CustomPaper}
                         renderOption={(props, option) =>
                             <Box>
-                                {props.id.endsWith('0') && (
+                                {props.id.endsWith('-0') && (
                                     <li className={props.className}>
-                                        <Box sx={{ flex: 1 }}>{valueField}</Box>
-                                        <Box sx={{ flex: 1 }}>{displayField}</Box>
+                                        <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>
+                                        <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>
                                     </li>
                                 )}
                                 <li {...props}>
@@ -86,6 +89,7 @@ const CustomLookup = ({
                         renderInput={(params) =>
                             <TextField
                                 {...params}
+                                onChange={(e) => e.target.value ? onLookup(e.target.value) : setStore([])}
                                 type={type}
                                 variant={variant}
                                 label={label}
@@ -113,7 +117,8 @@ const CustomLookup = ({
                     <TextField
                         size={size}
                         variant={variant}
-                        value={value ? value[displayField] : ''}
+                        placeholder={displayField.toUpperCase()}
+                        value={secondValue ? secondValue : ''}
                         required={required}
                         disabled={disabled}
                         InputProps={{

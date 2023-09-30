@@ -100,14 +100,15 @@ const getCleanValues = values => {
     return cleanValues
 }
 
-const DocumentTypes = (props) => {
-    console.log({ props })
+const DocumentTypes = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
 
     //stores
     const [gridData, setGridData] = useState([])
     const [integrationLogicStore, setIntegrationLogicStore] = useState([])
     const [sysFunctionsStore, setSysFunctionsStore] = useState([])
+    const [activeStatusStore, setActiveStatusStore] = useState([])
+    const [numberRangeStore, setNumberRangeStore] = useState([])
 
     //states
     const [windowOpen, setWindowOpen] = useState(false)
@@ -171,7 +172,6 @@ const DocumentTypes = (props) => {
             'parameters': parameters,
         })
             .then((res) => {
-                console.log({ res })
                 setGridData(res.list)
             })
             .catch((error) => {
@@ -194,9 +194,9 @@ const DocumentTypes = (props) => {
     }
 
     const fillSysFunctionsStore = () => {
-        var parameters = ''
+        var parameters = '_database=25' //add 'xml'.json and get _database values from there
         getRequest({
-            'extension': GeneralLedgerRepository.IntegrationLogic.qry,
+            'extension': SystemRepository.XMLDictionary,
             'parameters': parameters,
         })
             .then((res) => {
@@ -204,6 +204,36 @@ const DocumentTypes = (props) => {
             })
             .catch((error) => {
                 console.log({ error: error.response.data })
+            })
+    }
+
+    const fillActiveStatusStore = () => {
+        var parameters = '_database=11' //add 'xml'.json and get _database values from there
+        getRequest({
+            'extension': SystemRepository.XMLDictionary,
+            'parameters': parameters,
+        })
+            .then((res) => {
+                //ask about lang values
+                setActiveStatusStore(res.list)
+            })
+            .catch((error) => {
+                console.log({ error: error.response.data })
+            })
+    }
+
+    const lookupNumberRange = (searchQry) => {
+
+        var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
+        getRequest({
+            'extension': SystemRepository.NumberRange.snapshot,
+            'parameters': parameters,
+        })
+            .then((res) => {
+                setNumberRangeStore(res.list)
+            })
+            .catch((error) => {
+                console.log({ error: error })
             })
     }
 
@@ -220,13 +250,9 @@ const DocumentTypes = (props) => {
     useEffect(() => {
         getGridData()
         fillIntegrationLogicStore()
-
-        // fillSysFunctionsStore()
+        fillSysFunctionsStore()
+        fillActiveStatusStore()
     }, [])
-
-    useEffect(() => {
-        console.log({ documentTypesValidation: documentTypesValidation.values })
-    }, [documentTypesValidation.values])
 
     return (
         <>
@@ -272,23 +298,6 @@ const DocumentTypes = (props) => {
                                     helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}
                                 />
                             </Grid>
-                            {/* <Grid item xs={12}>
-                                <CustomComboBox
-                                    name='dgName'
-                                    label='System Functions'
-                                    valueField='key'
-                                    displayField='value'
-                                    data={sysFunctionsStore}
-                                    value={documentTypesValidation.values.dgName}
-                                    required
-                                    onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('dgId', newValue)
-                                        documentTypesValidation.setFieldValue('dgName', newValue)
-                                    }}
-                                    error={documentTypesValidation.touched.dgName && Boolean(documentTypesValidation.errors.dgName)}
-                                    helperText={documentTypesValidation.touched.dgName && documentTypesValidation.errors.dgName}
-                                />
-                            </Grid> */}
                             <Grid item xs={12}>
                                 <CustomTextField
                                     name='name'
@@ -303,11 +312,28 @@ const DocumentTypes = (props) => {
                             </Grid>
                             <Grid item xs={12}>
                                 <CustomComboBox
+                                    name='dgName'
+                                    label='System Functions'
+                                    valueField='key'
+                                    displayField='value'
+                                    store={sysFunctionsStore}
+                                    value={documentTypesValidation.values.dgName}
+                                    required
+                                    onChange={(event, newValue) => {
+                                        documentTypesValidation.setFieldValue('dgId', newValue.key)
+                                        documentTypesValidation.setFieldValue('dgName', newValue.value)
+                                    }}
+                                    error={documentTypesValidation.touched.dgName && Boolean(documentTypesValidation.errors.dgName)}
+                                    helperText={documentTypesValidation.touched.dgName && documentTypesValidation.errors.dgName}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <CustomComboBox
                                     name='ilName'
                                     label='Integration Logic'
                                     valueField='recordId'
                                     displayField='name'
-                                    data={integrationLogicStore}
+                                    store={integrationLogicStore}
                                     getOptionBy={documentTypesValidation.values.ilId}
                                     value={documentTypesValidation.values.ilName}
                                     required
@@ -319,18 +345,18 @@ const DocumentTypes = (props) => {
                                     helperText={documentTypesValidation.touched.ilName && documentTypesValidation.errors.ilName}
                                 />
                             </Grid>
-                            {/* <Grid item xs={12}>
+                            <Grid item xs={12}>
                                 <CustomComboBox
                                     name='activeStatusName'
                                     label='Status'
                                     valueField='key'
                                     displayField='value'
-                                    data={countries}
+                                    store={activeStatusStore}
                                     value={documentTypesValidation.values.activeStatusName}
                                     required
                                     onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('activeStatus', newValue)
-                                        documentTypesValidation.setFieldValue('activeStatusName', newValue)
+                                        documentTypesValidation.setFieldValue('activeStatus', newValue.key)
+                                        documentTypesValidation.setFieldValue('activeStatusName', newValue.value)
                                     }}
                                     error={documentTypesValidation.touched.activeStatusName && Boolean(documentTypesValidation.errors.activeStatusName)}
                                     helperText={documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName}
@@ -338,90 +364,33 @@ const DocumentTypes = (props) => {
                             </Grid>
                             <Grid item xs={12}>
                                 <CustomLookup
-                                    name='nra'
+                                    name='nraRef'
                                     label='Number Range'
-                                    valueField='key'
-                                    displayField='value'
-                                    data={currency}
-                                    value={documentTypesValidation.values.nra}
+                                    valueField='reference'
+                                    displayField='description'
+                                    store={numberRangeStore}
+                                    setStore={setNumberRangeStore}
+                                    firstValue={documentTypesValidation.values.nraRef}
+                                    secondValue={documentTypesValidation.values.nraDescription}
                                     required
-                                    onChange={documentTypesValidation.setFieldValue}
+                                    onLookup={lookupNumberRange}
+                                    onChange={(event, newValue) => {
+                                        if (newValue) {
+                                            documentTypesValidation.setFieldValue('nraId', newValue?.recordId)
+                                            documentTypesValidation.setFieldValue('nraRef', newValue?.reference)
+                                            documentTypesValidation.setFieldValue('nraDescription', newValue?.description)
+                                        } else {
+                                            documentTypesValidation.setFieldValue('nraId', null)
+                                            documentTypesValidation.setFieldValue('nraRef', null)
+                                            documentTypesValidation.setFieldValue('nraDescription', null)
+                                        }
+                                    }}
                                     error={documentTypesValidation.touched.nra && Boolean(documentTypesValidation.errors.nra)}
                                     helperText={documentTypesValidation.touched.nra && documentTypesValidation.errors.nra}
                                 />
-                            </Grid> */}
+                            </Grid>
                         </Grid>
                     </CustomTabPanel>
-                    {/* <CustomTabPanel index={1} value={activeTab}>
-                        <Grid container spacing={4}>
-                        <Grid item xs={12}>
-                                <CustomTextField
-                                    name='reference'
-                                    label='Reference'
-                                    value={documentTypesValidation.values.name}
-                                    required
-                                    onChange={documentTypesValidation.handleChange}
-                                    onClear={() => documentTypesValidation.setFieldValue('reference', '')}
-                                    error={documentTypesValidation.touched.name && Boolean(documentTypesValidation.errors.name)}
-                                    helperText={documentTypesValidation.touched.name && documentTypesValidation.errors.name}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomTextField
-                                    type='number'
-                                    name='age'
-                                    label='Age'
-                                    value={documentTypesValidation.values.age}
-                                    required
-                                    onChange={documentTypesValidation.handleChange}
-                                    onClear={() => documentTypesValidation.setFieldValue('age', 1)}
-                                    error={documentTypesValidation.touched.age && Boolean(documentTypesValidation.errors.age)}
-                                    helperText={documentTypesValidation.touched.age && documentTypesValidation.errors.age}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomLookup
-                                    name='currency'
-                                    label='Currency'
-                                    valueField='key'
-                                    displayField='value'
-                                    searchBy='key'
-                                    data={currency}
-                                    value={documentTypesValidation.values.currency}
-                                    required
-                                    onChange={documentTypesValidation.setFieldValue}
-                                    onClear={() => documentTypesValidation.setFieldValue('currency', null)}
-                                    error={documentTypesValidation.touched.currency && Boolean(documentTypesValidation.errors.currency)}
-                                    helperText={documentTypesValidation.touched.currency && documentTypesValidation.errors.currency}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomComboBox
-                                    name='country'
-                                    label='Country'
-                                    valueField='key'
-                                    displayField='value'
-                                    data={countries}
-                                    value={documentTypesValidation.values.country}
-                                    required
-                                    onChange={documentTypesValidation.setFieldValue}
-                                    error={documentTypesValidation.touched.country && Boolean(documentTypesValidation.errors.country)}
-                                    helperText={documentTypesValidation.touched.country && documentTypesValidation.errors.country}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomDatePicker
-                                    name='dob'
-                                    label='Date Of Birth'
-                                    value={documentTypesValidation.values.dob}
-                                    required
-                                    onChange={documentTypesValidation.setFieldValue}
-                                    error={documentTypesValidation.touched.dob && Boolean(documentTypesValidation.errors.dob)}
-                                    helperText={documentTypesValidation.touched.dob && documentTypesValidation.errors.dob}
-                                />
-                            </Grid>
-                        </Grid>
-                    </CustomTabPanel> */}
                 </Window>
             }
         </>

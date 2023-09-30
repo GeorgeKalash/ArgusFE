@@ -17,7 +17,6 @@ const getNewDocumentTypes = () => {
         nraDescription: null,
         recordId: null,
         reference: null,
-        dob: formatDateFromApi("/Date(1695513600000)/")
     }
 }
 

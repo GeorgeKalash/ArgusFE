@@ -11,7 +11,7 @@ const CustomComboBox = ({
     value,
     valueField = 'key',
     displayField = 'value',
-    data = [],
+    store = [],
     getOptionBy,
     onChange,
     error,
@@ -30,7 +30,7 @@ const CustomComboBox = ({
             name={name}
             value={value}
             size={size}
-            options={data}
+            options={store}
             getOptionLabel={option => {
                 if (typeof option === 'object')
                     return option[displayField]
