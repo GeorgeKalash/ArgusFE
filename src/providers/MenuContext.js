@@ -21,8 +21,8 @@ const MenuProvider = ({ children }) => {
             'extension': SystemRepository.get2AM,
             'parameters': parameters,
         })
-            .then(async (get2AMRes) => {
-                const builtMenu = buildMenu(get2AMRes.record.folders, get2AMRes.record.commandLines)
+            .then(async (res) => {
+                const builtMenu = buildMenu(res.record.folders, res.record.commandLines)
                 setMenu(builtMenu)
             })
             .catch((error) => {
@@ -80,7 +80,7 @@ const MenuProvider = ({ children }) => {
                 'extension': AccessControlRepository.delBMK,
                 'record': JSON.stringify(record),
             })
-                .then((delBMKRes) => {
+                .then((res) => {
                     if (typeof callBack === 'function') {
                         callBack()
                     }
@@ -95,7 +95,7 @@ const MenuProvider = ({ children }) => {
                 'extension': AccessControlRepository.setBMK,
                 'record': JSON.stringify(record),
             })
-                .then((setBMKRes) => {
+                .then((res) => {
                     if (typeof callBack === 'function') {
                         callBack()
                     }

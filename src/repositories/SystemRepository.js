@@ -7,6 +7,8 @@ export const SystemRepository = {
     DocumentType: {
         qry: service + 'qryDT',
         get: service + 'getDT',
+        set: service + 'setDT',
+        del: service + 'delDT',
     },
     NumberRange: {
         snapshot: service + 'snapshotNRA'

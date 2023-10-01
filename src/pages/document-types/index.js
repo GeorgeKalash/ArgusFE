@@ -1,3 +1,4 @@
+// ** React Imports
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
@@ -10,6 +11,7 @@ import {
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
+import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
@@ -20,26 +22,11 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
-// ** Helpers
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
-
-const countries = [
-    { key: 0, value: 'Lebanon' },
-    { key: 1, value: 'Syria' },
-    { key: 2, value: 'Egypt' },
-]
-
-const currency = [
-    { key: '0', value: 'LBP' },
-    { key: '11', value: 'USD' },
-    { key: '12', value: 'YEN' },
-]
 
 const columns = [
     {
@@ -92,11 +79,6 @@ const getCleanValues = values => {
     else
         cleanValues.country = cleanValues.country.key
 
-    if (!cleanValues.dob)
-        delete cleanValues.dob
-    else
-        cleanValues.dob = formatDateToApi(cleanValues.dob)
-
     return cleanValues
 }
 
@@ -118,51 +100,22 @@ const DocumentTypes = () => {
         enableReinitialize: false,
         validateOnChange: false,
 
-        // initialValues: {
-        //     reference: '',
-        //     age: null,
-        //     currency: null,
-        //     system: null,
-        //     dob: formatDateFromApi("/Date(1695513600000)/")
-        // },
-        // validationSchema: yup.object({
-        //     name: yup.string().required('name is required'),
-        //     age: yup.number().required('age is required'),
-        //     currency: yup.object().required('currency is required'),
-        //     country: yup.object().required('country is required'),
-        //     dob: yup.date().required('Date of birth is required'),
-        // }),
+        validationSchema: yup.object({
+            reference: yup.string().required('This field is required'),
+            name: yup.string().required('This field is required'),
+            dgName: yup.string().required('This field is required'),
+            activeStatusName: yup.string().required('This field is required'),
+        }),
         onSubmit: values => {
             // let cleanValues = getCleanValues(values)
             console.log({ values })
+            postDocumentType(values)
         }
     })
-
-    // const securityGrps = useFormik({
-    //     enableReinitialize: false,
-    //     validateOnChange: false,
-    //     initialValues: {
-    //         currency: null,
-    //         country: null,
-    //         dob: formatDateFromApi("/Date(1695513600000)/")
-    //     },
-    //     validationSchema: yup.object({
-    //         currency: yup.object().required('currency is required'),
-    //         country: yup.object().required('country is required'),
-    //         dob: yup.date().required('Date of birth is required'),
-    //     }),
-    //     onSubmit: values => {
-    //         let cleanValues = getCleanValues(values)
-    //         console.log({ cleanValues })
-    //     }
-    // })
 
     const handleSubmit = () => {
         if (activeTab === 0)
             documentTypesValidation.handleSubmit()
-
-        // if (activeTab === 1)
-        //     securityGrps.handleSubmit()
     }
 
     const getGridData = () => {
@@ -237,6 +190,40 @@ const DocumentTypes = () => {
             })
     }
 
+    const postDocumentType = (obj) => {
+        const recordId = obj.recordId
+        postRequest({
+            'extension': SystemRepository.DocumentType.set,
+            'record': JSON.stringify(obj),
+        })
+            .then((res) => {
+                getGridData()
+                setWindowOpen(false)
+                if (!recordId)
+                    toast.success('Record Added Successfully')
+                else
+                    toast.success('Record Editted Successfully')
+            })
+            .catch((error) => {
+                console.log({ error: error })
+            })
+    }
+
+    const delDocumentType = (obj) => {
+        postRequest({
+            'extension': SystemRepository.DocumentType.del,
+            'record': JSON.stringify(obj),
+        })
+            .then((res) => {
+                console.log({ res })
+                getGridData()
+                toast.success('Record Deleted Successfully')
+            })
+            .catch((error) => {
+                console.log({ error: error })
+            })
+    }
+
     const addDocumentType = () => {
         documentTypesValidation.setValues(getNewDocumentTypes())
         setWindowOpen(true)
@@ -256,22 +243,25 @@ const DocumentTypes = () => {
 
     return (
         <>
-            <Grid container spacing={2}>
-                <Grid item xs={12}>
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                        <Button onClick={() => addDocumentType()} variant='contained'>Add</Button>
-                    </Box>
-                </Grid>
-                <Grid item xs={12}>
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+            }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+                    <Button onClick={() => addDocumentType()} variant='contained'>Add</Button>
+                </Box>
+                <Box sx={{ pt: 2 }}>
                     <Table
                         columns={columns}
                         rows={gridData}
                         rowId='recordId'
                         onEdit={editDocumentType}
+                        onDelete={delDocumentType}
                         isLoading={false}
                     />
-                </Grid>
-            </Grid>
+                </Box>
+            </Box>
             {windowOpen &&
                 <Window
                     id='DocumentTypeWindow'
@@ -336,7 +326,6 @@ const DocumentTypes = () => {
                                     store={integrationLogicStore}
                                     getOptionBy={documentTypesValidation.values.ilId}
                                     value={documentTypesValidation.values.ilName}
-                                    required
                                     onChange={(event, newValue) => {
                                         documentTypesValidation.setFieldValue('ilId', newValue.recordId)
                                         documentTypesValidation.setFieldValue('ilName', newValue.name)
@@ -372,7 +361,6 @@ const DocumentTypes = () => {
                                     setStore={setNumberRangeStore}
                                     firstValue={documentTypesValidation.values.nraRef}
                                     secondValue={documentTypesValidation.values.nraDescription}
-                                    required
                                     onLookup={lookupNumberRange}
                                     onChange={(event, newValue) => {
                                         if (newValue) {

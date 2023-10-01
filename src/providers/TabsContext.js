@@ -22,19 +22,20 @@ function CustomTabPanel(props) {
     const { children, value, index, ...other } = props
 
     return (
-        <div
+        <Box
             role="tabpanel"
             hidden={value !== index}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
+            sx={{ height: '100%' }}
             {...other}
         >
             {value === index && (
-                <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
-                </Box>
+
+                //NOTE: EVERY PAGE PADDING CAN BE ADDED HERE
+                children
             )}
-        </div>
+        </Box>
     )
 }
 
@@ -94,7 +95,7 @@ const TabsProvider = ({ children }) => {
 
     return (
         <>
-            <Box sx={{ width: '100%' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                         {activeTabs.map((activeTab, i) => (

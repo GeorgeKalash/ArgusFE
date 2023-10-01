@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import LinearProgress from '@mui/material/LinearProgress'
 import PropTypes from 'prop-types'
 import { alpha, styled } from '@mui/material/styles';
@@ -6,10 +7,14 @@ import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
 import { IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
+import DeleteDialog from './DeleteDialog';
 
 const ODD_OPACITY = 0.2;
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    borderRadius: 0,
+    borderTop: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
+    borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
     '& .MuiDataGrid-columnsContainer': {
         backgroundColor: theme.palette.mode === 'light' ? '#fafafa' : '#1d1d1d',
     },
@@ -61,11 +66,13 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
 }));
 
 const Table = props => {
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}]);
+
     const getRowId = (row) => {
         return row[props.rowId]
     }
 
-    function CustomPagination() {
+    const CustomPagination = () => {
         const apiRef = useGridApiContext()
         const page = useGridSelector(apiRef, gridPageSelector)
         const pageCount = useGridSelector(apiRef, gridPageCountSelector)
@@ -89,22 +96,27 @@ const Table = props => {
         field: 'action',
         headerName: 'ACTIONS',
         flex: 0.5,
+        sortable: false,
         renderCell: params => {
             return (
                 <>
-                    <IconButton
-                        size='small'
-                        onClick={() => props.onEdit(params.row)}
-                    >
-                        <Icon icon='mdi:application-edit-outline' fontSize={18} />
-                    </IconButton>
-                    <IconButton
-                        size='small'
-                        onClick={() => console.log(params.row)}
-                        color='error'
-                    >
-                        <Icon icon='mdi:delete-forever' fontSize={18} />
-                    </IconButton>
+                    {props.onEdit &&
+                        <IconButton
+                            size='small'
+                            onClick={() => props.onEdit(params.row)}
+                        >
+                            <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                        </IconButton>
+                    }
+                    {props.onDelete &&
+                        <IconButton
+                            size='small'
+                            onClick={() => setDeleteDialogOpen([true, params.row])}
+                            color='error'
+                        >
+                            <Icon icon='mdi:delete-forever' fontSize={18} />
+                        </IconButton>
+                    }
                 </>
             )
         }
@@ -135,6 +147,14 @@ const Table = props => {
                     params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
                 }
                 {...props}
+            />
+            <DeleteDialog
+                open={deleteDialogOpen}
+                onClose={() => setDeleteDialogOpen([false, {}])}
+                onConfirm={(obj) => {
+                    setDeleteDialogOpen([false, {}])
+                    props.onDelete(obj)
+                }}
             />
         </>
     )

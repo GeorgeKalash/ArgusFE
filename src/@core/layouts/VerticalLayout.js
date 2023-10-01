@@ -35,12 +35,14 @@ const MainContentWrapper = styled(Box)({
 const ContentWrapper = styled('main')(({ theme }) => ({
   flexGrow: 1,
   width: '100%',
-  padding: theme.spacing(6),
-  transition: 'padding .25s ease-in-out',
-  [theme.breakpoints.down('sm')]: {
-    paddingLeft: theme.spacing(4),
-    paddingRight: theme.spacing(4)
-  }
+
+  // NOTE: WRAPPER PADDING
+  // padding: theme.spacing(6),
+  // transition: 'padding .25s ease-in-out',
+  // [theme.breakpoints.down('sm')]: {
+  //   paddingLeft: theme.spacing(4),
+  //   paddingRight: theme.spacing(4)
+  // }
 }))
 
 const VerticalLayout = props => {
@@ -114,7 +116,7 @@ const VerticalLayout = props => {
           </ContentWrapper>
 
           {/* Footer Component */}
-          <Footer footerStyles={footerProps?.sx} footerContent={footerProps?.content} {...props} />
+          {/* <Footer footerStyles={footerProps?.sx} footerContent={footerProps?.content} {...props} /> */}
         </MainContentWrapper>
       </VerticalLayoutWrapper>
 
