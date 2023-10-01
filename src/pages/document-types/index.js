@@ -66,22 +66,6 @@ const tabs = [
     { label: 'Tab Two' },
 ]
 
-const getCleanValues = values => {
-    let cleanValues = { ...values }
-
-    if (!cleanValues.currency)
-        delete cleanValues.currency
-    else
-        cleanValues.currency = cleanValues.currency.key
-
-    if (!cleanValues.country)
-        delete cleanValues.country
-    else
-        cleanValues.country = cleanValues.country.key
-
-    return cleanValues
-}
-
 const DocumentTypes = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -94,6 +78,7 @@ const DocumentTypes = () => {
 
     //states
     const [windowOpen, setWindowOpen] = useState(false)
+    const [editMode, setEditMode] = useState(false)
     const [activeTab, setActiveTab] = useState(0)
 
     const documentTypesValidation = useFormik({
@@ -107,7 +92,6 @@ const DocumentTypes = () => {
             activeStatusName: yup.string().required('This field is required'),
         }),
         onSubmit: values => {
-            // let cleanValues = getCleanValues(values)
             console.log({ values })
             postDocumentType(values)
         }
@@ -226,11 +210,13 @@ const DocumentTypes = () => {
 
     const addDocumentType = () => {
         documentTypesValidation.setValues(getNewDocumentTypes())
+        setEditMode(false)
         setWindowOpen(true)
     }
 
     const editDocumentType = (obj) => {
         documentTypesValidation.setValues(populateDocumentTypes(obj))
+        setEditMode(true)
         setWindowOpen(true)
     }
 
@@ -309,6 +295,7 @@ const DocumentTypes = () => {
                                     store={sysFunctionsStore}
                                     value={documentTypesValidation.values.dgName}
                                     required
+                                    readOnly={editMode}
                                     onChange={(event, newValue) => {
                                         documentTypesValidation.setFieldValue('dgId', newValue.key)
                                         documentTypesValidation.setFieldValue('dgName', newValue.value)

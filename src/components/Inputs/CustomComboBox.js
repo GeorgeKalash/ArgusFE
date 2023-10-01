@@ -41,6 +41,7 @@ const CustomComboBox = ({
             onChange={onChange}
             fullWidth={fullWidth}
             readOnly={readOnly}
+            freeSolo={readOnly}
             disabled={disabled}
             renderInput={(params) =>
                 <TextField

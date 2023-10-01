@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react'
 
 // ** 3rd Party Imports
 import axios from "axios"
-import jwt from 'jwt-decode';
+import jwt from 'jwt-decode'
 
 import { AuthContext } from 'src/providers/AuthContext'
 
@@ -46,7 +46,7 @@ const RequestsProvider = ({ children }) => {
     }
 
     const getAccessToken = async () => {
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
 
             if (user.expiresAt !== null) {
 
@@ -57,35 +57,34 @@ const RequestsProvider = ({ children }) => {
                     var bodyFormData = new FormData()
                     bodyFormData.append('record', JSON.stringify({ "accessToken": user.accessToken, "refreshToken": user.refreshToken }))
 
-                    return axios({
-
-                        method: 'POST',
-                        url: process.env.NEXT_PUBLIC_AuthURL + 'MA.asmx/' + 'newAT',
-                        headers: {
-                            'authorization': 'Bearer ' + user.accessToken,
-                            "Content-Type": "multipart/form-data",
-                        },
-                        data: bodyFormData,
-                    })
-                        .then(res => {
-
-                            let newUser = {
-                                ...user,
-                                accessToken: res.data.record.accessToken,
-                                refreshToken: res.data.record.refreshToken,
-                                expiresAt: jwt(res.data.record.accessToken).exp,
-                            }
-
-                            if (window.localStorage.getItem('userData'))
-                                window.localStorage.setItem('userData', JSON.stringify(newUser))
-                            else
-                                window.sessionStorage.setItem('userData', JSON.stringify(newUser))
-
-                            resolve(res.data.record.accessToken)
+                    try {
+                        const res = await axios({
+                            method: 'POST',
+                            url: process.env.NEXT_PUBLIC_AuthURL + 'MA.asmx/' + 'newAT',
+                            headers: {
+                                'authorization': 'Bearer ' + user.accessToken,
+                                "Content-Type": "multipart/form-data",
+                            },
+                            data: bodyFormData,
                         })
-                        .catch(() => {
-                            resolve('error getting new Access Token')
-                        })
+
+                        let newUser = {
+                            ...user,
+                            accessToken: res.data.record.accessToken,
+                            refreshToken: res.data.record.refreshToken,
+                            expiresAt: jwt(res.data.record.accessToken).exp,
+                        }
+
+                        if (window.localStorage.getItem('userData'))
+                            window.localStorage.setItem('userData', JSON.stringify(newUser))
+
+                        else
+                            window.sessionStorage.setItem('userData', JSON.stringify(newUser))
+
+                        resolve(res.data.record.accessToken)
+                    } catch {
+                        resolve('error getting new Access Token')
+                    }
                 } else
                     resolve(user.accessToken)
             } else

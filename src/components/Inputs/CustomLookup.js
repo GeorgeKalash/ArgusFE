@@ -100,6 +100,7 @@ const CustomLookup = ({
                             />
                         }
                         readOnly={readOnly}
+                        freeSolo={readOnly}
                         disabled={disabled}
                         sx={{ flex: 1 }}
                     />

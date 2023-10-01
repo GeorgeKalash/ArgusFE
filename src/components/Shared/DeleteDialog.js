@@ -9,7 +9,6 @@ import {
 } from '@mui/material'
 
 const DeleteDialog = (props) => {
-    console.log({ open: props.open[0] })
 
     return (
         <Dialog
