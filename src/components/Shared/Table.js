@@ -95,7 +95,7 @@ const Table = props => {
     columns.push({
         field: 'action',
         headerName: 'ACTIONS',
-        flex: 0.5,
+        width: 100,
         sortable: false,
         renderCell: params => {
             return (

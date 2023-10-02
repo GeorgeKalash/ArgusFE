@@ -12,6 +12,7 @@ import {
     IconButton,
     Button
 } from '@mui/material'
+import { ClickAwayListener } from '@mui/base';
 import ClearIcon from '@mui/icons-material/Clear'
 
 // ** 3rd Party Imports
@@ -29,53 +30,60 @@ function PaperComponent(props) {
 }
 
 
-const Window = ({ children, open, onClose, tabs, height = 400,
+const Window = ({
+    children,
+    onClose,
+    tabs,
+    width = 800,
+    height = 400,
     activeTab,
     setActiveTab,
     Title,
-    onSave
+    onSave,
 }) => {
 
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            fullWidth={true}
-            maxWidth='sm'
-            PaperComponent={PaperComponent}
+        <Draggable
+            handle="#draggable-dialog-title"
+            cancel={'[class*="MuiDialogContent-root"]'}
         >
-            <DialogTitle sx={{ cursor: 'move', py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} id="draggable-dialog-title">
-                <Box>
-                    <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
-                        {Title}
-                    </Typography>
-                </Box>
-                <Box>
-                    <IconButton
-                        tabIndex={-1}
-                        edge='end'
-                        onClick={onClose}
-                        aria-label='clear input'
-                    >
-                        <ClearIcon />
-                    </IconButton>
-                </Box>
-            </DialogTitle>
-            <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
-                {tabs.map((tab, i) => (
-                    <Tab
-                        key={i}
-                        label={tab.label}
-                    />
-                ))}
-            </Tabs>
-            <DialogContent sx={{ height: height, p: 0 }}>
-                {children}
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onSave} variant='contained'>Submit</Button>
-            </DialogActions>
-        </Dialog>
+            <Paper sx={{ width: width, minHeight: height, position: 'absolute', top: `calc(70vh - ${height}px)`, left: `calc(70vw - ${width}px)` }}>
+                <DialogTitle sx={{ cursor: 'move', py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} id="draggable-dialog-title">
+                    <Box>
+                        <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
+                            {Title}
+                        </Typography>
+                    </Box>
+                    <Box>
+                        <IconButton
+                            tabIndex={-1}
+                            edge='end'
+                            onClick={onClose}
+                            aria-label='clear input'
+                        >
+                            <ClearIcon />
+                        </IconButton>
+                    </Box>
+                </DialogTitle>
+                {tabs &&
+                    <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                        {tabs.map((tab, i) => (
+                            <Tab
+                                key={i}
+                                label={tab.label}
+                            />
+                        ))}
+                    </Tabs>
+                }
+                <DialogContent sx={{ height: height, p: 0 }}>
+                    {children}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={onSave} variant='contained'>Submit</Button>
+                </DialogActions>
+
+            </Paper>
+        </Draggable>
     );
 };
 

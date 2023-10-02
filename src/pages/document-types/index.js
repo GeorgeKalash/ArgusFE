@@ -84,7 +84,7 @@ const DocumentTypes = () => {
 
     const documentTypesValidation = useFormik({
         enableReinitialize: false,
-        validateOnChange: false,
+        validateOnChange: true,
 
         validationSchema: yup.object({
             reference: yup.string().required('This field is required'),
@@ -253,11 +253,11 @@ const DocumentTypes = () => {
                 <Window
                     id='DocumentTypeWindow'
                     Title='Document Types'
-                    open={windowOpen}
                     onClose={() => setWindowOpen(false)}
                     tabs={tabs}
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
+                    width={600}
                     height={400}
                     onSave={handleSubmit}
                 >
