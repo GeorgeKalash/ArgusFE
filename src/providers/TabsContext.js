@@ -4,12 +4,10 @@ import { createContext, useEffect, useState } from 'react'
 // ** Next Import
 import { useRouter } from 'next/router'
 
-
 // ** MUI Imports
 import {
     Tabs,
     Tab,
-    Typography,
     Box,
 } from '@mui/material'
 import { IconButton } from '@mui/material'
@@ -22,6 +20,8 @@ function CustomTabPanel(props) {
     const { children, value, index, ...other } = props
 
     return (
+
+        //NOTE: EVERY PAGE PADDING CAN BE ADDED HERE
         <Box
             role="tabpanel"
             hidden={value !== index}
@@ -30,11 +30,7 @@ function CustomTabPanel(props) {
             sx={{ height: '100%' }}
             {...other}
         >
-            {value === index && (
-
-                //NOTE: EVERY PAGE PADDING CAN BE ADDED HERE
-                children
-            )}
+            {children}
         </Box>
     )
 }
@@ -64,34 +60,43 @@ const TabsProvider = ({ children }) => {
     }
 
     const closeTab = (tabRoute) => {
-        setActiveTabs(prevState => {
-            const index = prevState.findIndex((tab) => tab.route === tabRoute)
-            if (index === value) {
-                const newValue = index > 0 ? index - 1 : 0
-                setValue(newValue)
-            } else if (value === prevState.length - 1) {
-                setValue(prevState.length - 2)
+        const index = activeTabs.findIndex((tab) => tab.route === tabRoute)
+        if (index === value) {
+            const newValue = index > 0 ? index - 1 : 1
+            if (activeTabs[newValue]) {
+                router.push(activeTabs[newValue].route)
             }
+            setValue(newValue - 1 >= 0 ? newValue - 1 : 0)
+        } else if (value === activeTabs.length - 1) {
+            if (activeTabs[index - 1]) {
+                router.push(activeTabs[index - 1].route)
+            }
+            setValue(activeTabs.length - 2)
+        }
 
-            return prevState.filter((tab) => tab.route !== tabRoute)
+        setActiveTabs(prevState => {
+            prevState = prevState.filter((tab) => tab.route !== tabRoute)
+
+            return prevState
         })
     }
 
     useEffect(() => {
-        setActiveTabs(prevState => {
-
-            if (prevState.some(activeTab => activeTab.page === children || activeTab.route === router.route))
-                return prevState
-            else {
-                setValue(prevState.length)
+        const isTabOpen = activeTabs.some(activeTab => activeTab.page === children || activeTab.route === router.route)
+        if (isTabOpen)
+            return
+        else {
+            const newValueState = activeTabs.length
+            setActiveTabs(prevState => {
 
                 return [
                     ...prevState,
                     { page: children, route: router.route, label: getLabel() }
                 ]
-            }
-        })
-    }, [children])
+            })
+            setValue(newValueState)
+        }
+    }, [children, router.route])
 
     return (
         <>
@@ -101,7 +106,7 @@ const TabsProvider = ({ children }) => {
                         {activeTabs.map((activeTab, i) => (
                             <Tab
                                 key={i}
-                                label={activeTab.label}
+                                label={activeTab.label.replace(/-/g, ' ')}
                                 onClick={() => router.push(activeTab.route)}
                                 icon={
                                     <IconButton
@@ -120,7 +125,6 @@ const TabsProvider = ({ children }) => {
                     </Tabs>
                 </Box>
                 {activeTabs.map((activeTab, i) => (
-
                     <CustomTabPanel key={i} index={i} value={value}>
                         {activeTab.page}
                     </CustomTabPanel>

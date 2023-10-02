@@ -27,10 +27,11 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
+import { useRouter } from 'next/router'
 
-
-const DocumentTypes = () => {
+const Batches = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
+    const router = useRouter()
 
     //stores
     const [gridData, setGridData] = useState([])
@@ -236,7 +237,7 @@ const DocumentTypes = () => {
                 height: '100%',
             }}>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-                    <Button onClick={() => addDocumentType()} variant='contained'>Add</Button>
+                    <Button onClick={() => router.push('/document-types')} variant='contained'>Batches</Button>
                 </Box>
                 <Box sx={{ pt: 2 }}>
                     <Table
@@ -373,4 +374,4 @@ const DocumentTypes = () => {
     )
 }
 
-export default DocumentTypes
+export default Batches
