@@ -75,7 +75,7 @@ const DocumentTypes = () => {
             headerName: 'Number Range',
             flex: 1,
         },
-    ]
+    ] //try number formatting and aligned right
 
     const tabs = [
         { label: 'Document Types' },
@@ -84,7 +84,7 @@ const DocumentTypes = () => {
 
     const documentTypesValidation = useFormik({
         enableReinitialize: false,
-        validateOnChange: true,
+        validateOnChange: false,
 
         validationSchema: yup.object({
             reference: yup.string().required('This field is required'),
@@ -134,7 +134,7 @@ const DocumentTypes = () => {
     const fillSysFunctionsStore = () => {
         var parameters = '_database=25' //add 'xml'.json and get _database values from there
         getRequest({
-            'extension': SystemRepository.XMLDictionary,
+            'extension': SystemRepository.KeyValueStore,
             'parameters': parameters,
         })
             .then((res) => {
@@ -148,7 +148,7 @@ const DocumentTypes = () => {
     const fillActiveStatusStore = () => {
         var parameters = '_database=11' //add 'xml'.json and get _database values from there
         getRequest({
-            'extension': SystemRepository.XMLDictionary,
+            'extension': SystemRepository.KeyValueStore,
             'parameters': parameters,
         })
             .then((res) => {
@@ -211,19 +211,20 @@ const DocumentTypes = () => {
 
     const addDocumentType = () => {
         documentTypesValidation.setValues(getNewDocumentTypes())
+        fillIntegrationLogicStore()
         setEditMode(false)
         setWindowOpen(true)
     }
 
     const editDocumentType = (obj) => {
         documentTypesValidation.setValues(populateDocumentTypes(obj))
+        fillIntegrationLogicStore()
         setEditMode(true)
         setWindowOpen(true)
     }
 
     useEffect(() => {
         getGridData()
-        fillIntegrationLogicStore()
         fillSysFunctionsStore()
         fillActiveStatusStore()
     }, [])
@@ -242,7 +243,7 @@ const DocumentTypes = () => {
                     <Table
                         columns={columns}
                         rows={gridData}
-                        rowId='recordId'
+                        rowId='recordId' //send an array
                         onEdit={editDocumentType}
                         onDelete={delDocumentType}
                         isLoading={false}
@@ -298,8 +299,8 @@ const DocumentTypes = () => {
                                     required
                                     readOnly={editMode}
                                     onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('dgId', newValue.key)
-                                        documentTypesValidation.setFieldValue('dgName', newValue.value)
+                                        documentTypesValidation.setFieldValue('dgId', newValue?.key)
+                                        documentTypesValidation.setFieldValue('dgName', newValue?.value)
                                     }}
                                     error={documentTypesValidation.touched.dgName && Boolean(documentTypesValidation.errors.dgName)}
                                     helperText={documentTypesValidation.touched.dgName && documentTypesValidation.errors.dgName}
@@ -315,8 +316,8 @@ const DocumentTypes = () => {
                                     getOptionBy={documentTypesValidation.values.ilId}
                                     value={documentTypesValidation.values.ilName}
                                     onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('ilId', newValue.recordId)
-                                        documentTypesValidation.setFieldValue('ilName', newValue.name)
+                                        documentTypesValidation.setFieldValue('ilId', newValue?.recordId)
+                                        documentTypesValidation.setFieldValue('ilName', newValue?.name)
                                     }}
                                     error={documentTypesValidation.touched.ilName && Boolean(documentTypesValidation.errors.ilName)}
                                     helperText={documentTypesValidation.touched.ilName && documentTypesValidation.errors.ilName}
@@ -332,8 +333,8 @@ const DocumentTypes = () => {
                                     value={documentTypesValidation.values.activeStatusName}
                                     required
                                     onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('activeStatus', newValue.key)
-                                        documentTypesValidation.setFieldValue('activeStatusName', newValue.value)
+                                        documentTypesValidation.setFieldValue('activeStatus', newValue?.key)
+                                        documentTypesValidation.setFieldValue('activeStatusName', newValue?.value)
                                     }}
                                     error={documentTypesValidation.touched.activeStatusName && Boolean(documentTypesValidation.errors.activeStatusName)}
                                     helperText={documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName}

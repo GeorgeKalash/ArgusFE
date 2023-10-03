@@ -29,7 +29,7 @@ function PaperComponent(props) {
 }
 
 
-const Window = ({ children, open, onClose, tabs, height = 400,
+const OldWindow = ({ children, open, onClose, tabs, height = 400,
     activeTab,
     setActiveTab,
     Title,
@@ -79,4 +79,4 @@ const Window = ({ children, open, onClose, tabs, height = 400,
     );
 };
 
-export default Window;
+export default OldWindow;

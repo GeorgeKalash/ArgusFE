@@ -3,7 +3,7 @@ const service = 'SY.asmx/'
 export const SystemRepository = {
 
     get2AM: service + 'get2AM',
-    XMLDictionary: service + 'qryXML',
+    KeyValueStore: service + 'qryKVS',
     DocumentType: {
         qry: service + 'qryDT',
         get: service + 'getDT',

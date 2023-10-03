@@ -51,7 +51,7 @@ const MenuProvider = ({ children }) => {
                         folderItem.children.push({
                             id: commandLine.id,
                             title: commandLine.name,
-                            path: '/' + commandLine.api.replace(/\.aspx$/, "").toLowerCase(),
+                            path: '/' + commandLine.nextApi ? commandLine.nextApi : commandLine.api.replace(/\.aspx$/, "").toLowerCase(),
 
                             // icon: commandLine.addToBookmarks && 'mdi:star'
                         })

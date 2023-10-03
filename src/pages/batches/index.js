@@ -135,7 +135,7 @@ const Batches = () => {
     const fillSysFunctionsStore = () => {
         var parameters = '_database=25' //add 'xml'.json and get _database values from there
         getRequest({
-            'extension': SystemRepository.XMLDictionary,
+            'extension': SystemRepository.KeyValueStore,
             'parameters': parameters,
         })
             .then((res) => {
@@ -149,7 +149,7 @@ const Batches = () => {
     const fillActiveStatusStore = () => {
         var parameters = '_database=11' //add 'xml'.json and get _database values from there
         getRequest({
-            'extension': SystemRepository.XMLDictionary,
+            'extension': SystemRepository.KeyValueStore,
             'parameters': parameters,
         })
             .then((res) => {
