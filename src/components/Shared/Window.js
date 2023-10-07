@@ -18,6 +18,9 @@ import ClearIcon from '@mui/icons-material/Clear'
 // ** 3rd Party Imports
 import Draggable from 'react-draggable';
 
+// ** Custom Imports
+import WindowToolbar from './WindowToolbar';
+
 function PaperComponent(props) {
     return (
         <Draggable
@@ -28,7 +31,6 @@ function PaperComponent(props) {
         </Draggable>
     );
 }
-
 
 const Window = ({
     children,
@@ -78,10 +80,7 @@ const Window = ({
                 <DialogContent sx={{ height: height, p: 0 }}>
                     {children}
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={onSave} variant='contained'>Submit</Button>
-                </DialogActions>
-
+                <WindowToolbar onSave={onSave} />
             </Paper>
         </Draggable>
     );

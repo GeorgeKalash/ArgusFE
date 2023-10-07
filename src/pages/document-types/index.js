@@ -21,6 +21,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -236,9 +237,9 @@ const DocumentTypes = () => {
                 flexDirection: 'column',
                 height: '100%',
             }}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-                    <Button onClick={() => addDocumentType()} variant='contained'>Add</Button>
-                </Box>
+                <GridToolbar
+                    onAdd={addDocumentType}
+                />
                 <Box sx={{ pt: 2 }}>
                     <Table
                         columns={columns}
