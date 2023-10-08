@@ -118,7 +118,6 @@ const DocumentTypes = () => {
     }
 
     const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-        console.log({ _startAt, _pageSize })
         const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
         var parameters = defaultParams + '&_dgId=0'
 
@@ -128,7 +127,6 @@ const DocumentTypes = () => {
             'parameters': parameters,
         })
             .then((res) => {
-                console.log({ res })
                 setGridData({ ...res, _startAt })
             })
             .catch((error) => {
@@ -247,10 +245,6 @@ const DocumentTypes = () => {
         fillSysFunctionsStore()
         fillActiveStatusStore()
     }, [])
-
-    useEffect(() => {
-        console.log({ gridData })
-    }, [gridData])
 
     return (
         <>
