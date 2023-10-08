@@ -22,3 +22,73 @@ code:not([class*='language-']):after {
 code[class*='language-'] {
   padding: 0;
 }
+
+/* styles/Sidebar.css */
+.sidebar {
+  padding-left: 10px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.node {
+  width: '100%';
+  padding-top: 8px;
+  padding-bottom: 2px;
+  cursor: pointer;
+}
+
+.folder {
+  font-size: 14px;
+  width: '100%';
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: 'red';
+}
+
+.node.folder {
+  background-color: #231f20;
+  padding-left: 8px;
+  border-radius: 4px;
+}
+
+.node.folder .children {
+  background-color: #231f20;
+  border-radius: 0;
+}
+
+.node.folder.open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.file {
+  font-size: 14px;
+  padding-left: 12px;
+}
+
+.children {
+  background-color: #231f20;
+  padding-left: 12px;
+}
+
+.node.folder.open .file:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.icon {
+  margin-right: 8px;
+}
+
+.arrow {
+  position: absolute;
+  right: 12px;
+  margin-right: 10px;
+}
+
+.node .text {
+  display: flex;
+  align-items: center;
+  padding-bottom: 4px;
+}

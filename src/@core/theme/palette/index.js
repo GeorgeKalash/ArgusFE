@@ -28,7 +28,7 @@ const DefaultPalette = (mode, skin, themeColor) => {
       return '#312D4B'
     } else if (mode === 'light') {
       return '#F4F5FA'
-    } else return '#28243D'
+    } else return '#383838'
   }
 
   return {
@@ -37,10 +37,10 @@ const DefaultPalette = (mode, skin, themeColor) => {
       main: mainColor,
       light: lightColor,
       primaryGradient: primaryGradient(),
-      bodyBg: mode === 'light' ? '#F4F5FA' : '#28243D',
+      bodyBg: mode === 'light' ? '#F4F5FA' : '#383838',
       trackBg: mode === 'light' ? '#F0F2F8' : '#474360',
       avatarBg: mode === 'light' ? '#F0EFF0' : '#3F3B59',
-      darkBg: skin === 'bordered' ? '#312D4B' : '#28243D',
+      darkBg: skin === 'bordered' ? '#312D4B' : '#383838',
       lightBg: skin === 'bordered' ? whiteColor : '#F4F5FA',
       tableHeaderBg: mode === 'light' ? '#F9FAFC' : '#3D3759'
     },
@@ -57,7 +57,7 @@ const DefaultPalette = (mode, skin, themeColor) => {
     },
     secondary: {
       light: '#9C9FA4',
-      main: '#8A8D93',
+      main: '#383838',
       dark: '#777B82',
       contrastText: whiteColor
     },

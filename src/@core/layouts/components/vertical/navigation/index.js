@@ -51,9 +51,9 @@ const Navigation = props => {
 
   // ** States
   const [navHover, setNavHover] = useState(false)
-  const [groupActive, setGroupActive] = useState([])
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
   const [filteredMenu, setFilteredMenu] = useState([]) //menu
+  const [openFolders, setOpenFolders] = useState([]);
   const menu = props.verticalNavItems //menu
 
   // ** Ref
@@ -66,8 +66,6 @@ const Navigation = props => {
   const navMenuContentProps = {
     ...props,
     navHover,
-    groupActive,
-    setGroupActive,
     currentActiveGroup,
     setCurrentActiveGroup
   }
@@ -117,56 +115,88 @@ const Navigation = props => {
 
     if (term === '') {
       setFilteredMenu(menu)
-      setGroupActive([])
+      setOpenFolders([])
     }
     else {
       const [filteredChildren, updatedActiveGroups] = filterMenu(menu, term);
       setFilteredMenu(filteredChildren)
-      setGroupActive(updatedActiveGroups)
     }
   };
 
-  const filterMenu = (items, term, newActiveGroups = []) => {
+  // const filterMenu = (items, term, newActiveGroups = []) => {
 
-    const filtered = items.map((item) => {
+  //   const filtered = items.map((item) => {
+  //     if (item.children) {
+  //       // Recursively filter children
+  //       const [filteredChildren, updatedActiveGroups] = filterMenu(item.children, term, newActiveGroups);
+
+  //       // Keep the folder if any of its children match the search term
+  //       if (filteredChildren.length > 0) {
+  //         if (!newActiveGroups.includes(item.id)) {
+  //           newActiveGroups.push(item.id);
+  //         }
+
+  //         return {
+  //           ...item,
+  //           children: filteredChildren,
+  //         };
+  //       }
+  //     }
+
+  //     // Check if the item's title includes the search term
+  //     if (item.title.toLowerCase().includes(term.toLowerCase())) {
+  //       if (item.children && item.children.length > 0 && !newActiveGroups.includes(item.id)) {
+  //         newActiveGroups.push(item.id);
+  //       }
+
+  //       return item;
+  //     }
+
+  //     return null;
+  //   });
+
+  //   // Remove null values and return filtered items
+  //   const filteredItems = filtered.filter((item) => item !== null);
+
+  //   return [filteredItems, newActiveGroups];
+  // };
+
+  const filterMenu = (items, term) => {
+
+    const filteredItems = items.map((item) => {
       if (item.children) {
-        // Recursively filter children
-        const [filteredChildren, updatedActiveGroups] = filterMenu(item.children, term, newActiveGroups);
-
-        // Keep the folder if any of its children match the search term
-        if (filteredChildren.length > 0) {
-          if (!newActiveGroups.includes(item.id)) {
-            newActiveGroups.push(item.id);
-          }
+        const [filteredChildren, hasMatchingChild] = filterMenu(item.children, term)
+        if (filteredChildren.length > 0 || hasMatchingChild) {
+          setOpenFolders(prevState => {
+            return [...prevState, item.id]
+          })
 
           return {
             ...item,
             children: filteredChildren,
+            isOpen: true, // Open folders with matching children
           };
         }
       }
+      const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
 
-      // Check if the item's title includes the search term
-      if (item.title.toLowerCase().includes(term.toLowerCase())) {
-        if (item.children && item.children.length > 0 && !newActiveGroups.includes(item.id)) {
-          newActiveGroups.push(item.id);
-        }
+      return isMatch ? { ...item, isOpen: true } : null;
+    })
 
-        return item;
-      }
+    const filteredItemsWithoutNull = filteredItems.filter((item) => item !== null)
+    const hasMatchingItem = filteredItemsWithoutNull.some((item) => item.isOpen)
 
-      return null;
-    });
-
-    // Remove null values and return filtered items
-    const filteredItems = filtered.filter((item) => item !== null);
-
-    return [filteredItems, newActiveGroups];
+    return [filteredItemsWithoutNull, hasMatchingItem]
   };
 
   useEffect(() => {
     setFilteredMenu(props.verticalNavItems)
   }, [props.verticalNavItems])
+
+  useEffect(() => {
+    if (navCollapsed)
+      setOpenFolders([])
+  }, [navCollapsed])
 
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 
@@ -221,15 +251,18 @@ const Navigation = props => {
                   pt: 0,
                   transition: 'padding .25s ease',
                   '& > :first-child': { mt: '0' },
-                  pr: !navCollapsed || (navCollapsed && navHover) ? 4.5 : 1.25
+
+                  pr: !navCollapsed || (navCollapsed && navHover) ? '10px' : 1.25
+
                 }}
               >
                 <VerticalNavItems
                   navHover={navHover}
-                  groupActive={groupActive}
-                  setGroupActive={setGroupActive}
+                  navCollapsed={navCollapsed}
                   currentActiveGroup={currentActiveGroup}
                   setCurrentActiveGroup={setCurrentActiveGroup}
+                  openFolders={openFolders}
+                  setOpenFolders={setOpenFolders}
                   {...props}
                   verticalNavItems={filteredMenu}
                 />

@@ -21,17 +21,20 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
-import { useRouter } from 'next/router'
+
+// ** Helpers
+// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { defaultParams } from 'src/lib/defaults'
 
 const Batches = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
-    const router = useRouter()
 
     //stores
     const [gridData, setGridData] = useState([])
@@ -48,8 +51,11 @@ const Batches = () => {
     const columns = [
         {
             field: 'reference',
-            headerName: 'Reference',
+            headerName: 'Batches Reference',
             flex: 1,
+
+            // align: 'right',
+            // valueGetter: ({ row }) => getFormattedNumber(row?.reference, 4)
         },
         {
             field: 'dgName',
@@ -88,13 +94,20 @@ const Batches = () => {
         validateOnChange: false,
 
         validationSchema: yup.object({
+            // reference: yup.number()
+            //     .required('This field is required')
+            //     .transform((value, originalValue) => validateNumberField(value, originalValue))
+            //     .min(10, 'Value must be greater than or equal to 10')
+            //     .max(9999999, 'Value must be less than or equal to 9999999'),
+
             reference: yup.string().required('This field is required'),
             name: yup.string().required('This field is required'),
             dgName: yup.string().required('This field is required'),
             activeStatusName: yup.string().required('This field is required'),
         }),
         onSubmit: values => {
-            console.log({ values })
+            // values.reference = getNumberWithoutCommas(values.reference)
+            // console.log({ values })
             postDocumentType(values)
         }
     })
@@ -104,14 +117,17 @@ const Batches = () => {
             documentTypesValidation.handleSubmit()
     }
 
-    const getGridData = () => {
-        var parameters = '_dgId=0&_startAt=0&_pageSize=30'
+    const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+        const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+        var parameters = defaultParams + '&_dgId=0'
+
+        // var parameters = defaultParams + '&_dgId=0'
         getRequest({
             'extension': SystemRepository.DocumentType.qry,
             'parameters': parameters,
         })
             .then((res) => {
-                setGridData(res.list)
+                setGridData({ ...res, _startAt })
             })
             .catch((error) => {
                 console.log({ error: error.response.data })
@@ -212,19 +228,20 @@ const Batches = () => {
 
     const addDocumentType = () => {
         documentTypesValidation.setValues(getNewDocumentTypes())
+        fillIntegrationLogicStore()
         setEditMode(false)
         setWindowOpen(true)
     }
 
     const editDocumentType = (obj) => {
         documentTypesValidation.setValues(populateDocumentTypes(obj))
+        fillIntegrationLogicStore()
         setEditMode(true)
         setWindowOpen(true)
     }
 
     useEffect(() => {
-        getGridData()
-        fillIntegrationLogicStore()
+        getGridData({ _startAt: 0, _pageSize: 30 })
         fillSysFunctionsStore()
         fillActiveStatusStore()
     }, [])
@@ -236,29 +253,30 @@ const Batches = () => {
                 flexDirection: 'column',
                 height: '100%',
             }}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-                    <Button onClick={() => router.push('/document-types')} variant='contained'>Batches</Button>
-                </Box>
-                <Box sx={{ pt: 2 }}>
-                    <Table
-                        columns={columns}
-                        rows={gridData}
-                        rowId='recordId'
-                        onEdit={editDocumentType}
-                        onDelete={delDocumentType}
-                        isLoading={false}
-                    />
-                </Box>
+                <GridToolbar
+                    onAdd={addDocumentType}
+                />
+                <Table
+                    columns={columns}
+                    gridData={gridData}
+                    rowId={['recordId']}
+                    api={getGridData}
+
+                    // rowId={['recordId', 'reference']}
+                    onEdit={editDocumentType}
+                    onDelete={delDocumentType}
+                    isLoading={false}
+                />
             </Box>
             {windowOpen &&
                 <Window
                     id='DocumentTypeWindow'
                     Title='Document Types'
-                    open={windowOpen}
                     onClose={() => setWindowOpen(false)}
                     tabs={tabs}
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
+                    width={600}
                     height={400}
                     onSave={handleSubmit}
                 >
@@ -271,6 +289,9 @@ const Batches = () => {
                                     value={documentTypesValidation.values.reference}
                                     required
                                     onChange={documentTypesValidation.handleChange}
+
+                                    // numberField
+                                    // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e.target.value, 4))}
                                     onClear={() => documentTypesValidation.setFieldValue('reference', '')}
                                     error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
                                     helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}
@@ -299,8 +320,8 @@ const Batches = () => {
                                     required
                                     readOnly={editMode}
                                     onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('dgId', newValue.key)
-                                        documentTypesValidation.setFieldValue('dgName', newValue.value)
+                                        documentTypesValidation.setFieldValue('dgId', newValue?.key)
+                                        documentTypesValidation.setFieldValue('dgName', newValue?.value)
                                     }}
                                     error={documentTypesValidation.touched.dgName && Boolean(documentTypesValidation.errors.dgName)}
                                     helperText={documentTypesValidation.touched.dgName && documentTypesValidation.errors.dgName}
@@ -316,8 +337,8 @@ const Batches = () => {
                                     getOptionBy={documentTypesValidation.values.ilId}
                                     value={documentTypesValidation.values.ilName}
                                     onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('ilId', newValue.recordId)
-                                        documentTypesValidation.setFieldValue('ilName', newValue.name)
+                                        documentTypesValidation.setFieldValue('ilId', newValue?.recordId)
+                                        documentTypesValidation.setFieldValue('ilName', newValue?.name)
                                     }}
                                     error={documentTypesValidation.touched.ilName && Boolean(documentTypesValidation.errors.ilName)}
                                     helperText={documentTypesValidation.touched.ilName && documentTypesValidation.errors.ilName}
@@ -333,8 +354,8 @@ const Batches = () => {
                                     value={documentTypesValidation.values.activeStatusName}
                                     required
                                     onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('activeStatus', newValue.key)
-                                        documentTypesValidation.setFieldValue('activeStatusName', newValue.value)
+                                        documentTypesValidation.setFieldValue('activeStatus', newValue?.key)
+                                        documentTypesValidation.setFieldValue('activeStatusName', newValue?.value)
                                     }}
                                     error={documentTypesValidation.touched.activeStatusName && Boolean(documentTypesValidation.errors.activeStatusName)}
                                     helperText={documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName}

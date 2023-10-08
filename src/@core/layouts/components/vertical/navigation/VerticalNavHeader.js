@@ -1,5 +1,6 @@
 // ** Next Import
 import Link from 'next/link'
+import Image from 'next/image'
 
 // ** MUI Imports
 import IconButton from '@mui/material/IconButton'
@@ -77,7 +78,16 @@ const VerticalNavHeader = props => {
         userNavMenuBranding(props)
       ) : (
         <LinkStyled href='/'>
-          <svg
+          <img
+            src={!navCollapsed || (navCollapsed && navHover) ?
+              '/images/logos/ArgusLogo.png'
+              :
+              '/images/logos/ArgusA.png'
+            }
+            alt='Argus'
+            style={{ maxHeight: '30px' }}
+          />
+          {/* <svg
             width={30}
             height={25}
             version='1.1'
@@ -138,7 +148,7 @@ const VerticalNavHeader = props => {
           </svg>
           <HeaderTitle variant='h6' sx={{ ...menuCollapsedStyles, ...(navCollapsed && !navHover ? {} : { ml: 3 }) }}>
             {themeConfig.templateName}
-          </HeaderTitle>
+          </HeaderTitle> */}
         </LinkStyled>
       )}
 

@@ -39,7 +39,9 @@ const MenuProvider = ({ children }) => {
                 const folderItem = {
                     id: folder.id,
                     title: folder.name,
+                    iconName: folder.iconName && folder.iconName,
                     icon: folder.nextIcon,
+                    parentId: folder.parentId,
                     children: [],
                 }
 
@@ -51,9 +53,8 @@ const MenuProvider = ({ children }) => {
                         folderItem.children.push({
                             id: commandLine.id,
                             title: commandLine.name,
-                            path: '/' + commandLine.nextApi ? commandLine.nextApi : commandLine.api.replace(/\.aspx$/, "").toLowerCase(),
-
-                            // icon: commandLine.addToBookmarks && 'mdi:star'
+                            path: `/${commandLine.nextApi ? commandLine.nextApi : commandLine.api.replace(/\.aspx$/, "").toLowerCase()}`,
+                            iconName: commandLine.addToBookmarks && 'FavIcon'
                         })
                     })
 
@@ -81,6 +82,7 @@ const MenuProvider = ({ children }) => {
                 'record': JSON.stringify(record),
             })
                 .then((res) => {
+                    getMenu()
                     if (typeof callBack === 'function') {
                         callBack()
                     }
@@ -96,6 +98,7 @@ const MenuProvider = ({ children }) => {
                 'record': JSON.stringify(record),
             })
                 .then((res) => {
+                    getMenu()
                     if (typeof callBack === 'function') {
                         callBack()
                     }

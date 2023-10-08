@@ -1,26 +1,145 @@
-// ** Custom Menu Components
-import VerticalNavLink from './VerticalNavLink'
-import VerticalNavGroup from './VerticalNavGroup'
-import VerticalNavSectionTitle from './VerticalNavSectionTitle'
+// ** React Imports
+import { useContext, useState } from 'react'
 
-const resolveNavItemComponent = item => {
-  if (item.sectionTitle) return VerticalNavSectionTitle
-  if (item.children) return VerticalNavGroup
+// ** Next Imports
+import { useRouter } from 'next/router'
+import Image from 'next/image'
 
-  return VerticalNavLink
-}
+// ** MUI Imports
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+
+// ** Context
+import { MenuContext } from 'src/providers/MenuContext'
 
 const VerticalNavItems = props => {
+  const router = useRouter()
+  const { handleBookmark } = useContext(MenuContext)
+
   // ** Props
-  const { verticalNavItems } = props
+  const { verticalNavItems, openFolders, setOpenFolders, navHover, navCollapsed } = props
 
-  const RenderMenuItems = verticalNavItems?.map((item, index) => {
-    const TagName = resolveNavItemComponent(item)
+  const [selectedNode, setSelectedNode] = useState(false)
 
-    return <TagName {...props} key={index} item={item} />
-  })
+  const closeDialog = () => {
+    setOpenFolders([])
+    setSelectedNode(false)
+  }
 
-  return <>{RenderMenuItems}</>
+  const handleRightClick = (e, node, imgName) => {
+    e.preventDefault()
+    setSelectedNode([node, imgName ? true : false])
+  }
+
+  const toggleFolder = (folderId) => {
+    if (openFolders.includes(folderId)) {
+      setOpenFolders(openFolders.filter((id) => id !== folderId))
+    } else {
+      setOpenFolders([...openFolders, folderId])
+    }
+  }
+
+  const renderNode = (node) => {
+    const isOpen = openFolders.includes(node.id)
+    const isRoot = node.parentId === 0
+    const isFolder = node.children
+
+    const imgName =
+      node.iconName ?
+        isRoot ?
+          `/images/folderIcons/${isOpen ? node.iconName + 'Active' : node.iconName}.png`
+          : `/images/folderIcons/${node.iconName}.png`
+        : null
+
+    return (
+      <div key={node.id} style={{ paddingTop: isRoot && 10, }}>
+        <div
+          className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
+          onClick={() => node.children ? toggleFolder(node.id) : router.push(node.path)}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }} onContextMenu={(e) => !isFolder && handleRightClick(e, node, imgName)}>
+            {imgName && (
+              <div className="icon">
+                <Image
+                  src={imgName} // Assuming the images are in the public/icons folder
+                  alt={node.title}
+                  width={22} // Set the width as needed
+                  height={22} // Set the height as needed
+                />
+              </div>
+            )}
+            {!navCollapsed || (navCollapsed && navHover) ?
+              <>
+                <div className="text"> {/* Added a container div for text */}
+                  <span>{node.title}</span>
+                </div>
+                {isFolder && (
+                  <div className="arrow">
+                    {isOpen ? <ExpandMoreIcon style={{ fontSize: 20 }} /> : <ChevronRightIcon style={{ fontSize: 20 }} />}
+                  </div>
+                )}
+              </>
+              : <></>
+            }
+          </div>
+        </div>
+        {isOpen && isFolder && (
+          <div className="children">
+            {node.children.map((child) => renderNode(child))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="sidebar" style={{ paddingRight: navCollapsed && '8px' }}>
+        {verticalNavItems.map((node) => renderNode(node))}
+      </div>
+      {selectedNode &&
+        <Dialog
+          open={selectedNode ? true : false}
+          onClose={() => setSelectedNode(false)}
+          fullWidth={true}
+          maxWidth="xs"
+        >
+          <DialogTitle>Confirmation</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {selectedNode[1] ?
+                'Remove from favorites ?' : 'Add to favorites ?'
+              }
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => handleBookmark(selectedNode[0], selectedNode[1], closeDialog)} color="primary">
+              OK
+            </Button>
+            <Button onClick={() => setSelectedNode(false)} color="primary">
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
+      }
+    </>
+  )
+
+  // const RenderMenuItems = verticalNavItems?.map((item, index) => {
+  //   const TagName = resolveNavItemComponent(item)
+
+  //   return <TagName {...props} key={index} item={item} />
+  // })
+
+  // return <>{RenderMenuItems}</>
 }
 
 export default VerticalNavItems
