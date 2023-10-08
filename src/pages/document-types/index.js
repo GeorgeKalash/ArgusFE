@@ -53,7 +53,9 @@ const DocumentTypes = () => {
             field: 'reference',
             headerName: 'Reference',
             flex: 1,
-            align: 'right'
+
+            // align: 'right',
+            // valueGetter: ({ row }) => getFormattedNumber(row?.reference, 4)
         },
         {
             field: 'dgName',
@@ -115,14 +117,19 @@ const DocumentTypes = () => {
             documentTypesValidation.handleSubmit()
     }
 
-    const getGridData = () => {
+    const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+        console.log({ _startAt, _pageSize })
+        const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
         var parameters = defaultParams + '&_dgId=0'
+
+        // var parameters = defaultParams + '&_dgId=0'
         getRequest({
             'extension': SystemRepository.DocumentType.qry,
             'parameters': parameters,
         })
             .then((res) => {
-                setGridData(res.list)
+                console.log({ res })
+                setGridData({ ...res, _startAt })
             })
             .catch((error) => {
                 console.log({ error: error.response.data })
@@ -236,10 +243,14 @@ const DocumentTypes = () => {
     }
 
     useEffect(() => {
-        getGridData()
+        getGridData({ _startAt: 0, _pageSize: 30 })
         fillSysFunctionsStore()
         fillActiveStatusStore()
     }, [])
+
+    useEffect(() => {
+        console.log({ gridData })
+    }, [gridData])
 
     return (
         <>
@@ -253,8 +264,9 @@ const DocumentTypes = () => {
                 />
                 <Table
                     columns={columns}
-                    rows={gridData}
+                    gridData={gridData}
                     rowId={['recordId']}
+                    api={getGridData}
 
                     // rowId={['recordId', 'reference']}
                     onEdit={editDocumentType}
@@ -285,7 +297,7 @@ const DocumentTypes = () => {
                                     onChange={documentTypesValidation.handleChange}
 
                                     // numberField
-                                    // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e, 4))}
+                                    // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e.target.value, 4))}
                                     onClear={() => documentTypesValidation.setFieldValue('reference', '')}
                                     error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
                                     helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}

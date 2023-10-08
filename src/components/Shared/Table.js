@@ -4,21 +4,21 @@ import PropTypes from 'prop-types'
 // ** MUI Imports
 import {
     Box,
-    Pagination,
-    PaginationItem,
+    IconButton,
     LinearProgress
 } from '@mui/material'
 import {
     DataGrid,
-    gridPageCountSelector,
-    gridPageSelector,
-    useGridApiContext,
-    useGridSelector,
-    gridClasses
+    gridClasses,
 } from '@mui/x-data-grid'
-import { IconButton } from '@mui/material'
 import { alpha, styled } from '@mui/material/styles'
+
+// ** Icons
 import Icon from 'src/@core/components/icon'
+import FirstPageIcon from '@mui/icons-material/FirstPage'
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
+import NavigateNextIcon from '@mui/icons-material/NavigateNext'
+import LastPageIcon from '@mui/icons-material/LastPage'
 
 // ** Custom Imports
 import DeleteDialog from './DeleteDialog'
@@ -79,7 +79,31 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     },
 }))
 
+const TableContainer = styled(Box)({
+    // height: '600px', // Change this value as needed
+    // flex: 1,
+    // overflow: 'auto', // Enable scrolling within the container
+    position: 'relative',
+})
+
+const ScrollableTable = styled('div')({
+    overflowY: 'auto', // Enable vertical scrolling
+    maxHeight: '100%', // Limit the maximum height to the container's height
+})
+
+const PaginationContainer = styled(Box)({
+    width: '100%',
+    position: 'fixed',
+    bottom: '0',
+    backgroundColor: '#fff',
+    borderTop: '1px solid #ccc',
+})
+
 const Table = props => {
+    const gridData = props.gridData
+    const api = props.api
+    const startAt = gridData._startAt
+    const pageSize = 30
     const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
     const getRowId = (row) => {
@@ -87,20 +111,65 @@ const Table = props => {
     }
 
     const CustomPagination = () => {
-        const apiRef = useGridApiContext()
-        const page = useGridSelector(apiRef, gridPageSelector)
-        const pageCount = useGridSelector(apiRef, gridPageCountSelector)
+        const page = Math.ceil(startAt === 0 ? 1 : (startAt + 1) / pageSize)
+        const pageCount = Math.ceil(gridData.count / pageSize)
+
+        const incrementPage = () => {
+            if (page < pageCount) {
+                console.log((page + 1) * pageSize)
+                api({ _startAt: page * pageSize, _pageSize: pageSize })
+            }
+        }
+
+        const decrementPage = () => {
+            if (page > 1) {
+                console.log((page - 2) * pageSize)
+                api({ _startAt: (page - 2) * pageSize, _pageSize: pageSize })
+            }
+        }
+
+        const goToFirstPage = () => {
+            api({ _startAt: 0, _pageSize: pageSize })
+        }
+
+        const goToLastPage = () => {
+            api({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize })
+        }
 
         return (
-            <Pagination
-                color='primary'
-                variant='outlined'
-                shape='rounded'
-                page={page + 1}
-                count={pageCount}
-                renderItem={props2 => <PaginationItem {...props2} disableRipple />}
-                onChange={(event, value) => apiRef.current.setPage(value - 1)}
-            />
+            <PaginationContainer>
+                <IconButton onClick={goToFirstPage} disabled={page === 1}>
+                    <FirstPageIcon />
+                </IconButton>
+                <IconButton onClick={decrementPage} disabled={page === 1}>
+                    <NavigateBeforeIcon />
+                </IconButton>
+                Page: {page} of {pageCount}
+                <IconButton onClick={incrementPage} disabled={page === pageCount}>
+                    <NavigateNextIcon />
+                </IconButton>
+                <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+                    <LastPageIcon />
+                </IconButton>
+                {/* <Pagination
+                    color='primary'
+                    variant='outlined'
+                    shape='rounded'
+                    page={page + 1}
+                    count={pageCount}
+                    renderItem={props2 => <PaginationItem {...props2} disableRipple />}
+                    onChange={(event, value) => {
+                        console.log((value * 30) + 1)
+                        apiRef.current.setPage(value - 1)
+                    }}
+                    style={{
+                        width: '100%',
+                        position: 'absolute',
+                        bottom: '0',
+                        backgroundColor: '#fff',
+                    }}
+                /> */}
+            </PaginationContainer>
         )
     }
 
@@ -138,9 +207,10 @@ const Table = props => {
 
     return (
         <>
-            <Box sx={props.style ? props.style : { pt: 2 }}>
+            <TableContainer sx={props.style ? props.style : { pt: 2 }}>
+                {/* <ScrollableTable> */}
                 <StripedDataGrid
-                    rows={props.rows}
+                    rows={gridData.list || []}
                     columns={columns}
                     autoHeight
                     initialState={{
@@ -163,7 +233,11 @@ const Table = props => {
                     }
                     {...props}
                 />
-            </Box>
+                {/* </ScrollableTable> */}
+                {/* <PaginationContainer>
+                    <CustomPagination />
+                </PaginationContainer> */}
+            </TableContainer>
             <DeleteDialog
                 open={deleteDialogOpen}
                 onClose={() => setDeleteDialogOpen([false, {}])}
@@ -181,7 +255,6 @@ export default Table
 Table.propTypes = {
     isLoading: PropTypes.bool,
     columns: PropTypes.array,
-    rows: PropTypes.array,
     selectedRow: PropTypes.array,
     setselectedRow: PropTypes.func,
     onSelectionChange: PropTypes.func

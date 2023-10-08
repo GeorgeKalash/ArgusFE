@@ -1,5 +1,7 @@
-const getFormattedNumber = (event, decimal) => {
-    const value = event.target.value
+const getFormattedNumber = (value, decimal) => {
+
+    if (!value)
+        return
 
     // Remove non-numeric and non-decimal characters
     const sanitizedValue = value.replace(/[^0-9.]/g, '')
