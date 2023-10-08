@@ -29,6 +29,9 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
 
+// ** Helpers
+// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { defaultParams } from 'src/lib/defaults'
 
 const DocumentTypes = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -50,6 +53,7 @@ const DocumentTypes = () => {
             field: 'reference',
             headerName: 'Reference',
             flex: 1,
+            align: 'right'
         },
         {
             field: 'dgName',
@@ -76,7 +80,7 @@ const DocumentTypes = () => {
             headerName: 'Number Range',
             flex: 1,
         },
-    ] //try number formatting and aligned right
+    ]
 
     const tabs = [
         { label: 'Document Types' },
@@ -88,13 +92,20 @@ const DocumentTypes = () => {
         validateOnChange: false,
 
         validationSchema: yup.object({
+            // reference: yup.number()
+            //     .required('This field is required')
+            //     .transform((value, originalValue) => validateNumberField(value, originalValue))
+            //     .min(10, 'Value must be greater than or equal to 10')
+            //     .max(9999999, 'Value must be less than or equal to 9999999'),
+
             reference: yup.string().required('This field is required'),
             name: yup.string().required('This field is required'),
             dgName: yup.string().required('This field is required'),
             activeStatusName: yup.string().required('This field is required'),
         }),
         onSubmit: values => {
-            console.log({ values })
+            // values.reference = getNumberWithoutCommas(values.reference)
+            // console.log({ values })
             postDocumentType(values)
         }
     })
@@ -105,7 +116,7 @@ const DocumentTypes = () => {
     }
 
     const getGridData = () => {
-        var parameters = '_dgId=0&_startAt=0&_pageSize=30'
+        var parameters = defaultParams + '&_dgId=0'
         getRequest({
             'extension': SystemRepository.DocumentType.qry,
             'parameters': parameters,
@@ -240,16 +251,16 @@ const DocumentTypes = () => {
                 <GridToolbar
                     onAdd={addDocumentType}
                 />
-                <Box sx={{ pt: 2 }}>
-                    <Table
-                        columns={columns}
-                        rows={gridData}
-                        rowId='recordId' //send an array
-                        onEdit={editDocumentType}
-                        onDelete={delDocumentType}
-                        isLoading={false}
-                    />
-                </Box>
+                <Table
+                    columns={columns}
+                    rows={gridData}
+                    rowId={['recordId']}
+
+                    // rowId={['recordId', 'reference']}
+                    onEdit={editDocumentType}
+                    onDelete={delDocumentType}
+                    isLoading={false}
+                />
             </Box>
             {windowOpen &&
                 <Window
@@ -272,6 +283,9 @@ const DocumentTypes = () => {
                                     value={documentTypesValidation.values.reference}
                                     required
                                     onChange={documentTypesValidation.handleChange}
+
+                                    // numberField
+                                    // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e, 4))}
                                     onClear={() => documentTypesValidation.setFieldValue('reference', '')}
                                     error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
                                     helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}

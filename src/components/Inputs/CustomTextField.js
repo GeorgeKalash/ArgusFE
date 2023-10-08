@@ -16,6 +16,7 @@ const CustomTextField = ({
     autoFocus = false,
     readOnly = false,
     autoComplete = 'new-password',
+    numberField = false,
     ...props
 }) => {
 
@@ -27,7 +28,15 @@ const CustomTextField = ({
             size={size}
             fullWidth={fullWidth}
             autoFocus={autoFocus}
-            inputProps={{ autoComplete: autoComplete, readOnly: readOnly }}
+            inputProps={{
+                autoComplete: autoComplete,
+                readOnly: readOnly,
+                pattern: numberField && '[0-9]*', // Allow only numeric input
+                style: {
+                    textAlign: numberField && 'right'
+                }
+            }}
+            style={{ textAlign: 'right' }}
             InputProps={{
                 endAdornment: value && (
                     <InputAdornment position='end'>

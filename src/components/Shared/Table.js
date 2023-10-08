@@ -1,15 +1,29 @@
 import { useState } from 'react'
-import LinearProgress from '@mui/material/LinearProgress'
 import PropTypes from 'prop-types'
-import { alpha, styled } from '@mui/material/styles';
-import { DataGrid, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector, gridClasses } from '@mui/x-data-grid'
-import Pagination from '@mui/material/Pagination'
-import PaginationItem from '@mui/material/PaginationItem'
-import { IconButton } from '@mui/material'
-import Icon from 'src/@core/components/icon'
-import DeleteDialog from './DeleteDialog';
 
-const ODD_OPACITY = 0.2;
+// ** MUI Imports
+import {
+    Box,
+    Pagination,
+    PaginationItem,
+    LinearProgress
+} from '@mui/material'
+import {
+    DataGrid,
+    gridPageCountSelector,
+    gridPageSelector,
+    useGridApiContext,
+    useGridSelector,
+    gridClasses
+} from '@mui/x-data-grid'
+import { IconButton } from '@mui/material'
+import { alpha, styled } from '@mui/material/styles'
+import Icon from 'src/@core/components/icon'
+
+// ** Custom Imports
+import DeleteDialog from './DeleteDialog'
+
+const ODD_OPACITY = 0.2
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     borderRadius: 0,
@@ -63,13 +77,13 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
             },
         },
     },
-}));
+}))
 
 const Table = props => {
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}]);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
     const getRowId = (row) => {
-        return row[props.rowId]
+        return props.rowId.map(field => row[field]).join('-')
     }
 
     const CustomPagination = () => {
@@ -124,30 +138,32 @@ const Table = props => {
 
     return (
         <>
-            <StripedDataGrid
-                rows={props.rows}
-                columns={columns}
-                autoHeight
-                initialState={{
-                    pagination: {
-                        paginationModel: {
-                            pageSize: 30,
+            <Box sx={props.style ? props.style : { pt: 2 }}>
+                <StripedDataGrid
+                    rows={props.rows}
+                    columns={columns}
+                    autoHeight
+                    initialState={{
+                        pagination: {
+                            paginationModel: {
+                                pageSize: 30,
+                            },
                         },
-                    },
-                }}
-                components={{
-                    LoadingOverlay: LinearProgress,
-                    Pagination: CustomPagination
-                }}
-                loading={props.isLoading}
-                getRowId={getRowId}
-                disableRowSelectionOnClick
-                disableColumnMenu
-                getRowClassName={(params) =>
-                    params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-                }
-                {...props}
-            />
+                    }}
+                    components={{
+                        LoadingOverlay: LinearProgress,
+                        Pagination: CustomPagination
+                    }}
+                    loading={props.isLoading}
+                    getRowId={getRowId}
+                    disableRowSelectionOnClick
+                    disableColumnMenu
+                    getRowClassName={(params) =>
+                        params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+                    }
+                    {...props}
+                />
+            </Box>
             <DeleteDialog
                 open={deleteDialogOpen}
                 onClose={() => setDeleteDialogOpen([false, {}])}
