@@ -86,10 +86,7 @@ const AuthProvider = ({ children }) => {
         },
       })
 
-
       const signIn3Params = `_email=${params.email}&_password=${encryptePWD(params.password)}&_accountId=${getAC.data.record.accountId}&_userId=${getUS2.data.record.recordId}`
-
-      console.log(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`)
 
       const signIn3 = await axios({
         method: 'GET',
@@ -101,12 +98,15 @@ const AuthProvider = ({ children }) => {
         },
       })
 
-      console.log(signIn3);
+      // console.log({ getAC: getAC.data.record })
+      // console.log({ getUS2: getUS2.data.record })
+      // console.log({ signIn3: signIn3.data.record })
 
       const loggedUser = {
         accountId: getAC.data.record.accountId,
         userId: getUS2.data.record.recordId,
         email: getUS2.data.record.email,
+        languageId: getUS2.data.record.languageId,
         userType: getUS2.data.record.userType,
         employeeId: getUS2.data.record.employeeId,
         fullName: getUS2.data.record.fullName,
@@ -120,7 +120,7 @@ const AuthProvider = ({ children }) => {
       // params.rememberMe
       //   ? window.localStorage.setItem(authConfig.storageTokenKeyName, signIn3.data.record.accessToken)
       //   : null
-
+      // console.log({ loggedUser })
       setUser({ ...loggedUser })
 
       params.rememberMe ?
