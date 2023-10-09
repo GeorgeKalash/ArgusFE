@@ -14,7 +14,6 @@ const RequestsProvider = ({ children }) => {
     const { user } = useContext(AuthContext)
 
     const getRequest = async (body) => {
-
         const accessToken = await getAccessToken()
 
         return axios({
@@ -23,6 +22,7 @@ const RequestsProvider = ({ children }) => {
             headers: {
                 'Authorization': 'Bearer ' + accessToken,
                 "Content-Type": "multipart/form-data",
+                "LanguageId": user.languageId
             },
         }).then(res => res.data)
     }

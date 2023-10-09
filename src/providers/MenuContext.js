@@ -53,7 +53,7 @@ const MenuProvider = ({ children }) => {
                         folderItem.children.push({
                             id: commandLine.id,
                             title: commandLine.name,
-                            path: `/${commandLine.nextApi ? commandLine.nextApi : commandLine.api.replace(/\.aspx$/, "").toLowerCase()}`,
+                            path: `/${commandLine.nextAPI ? commandLine.nextAPI : commandLine.api.replace(/\.aspx$/, "").toLowerCase()}`,
                             iconName: commandLine.addToBookmarks && 'FavIcon'
                         })
                     })
