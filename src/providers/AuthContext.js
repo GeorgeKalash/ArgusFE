@@ -75,10 +75,9 @@ const AuthProvider = ({ children }) => {
         url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=react`
       })
 
-      //when fixed from getAC react https://${getAC.data.record.api} needs to be ${getAC.data.record.api}
       const getUS2 = await axios({
         method: 'GET',
-        url: `${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.email}`,
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/SY.asmx/getUS2?_email=${params.email}`,
         headers: {
           'accountId': JSON.parse(getAC.data.record.accountId),
           'dbe': JSON.parse(getAC.data.record.dbe),
