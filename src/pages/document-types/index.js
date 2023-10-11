@@ -32,6 +32,7 @@ import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/Do
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const DocumentTypes = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -47,6 +48,7 @@ const DocumentTypes = () => {
     const [windowOpen, setWindowOpen] = useState(false)
     const [editMode, setEditMode] = useState(false)
     const [activeTab, setActiveTab] = useState(0)
+    const [errorMessage, setErrorMessage] = useState(null)
 
     const columns = [
         {
@@ -121,7 +123,6 @@ const DocumentTypes = () => {
         const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
         var parameters = defaultParams + '&_dgId=0'
 
-        // var parameters = defaultParams + '&_dgId=0'
         getRequest({
             'extension': SystemRepository.DocumentType.qry,
             'parameters': parameters,
@@ -130,7 +131,7 @@ const DocumentTypes = () => {
                 setGridData({ ...res, _startAt })
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -144,7 +145,7 @@ const DocumentTypes = () => {
                 setIntegrationLogicStore(res.list)
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -158,7 +159,7 @@ const DocumentTypes = () => {
                 setSysFunctionsStore(res.list)
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -173,7 +174,7 @@ const DocumentTypes = () => {
                 setActiveStatusStore(res.list)
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -188,7 +189,7 @@ const DocumentTypes = () => {
                 setNumberRangeStore(res.list)
             })
             .catch((error) => {
-                console.log({ error: error })
+                setErrorMessage(error)
             })
     }
 
@@ -199,7 +200,7 @@ const DocumentTypes = () => {
             'record': JSON.stringify(obj),
         })
             .then((res) => {
-                getGridData()
+                getGridData({})
                 setWindowOpen(false)
                 if (!recordId)
                     toast.success('Record Added Successfully')
@@ -207,22 +208,22 @@ const DocumentTypes = () => {
                     toast.success('Record Editted Successfully')
             })
             .catch((error) => {
-                console.log({ error: error })
+                setErrorMessage(error)
             })
     }
 
     const delDocumentType = (obj) => {
+        obj.id = '215'
         postRequest({
             'extension': SystemRepository.DocumentType.del,
             'record': JSON.stringify(obj),
         })
             .then((res) => {
-                console.log({ res })
-                getGridData()
+                getGridData({})
                 toast.success('Record Deleted Successfully')
             })
             .catch((error) => {
-                console.log({ error: error })
+                setErrorMessage(error)
             })
     }
 
@@ -391,6 +392,11 @@ const DocumentTypes = () => {
                     </CustomTabPanel>
                 </Window>
             }
+            <ErrorWindow
+                open={errorMessage}
+                onClose={() => setErrorMessage(null)}
+                message={errorMessage}
+            />
         </>
     )
 }
