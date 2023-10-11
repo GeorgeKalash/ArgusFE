@@ -25,19 +25,23 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewGeographicRegion, populateGeographicRegions } from 'src/Models/System/GeographicRegions'
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { defaultParams } from 'src/lib/defaults'
 
 const GeographicRegions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   //stores
   const [gridData, setGridData] = useState([])
+  const [integrationLogicStore, setIntegrationLogicStore] = useState([])
+  const [sysFunctionsStore, setSysFunctionsStore] = useState([])
+  const [activeStatusStore, setActiveStatusStore] = useState([])
+  const [numberRangeStore, setNumberRangeStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   const columns = [
     {
@@ -81,7 +85,7 @@ const GeographicRegions = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        console.log({ error: error.response.data })
       })
   }
 
@@ -98,7 +102,7 @@ const GeographicRegions = () => {
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
-        setErrorMessage(error)
+        console.log({ error: error })
       })
   }
   const tabs = [{ label: 'Geographic Regions' }]
@@ -113,7 +117,7 @@ const GeographicRegions = () => {
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
-        setErrorMessage(error)
+        console.log({ error: error })
       })
   }
 
@@ -173,8 +177,9 @@ const GeographicRegions = () => {
                   label='Reference'
                   value={geographicRegionsValidation.values.reference}
                   required
-                  readOnly={editMode}
                   onChange={geographicRegionsValidation.handleChange}
+                  // numberField
+                  // onChange={(e) => geographicRegionsValidation.setFieldValue('reference', getFormattedNumber(e.target.value, 4))}
                   onClear={() => geographicRegionsValidation.setFieldValue('reference', '')}
                   error={
                     geographicRegionsValidation.touched.reference &&
@@ -201,7 +206,6 @@ const GeographicRegions = () => {
           </CustomTabPanel>
         </Window>
       )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
