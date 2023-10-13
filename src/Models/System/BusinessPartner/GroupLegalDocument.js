@@ -7,8 +7,8 @@ const getNewGroupLegalDocument = () => {
   return {
     groupId: null,
     incId: null,
-    required: null,
-    mandatory: null,
+    required: false,
+    mandatory: false,
     groupName: null,
     incName: null
   }

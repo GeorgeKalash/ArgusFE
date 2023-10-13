@@ -13,27 +13,36 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { getNewGroupLegalDocument, populateGroupLegalDocument } from 'src/Models/System/GroupLegalDocument'
+import {
+  getNewGroupLegalDocument,
+  populateGroupLegalDocument
+} from 'src/Models/System/BusinessPartner/GroupLegalDocument'
+import { getNewCategoryId, populateCategoryId } from 'src/Models/System/BusinessPartner/Group'
+import { getNewGroup, populateGroup } from 'src/Models/System/BusinessPartner/CategoryID'
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const GroupLegalDocument = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   //stores
   const [gridData, setGridData] = useState([])
+  const [categoryStore, setCategoryStore] = useState([])
+  const [groupStore, setGroupStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const columns = [
     {
@@ -61,7 +70,6 @@ const GroupLegalDocument = () => {
   const GroupLegalDocumentValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
-
     validationSchema: yup.object({
       groupName: yup.string().required('This field is required'),
       incName: yup.string().required('This field is required'),
@@ -79,9 +87,8 @@ const GroupLegalDocument = () => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     var parameters = defaultParams
 
-    // var parameters = defaultParams + '&_dgId=0'
     getRequest({
-      extension: BusinessPartnerRepository.qryGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.qryGIN,
       parameters: parameters
     })
       .then(res => {
@@ -89,29 +96,56 @@ const GroupLegalDocument = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        console.error('Error occurred:', error)
-        console.log('Error response data:', error.response ? error.response.data : null)
+        setErrorMessage(error.response.data)
       })
   }
+
+  const FillCategoryStore = () => {
+    var parameters = `filter=`
+    getRequest({
+      extension: BusinessPartnerRepository.CategoryID.qryINC,
+      parameters: parameters
+    })
+      .then(res => {
+        setCategoryStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+  const FillGroupStore = () => {
+    var parameters = `filter=`
+    getRequest({
+      extension: BusinessPartnerRepository.Group.qryGRP,
+      parameters: parameters
+    })
+      .then(res => {
+        setGroupStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
   const postGroupLegalDocument = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: BusinessPartnerRepository.setGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.setGIN,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData()
+        getGridData({})
         setWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Editted Successfully')
       })
       .catch(error => {
-        console.log({ error: error })
+        setErrorMessage(error)
       })
   }
   const delGroupLegalDocument = obj => {
     postRequest({
-      extension: BusinessPartnerRepository.delGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.delGIN,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -120,23 +154,29 @@ const GroupLegalDocument = () => {
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
-        console.log({ error: error })
+        setErrorMessage(error)
       })
   }
 
   const addGroupLegalDocument = () => {
     GroupLegalDocumentValidation.setValues(getNewGroupLegalDocument())
+    FillCategoryStore()
+    FillGroupStore()
     setEditMode(false)
     setWindowOpen(true)
   }
 
   const editGroupLegalDocument = obj => {
     GroupLegalDocumentValidation.setValues(populateGroupLegalDocument(obj))
+    FillCategoryStore()
+    FillGroupStore()
     setEditMode(true)
     setWindowOpen(true)
   }
   useEffect(() => {
     getGridData({ _startAt: 0, _pageSize: 30 })
+    FillGroupStore()
+    FillCategoryStore()
   }, [])
 
   return (
@@ -171,13 +211,18 @@ const GroupLegalDocument = () => {
           <CustomTabPanel>
             <Grid container spacing={4}>
               <Grid item xs={12}>
-                <CustomTextField
-                  name='groupName'
-                  label='groupName'
+                <CustomComboBox
+                  name='groupId'
+                  label='Group Name'
+                  valueField='recordId'
+                  displayField='name'
+                  store={groupStore}
                   value={GroupLegalDocumentValidation.values.groupName}
                   required
-                  onChange={GroupLegalDocumentValidation.handleChange}
-                  onClear={() => GroupLegalDocumentValidation.setFieldValue('groupName', '')}
+                  readOnly={editMode}
+                  onChange={(event, newValue) => {
+                    GroupLegalDocumentValidation.setFieldValue('groupId', newValue?.recordId)
+                  }}
                   error={
                     GroupLegalDocumentValidation.touched.groupName &&
                     Boolean(GroupLegalDocumentValidation.errors.groupName)
@@ -188,13 +233,18 @@ const GroupLegalDocument = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  name='incName'
-                  label='incName'
+                <CustomComboBox
+                  name='incId'
+                  label='Category ID'
+                  valueField='recordId'
+                  displayField='name'
+                  store={categoryStore}
                   value={GroupLegalDocumentValidation.values.incName}
                   required
-                  onChange={GroupLegalDocumentValidation.handleChange}
-                  onClear={() => GroupLegalDocumentValidation.setFieldValue('incName', '')}
+                  readOnly={editMode}
+                  onChange={(event, newValue) => {
+                    GroupLegalDocumentValidation.setFieldValue('incId', newValue?.recordId)
+                  }}
                   error={
                     GroupLegalDocumentValidation.touched.incName && Boolean(GroupLegalDocumentValidation.errors.incName)
                   }
@@ -207,6 +257,7 @@ const GroupLegalDocument = () => {
           </CustomTabPanel>
         </Window>
       )}
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
