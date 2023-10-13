@@ -67,7 +67,7 @@ const GroupLegalDocument = () => {
     }
   ]
 
-  const GroupLegalDocumentValidation = useFormik({
+  const groupLegalDocumentValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
@@ -81,7 +81,7 @@ const GroupLegalDocument = () => {
     }
   })
   const handleSubmit = () => {
-    GroupLegalDocumentValidation.handleSubmit()
+    groupLegalDocumentValidation.handleSubmit()
   }
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
@@ -159,7 +159,7 @@ const GroupLegalDocument = () => {
   }
 
   const addGroupLegalDocument = () => {
-    GroupLegalDocumentValidation.setValues(getNewGroupLegalDocument())
+    groupLegalDocumentValidation.setValues(getNewGroupLegalDocument())
     FillCategoryStore()
     FillGroupStore()
     setEditMode(false)
@@ -167,7 +167,7 @@ const GroupLegalDocument = () => {
   }
 
   const editGroupLegalDocument = obj => {
-    GroupLegalDocumentValidation.setValues(populateGroupLegalDocument(obj))
+    groupLegalDocumentValidation.setValues(populateGroupLegalDocument(obj))
     FillCategoryStore()
     FillGroupStore()
     setEditMode(true)
@@ -217,18 +217,19 @@ const GroupLegalDocument = () => {
                   valueField='recordId'
                   displayField='name'
                   store={groupStore}
-                  value={GroupLegalDocumentValidation.values.groupName}
+                  value={groupLegalDocumentValidation.values.groupName}
                   required
                   readOnly={editMode}
                   onChange={(event, newValue) => {
-                    GroupLegalDocumentValidation.setFieldValue('groupId', newValue?.recordId)
+                    groupLegalDocumentValidation.setFieldValue('groupId', newValue?.recordId)
+                    groupLegalDocumentValidation.setFieldValue('groupName', newValue?.name)
                   }}
                   error={
-                    GroupLegalDocumentValidation.touched.groupName &&
-                    Boolean(GroupLegalDocumentValidation.errors.groupName)
+                    groupLegalDocumentValidation.touched.groupName &&
+                    Boolean(groupLegalDocumentValidation.errors.groupName)
                   }
                   helperText={
-                    GroupLegalDocumentValidation.touched.groupName && GroupLegalDocumentValidation.errors.groupName
+                    groupLegalDocumentValidation.touched.groupName && groupLegalDocumentValidation.errors.groupName
                   }
                 />
               </Grid>
@@ -239,17 +240,18 @@ const GroupLegalDocument = () => {
                   valueField='recordId'
                   displayField='name'
                   store={categoryStore}
-                  value={GroupLegalDocumentValidation.values.incName}
+                  value={groupLegalDocumentValidation.values.incName}
                   required
                   readOnly={editMode}
                   onChange={(event, newValue) => {
-                    GroupLegalDocumentValidation.setFieldValue('incId', newValue?.recordId)
+                    groupLegalDocumentValidation.setFieldValue('incId', newValue?.recordId)
+                    groupLegalDocumentValidation.setFieldValue('incName', newValue?.name)
                   }}
                   error={
-                    GroupLegalDocumentValidation.touched.incName && Boolean(GroupLegalDocumentValidation.errors.incName)
+                    groupLegalDocumentValidation.touched.incName && Boolean(groupLegalDocumentValidation.errors.incName)
                   }
                   helperText={
-                    GroupLegalDocumentValidation.touched.incName && GroupLegalDocumentValidation.errors.incName
+                    groupLegalDocumentValidation.touched.incName && groupLegalDocumentValidation.errors.incName
                   }
                 />
               </Grid>
