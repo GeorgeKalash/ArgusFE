@@ -4,6 +4,7 @@ export const SystemRepository = {
 
     get2AM: service + 'get2AM',
     KeyValueStore: service + 'qryKVS',
+    ParameterDefinition: service + 'qryRP',
     DocumentType: {
         qry: service + 'qryDT',
         get: service + 'getDT',

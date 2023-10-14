@@ -22,6 +22,7 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import OldWindow from 'src/components/Shared/OldWindow'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -32,7 +33,6 @@ import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/Do
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const DocumentTypes = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)

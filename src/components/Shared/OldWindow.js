@@ -32,7 +32,12 @@ function PaperComponent(props) {
     )
 }
 
-const OldWindow = ({ children, open, onClose, tabs, height = 400,
+const OldWindow = ({
+    children,
+    open,
+    onClose,
+    tabs,
+    height = 400,
     activeTab,
     setActiveTab,
     Title,

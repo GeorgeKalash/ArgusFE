@@ -20,6 +20,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import OldWindow from 'src/components/Shared/OldWindow'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -27,7 +28,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewDocumentTypeMaps, populateDocumentTypeMaps } from 'src/Models/System/DocumentTypeMaps'
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 
 const DocumentTypeMaps = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -39,6 +40,7 @@ const DocumentTypeMaps = () => {
 
     //states
     const [windowOpen, setWindowOpen] = useState(false)
+    const [reportParamWindowOpen, setReportParamWindowOpen] = useState(false)
     const [editMode, setEditMode] = useState(false)
     const [activeTab, setActiveTab] = useState(0)
     const [errorMessage, setErrorMessage] = useState(null)
@@ -66,10 +68,6 @@ const DocumentTypeMaps = () => {
         },
     ]
 
-    const tabs = [
-        { label: 'Document Types' },
-    ]
-
     const documentTypeMapsValidation = useFormik({
         enableReinitialize: false,
         validateOnChange: false,
@@ -91,9 +89,9 @@ const DocumentTypeMaps = () => {
             documentTypeMapsValidation.handleSubmit()
     }
 
-    const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+    const getGridData = ({ _startAt = 0, _pageSize = 30, params = '' }) => {
         const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-        var parameters = defaultParams + '&_params='
+        var parameters = defaultParams + '&_params=' + params
 
         getRequest({
             'extension': SystemRepository.DocumentTypeMap.qry,
@@ -184,7 +182,7 @@ const DocumentTypeMaps = () => {
     }
 
     useEffect(() => {
-        getGridData({ _startAt: 0, _pageSize: 30 })
+        getGridData({ _startAt: 0, _pageSize: 30, params: '' })
         fillDocumentTypeStore({ _startAt: 0, _pageSize: 30 })
         fillFunctionStore()
     }, [])
@@ -204,6 +202,8 @@ const DocumentTypeMaps = () => {
             >
                 <GridToolbar
                     onAdd={addDocumentType}
+
+                // openRPB={() => setReportParamWindowOpen(true)}
                 />
                 <Table
                     columns={columns}
@@ -216,7 +216,6 @@ const DocumentTypeMaps = () => {
                 />
             </Box>
             <OldWindow
-                id='DocumentTypeWindow'
                 Title='Document Type Map'
                 open={windowOpen}
                 onClose={() => setWindowOpen(false)}
@@ -309,6 +308,13 @@ const DocumentTypeMaps = () => {
                     </Grid>
                 </Grid>
             </OldWindow>
+            <ReportParameterBrowser
+                open={reportParamWindowOpen}
+                onClose={() => setReportParamWindowOpen(false)}
+                onSave={() => console.log('SAVE')}
+                reportName='SYDTM'
+                functionStore={functionStore}
+            />
             <ErrorWindow
                 open={errorMessage}
                 onClose={() => setErrorMessage(null)}
