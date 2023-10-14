@@ -32,8 +32,6 @@ function PaperComponent(props) {
     )
 }
 
-
-
 const OldWindow = ({ children, open, onClose, tabs, height = 400,
     activeTab,
     setActiveTab,
@@ -79,7 +77,17 @@ const OldWindow = ({ children, open, onClose, tabs, height = 400,
                 },
             }}
         >
-            <DialogTitle sx={{ cursor: 'move', py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} id="draggable-dialog-title">
+            <DialogTitle
+                sx={{
+                    cursor: 'move',
+                    py: 2,
+                    pl: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                }}
+                id="draggable-dialog-title"
+            >
                 <Box>
                     <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
                         {Title}
@@ -96,15 +104,17 @@ const OldWindow = ({ children, open, onClose, tabs, height = 400,
                     </IconButton>
                 </Box>
             </DialogTitle>
-            <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
-                {tabs.map((tab, i) => (
-                    <Tab
-                        key={i}
-                        label={tab.label}
-                    />
-                ))}
-            </Tabs>
-            <DialogContent sx={{ height: height, p: 0 }}>
+            {tabs &&
+                <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                    {tabs.map((tab, i) => (
+                        <Tab
+                            key={i}
+                            label={tab.label}
+                        />
+                    ))}
+                </Tabs>
+            }
+            <DialogContent sx={{ height: height, p: tabs ? 0 : 3 }}>
                 {children}
             </DialogContent>
             <WindowToolbar onSave={onSave} />

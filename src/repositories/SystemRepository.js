@@ -10,6 +10,12 @@ export const SystemRepository = {
         set: service + 'setDT',
         del: service + 'delDT',
     },
+    DocumentTypeMap: {
+        qry: service + 'qryDTM',
+        get: service + 'getDTM',
+        set: service + 'setDTM',
+        del: service + 'delDTM',
+    },
     NumberRange: {
         snapshot: service + 'snapshotNRA'
     }

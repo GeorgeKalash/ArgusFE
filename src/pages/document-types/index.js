@@ -5,7 +5,6 @@ import { useEffect, useState, useContext } from 'react'
 import {
     Grid,
     Box,
-    Button,
 } from '@mui/material'
 
 // ** Third Party Imports
@@ -22,6 +21,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import OldWindow from 'src/components/Shared/OldWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -33,7 +33,6 @@ import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/Do
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import OldWindow from 'src/components/Shared/OldWindow'
 
 const DocumentTypes = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
