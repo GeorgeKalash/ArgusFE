@@ -5,7 +5,6 @@ import { useEffect, useState, useContext } from 'react'
 import {
     Grid,
     Box,
-    Button,
 } from '@mui/material'
 
 // ** Third Party Imports
@@ -22,6 +21,8 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import OldWindow from 'src/components/Shared/OldWindow'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -47,6 +48,7 @@ const DocumentTypes = () => {
     const [windowOpen, setWindowOpen] = useState(false)
     const [editMode, setEditMode] = useState(false)
     const [activeTab, setActiveTab] = useState(0)
+    const [errorMessage, setErrorMessage] = useState(null)
 
     const columns = [
         {
@@ -121,7 +123,6 @@ const DocumentTypes = () => {
         const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
         var parameters = defaultParams + '&_dgId=0'
 
-        // var parameters = defaultParams + '&_dgId=0'
         getRequest({
             'extension': SystemRepository.DocumentType.qry,
             'parameters': parameters,
@@ -130,7 +131,7 @@ const DocumentTypes = () => {
                 setGridData({ ...res, _startAt })
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -144,7 +145,7 @@ const DocumentTypes = () => {
                 setIntegrationLogicStore(res.list)
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -158,7 +159,7 @@ const DocumentTypes = () => {
                 setSysFunctionsStore(res.list)
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -173,7 +174,7 @@ const DocumentTypes = () => {
                 setActiveStatusStore(res.list)
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -188,7 +189,7 @@ const DocumentTypes = () => {
                 setNumberRangeStore(res.list)
             })
             .catch((error) => {
-                console.log({ error: error })
+                setErrorMessage(error)
             })
     }
 
@@ -199,7 +200,7 @@ const DocumentTypes = () => {
             'record': JSON.stringify(obj),
         })
             .then((res) => {
-                getGridData()
+                getGridData({})
                 setWindowOpen(false)
                 if (!recordId)
                     toast.success('Record Added Successfully')
@@ -207,22 +208,22 @@ const DocumentTypes = () => {
                     toast.success('Record Editted Successfully')
             })
             .catch((error) => {
-                console.log({ error: error })
+                setErrorMessage(error)
             })
     }
 
     const delDocumentType = (obj) => {
+        obj.id = '215'
         postRequest({
             'extension': SystemRepository.DocumentType.del,
             'record': JSON.stringify(obj),
         })
             .then((res) => {
-                console.log({ res })
-                getGridData()
+                getGridData({})
                 toast.success('Record Deleted Successfully')
             })
             .catch((error) => {
-                console.log({ error: error })
+                setErrorMessage(error)
             })
     }
 
@@ -248,11 +249,13 @@ const DocumentTypes = () => {
 
     return (
         <>
-            <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-            }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                }}
+            >
                 <GridToolbar
                     onAdd={addDocumentType}
                 />
@@ -268,129 +271,133 @@ const DocumentTypes = () => {
                     isLoading={false}
                 />
             </Box>
-            {windowOpen &&
-                <Window
-                    id='DocumentTypeWindow'
-                    Title='Document Types'
-                    onClose={() => setWindowOpen(false)}
-                    tabs={tabs}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    width={600}
-                    height={400}
-                    onSave={handleSubmit}
-                >
-                    <CustomTabPanel index={0} value={activeTab}>
-                        <Grid container spacing={4}>
-                            <Grid item xs={12}>
-                                <CustomTextField
-                                    name='reference'
-                                    label='Reference'
-                                    value={documentTypesValidation.values.reference}
-                                    required
-                                    onChange={documentTypesValidation.handleChange}
+            <OldWindow
+                id='DocumentTypeWindow'
+                Title='Document Types'
+                open={windowOpen}
+                onClose={() => setWindowOpen(false)}
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                width={600}
+                height={400}
+                onSave={handleSubmit}
+            >
+                <CustomTabPanel index={0} value={activeTab}>
+                    <Grid container spacing={4}>
+                        <Grid item xs={12}>
+                            <CustomTextField
+                                name='reference'
+                                label='Reference'
+                                value={documentTypesValidation.values?.reference}
+                                required
+                                onChange={documentTypesValidation.handleChange}
 
-                                    // numberField
-                                    // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e.target.value, 4))}
-                                    onClear={() => documentTypesValidation.setFieldValue('reference', '')}
-                                    error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
-                                    helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomTextField
-                                    name='name'
-                                    label='Name'
-                                    value={documentTypesValidation.values.name}
-                                    required
-                                    onChange={documentTypesValidation.handleChange}
-                                    onClear={() => documentTypesValidation.setFieldValue('name', '')}
-                                    error={documentTypesValidation.touched.name && Boolean(documentTypesValidation.errors.name)}
-                                    helperText={documentTypesValidation.touched.name && documentTypesValidation.errors.name}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomComboBox
-                                    name='dgName'
-                                    label='System Functions'
-                                    valueField='key'
-                                    displayField='value'
-                                    store={sysFunctionsStore}
-                                    value={documentTypesValidation.values.dgName}
-                                    required
-                                    readOnly={editMode}
-                                    onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('dgId', newValue?.key)
-                                        documentTypesValidation.setFieldValue('dgName', newValue?.value)
-                                    }}
-                                    error={documentTypesValidation.touched.dgName && Boolean(documentTypesValidation.errors.dgName)}
-                                    helperText={documentTypesValidation.touched.dgName && documentTypesValidation.errors.dgName}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomComboBox
-                                    name='ilName'
-                                    label='Integration Logic'
-                                    valueField='recordId'
-                                    displayField='name'
-                                    store={integrationLogicStore}
-                                    getOptionBy={documentTypesValidation.values.ilId}
-                                    value={documentTypesValidation.values.ilName}
-                                    onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('ilId', newValue?.recordId)
-                                        documentTypesValidation.setFieldValue('ilName', newValue?.name)
-                                    }}
-                                    error={documentTypesValidation.touched.ilName && Boolean(documentTypesValidation.errors.ilName)}
-                                    helperText={documentTypesValidation.touched.ilName && documentTypesValidation.errors.ilName}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomComboBox
-                                    name='activeStatusName'
-                                    label='Status'
-                                    valueField='key'
-                                    displayField='value'
-                                    store={activeStatusStore}
-                                    value={documentTypesValidation.values.activeStatusName}
-                                    required
-                                    onChange={(event, newValue) => {
-                                        documentTypesValidation.setFieldValue('activeStatus', newValue?.key)
-                                        documentTypesValidation.setFieldValue('activeStatusName', newValue?.value)
-                                    }}
-                                    error={documentTypesValidation.touched.activeStatusName && Boolean(documentTypesValidation.errors.activeStatusName)}
-                                    helperText={documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <CustomLookup
-                                    name='nraRef'
-                                    label='Number Range'
-                                    valueField='reference'
-                                    displayField='description'
-                                    store={numberRangeStore}
-                                    setStore={setNumberRangeStore}
-                                    firstValue={documentTypesValidation.values.nraRef}
-                                    secondValue={documentTypesValidation.values.nraDescription}
-                                    onLookup={lookupNumberRange}
-                                    onChange={(event, newValue) => {
-                                        if (newValue) {
-                                            documentTypesValidation.setFieldValue('nraId', newValue?.recordId)
-                                            documentTypesValidation.setFieldValue('nraRef', newValue?.reference)
-                                            documentTypesValidation.setFieldValue('nraDescription', newValue?.description)
-                                        } else {
-                                            documentTypesValidation.setFieldValue('nraId', null)
-                                            documentTypesValidation.setFieldValue('nraRef', null)
-                                            documentTypesValidation.setFieldValue('nraDescription', null)
-                                        }
-                                    }}
-                                    error={documentTypesValidation.touched.nra && Boolean(documentTypesValidation.errors.nra)}
-                                    helperText={documentTypesValidation.touched.nra && documentTypesValidation.errors.nra}
-                                />
-                            </Grid>
+                                // numberField
+                                // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e.target.value, 4))}
+                                onClear={() => documentTypesValidation.setFieldValue('reference', '')}
+                                error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
+                                helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}
+                            />
                         </Grid>
-                    </CustomTabPanel>
-                </Window>
-            }
+                        <Grid item xs={12}>
+                            <CustomTextField
+                                name='name'
+                                label='Name'
+                                value={documentTypesValidation.values?.name}
+                                required
+                                onChange={documentTypesValidation.handleChange}
+                                onClear={() => documentTypesValidation.setFieldValue('name', '')}
+                                error={documentTypesValidation.touched.name && Boolean(documentTypesValidation.errors.name)}
+                                helperText={documentTypesValidation.touched.name && documentTypesValidation.errors.name}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <CustomComboBox
+                                name='dgName'
+                                label='System Functions'
+                                valueField='key'
+                                displayField='value'
+                                store={sysFunctionsStore}
+                                value={documentTypesValidation.values?.dgName}
+                                required
+                                readOnly={editMode}
+                                onChange={(event, newValue) => {
+                                    documentTypesValidation.setFieldValue('dgId', newValue?.key)
+                                    documentTypesValidation.setFieldValue('dgName', newValue?.value)
+                                }}
+                                error={documentTypesValidation.touched.dgName && Boolean(documentTypesValidation.errors.dgName)}
+                                helperText={documentTypesValidation.touched.dgName && documentTypesValidation.errors.dgName}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <CustomComboBox
+                                name='ilName'
+                                label='Integration Logic'
+                                valueField='recordId'
+                                displayField='name'
+                                store={integrationLogicStore}
+                                getOptionBy={documentTypesValidation.values?.ilId}
+                                value={documentTypesValidation.values?.ilName}
+                                onChange={(event, newValue) => {
+                                    documentTypesValidation.setFieldValue('ilId', newValue?.recordId)
+                                    documentTypesValidation.setFieldValue('ilName', newValue?.name)
+                                }}
+                                error={documentTypesValidation.touched.ilName && Boolean(documentTypesValidation.errors.ilName)}
+                                helperText={documentTypesValidation.touched.ilName && documentTypesValidation.errors.ilName}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <CustomComboBox
+                                name='activeStatusName'
+                                label='Status'
+                                valueField='key'
+                                displayField='value'
+                                store={activeStatusStore}
+                                value={documentTypesValidation.values?.activeStatusName}
+                                required
+                                onChange={(event, newValue) => {
+                                    documentTypesValidation.setFieldValue('activeStatus', newValue?.key)
+                                    documentTypesValidation.setFieldValue('activeStatusName', newValue?.value)
+                                }}
+                                error={documentTypesValidation.touched.activeStatusName && Boolean(documentTypesValidation.errors.activeStatusName)}
+                                helperText={documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <CustomLookup
+                                name='nraRef'
+                                label='Number Range'
+                                valueField='reference'
+                                displayField='description'
+                                store={numberRangeStore}
+                                setStore={setNumberRangeStore}
+                                firstValue={documentTypesValidation.values?.nraRef}
+                                secondValue={documentTypesValidation.values?.nraDescription}
+                                onLookup={lookupNumberRange}
+                                onChange={(event, newValue) => {
+                                    if (newValue) {
+                                        documentTypesValidation.setFieldValue('nraId', newValue?.recordId)
+                                        documentTypesValidation.setFieldValue('nraRef', newValue?.reference)
+                                        documentTypesValidation.setFieldValue('nraDescription', newValue?.description)
+                                    } else {
+                                        documentTypesValidation.setFieldValue('nraId', null)
+                                        documentTypesValidation.setFieldValue('nraRef', null)
+                                        documentTypesValidation.setFieldValue('nraDescription', null)
+                                    }
+                                }}
+                                error={documentTypesValidation.touched.nra && Boolean(documentTypesValidation.errors.nra)}
+                                helperText={documentTypesValidation.touched.nra && documentTypesValidation.errors.nra}
+                            />
+                        </Grid>
+                    </Grid>
+                </CustomTabPanel>
+            </OldWindow>
+            <ErrorWindow
+                open={errorMessage}
+                onClose={() => setErrorMessage(null)}
+                message={errorMessage}
+            />
         </>
     )
 }

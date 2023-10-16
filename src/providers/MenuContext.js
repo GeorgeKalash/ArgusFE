@@ -50,12 +50,15 @@ const MenuProvider = ({ children }) => {
                 commandLines
                     .filter((commandLine) => commandLine.folderId === folder.id)
                     .forEach((commandLine) => {
-                        folderItem.children.push({
-                            id: commandLine.id,
-                            title: commandLine.name,
-                            path: `/${commandLine.nextAPI ? commandLine.nextAPI : commandLine.api.replace(/\.aspx$/, "").toLowerCase()}`,
-                            iconName: commandLine.addToBookmarks && 'FavIcon'
-                        })
+                        if (commandLine.nextAPI)
+                            folderItem.children.push({
+                                id: commandLine.id,
+                                title: commandLine.name,
+                                path: `/${commandLine.nextAPI}`,
+
+                                // path: `/${commandLine.nextAPI ? commandLine.nextAPI : commandLine.api.replace(/\.aspx$/, "").toLowerCase()}`,
+                                iconName: commandLine.addToBookmarks && 'FavIcon'
+                            })
                     })
 
                 menu.push(folderItem)

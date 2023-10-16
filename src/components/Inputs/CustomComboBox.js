@@ -23,6 +23,7 @@ const CustomComboBox = ({
     autoFocus = false,
     disabled = false,
     readOnly = false,
+    sx,
 }) => {
 
     return (
@@ -43,6 +44,7 @@ const CustomComboBox = ({
             readOnly={readOnly}
             freeSolo={readOnly}
             disabled={disabled}
+            sx={sx}
             renderInput={(params) =>
                 <TextField
                     {...params}
