@@ -18,6 +18,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -37,6 +38,7 @@ const LegalStatus = () => {
     //states
     const [windowOpen, setWindowOpen] = useState(false)
     const [editMode, setEditMode] = useState(false)
+    const [errorMessage, setErrorMessage] = useState(null)
 
     const columns = [
         {
@@ -83,7 +85,7 @@ const LegalStatus = () => {
                 setGridData({ ...res, _startAt })
             })
             .catch((error) => {
-                console.log({ error: error.response.data })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -102,7 +104,7 @@ const LegalStatus = () => {
                     toast.success('Record Edited Successfully')
             })
             .catch((error) => {
-                console.log({ error: error })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -117,7 +119,7 @@ const LegalStatus = () => {
                 toast.success('Record Deleted Successfully')
             })
             .catch((error) => {
-                console.log({ error: error })
+                setErrorMessage(error.response.data)
             })
     }
 
@@ -197,6 +199,11 @@ const LegalStatus = () => {
                     </CustomTabPanel>
                 </Window>
             }
+            <ErrorWindow
+                open={errorMessage}
+                onClose={() => setErrorMessage(null)}
+                message={errorMessage}
+            />
         </>
     )
 }
