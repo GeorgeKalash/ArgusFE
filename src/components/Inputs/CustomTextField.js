@@ -33,14 +33,13 @@ const CustomTextField = ({
       autoComplete={autoComplete}
       style={{ textAlign: 'right' }}
       InputProps={{
-        endAdornment: !readOnly &&
-          value && ( // Only show the clear icon if readOnly is false
-            <InputAdornment position='end'>
-              <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                <ClearIcon />
-              </IconButton>
-            </InputAdornment>
-          )
+        endAdornment: value && (
+          <InputAdornment position='end'>
+            <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
+              <ClearIcon />
+            </IconButton>
+          </InputAdornment>
+        )
       }}
       {...props}
     />
