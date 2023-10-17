@@ -1,8 +1,8 @@
-// ** React Imports
+// ** React Importsport
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button } from '@mui/material'
+import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -46,12 +46,12 @@ const GroupLegalDocument = () => {
 
   const columns = [
     {
-      field: 'groupName ',
+      field: 'groupName',
       headerName: 'Group Name ',
       flex: 1
     },
     {
-      field: 'incName ',
+      field: 'incName',
       headerName: 'Inc Name ',
       flex: 1
     },
@@ -144,13 +144,14 @@ const GroupLegalDocument = () => {
       })
   }
   const delGroupLegalDocument = obj => {
+    console.log('jsonOBJ ' + JSON.stringify(obj))
     postRequest({
       extension: BusinessPartnerRepository.GroupLegalDocument.delGIN,
       record: JSON.stringify(obj)
     })
       .then(res => {
         console.log({ res })
-        getGridData()
+        getGridData({})
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
@@ -167,6 +168,7 @@ const GroupLegalDocument = () => {
   }
 
   const editGroupLegalDocument = obj => {
+    console.log(obj)
     groupLegalDocumentValidation.setValues(populateGroupLegalDocument(obj))
     FillCategoryStore()
     FillGroupStore()
@@ -253,6 +255,30 @@ const GroupLegalDocument = () => {
                   helperText={
                     groupLegalDocumentValidation.touched.incName && groupLegalDocumentValidation.errors.incName
                   }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='required'
+                      checked={groupLegalDocumentValidation.values?.required}
+                      onChange={groupLegalDocumentValidation.handleChange}
+                    />
+                  }
+                  label='Required'
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='mandatory'
+                      checked={groupLegalDocumentValidation.values?.mandatory}
+                      onChange={groupLegalDocumentValidation.handleChange}
+                    />
+                  }
+                  label='Mandatory'
                 />
               </Grid>
             </Grid>
