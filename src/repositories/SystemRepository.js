@@ -23,5 +23,11 @@ export const SystemRepository = {
     get: service + 'getRGN',
     set: service + 'setRGN',
     del: service + 'delRGN'
+  },
+  Currency: {
+    qry: service + 'qryCU',
+    get: service + 'getCU',
+    set: service + 'setCU',
+    del: service + 'delCU'
   }
 }

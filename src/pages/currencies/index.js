@@ -1,0 +1,316 @@
+// ** React Importsport
+import { useEffect, useState, useContext } from 'react'
+
+// ** MUI Imports
+import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
+
+// ** Third Party Imports
+import { useFormik } from 'formik'
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
+
+// ** Custom Imports
+import Table from 'src/components/Shared/Table'
+import Window from 'src/components/Shared/Window'
+import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+
+// ** API
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { getNewCurrency, populateCurrency } from 'src/Models/System/currency'
+// ** Helpers
+// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { defaultParams } from 'src/lib/defaults'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+
+const Currencies = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  //stores
+  const [gridData, setGridData] = useState([])
+  const [decimalStore, setDecimalStore] = useState([])
+  const [profileStore, setProfileStore] = useState([])
+
+  //states
+  const [windowOpen, setWindowOpen] = useState(false)
+  const [editMode, setEditMode] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  const columns = [
+    {
+      field: 'reference',
+      headerName: 'Reference',
+      flex: 1
+    },
+    {
+      field: 'name',
+      headerName: 'Name',
+      flex: 1
+    },
+    {
+      field: 'currencyTypeName',
+      headerName: 'Currency Type',
+      flex: 1
+    }
+  ]
+  const currencyValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: false,
+    validationSchema: yup.object({
+      reference: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required'),
+      decimals: yup.string().required('This field is required'),
+      profileId: yup.string().required('This field is required'),
+      currencyTypeName: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+      postCurrency(values)
+    }
+  })
+  const handleSubmit = () => {
+    currencyValidation.handleSubmit()
+  }
+  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    var parameters = defaultParams
+
+    getRequest({
+      extension: SystemRepository.Currency.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log('Response received:', res)
+        setGridData({ ...res, _startAt })
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+  const FillProfileStore = () => {
+    var parameters = '_database=6' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        setSysFunctionsStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+  const FillCurrencyStore = () => {
+    var parameters = '_database=117' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        setSysFunctionsStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+  const FillDecimalStore = () => {}
+  const postCurrency = obj => {
+    const recordId = obj.recordId
+    postRequest({
+      extension: SystemRepository.Currency.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        getGridData({})
+        setWindowOpen(false)
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Editted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+  const delCurrency = obj => {
+    console.log('jsonOBJ ' + JSON.stringify(obj))
+    postRequest({
+      extension: SystemRepository.Currency.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        console.log({ res })
+        getGridData({})
+        toast.success('Record Deleted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const addCurrency = () => {
+    currencyValidation.setValues(getNewCurrency())
+    FillDecimalStore()
+    FillProfileStore()
+    FillCurrencyStore()
+    setEditMode(false)
+    setWindowOpen(true)
+  }
+
+  const editCurrency = obj => {
+    console.log(obj)
+    currencyValidation.setValues(populateCurrency(obj))
+    FillDecimalStore()
+    FillProfileStore()
+    FillCurrencyStore()
+    setEditMode(true)
+    setWindowOpen(true)
+  }
+  useEffect(() => {
+    getGridData({ _startAt: 0, _pageSize: 30 })
+    FillDecimalStore()
+    FillProfileStore()
+    FillCurrencyStore()
+  }, [])
+  return (
+    <>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%'
+        }}
+      >
+        <GridToolbar onAdd={addCurrency} />
+        <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['recordId']}
+          api={getGridData}
+          onEdit={editCurrency}
+          onDelete={delCurrency}
+          isLoading={false}
+        />
+      </Box>
+      {windowOpen && (
+        <Window
+          id='CurrencyWindow'
+          Title='Currency'
+          onClose={() => setWindowOpen(false)}
+          width={600}
+          height={400}
+          onSave={handleSubmit}
+        >
+          <CustomTabPanel>
+            <Grid container spacing={4}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='reference'
+                  label='Reference'
+                  value={currencyValidation.values.reference}
+                  required
+                  onChange={currencyValidation.handleChange}
+                  onClear={() => currencyValidation.setFieldValue('reference', '')}
+                  error={currencyValidation.touched.reference && Boolean(currencyValidation.errors.reference)}
+                  helperText={currencyValidation.touched.reference && currencyValidation.errors.reference}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='name'
+                  label='Name'
+                  value={currencyValidation.values.name}
+                  required
+                  onChange={currencyValidation.handleChange}
+                  onClear={() => currencyValidation.setFieldValue('name', '')}
+                  error={currencyValidation.touched.name && Boolean(currencyValidation.errors.name)}
+                  helperText={currencyValidation.touched.name && currencyValidation.errors.name}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomComboBox
+                  name='decimals'
+                  label='Decimals'
+                  valueField='decimals'
+                  displayField='decimals'
+                  store={decimalStore}
+                  value={currencyValidation.values.decimals}
+                  required
+                  readOnly={editMode}
+                  onChange={(event, newValue) => {
+                    currencyValidation.setFieldValue('decimals', newValue?.decimals)
+                  }}
+                  error={currencyValidation.touched.decimals && Boolean(currencyValidation.errors.decimals)}
+                  helperText={currencyValidation.touched.decimals && currencyValidation.errors.decimals}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomComboBox
+                  name='profileId'
+                  label='Profile'
+                  valueField='key'
+                  displayField='value'
+                  store={profileStore}
+                  value={currencyValidation.values.profileId}
+                  required
+                  readOnly={editMode}
+                  onChange={(event, newValue) => {
+                    currencyValidation.setFieldValue('profileId', newValue?.key)
+                  }}
+                  error={currencyValidation.touched.profileId && Boolean(currencyValidation.errors.profileId)}
+                  helperText={currencyValidation.touched.profileId && currencyValidation.errors.profileId}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomComboBox
+                  name='currencyType'
+                  label='Currency Type'
+                  valueField='key'
+                  displayField='value'
+                  store={currencyStore}
+                  value={currencyValidation.values.currencyTypeName}
+                  required
+                  readOnly={editMode}
+                  onChange={(event, newValue) => {
+                    currencyValidation.setFieldValue('currencyType', newValue?.key)
+                    currencyValidation.setFieldValue('currencyTypeName', newValue?.value)
+                  }}
+                  error={
+                    currencyValidation.touched.currencyTypeName && Boolean(currencyValidation.errors.currencyTypeName)
+                  }
+                  helperText={currencyValidation.touched.currencyTypeName && currencyValidation.errors.currencyTypeName}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='sale'
+                      checked={groupLegalDocumentValidation.values?.sale}
+                      onChange={groupLegalDocumentValidation.handleChange}
+                    />
+                  }
+                  label='Sale'
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name='purchase'
+                      checked={groupLegalDocumentValidation.values?.purchase}
+                      onChange={groupLegalDocumentValidation.handleChange}
+                    />
+                  }
+                  label='Purchase'
+                />
+              </Grid>
+            </Grid>
+          </CustomTabPanel>
+        </Window>
+      )}
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+    </>
+  )
+}
+
+export default Currency
