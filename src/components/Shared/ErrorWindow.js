@@ -7,11 +7,17 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 
 const ErrorWindow = ({ open, onClose, message }) => {
+
+    const errorMessage =
+        !message?.response ?
+            message?.message :
+            message?.response?.data?.error ? message.response.data.error : message?.response?.data
+
     return (
         <Dialog open={open} onClose={onClose}>
             <DialogTitle>Error</DialogTitle>
             <DialogContent>
-                <DialogContentText>{message}</DialogContentText>
+                <DialogContentText>{errorMessage}</DialogContentText>
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="primary">

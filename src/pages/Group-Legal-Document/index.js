@@ -26,6 +26,7 @@ import {
 } from 'src/Models/System/BusinessPartner/GroupLegalDocument'
 import { getNewCategoryId, populateCategoryId } from 'src/Models/System/BusinessPartner/Group'
 import { getNewGroup, populateGroup } from 'src/Models/System/BusinessPartner/CategoryID'
+
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
@@ -80,9 +81,11 @@ const GroupLegalDocument = () => {
       postGroupLegalDocument(values)
     }
   })
+
   const handleSubmit = () => {
     groupLegalDocumentValidation.handleSubmit()
   }
+
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     var parameters = defaultParams
@@ -113,6 +116,7 @@ const GroupLegalDocument = () => {
         setErrorMessage(error.response.data)
       })
   }
+
   const FillGroupStore = () => {
     var parameters = `filter=`
     getRequest({
@@ -143,6 +147,7 @@ const GroupLegalDocument = () => {
         setErrorMessage(error)
       })
   }
+
   const delGroupLegalDocument = obj => {
     console.log('jsonOBJ ' + JSON.stringify(obj))
     postRequest({
