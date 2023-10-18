@@ -16,13 +16,6 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import Window from 'src/components/Shared/Window'
 
-// ** API
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
 const productLegTab = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -51,9 +44,7 @@ const productLegTab = () => {
     }
   ]
 
-  const tabs = [{ label: 'Product Commission' }]
-
-  const getGridData = ({ }) => {
+  const getGridData = ({}) => {
     const newData = { list: [{ recordId: 1, fromAmount: 1000, toAmount: 2000 }] }
     setGridData({ ...newData })
   }
@@ -88,10 +79,9 @@ const productLegTab = () => {
           height: '100%'
         }}
       >
-        <div style={{ display: 'flex' }}>
+        <Grid container>
           {/* First Column */}
-
-          <Grid container spacing={4}>
+          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
             </Grid>
@@ -103,19 +93,15 @@ const productLegTab = () => {
             </Grid>
           </Grid>
           {/* Second Column */}
-          <Grid container spacing={4}>
+          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField label='Name' value={'name 1'} readOnly={true} />
             </Grid>
             <Grid item xs={12}>
               <CustomComboBox name='currencyName' label='Currency' required />
             </Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={12}></Grid>
           </Grid>
-        </div>
+        </Grid>
         <Table
           columns={columns}
           gridData={gridData}
@@ -123,6 +109,7 @@ const productLegTab = () => {
           api={getGridData}
           onEdit={editProductCommission}
           isLoading={false}
+          pagination={false}
         />
       </Box>
 
@@ -131,9 +118,6 @@ const productLegTab = () => {
           id='ProductCommissionsWindow'
           Title='Product Commission'
           onClose={() => setWindowOpen(false)}
-          tabs={tabs}
-          activeTab={0}
-          setActiveTab={0}
           width={500}
           height={400}
         >
@@ -145,27 +129,27 @@ const productLegTab = () => {
                 height: '100%'
               }}
             >
-              <div style={{ display: 'flex' }}>
+              <Grid container>
                 {/* First Column */}
-
-                <Grid container spacing={4}>
+                <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
                   <Grid item xs={12}>
                     <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
                   </Grid>
                 </Grid>
                 {/* Second Column */}
-                <Grid container spacing={4}>
+                <Grid ccontainer rowGap={2} xs={6} sx={{ px: 2 }}>
                   <Grid item xs={12}>
                     <CustomTextField label='Name' value={'name 1'} readOnly={true} />
                   </Grid>
                 </Grid>
-              </div>
+              </Grid>
               <Table
                 columns={commissionColumns}
                 gridData={gridData}
                 rowId={['recordId']}
                 api={getGridData}
                 isLoading={false}
+                pagination={false}
               />
             </Box>
           </CustomTabPanel>

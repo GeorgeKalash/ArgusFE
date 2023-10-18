@@ -80,21 +80,6 @@ const ProductDispursalTab = () => {
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {}
 
-  const fillTypeStore = () => {
-    var parameters = '_database=15' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
-    })
-      .then(res => {
-        //ask about lang values
-        setTypeStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
-  }
-
   const postProductMaster = obj => {}
 
   const tabs = [{ label: 'Product Master' }, { label: 'Product Dispursal' }, { label: 'Product Leg' }]
@@ -112,22 +97,29 @@ const ProductDispursalTab = () => {
           height: '100%'
         }}
       >
-        <div style={{ display: 'flex' }}>
+        <Grid container>
           {/* First Column */}
 
-          <Grid container spacing={4}>
+          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
             </Grid>
           </Grid>
           {/* Second Column */}
-          <Grid container spacing={4}>
+          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField label='Name' value={'name 1'} readOnly={true} />
             </Grid>
           </Grid>
-        </div>
-        <Table columns={columns} gridData={gridData} rowId={['recordId']} api={getGridData} isLoading={false} />
+        </Grid>
+        <Table
+          columns={columns}
+          gridData={gridData}
+          rowId={['recordId']}
+          api={getGridData}
+          isLoading={false}
+          pagination={false}
+        />
       </Box>
     </>
   )
