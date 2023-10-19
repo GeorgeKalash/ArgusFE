@@ -35,6 +35,7 @@ const ProductMaster = () => {
   const [typeStore, setTypeStore] = useState([])
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
+
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
@@ -99,7 +100,7 @@ const ProductMaster = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {}
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => { }
 
   const fillTypeStore = () => {
     var parameters = '_database=15' //add 'xml'.json and get _database values from there
@@ -130,6 +131,7 @@ const ProductMaster = () => {
         setErrorMessage(error.response.data)
       })
   }
+
   const fillCommissionBaseStore = () => {
     var parameters = '_database=13' //add 'xml'.json and get _database values from there
     getRequest({
@@ -145,11 +147,11 @@ const ProductMaster = () => {
       })
   }
 
-  const postProductMaster = obj => {}
+  const postProductMaster = obj => { }
 
   const tabs = [{ label: 'Product Master' }, { label: 'Product Dispursal' }, { label: 'Product Leg' }]
 
-  const delProductMaster = obj => {}
+  const delProductMaster = obj => { }
 
   const addProductMaster = () => {
     productMasterValidation.setValues({})

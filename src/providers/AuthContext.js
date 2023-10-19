@@ -81,9 +81,8 @@ const AuthProvider = ({ children }) => {
         }
       })
 
-      const signIn3Params = `_email=${params.email}&_password=${encryptePWD(params.password)}&_accountId=${
-        getAC.data.record.accountId
-      }&_userId=${getUS2.data.record.recordId}`
+      const signIn3Params = `_email=${params.email}&_password=${encryptePWD(params.password)}&_accountId=${getAC.data.record.accountId
+        }&_userId=${getUS2.data.record.recordId}`
 
       const signIn3 = await axios({
         method: 'GET',

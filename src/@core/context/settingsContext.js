@@ -66,8 +66,6 @@ export const SettingsContext = createContext({
 
 export const SettingsProvider = ({ children, pageSettings }) => {
   // ** State
-  console.log({ initialSettings })
-  console.log({ pageSettings })
   const [settings, setSettings] = useState({ ...initialSettings })
   useEffect(() => {
     const restoredSettings = restoreSettings()

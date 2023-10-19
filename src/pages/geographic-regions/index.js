@@ -49,6 +49,8 @@ const GeographicRegions = () => {
     }
   ]
 
+  const tabs = [{ label: 'Geographic Regions' }]
+
   const geographicRegionsValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
@@ -78,7 +80,7 @@ const GeographicRegions = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 
@@ -95,10 +97,11 @@ const GeographicRegions = () => {
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
+        console.log({ error })
         setErrorMessage(error)
       })
   }
-  const tabs = [{ label: 'Geographic Regions' }]
+
   const delGeographicRegion = obj => {
     postRequest({
       extension: SystemRepository.GeographicRegion.del,
@@ -148,6 +151,7 @@ const GeographicRegions = () => {
           onEdit={editGeographicRegion}
           onDelete={delGeographicRegion}
           isLoading={false}
+          pageSize={30}
         />
       </Box>
       {windowOpen && (

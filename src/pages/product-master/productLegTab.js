@@ -26,6 +26,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 const productLegTab = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
+
   //stores
   const [gridData, setGridData] = useState([])
 
@@ -41,6 +42,7 @@ const productLegTab = () => {
       flex: 1
     }
   ]
+
   const commissionColumns = [
     {
       field: 'commission',
@@ -51,7 +53,7 @@ const productLegTab = () => {
 
   const tabs = [{ label: 'Product Commission' }]
 
-  const getGridData = ({}) => {
+  const getGridData = ({ }) => {
     const newData = { list: [{ recordId: 1, fromAmount: 1000, toAmount: 2000 }] }
     setGridData({ ...newData })
   }

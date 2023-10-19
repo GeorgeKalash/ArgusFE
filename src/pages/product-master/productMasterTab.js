@@ -15,10 +15,9 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseStore, languageStore }) => {
   return (
     <>
-      <div style={{ display: 'flex' }}>
+      <Grid container>
         {/* First Column */}
-
-        <Grid container spacing={4}>
+        <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
             <CustomTextField
               name='reference'
@@ -84,7 +83,7 @@ const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseSt
           </Grid>
         </Grid>
         {/* Second Column */}
-        <Grid container spacing={4}>
+        <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
             <CustomComboBox
               name='languageName'
@@ -166,7 +165,7 @@ const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseSt
             />
           </Grid>
         </Grid>
-      </div>
+      </Grid>
     </>
   )
 }

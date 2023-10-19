@@ -84,11 +84,11 @@ const PaginationContainer = styled(Box)({
   borderTop: '1px solid #ccc'
 })
 
-const Table = props => {
+const Table = ({ pagination = true, ...props }) => {
   const gridData = props.gridData
   const api = props.api
   const startAt = gridData._startAt
-  const pageSize = 50
+  const pageSize = props.pageSize ? props.pageSize : 50
   const totalRecords = gridData.count ? gridData.count : 0
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
@@ -168,28 +168,30 @@ const Table = props => {
 
   const columns = props.columns
 
-  columns.push({
-    field: 'action',
-    headerName: 'ACTIONS',
-    width: 100,
-    sortable: false,
-    renderCell: params => {
-      return (
-        <>
-          {props.onEdit && (
-            <IconButton size='small' onClick={() => props.onEdit(params.row)}>
-              <Icon icon='mdi:application-edit-outline' fontSize={18} />
-            </IconButton>
-          )}
-          {props.onDelete && (
-            <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
-              <Icon icon='mdi:delete-forever' fontSize={18} />
-            </IconButton>
-          )}
-        </>
-      )
-    }
-  })
+  if (props.onEdit || props.onDelete) {
+    columns.push({
+      field: 'action',
+      headerName: 'ACTIONS',
+      width: 100,
+      sortable: false,
+      renderCell: params => {
+        return (
+          <>
+            {props.onEdit && (
+              <IconButton size='small' onClick={() => props.onEdit(params.row)}>
+                <Icon icon='mdi:application-edit-outline' fontSize={18} />
+              </IconButton>
+            )}
+            {props.onDelete && (
+              <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
+                <Icon icon='mdi:delete-forever' fontSize={18} />
+              </IconButton>
+            )}
+          </>
+        )
+      }
+    })
+  }
 
   return (
     <>
@@ -208,7 +210,7 @@ const Table = props => {
           }}
           components={{
             LoadingOverlay: LinearProgress,
-            Pagination: CustomPagination,
+            Pagination: pagination ? CustomPagination : null,
             NoRowsOverlay: () => (
               <Stack height='100%' alignItems='center' justifyContent='center'>
                 This Screen Has No Data
