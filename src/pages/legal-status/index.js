@@ -70,7 +70,7 @@ const LegalStatus = () => {
             legalStatusValidation.handleSubmit()
     }
 
-    const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+    const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
         console.log(_startAt);
         console.log(_pageSize);
         const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
