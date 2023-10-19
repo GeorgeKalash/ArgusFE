@@ -49,6 +49,12 @@ const Currencies = () => {
       headerName: 'Name',
       flex: 1
     },
+    ,
+    {
+      field: 'flName',
+      headerName: 'Foreign Language',
+      flex: 1
+    },
     {
       field: 'currencyTypeName',
       headerName: 'Currency Type',
@@ -72,10 +78,9 @@ const Currencies = () => {
   const handleSubmit = () => {
     currencyValidation.handleSubmit()
   }
-  const getGridData = ({ _startAt = 0, _pageSize = 200 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    var parameters = defaultParams
-
+  const getGridData = () => {
+    var _startAt = 0
+    var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: parameters
@@ -85,7 +90,7 @@ const Currencies = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
   const FillProfileStore = () => {
@@ -98,7 +103,7 @@ const Currencies = () => {
         setProfileStore(res.list)
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
   const FillCurrencyStore = () => {
@@ -111,7 +116,7 @@ const Currencies = () => {
         setCurrencyStore(res.list)
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(erro)
       })
   }
   const FillDecimalStore = () => {}
@@ -128,7 +133,7 @@ const Currencies = () => {
         else toast.success('Record Editted Successfully')
       })
       .catch(error => {
-        setErrorMessage(error.message)
+        setErrorMessage(error)
       })
   }
   const delCurrency = obj => {
@@ -166,7 +171,7 @@ const Currencies = () => {
     setWindowOpen(true)
   }
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 200 })
+    getGridData()
     FillDecimalStore()
     FillProfileStore()
     FillCurrencyStore()
@@ -191,6 +196,8 @@ const Currencies = () => {
           onEdit={editCurrency}
           onDelete={delCurrency}
           isLoading={false}
+          pageSize={50}
+          pagination={false}
         />
       </Box>
       {windowOpen && (
@@ -226,6 +233,18 @@ const Currencies = () => {
                   onClear={() => currencyValidation.setFieldValue('name', '')}
                   error={currencyValidation.touched.name && Boolean(currencyValidation.errors.name)}
                   helperText={currencyValidation.touched.name && currencyValidation.errors.name}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='flName'
+                  label='Foreign Language'
+                  value={currencyValidation.values.flName}
+                  required
+                  onChange={currencyValidation.handleChange}
+                  onClear={() => currencyValidation.setFieldValue('flName', '')}
+                  error={currencyValidation.touched.flName && Boolean(currencyValidation.errors.flName)}
+                  helperText={currencyValidation.touched.flName && currencyValidation.errors.flName}
                 />
               </Grid>
               <Grid item xs={12}>

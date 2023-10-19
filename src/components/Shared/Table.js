@@ -204,7 +204,7 @@ const Table = ({ pagination = true, ...props }) => {
           initialState={{
             pagination: {
               paginationModel: {
-                pageSize: 30
+                pageSize: pageSize
               }
             }
           }}
