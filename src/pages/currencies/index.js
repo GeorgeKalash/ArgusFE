@@ -32,7 +32,7 @@ const Currencies = () => {
   const [gridData, setGridData] = useState([])
   const [decimalStore, setDecimalStore] = useState([])
   const [profileStore, setProfileStore] = useState([])
-
+  const [currencyStore, setCurrencyStore] = useState([])
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
@@ -73,7 +73,7 @@ const Currencies = () => {
     currencyValidation.handleSubmit()
   }
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     var parameters = defaultParams
 
     getRequest({
@@ -95,7 +95,7 @@ const Currencies = () => {
       parameters: parameters
     })
       .then(res => {
-        setSysFunctionsStore(res.list)
+        setProfileStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error.response.data)
@@ -108,7 +108,7 @@ const Currencies = () => {
       parameters: parameters
     })
       .then(res => {
-        setSysFunctionsStore(res.list)
+        setCurrencyStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error.response.data)
@@ -166,10 +166,13 @@ const Currencies = () => {
     setWindowOpen(true)
   }
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
+    console.log('passeddddddd')
+    getGridData({ _startAt: 0, _pageSize: 50 })
     FillDecimalStore()
     FillProfileStore()
     FillCurrencyStore()
+    const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
+    setDecimalStore(decimalDataSource)
   }, [])
   return (
     <>
@@ -254,7 +257,7 @@ const Currencies = () => {
                   required
                   readOnly={editMode}
                   onChange={(event, newValue) => {
-                    currencyValidation.setFieldValue('profileId', newValue?.key)
+                    currencyValidation.setFieldValue('profileId', newValue?.value)
                   }}
                   error={currencyValidation.touched.profileId && Boolean(currencyValidation.errors.profileId)}
                   helperText={currencyValidation.touched.profileId && currencyValidation.errors.profileId}
@@ -285,8 +288,8 @@ const Currencies = () => {
                   control={
                     <Checkbox
                       name='sale'
-                      checked={groupLegalDocumentValidation.values?.sale}
-                      onChange={groupLegalDocumentValidation.handleChange}
+                      checked={currencyValidation.values?.sale}
+                      onChange={currencyValidation.handleChange}
                     />
                   }
                   label='Sale'
@@ -297,8 +300,8 @@ const Currencies = () => {
                   control={
                     <Checkbox
                       name='purchase'
-                      checked={groupLegalDocumentValidation.values?.purchase}
-                      onChange={groupLegalDocumentValidation.handleChange}
+                      checked={currencyValidation.values?.purchase}
+                      onChange={currencyValidation.handleChange}
                     />
                   }
                   label='Purchase'
@@ -313,4 +316,4 @@ const Currencies = () => {
   )
 }
 
-export default Currency
+export default Currencies
