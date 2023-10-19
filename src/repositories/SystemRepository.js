@@ -29,5 +29,11 @@ export const SystemRepository = {
     get: service + 'getCU',
     set: service + 'setCU',
     del: service + 'delCU'
+  },
+  City: {
+    qry: service + 'qryCIT',
+    get: service + 'getCIT',
+    set: service + 'setCIT',
+    del: service + 'delCIT'
   }
 }
