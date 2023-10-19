@@ -16,12 +16,8 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import Window from 'src/components/Shared/Window'
 
-// ** API
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+//** Helpers
+import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 const productLegTab = () => {
   //states
@@ -29,21 +25,45 @@ const productLegTab = () => {
 
   //stores
   const [gridData, setGridData] = useState([])
+  const [commissionGridData, setCommissionGridData] = useState([])
 
   const columns = [
     {
       field: 'fromAmount',
       headerName: 'From Amount',
       flex: 1
+      // align: 'right',
+      // valueGetter: ({ row }) => getFormattedNumber(row?.fromAmount, 2)
     },
     {
       field: 'toAmount',
       headerName: 'To Amount',
       flex: 1
+      // align: 'right',
+      // valueGetter: ({ row }) => getFormattedNumber(row?.toAmount, 2)
     }
   ]
 
   const commissionColumns = [
+    {
+      field: 'checkBox',
+      headerName: '',
+      flex: 0.5,
+      renderCell: params => (
+        <Checkbox
+          color='primary'
+          checked={params.row.checkBox === true}
+          onChange={() => {
+            params.row.checkBox = !params.row.checkBox
+          }}
+        />
+      )
+    },
+    {
+      field: 'commissionName',
+      headerName: 'Commission Name',
+      flex: 1
+    },
     {
       field: 'commission',
       headerName: 'Commission',
@@ -51,10 +71,8 @@ const productLegTab = () => {
     }
   ]
 
-  const tabs = [{ label: 'Product Commission' }]
-
-  const getGridData = ({ }) => {
-    const newData = { list: [{ recordId: 1, fromAmount: 1000, toAmount: 2000 }] }
+  const getGridData = ({}) => {
+    const newData = { list: [{ recordId: 1, fromAmount: 1000.66, toAmount: 2000.97 }] }
     setGridData({ ...newData })
   }
 
@@ -66,12 +84,12 @@ const productLegTab = () => {
   const fillCommissionStore = () => {
     const newData = {
       list: [
-        { recordId: 1, commission: 50 },
-        { recordId: 2, commission: 100 },
-        { recordId: 3, commission: 150 }
+        { commissionId: 1, commissionName: 'PCT', commission: 50 },
+        { commissionId: 2, commissionName: 'fixed', commission: 100 },
+        { commissionId: 3, commissionName: 'fixed (other charges)', commission: 150 }
       ]
     }
-    setGridData({ ...newData })
+    setCommissionGridData({ ...newData })
   }
 
   useEffect(() => {
@@ -88,34 +106,29 @@ const productLegTab = () => {
           height: '100%'
         }}
       >
-        <div style={{ display: 'flex' }}>
+        <Grid container>
           {/* First Column */}
-
-          <Grid container spacing={4}>
+          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
             </Grid>
             <Grid item xs={12}>
-              <CustomComboBox name='plantName' label='Plant' readOnly={true} required />
+              <CustomComboBox name='plantName' label='Plant' readOnly={false} required />
             </Grid>
             <Grid item xs={12}>
-              <CustomComboBox name='dispursal' label='Dispursal' readOnly={true} required />
+              <CustomComboBox name='dispursal' label='Dispursal' readOnly={false} required />
             </Grid>
           </Grid>
           {/* Second Column */}
-          <Grid container spacing={4}>
+          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField label='Name' value={'name 1'} readOnly={true} />
             </Grid>
             <Grid item xs={12}>
               <CustomComboBox name='currencyName' label='Currency' required />
             </Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={12}></Grid>
           </Grid>
-        </div>
+        </Grid>
         <Table
           columns={columns}
           gridData={gridData}
@@ -123,6 +136,7 @@ const productLegTab = () => {
           api={getGridData}
           onEdit={editProductCommission}
           isLoading={false}
+          pagination={false}
         />
       </Box>
 
@@ -131,9 +145,6 @@ const productLegTab = () => {
           id='ProductCommissionsWindow'
           Title='Product Commission'
           onClose={() => setWindowOpen(false)}
-          tabs={tabs}
-          activeTab={0}
-          setActiveTab={0}
           width={500}
           height={400}
         >
@@ -145,27 +156,36 @@ const productLegTab = () => {
                 height: '100%'
               }}
             >
-              <div style={{ display: 'flex' }}>
+              <Grid container>
                 {/* First Column */}
-
-                <Grid container spacing={4}>
+                <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
                   <Grid item xs={12}>
                     <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
                   </Grid>
+                  <Grid item xs={12}>
+                    <CustomComboBox name='plantName' label='Plant' readOnly={true} required />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomComboBox name='dispursal' label='Dispursal' readOnly={true} required />
+                  </Grid>
                 </Grid>
                 {/* Second Column */}
-                <Grid container spacing={4}>
+                <Grid ccontainer rowGap={2} xs={6} sx={{ px: 2 }}>
                   <Grid item xs={12}>
                     <CustomTextField label='Name' value={'name 1'} readOnly={true} />
                   </Grid>
+                  <Grid item xs={12}>
+                    <CustomComboBox name='currencyName' label='Currency' required />
+                  </Grid>
                 </Grid>
-              </div>
+              </Grid>
               <Table
                 columns={commissionColumns}
-                gridData={gridData}
-                rowId={['recordId']}
+                gridData={commissionGridData}
+                rowId={['commissionId']}
                 api={getGridData}
                 isLoading={false}
+                pagination={false}
               />
             </Box>
           </CustomTabPanel>

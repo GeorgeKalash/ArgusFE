@@ -23,9 +23,12 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+
+// **Tabs
 import ProductMasterTab from './productMasterTab'
 import ProductDispursalTab from './productDispursalTab'
 import ProductLegTab from './productLegTab'
+import ProductFieldTab from './productFieldTab'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -100,7 +103,7 @@ const ProductMaster = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => { }
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {}
 
   const fillTypeStore = () => {
     var parameters = '_database=15' //add 'xml'.json and get _database values from there
@@ -147,11 +150,16 @@ const ProductMaster = () => {
       })
   }
 
-  const postProductMaster = obj => { }
+  const postProductMaster = obj => {}
 
-  const tabs = [{ label: 'Product Master' }, { label: 'Product Dispursal' }, { label: 'Product Leg' }]
+  const tabs = [
+    { label: 'Product Master' },
+    { label: 'Product Dispursal' },
+    { label: 'Product Leg' },
+    { label: 'Product Fields' }
+  ]
 
-  const delProductMaster = obj => { }
+  const delProductMaster = obj => {}
 
   const addProductMaster = () => {
     productMasterValidation.setValues({})
@@ -218,6 +226,9 @@ const ProductMaster = () => {
           </CustomTabPanel>
           <CustomTabPanel index={2} value={activeTab}>
             <ProductLegTab />
+          </CustomTabPanel>
+          <CustomTabPanel index={3} value={activeTab}>
+            <ProductFieldTab />
           </CustomTabPanel>
         </Window>
       )}

@@ -49,8 +49,6 @@ const GeographicRegions = () => {
     }
   ]
 
-  const tabs = [{ label: 'Geographic Regions' }]
-
   const geographicRegionsValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
@@ -159,9 +157,6 @@ const GeographicRegions = () => {
           id='GeographicRegionWindow'
           Title='Geographic Regions'
           onClose={() => setWindowOpen(false)}
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
           width={500}
           height={300}
           onSave={handleSubmit}

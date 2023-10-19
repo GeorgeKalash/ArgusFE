@@ -12,63 +12,47 @@ import toast from 'react-hot-toast'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-// ** API
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-const ProductDispursalTab = () => {
+const ProductFieldTab = () => {
   //stores
   const [gridData, setGridData] = useState([])
 
   const columns = [
     {
-      recordId: '1',
-      field: 'reference',
-      headerName: 'Reference',
+      field: 'controls',
+      headerName: 'Controls',
       flex: 1
     },
     {
-      recordId: '2',
-      field: 'name',
-      headerName: 'Name',
+      field: 'format',
+      headerName: 'Format',
       flex: 1
     },
     {
-      recordId: '3',
-      field: 'type',
-      headerName: 'Dispursal Type',
+      field: 'securityLevel',
+      headerName: 'securityLevel',
       flex: 1
     },
     {
-      recordId: '4',
-      field: 'apiBankCode',
-      headerName: 'API Bank Code',
+      field: 'specialChars',
+      headerName: 'special Chars',
       flex: 1
     },
     {
-      recordId: '5',
-      field: 'default',
-      headerName: 'Default',
+      field: 'fixedLength',
+      headerName: 'fixed Length',
       flex: 1
     },
     {
-      recordId: '6',
-      field: 'isInactive',
-      headerName: 'Inactive',
-      flex: 1,
-      renderCell: params => (
-        <Checkbox
-          color='primary'
-          checked={params.row.isInactive === true} // Checked based on 'isInactive' property
-          onChange={() => {
-            params.row.isInactive = !params.row.isInactive
-          }}
-        />
-      )
+      field: 'minLength',
+      headerName: 'min Length',
+      flex: 1
+    },
+    {
+      field: 'maxLength',
+      headerName: 'max Length',
+      flex: 1
     }
   ]
 
@@ -98,39 +82,43 @@ const ProductDispursalTab = () => {
       list: [
         {
           recordId: 1,
-          reference: 'NTFS',
-          name: 'NTFS',
-          type: 'bank',
-          apiBankCode: 'ABC',
-          default: 'ABC',
-          isInactive: true
+          controls: 'phone',
+          format: 'Alfa',
+          securityLevel: 'readOnly',
+          specialChars: '@',
+          fixedLength: 10,
+          minLength: 3,
+          maxLength: 10
         },
         {
           recordId: 2,
-          reference: 'CASH',
-          name: 'cash',
-          type: 'cash',
-          apiBankCode: 'ABC',
-          default: 'ABC',
-          isInactive: false
+          controls: 'email',
+          format: 'Alfa+SP',
+          securityLevel: 'Optional',
+          specialChars: '@',
+          fixedLength: 10,
+          minLength: 3,
+          maxLength: 10
         },
         {
           recordId: 3,
-          reference: 'WALLET',
-          name: 'wallet (bitcoin)',
-          type: 'wallet',
-          apiBankCode: 'ABC',
-          default: 'ABC',
-          isInactive: false
+          controls: 'Country',
+          format: 'Numeric',
+          securityLevel: 'Mandatory',
+          specialChars: '@',
+          fixedLength: 10,
+          minLength: 3,
+          maxLength: 10
         },
         {
           recordId: 4,
-          reference: 'CASH DLV',
-          name: 'cash delivery',
-          type: 'delivery',
-          apiBankCode: 'ABC',
-          default: 'ABC',
-          isInactive: true
+          controls: 'City',
+          format: 'Alfa Numeric',
+          securityLevel: 'hidden',
+          specialChars: '@',
+          fixedLength: 10,
+          minLength: 3,
+          maxLength: 10
         }
       ]
     }
@@ -138,8 +126,6 @@ const ProductDispursalTab = () => {
   }
 
   const postProductMaster = obj => {}
-
-  const tabs = [{ label: 'Product Master' }, { label: 'Product Dispursal' }, { label: 'Product Leg' }]
 
   useEffect(() => {
     getGridData({})
@@ -156,16 +142,24 @@ const ProductDispursalTab = () => {
       >
         <Grid container>
           {/* First Column */}
-
           <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
             </Grid>
+            <Grid item xs={12}>
+              <CustomComboBox name='plantName' label='Plant' readOnly={true} required />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomComboBox name='dispursal' label='Dispursal' readOnly={true} required />
+            </Grid>
           </Grid>
           {/* Second Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+          <Grid ccontainer rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField label='Name' value={'name 1'} readOnly={true} />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomComboBox name='currencyName' label='Currency' required />
             </Grid>
           </Grid>
         </Grid>
@@ -182,4 +176,4 @@ const ProductDispursalTab = () => {
   )
 }
 
-export default ProductDispursalTab
+export default ProductFieldTab
