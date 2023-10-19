@@ -72,7 +72,7 @@ const Currencies = () => {
   const handleSubmit = () => {
     currencyValidation.handleSubmit()
   }
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+  const getGridData = ({ _startAt = 0, _pageSize = 200 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     var parameters = defaultParams
 
@@ -128,7 +128,7 @@ const Currencies = () => {
         else toast.success('Record Editted Successfully')
       })
       .catch(error => {
-        setErrorMessage(error)
+        setErrorMessage(error.message)
       })
   }
   const delCurrency = obj => {
@@ -166,8 +166,7 @@ const Currencies = () => {
     setWindowOpen(true)
   }
   useEffect(() => {
-    console.log('passeddddddd')
-    getGridData({ _startAt: 0, _pageSize: 50 })
+    getGridData({ _startAt: 0, _pageSize: 200 })
     FillDecimalStore()
     FillProfileStore()
     FillCurrencyStore()
@@ -257,7 +256,7 @@ const Currencies = () => {
                   required
                   readOnly={editMode}
                   onChange={(event, newValue) => {
-                    currencyValidation.setFieldValue('profileId', newValue?.value)
+                    currencyValidation.setFieldValue('profileId', newValue?.key)
                   }}
                   error={currencyValidation.touched.profileId && Boolean(currencyValidation.errors.profileId)}
                   helperText={currencyValidation.touched.profileId && currencyValidation.errors.profileId}
