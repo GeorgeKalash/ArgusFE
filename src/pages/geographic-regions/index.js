@@ -14,9 +14,6 @@ import Table from 'src/components/Shared/Table'
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import CustomLookup from 'src/components/Inputs/CustomLookup'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
@@ -52,6 +49,8 @@ const GeographicRegions = () => {
     }
   ]
 
+  const tabs = [{ label: 'Geographic Regions' }]
+
   const geographicRegionsValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
@@ -81,7 +80,7 @@ const GeographicRegions = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 
@@ -98,10 +97,11 @@ const GeographicRegions = () => {
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
+        console.log({ error })
         setErrorMessage(error)
       })
   }
-  const tabs = [{ label: 'Geographic Regions' }]
+
   const delGeographicRegion = obj => {
     postRequest({
       extension: SystemRepository.GeographicRegion.del,
@@ -151,6 +151,7 @@ const GeographicRegions = () => {
           onEdit={editGeographicRegion}
           onDelete={delGeographicRegion}
           isLoading={false}
+          pageSize={30}
         />
       </Box>
       {windowOpen && (

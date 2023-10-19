@@ -252,6 +252,7 @@ const DocumentTypes = () => {
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
+
           // rowId={['recordId', 'reference']}
           onEdit={editDocumentType}
           onDelete={delDocumentType}
@@ -279,6 +280,7 @@ const DocumentTypes = () => {
                   value={documentTypesValidation.values.reference}
                   required
                   onChange={documentTypesValidation.handleChange}
+
                   // numberField
                   // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e.target.value, 4))}
                   onClear={() => documentTypesValidation.setFieldValue('reference', '')}
