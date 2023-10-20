@@ -7,15 +7,12 @@ import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -29,6 +26,7 @@ import ProductMasterTab from './productMasterTab'
 import ProductDispursalTab from './productDispursalTab'
 import ProductLegTab from './productLegTab'
 import ProductFieldTab from './productFieldTab'
+import ProductAgentTab from './productAgentTab'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -103,7 +101,7 @@ const ProductMaster = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {}
+  const getGridData = () => {}
 
   const fillTypeStore = () => {
     var parameters = '_database=15' //add 'xml'.json and get _database values from there
@@ -152,12 +150,7 @@ const ProductMaster = () => {
 
   const postProductMaster = obj => {}
 
-  const tabs = [
-    { label: 'Product Master' },
-    { label: 'Product Dispursal' },
-    { label: 'Product Leg' },
-    { label: 'Product Fields' }
-  ]
+  const tabs = [{ label: 'Main' }, { label: 'Dispursal' }, { label: 'Leg' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => {}
 
@@ -229,6 +222,9 @@ const ProductMaster = () => {
           </CustomTabPanel>
           <CustomTabPanel index={3} value={activeTab}>
             <ProductFieldTab />
+          </CustomTabPanel>
+          <CustomTabPanel index={4} value={activeTab}>
+            <ProductAgentTab />
           </CustomTabPanel>
         </Window>
       )}

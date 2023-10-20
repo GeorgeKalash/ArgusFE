@@ -14,44 +14,14 @@ import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-const ProductFieldTab = () => {
+const ProductAgentTab = () => {
   //stores
   const [gridData, setGridData] = useState([])
 
   const columns = [
     {
-      field: 'controls',
-      headerName: 'Controls',
-      flex: 1
-    },
-    {
-      field: 'format',
-      headerName: 'Format',
-      flex: 1
-    },
-    {
-      field: 'securityLevel',
-      headerName: 'securityLevel',
-      flex: 1
-    },
-    {
-      field: 'specialChars',
-      headerName: 'special Chars',
-      flex: 1
-    },
-    {
-      field: 'fixedLength',
-      headerName: 'fixed Length',
-      flex: 1
-    },
-    {
-      field: 'minLength',
-      headerName: 'min Length',
-      flex: 1
-    },
-    {
-      field: 'maxLength',
-      headerName: 'max Length',
+      field: 'agent',
+      headerName: 'Agent',
       flex: 1
     }
   ]
@@ -61,43 +31,15 @@ const ProductFieldTab = () => {
       list: [
         {
           recordId: 1,
-          controls: 'phone',
-          format: 'Alfa',
-          securityLevel: 'readOnly',
-          specialChars: '@',
-          fixedLength: 10,
-          minLength: 3,
-          maxLength: 10
+          agent: 'ABC'
         },
         {
           recordId: 2,
-          controls: 'email',
-          format: 'Alfa+SP',
-          securityLevel: 'Optional',
-          specialChars: '@',
-          fixedLength: 10,
-          minLength: 3,
-          maxLength: 10
+          agent: 'DEF'
         },
         {
           recordId: 3,
-          controls: 'Country',
-          format: 'Numeric',
-          securityLevel: 'Mandatory',
-          specialChars: '@',
-          fixedLength: 10,
-          minLength: 3,
-          maxLength: 10
-        },
-        {
-          recordId: 4,
-          controls: 'City',
-          format: 'Alfa Numeric',
-          securityLevel: 'hidden',
-          specialChars: '@',
-          fixedLength: 10,
-          minLength: 3,
-          maxLength: 10
+          agent: 'GHI'
         }
       ]
     }
@@ -149,4 +91,4 @@ const ProductFieldTab = () => {
   )
 }
 
-export default ProductFieldTab
+export default ProductAgentTab

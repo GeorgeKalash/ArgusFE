@@ -16,9 +16,6 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import Window from 'src/components/Shared/Window'
 
-//** Helpers
-import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-
 const productLegTab = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)

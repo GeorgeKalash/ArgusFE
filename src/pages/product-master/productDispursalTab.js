@@ -72,27 +72,6 @@ const ProductDispursalTab = () => {
     }
   ]
 
-  const productMasterValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      type: yup.string().required('This field is required'),
-      correspondant: yup.string().required('This field is required'),
-      country: yup.string().required('This field is required'),
-      language: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      postProductMaster(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    if (activeTab === 0) productMasterValidation.handleSubmit()
-  }
-
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const newData = {
       list: [
