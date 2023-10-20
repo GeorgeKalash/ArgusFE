@@ -24,10 +24,16 @@ export const SystemRepository = {
     set: service + 'setRGN',
     del: service + 'delRGN'
   },
-  Countries: {
-    qry: service + 'qryCO',
-    get: service + 'getCO',
-    set: service + 'setCO',
-    del: service + 'delCO'
+  Currency: {
+    qry: service + 'qryCU',
+    get: service + 'getCU',
+    set: service + 'setCU',
+    del: service + 'delCU'
+  },
+  City: {
+    qry: service + 'qryCIT',
+    get: service + 'getCIT',
+    set: service + 'setCIT',
+    del: service + 'delCIT'
   }
 }
