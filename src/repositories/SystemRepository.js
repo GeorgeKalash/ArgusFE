@@ -1,6 +1,8 @@
 const service = 'SY.asmx/'
+
 export const SystemRepository = {
   get2AM: service + 'get2AM',
+  getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
   DocumentType: {

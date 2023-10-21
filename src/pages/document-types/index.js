@@ -25,11 +25,15 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
+
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const DocumentTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -42,15 +46,25 @@ const DocumentTypes = () => {
   const [numberRangeStore, setNumberRangeStore] = useState([])
 
   //states
+  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const _labels = {
+    reference: labels && labels.find(item => item.key === 1).value,
+    name: labels && labels.find(item => item.key === 2).value,
+    sysFunction: labels && labels.find(item => item.key === 3).value,
+    intLogic: labels && labels.find(item => item.key === 4).value,
+    status: labels && labels.find(item => item.key === 5).value,
+    nuRange: labels && labels.find(item => item.key === 6).value,
+  }
+
   const columns = [
     {
       field: 'reference',
-      headerName: 'Reference',
+      headerName: _labels.reference,
       flex: 1
 
       // align: 'right',
@@ -58,27 +72,27 @@ const DocumentTypes = () => {
     },
     {
       field: 'dgName',
-      headerName: 'System Functions',
+      headerName: _labels.sysFunction,
       flex: 1
     },
     {
       field: 'ilName',
-      headerName: 'Integration Logic',
+      headerName: _labels.intLogic,
       flex: 1
     },
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: _labels.name,
       flex: 1
     },
     {
       field: 'activeStatusName',
-      headerName: 'Status',
+      headerName: _labels.status,
       flex: 1
     },
     {
       field: 'nraRef',
-      headerName: 'Number Range',
+      headerName: _labels.nuRange,
       flex: 1
     }
   ]
@@ -112,6 +126,22 @@ const DocumentTypes = () => {
     if (activeTab === 0) documentTypesValidation.handleSubmit()
   }
 
+  const getLabels = () => {
+    var parameters = '_dataset=' + ResourceIds.DocumentTypes
+
+    getRequest({
+      'extension': KVSRepository.getLabels,
+      'parameters': parameters,
+    })
+      .then((res) => {
+        console.log({ res })
+        setLabels(res.list)
+      })
+      .catch((error) => {
+        setErrorMessage(error)
+      })
+  }
+
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     var parameters = defaultParams + '&_dgId=0'
@@ -124,7 +154,7 @@ const DocumentTypes = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 
@@ -138,7 +168,7 @@ const DocumentTypes = () => {
         setIntegrationLogicStore(res.list)
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 
@@ -152,7 +182,7 @@ const DocumentTypes = () => {
         setSysFunctionsStore(res.list)
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 
@@ -167,7 +197,7 @@ const DocumentTypes = () => {
         setActiveStatusStore(res.list)
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 
@@ -235,6 +265,7 @@ const DocumentTypes = () => {
     getGridData({ _startAt: 0, _pageSize: 30 })
     fillSysFunctionsStore()
     fillActiveStatusStore()
+    getLabels()
   }, [])
 
   return (
@@ -276,7 +307,7 @@ const DocumentTypes = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
-                  label='Reference'
+                  label={_labels.reference}
                   value={documentTypesValidation.values.reference}
                   required
                   onChange={documentTypesValidation.handleChange}
@@ -291,7 +322,7 @@ const DocumentTypes = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='name'
-                  label='Name'
+                  label={_labels.name}
                   value={documentTypesValidation.values.name}
                   required
                   onChange={documentTypesValidation.handleChange}
@@ -303,7 +334,7 @@ const DocumentTypes = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='dgName'
-                  label='System Functions'
+                  label={_labels.sysFunction}
                   valueField='key'
                   displayField='value'
                   store={sysFunctionsStore}
@@ -321,7 +352,7 @@ const DocumentTypes = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='ilName'
-                  label='Integration Logic'
+                  label={_labels.intLogic}
                   valueField='recordId'
                   displayField='name'
                   store={integrationLogicStore}
@@ -338,7 +369,7 @@ const DocumentTypes = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='activeStatusName'
-                  label='Status'
+                  label={_labels.status}
                   valueField='key'
                   displayField='value'
                   store={activeStatusStore}
@@ -360,7 +391,7 @@ const DocumentTypes = () => {
               <Grid item xs={12}>
                 <CustomLookup
                   name='nraRef'
-                  label='Number Range'
+                  label={_labels.nuRange}
                   valueField='reference'
                   displayField='description'
                   store={numberRangeStore}
