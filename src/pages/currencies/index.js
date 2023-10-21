@@ -21,6 +21,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCurrency, populateCurrency } from 'src/Models/System/currency'
+
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
@@ -28,11 +29,13 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
   //stores
   const [gridData, setGridData] = useState([])
   const [decimalStore, setDecimalStore] = useState([])
   const [profileStore, setProfileStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
+
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
@@ -61,6 +64,7 @@ const Currencies = () => {
       flex: 1
     }
   ]
+
   const currencyValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
@@ -75,9 +79,11 @@ const Currencies = () => {
       postCurrency(values)
     }
   })
+
   const handleSubmit = () => {
     currencyValidation.handleSubmit()
   }
+
   const getGridData = () => {
     var _startAt = 0
     var parameters = '_filter='
@@ -86,13 +92,13 @@ const Currencies = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log('Response received:', res)
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
+
   const FillProfileStore = () => {
     var parameters = '_database=6' //add 'xml'.json and get _database values from there
     getRequest({
@@ -106,6 +112,7 @@ const Currencies = () => {
         setErrorMessage(error)
       })
   }
+
   const FillCurrencyStore = () => {
     var parameters = '_database=117' //add 'xml'.json and get _database values from there
     getRequest({
@@ -116,10 +123,11 @@ const Currencies = () => {
         setCurrencyStore(res.list)
       })
       .catch(error => {
-        setErrorMessage(erro)
+        setErrorMessage(error)
       })
   }
-  const FillDecimalStore = () => {}
+  const FillDecimalStore = () => { }
+
   const postCurrency = obj => {
     const recordId = obj.recordId
     postRequest({
@@ -136,14 +144,13 @@ const Currencies = () => {
         setErrorMessage(error)
       })
   }
+
   const delCurrency = obj => {
-    console.log('jsonOBJ ' + JSON.stringify(obj))
     postRequest({
       extension: SystemRepository.Currency.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ res })
         getGridData({})
         toast.success('Record Deleted Successfully')
       })
@@ -162,7 +169,6 @@ const Currencies = () => {
   }
 
   const editCurrency = obj => {
-    console.log(obj)
     currencyValidation.setValues(populateCurrency(obj))
     FillDecimalStore()
     FillProfileStore()
@@ -178,6 +184,7 @@ const Currencies = () => {
     const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
     setDecimalStore(decimalDataSource)
   }, [])
+
   return (
     <>
       <Box
@@ -197,7 +204,6 @@ const Currencies = () => {
           onDelete={delCurrency}
           isLoading={false}
           pageSize={50}
-          pagination={false}
         />
       </Box>
       {windowOpen && (
@@ -271,7 +277,7 @@ const Currencies = () => {
                   valueField='key'
                   displayField='value'
                   store={profileStore}
-                  value={currencyValidation.values.profileId}
+                  value={profileStore.filter(item => item.key === currencyValidation.values.profileId)[0]}
                   required
                   readOnly={editMode}
                   onChange={(event, newValue) => {
@@ -288,7 +294,7 @@ const Currencies = () => {
                   valueField='key'
                   displayField='value'
                   store={currencyStore}
-                  value={currencyValidation.values.currencyTypeName}
+                  value={profileStore.filter(item => item.key === currencyValidation.values.currencyType)[0]}
                   required
                   readOnly={editMode}
                   onChange={(event, newValue) => {

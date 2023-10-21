@@ -4,7 +4,7 @@ const getFormattedNumber = (value, decimal) => {
         return
 
     // Remove non-numeric and non-decimal characters
-    const sanitizedValue = value.replace(/[^0-9.]/g, '')
+    const sanitizedValue = value.toString().replace(/[^0-9.]/g, '')
 
     // Split the value into integer and decimal parts
     const [integerPart, decimalPart] = sanitizedValue.split('.')

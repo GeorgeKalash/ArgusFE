@@ -16,6 +16,9 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import Window from 'src/components/Shared/Window'
 
+// ** Helpers
+import { getFormattedNumber } from 'src/lib/numberField-helper'
+
 const productLegTab = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -28,16 +31,17 @@ const productLegTab = () => {
     {
       field: 'fromAmount',
       headerName: 'From Amount',
-      flex: 1
-      // align: 'right',
-      // valueGetter: ({ row }) => getFormattedNumber(row?.fromAmount, 2)
+      flex: 1,
+      align: 'right',
+      valueGetter: ({ row }) => getFormattedNumber(row?.fromAmount, 2)
+
     },
     {
       field: 'toAmount',
       headerName: 'To Amount',
-      flex: 1
-      // align: 'right',
-      // valueGetter: ({ row }) => getFormattedNumber(row?.toAmount, 2)
+      flex: 1,
+      align: 'right',
+      valueGetter: ({ row }) => getFormattedNumber(row?.toAmount, 2)
     }
   ]
 
@@ -68,7 +72,7 @@ const productLegTab = () => {
     }
   ]
 
-  const getGridData = ({}) => {
+  const getGridData = ({ }) => {
     const newData = { list: [{ recordId: 1, fromAmount: 1000.66, toAmount: 2000.97 }] }
     setGridData({ ...newData })
   }
