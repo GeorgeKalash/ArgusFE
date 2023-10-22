@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 // ** MUI Imports
@@ -95,13 +95,19 @@ const PaginationContainer = styled(Box)({
   borderTop: '1px solid #ccc'
 })
 
-const Table = ({ pagination = true, ...props }) => {
-  const gridData = props.gridData
-  const api = props.api
-  const startAt = gridData._startAt
-  const pageSize = props.pageSize ? props.pageSize : 50
-  const totalRecords = gridData.count ? gridData.count : 0
+const Table = ({
+  pagination = true,
+  paginationType = 'api',
+  ...props }) => {
+
+  const [gridData, setGridData] = useState(props.gridData)
+  const [startAt, setStartAt] = useState(0)
+  const [page, setPage] = useState(1)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
+
+  const pageSize = props.pageSize ? props.pageSize : 50
+  const originalGridData = (props.gridData && props.gridData.list) && props.gridData.list
+  const api = props.api
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -109,72 +115,176 @@ const Table = ({ pagination = true, ...props }) => {
 
   const CustomPagination = () => {
     if (pagination) {
+      if (paginationType === 'api') {
+        const startAt = gridData._startAt
+        const totalRecords = gridData.count ? gridData.count : 0
 
-      const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
+        const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
 
-      const pageCount = Math.ceil(gridData.count ? gridData.count / pageSize : 1)
+        const pageCount = Math.ceil(gridData.count ? gridData.count / pageSize : 1)
 
-      const incrementPage = () => {
-        if (page < pageCount) {
-          api({ _startAt: page * pageSize, _pageSize: pageSize })
+        const incrementPage = () => {
+          if (page < pageCount) {
+            api({ _startAt: page * pageSize, _pageSize: pageSize })
+          }
+        }
+
+        const decrementPage = () => {
+          if (page > 1) {
+            api({ _startAt: (page - 2) * pageSize, _pageSize: pageSize })
+          }
+        }
+
+        const goToFirstPage = () => {
+          api({ _startAt: 0, _pageSize: pageSize })
+        }
+
+        const goToLastPage = () => {
+          api({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize })
+        }
+
+        return (
+          <PaginationContainer>
+            <IconButton onClick={goToFirstPage} disabled={page === 1}>
+              <FirstPageIcon />
+            </IconButton>
+            <IconButton onClick={decrementPage} disabled={page === 1}>
+              <NavigateBeforeIcon />
+            </IconButton>
+            Page: {page} of {pageCount}
+            <IconButton onClick={incrementPage} disabled={page === pageCount}>
+              <NavigateNextIcon />
+            </IconButton>
+            <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+              <LastPageIcon />
+            </IconButton>
+            {api &&
+              <IconButton onClick={goToFirstPage}>
+                <RefreshIcon />
+              </IconButton>
+            }
+            Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
+            {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
+            {totalRecords}
+            {/* <Pagination
+                  color='primary'
+                  variant='outlined'
+                  shape='rounded'
+                  page={page + 1}
+                  count={pageCount}
+                  renderItem={props2 => <PaginationItem {...props2} disableRipple />}
+                  onChange={(event, value) => {
+                      console.log((value * 30) + 1)
+                      apiRef.current.setPage(value - 1)
+                  }}
+                  style={{
+                      width: '100%',
+                      position: 'absolute',
+                      bottom: '0',
+                      backgroundColor: '#fff',
+                  }}
+              /> */}
+          </PaginationContainer>
+        )
+      } else {
+        if (gridData && gridData.list) {
+          var _gridData = props.gridData.list
+          const pageCount = Math.ceil(originalGridData.length ? originalGridData.length / pageSize : 1)
+          const totalRecords = originalGridData.length
+
+          const incrementPage = () => {
+            if (page < pageCount) {
+              var slicedGridData = _gridData.slice(page * pageSize, (page + 1) * pageSize)
+              setGridData({
+                ...gridData,
+                list: slicedGridData
+              })
+              setPage(page + 1)
+              setStartAt(startAt + pageSize)
+            }
+          }
+
+          const decrementPage = () => {
+            if (page > 1) {
+              var slicedGridData = _gridData.slice((page - 2) * pageSize, (page - 1) * pageSize)
+              setGridData({
+                ...gridData,
+                list: slicedGridData
+              })
+              setPage(page - 1)
+              setStartAt(startAt - pageSize)
+            }
+          }
+
+          const goToFirstPage = () => {
+            if (page > 1) {
+              var slicedGridData = _gridData.slice(0, originalGridData.length > pageSize ? pageSize : originalGridData.length)
+              setGridData({
+                ...gridData,
+                list: slicedGridData
+              })
+              setPage(1)
+              setStartAt(0)
+            }
+          }
+
+          const goToLastPage = () => {
+            if (page < pageCount) {
+              var slicedGridData = _gridData.slice((pageCount - 1) * pageSize, originalGridData.length)
+              setGridData({
+                ...gridData,
+                list: slicedGridData
+              })
+              setPage(pageCount)
+              setStartAt(originalGridData.length - pageSize)
+            }
+          }
+
+          return (
+            <PaginationContainer>
+              <IconButton onClick={goToFirstPage} disabled={page === 1}>
+                <FirstPageIcon />
+              </IconButton>
+              <IconButton onClick={decrementPage} disabled={page === 1}>
+                <NavigateBeforeIcon />
+              </IconButton>
+              Page: {page} of {pageCount}
+              <IconButton onClick={incrementPage} disabled={page === pageCount}>
+                <NavigateNextIcon />
+              </IconButton>
+              <IconButton onClick={goToLastPage} disabled={page === pageCount}>
+                <LastPageIcon />
+              </IconButton>
+              {api &&
+                <IconButton onClick={goToFirstPage}>
+                  <RefreshIcon />
+                </IconButton>
+              }
+              Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
+              {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
+              {totalRecords}
+              {/* <Pagination
+                    color='primary'
+                    variant='outlined'
+                    shape='rounded'
+                    page={page + 1}
+                    count={pageCount}
+                    renderItem={props2 => <PaginationItem {...props2} disableRipple />}
+                    onChange={(event, value) => {
+                        console.log((value * 30) + 1)
+                        apiRef.current.setPage(value - 1)
+                    }}
+                    style={{
+                        width: '100%',
+                        position: 'absolute',
+                        bottom: '0',
+                        backgroundColor: '#fff',
+                    }}
+                /> */}
+            </PaginationContainer>
+          )
         }
       }
-
-      const decrementPage = () => {
-        if (page > 1) {
-          api({ _startAt: (page - 2) * pageSize, _pageSize: pageSize })
-        }
-      }
-
-      const goToFirstPage = () => {
-        api({ _startAt: 0, _pageSize: pageSize })
-      }
-
-      const goToLastPage = () => {
-        api({ _startAt: (pageCount - 1) * pageSize, _pageSize: pageSize })
-      }
-
-      return (
-        <PaginationContainer>
-          <IconButton onClick={goToFirstPage} disabled={page === 1}>
-            <FirstPageIcon />
-          </IconButton>
-          <IconButton onClick={decrementPage} disabled={page === 1}>
-            <NavigateBeforeIcon />
-          </IconButton>
-          Page: {page} of {pageCount}
-          <IconButton onClick={incrementPage} disabled={page === pageCount}>
-            <NavigateNextIcon />
-          </IconButton>
-          <IconButton onClick={goToLastPage} disabled={page === pageCount}>
-            <LastPageIcon />
-          </IconButton>
-          <IconButton onClick={goToFirstPage}>
-            <RefreshIcon />
-          </IconButton>
-          Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
-          {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
-          {totalRecords}
-          {/* <Pagination
-                      color='primary'
-                      variant='outlined'
-                      shape='rounded'
-                      page={page + 1}
-                      count={pageCount}
-                      renderItem={props2 => <PaginationItem {...props2} disableRipple />}
-                      onChange={(event, value) => {
-                          console.log((value * 30) + 1)
-                          apiRef.current.setPage(value - 1)
-                      }}
-                      style={{
-                          width: '100%',
-                          position: 'absolute',
-                          bottom: '0',
-                          backgroundColor: '#fff',
-                      }}
-                  /> */}
-        </PaginationContainer>
-      )
     }
     else {
       return (
@@ -213,6 +323,11 @@ const Table = ({ pagination = true, ...props }) => {
   const paginationHeight = pagination ? '41px' : '10px'
   const tableHeight = `calc(100vh - 136px - 48px - ${paginationHeight})`
 
+  useEffect(() => {
+    if (props.gridData && props.gridData.list)
+      setGridData(props.gridData)
+  }, [props.gridData])
+
   return (
     <>
       <TableContainer
@@ -230,7 +345,7 @@ const Table = ({ pagination = true, ...props }) => {
       >
         {/* <ScrollableTable> */}
         <StripedDataGrid
-          rows={gridData.list || []}
+          rows={gridData?.list || []}
           columns={columns}
 
           sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}

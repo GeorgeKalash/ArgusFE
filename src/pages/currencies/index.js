@@ -31,7 +31,7 @@ const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   //stores
-  const [gridData, setGridData] = useState([])
+  const [gridData, setGridData] = useState(null)
   const [decimalStore, setDecimalStore] = useState([])
   const [profileStore, setProfileStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
@@ -85,14 +85,13 @@ const Currencies = () => {
   }
 
   const getGridData = () => {
-    var _startAt = 0
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: parameters
     })
       .then(res => {
-        setGridData({ ...res, _startAt })
+        setGridData(res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -200,6 +199,7 @@ const Currencies = () => {
           onDelete={delCurrency}
           isLoading={false}
           pageSize={50}
+          paginationType='client'
         />
       </Box>
       {windowOpen && (
