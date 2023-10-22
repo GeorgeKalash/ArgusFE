@@ -50,7 +50,10 @@ const Window = ({
                 position: 'absolute',
                 width: containerWidth,
                 height: containerHeight,
-                backgroundColor: 'rgba(0, 0, 0, 0.1)'
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
             }}
         >
             <Draggable
@@ -61,9 +64,6 @@ const Window = ({
                     sx={{
                         width: width,
                         minHeight: height,
-                        position: 'absolute',
-                        top: `calc(55vh - ${height}px)`,
-                        left: `calc(60vw - ${width}px)`
                     }}
                 >
                     <DialogTitle
