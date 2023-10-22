@@ -30,6 +30,9 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .MuiDataGrid-columnHeaders": {
     position: "sticky"
   },
+  '& .MuiDataGrid-row:last-child': {
+    borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
+  },
   "& .MuiDataGrid-virtualScroller": {
     // remove the space left for the header
     marginTop: "0!important"
