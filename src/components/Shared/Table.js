@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 // ** MUI Imports
 import {
     Box,
+    Stack,
     IconButton,
     LinearProgress
 } from '@mui/material'
@@ -19,6 +20,7 @@ import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import LastPageIcon from '@mui/icons-material/LastPage'
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 // ** Custom Imports
 import DeleteDialog from './DeleteDialog'
@@ -99,11 +101,15 @@ const PaginationContainer = styled(Box)({
     borderTop: '1px solid #ccc',
 })
 
-const Table = props => {
+const Table = ({
+    pagination = true,
+    ...props
+}) => {
     const gridData = props.gridData
     const api = props.api
     const startAt = gridData._startAt
-    const pageSize = 30
+    const pageSize = props.pageSize ? props.pageSize : 50
+    const totalRecords = gridData.count ? gridData.count : 0
     const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
     const getRowId = (row) => {
@@ -111,8 +117,20 @@ const Table = props => {
     }
 
     const CustomPagination = () => {
-        const page = Math.ceil(startAt === 0 ? 1 : (startAt + 1) / pageSize)
-        const pageCount = Math.ceil(gridData.count / pageSize)
+        const page = Math.ceil(
+            gridData.count ?
+                startAt === 0 ?
+                    1
+                    : (startAt + 1) / pageSize
+                : 1
+        )
+
+        const pageCount = Math.ceil(
+            gridData.count ?
+                gridData.count / pageSize
+                : 1
+        )
+
 
         const incrementPage = () => {
             if (page < pageCount) {
@@ -151,6 +169,10 @@ const Table = props => {
                 <IconButton onClick={goToLastPage} disabled={page === pageCount}>
                     <LastPageIcon />
                 </IconButton>
+                <IconButton onClick={goToFirstPage}>
+                    <RefreshIcon />
+                </IconButton>
+                Displaying Records {startAt === 0 ? 1 : startAt} - {totalRecords < pageSize ? totalRecords : startAt + pageSize} of {totalRecords}
                 {/* <Pagination
                     color='primary'
                     variant='outlined'
@@ -175,39 +197,44 @@ const Table = props => {
 
     const columns = props.columns
 
-    columns.push({
-        field: 'action',
-        headerName: 'ACTIONS',
-        width: 100,
-        sortable: false,
-        renderCell: params => {
-            return (
-                <>
-                    {props.onEdit &&
-                        <IconButton
-                            size='small'
-                            onClick={() => props.onEdit(params.row)}
-                        >
-                            <Icon icon='mdi:application-edit-outline' fontSize={18} />
-                        </IconButton>
-                    }
-                    {props.onDelete &&
-                        <IconButton
-                            size='small'
-                            onClick={() => setDeleteDialogOpen([true, params.row])}
-                            color='error'
-                        >
-                            <Icon icon='mdi:delete-forever' fontSize={18} />
-                        </IconButton>
-                    }
-                </>
-            )
-        }
-    })
+    if (
+        props.onEdit
+        || props.onDelete
+    ) {
+        columns.push({
+            field: 'action',
+            headerName: 'ACTIONS',
+            width: 100,
+            sortable: false,
+            renderCell: params => {
+                return (
+                    <>
+                        {props.onEdit &&
+                            <IconButton
+                                size='small'
+                                onClick={() => props.onEdit(params.row)}
+                            >
+                                <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                            </IconButton>
+                        }
+                        {props.onDelete &&
+                            <IconButton
+                                size='small'
+                                onClick={() => setDeleteDialogOpen([true, params.row])}
+                                color='error'
+                            >
+                                <Icon icon='mdi:delete-forever' fontSize={18} />
+                            </IconButton>
+                        }
+                    </>
+                )
+            }
+        })
+    }
 
     return (
         <>
-            <TableContainer sx={props.style ? props.style : { pt: 2 }}>
+            <TableContainer sx={props.style ? props.style : { pt: 2, zIndex: 0 }}>
                 {/* <ScrollableTable> */}
                 <StripedDataGrid
                     rows={gridData.list || []}
@@ -222,7 +249,12 @@ const Table = props => {
                     }}
                     components={{
                         LoadingOverlay: LinearProgress,
-                        Pagination: CustomPagination
+                        Pagination: pagination ? CustomPagination : null,
+                        NoRowsOverlay: () => (
+                            <Stack height="100%" alignItems="center" justifyContent="center">
+                                This Screen Has No Data
+                            </Stack>
+                        ),
                     }}
                     loading={props.isLoading}
                     getRowId={getRowId}

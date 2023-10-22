@@ -20,25 +20,23 @@ const AuthContext = createContext(defaultProvider)
 
 // ** 3rd Party Imports
 import axios from 'axios'
-import SHA1 from 'crypto-js/sha1';
-import jwt from 'jwt-decode';
+import SHA1 from 'crypto-js/sha1'
+import jwt from 'jwt-decode'
 
-const encryptePWD = (pwd) => {
-
-  var encryptedPWD = SHA1(pwd).toString();
-  var shuffledString = "";
+const encryptePWD = pwd => {
+  var encryptedPWD = SHA1(pwd).toString()
+  var shuffledString = ''
 
   for (let i = 0; i < encryptedPWD.length; i = i + 8) {
-
     var subString = encryptedPWD.slice(i, i + 8)
 
-    shuffledString += subString.charAt(6) + subString.charAt(7);
-    shuffledString += subString.charAt(4) + subString.charAt(5);
-    shuffledString += subString.charAt(2) + subString.charAt(3);
-    shuffledString += subString.charAt(0) + subString.charAt(1);
+    shuffledString += subString.charAt(6) + subString.charAt(7)
+    shuffledString += subString.charAt(4) + subString.charAt(5)
+    shuffledString += subString.charAt(2) + subString.charAt(3)
+    shuffledString += subString.charAt(0) + subString.charAt(1)
   }
 
-  return shuffledString.toUpperCase();
+  return shuffledString.toUpperCase()
 }
 
 const AuthProvider = ({ children }) => {
@@ -50,11 +48,10 @@ const AuthProvider = ({ children }) => {
   const router = useRouter()
 
   useEffect(() => {
-
     const initAuth = async () => {
-      const userData =
-        window.localStorage.getItem('userData') ?
-          window.localStorage.getItem('userData') : window.sessionStorage.getItem('userData')
+      const userData = window.localStorage.getItem('userData')
+        ? window.localStorage.getItem('userData')
+        : window.sessionStorage.getItem('userData')
 
       if (userData) {
         setUser(JSON.parse(userData))
@@ -69,33 +66,32 @@ const AuthProvider = ({ children }) => {
 
   const handleLogin = async (params, errorCallback) => {
     try {
-
       const getAC = await axios({
         method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=react`
+        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
       })
 
-      //when fixed from getAC react https://${getAC.data.record.api} needs to be ${getAC.data.record.api}
       const getUS2 = await axios({
         method: 'GET',
-        url: `${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.email}`,
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/SY.asmx/getUS2?_email=${params.email}`,
         headers: {
-          'accountId': JSON.parse(getAC.data.record.accountId),
-          'dbe': JSON.parse(getAC.data.record.dbe),
-          'dbs': JSON.parse(getAC.data.record.dbs),
-        },
+          accountId: JSON.parse(getAC.data.record.accountId),
+          dbe: JSON.parse(getAC.data.record.dbe),
+          dbs: JSON.parse(getAC.data.record.dbs)
+        }
       })
 
-      const signIn3Params = `_email=${params.email}&_password=${encryptePWD(params.password)}&_accountId=${getAC.data.record.accountId}&_userId=${getUS2.data.record.recordId}`
+      const signIn3Params = `_email=${params.email}&_password=${encryptePWD(params.password)}&_accountId=${getAC.data.record.accountId
+        }&_userId=${getUS2.data.record.recordId}`
 
       const signIn3 = await axios({
         method: 'GET',
         url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`,
         headers: {
-          'accountId': JSON.parse(getAC.data.record.accountId),
-          'dbe': JSON.parse(getAC.data.record.dbe),
-          'dbs': JSON.parse(getAC.data.record.dbs),
-        },
+          accountId: JSON.parse(getAC.data.record.accountId),
+          dbe: JSON.parse(getAC.data.record.dbe),
+          dbs: JSON.parse(getAC.data.record.dbs)
+        }
       })
 
       // console.log({ getAC: getAC.data.record })
@@ -123,8 +119,8 @@ const AuthProvider = ({ children }) => {
       // console.log({ loggedUser })
       setUser({ ...loggedUser })
 
-      params.rememberMe ?
-        window.localStorage.setItem('userData', JSON.stringify(loggedUser))
+      params.rememberMe
+        ? window.localStorage.setItem('userData', JSON.stringify(loggedUser))
         : window.sessionStorage.setItem('userData', JSON.stringify(loggedUser))
 
       const returnUrl = router.query.returnUrl
@@ -146,50 +142,45 @@ const AuthProvider = ({ children }) => {
   }
 
   const getAccessToken = async () => {
-    return new Promise((resolve) => {
-
+    return new Promise(resolve => {
       if (user.expiresAt !== null) {
-
         var dateNow = new Date()
 
         if (user.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
-
           var bodyFormData = new FormData()
-          bodyFormData.append('record', JSON.stringify({ "accessToken": user.accessToken, "refreshToken": user.refreshToken }))
+          bodyFormData.append(
+            'record',
+            JSON.stringify({ accessToken: user.accessToken, refreshToken: user.refreshToken })
+          )
 
           return axios({
-
             method: 'POST',
             url: process.env.NEXT_PUBLIC_AuthURL + 'MA.asmx/' + 'newAT',
             headers: {
-              'authorization': 'Bearer ' + user.accessToken,
-              "Content-Type": "multipart/form-data",
+              authorization: 'Bearer ' + user.accessToken,
+              'Content-Type': 'multipart/form-data'
             },
-            data: bodyFormData,
+            data: bodyFormData
           })
             .then(res => {
-
               let newUser = {
                 ...user,
                 accessToken: res.data.record.accessToken,
                 refreshToken: res.data.record.refreshToken,
-                expiresAt: jwt(res.data.record.accessToken).exp,
+                expiresAt: jwt(res.data.record.accessToken).exp
               }
 
               if (window.localStorage.getItem('userData'))
                 window.localStorage.setItem('userData', JSON.stringify(newUser))
-              else
-                window.sessionStorage.setItem('userData', JSON.stringify(newUser))
+              else window.sessionStorage.setItem('userData', JSON.stringify(newUser))
 
               resolve(res.data.record.accessToken)
             })
             .catch(() => {
               resolve('error getting new Access Token')
             })
-        } else
-          resolve(user.accessToken)
-      } else
-        resolve(null)
+        } else resolve(user.accessToken)
+      } else resolve(null)
     })
   }
 

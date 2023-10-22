@@ -219,6 +219,7 @@ const Navigation = props => {
               margin="normal"
               size="small"
               onChange={handleSearch}
+              autoComplete='off'
               InputProps={{
                 endAdornment: <SearchIcon />,
               }}
