@@ -1,6 +1,8 @@
 const service = 'SY.asmx/'
+
 export const SystemRepository = {
   get2AM: service + 'get2AM',
+  getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
   DocumentType: {
@@ -23,5 +25,17 @@ export const SystemRepository = {
     get: service + 'getRGN',
     set: service + 'setRGN',
     del: service + 'delRGN'
+  },
+  Currency: {
+    qry: service + 'qryCU',
+    get: service + 'getCU',
+    set: service + 'setCU',
+    del: service + 'delCU'
+  },
+  City: {
+    qry: service + 'qryCIT',
+    get: service + 'getCIT',
+    set: service + 'setCIT',
+    del: service + 'delCIT'
   }
 }

@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 export default (req, res) => {
   const dllFilePath = path.resolve('./src/dlls/ArgusRPT.dll')
+
   // Check if the file exists
   if (fs.existsSync(dllFilePath)) {
     // Read the DLL file

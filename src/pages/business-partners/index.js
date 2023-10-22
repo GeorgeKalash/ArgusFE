@@ -30,6 +30,7 @@ const DocumentTypes = () => {
     })
       .then(res => {
         console.log({ res })
+
         // setReportData()
       })
       .catch(error => {
@@ -46,12 +47,14 @@ const DocumentTypes = () => {
       }
     }).then(async res => {
       console.log({ data: res.data })
+
       //setReportTemplate(res.data.message)
     })
   }
 
   useEffect(() => {
     getReportTemplate()
+
     // getReportData()
   }, [])
 
