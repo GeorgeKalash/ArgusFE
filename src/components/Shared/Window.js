@@ -1,18 +1,14 @@
 // ** MUI Imports
 import {
-    Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions,
     Paper,
     Tabs,
     Tab,
     Box,
     Typography,
     IconButton,
-    Button
 } from '@mui/material'
-import { ClickAwayListener } from '@mui/base';
 import ClearIcon from '@mui/icons-material/Clear'
 
 // ** 3rd Party Imports
@@ -21,16 +17,7 @@ import Draggable from 'react-draggable';
 // ** Custom Imports
 import WindowToolbar from './WindowToolbar';
 
-function PaperComponent(props) {
-    return (
-        <Draggable
-            handle="#draggable-dialog-title"
-            cancel={'[class*="MuiDialogContent-root"]'}
-        >
-            <Paper {...props} />
-        </Draggable>
-    );
-}
+import { useSettings } from 'src/@core/hooks/useSettings'
 
 const Window = ({
     children,
@@ -44,45 +31,84 @@ const Window = ({
     onSave,
 }) => {
 
+    const { settings } = useSettings()
+    const { navCollapsed } = settings
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            onSave();
+        }
+    };
+
+    const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
+    const containerHeight = `calc(100vh - 136px)`
+
     return (
-        <Draggable
-            handle="#draggable-dialog-title"
-            cancel={'[class*="MuiDialogContent-root"]'}
+        <Box
+            sx={{
+                bottom: 0,
+                position: 'absolute',
+                width: containerWidth,
+                height: containerHeight,
+                backgroundColor: 'rgba(0, 0, 0, 0.1)'
+            }}
         >
-            <Paper sx={{ width: width, minHeight: height, position: 'absolute', top: `calc(70vh - ${height}px)`, left: `calc(70vw - ${width}px)` }}>
-                <DialogTitle sx={{ cursor: 'move', py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} id="draggable-dialog-title">
-                    <Box>
-                        <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
-                            {Title}
-                        </Typography>
-                    </Box>
-                    <Box>
-                        <IconButton
-                            tabIndex={-1}
-                            edge='end'
-                            onClick={onClose}
-                            aria-label='clear input'
-                        >
-                            <ClearIcon />
-                        </IconButton>
-                    </Box>
-                </DialogTitle>
-                {tabs &&
-                    <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
-                        {tabs.map((tab, i) => (
-                            <Tab
-                                key={i}
-                                label={tab.label}
-                            />
-                        ))}
-                    </Tabs>
-                }
-                <DialogContent sx={{ height: height, p: 0 }}>
-                    {children}
-                </DialogContent>
-                <WindowToolbar onSave={onSave} />
-            </Paper>
-        </Draggable>
+            <Draggable
+                handle="#draggable-dialog-title"
+                cancel={'[class*="MuiDialogContent-root"]'}
+            >
+                <Paper onKeyDown={handleKeyDown}
+                    sx={{
+                        width: width,
+                        minHeight: height,
+                        position: 'absolute',
+                        top: `calc(55vh - ${height}px)`,
+                        left: `calc(60vw - ${width}px)`
+                    }}
+                >
+                    <DialogTitle
+                        id="draggable-dialog-title"
+                        sx={{
+                            cursor: 'move',
+                            py: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                        }}
+                    >
+                        <Box>
+                            <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
+                                {Title}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <IconButton
+                                tabIndex={-1}
+                                edge='end'
+                                onClick={onClose}
+                                aria-label='clear input'
+                            >
+                                <ClearIcon />
+                            </IconButton>
+                        </Box>
+                    </DialogTitle>
+                    {tabs &&
+                        <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                            {tabs.map((tab, i) => (
+                                <Tab
+                                    key={i}
+                                    label={tab.label}
+                                />
+                            ))}
+                        </Tabs>
+                    }
+                    <DialogContent sx={{ height: height, p: 0 }}>
+                        {children}
+                    </DialogContent>
+                    <WindowToolbar onSave={onSave} />
+                </Paper>
+            </Draggable>
+        </Box>
     );
 };
 

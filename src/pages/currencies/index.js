@@ -126,6 +126,7 @@ const Currencies = () => {
         setErrorMessage(error)
       })
   }
+
   const FillDecimalStore = () => { }
 
   const postCurrency = obj => {
@@ -176,6 +177,7 @@ const Currencies = () => {
     setEditMode(true)
     setWindowOpen(true)
   }
+
   useEffect(() => {
     getGridData()
     FillDecimalStore()
@@ -187,13 +189,7 @@ const Currencies = () => {
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+      <Box>
         <GridToolbar onAdd={addCurrency} />
         <Table
           columns={columns}

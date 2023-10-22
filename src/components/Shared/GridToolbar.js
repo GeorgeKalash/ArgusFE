@@ -1,7 +1,7 @@
 // ** MUI Imports
 import {
     Box,
-    Button
+    Button,
 } from '@mui/material'
 
 const GridToolbar = ({
@@ -10,7 +10,7 @@ const GridToolbar = ({
 }) => {
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', pb: 2 }}>
             {onAdd &&
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
                     <Button onClick={onAdd} variant='contained'>Add</Button>
