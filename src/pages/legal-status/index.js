@@ -67,15 +67,16 @@ const LegalStatus = () => {
     })
 
     const handleSubmit = () => {
-            legalStatusValidation.handleSubmit()
+        legalStatusValidation.handleSubmit()
     }
 
     const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
         console.log(_startAt);
         console.log(_pageSize);
         const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-        var parameters = defaultParams 
+        var parameters = defaultParams
         console.log(parameters);
+
         // var parameters = defaultParams + '&_dgId=0'
         getRequest({
             'extension': BusinessPartnerRepository.LegalStatus.qry,
@@ -195,7 +196,7 @@ const LegalStatus = () => {
                                     helperText={legalStatusValidation.touched.name && legalStatusValidation.errors.name}
                                 />
                             </Grid>
-                       </Grid>
+                        </Grid>
                     </CustomTabPanel>
                 </Window>
             }

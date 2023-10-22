@@ -26,12 +26,15 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
   //stores
   const [gridData, setGridData] = useState([])
   const [stateStore, setStateStore] = useState([])
+
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 }
+
 export default City
