@@ -82,11 +82,6 @@ const TableContainer = styled(Box)({
   position: 'relative'
 })
 
-const ScrollableTable = styled('div')({
-  overflowY: 'auto', // Enable vertical scrolling
-  maxHeight: '100%' // Limit the maximum height to the container's height
-})
-
 const PaginationContainer = styled(Box)({
   width: '100%',
   position: 'fixed',
@@ -166,24 +161,6 @@ const Table = ({
             Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
             {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
             {totalRecords}
-            {/* <Pagination
-                  color='primary'
-                  variant='outlined'
-                  shape='rounded'
-                  page={page + 1}
-                  count={pageCount}
-                  renderItem={props2 => <PaginationItem {...props2} disableRipple />}
-                  onChange={(event, value) => {
-                      console.log((value * 30) + 1)
-                      apiRef.current.setPage(value - 1)
-                  }}
-                  style={{
-                      width: '100%',
-                      position: 'absolute',
-                      bottom: '0',
-                      backgroundColor: '#fff',
-                  }}
-              /> */}
           </PaginationContainer>
         )
       } else {
@@ -263,24 +240,6 @@ const Table = ({
               Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
               {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
               {totalRecords}
-              {/* <Pagination
-                    color='primary'
-                    variant='outlined'
-                    shape='rounded'
-                    page={page + 1}
-                    count={pageCount}
-                    renderItem={props2 => <PaginationItem {...props2} disableRipple />}
-                    onChange={(event, value) => {
-                        console.log((value * 30) + 1)
-                        apiRef.current.setPage(value - 1)
-                    }}
-                    style={{
-                        width: '100%',
-                        position: 'absolute',
-                        bottom: '0',
-                        backgroundColor: '#fff',
-                    }}
-                /> */}
             </PaginationContainer>
           )
         }

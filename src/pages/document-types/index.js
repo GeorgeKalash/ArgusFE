@@ -248,6 +248,7 @@ const DocumentTypes = () => {
   }
 
   const addDocumentType = () => {
+    documentTypesValidation.resetForm()
     documentTypesValidation.setValues(getNewDocumentTypes())
     fillIntegrationLogicStore()
     setEditMode(false)
@@ -255,6 +256,7 @@ const DocumentTypes = () => {
   }
 
   const editDocumentType = obj => {
+    documentTypesValidation.resetForm()
     documentTypesValidation.setValues(populateDocumentTypes(obj))
     fillIntegrationLogicStore()
     setEditMode(true)
