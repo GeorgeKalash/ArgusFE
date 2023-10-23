@@ -96,6 +96,7 @@ const PaginationContainer = styled(Box)({
 const Table = ({
   pagination = true,
   paginationType = 'api',
+  height,
   ...props }) => {
 
   const [gridData, setGridData] = useState(props.gridData)
@@ -283,7 +284,7 @@ const Table = ({
   }
 
   const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = `calc(100vh - 136px - 48px - ${paginationHeight})`
+  const tableHeight = height ? `${height}px` : `calc(100vh - 136px - 48px - ${paginationHeight})`
 
   useEffect(() => {
     if (props.gridData && props.gridData.list)
