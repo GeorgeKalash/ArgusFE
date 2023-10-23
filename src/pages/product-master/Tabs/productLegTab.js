@@ -101,6 +101,8 @@ const productLegTab = ({
           onEdit={editProductCommission}
           isLoading={false}
           pagination={false}
+          actionColumnHeader='Commissions'
+          height={180}
         />
       </Box>
     </>

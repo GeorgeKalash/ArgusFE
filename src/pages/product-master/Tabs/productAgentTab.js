@@ -46,6 +46,7 @@ const ProductAgentTab = ({ productAgentGridData }) => {
           rowId={['recordId']}
           isLoading={false}
           pagination={false}
+          height={220}
         />
       </Box>
     </>
