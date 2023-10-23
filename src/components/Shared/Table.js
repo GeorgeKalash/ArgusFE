@@ -255,7 +255,7 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
 
   if (props.onEdit || props.onDelete) {
     columns.push({
-      field: 'action',
+      field: actionColumnHeader,
       headerName: actionColumnHeader,
       width: 100,
       sortable: false,
@@ -305,13 +305,6 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
           rows={gridData?.list || []}
           columns={columns}
           sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
-          // initialState={{
-          //   pagination: {
-          //     paginationModel: {
-          //       pageSize: pageSize
-          //     }
-          //   }
-          // }}
           density='compact'
           components={{
             LoadingOverlay: LinearProgress,

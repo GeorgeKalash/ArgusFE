@@ -269,7 +269,7 @@ const DocumentTypes = () => {
     fillSysFunctionsStore()
     fillActiveStatusStore()
     getLabels()
-  }, [])
+  })
 
   return (
     <>
