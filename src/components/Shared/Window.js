@@ -45,6 +45,7 @@ const Window = ({
 
     return (
         <Box
+            id='parent'
             sx={{
                 bottom: 0,
                 position: 'absolute',
@@ -59,54 +60,57 @@ const Window = ({
             <Draggable
                 handle="#draggable-dialog-title"
                 cancel={'[class*="MuiDialogContent-root"]'}
+                bounds='parent'
             >
-                <Paper onKeyDown={handleKeyDown}
-                    sx={{
-                        width: width,
-                        minHeight: height,
-                    }}
-                >
-                    <DialogTitle
-                        id="draggable-dialog-title"
+                <Box sx={{ position: 'relative' }}>
+                    <Paper onKeyDown={handleKeyDown}
                         sx={{
-                            cursor: 'move',
-                            py: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between'
+                            width: width,
+                            minHeight: height,
                         }}
                     >
-                        <Box>
-                            <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
-                                {Title}
-                            </Typography>
-                        </Box>
-                        <Box>
-                            <IconButton
-                                tabIndex={-1}
-                                edge='end'
-                                onClick={onClose}
-                                aria-label='clear input'
-                            >
-                                <ClearIcon />
-                            </IconButton>
-                        </Box>
-                    </DialogTitle>
-                    {tabs &&
-                        <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
-                            {tabs.map((tab, i) => (
-                                <Tab
-                                    key={i}
-                                    label={tab.label}
-                                />
-                            ))}
-                        </Tabs>
-                    }
-                    <DialogContent sx={{ height: height, p: 0 }}>
-                        {children}
-                    </DialogContent>
-                    <WindowToolbar onSave={onSave} />
-                </Paper>
+                        <DialogTitle
+                            id="draggable-dialog-title"
+                            sx={{
+                                cursor: 'move',
+                                py: 2,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                            }}
+                        >
+                            <Box>
+                                <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
+                                    {Title}
+                                </Typography>
+                            </Box>
+                            <Box>
+                                <IconButton
+                                    tabIndex={-1}
+                                    edge='end'
+                                    onClick={onClose}
+                                    aria-label='clear input'
+                                >
+                                    <ClearIcon />
+                                </IconButton>
+                            </Box>
+                        </DialogTitle>
+                        {tabs &&
+                            <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                                {tabs.map((tab, i) => (
+                                    <Tab
+                                        key={i}
+                                        label={tab.label}
+                                    />
+                                ))}
+                            </Tabs>
+                        }
+                        <DialogContent sx={{ height: height, p: 0 }}>
+                            {children}
+                        </DialogContent>
+                        <WindowToolbar onSave={onSave} />
+                    </Paper>
+                </Box>
             </Draggable>
         </Box>
     );
