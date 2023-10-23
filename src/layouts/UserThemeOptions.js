@@ -22,7 +22,7 @@ const UserThemeOptions = () => {
       primary: {
         light: '#666666',
         main: '#383838',
-        dark: '#804BDF',
+        dark: '#231f20',
         contrastText: '#FFF'
       }
     },
