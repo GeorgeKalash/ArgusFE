@@ -1,13 +1,5 @@
-// ** React Imports
-import { useEffect, useState, useContext } from 'react'
-
 // ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
+import { Grid, Box } from '@mui/material'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
@@ -54,8 +46,6 @@ const ProductFieldTab = ({ productFieldGridData }) => {
       flex: 1
     }
   ]
-
-  const postProductMaster = obj => {}
 
   return (
     <>

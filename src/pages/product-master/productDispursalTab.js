@@ -2,23 +2,11 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
+import { Grid, Box, Checkbox } from '@mui/material'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
-// ** API
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const ProductDispursalTab = ({ productDispursalGridData }) => {
   const columns = [
@@ -68,10 +56,6 @@ const ProductDispursalTab = ({ productDispursalGridData }) => {
       )
     }
   ]
-
-  const postProductMaster = obj => {}
-
-  const tabs = [{ label: 'Product Master' }, { label: 'Product Dispursal' }, { label: 'Product Leg' }]
 
   return (
     <>

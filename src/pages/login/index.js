@@ -18,7 +18,7 @@ import {
   IconButton,
   Box,
   InputAdornment,
-  CardMedia,
+  CardMedia
 } from '@mui/material'
 import MuiFormControlLabel from '@mui/material/FormControlLabel'
 import { styled, useTheme } from '@mui/material/styles'
@@ -51,7 +51,6 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const LoginPage = () => {
-
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -72,9 +71,9 @@ const LoginPage = () => {
       rememberMe: yup.boolean()
     }),
     onSubmit: values => {
-      auth.login({ ...values }, (error) => {
+      auth.login({ ...values }, error => {
         console.log({ error })
-        setErrorMessage('Wrong Email or Password')
+        setErrorMessage(error)
       })
     }
   })
@@ -84,14 +83,14 @@ const LoginPage = () => {
       <Box className='content-center'>
         <Card sx={{ zIndex: 1, width: '28rem' }}>
           <CardMedia
-            component="img"
-            image="/images/logos/ArgusLogo.png"
-            alt="ArgusERP"
+            component='img'
+            image='/images/logos/ArgusLogo.png'
+            alt='ArgusERP'
             sx={{
               height: 60,
               backgroundColor: theme.palette.primary.main,
               objectFit: 'contain',
-              p: 4,
+              p: 4
             }}
           />
           <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }}>
@@ -120,7 +119,7 @@ const LoginPage = () => {
                   error={validation.touched.password && validation.errors.password}
                   helperText={validation.touched.password && validation.errors.password}
                   InputProps={{
-                    endAdornment:
+                    endAdornment: (
                       <InputAdornment position='end'>
                         <IconButton
                           edge='end'
@@ -130,6 +129,7 @@ const LoginPage = () => {
                           <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
                         </IconButton>
                       </InputAdornment>
+                    )
                   }}
                 />
               </Grid>
@@ -149,17 +149,20 @@ const LoginPage = () => {
               />
               <LinkStyled href='/pages/auth/forgot-password-v1'>Forgot Password?</LinkStyled>
             </Box>
-            <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 7 }} onClick={validation.handleSubmit}>
+            <Button
+              fullWidth
+              size='large'
+              type='submit'
+              variant='contained'
+              sx={{ mb: 7 }}
+              onClick={validation.handleSubmit}
+            >
               Login
             </Button>
           </CardContent>
         </Card>
       </Box>
-      <ErrorWindow
-        open={errorMessage}
-        onClose={() => setErrorMessage(null)}
-        message={errorMessage}
-      />
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
