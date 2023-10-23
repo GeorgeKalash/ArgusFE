@@ -177,11 +177,7 @@ const DocumentTypeMaps = () => {
     getGridData({ _startAt: 0, _pageSize: 30, params: '' })
     fillDocumentTypeStore({ _startAt: 0, _pageSize: 30 })
     fillFunctionStore()
-  })
-
-  useEffect(() => {
-    console.log({ VALUES: documentTypeMapsValidation.values })
-  }, [documentTypeMapsValidation.values])
+  }, [])
 
   return (
     <>
@@ -195,7 +191,7 @@ const DocumentTypeMaps = () => {
         <GridToolbar
           onAdd={addDocumentType}
 
-          // openRPB={() => setReportParamWindowOpen(true)}
+        // openRPB={() => setReportParamWindowOpen(true)}
         />
         <Table
           columns={columns}
