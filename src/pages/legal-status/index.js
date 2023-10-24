@@ -86,7 +86,7 @@ const LegalStatus = () => {
                 setGridData({ ...res, _startAt })
             })
             .catch((error) => {
-                setErrorMessage(error.response.data)
+                setErrorMessage(error)
             })
     }
 
@@ -105,7 +105,7 @@ const LegalStatus = () => {
                     toast.success('Record Edited Successfully')
             })
             .catch((error) => {
-                setErrorMessage(error.response.data)
+                setErrorMessage(error)
             })
     }
 
@@ -120,7 +120,7 @@ const LegalStatus = () => {
                 toast.success('Record Deleted Successfully')
             })
             .catch((error) => {
-                setErrorMessage(error.response.data)
+                setErrorMessage(error)
             })
     }
 
