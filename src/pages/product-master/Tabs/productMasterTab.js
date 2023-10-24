@@ -38,19 +38,18 @@ const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseSt
           </Grid>
           <Grid item xs={12}>
             <CustomComboBox
-              name='typeName'
+              name='type'
               label='Type'
               valueField='key'
               displayField='value'
               store={typeStore}
-              value={productMasterValidation.values.typeName}
+              value={typeStore.filter(item => item.key === productMasterValidation.values.type)[0]}
               required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('type', newValue?.key)
-                productMasterValidation.setFieldValue('typeName', newValue?.value)
               }}
-              error={productMasterValidation.touched.typeName && Boolean(productMasterValidation.errors.typeName)}
-              helperText={productMasterValidation.touched.typeName && productMasterValidation.errors.typeName}
+              error={productMasterValidation.touched.type && Boolean(productMasterValidation.errors.type)}
+              helperText={productMasterValidation.touched.type && productMasterValidation.errors.type}
             />
           </Grid>
           <Grid item xs={12}>
