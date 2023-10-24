@@ -87,6 +87,7 @@ const ProductDispursalTab = ({ productDispursalGridData }) => {
           rowId={['recordId']}
           isLoading={false}
           pagination={false}
+          height={280}
         />
       </Box>
     </>

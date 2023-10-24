@@ -23,19 +23,19 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   borderRadius: 0,
   borderTop: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
   borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
-  "& .MuiDataGrid-main": {
+  '& .MuiDataGrid-main': {
     // remove overflow hidden overwise sticky does not work
-    overflow: "unset"
+    overflow: 'unset'
   },
-  "& .MuiDataGrid-columnHeaders": {
-    position: "sticky"
+  '& .MuiDataGrid-columnHeaders': {
+    position: 'sticky'
   },
   '& .MuiDataGrid-row:last-child': {
-    borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
+    borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
-  "& .MuiDataGrid-virtualScroller": {
+  '& .MuiDataGrid-virtualScroller': {
     // remove the space left for the header
-    marginTop: "0!important"
+    marginTop: '0!important'
   },
   '& .MuiDataGrid-columnsContainer': {
     backgroundColor: theme.palette.mode === 'light' ? '#fafafa' : '#1d1d1d'
@@ -93,18 +93,14 @@ const PaginationContainer = styled(Box)({
   borderTop: '1px solid #ccc'
 })
 
-const Table = ({
-  pagination = true,
-  paginationType = 'api',
-  ...props }) => {
-
+const Table = ({ pagination = true, paginationType = 'api', height, actionColumnHeader = null, ...props }) => {
   const [gridData, setGridData] = useState(props.gridData)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   const pageSize = props.pageSize ? props.pageSize : 50
-  const originalGridData = (props.gridData && props.gridData.list) && props.gridData.list
+  const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props.api
 
   const getRowId = row => {
@@ -156,11 +152,11 @@ const Table = ({
             <IconButton onClick={goToLastPage} disabled={page === pageCount}>
               <LastPageIcon />
             </IconButton>
-            {api &&
+            {api && (
               <IconButton onClick={goToFirstPage}>
                 <RefreshIcon />
               </IconButton>
-            }
+            )}
             Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
             {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
             {totalRecords}
@@ -198,7 +194,10 @@ const Table = ({
 
           const goToFirstPage = () => {
             if (page > 1) {
-              var slicedGridData = _gridData.slice(0, originalGridData.length > pageSize ? pageSize : originalGridData.length)
+              var slicedGridData = _gridData.slice(
+                0,
+                originalGridData.length > pageSize ? pageSize : originalGridData.length
+              )
               setGridData({
                 ...gridData,
                 list: slicedGridData
@@ -235,11 +234,11 @@ const Table = ({
               <IconButton onClick={goToLastPage} disabled={page === pageCount}>
                 <LastPageIcon />
               </IconButton>
-              {api &&
+              {api && (
                 <IconButton onClick={goToFirstPage}>
                   <RefreshIcon />
                 </IconButton>
-              }
+              )}
               Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
               {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
               {totalRecords}
@@ -247,11 +246,8 @@ const Table = ({
           )
         }
       }
-    }
-    else {
-      return (
-        <div></div>
-      )
+    } else {
+      return <div></div>
     }
   }
 
@@ -259,8 +255,8 @@ const Table = ({
 
   if (props.onEdit || props.onDelete) {
     columns.push({
-      field: 'action',
-      headerName: 'ACTIONS',
+      field: actionColumnHeader,
+      headerName: actionColumnHeader,
       width: 100,
       sortable: false,
       renderCell: params => {
@@ -283,42 +279,32 @@ const Table = ({
   }
 
   const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = `calc(100vh - 136px - 48px - ${paginationHeight})`
+  const tableHeight = height ? `${height}px` : `calc(100vh - 136px - 48px - ${paginationHeight})`
 
   useEffect(() => {
-    if (props.gridData && props.gridData.list)
-      setGridData(props.gridData)
+    if (props.gridData && props.gridData.list) setGridData(props.gridData)
   }, [props.gridData])
 
   return (
     <>
       <TableContainer
         sx={
-          props.style ?
-            props.style
+          props.style
+            ? props.style
             : {
-              zIndex: 0,
+                zIndex: 0
 
-              // marginBottom: 0,
-              // pb: 0,
-              // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
-            }
+                // marginBottom: 0,
+                // pb: 0,
+                // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
+              }
         }
       >
         {/* <ScrollableTable> */}
         <StripedDataGrid
           rows={gridData?.list || []}
           columns={columns}
-
           sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
-
-          // initialState={{
-          //   pagination: {
-          //     paginationModel: {
-          //       pageSize: pageSize
-          //     }
-          //   }
-          // }}
           density='compact'
           components={{
             LoadingOverlay: LinearProgress,

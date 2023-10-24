@@ -101,59 +101,10 @@ const productLegTab = ({
           onEdit={editProductCommission}
           isLoading={false}
           pagination={false}
+          actionColumnHeader='Commissions'
+          height={180}
         />
       </Box>
-
-      {productLegWindowOpen && (
-        <Window
-          id='ProductCommissionsWindow'
-          Title='Product Commission'
-          onClose={() => setProductLegWindowOpen(false)}
-          width={500}
-          height={400}
-        >
-          <CustomTabPanel index={0} value={0}>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%'
-              }}
-            >
-              <Grid container>
-                {/* First Column */}
-                <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-                  <Grid item xs={12}>
-                    <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomComboBox name='plantName' label='Plant' readOnly={true} required />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomComboBox name='dispursal' label='Dispursal' readOnly={true} required />
-                  </Grid>
-                </Grid>
-                {/* Second Column */}
-                <Grid ccontainer rowGap={2} xs={6} sx={{ px: 2 }}>
-                  <Grid item xs={12}>
-                    <CustomTextField label='Name' value={'name 1'} readOnly={true} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomComboBox name='currencyName' label='Currency' required />
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Table
-                columns={commissionColumns}
-                gridData={productLegCommissionGridData}
-                rowId={['commissionId']}
-                isLoading={false}
-                pagination={false}
-              />
-            </Box>
-          </CustomTabPanel>
-        </Window>
-      )}
     </>
   )
 }

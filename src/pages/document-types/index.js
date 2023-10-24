@@ -59,6 +59,7 @@ const DocumentTypes = () => {
     intLogic: labels && labels.find(item => item.key === 4).value,
     status: labels && labels.find(item => item.key === 5).value,
     nuRange: labels && labels.find(item => item.key === 6).value,
+    documentType: labels && labels.find(item => item.key === 7).value
   }
 
   const columns = [
@@ -97,7 +98,7 @@ const DocumentTypes = () => {
     }
   ]
 
-  const tabs = [{ label: 'Document Types' }, { label: 'Tab Two' }]
+  const tabs = [{ label: _labels.documentType }, { label: 'Tab Two' }]
 
   const documentTypesValidation = useFormik({
     enableReinitialize: false,
@@ -130,14 +131,14 @@ const DocumentTypes = () => {
     var parameters = '_dataset=' + ResourceIds.DocumentTypes
 
     getRequest({
-      'extension': KVSRepository.getLabels,
-      'parameters': parameters,
+      extension: KVSRepository.getLabels,
+      parameters: parameters
     })
-      .then((res) => {
+      .then(res => {
         console.log({ res })
         setLabels(res.list)
       })
-      .catch((error) => {
+      .catch(error => {
         setErrorMessage(error)
       })
   }
@@ -285,8 +286,6 @@ const DocumentTypes = () => {
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-
-          // rowId={['recordId', 'reference']}
           onEdit={editDocumentType}
           onDelete={delDocumentType}
           isLoading={false}
@@ -295,7 +294,7 @@ const DocumentTypes = () => {
       {windowOpen && (
         <Window
           id='DocumentTypeWindow'
-          Title='Document Types'
+          Title={_labels.documentType}
           onClose={() => setWindowOpen(false)}
           tabs={tabs}
           activeTab={activeTab}
@@ -313,9 +312,6 @@ const DocumentTypes = () => {
                   value={documentTypesValidation.values.reference}
                   required
                   onChange={documentTypesValidation.handleChange}
-
-                  // numberField
-                  // onChange={(e) => documentTypesValidation.setFieldValue('reference', getFormattedNumber(e.target.value, 4))}
                   onClear={() => documentTypesValidation.setFieldValue('reference', '')}
                   error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
                   helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}

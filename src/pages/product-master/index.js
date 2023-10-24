@@ -21,12 +21,13 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
-// **Tabs
-import ProductMasterTab from './productMasterTab'
-import ProductDispursalTab from './productDispursalTab'
-import ProductLegTab from './productLegTab'
-import ProductFieldTab from './productFieldTab'
-import ProductAgentTab from './productAgentTab'
+// ** Windows
+import ProductMasterWindow from './Windows/ProductMasterWindow'
+import ProductLegWindow from './Windows/ProductLegWindow'
+
+// ** Tabs
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -88,6 +89,33 @@ const ProductMaster = () => {
     }
   ]
 
+  const commissionColumns = [
+    {
+      field: 'checkBox',
+      headerName: '',
+      flex: 0.5,
+      renderCell: params => (
+        <Checkbox
+          color='primary'
+          checked={params.row.checkBox === true}
+          onChange={() => {
+            params.row.checkBox = !params.row.checkBox
+          }}
+        />
+      )
+    },
+    {
+      field: 'commissionName',
+      headerName: 'Commission Name',
+      flex: 1
+    },
+    {
+      field: 'commission',
+      headerName: 'Commission',
+      flex: 1
+    }
+  ]
+
   const productMasterValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
@@ -109,7 +137,7 @@ const ProductMaster = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
   }
 
-  const getGridData = () => {}
+  const getGridData = () => { }
 
   const fillTypeStore = () => {
     var parameters = '_database=15' //add 'xml'.json and get _database values from there
@@ -156,11 +184,11 @@ const ProductMaster = () => {
       })
   }
 
-  const postProductMaster = obj => {}
+  const postProductMaster = obj => { }
 
   const tabs = [{ label: 'Main' }, { label: 'Dispursal' }, { label: 'Leg' }, { label: 'Fields' }, { label: 'Agent' }]
 
-  const delProductMaster = obj => {}
+  const delProductMaster = obj => { }
 
   const addProductMaster = () => {
     productMasterValidation.setValues({})
@@ -178,7 +206,7 @@ const ProductMaster = () => {
     setWindowOpen(true)
   }
 
-  const getProductLegGridData = ({}) => {
+  const getProductLegGridData = ({ }) => {
     const newData = { list: [{ recordId: 1, fromAmount: 1000.66, toAmount: 2000.97 }] }
     setProductLegGridData({ ...newData })
   }
@@ -349,9 +377,7 @@ const ProductMaster = () => {
         />
       </Box>
       {windowOpen && (
-        <Window
-          id='ProductMasterWindow'
-          Title='Product Master'
+        <ProductMasterWindow
           onClose={() => setWindowOpen(false)}
           tabs={tabs}
           activeTab={activeTab}
@@ -359,34 +385,27 @@ const ProductMaster = () => {
           width={900}
           height={350}
           onSave={handleSubmit}
-        >
-          <CustomTabPanel index={0} value={activeTab}>
-            <ProductMasterTab
-              productMasterValidation={productMasterValidation}
-              typeStore={typeStore}
-              commissionBaseStore={commissionBaseStore}
-              languageStore={languageStore}
-            />
-          </CustomTabPanel>
-          <CustomTabPanel index={1} value={activeTab}>
-            <ProductDispursalTab productDispursalGridData={productDispursalGridData} />
-          </CustomTabPanel>
-          <CustomTabPanel index={2} value={activeTab}>
-            <ProductLegTab
-              productLegWindowOpen={productLegWindowOpen}
-              productLegGridData={productLegGridData}
-              productLegCommissionGridData={productLegCommissionGridData}
-              editProductCommission={editProductCommission}
-              setProductLegWindowOpen={setProductLegWindowOpen}
-            />
-          </CustomTabPanel>
-          <CustomTabPanel index={3} value={activeTab}>
-            <ProductFieldTab productFieldGridData={productFieldGridData} />
-          </CustomTabPanel>
-          <CustomTabPanel index={4} value={activeTab}>
-            <ProductAgentTab productAgentGridData={productAgentGridData} />
-          </CustomTabPanel>
-        </Window>
+          productMasterValidation={productMasterValidation}
+          typeStore={typeStore}
+          commissionBaseStore={commissionBaseStore}
+          languageStore={languageStore}
+          productDispursalGridData={productDispursalGridData}
+          productLegWindowOpen={productLegWindowOpen}
+          productLegGridData={productLegGridData}
+          productLegCommissionGridData={productLegCommissionGridData}
+          editProductCommission={editProductCommission}
+          setProductLegWindowOpen={setProductLegWindowOpen}
+          productFieldGridData={productFieldGridData}
+          productAgentGridData={productAgentGridData}
+        />
+      )}
+
+      {productLegWindowOpen && (
+        <ProductLegWindow
+          onClose={() => setProductLegWindowOpen(false)}
+          commissionColumns={commissionColumns}
+          productLegCommissionGridData={productLegCommissionGridData}
+        />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>

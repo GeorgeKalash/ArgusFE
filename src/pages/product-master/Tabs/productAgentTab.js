@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid, Box } from '@mui/material'
 
 // ** Custom Imports
@@ -6,43 +5,11 @@ import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-const ProductFieldTab = ({ productFieldGridData }) => {
-  //stores
-
+const ProductAgentTab = ({ productAgentGridData }) => {
   const columns = [
     {
-      field: 'controls',
-      headerName: 'Controls',
-      flex: 1
-    },
-    {
-      field: 'format',
-      headerName: 'Format',
-      flex: 1
-    },
-    {
-      field: 'securityLevel',
-      headerName: 'securityLevel',
-      flex: 1
-    },
-    {
-      field: 'specialChars',
-      headerName: 'special Chars',
-      flex: 1
-    },
-    {
-      field: 'fixedLength',
-      headerName: 'fixed Length',
-      flex: 1
-    },
-    {
-      field: 'minLength',
-      headerName: 'min Length',
-      flex: 1
-    },
-    {
-      field: 'maxLength',
-      headerName: 'max Length',
+      field: 'agent',
+      headerName: 'Agent',
       flex: 1
     }
   ]
@@ -75,14 +42,15 @@ const ProductFieldTab = ({ productFieldGridData }) => {
         </Grid>
         <Table
           columns={columns}
-          gridData={productFieldGridData}
+          gridData={productAgentGridData}
           rowId={['recordId']}
           isLoading={false}
           pagination={false}
+          height={220}
         />
       </Box>
     </>
   )
 }
 
-export default ProductFieldTab
+export default ProductAgentTab
