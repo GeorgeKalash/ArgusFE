@@ -23,6 +23,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCity, populateCity } from 'src/Models/System/City'
 import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { ContactSupportOutlined } from '@mui/icons-material'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -50,12 +51,12 @@ const City = () => {
     },
     ,
     {
-      field: 'countryId',
+      field: 'countryName',
       headerName: 'Country',
       flex: 1
     },
     {
-      field: 'stateId',
+      field: 'stateName',
       headerName: 'State',
       flex: 1
     }
@@ -64,8 +65,11 @@ const City = () => {
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
+      reference: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      stateId: yup.string().required('This field is required')
+      //yup.string().nullable()
     }),
     onSubmit: values => {
       postCity(values)
@@ -76,7 +80,7 @@ const City = () => {
     cityValidation.handleSubmit()
   }
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     var parameters = defaultParams + '&_countryId=0' + '&_stateId=0'
     getRequest({
       extension: SystemRepository.City.qry,
@@ -90,7 +94,7 @@ const City = () => {
       })
   }
   const fillCountryStore = () => {
-    /* var parameters = ``
+    var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Country.qry,
       parameters: parameters
@@ -100,7 +104,7 @@ const City = () => {
       })
       .catch(error => {
         setErrorMessage(error)
-      })*/
+      })
   }
   const fillStateStore = countryId => {
     var parameters = `_countryId=${countryId}`
@@ -149,6 +153,7 @@ const City = () => {
   const addCity = () => {
     cityValidation.setValues(getNewCity())
     fillCountryStore()
+    setStateStore([])
     setEditMode(false)
     setWindowOpen(true)
   }
@@ -156,8 +161,10 @@ const City = () => {
   const editCity = obj => {
     cityValidation.setValues(populateCity(obj))
     fillCountryStore()
-    const countryId = cityValidation.values.countryId !== undefined ? cityValidation.values.countryId : ''
-    fillStateStore(countryId)
+    fillStateStore(obj['countryId'])
+    //const comboBox = document.getElementById('stateCombo')
+    //console.log(comboBox)
+    //comboBox.readOnly = obj['countryId'] === null ? false : true
     setEditMode(true)
     setWindowOpen(true)
   }
@@ -198,6 +205,7 @@ const City = () => {
                   label='Reference'
                   value={cityValidation.values.reference}
                   required
+                  readOnly={editMode}
                   onChange={cityValidation.handleChange}
                   onClear={() => cityValidation.setFieldValue('reference', '')}
                   error={cityValidation.touched.reference && Boolean(cityValidation.errors.reference)}
@@ -210,6 +218,7 @@ const City = () => {
                   label='Name'
                   value={cityValidation.values.name}
                   required
+                  readOnly={editMode}
                   onChange={cityValidation.handleChange}
                   onClear={() => cityValidation.setFieldValue('name', '')}
                   error={cityValidation.touched.name && Boolean(cityValidation.errors.name)}
@@ -223,16 +232,13 @@ const City = () => {
                   valueField='recordId'
                   displayField='name'
                   store={countryStore}
-                  value={countryStore.filter(item => item.recordId === cityValidation.values.countyId)[0]}
+                  value={countryStore.filter(item => item.recordId === cityValidation.values.countryId)[0]}
                   required
                   readOnly={editMode}
                   onChange={(event, newValue) => {
                     cityValidation.setFieldValue('countryId', newValue?.recordId)
                     cityValidation.setFieldValue('countryName', newValue?.name)
-
                     const selectedCountryId = newValue?.recordId || ''
-                    setCountryId(selectedCountryId)
-                    setStateStore('') // Clear stateId when country changes
                     fillStateStore(selectedCountryId) // Fetch and update state data based on the selected country
                   }}
                   error={cityValidation.touched.countryId && Boolean(cityValidation.errors.countryId)}
@@ -241,6 +247,7 @@ const City = () => {
               </Grid>
               <Grid item xs={12}>
                 <CustomComboBox
+                  //id='stateCombo'
                   name='stateId'
                   label='State'
                   valueField='recordId'
@@ -248,11 +255,8 @@ const City = () => {
                   store={stateStore}
                   value={stateStore.filter(item => item.recordId === cityValidation.values.stateId)[0]}
                   required
-                  readOnly={editMode}
                   onChange={(event, newValue) => {
                     cityValidation.setFieldValue('stateId', newValue?.recordId)
-                    //const selectedStateId = newValue?.recordId || ''
-                    //setStateStore(selectedStateId)
                   }}
                   error={cityValidation.touched.stateId && Boolean(cityValidation.errors.stateId)}
                   helperText={cityValidation.touched.stateId && cityValidation.errors.stateId}
