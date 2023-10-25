@@ -184,7 +184,7 @@ const GroupLegalDocument = () => {
     getGridData({ _startAt: 0, _pageSize: 30 })
     FillGroupStore()
     FillCategoryStore()
-  }, [])
+  })
 
   return (
     <>

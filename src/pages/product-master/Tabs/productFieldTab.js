@@ -79,6 +79,7 @@ const ProductFieldTab = ({ productFieldGridData }) => {
           rowId={['recordId']}
           isLoading={false}
           pagination={false}
+          height={220}
         />
       </Box>
     </>

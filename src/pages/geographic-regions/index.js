@@ -19,10 +19,14 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 import { getNewGeographicRegion, populateGeographicRegions } from 'src/Models/System/GeographicRegions'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const GeographicRegions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,20 +35,27 @@ const GeographicRegions = () => {
   const [gridData, setGridData] = useState([])
 
   //states
+  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const _labels = {
+    reference: labels && labels.find(item => item.key === 1).value,
+    name: labels && labels.find(item => item.key === 2).value,
+    geographicRegion: labels && labels.find(item => item.key === 3).value
+  }
+
   const columns = [
     {
       field: 'reference',
-      headerName: 'Reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: _labels.name,
       flex: 1
     }
   ]
@@ -54,8 +65,18 @@ const GeographicRegions = () => {
     validateOnChange: false,
 
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      reference: yup
+        .string()
+        .required('This field is required')
+        .test('referenceLength', 'Field must be max 10 characters long', value => {
+          return value.length < 10
+        }),
+      name: yup
+        .string()
+        .required('This field is required')
+        .test('nameLength', 'Field must be max 30 characters long', value => {
+          return value.length < 30
+        })
     }),
     onSubmit: values => {
       postGeographicRegion(values)
@@ -127,9 +148,25 @@ const GeographicRegions = () => {
     setWindowOpen(true)
   }
 
+  const getLabels = () => {
+    var parameters = '_dataset=' + ResourceIds.GeographicRegions
+
+    getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: parameters
+    })
+      .then(res => {
+        setLabels(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   useEffect(() => {
     getGridData({ _startAt: 0, _pageSize: 30 })
-  }, [])
+    getLabels()
+  })
 
   return (
     <>
@@ -155,7 +192,7 @@ const GeographicRegions = () => {
       {windowOpen && (
         <Window
           id='GeographicRegionWindow'
-          Title='Geographic Regions'
+          Title={_labels.geographicRegion}
           onClose={() => setWindowOpen(false)}
           width={500}
           height={300}
@@ -166,7 +203,7 @@ const GeographicRegions = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
-                  label='Reference'
+                  label={_labels.reference}
                   value={geographicRegionsValidation.values.reference}
                   required
                   readOnly={editMode}
@@ -184,7 +221,7 @@ const GeographicRegions = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='name'
-                  label='Name'
+                  label={_labels.name}
                   value={geographicRegionsValidation.values.name}
                   required
                   onChange={geographicRegionsValidation.handleChange}
