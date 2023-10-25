@@ -6,7 +6,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseStore, languageStore }) => {
-  console.log("productMasterValidation tab:", productMasterValidation);
 
   return (
     <>
@@ -59,8 +58,14 @@ const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseSt
               name='correspondant'
               label='Correspondant'
               value={productMasterValidation.values.correspondant}
-              required
-              readOnly={false}
+
+              //following are an example edit as needed
+              //for more complex scenario a function can be passed 
+              //returning bool depending on set of if or switch
+              required={productMasterValidation.values.type === 1 ? true : false}
+              readOnly={productMasterValidation.values.type === 2 ? true : false}
+              disabled={productMasterValidation.values.type === 2 ? true : false}
+
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('correspondant', '')}
               error={

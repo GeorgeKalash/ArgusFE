@@ -30,7 +30,6 @@ const ProductMasterWindow = ({
     productFieldGridData,
     productAgentGridData,
 }) => {
-    console.log("productMasterValidation received:", productMasterValidation);
 
     return (
         <Window
