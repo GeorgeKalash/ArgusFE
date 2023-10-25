@@ -36,9 +36,18 @@ const ProductDispursalTab = ({ productDispursalGridData }) => {
     },
     {
       recordId: '5',
-      field: 'default',
-      headerName: 'Default',
-      flex: 1
+      field: 'isDefault',
+      headerName: 'is Default',
+      flex: 1,
+      renderCell: params => (
+        <Checkbox
+          color='primary'
+          checked={params.row.isDefault === true} // Checked based on 'isDefault' property
+          onChange={() => {
+            params.row.isDefault = !params.row.isDefault
+          }}
+        />
+      )
     },
     {
       recordId: '6',

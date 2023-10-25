@@ -37,6 +37,7 @@ const ProductMaster = () => {
   const [typeStore, setTypeStore] = useState([])
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
+  const [currencytore, setCurrencyStore] = useState([])
 
   const [productLegGridData, setProductLegGridData] = useState([]) //for productLegTab
   const [productLegCommissionGridData, setProductLegCommissionGridData] = useState([]) //for productLegTab
@@ -137,10 +138,10 @@ const ProductMaster = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
   }
 
-  const getGridData = () => { }
+  const getGridData = () => {}
 
   const fillTypeStore = () => {
-    var parameters = '_database=15' //add 'xml'.json and get _database values from there
+    var parameters = '_database=140' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
@@ -170,7 +171,7 @@ const ProductMaster = () => {
   }
 
   const fillCommissionBaseStore = () => {
-    var parameters = '_database=13' //add 'xml'.json and get _database values from there
+    var parameters = '_database=141' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
@@ -184,17 +185,32 @@ const ProductMaster = () => {
       })
   }
 
-  const postProductMaster = obj => { }
+  const FillCurrencyStore = () => {
+    var parameters = '_filter='
+    getRequest({
+      extension: SystemRepository.Currency.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCurrencyStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const postProductMaster = obj => {}
 
   const tabs = [{ label: 'Main' }, { label: 'Dispursal' }, { label: 'Leg' }, { label: 'Fields' }, { label: 'Agent' }]
 
-  const delProductMaster = obj => { }
+  const delProductMaster = obj => {}
 
   const addProductMaster = () => {
     productMasterValidation.setValues({})
     fillTypeStore()
     fillLanguageStore()
     fillCommissionBaseStore()
+    FillCurrencyStore()
     setWindowOpen(true)
   }
 
@@ -203,10 +219,11 @@ const ProductMaster = () => {
     fillTypeStore()
     fillLanguageStore()
     fillCommissionBaseStore()
+    FillCurrencyStore()
     setWindowOpen(true)
   }
 
-  const getProductLegGridData = ({ }) => {
+  const getProductLegGridData = ({}) => {
     const newData = { list: [{ recordId: 1, fromAmount: 1000.66, toAmount: 2000.97 }] }
     setProductLegGridData({ ...newData })
   }
@@ -288,7 +305,7 @@ const ProductMaster = () => {
           name: 'NTFS',
           type: 'bank',
           apiBankCode: 'ABC',
-          default: 'ABC',
+          isDefault: true,
           isInactive: true
         },
         {
@@ -297,7 +314,7 @@ const ProductMaster = () => {
           name: 'cash',
           type: 'cash',
           apiBankCode: 'ABC',
-          default: 'ABC',
+          isDefault: true,
           isInactive: false
         },
         {
@@ -306,7 +323,7 @@ const ProductMaster = () => {
           name: 'wallet (bitcoin)',
           type: 'wallet',
           apiBankCode: 'ABC',
-          default: 'ABC',
+          isDefault: false,
           isInactive: false
         },
         {
@@ -315,7 +332,7 @@ const ProductMaster = () => {
           name: 'cash delivery',
           type: 'delivery',
           apiBankCode: 'ABC',
-          default: 'ABC',
+          isDefault: false,
           isInactive: true
         }
       ]
