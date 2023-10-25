@@ -69,29 +69,26 @@ const ProductDispersalTab = ({ productDispersalGridData }) => {
           height: '100%'
         }}
       >
-        <Grid container>
-          {/* First Column */}
-
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
+        <Grid container gap={2}>
+          <Grid container xs={12} spacing={2}>
+            <Grid item xs={6}>
               <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
             </Grid>
-          </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomTextField label='Name' value={'name 1'} readOnly={true} />
             </Grid>
           </Grid>
+          <Grid xs={12}>
+            <Table
+              columns={columns}
+              gridData={productDispersalGridData}
+              rowId={['recordId']}
+              isLoading={false}
+              pagination={false}
+              height={260}
+            />
+          </Grid>
         </Grid>
-        <Table
-          columns={columns}
-          gridData={productDispersalGridData}
-          rowId={['recordId']}
-          isLoading={false}
-          pagination={false}
-          height={280}
-        />
       </Box>
     </>
   )
