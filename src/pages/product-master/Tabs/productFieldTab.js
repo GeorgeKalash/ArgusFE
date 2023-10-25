@@ -63,7 +63,7 @@ const ProductFieldTab = ({ productFieldGridData }) => {
               <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
             </Grid>
             <Grid item xs={12}>
-              <CustomComboBox name='dispursal' label='Dispursal' readOnly={false} required />
+              <CustomComboBox name='dispersal' label='Dispersal' readOnly={false} required />
             </Grid>
           </Grid>
           {/* Second Column */}

@@ -6,6 +6,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseStore, languageStore }) => {
+  console.log("productMasterValidation tab:", productMasterValidation);
+
   return (
     <>
       <Grid container>

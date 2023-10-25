@@ -43,7 +43,7 @@ const ProductMaster = () => {
   const [productLegCommissionGridData, setProductLegCommissionGridData] = useState([]) //for productLegTab
   const [productFieldGridData, setProductFieldGridData] = useState([]) //for productFieldTab
   const [productAgentGridData, setProductAgentGridData] = useState([]) //for product agent tab
-  const [productDispursalGridData, setProductDispursalGridData] = useState([]) //for product dispursal tab
+  const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -199,9 +199,9 @@ const ProductMaster = () => {
       })
   }
 
-  const postProductMaster = obj => {}
+  const postProductMaster = obj => {console.log("postProductMaster"); console.log(obj);}
 
-  const tabs = [{ label: 'Main' }, { label: 'Dispursal' }, { label: 'Leg' }, { label: 'Fields' }, { label: 'Agent' }]
+  const tabs = [{ label: 'Main' }, { label: 'Dispersal' }, { label: 'Leg' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => {}
 
@@ -215,12 +215,6 @@ const ProductMaster = () => {
   }
 
   const editProductMaster = obj => {
-    productMasterValidation.setValues({})
-    fillTypeStore()
-    fillLanguageStore()
-    fillCommissionBaseStore()
-    FillCurrencyStore()
-    setWindowOpen(true)
   }
 
   const getProductLegGridData = ({}) => {
@@ -296,7 +290,7 @@ const ProductMaster = () => {
     setProductAgentGridData({ ...newData })
   }
 
-  const getProductDispursalGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+  const getProductDispersalGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const newData = {
       list: [
         {
@@ -304,7 +298,6 @@ const ProductMaster = () => {
           reference: 'NTFS',
           name: 'NTFS',
           type: 'bank',
-          apiBankCode: 'ABC',
           isDefault: true,
           isInactive: true
         },
@@ -313,7 +306,6 @@ const ProductMaster = () => {
           reference: 'CASH',
           name: 'cash',
           type: 'cash',
-          apiBankCode: 'ABC',
           isDefault: true,
           isInactive: false
         },
@@ -322,7 +314,6 @@ const ProductMaster = () => {
           reference: 'WALLET',
           name: 'wallet (bitcoin)',
           type: 'wallet',
-          apiBankCode: 'ABC',
           isDefault: false,
           isInactive: false
         },
@@ -331,13 +322,12 @@ const ProductMaster = () => {
           reference: 'CASH DLV',
           name: 'cash delivery',
           type: 'delivery',
-          apiBankCode: 'ABC',
           isDefault: false,
           isInactive: true
         }
       ]
     }
-    setProductDispursalGridData({ ...newData })
+    setProductDispersalGridData({ ...newData })
   }
 
   const editProductCommission = obj => {
@@ -369,8 +359,8 @@ const ProductMaster = () => {
     //for product agent tab
     getProductAgentGridData({})
 
-    //for product dispursal tab
-    getProductDispursalGridData({})
+    //for product dispersal tab
+    getProductDispersalGridData({})
   }, [])
 
   return (
@@ -406,7 +396,7 @@ const ProductMaster = () => {
           typeStore={typeStore}
           commissionBaseStore={commissionBaseStore}
           languageStore={languageStore}
-          productDispursalGridData={productDispursalGridData}
+          productDispersalGridData={productDispersalGridData}
           productLegWindowOpen={productLegWindowOpen}
           productLegGridData={productLegGridData}
           productLegCommissionGridData={productLegCommissionGridData}

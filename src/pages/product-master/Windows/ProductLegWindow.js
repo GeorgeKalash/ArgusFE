@@ -8,13 +8,6 @@ import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-// **Tabs
-import ProductMasterTab from 'src/pages/product-master/Tabs/productMasterTab'
-import ProductDispursalTab from 'src/pages/product-master/Tabs/productDispursalTab'
-import ProductLegTab from 'src/pages/product-master/Tabs/productLegTab'
-import ProductFieldTab from 'src/pages/product-master/Tabs/productFieldTab'
-import ProductAgentTab from 'src/pages/product-master/Tabs/productAgentTab'
-
 const ProductMasterWindow = ({
   onClose,
   tabs,
@@ -47,7 +40,7 @@ const ProductMasterWindow = ({
                 <CustomTextField name='plantName' label='Plant' readOnly={true} />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField name='dispursal' label='Dispursal' readOnly={true} />
+                <CustomTextField name='dispersal' label='Dispersal' readOnly={true} />
               </Grid>
             </Grid>
             {/* Second Column */}

@@ -4,7 +4,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // **Tabs
 import ProductMasterTab from 'src/pages/product-master/Tabs/productMasterTab'
-import ProductDispursalTab from 'src/pages/product-master/Tabs/productDispursalTab'
+import ProductDispersalTab from 'src/pages/product-master/Tabs/productDispersalTab'
 import ProductLegTab from 'src/pages/product-master/Tabs/productLegTab'
 import ProductFieldTab from 'src/pages/product-master/Tabs/productFieldTab'
 import ProductAgentTab from 'src/pages/product-master/Tabs/productAgentTab'
@@ -14,12 +14,14 @@ const ProductMasterWindow = ({
     tabs,
     activeTab,
     setActiveTab,
+    width,
+    height,
     onSave,
     productMasterValidation,
     typeStore,
     commissionBaseStore,
     languageStore,
-    productDispursalGridData,
+    productDispersalGridData,
     productLegWindowOpen,
     productLegGridData,
     productLegCommissionGridData,
@@ -28,6 +30,7 @@ const ProductMasterWindow = ({
     productFieldGridData,
     productAgentGridData,
 }) => {
+    console.log("productMasterValidation received:", productMasterValidation);
 
     return (
         <Window
@@ -37,8 +40,8 @@ const ProductMasterWindow = ({
             tabs={tabs}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            width={900}
-            height={350}
+            width={width}
+            height={height}
             onSave={onSave}
         >
             <CustomTabPanel index={0} value={activeTab}>
@@ -50,7 +53,7 @@ const ProductMasterWindow = ({
                 />
             </CustomTabPanel>
             <CustomTabPanel index={1} value={activeTab}>
-                <ProductDispursalTab productDispursalGridData={productDispursalGridData} />
+                <ProductDispersalTab productDispersalGridData={productDispersalGridData} />
             </CustomTabPanel>
             <CustomTabPanel index={2} value={activeTab}>
                 <ProductLegTab

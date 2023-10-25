@@ -8,7 +8,7 @@ import { Grid, Box, Checkbox } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const ProductDispursalTab = ({ productDispursalGridData }) => {
+const ProductDispersalTab = ({ productDispersalGridData }) => {
   const columns = [
     {
       recordId: '1',
@@ -25,13 +25,7 @@ const ProductDispursalTab = ({ productDispursalGridData }) => {
     {
       recordId: '3',
       field: 'type',
-      headerName: 'Dispursal Type',
-      flex: 1
-    },
-    {
-      recordId: '4',
-      field: 'apiBankCode',
-      headerName: 'API Bank Code',
+      headerName: 'Dispersal Type',
       flex: 1
     },
     {
@@ -92,7 +86,7 @@ const ProductDispursalTab = ({ productDispursalGridData }) => {
         </Grid>
         <Table
           columns={columns}
-          gridData={productDispursalGridData}
+          gridData={productDispersalGridData}
           rowId={['recordId']}
           isLoading={false}
           pagination={false}
@@ -103,4 +97,4 @@ const ProductDispursalTab = ({ productDispursalGridData }) => {
   )
 }
 
-export default ProductDispursalTab
+export default ProductDispersalTab

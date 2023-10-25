@@ -81,7 +81,7 @@ const productLegTab = ({
               <CustomComboBox name='plantName' label='Plant' readOnly={false} required />
             </Grid>
             <Grid item xs={12}>
-              <CustomComboBox name='dispursal' label='Dispursal' readOnly={false} required />
+              <CustomComboBox name='dispersal' label='Dispersal' readOnly={false} required />
             </Grid>
           </Grid>
           {/* Second Column */}
