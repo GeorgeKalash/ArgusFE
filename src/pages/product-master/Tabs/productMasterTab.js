@@ -5,7 +5,13 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseStore, languageStore }) => {
+const ProductMasterTab = ({
+  productMasterValidation,
+  typeStore,
+  commissionBaseStore,
+  languageStore,
+  currencyStore
+}) => {
 
   return (
     <>
@@ -75,10 +81,27 @@ const ProductMasterTab = ({ productMasterValidation, typeStore, commissionBaseSt
             />
           </Grid>
           <Grid item xs={12}>
+
+            {/* as currency combo below */}
             <CustomComboBox name='countryName' label='Country' required />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox name='currencyName' label='Currency' />
+            <CustomComboBox
+              name='currencyName'
+              label='Currency'
+              valueField='recordId'
+              displayField='name'
+              store={currencyStore}
+              value={currencyStore.filter(item => item.recordId === productMasterValidation.values.currencyId)[0]}
+              required
+              onChange={(event, newValue) => {
+                productMasterValidation.setFieldValue('currencyId', newValue?.recordId)
+              }}
+              error={
+                productMasterValidation.touched.currencyName && Boolean(productMasterValidation.errors.currencyName)
+              }
+              helperText={productMasterValidation.touched.currencyName && productMasterValidation.errors.currencyName}
+            />
           </Grid>
         </Grid>
         {/* Second Column */}

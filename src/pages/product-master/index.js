@@ -37,7 +37,7 @@ const ProductMaster = () => {
   const [typeStore, setTypeStore] = useState([])
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
-  const [currencytore, setCurrencyStore] = useState([])
+  const [currencyStore, setCurrencyStore] = useState([])
 
   const [productLegGridData, setProductLegGridData] = useState([]) //for productLegTab
   const [productLegCommissionGridData, setProductLegCommissionGridData] = useState([]) //for productLegTab
@@ -187,14 +187,16 @@ const ProductMaster = () => {
       })
   }
 
-  const FillCurrencyStore = () => {
+  const fillCurrencyStore = () => {
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: parameters
     })
       .then(res => {
-        setCurrencyStore(res)
+
+        console.log({ res })
+        setCurrencyStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -212,7 +214,7 @@ const ProductMaster = () => {
     fillTypeStore()
     fillLanguageStore()
     fillCommissionBaseStore()
-    FillCurrencyStore()
+    fillCurrencyStore()
     setWindowOpen(true)
   }
 
@@ -406,6 +408,7 @@ const ProductMaster = () => {
           setProductLegWindowOpen={setProductLegWindowOpen}
           productFieldGridData={productFieldGridData}
           productAgentGridData={productAgentGridData}
+          currencyStore={currencyStore}
         />
       )}
 
