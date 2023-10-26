@@ -96,6 +96,7 @@ const GroupLegalDocument = () => {
   const handleSubmit = () => {
     groupLegalDocumentValidation.handleSubmit()
   }
+
   const getLabels = () => {
     var parameters = '_dataset=' + ResourceIds.GroupLegalDocument
 
@@ -111,6 +112,7 @@ const GroupLegalDocument = () => {
         setErrorMessage(error)
       })
   }
+
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     var parameters = defaultParams
@@ -211,6 +213,7 @@ const GroupLegalDocument = () => {
     fillCategoryStore()
     getLabels()
   }, [])
+  
   return (
     <>
       <Box

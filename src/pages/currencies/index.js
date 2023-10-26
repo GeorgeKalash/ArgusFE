@@ -98,6 +98,7 @@ const Currencies = () => {
   const handleSubmit = () => {
     currencyValidation.handleSubmit()
   }
+  
   const getLabels = () => {
     var parameters = '_dataset=' + ResourceIds.Currencies
 
@@ -106,13 +107,14 @@ const Currencies = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log({ res })
+        console.log('labels '+{ res })
         setLabels(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
+
   const getGridData = () => {
     var parameters = '_filter='
     getRequest({

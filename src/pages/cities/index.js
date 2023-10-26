@@ -72,6 +72,7 @@ const City = () => {
       flex: 1
     }
   ]
+
   const cityValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
@@ -79,7 +80,9 @@ const City = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required')
+
       // stateId: yup.string().nullable()
+
     }),
     onSubmit: values => {
       postCity(values)
@@ -89,6 +92,7 @@ const City = () => {
   const handleSubmit = () => {
     cityValidation.handleSubmit()
   }
+
   const getLabels = () => {
     var parameters = '_dataset=' + ResourceIds.Cities
 
@@ -104,6 +108,7 @@ const City = () => {
         setErrorMessage(error)
       })
   }
+
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     var parameters = defaultParams + '&_countryId=0' + '&_stateId=0'
@@ -118,6 +123,7 @@ const City = () => {
         setErrorMessage(error)
       })
   }
+
   const fillCountryStore = () => {
     var parameters = `_filter=`
     getRequest({
@@ -131,6 +137,7 @@ const City = () => {
         setErrorMessage(error)
       })
   }
+
   const fillStateStore = countryId => {
     var parameters = `_countryId=${countryId}`
     getRequest({
@@ -144,6 +151,7 @@ const City = () => {
         setErrorMessage(error)
       })
   }
+
   const postCity = obj => {
     const recordId = obj.recordId
     postRequest({
@@ -186,7 +194,9 @@ const City = () => {
   const editCity = obj => {
     cityValidation.setValues(populateCity(obj))
     fillCountryStore()
+
     //console.log('countryId ' + obj['countryId'])
+    
     fillStateStore(obj['countryId'])
     setEditMode(true)
     setWindowOpen(true)
@@ -197,6 +207,7 @@ const City = () => {
     fillCountryStore()
     getLabels()
   }, [])
+  
   return (
     <>
       <Box>
