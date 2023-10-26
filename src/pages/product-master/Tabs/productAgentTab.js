@@ -29,10 +29,10 @@ const ProductAgentTab = ({ productAgentGridData }) => {
               <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
-              <CustomComboBox name='dispersal' label='Dispersal' readOnly={false} required />
+              <CustomTextField label='Name' value={'name 1'} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField label='Name' value={'name 1'} readOnly={true} />
+              <CustomComboBox name='dispersal' label='Dispersal' readOnly={false} required />
             </Grid>
           </Grid>
           <Grid xs={12}>

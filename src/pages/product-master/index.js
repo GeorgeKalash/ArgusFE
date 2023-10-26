@@ -38,6 +38,7 @@ const ProductMaster = () => {
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
+  const [countryStore, setCountryStore] = useState([])
 
   const [productLegGridData, setProductLegGridData] = useState([]) //for productLegTab
   const [productLegCommissionGridData, setProductLegCommissionGridData] = useState([]) //for productLegTab
@@ -125,8 +126,15 @@ const ProductMaster = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       type: yup.string().required('This field is required'),
-      country: yup.string().required('This field is required'),
+      correspondant: yup.string().nullable(),
+      countryId: yup.string().required('This field is required'),
+      currencyId: yup.string().nullable(),
       language: yup.string().required('This field is required'),
+      interfaceId: yup.string().nullable(),
+      commissionBase: yup.string().nullable(),
+      posMsg: yup.string().nullable(),
+      posMsgIsActive: yup.string().nullable(),
+      isInactive: yup.string().nullable(),
 
       //not needed if going to be conditionaly changed according to another field value
       // correspondant: yup.string().required('This field is required'),
@@ -194,9 +202,21 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-
-        console.log({ res })
         setCurrencyStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillCoutryStore = () => {
+    var parameters = '_filter='
+    getRequest({
+      extension: SystemRepository.Country.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCountryStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -215,6 +235,7 @@ const ProductMaster = () => {
     fillLanguageStore()
     fillCommissionBaseStore()
     fillCurrencyStore()
+    fillCoutryStore()
     setWindowOpen(true)
   }
 
@@ -409,6 +430,7 @@ const ProductMaster = () => {
           productFieldGridData={productFieldGridData}
           productAgentGridData={productAgentGridData}
           currencyStore={currencyStore}
+          countryStore={countryStore}
         />
       )}
 

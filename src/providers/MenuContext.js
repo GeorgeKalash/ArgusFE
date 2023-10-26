@@ -18,7 +18,7 @@ const MenuProvider = ({ children }) => {
     const getMenu = async () => {
         var parameters = '_filter='
         getRequest({
-            'extension': SystemRepository.get2AM,
+            'extension': SystemRepository.mainMenu,
             'parameters': parameters,
         })
             .then(async (res) => {

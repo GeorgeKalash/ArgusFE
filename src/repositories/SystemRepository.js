@@ -1,7 +1,7 @@
 const service = 'SY.asmx/'
 
 export const SystemRepository = {
-  get2AM: service + 'get2AM',
+  mainMenu: service + 'mainMenu',
   getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',

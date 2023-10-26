@@ -10,7 +10,8 @@ const ProductMasterTab = ({
   typeStore,
   commissionBaseStore,
   languageStore,
-  currencyStore
+  currencyStore,
+  countryStore
 }) => {
 
   return (
@@ -81,26 +82,39 @@ const ProductMasterTab = ({
             />
           </Grid>
           <Grid item xs={12}>
+            <CustomComboBox
+              name='countryId'
+              label='Country'
+              valueField='recordId'
+              displayField='name'
+              store={countryStore}
+              value={countryStore.filter(item => item.recordId === productMasterValidation.values.countryId)[0]}
+              required
+              onChange={(event, newValue) => {
+                productMasterValidation.setFieldValue('countryId', newValue?.recordId)
+              }}
+              error={
+                productMasterValidation.touched.countryId && Boolean(productMasterValidation.errors.countryId)
+              }
+              helperText={productMasterValidation.touched.countryId && productMasterValidation.errors.countryId}
+            />
 
-            {/* as currency combo below */}
-            <CustomComboBox name='countryName' label='Country' required />
           </Grid>
           <Grid item xs={12}>
             <CustomComboBox
-              name='currencyName'
+              name='currencyId'
               label='Currency'
               valueField='recordId'
               displayField='name'
               store={currencyStore}
               value={currencyStore.filter(item => item.recordId === productMasterValidation.values.currencyId)[0]}
-              required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('currencyId', newValue?.recordId)
               }}
               error={
-                productMasterValidation.touched.currencyName && Boolean(productMasterValidation.errors.currencyName)
+                productMasterValidation.touched.currencyId && Boolean(productMasterValidation.errors.currencyId)
               }
-              helperText={productMasterValidation.touched.currencyName && productMasterValidation.errors.currencyName}
+              helperText={productMasterValidation.touched.currencyId && productMasterValidation.errors.currencyId}
             />
           </Grid>
         </Grid>
@@ -126,7 +140,7 @@ const ProductMasterTab = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox name='interfaceName' label='Interface' />
+            <CustomComboBox name='interfaceId' label='Interface' />
           </Grid>
           <Grid item xs={12}>
             <CustomComboBox
@@ -136,7 +150,6 @@ const ProductMasterTab = ({
               displayField='value'
               store={commissionBaseStore}
               value={productMasterValidation.values.commissionBaseName}
-              required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('commissionBase', newValue?.key)
                 productMasterValidation.setFieldValue('commissionBaseName', newValue?.value)

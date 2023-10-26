@@ -29,7 +29,8 @@ const ProductMasterWindow = ({
     setProductLegWindowOpen,
     productFieldGridData,
     productAgentGridData,
-    currencyStore
+    currencyStore,
+    countryStore
 }) => {
 
     return (
@@ -51,6 +52,7 @@ const ProductMasterWindow = ({
                     commissionBaseStore={commissionBaseStore}
                     languageStore={languageStore}
                     currencyStore={currencyStore}
+                    countryStore={countryStore}
                 />
             </CustomTabPanel>
             <CustomTabPanel index={1} value={activeTab}>
