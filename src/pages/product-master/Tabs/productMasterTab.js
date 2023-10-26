@@ -70,8 +70,9 @@ const ProductMasterTab = ({
               //for more complex scenario a function can be passed 
               //returning bool depending on set of if or switch
               required={productMasterValidation.values.type === 1 ? true : false}
-              readOnly={productMasterValidation.values.type === 2 ? true : false}
-              disabled={productMasterValidation.values.type === 2 ? true : false}
+              
+              //readOnly={productMasterValidation.values.type === 2 ? true : false}
+              // disabled={productMasterValidation.values.type === 2 ? true : false}
 
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('correspondant', '')}
