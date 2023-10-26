@@ -24,6 +24,8 @@ import { getNewCity, populateCity } from 'src/Models/System/City'
 import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ContactSupportOutlined } from '@mui/icons-material'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -34,30 +36,39 @@ const City = () => {
   const [countryStore, setCountryStore] = useState([])
 
   //states
+  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const _labels = {
+    reference: labels && labels.find(item => item.key === 1).value,
+    name: labels && labels.find(item => item.key === 2).value,
+    country: labels && labels.find(item => item.key === 3).value,
+    state: labels && labels.find(item => item.key === 4).value,
+    cities: labels && labels.find(item => item.key === 5).value
+  }
+
   const columns = [
     {
       field: 'reference',
-      headerName: 'Reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: _labels.name,
       flex: 1
     },
     ,
     {
       field: 'countryName',
-      headerName: 'Country',
+      headerName: _labels.country,
       flex: 1
     },
     {
       field: 'stateName',
-      headerName: 'State',
+      headerName: _labels.state,
       flex: 1
     }
   ]
@@ -67,9 +78,8 @@ const City = () => {
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required'),
-      stateId: yup.string().required('This field is required')
-      //yup.string().nullable()
+      countryId: yup.string().required('This field is required')
+      // stateId: yup.string().nullable()
     }),
     onSubmit: values => {
       postCity(values)
@@ -79,7 +89,22 @@ const City = () => {
   const handleSubmit = () => {
     cityValidation.handleSubmit()
   }
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+  const getLabels = () => {
+    var parameters = '_dataset=' + ResourceIds.Cities
+
+    getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log({ res })
+        setLabels(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     var parameters = defaultParams + '&_countryId=0' + '&_stateId=0'
     getRequest({
@@ -161,17 +186,16 @@ const City = () => {
   const editCity = obj => {
     cityValidation.setValues(populateCity(obj))
     fillCountryStore()
+    //console.log('countryId ' + obj['countryId'])
     fillStateStore(obj['countryId'])
-    //const comboBox = document.getElementById('stateCombo')
-    //console.log(comboBox)
-    //comboBox.readOnly = obj['countryId'] === null ? false : true
     setEditMode(true)
     setWindowOpen(true)
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
+    getGridData({ _startAt: 0, _pageSize: 50 })
     fillCountryStore()
+    getLabels()
   }, [])
   return (
     <>
@@ -185,13 +209,12 @@ const City = () => {
           onEdit={editCity}
           onDelete={delCity}
           isLoading={false}
-          pageSize={50}
         />
       </Box>
       {windowOpen && (
         <Window
           id='CityWindow'
-          Title='City'
+          Title={_labels.cities}
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
@@ -202,7 +225,7 @@ const City = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
-                  label='Reference'
+                  label={_labels.reference}
                   value={cityValidation.values.reference}
                   required
                   readOnly={editMode}
@@ -215,7 +238,7 @@ const City = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='name'
-                  label='Name'
+                  label={_labels.reference}
                   value={cityValidation.values.name}
                   required
                   readOnly={editMode}
@@ -228,7 +251,7 @@ const City = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='countryId'
-                  label='Country'
+                  label={_labels.country}
                   valueField='recordId'
                   displayField='name'
                   store={countryStore}
@@ -247,14 +270,14 @@ const City = () => {
               </Grid>
               <Grid item xs={12}>
                 <CustomComboBox
-                  //id='stateCombo'
                   name='stateId'
-                  label='State'
+                  label={_labels.state}
                   valueField='recordId'
                   displayField='name'
                   store={stateStore}
                   value={stateStore.filter(item => item.recordId === cityValidation.values.stateId)[0]}
                   required
+                  readOnly={editMode && cityValidation.values.stateId !== null}
                   onChange={(event, newValue) => {
                     cityValidation.setFieldValue('stateId', newValue?.recordId)
                   }}
