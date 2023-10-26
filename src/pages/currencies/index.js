@@ -21,6 +21,8 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCurrency, populateCurrency } from 'src/Models/System/currency'
+import { KVSRepository } from 'src/repositories/KVSRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
@@ -37,30 +39,43 @@ const Currencies = () => {
   const [currencyStore, setCurrencyStore] = useState([])
 
   //states
+  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const _labels = {
+    reference: labels && labels.find(item => item.key === 1).value,
+    name: labels && labels.find(item => item.key === 2).value,
+    foreignLanguage: labels && labels.find(item => item.key === 3).value,
+    decimals: labels && labels.find(item => item.key === 4).value,
+    profile: labels && labels.find(item => item.key === 5).value,
+    currencyType: labels && labels.find(item => item.key === 6).value,
+    sales: labels && labels.find(item => item.key === 7).value,
+    purchase: labels && labels.find(item => item.key === 8).value,
+    currency: labels && labels.find(item => item.key === 9).value
+  }
+
   const columns = [
     {
       field: 'reference',
-      headerName: 'Reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: _labels.name,
       flex: 1
     },
     ,
     {
       field: 'flName',
-      headerName: 'Foreign Language',
+      headerName: _labels.foreignLanguage,
       flex: 1
     },
     {
       field: 'currencyTypeName',
-      headerName: 'Currency Type',
+      headerName: _labels.currencyType,
       flex: 1
     }
   ]
@@ -83,7 +98,21 @@ const Currencies = () => {
   const handleSubmit = () => {
     currencyValidation.handleSubmit()
   }
+  const getLabels = () => {
+    var parameters = '_dataset=' + ResourceIds.Currencies
 
+    getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log({ res })
+        setLabels(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
   const getGridData = () => {
     var parameters = '_filter='
     getRequest({
@@ -98,7 +127,7 @@ const Currencies = () => {
       })
   }
 
-  const FillProfileStore = () => {
+  const fillProfileStore = () => {
     var parameters = '_database=6' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
@@ -112,7 +141,7 @@ const Currencies = () => {
       })
   }
 
-  const FillCurrencyStore = () => {
+  const fillCurrencyStore = () => {
     var parameters = '_database=117' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
@@ -126,7 +155,7 @@ const Currencies = () => {
       })
   }
 
-  const FillDecimalStore = () => { }
+  const fillDecimalStore = () => {}
 
   const postCurrency = obj => {
     const recordId = obj.recordId
@@ -161,27 +190,28 @@ const Currencies = () => {
 
   const addCurrency = () => {
     currencyValidation.setValues(getNewCurrency())
-    FillDecimalStore()
-    FillProfileStore()
-    FillCurrencyStore()
+    fillDecimalStore()
+    fillProfileStore()
+    fillCurrencyStore()
     setEditMode(false)
     setWindowOpen(true)
   }
 
   const editCurrency = obj => {
     currencyValidation.setValues(populateCurrency(obj))
-    FillDecimalStore()
-    FillProfileStore()
-    FillCurrencyStore()
+    fillDecimalStore()
+    fillProfileStore()
+    fillCurrencyStore()
     setEditMode(true)
     setWindowOpen(true)
   }
 
   useEffect(() => {
     getGridData()
-    FillDecimalStore()
-    FillProfileStore()
-    FillCurrencyStore()
+    fillDecimalStore()
+    fillProfileStore()
+    fillCurrencyStore()
+    getLabels()
     const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
     setDecimalStore(decimalDataSource)
   }, [])
@@ -205,7 +235,7 @@ const Currencies = () => {
       {windowOpen && (
         <Window
           id='CurrencyWindow'
-          Title='Currency'
+          Title={_labels.currency}
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
@@ -216,10 +246,11 @@ const Currencies = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
-                  label='Reference'
+                  label={_labels.reference}
                   value={currencyValidation.values.reference}
                   required
                   onChange={currencyValidation.handleChange}
+                  inputProps={{ maxLength: '3' }}
                   onClear={() => currencyValidation.setFieldValue('reference', '')}
                   error={currencyValidation.touched.reference && Boolean(currencyValidation.errors.reference)}
                   helperText={currencyValidation.touched.reference && currencyValidation.errors.reference}
@@ -228,7 +259,7 @@ const Currencies = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='name'
-                  label='Name'
+                  label={_labels.name}
                   value={currencyValidation.values.name}
                   required
                   onChange={currencyValidation.handleChange}
@@ -240,7 +271,7 @@ const Currencies = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='flName'
-                  label='Foreign Language'
+                  label={_labels.foreignLanguage}
                   value={currencyValidation.values.flName}
                   required
                   onChange={currencyValidation.handleChange}
@@ -252,13 +283,12 @@ const Currencies = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='decimals'
-                  label='Decimals'
+                  label={_labels.decimals}
                   valueField='decimals'
                   displayField='decimals'
                   store={decimalStore}
                   value={currencyValidation.values.decimals}
                   required
-                  readOnly={editMode}
                   onChange={(event, newValue) => {
                     currencyValidation.setFieldValue('decimals', newValue?.decimals)
                   }}
@@ -269,13 +299,12 @@ const Currencies = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='profileId'
-                  label='Profile'
+                  label={_labels.profile}
                   valueField='key'
                   displayField='value'
                   store={profileStore}
                   value={profileStore.filter(item => item.key === currencyValidation.values.profileId)[0]}
                   required
-                  readOnly={editMode}
                   onChange={(event, newValue) => {
                     currencyValidation.setFieldValue('profileId', newValue?.key)
                   }}
@@ -286,7 +315,7 @@ const Currencies = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='currencyType'
-                  label='Currency Type'
+                  label={_labels.currencyType}
                   valueField='key'
                   displayField='value'
                   store={currencyStore}
@@ -312,7 +341,7 @@ const Currencies = () => {
                       onChange={currencyValidation.handleChange}
                     />
                   }
-                  label='Sale'
+                  label={_labels.sales}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -324,7 +353,7 @@ const Currencies = () => {
                       onChange={currencyValidation.handleChange}
                     />
                   }
-                  label='Purchase'
+                  label={_labels.purchase}
                 />
               </Grid>
             </Grid>

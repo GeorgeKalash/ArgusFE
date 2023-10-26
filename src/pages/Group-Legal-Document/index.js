@@ -31,6 +31,8 @@ import { getNewGroup, populateGroup } from 'src/Models/System/BusinessPartner/Ca
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 
 const GroupLegalDocument = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -41,29 +43,38 @@ const GroupLegalDocument = () => {
   const [groupStore, setGroupStore] = useState([])
 
   //states
+  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const _labels = {
+    group: labels && labels.find(item => item.key === 1).value,
+    categoryId: labels && labels.find(item => item.key === 2).value,
+    required: labels && labels.find(item => item.key === 3).value,
+    mandatory: labels && labels.find(item => item.key === 4).value,
+    groupLegalDocument: labels && labels.find(item => item.key === 5).value
+  }
+
   const columns = [
     {
       field: 'groupName',
-      headerName: 'Group Name ',
+      headerName: _labels.group,
       flex: 1
     },
     {
       field: 'incName',
-      headerName: 'Inc Name ',
+      headerName: _labels.categoryId,
       flex: 1
     },
     {
       field: 'required',
-      headerName: 'Required',
+      headerName: _labels.required,
       flex: 1
     },
     {
       field: 'mandatory',
-      headerName: 'Mandatory',
+      headerName: _labels.mandatory,
       flex: 1
     }
   ]
@@ -85,13 +96,27 @@ const GroupLegalDocument = () => {
   const handleSubmit = () => {
     groupLegalDocumentValidation.handleSubmit()
   }
+  const getLabels = () => {
+    var parameters = '_dataset=' + ResourceIds.GroupLegalDocument
 
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+    getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log({ res })
+        setLabels(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     var parameters = defaultParams
 
     getRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.qryGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.qry,
       parameters: parameters
     })
       .then(res => {
@@ -103,10 +128,10 @@ const GroupLegalDocument = () => {
       })
   }
 
-  const FillCategoryStore = () => {
+  const fillCategoryStore = () => {
     var parameters = `filter=`
     getRequest({
-      extension: BusinessPartnerRepository.CategoryID.qryINC,
+      extension: BusinessPartnerRepository.CategoryID.qry,
       parameters: parameters
     })
       .then(res => {
@@ -117,10 +142,10 @@ const GroupLegalDocument = () => {
       })
   }
 
-  const FillGroupStore = () => {
+  const fillGroupStore = () => {
     var parameters = `filter=`
     getRequest({
-      extension: BusinessPartnerRepository.Group.qryGRP,
+      extension: BusinessPartnerRepository.Group.qry,
       parameters: parameters
     })
       .then(res => {
@@ -134,7 +159,7 @@ const GroupLegalDocument = () => {
   const postGroupLegalDocument = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.setGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -151,7 +176,7 @@ const GroupLegalDocument = () => {
   const delGroupLegalDocument = obj => {
     console.log('jsonOBJ ' + JSON.stringify(obj))
     postRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.delGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -166,8 +191,8 @@ const GroupLegalDocument = () => {
 
   const addGroupLegalDocument = () => {
     groupLegalDocumentValidation.setValues(getNewGroupLegalDocument())
-    FillCategoryStore()
-    FillGroupStore()
+    fillCategoryStore()
+    fillGroupStore()
     setEditMode(false)
     setWindowOpen(true)
   }
@@ -175,17 +200,17 @@ const GroupLegalDocument = () => {
   const editGroupLegalDocument = obj => {
     console.log(obj)
     groupLegalDocumentValidation.setValues(populateGroupLegalDocument(obj))
-    FillCategoryStore()
-    FillGroupStore()
+    fillCategoryStore()
+    fillGroupStore()
     setEditMode(true)
     setWindowOpen(true)
   }
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
-    FillGroupStore()
-    FillCategoryStore()
-  })
-
+    getGridData({ _startAt: 0, _pageSize: 50 })
+    fillGroupStore()
+    fillCategoryStore()
+    getLabels()
+  }, [])
   return (
     <>
       <Box
@@ -209,7 +234,7 @@ const GroupLegalDocument = () => {
       {windowOpen && (
         <Window
           id='GroupLegalDocumentWindow'
-          Title='Group Legal Document'
+          Title={_labels.groupLegalDocument}
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
@@ -220,7 +245,7 @@ const GroupLegalDocument = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='groupId'
-                  label='Group Name'
+                  label={_labels.group}
                   valueField='recordId'
                   displayField='name'
                   store={groupStore}
@@ -243,7 +268,7 @@ const GroupLegalDocument = () => {
               <Grid item xs={12}>
                 <CustomComboBox
                   name='incId'
-                  label='Category ID'
+                  label={_labels.categoryId}
                   valueField='recordId'
                   displayField='name'
                   store={categoryStore}
@@ -271,7 +296,7 @@ const GroupLegalDocument = () => {
                       onChange={groupLegalDocumentValidation.handleChange}
                     />
                   }
-                  label='Required'
+                  label={_labels.required}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -283,7 +308,7 @@ const GroupLegalDocument = () => {
                       onChange={groupLegalDocumentValidation.handleChange}
                     />
                   }
-                  label='Mandatory'
+                  label={_labels.mandatory}
                 />
               </Grid>
             </Grid>

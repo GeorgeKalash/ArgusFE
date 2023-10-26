@@ -1,30 +1,28 @@
 const service = 'BP.asmx/'
 
 export const BusinessPartnerRepository = {
-
-    LegalStatus: {
-        qry: service + 'qryLGS',
-        get: service + 'getLGS',
-        set: service + 'setLGS',
-        del: service + 'delLGS',
-    },
-    GroupLegalDocument: {
-      qryGIN: service + 'qryGIN',
-      getGIN: service + 'getGIN',
-      setGIN: service + 'setGIN',
-      delGIN: service + 'delGIN'
-    },
-    CategoryID: {
-      qryINC: service + 'qryINC',
-      getINC: service + 'getINC',
-      setINC: service + 'setINC',
-      delINC: service + 'delINC'
-    },
-    Group: {
-      qryGRP: service + 'qryGRP',
-      getGRP: service + 'getGRP',
-      setGRP: service + 'setGRP',
-      delGRP: service + 'delGRP'
-    }
-
+  LegalStatus: {
+    qry: service + 'qryLGS',
+    get: service + 'getLGS',
+    set: service + 'setLGS',
+    del: service + 'delLGS'
+  },
+  GroupLegalDocument: {
+    qry: service + 'qryGIN',
+    get: service + 'getGIN',
+    set: service + 'setGIN',
+    del: service + 'delGIN'
+  },
+  CategoryID: {
+    qry: service + 'qryINC',
+    get: service + 'getINC',
+    set: service + 'setINC',
+    del: service + 'delINC'
+  },
+  Group: {
+    qry: service + 'qryGRP',
+    get: service + 'getGRP',
+    set: service + 'setGRP',
+    del: service + 'delGRP'
+  }
 }

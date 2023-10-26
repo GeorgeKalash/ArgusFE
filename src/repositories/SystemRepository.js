@@ -43,5 +43,11 @@ export const SystemRepository = {
     get: service + 'getCO',
     set: service + 'setCO',
     del: service + 'delCO'
+  },
+  State: {
+    qry: service + 'qryST',
+    get: service + 'getST',
+    set: service + 'setST',
+    del: service + 'delST'
   }
 }
