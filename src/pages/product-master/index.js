@@ -20,6 +20,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 // ** Windows
 import ProductMasterWindow from './Windows/ProductMasterWindow'
@@ -109,12 +110,14 @@ const ProductMaster = () => {
     {
       field: 'commissionName',
       headerName: 'Commission Name',
-      flex: 1
+      flex: 1,
     },
     {
       field: 'commission',
       headerName: 'Commission',
-      flex: 1
+      flex: 1,
+      align: 'right',
+      valueGetter: ({ row }) => getFormattedNumber(row?.commission, 2)
     }
   ]
 
