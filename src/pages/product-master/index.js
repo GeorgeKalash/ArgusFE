@@ -154,7 +154,7 @@ const ProductMaster = () => {
   const getGridData = () => { }
 
   const fillTypeStore = () => {
-    var parameters = '_database=140' //add 'xml'.json and get _database values from there
+    var parameters = '_database=3601' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
@@ -184,7 +184,7 @@ const ProductMaster = () => {
   }
 
   const fillCommissionBaseStore = () => {
-    var parameters = '_database=141' //add 'xml'.json and get _database values from there
+    var parameters = '_database=3602' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
@@ -257,7 +257,7 @@ const ProductMaster = () => {
           recordId: 1,
           controls: 'phone',
           format: 'Alfa',
-          securityLevel: 'readOnly',
+          securityLevel: 'readOnly', //actual combo fills from SY.qryKVS?_database=3605
           specialChars: '@',
           fixedLength: 10,
           minLength: 3,
@@ -325,7 +325,7 @@ const ProductMaster = () => {
           recordId: 1,
           reference: 'NTFS',
           name: 'NTFS',
-          type: 'bank',
+          type: 'bank', //dispersal types fill from KVS 3604
           isDefault: true,
           isInactive: true
         },
