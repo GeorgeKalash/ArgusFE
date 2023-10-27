@@ -11,10 +11,6 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
@@ -26,6 +22,9 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ContactSupportOutlined } from '@mui/icons-material'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { KVSRepository } from 'src/repositories/KVSRepository'
+
+// ** Windows
+import CityWindow from './Windows/CityWindow'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -159,7 +158,7 @@ const City = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData({})
+        getGridData({ })
         setWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Editted Successfully')
@@ -223,82 +222,18 @@ const City = () => {
         />
       </Box>
       {windowOpen && (
-        <Window
-          id='CityWindow'
-          Title={_labels.cities}
+        <CityWindow
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
+          cityValidation={cityValidation}
           onSave={handleSubmit}
-        >
-          <CustomTabPanel>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='reference'
-                  label={_labels.reference}
-                  value={cityValidation.values.reference}
-                  required
-                  readOnly={editMode}
-                  onChange={cityValidation.handleChange}
-                  onClear={() => cityValidation.setFieldValue('reference', '')}
-                  error={cityValidation.touched.reference && Boolean(cityValidation.errors.reference)}
-                  helperText={cityValidation.touched.reference && cityValidation.errors.reference}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='name'
-                  label={_labels.reference}
-                  value={cityValidation.values.name}
-                  required
-                  readOnly={editMode}
-                  onChange={cityValidation.handleChange}
-                  onClear={() => cityValidation.setFieldValue('name', '')}
-                  error={cityValidation.touched.name && Boolean(cityValidation.errors.name)}
-                  helperText={cityValidation.touched.name && cityValidation.errors.name}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='countryId'
-                  label={_labels.country}
-                  valueField='recordId'
-                  displayField='name'
-                  store={countryStore}
-                  value={countryStore.filter(item => item.recordId === cityValidation.values.countryId)[0]}
-                  required
-                  readOnly={editMode}
-                  onChange={(event, newValue) => {
-                    cityValidation.setFieldValue('countryId', newValue?.recordId)
-                    cityValidation.setFieldValue('countryName', newValue?.name)
-                    const selectedCountryId = newValue?.recordId || ''
-                    fillStateStore(selectedCountryId) // Fetch and update state data based on the selected country
-                  }}
-                  error={cityValidation.touched.countryId && Boolean(cityValidation.errors.countryId)}
-                  helperText={cityValidation.touched.countryId && cityValidation.errors.countryId}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='stateId'
-                  label={_labels.state}
-                  valueField='recordId'
-                  displayField='name'
-                  store={stateStore}
-                  value={stateStore.filter(item => item.recordId === cityValidation.values.stateId)[0]}
-                  required
-                  readOnly={editMode && cityValidation.values.stateId !== null}
-                  onChange={(event, newValue) => {
-                    cityValidation.setFieldValue('stateId', newValue?.recordId)
-                  }}
-                  error={cityValidation.touched.stateId && Boolean(cityValidation.errors.stateId)}
-                  helperText={cityValidation.touched.stateId && cityValidation.errors.stateId}
-                />
-              </Grid>
-            </Grid>
-          </CustomTabPanel>
-        </Window>
+          labels={_labels}
+          editMode={editMode}
+          stateStore={stateStore}
+          countryStore={countryStore}
+          fillStateStore={fillStateStore}
+        />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>

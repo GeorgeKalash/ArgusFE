@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
+import { Grid, Box} from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -11,10 +11,10 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+
+// ** Windows
+import GroupLegalDocumentWindow from './Windows/GroupLegalDocumentWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -192,7 +192,7 @@ const GroupLegalDocument = () => {
   }
 
   const addGroupLegalDocument = () => {
-    groupLegalDocumentValidation.setValues(getNewGroupLegalDocument())
+    groupLegalDocumentValidation.setValues(getNewGroupLegalDocument)
     fillCategoryStore()
     fillGroupStore()
     setEditMode(false)
@@ -235,89 +235,19 @@ const GroupLegalDocument = () => {
         />
       </Box>
       {windowOpen && (
-        <Window
-          id='GroupLegalDocumentWindow'
-          Title={_labels.groupLegalDocument}
+        <GroupLegalDocumentWindow
+          labels={_labels}
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
+          editMode={editMode}
           onSave={handleSubmit}
-        >
-          <CustomTabPanel>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='groupId'
-                  label={_labels.group}
-                  valueField='recordId'
-                  displayField='name'
-                  store={groupStore}
-                  value={groupLegalDocumentValidation.values.groupName}
-                  required
-                  readOnly={editMode}
-                  onChange={(event, newValue) => {
-                    groupLegalDocumentValidation.setFieldValue('groupId', newValue?.recordId)
-                    groupLegalDocumentValidation.setFieldValue('groupName', newValue?.name)
-                  }}
-                  error={
-                    groupLegalDocumentValidation.touched.groupName &&
-                    Boolean(groupLegalDocumentValidation.errors.groupName)
-                  }
-                  helperText={
-                    groupLegalDocumentValidation.touched.groupName && groupLegalDocumentValidation.errors.groupName
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='incId'
-                  label={_labels.categoryId}
-                  valueField='recordId'
-                  displayField='name'
-                  store={categoryStore}
-                  value={groupLegalDocumentValidation.values.incName}
-                  required
-                  readOnly={editMode}
-                  onChange={(event, newValue) => {
-                    groupLegalDocumentValidation.setFieldValue('incId', newValue?.recordId)
-                    groupLegalDocumentValidation.setFieldValue('incName', newValue?.name)
-                  }}
-                  error={
-                    groupLegalDocumentValidation.touched.incName && Boolean(groupLegalDocumentValidation.errors.incName)
-                  }
-                  helperText={
-                    groupLegalDocumentValidation.touched.incName && groupLegalDocumentValidation.errors.incName
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='required'
-                      checked={groupLegalDocumentValidation.values?.required}
-                      onChange={groupLegalDocumentValidation.handleChange}
-                    />
-                  }
-                  label={_labels.required}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='mandatory'
-                      checked={groupLegalDocumentValidation.values?.mandatory}
-                      onChange={groupLegalDocumentValidation.handleChange}
-                    />
-                  }
-                  label={_labels.mandatory}
-                />
-              </Grid>
-            </Grid>
-          </CustomTabPanel>
-        </Window>
+          groupLegalDocumentValidation={groupLegalDocumentValidation}
+          categoryStore={categoryStore}
+          groupStore={groupStore}
+        />
       )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
