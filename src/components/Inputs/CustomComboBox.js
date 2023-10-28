@@ -4,8 +4,6 @@ import {
     TextField,
 } from '@mui/material'
 
-
-
 const CustomComboBox = ({
     type = 'text', //any valid HTML5 input type
     name,
