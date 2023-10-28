@@ -36,6 +36,7 @@ import Spinner from 'src/@core/components/spinner'
 // ** Contexts
 import { AuthProvider } from 'src/providers/AuthContext'
 import { RequestsProvider } from 'src/providers/RequestsContext'
+import { ControlProvider } from 'src/providers/ControlContext'
 import { MenuProvider } from 'src/providers/MenuContext'
 import { TabsProvider } from 'src/providers/TabsContext'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
@@ -121,6 +122,7 @@ const App = props => {
 
         <AuthProvider>
           <RequestsProvider>
+          <ControlProvider>
             <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
               <SettingsConsumer>
                 {({ settings }) => {
@@ -139,6 +141,7 @@ const App = props => {
                 }}
               </SettingsConsumer>
             </SettingsProvider>
+          </ControlProvider>
           </RequestsProvider>
         </AuthProvider>
       </CacheProvider>

@@ -15,7 +15,6 @@ const RequestsProvider = ({ children }) => {
 
     const getRequest = async (body) => {
         const accessToken = await getAccessToken()
-        console.log(accessToken);
 
         return axios({
             method: 'GET',

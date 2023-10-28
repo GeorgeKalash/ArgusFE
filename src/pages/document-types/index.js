@@ -16,27 +16,32 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import OldWindow from 'src/components/Shared/OldWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import { KVSRepository } from 'src/repositories/KVSRepository'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
+// import { defaultParams } from 'src/lib/defaults'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const DocumentTypes = () => {
+  
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
+
+  //control
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -46,7 +51,6 @@ const DocumentTypes = () => {
   const [numberRangeStore, setNumberRangeStore] = useState([])
 
   //states
-  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
@@ -125,22 +129,6 @@ const DocumentTypes = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) documentTypesValidation.handleSubmit()
-  }
-
-  const getLabels = () => {
-    var parameters = '_dataset=' + ResourceIds.DocumentTypes
-
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log({ res })
-        setLabels(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
@@ -268,7 +256,9 @@ const DocumentTypes = () => {
     getGridData({ _startAt: 0, _pageSize: 30 })
     fillSysFunctionsStore()
     fillActiveStatusStore()
-    getLabels()
+
+    getAccess(ResourceIds.DocumentTypes, setAccess)
+    getLabels(ResourceIds.DocumentTypes, setLabels)
   }, [])
 
   return (
