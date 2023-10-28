@@ -256,7 +256,6 @@ const DocumentTypes = () => {
     getGridData({ _startAt: 0, _pageSize: 30 })
     fillSysFunctionsStore()
     fillActiveStatusStore()
-
     getAccess(ResourceIds.DocumentTypes, setAccess)
     getLabels(ResourceIds.DocumentTypes, setLabels)
   }, [])

@@ -12,8 +12,9 @@ const RequestsContext = createContext()
 const RequestsProvider = ({ children }) => {
 
     const { user } = useContext(AuthContext)
-
+    
     const getRequest = async (body) => {
+        console.log({getRequest: user})
         const accessToken = await getAccessToken()
 
         return axios({
@@ -48,11 +49,11 @@ const RequestsProvider = ({ children }) => {
     const getAccessToken = async () => {
         return new Promise(async (resolve) => {
 
-            if (user.expiresAt !== null) {
+            if (user?.expiresAt !== null) {
 
                 var dateNow = new Date()
 
-                if (user.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
+                if (user?.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
 
                     var bodyFormData = new FormData()
                     bodyFormData.append('record', JSON.stringify({ "accessToken": user.accessToken, "refreshToken": user.refreshToken }))
@@ -86,7 +87,7 @@ const RequestsProvider = ({ children }) => {
                         resolve('error getting new Access Token')
                     }
                 } else
-                    resolve(user.accessToken)
+                    resolve(user?.accessToken)
             } else
                 resolve(null)
         })

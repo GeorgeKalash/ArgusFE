@@ -68,7 +68,7 @@ const AuthProvider = ({ children }) => {
     try {
       const getAC = await axios({
         method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=react`
+        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
       })
 
       const getUS2 = await axios({

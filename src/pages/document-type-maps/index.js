@@ -19,6 +19,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewDocumentTypeMaps, populateDocumentTypeMaps } from 'src/Models/System/DocumentTypeMaps'
 
@@ -27,6 +28,7 @@ import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser
 
 const DocumentTypeMaps = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { fillDocumentTypeStore } = useContext(CommonContext)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -99,22 +101,6 @@ const DocumentTypeMaps = () => {
       })
   }
 
-  const fillDocumentTypeStore = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + '&_dgId=0'
-
-    getRequest({
-      extension: SystemRepository.DocumentType.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setDocumentTypeStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
-  }
-
   const fillFunctionStore = () => {
     var parameters = '_database=25'
     getRequest({
@@ -175,7 +161,7 @@ const DocumentTypeMaps = () => {
 
   useEffect(() => {
     getGridData({ _startAt: 0, _pageSize: 30, params: '' })
-    fillDocumentTypeStore({ _startAt: 0, _pageSize: 30 })
+    fillDocumentTypeStore({ _startAt: 0, _pageSize: 30, callback: setDocumentTypeStore })
     fillFunctionStore()
   }, [])
 
