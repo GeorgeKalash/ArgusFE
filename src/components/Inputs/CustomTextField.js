@@ -13,8 +13,16 @@ const CustomTextField = ({
   readOnly = false,
   autoComplete = 'off',
   numberField = false,
+  editMode = false,
   ...props
 }) => {
+
+  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+  const _readOnly = editMode ?
+    editMode && maxAccess < 3
+    : readOnly
+
   return (
     <TextField
       type={type}
@@ -24,7 +32,7 @@ const CustomTextField = ({
       fullWidth={fullWidth}
       autoFocus={autoFocus}
       inputProps={{
-        readOnly: readOnly,
+        readOnly: _readOnly,
         pattern: numberField && '[0-9]*', // Allow only numeric input
         style: {
           textAlign: numberField && 'right'

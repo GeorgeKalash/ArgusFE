@@ -24,7 +24,15 @@ const CustomComboBox = ({
     disabled = false,
     readOnly = false,
     sx,
+    editMode = false,
+    ...props
 }) => {
+
+    const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+    const _readOnly = editMode ?
+        editMode && maxAccess < 3
+        : readOnly
 
     return (
         <Autocomplete
@@ -41,8 +49,8 @@ const CustomComboBox = ({
             isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
             onChange={onChange}
             fullWidth={fullWidth}
-            readOnly={readOnly}
-            freeSolo={readOnly}
+            readOnly={_readOnly}
+            freeSolo={_readOnly}
             disabled={disabled}
             sx={sx}
             renderInput={(params) =>

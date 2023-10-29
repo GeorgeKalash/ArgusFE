@@ -102,6 +102,7 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props.api
+  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -254,6 +255,12 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
   const columns = props.columns
 
   if (props.onEdit || props.onDelete) {
+
+    const deleteBtnVisible =
+      maxAccess ?
+        props.onDelete && maxAccess > 3
+        : props.onDelete ? true : false
+
     columns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,
@@ -267,7 +274,7 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
               </IconButton>
             )}
-            {props.onDelete && (
+            {deleteBtnVisible && (
               <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
@@ -292,12 +299,12 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
           props.style
             ? props.style
             : {
-                zIndex: 0
+              zIndex: 0
 
-                // marginBottom: 0,
-                // pb: 0,
-                // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
-              }
+              // marginBottom: 0,
+              // pb: 0,
+              // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
+            }
         }
       >
         {/* <ScrollableTable> */}

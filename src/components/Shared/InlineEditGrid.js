@@ -95,7 +95,7 @@ const InlineEditGrid = ({
                 )
               )}
             </Grid>
-            <Grid item>
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <IconButton
                 onClick={() => handleDeleteRow(rowIndex)}
                 size="small"
@@ -103,7 +103,7 @@ const InlineEditGrid = ({
               >
                 <DeleteIcon />
               </IconButton>
-            </Grid>
+            </Box>
           </Box>
         </Grid>
       ))}

@@ -276,7 +276,7 @@ const DocumentTypes = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addDocumentType} />
+        <GridToolbar onAdd={addDocumentType} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -285,6 +285,7 @@ const DocumentTypes = () => {
           onEdit={editDocumentType}
           onDelete={delDocumentType}
           isLoading={false}
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
@@ -298,6 +299,7 @@ const DocumentTypes = () => {
           width={600}
           height={400}
           onSave={handleSubmit}
+          maxAccess={access}
         >
           <CustomTabPanel index={0} value={activeTab}>
             <Grid container spacing={4}>
@@ -311,6 +313,8 @@ const DocumentTypes = () => {
                   onClear={() => documentTypesValidation.setFieldValue('reference', '')}
                   error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
                   helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -323,6 +327,8 @@ const DocumentTypes = () => {
                   onClear={() => documentTypesValidation.setFieldValue('name', '')}
                   error={documentTypesValidation.touched.name && Boolean(documentTypesValidation.errors.name)}
                   helperText={documentTypesValidation.touched.name && documentTypesValidation.errors.name}
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -340,6 +346,8 @@ const DocumentTypes = () => {
                     documentTypesValidation.setFieldValue('dgName', newValue?.value)
                   }}
                   error={documentTypesValidation.touched.dgName && Boolean(documentTypesValidation.errors.dgName)}
+                  maxAccess={access}
+                  editMode={editMode}
                   helperText={documentTypesValidation.touched.dgName && documentTypesValidation.errors.dgName}
                 />
               </Grid>
@@ -358,6 +366,8 @@ const DocumentTypes = () => {
                   }}
                   error={documentTypesValidation.touched.ilName && Boolean(documentTypesValidation.errors.ilName)}
                   helperText={documentTypesValidation.touched.ilName && documentTypesValidation.errors.ilName}
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -380,6 +390,8 @@ const DocumentTypes = () => {
                   helperText={
                     documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName
                   }
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -406,14 +418,16 @@ const DocumentTypes = () => {
                   }}
                   error={documentTypesValidation.touched.nra && Boolean(documentTypesValidation.errors.nra)}
                   helperText={documentTypesValidation.touched.nra && documentTypesValidation.errors.nra}
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
             </Grid>
           </CustomTabPanel>
           <CustomTabPanel index={1} value={activeTab}>
-            <Grid container>
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
               <InlineEditGrid />
-            </Grid>
+            </Box>
           </CustomTabPanel>
         </Window>
       )}
