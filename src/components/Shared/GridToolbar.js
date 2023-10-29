@@ -4,6 +4,9 @@ import {
     Button,
 } from '@mui/material'
 
+// ** Resources
+import { TrxType } from 'src/resources/AccessLevels';
+
 const GridToolbar = ({
     onAdd,
     openRPB,
@@ -11,7 +14,7 @@ const GridToolbar = ({
 }) => {
 
     const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-    const addBtnVisible = onAdd && maxAccess != 1
+    const addBtnVisible = onAdd && maxAccess != TrxType.GET
 
     return (
         <Box sx={{ display: 'flex', pb: 2 }}>

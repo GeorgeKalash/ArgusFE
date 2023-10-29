@@ -69,6 +69,7 @@ const DocumentTypes = () => {
 
   const columns = [
     {
+      id: 'reference',
       field: 'reference',
       headerName: _labels.reference,
       flex: 1,
@@ -78,30 +79,35 @@ const DocumentTypes = () => {
       // valueGetter: ({ row }) => getFormattedNumber(row?.reference, 4)
     },
     {
+      id: 'dgName',
       field: 'dgName',
       headerName: _labels.sysFunction,
       flex: 1,
       editable: false
     },
     {
+      id: 'ColILName',
       field: 'ilName',
       headerName: _labels.intLogic,
       flex: 1,
       editable: false
     },
     {
+      id: 'name',
       field: 'name',
       headerName: _labels.name,
       flex: 1,
       editable: false
     },
     {
+      id: 'activeStatusName',
       field: 'activeStatusName',
       headerName: _labels.status,
       flex: 1,
       editable: false
     },
     {
+      id: 'ColNraRef',
       field: 'nraRef',
       headerName: _labels.nuRange,
       flex: 1,
@@ -125,11 +131,12 @@ const DocumentTypes = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       dgName: yup.string().required('This field is required'),
-      activeStatusName: yup.string().required('This field is required')
+      activeStatusName: yup.string().required('This field is required'),
+      ilId: access && access.record?.controls?.find(item => item.controlId === "ilId")?.accessLevel == 2 ? yup.string() : yup.string().required('This field is required')
     }),
     onSubmit: values => {
       // values.reference = getNumberWithoutCommas(values.reference)
-      // console.log({ values })
+      console.log({ values })
       postDocumentType(values)
     }
   })
@@ -267,6 +274,8 @@ const DocumentTypes = () => {
     getLabels(ResourceIds.DocumentTypes, setLabels)
   }, [])
 
+  console.log({ access })
+
   return (
     <>
       <Box
@@ -300,6 +309,7 @@ const DocumentTypes = () => {
           height={400}
           onSave={handleSubmit}
           maxAccess={access}
+          editMode={editMode}
         >
           <CustomTabPanel index={0} value={activeTab}>
             <Grid container spacing={4}>
@@ -353,19 +363,19 @@ const DocumentTypes = () => {
               </Grid>
               <Grid item xs={12}>
                 <CustomComboBox
-                  name='ilName'
+                  name='ilId'
                   label={_labels.intLogic}
                   valueField='recordId'
                   displayField='name'
                   store={integrationLogicStore}
                   getOptionBy={documentTypesValidation.values.ilId}
-                  value={documentTypesValidation.values.ilName}
+                  value={integrationLogicStore.filter(item => item.recordId === documentTypesValidation.values.ilId)[0]}
                   onChange={(event, newValue) => {
                     documentTypesValidation.setFieldValue('ilId', newValue?.recordId)
                     documentTypesValidation.setFieldValue('ilName', newValue?.name)
                   }}
-                  error={documentTypesValidation.touched.ilName && Boolean(documentTypesValidation.errors.ilName)}
-                  helperText={documentTypesValidation.touched.ilName && documentTypesValidation.errors.ilName}
+                  error={documentTypesValidation.touched.ilId && Boolean(documentTypesValidation.errors.ilId)}
+                  helperText={documentTypesValidation.touched.ilId && documentTypesValidation.errors.ilId}
                   maxAccess={access}
                   editMode={editMode}
                 />

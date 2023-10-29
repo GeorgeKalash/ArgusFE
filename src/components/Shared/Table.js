@@ -17,6 +17,9 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 // ** Custom Imports
 import DeleteDialog from './DeleteDialog'
 
+// ** Resources
+import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels';
+
 const ODD_OPACITY = 0.2
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
@@ -103,6 +106,7 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props.api
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -254,14 +258,22 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
 
   const columns = props.columns
 
+  const shouldRemoveColumn = (column) => {
+    const match = columnsAccess && columnsAccess.find((item) => item.controlId === column.id)
+
+    return match && match.accessLevel === ControlAccessLevel.Hidden;
+  }
+
+  const filteredColumns = columns.filter((column) => !shouldRemoveColumn(column))
+
   if (props.onEdit || props.onDelete) {
 
     const deleteBtnVisible =
       maxAccess ?
-        props.onDelete && maxAccess > 3
+        props.onDelete && maxAccess > TrxType.EDIT
         : props.onDelete ? true : false
 
-    columns.push({
+    filteredColumns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,
       width: 100,
@@ -310,7 +322,6 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
         {/* <ScrollableTable> */}
         <StripedDataGrid
           rows={gridData?.list || []}
-          columns={columns}
           sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
           density='compact'
           components={{
@@ -330,6 +341,7 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
           disableColumnMenu
           getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
           {...props}
+          columns={filteredColumns}
         />
         {/* </ScrollableTable> */}
         {/* <PaginationContainer>
