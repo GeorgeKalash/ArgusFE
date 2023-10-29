@@ -14,7 +14,6 @@ const RequestsProvider = ({ children }) => {
     const { user } = useContext(AuthContext)
     
     const getRequest = async (body) => {
-        console.log({getRequest: user})
         const accessToken = await getAccessToken()
 
         return axios({

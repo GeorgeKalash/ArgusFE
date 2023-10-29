@@ -18,6 +18,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -35,7 +36,7 @@ import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/Do
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const DocumentTypes = () => {
-  
+
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
@@ -70,7 +71,8 @@ const DocumentTypes = () => {
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1
+      flex: 1,
+      editable: false
 
       // align: 'right',
       // valueGetter: ({ row }) => getFormattedNumber(row?.reference, 4)
@@ -78,27 +80,32 @@ const DocumentTypes = () => {
     {
       field: 'dgName',
       headerName: _labels.sysFunction,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
       field: 'ilName',
       headerName: _labels.intLogic,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
       field: 'name',
       headerName: _labels.name,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
       field: 'activeStatusName',
       headerName: _labels.status,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
       field: 'nraRef',
       headerName: _labels.nuRange,
-      flex: 1
+      flex: 1,
+      editable: false
     }
   ]
 
@@ -401,6 +408,11 @@ const DocumentTypes = () => {
                   helperText={documentTypesValidation.touched.nra && documentTypesValidation.errors.nra}
                 />
               </Grid>
+            </Grid>
+          </CustomTabPanel>
+          <CustomTabPanel index={1} value={activeTab}>
+            <Grid container>
+              <InlineEditGrid />
             </Grid>
           </CustomTabPanel>
         </Window>
