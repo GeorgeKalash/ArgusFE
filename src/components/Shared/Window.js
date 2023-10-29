@@ -45,8 +45,6 @@ const Window = ({
         maxAccess < TrxType.EDIT ? false : true
         : maxAccess < TrxType.ADD ? false : true
 
-    console.log({ windowToolbarVisible })
-
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
             onSave()
