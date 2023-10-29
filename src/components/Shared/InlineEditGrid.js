@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const InlineEditGrid = ({
-  row = { column1: '', column2: '', column3: '', column4: '' }
+  row = { name: 'testName', reference: 'testRef' }
 }) => {
   const [data, setData] = useState([{ rowId: 0, ...row }]);
 
@@ -31,6 +31,9 @@ const InlineEditGrid = ({
   };
 
   const handleDeleteRow = (rowIndex) => {
+    if (data.length === 1)
+      return
+
     const updatedData = [...data];
     updatedData.splice(rowIndex, 1);
     setData(updatedData);
@@ -84,7 +87,8 @@ const InlineEditGrid = ({
                         }
                       }}
                       sx={{
-                        width: 120,
+                        minWidth: 120,
+                        maxWidth: 200,
                         borderRadius: 0,
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 0,

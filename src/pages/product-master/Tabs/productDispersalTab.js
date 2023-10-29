@@ -7,6 +7,7 @@ import { Grid, Box, Checkbox } from '@mui/material'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const ProductDispersalTab = ({ productDispersalGridData }) => {
   const columns = [
@@ -79,14 +80,17 @@ const ProductDispersalTab = ({ productDispersalGridData }) => {
             </Grid>
           </Grid>
           <Grid xs={12}>
-            <Table
+            {/* <Table
               columns={columns}
               gridData={productDispersalGridData}
               rowId={['recordId']}
               isLoading={false}
               pagination={false}
               height={260}
-            />
+            /> */}
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
+              <InlineEditGrid />
+            </Box>
           </Grid>
         </Grid>
       </Box>
