@@ -87,7 +87,7 @@ const Currencies = () => {
       name: yup.string().required('This field is required'),
       decimals: yup.string().required('This field is required'),
       profileId: yup.string().required('This field is required'),
-      currencyTypeName: yup.string().required('This field is required')
+      currencyType: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postCurrency(values)

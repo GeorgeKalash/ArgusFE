@@ -83,8 +83,8 @@ const GroupLegalDocument = () => {
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
-      groupName: yup.string().required('This field is required'),
-      incName: yup.string().required('This field is required'),
+      groupId: yup.string().required('This field is required'),
+      incId: yup.string().required('This field is required'),
       required: yup.string().required('This field is required'),
       mandatory: yup.string().required('This field is required')
     }),

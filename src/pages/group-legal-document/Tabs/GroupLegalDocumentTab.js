@@ -26,14 +26,13 @@ const GroupLegalDocumentTab=({
                   readOnly={editMode}
                   onChange={(event, newValue) => {
                     groupLegalDocumentValidation.setFieldValue('groupId', newValue?.recordId)
-                    groupLegalDocumentValidation.setFieldValue('groupName', newValue?.groupName)
                   }}
                   error={
-                    groupLegalDocumentValidation.touched.groupName &&
-                    Boolean(groupLegalDocumentValidation.errors.groupName)
+                    groupLegalDocumentValidation.touched.groupId &&
+                    Boolean(groupLegalDocumentValidation.errors.groupId)
                   }
                   helperText={
-                    groupLegalDocumentValidation.touched.groupName && groupLegalDocumentValidation.errors.groupName
+                    groupLegalDocumentValidation.touched.groupId && groupLegalDocumentValidation.errors.groupId
                   }
                 />
               </Grid>
@@ -49,13 +48,12 @@ const GroupLegalDocumentTab=({
                   readOnly={editMode}
                   onChange={(event, newValue) => {
                     groupLegalDocumentValidation.setFieldValue('incId', newValue?.recordId)
-                    groupLegalDocumentValidation.setFieldValue('incName', newValue?.incName)
                   }}
                   error={
-                    groupLegalDocumentValidation.touched.incName && Boolean(groupLegalDocumentValidation.errors.incName)
+                    groupLegalDocumentValidation.touched.incId && Boolean(groupLegalDocumentValidation.errors.incId)
                   }
                   helperText={
-                    groupLegalDocumentValidation.touched.incName && groupLegalDocumentValidation.errors.incName
+                    groupLegalDocumentValidation.touched.incId && groupLegalDocumentValidation.errors.incId
                   }
                 />
               </Grid>

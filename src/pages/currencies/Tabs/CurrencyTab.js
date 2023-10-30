@@ -96,12 +96,11 @@ const CurrencyTab=({
               readOnly={editMode}
               onChange={(event, newValue) => {
                 currencyValidation.setFieldValue('currencyType', newValue?.key)
-                currencyValidation.setFieldValue('currencyTypeName', newValue?.value)
               }}
               error={
-                currencyValidation.touched.currencyTypeName && Boolean(currencyValidation.errors.currencyTypeName)
+                currencyValidation.touched.currencyType && Boolean(currencyValidation.errors.currencyType)
               }
-              helperText={currencyValidation.touched.currencyTypeName && currencyValidation.errors.currencyTypeName}
+              helperText={currencyValidation.touched.currencyType && currencyValidation.errors.currencyType}
             />
           </Grid>
           <Grid item xs={12}>
