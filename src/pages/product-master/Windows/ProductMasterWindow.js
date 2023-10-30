@@ -35,7 +35,6 @@ const ProductMasterWindow = ({
     countryStore,
     maxAccess
 }) => {
-console.log(maxAccess);
 
     return (
         <Window

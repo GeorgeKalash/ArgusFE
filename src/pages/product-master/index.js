@@ -163,7 +163,10 @@ const ProductMaster = () => {
   })
 
   const handleSubmit = () => {
-    if (activeTab === 0) productMasterValidation.handleSubmit()
+    if (activeTab === 0) {
+      console.log({activeTab})
+      productMasterValidation.handleSubmit()
+    }
     else if (activeTab === 2) productLegValidation.handleSubmit()
   }
 

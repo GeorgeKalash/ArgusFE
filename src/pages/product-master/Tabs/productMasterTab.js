@@ -28,8 +28,8 @@ const ProductMasterTab = ({
               readOnly={false}
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('reference', '')}
-              error={productMasterValidation.touched.reference && Boolean(productMasterValidation.errors.reference)}
-              helperText={productMasterValidation.touched.reference && productMasterValidation.errors.reference}
+              error={Boolean(productMasterValidation.errors.reference)}
+              helperText={productMasterValidation.errors.reference}
             />
           </Grid>
           <Grid item xs={12}>
@@ -40,8 +40,8 @@ const ProductMasterTab = ({
               required
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('name', '')}
-              error={productMasterValidation.touched.name && Boolean(productMasterValidation.errors.name)}
-              helperText={productMasterValidation.touched.name && productMasterValidation.errors.name}
+              error={productMasterValidation.errors.name}
+              helperText={productMasterValidation.errors.name}
             />
           </Grid>
           <Grid item xs={12}>
@@ -56,8 +56,8 @@ const ProductMasterTab = ({
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('type', newValue?.key)
               }}
-              error={productMasterValidation.touched.type && Boolean(productMasterValidation.errors.type)}
-              helperText={productMasterValidation.touched.type && productMasterValidation.errors.type}
+              error={Boolean(productMasterValidation.errors.type)}
+              helperText={productMasterValidation.errors.type}
             />
           </Grid>
           <Grid item xs={12}>
@@ -77,9 +77,9 @@ const ProductMasterTab = ({
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('correspondant', '')}
               error={
-                productMasterValidation.touched.correspondant && Boolean(productMasterValidation.errors.correspondant)
+                Boolean(productMasterValidation.errors.correspondant)
               }
-              helperText={productMasterValidation.touched.correspondant && productMasterValidation.errors.correspondant}
+              helperText={productMasterValidation.errors.correspondant}
             />
           </Grid>
           <Grid item xs={12}>
@@ -95,9 +95,9 @@ const ProductMasterTab = ({
                 productMasterValidation.setFieldValue('countryId', newValue?.recordId)
               }}
               error={
-                productMasterValidation.touched.countryId && Boolean(productMasterValidation.errors.countryId)
+                Boolean(productMasterValidation.errors.countryId)
               }
-              helperText={productMasterValidation.touched.countryId && productMasterValidation.errors.countryId}
+              helperText={productMasterValidation.errors.countryId}
             />
 
           </Grid>
@@ -113,9 +113,9 @@ const ProductMasterTab = ({
                 productMasterValidation.setFieldValue('currencyId', newValue?.recordId)
               }}
               error={
-                productMasterValidation.touched.currencyId && Boolean(productMasterValidation.errors.currencyId)
+                Boolean(productMasterValidation.errors.currencyId)
               }
-              helperText={productMasterValidation.touched.currencyId && productMasterValidation.errors.currencyId}
+              helperText={productMasterValidation.errors.currencyId}
             />
           </Grid>
         </Grid>
@@ -135,9 +135,9 @@ const ProductMasterTab = ({
                 productMasterValidation.setFieldValue('languageName', newValue?.value)
               }}
               error={
-                productMasterValidation.touched.languageName && Boolean(productMasterValidation.errors.languageName)
+                Boolean(productMasterValidation.errors.languageName)
               }
-              helperText={productMasterValidation.touched.languageName && productMasterValidation.errors.languageName}
+              helperText={productMasterValidation.errors.languageName}
             />
           </Grid>
           <Grid item xs={12}>
@@ -156,11 +156,10 @@ const ProductMasterTab = ({
                 productMasterValidation.setFieldValue('commissionBaseName', newValue?.value)
               }}
               error={
-                productMasterValidation.touched.commissionBaseName &&
-                Boolean(productMasterValidation.errors.commissionBaseName)
+                                Boolean(productMasterValidation.errors.commissionBaseName)
               }
               helperText={
-                productMasterValidation.touched.commissionBaseName && productMasterValidation.errors.commissionBaseName
+                productMasterValidation.errors.commissionBaseName
               }
             />
           </Grid>
@@ -172,8 +171,8 @@ const ProductMasterTab = ({
               readOnly={false}
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('posMsg', '')}
-              error={productMasterValidation.touched.posMsg && Boolean(productMasterValidation.errors.posMsg)}
-              helperText={productMasterValidation.touched.posMsg && productMasterValidation.errors.posMsg}
+              error={Boolean(productMasterValidation.errors.posMsg)}
+              helperText={productMasterValidation.errors.posMsg}
             />
           </Grid>
           <Grid item xs={12}>
