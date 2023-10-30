@@ -306,56 +306,62 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
 
   return (
     <>
-      <TableContainer
-        sx={
-          props.style
-            ? props.style
-            : {
-              zIndex: 0
+      {maxAccess && maxAccess > TrxType.NOACCESS ?
+        <>
+          <TableContainer
+            sx={
+              props.style
+                ? props.style
+                : {
+                  zIndex: 0
 
-              // marginBottom: 0,
-              // pb: 0,
-              // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
+                  // marginBottom: 0,
+                  // pb: 0,
+                  // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
+                }
             }
-        }
-      >
-        {/* <ScrollableTable> */}
-        <StripedDataGrid
-          rows={gridData?.list || []}
-          sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
-          density='compact'
-          components={{
-            LoadingOverlay: LinearProgress,
+          >
+            {/* <ScrollableTable> */}
+            <StripedDataGrid
+              rows={gridData?.list || []}
+              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
+              density='compact'
+              components={{
+                LoadingOverlay: LinearProgress,
 
-            // Pagination: pagination ? CustomPagination : null,
-            Footer: CustomPagination,
-            NoRowsOverlay: () => (
-              <Stack height='100%' alignItems='center' justifyContent='center'>
-                This Screen Has No Data
-              </Stack>
-            )
-          }}
-          loading={props.isLoading}
-          getRowId={getRowId}
-          disableRowSelectionOnClick
-          disableColumnMenu
-          getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
-          {...props}
-          columns={filteredColumns}
-        />
-        {/* </ScrollableTable> */}
-        {/* <PaginationContainer>
+                // Pagination: pagination ? CustomPagination : null,
+                Footer: CustomPagination,
+                NoRowsOverlay: () => (
+                  <Stack height='100%' alignItems='center' justifyContent='center'>
+                    This Screen Has No Data
+                  </Stack>
+                )
+              }}
+              loading={props.isLoading}
+              getRowId={getRowId}
+              disableRowSelectionOnClick
+              disableColumnMenu
+              getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
+              {...props}
+              columns={filteredColumns}
+            />
+            {/* </ScrollableTable> */}
+            {/* <PaginationContainer>
                     <CustomPagination />
                 </PaginationContainer> */}
-      </TableContainer>
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen([false, {}])}
-        onConfirm={obj => {
-          setDeleteDialogOpen([false, {}])
-          props.onDelete(obj)
-        }}
-      />
+          </TableContainer>
+          <DeleteDialog
+            open={deleteDialogOpen}
+            onClose={() => setDeleteDialogOpen([false, {}])}
+            onConfirm={obj => {
+              setDeleteDialogOpen([false, {}])
+              props.onDelete(obj)
+            }}
+          />
+        </>
+        :
+        'NO ACCESS'
+      }
     </>
   )
 }
