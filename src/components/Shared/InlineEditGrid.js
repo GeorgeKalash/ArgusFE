@@ -9,13 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { Autocomplete, InputAdornment } from '@mui/material'
 
 const InlineEditGrid = ({
-  columns = [
-    { key: 0, header: 'Reference', name: 'reference', value: '' },
-    { key: 0, header: 'Name', name: 'dispersalTypeId', value: '' },
-    { key: 1, header: 'Disp. Type', name: 'dispersalTypeId', value: null },
-    { key: 2, header: 'Is Default', name: 'isDefault ', value: false },
-    { key: 2, header: 'Is Inactive', name: 'isInactive', value: false },
-  ]
+  columns
 }) => {
   const [data, setData] = useState([{ rowId: 0, columns }])
 

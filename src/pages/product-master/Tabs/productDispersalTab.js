@@ -10,55 +10,63 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const ProductDispersalTab = ({ productDispersalGridData }) => {
+  // const columns = [
+  //   {
+  //     recordId: '1',
+  //     field: 'reference',
+  //     headerName: 'Reference',
+  //     flex: 1
+  //   },
+  //   {
+  //     recordId: '2',
+  //     field: 'name',
+  //     headerName: 'Name',
+  //     flex: 1
+  //   },
+  //   {
+  //     recordId: '3',
+  //     field: 'type',
+  //     headerName: 'Dispersal Type',
+  //     flex: 1
+  //   },
+  //   {
+  //     recordId: '5',
+  //     field: 'isDefault',
+  //     headerName: 'is Default',
+  //     flex: 1,
+  //     renderCell: params => (
+  //       <Checkbox
+  //         color='primary'
+  //         checked={params.row.isDefault === true} // Checked based on 'isDefault' property
+  //         onChange={() => {
+  //           params.row.isDefault = !params.row.isDefault
+  //         }}
+  //       />
+  //     )
+  //   },
+  //   {
+  //     recordId: '6',
+  //     field: 'isInactive',
+  //     headerName: 'Inactive',
+  //     flex: 1,
+  //     renderCell: params => (
+  //       <Checkbox
+  //         color='primary'
+  //         checked={params.row.isInactive === true} // Checked based on 'isInactive' property
+  //         onChange={() => {
+  //           params.row.isInactive = !params.row.isInactive
+  //         }}
+  //       />
+  //     )
+  //   }
+  // ]
+
   const columns = [
-    {
-      recordId: '1',
-      field: 'reference',
-      headerName: 'Reference',
-      flex: 1
-    },
-    {
-      recordId: '2',
-      field: 'name',
-      headerName: 'Name',
-      flex: 1
-    },
-    {
-      recordId: '3',
-      field: 'type',
-      headerName: 'Dispersal Type',
-      flex: 1
-    },
-    {
-      recordId: '5',
-      field: 'isDefault',
-      headerName: 'is Default',
-      flex: 1,
-      renderCell: params => (
-        <Checkbox
-          color='primary'
-          checked={params.row.isDefault === true} // Checked based on 'isDefault' property
-          onChange={() => {
-            params.row.isDefault = !params.row.isDefault
-          }}
-        />
-      )
-    },
-    {
-      recordId: '6',
-      field: 'isInactive',
-      headerName: 'Inactive',
-      flex: 1,
-      renderCell: params => (
-        <Checkbox
-          color='primary'
-          checked={params.row.isInactive === true} // Checked based on 'isInactive' property
-          onChange={() => {
-            params.row.isInactive = !params.row.isInactive
-          }}
-        />
-      )
-    }
+    { key: 0, header: 'Reference', name: 'reference', value: '' },
+    { key: 0, header: 'Name', name: 'dispersalTypeId', value: '' },
+    { key: 1, header: 'Disp. Type', name: 'dispersalTypeId', value: null },
+    { key: 2, header: 'Is Default', name: 'isDefault ', value: false },
+    { key: 2, header: 'Is Inactive', name: 'isInactive', value: false },
   ]
 
   return (
@@ -89,7 +97,7 @@ const ProductDispersalTab = ({ productDispersalGridData }) => {
               height={260}
             /> */}
             <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
-              <InlineEditGrid />
+              <InlineEditGrid columns={columns}/>
             </Box>
           </Grid>
         </Grid>
