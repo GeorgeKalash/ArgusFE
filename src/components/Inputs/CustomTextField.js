@@ -14,6 +14,7 @@ const CustomTextField = ({
   autoComplete = 'off',
   numberField = false,
   editMode = false,
+  maxLength = '',
   ...props
 }) => {
 
@@ -33,6 +34,7 @@ const CustomTextField = ({
       autoFocus={autoFocus}
       inputProps={{
         readOnly: _readOnly,
+        maxLength: maxLength,
         pattern: numberField && '[0-9]*', // Allow only numeric input
         style: {
           textAlign: numberField && 'right'

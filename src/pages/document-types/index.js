@@ -330,6 +330,7 @@ const DocumentTypes = () => {
                   helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}
                   maxAccess={access}
                   editMode={editMode}
+                  maxLength={6}
                 />
               </Grid>
               <Grid item xs={12}>
