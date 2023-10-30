@@ -18,6 +18,7 @@ const ProductMasterWindow = ({
     height,
     onSave,
     productMasterValidation,
+    productLegValidation,
     typeStore,
     commissionBaseStore,
     languageStore,
@@ -30,8 +31,11 @@ const ProductMasterWindow = ({
     productFieldGridData,
     productAgentGridData,
     currencyStore,
-    countryStore
+    plantStore,
+    countryStore,
+    maxAccess
 }) => {
+console.log(maxAccess);
 
     return (
         <Window
@@ -53,25 +57,30 @@ const ProductMasterWindow = ({
                     languageStore={languageStore}
                     currencyStore={currencyStore}
                     countryStore={countryStore}
+                    maxAccess={maxAccess} 
                 />
             </CustomTabPanel>
             <CustomTabPanel index={1} value={activeTab}>
-                <ProductDispersalTab productDispersalGridData={productDispersalGridData} />
+                <ProductDispersalTab productDispersalGridData={productDispersalGridData} maxAccess={maxAccess} />
             </CustomTabPanel>
             <CustomTabPanel index={2} value={activeTab}>
                 <ProductLegTab
+                    productLegValidation={productLegValidation}
                     productLegWindowOpen={productLegWindowOpen}
                     productLegGridData={productLegGridData}
                     productLegCommissionGridData={productLegCommissionGridData}
                     editProductCommission={editProductCommission}
-                    setProductLegWindowOpen={setProductLegWindowOpen}
+                    setProductLegWindowOpen={setProductLegWindowOpen} 
+                    currencyStore={currencyStore}
+                    plantStore={plantStore}
+                    maxAccess={maxAccess} 
                 />
             </CustomTabPanel>
             <CustomTabPanel index={3} value={activeTab}>
-                <ProductFieldTab productFieldGridData={productFieldGridData} />
+                <ProductFieldTab productFieldGridData={productFieldGridData} maxAccess={maxAccess} />
             </CustomTabPanel>
             <CustomTabPanel index={4} value={activeTab}>
-                <ProductAgentTab productAgentGridData={productAgentGridData} />
+                <ProductAgentTab productAgentGridData={productAgentGridData} maxAccess={maxAccess} />
             </CustomTabPanel>
         </Window>
     )

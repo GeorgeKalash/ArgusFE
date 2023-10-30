@@ -12,11 +12,15 @@ import Window from 'src/components/Shared/Window'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const productLegTab = ({
+  productLegValidation,
   productLegWindowOpen,
   productLegGridData,
   productLegCommissionGridData,
   editProductCommission,
-  setProductLegWindowOpen
+  setProductLegWindowOpen,
+  currencyStore,
+  plantStore,
+  maxAccess
 }) => {
   const columns = [
     {
@@ -80,10 +84,38 @@ const productLegTab = ({
               <CustomTextField label='Name' value={'name 1'} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
-              <CustomComboBox name='plantName' label='Plant' readOnly={false} required />
+              <CustomComboBox
+              name='plantId'
+              label='Plant'
+              valueField='recordId'
+              displayField='name'
+              store={plantStore}
+              value={plantStore.filter(item => item.recordId === productLegValidation.values.plantId)[0]}
+              onChange={(event, newValue) => {
+                productLegValidation.setFieldValue('plantId', newValue?.recordId)
+              }}
+              error={
+                productLegValidation.touched.plantId && Boolean(productLegValidation.errors.plantId)
+              }
+              helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
+            />
             </Grid>
             <Grid item xs={6}>
-              <CustomComboBox name='currencyName' label='Currency' required />
+            <CustomComboBox
+              name='currencyId'
+              label='Currency'
+              valueField='recordId'
+              displayField='name'
+              store={currencyStore}
+              value={currencyStore.filter(item => item.recordId === productLegValidation.values.currencyId)[0]}
+              onChange={(event, newValue) => {
+                productLegValidation.setFieldValue('currencyId', newValue?.recordId)
+              }}
+              error={
+                productLegValidation.touched.currencyId && Boolean(productLegValidation.errors.currencyId)
+              }
+              helperText={productLegValidation.touched.currencyId && productLegValidation.errors.currencyId}
+            />
             </Grid>
             <Grid item xs={6}>
               <CustomComboBox name='dispersal' label='Dispersal' readOnly={false} required />
@@ -99,6 +131,7 @@ const productLegTab = ({
               pagination={false}
               actionColumnHeader='Commissions'
               height={180}
+              maxAccess={maxAccess} 
             />
           </Grid>
         </Grid>

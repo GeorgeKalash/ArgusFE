@@ -19,7 +19,8 @@ const ProductMasterWindow = ({
   commissionColumns,
   productLegCommissionGridData,
   productFieldGridData,
-  productAgentGridData
+  productAgentGridData,
+  maxAccess
 }) => {
   return (
     <Window id='ProductCommissionsWindow' Title='Commission' onClose={onClose} width={500} height={400}>
@@ -57,6 +58,7 @@ const ProductMasterWindow = ({
                 isLoading={false}
                 pagination={false}
                 height={200}
+                maxAccess={maxAccess} 
               />
             </Grid>
           </Grid>

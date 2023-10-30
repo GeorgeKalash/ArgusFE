@@ -16,6 +16,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 // ** Helpers
@@ -30,8 +31,15 @@ import ProductLegWindow from './Windows/ProductLegWindow'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
+
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
+
+  //controls
+  const [access, setAccess] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -39,6 +47,7 @@ const ProductMaster = () => {
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
+  const [plantStore, setPlantStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
 
   const [productLegGridData, setProductLegGridData] = useState([]) //for productLegTab
@@ -53,6 +62,7 @@ const ProductMaster = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   const [productLegWindowOpen, setProductLegWindowOpen] = useState(false) //for productLegTab
+  
 
   const columns = [
     {
@@ -147,8 +157,14 @@ const ProductMaster = () => {
     }
   })
 
+  const productLegValidation = useFormik({
+    plantId: yup.string().required('This field is required'),
+    currencyId: yup.string().required('This field is required'),
+  })
+
   const handleSubmit = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
+    else if (activeTab === 2) productLegValidation.handleSubmit()
   }
 
   const getGridData = () => { }
@@ -212,6 +228,20 @@ const ProductMaster = () => {
       })
   }
 
+  const fillPlantStore = () => {
+    var parameters = '_filter='
+    getRequest({
+      extension: SystemRepository.Plant.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setPlantStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const fillCoutryStore = () => {
     var parameters = '_filter='
     getRequest({
@@ -234,10 +264,12 @@ const ProductMaster = () => {
 
   const addProductMaster = () => {
     productMasterValidation.setValues({})
+    productLegValidation.setValues({})
     fillTypeStore()
     fillLanguageStore()
     fillCommissionBaseStore()
     fillCurrencyStore()
+    fillPlantStore()
     fillCoutryStore()
     setWindowOpen(true)
   }
@@ -375,21 +407,29 @@ const ProductMaster = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
+    if (!access)
+      getAccess(ResourceIds.ProductMaster, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData({ _startAt: 0, _pageSize: 30 })
 
-    //for product leg tab
-    setProductLegWindowOpen(false)
-    getProductLegGridData({})
+        //for product leg tab
+        setProductLegWindowOpen(false)
+        getProductLegGridData({})
 
-    //for product field tab
-    getProductFieldGridData({})
+        //for product field tab
+        getProductFieldGridData({})
 
-    //for product agent tab
-    getProductAgentGridData({})
+        //for product agent tab
+        getProductAgentGridData({})
 
-    //for product dispersal tab
-    getProductDispersalGridData({})
-  }, [])
+        //for product dispersal tab
+        getProductDispersalGridData({})
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
+    }
+  }, [access])
 
   return (
     <>
@@ -400,7 +440,7 @@ const ProductMaster = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addProductMaster} />
+        <GridToolbar onAdd={addProductMaster} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -409,6 +449,7 @@ const ProductMaster = () => {
           onEdit={editProductMaster}
           onDelete={delProductMaster}
           isLoading={false}
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
@@ -421,6 +462,7 @@ const ProductMaster = () => {
           height={350}
           onSave={handleSubmit}
           productMasterValidation={productMasterValidation}
+          productLegValidation={productLegValidation}
           typeStore={typeStore}
           commissionBaseStore={commissionBaseStore}
           languageStore={languageStore}
@@ -433,7 +475,9 @@ const ProductMaster = () => {
           productFieldGridData={productFieldGridData}
           productAgentGridData={productAgentGridData}
           currencyStore={currencyStore}
+          plantStore={plantStore}
           countryStore={countryStore}
+          maxAccess={access}
         />
       )}
 
@@ -442,6 +486,7 @@ const ProductMaster = () => {
           onClose={() => setProductLegWindowOpen(false)}
           commissionColumns={commissionColumns}
           productLegCommissionGridData={productLegCommissionGridData}
+          maxAccess={access}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
