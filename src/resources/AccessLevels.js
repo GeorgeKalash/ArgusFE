@@ -6,6 +6,7 @@ const ControlAccessLevel = {
 }
 
 const TrxType = {
+    NOACCESS: 0, //No access
     GET: 1, //can read only (add, delete disabled or hidden and all fields in the form are readonly)
     ADD: 2, //can read and add (delete disabled or hidden and fields in edit mode are all readonly)
     EDIT: 3, //can read, add, edit (delete disabled or hidden)
