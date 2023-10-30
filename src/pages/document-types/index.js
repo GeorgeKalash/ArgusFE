@@ -18,7 +18,8 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+
+// import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -440,11 +441,11 @@ const DocumentTypes = () => {
               </Grid>
             </Grid>
           </CustomTabPanel>
-          <CustomTabPanel index={1} value={activeTab}>
+          {/* <CustomTabPanel index={1} value={activeTab}>
             <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
               <InlineEditGrid />
             </Box>
-          </CustomTabPanel>
+          </CustomTabPanel> */}
         </Window>
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
