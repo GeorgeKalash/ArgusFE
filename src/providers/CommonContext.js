@@ -16,9 +16,9 @@ const CommonProvider = ({ children }) => {
 
     const [errorMessage, setErrorMessage] = useState(null)
 
-    const fillDocumentTypeStore = ({ _startAt = 0, _pageSize = 30, callback }) => {
+    const fillDocumentTypeStore = ({ _startAt = 0, _pageSize = 30, _dgId = 0, callback }) => {
       const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-      var parameters = defaultParams + '&_dgId=0'
+      var parameters = defaultParams + `&_dgId=${_dgId}`
   
       getRequest({
         extension: SystemRepository.DocumentType.qry,

@@ -33,7 +33,8 @@ const DocumentTypeMaps = () => {
   //stores
   const [gridData, setGridData] = useState([])
   const [functionStore, setFunctionStore] = useState([])
-  const [documentTypeStore, setDocumentTypeStore] = useState([])
+  const [fromDocumentTypeStore, setFromDocumentTypeStore] = useState([])
+  const [toDocumentTypeStore, setToDocumentTypeStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -161,7 +162,6 @@ const DocumentTypeMaps = () => {
 
   useEffect(() => {
     getGridData({ _startAt: 0, _pageSize: 30, params: '' })
-    fillDocumentTypeStore({ _startAt: 0, _pageSize: 30, callback: setDocumentTypeStore })
     fillFunctionStore()
   }, [])
 
@@ -212,6 +212,7 @@ const DocumentTypeMaps = () => {
               onChange={(event, newValue) => {
                 documentTypeMapsValidation.setFieldValue('fromFunctionId', newValue?.key)
                 documentTypeMapsValidation.setFieldValue('fromFunctionName', newValue?.value)
+                fillDocumentTypeStore({ _startAt: 0, _pageSize: 30, _dgId: newValue?.key, callback: setFromDocumentTypeStore })
               }}
               error={
                 documentTypeMapsValidation.touched.fromFunctionId &&
@@ -228,7 +229,7 @@ const DocumentTypeMaps = () => {
               label='From Document Type'
               valueField='recordId'
               displayField='name'
-              store={documentTypeStore}
+              store={fromDocumentTypeStore}
               getOptionBy={documentTypeMapsValidation.values?.fromDTId}
               value={documentTypeMapsValidation.values?.fromDTName}
               onChange={(event, newValue) => {
@@ -251,6 +252,7 @@ const DocumentTypeMaps = () => {
               onChange={(event, newValue) => {
                 documentTypeMapsValidation.setFieldValue('toFunctionId', newValue?.key)
                 documentTypeMapsValidation.setFieldValue('toFunctionName', newValue?.value)
+                fillDocumentTypeStore({ _startAt: 0, _pageSize: 30, _dgId: newValue?.key, callback: setToDocumentTypeStore })
               }}
               error={
                 documentTypeMapsValidation.touched.toFunctionId &&
@@ -267,7 +269,7 @@ const DocumentTypeMaps = () => {
               label='To Document Type'
               valueField='recordId'
               displayField='name'
-              store={documentTypeStore}
+              store={toDocumentTypeStore}
               getOptionBy={documentTypeMapsValidation.values?.dtId}
               value={documentTypeMapsValidation.values?.toDTName}
               onChange={(event, newValue) => {
