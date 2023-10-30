@@ -14,7 +14,7 @@ const GridToolbar = ({
 }) => {
 
     const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-    const addBtnVisible = onAdd && maxAccess != TrxType.GET
+    const addBtnVisible = onAdd && maxAccess > TrxType.NOACCESS
 
     return (
         <Box sx={{ display: 'flex', pb: 2 }}>

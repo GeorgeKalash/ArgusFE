@@ -267,12 +267,19 @@ const DocumentTypes = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
-    fillSysFunctionsStore()
-    fillActiveStatusStore()
     getAccess(ResourceIds.DocumentTypes, setAccess)
-    getLabels(ResourceIds.DocumentTypes, setLabels)
   }, [])
+
+  useEffect(() => {
+    if (access && access.maxAccess > 0) {
+      getGridData({ _startAt: 0, _pageSize: 30 })
+      fillSysFunctionsStore()
+      fillActiveStatusStore()
+      getLabels(ResourceIds.DocumentTypes, setLabels)
+    } else {
+      setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    }
+  }, [access])
 
   console.log({ access })
 
