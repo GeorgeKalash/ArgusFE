@@ -6,7 +6,7 @@ import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-const ProductFieldTab = ({ productFieldGridData }) => {
+const ProductFieldTab = ({ productFieldGridData, maxAccess }) => {
   //stores
 
   const columns = [
@@ -76,6 +76,7 @@ const ProductFieldTab = ({ productFieldGridData }) => {
               isLoading={false}
               pagination={false}
               height={220}
+              maxAccess={maxAccess} 
             />
           </Grid>
         </Grid>

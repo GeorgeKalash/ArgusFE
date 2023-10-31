@@ -19,6 +19,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewDocumentTypeMaps, populateDocumentTypeMaps } from 'src/Models/System/DocumentTypeMaps'
 
@@ -27,11 +28,13 @@ import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser
 
 const DocumentTypeMaps = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { fillDocumentTypeStore } = useContext(CommonContext)
 
   //stores
   const [gridData, setGridData] = useState([])
   const [functionStore, setFunctionStore] = useState([])
-  const [documentTypeStore, setDocumentTypeStore] = useState([])
+  const [fromDocumentTypeStore, setFromDocumentTypeStore] = useState([])
+  const [toDocumentTypeStore, setToDocumentTypeStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -99,22 +102,6 @@ const DocumentTypeMaps = () => {
       })
   }
 
-  const fillDocumentTypeStore = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + '&_dgId=0'
-
-    getRequest({
-      extension: SystemRepository.DocumentType.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setDocumentTypeStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
-  }
-
   const fillFunctionStore = () => {
     var parameters = '_database=25'
     getRequest({
@@ -175,7 +162,6 @@ const DocumentTypeMaps = () => {
 
   useEffect(() => {
     getGridData({ _startAt: 0, _pageSize: 30, params: '' })
-    fillDocumentTypeStore({ _startAt: 0, _pageSize: 30 })
     fillFunctionStore()
   }, [])
 
@@ -226,6 +212,7 @@ const DocumentTypeMaps = () => {
               onChange={(event, newValue) => {
                 documentTypeMapsValidation.setFieldValue('fromFunctionId', newValue?.key)
                 documentTypeMapsValidation.setFieldValue('fromFunctionName', newValue?.value)
+                fillDocumentTypeStore({ _startAt: 0, _pageSize: 30, _dgId: newValue?.key, callback: setFromDocumentTypeStore })
               }}
               error={
                 documentTypeMapsValidation.touched.fromFunctionId &&
@@ -242,7 +229,7 @@ const DocumentTypeMaps = () => {
               label='From Document Type'
               valueField='recordId'
               displayField='name'
-              store={documentTypeStore}
+              store={fromDocumentTypeStore}
               getOptionBy={documentTypeMapsValidation.values?.fromDTId}
               value={documentTypeMapsValidation.values?.fromDTName}
               onChange={(event, newValue) => {
@@ -265,6 +252,7 @@ const DocumentTypeMaps = () => {
               onChange={(event, newValue) => {
                 documentTypeMapsValidation.setFieldValue('toFunctionId', newValue?.key)
                 documentTypeMapsValidation.setFieldValue('toFunctionName', newValue?.value)
+                fillDocumentTypeStore({ _startAt: 0, _pageSize: 30, _dgId: newValue?.key, callback: setToDocumentTypeStore })
               }}
               error={
                 documentTypeMapsValidation.touched.toFunctionId &&
@@ -281,7 +269,7 @@ const DocumentTypeMaps = () => {
               label='To Document Type'
               valueField='recordId'
               displayField='name'
-              store={documentTypeStore}
+              store={toDocumentTypeStore}
               getOptionBy={documentTypeMapsValidation.values?.dtId}
               value={documentTypeMapsValidation.values?.toDTName}
               onChange={(event, newValue) => {

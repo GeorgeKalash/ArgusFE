@@ -16,27 +16,34 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import OldWindow from 'src/components/Shared/OldWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+
+// import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import { KVSRepository } from 'src/repositories/KVSRepository'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
+// import { defaultParams } from 'src/lib/defaults'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const DocumentTypes = () => {
+
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
+
+  //control
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -46,7 +53,6 @@ const DocumentTypes = () => {
   const [numberRangeStore, setNumberRangeStore] = useState([])
 
   //states
-  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
@@ -64,37 +70,49 @@ const DocumentTypes = () => {
 
   const columns = [
     {
+      id: 'reference',
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1
+      flex: 1,
+      editable: false
 
       // align: 'right',
       // valueGetter: ({ row }) => getFormattedNumber(row?.reference, 4)
     },
     {
+      id: 'dgName',
       field: 'dgName',
       headerName: _labels.sysFunction,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
+      id: 'ColILName',
       field: 'ilName',
       headerName: _labels.intLogic,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
+      id: 'name',
       field: 'name',
       headerName: _labels.name,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
+      id: 'activeStatusName',
       field: 'activeStatusName',
       headerName: _labels.status,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
+      id: 'ColNraRef',
       field: 'nraRef',
       headerName: _labels.nuRange,
-      flex: 1
+      flex: 1,
+      editable: false
     }
   ]
 
@@ -114,33 +132,18 @@ const DocumentTypes = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       dgName: yup.string().required('This field is required'),
-      activeStatusName: yup.string().required('This field is required')
+      activeStatusName: yup.string().required('This field is required'),
+      ilId: access && access.record?.controls?.find(item => item.controlId === "ilId")?.accessLevel == 2 ? yup.string() : yup.string().required('This field is required')
     }),
     onSubmit: values => {
       // values.reference = getNumberWithoutCommas(values.reference)
-      // console.log({ values })
+      console.log({ values })
       postDocumentType(values)
     }
   })
 
   const handleSubmit = () => {
     if (activeTab === 0) documentTypesValidation.handleSubmit()
-  }
-
-  const getLabels = () => {
-    var parameters = '_dataset=' + ResourceIds.DocumentTypes
-
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log({ res })
-        setLabels(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
@@ -265,11 +268,19 @@ const DocumentTypes = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
-    fillSysFunctionsStore()
-    fillActiveStatusStore()
-    getLabels()
-  }, [])
+    if (!access)
+      getAccess(ResourceIds.DocumentTypes, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData({ _startAt: 0, _pageSize: 30 })
+        fillSysFunctionsStore()
+        fillActiveStatusStore()
+        getLabels(ResourceIds.DocumentTypes, setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
+    }
+  }, [access])
 
   return (
     <>
@@ -280,7 +291,7 @@ const DocumentTypes = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addDocumentType} />
+        <GridToolbar onAdd={addDocumentType} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -289,6 +300,7 @@ const DocumentTypes = () => {
           onEdit={editDocumentType}
           onDelete={delDocumentType}
           isLoading={false}
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
@@ -302,6 +314,8 @@ const DocumentTypes = () => {
           width={600}
           height={400}
           onSave={handleSubmit}
+          maxAccess={access}
+          editMode={editMode}
         >
           <CustomTabPanel index={0} value={activeTab}>
             <Grid container spacing={4}>
@@ -315,6 +329,9 @@ const DocumentTypes = () => {
                   onClear={() => documentTypesValidation.setFieldValue('reference', '')}
                   error={documentTypesValidation.touched.reference && Boolean(documentTypesValidation.errors.reference)}
                   helperText={documentTypesValidation.touched.reference && documentTypesValidation.errors.reference}
+                  maxAccess={access}
+                  editMode={editMode}
+                  maxLength={6}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -327,6 +344,8 @@ const DocumentTypes = () => {
                   onClear={() => documentTypesValidation.setFieldValue('name', '')}
                   error={documentTypesValidation.touched.name && Boolean(documentTypesValidation.errors.name)}
                   helperText={documentTypesValidation.touched.name && documentTypesValidation.errors.name}
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -344,24 +363,28 @@ const DocumentTypes = () => {
                     documentTypesValidation.setFieldValue('dgName', newValue?.value)
                   }}
                   error={documentTypesValidation.touched.dgName && Boolean(documentTypesValidation.errors.dgName)}
+                  maxAccess={access}
+                  editMode={editMode}
                   helperText={documentTypesValidation.touched.dgName && documentTypesValidation.errors.dgName}
                 />
               </Grid>
               <Grid item xs={12}>
                 <CustomComboBox
-                  name='ilName'
+                  name='ilId'
                   label={_labels.intLogic}
                   valueField='recordId'
                   displayField='name'
                   store={integrationLogicStore}
                   getOptionBy={documentTypesValidation.values.ilId}
-                  value={documentTypesValidation.values.ilName}
+                  value={integrationLogicStore.filter(item => item.recordId === documentTypesValidation.values.ilId)[0]}
                   onChange={(event, newValue) => {
                     documentTypesValidation.setFieldValue('ilId', newValue?.recordId)
                     documentTypesValidation.setFieldValue('ilName', newValue?.name)
                   }}
-                  error={documentTypesValidation.touched.ilName && Boolean(documentTypesValidation.errors.ilName)}
-                  helperText={documentTypesValidation.touched.ilName && documentTypesValidation.errors.ilName}
+                  error={documentTypesValidation.touched.ilId && Boolean(documentTypesValidation.errors.ilId)}
+                  helperText={documentTypesValidation.touched.ilId && documentTypesValidation.errors.ilId}
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -384,6 +407,8 @@ const DocumentTypes = () => {
                   helperText={
                     documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName
                   }
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -410,10 +435,17 @@ const DocumentTypes = () => {
                   }}
                   error={documentTypesValidation.touched.nra && Boolean(documentTypesValidation.errors.nra)}
                   helperText={documentTypesValidation.touched.nra && documentTypesValidation.errors.nra}
+                  maxAccess={access}
+                  editMode={editMode}
                 />
               </Grid>
             </Grid>
           </CustomTabPanel>
+          {/* <CustomTabPanel index={1} value={activeTab}>
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
+              <InlineEditGrid />
+            </Box>
+          </CustomTabPanel> */}
         </Window>
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

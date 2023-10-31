@@ -7,8 +7,9 @@ import { Grid, Box, Checkbox } from '@mui/material'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const ProductDispersalTab = ({ productDispersalGridData }) => {
+const ProductDispersalTab = ({ productDispersalGridData, maxAccess }) => {
   const columns = [
     {
       recordId: '1',
@@ -60,6 +61,14 @@ const ProductDispersalTab = ({ productDispersalGridData }) => {
     }
   ]
 
+  // const columns = [
+  //   { key: 0, header: 'Reference', name: 'reference', value: '' },
+  //   { key: 0, header: 'Name', name: 'dispersalTypeId', value: '' },
+  //   { key: 1, header: 'Disp. Type', name: 'dispersalTypeId', value: null },
+  //   { key: 2, header: 'Is Default', name: 'isDefault ', value: false },
+  //   { key: 2, header: 'Is Inactive', name: 'isInactive', value: false },
+  // ]
+
   return (
     <>
       <Box
@@ -86,7 +95,11 @@ const ProductDispersalTab = ({ productDispersalGridData }) => {
               isLoading={false}
               pagination={false}
               height={260}
+              maxAccess={maxAccess}
             />
+            {/* <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
+              <InlineEditGrid columns={columns}/>
+            </Box> */}
           </Grid>
         </Grid>
       </Box>

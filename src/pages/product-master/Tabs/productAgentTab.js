@@ -4,8 +4,9 @@ import { Grid, Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const ProductAgentTab = ({ productAgentGridData }) => {
+const ProductAgentTab = ({ productAgentGridData, maxAccess }) => {
   const columns = [
     {
       field: 'agent',
@@ -13,6 +14,10 @@ const ProductAgentTab = ({ productAgentGridData }) => {
       flex: 1
     }
   ]
+
+  // const columns = [
+  //   { key: 0, header: 'Agent', name: 'agent', value: '' },
+  // ]
 
   return (
     <>
@@ -43,7 +48,11 @@ const ProductAgentTab = ({ productAgentGridData }) => {
               isLoading={false}
               pagination={false}
               height={220}
+              maxAccess={maxAccess} 
             />
+            {/* <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
+              <InlineEditGrid columns={columns}/>
+            </Box> */}
           </Grid>
         </Grid>
       </Box>
