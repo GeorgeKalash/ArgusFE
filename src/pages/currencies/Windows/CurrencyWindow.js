@@ -13,7 +13,8 @@ const CurrencyWindow = ({
     profileStore,
     currencyStore,
     currencyValidation,
-    labels
+    labels,
+    maxAccess
 }) => {
     return (
         <Window
@@ -36,6 +37,7 @@ const CurrencyWindow = ({
                   profileStore={profileStore}
                   currencyStore={currencyStore}
                   editMode={editMode}
+                  maxAccess={maxAccess}
                />
                </CustomTabPanel>
             </Window> 

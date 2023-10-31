@@ -11,7 +11,8 @@ const CurrencyTab=({
     decimalStore,
     profileStore,
     currencyStore,
-    editMode
+    editMode,
+    maxAccess
 }) =>{
     return (
         <Grid container spacing={4}>
@@ -23,6 +24,7 @@ const CurrencyTab=({
               required
               onChange={currencyValidation.handleChange}
               maxLength = '3'
+              maxAccess={maxAccess}
               onClear={() => currencyValidation.setFieldValue('reference', '')}
               error={currencyValidation.touched.reference && Boolean(currencyValidation.errors.reference)}
               helperText={currencyValidation.touched.reference && currencyValidation.errors.reference}
@@ -34,6 +36,7 @@ const CurrencyTab=({
               label={labels.name}
               value={currencyValidation.values.name}
               required
+              maxAccess={maxAccess}
               onChange={currencyValidation.handleChange}
               onClear={() => currencyValidation.setFieldValue('name', '')}
               error={currencyValidation.touched.name && Boolean(currencyValidation.errors.name)}
@@ -46,6 +49,7 @@ const CurrencyTab=({
               label={labels.foreignLanguage}
               value={currencyValidation.values.flName}
               required
+              maxAccess={maxAccess}
               onChange={currencyValidation.handleChange}
               onClear={() => currencyValidation.setFieldValue('flName', '')}
               error={currencyValidation.touched.flName && Boolean(currencyValidation.errors.flName)}
@@ -61,6 +65,7 @@ const CurrencyTab=({
               store={decimalStore}
               value={currencyValidation.values.decimals}
               required
+              maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 currencyValidation.setFieldValue('decimals', newValue?.decimals)
               }}
@@ -77,6 +82,7 @@ const CurrencyTab=({
               store={profileStore}
               value={profileStore.filter(item => item.key === currencyValidation.values.profileId)[0]}
               required
+              maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 currencyValidation.setFieldValue('profileId', newValue?.key)
               }}
@@ -93,6 +99,7 @@ const CurrencyTab=({
               store={currencyStore}
               value={currencyStore.filter(item => item.key === currencyValidation.values.currencyType)[0]}
               required
+              maxAccess={maxAccess}
               readOnly={editMode}
               onChange={(event, newValue) => {
                 currencyValidation.setFieldValue('currencyType', newValue?.key)
@@ -107,6 +114,7 @@ const CurrencyTab=({
             <FormControlLabel
               control={
                 <Checkbox
+                maxAccess={maxAccess}
                   name='sale'
                   checked={currencyValidation.values?.sale}
                   onChange={currencyValidation.handleChange}
@@ -119,6 +127,7 @@ const CurrencyTab=({
             <FormControlLabel
               control={
                 <Checkbox
+                maxAccess={maxAccess}
                   name='purchase'
                   checked={currencyValidation.values?.purchase}
                   onChange={currencyValidation.handleChange}
