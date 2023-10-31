@@ -49,6 +49,7 @@ const ProductMaster = () => {
   const [currencyStore, setCurrencyStore] = useState([])
   const [plantStore, setPlantStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
+  const [dispersalStore, setDispersalStore] = useState([])
 
   const [productLegGridData, setProductLegGridData] = useState([]) //for productLegTab
   const [productLegCommissionGridData, setProductLegCommissionGridData] = useState([]) //for productLegTab
@@ -116,6 +117,11 @@ const ProductMaster = () => {
           }}
         />
       )
+    },
+    {
+      field: 'commissionRef',
+      headerName: 'Commission Ref',
+      flex: 1,
     },
     {
       field: 'commissionName',
@@ -242,6 +248,11 @@ const ProductMaster = () => {
       })
   }
 
+  const fillDispersalStore = () => {
+    const newData = { list: [{ recordId: 1, reference: 'STD', name: 'standard' },{ recordId: 2, reference: 'EXP', name: 'express' }] }
+    setDispersalStore(newData.list)
+  }
+
   const fillCoutryStore = () => {
     var parameters = '_filter='
     getRequest({
@@ -270,6 +281,7 @@ const ProductMaster = () => {
     fillCommissionBaseStore()
     fillCurrencyStore()
     fillPlantStore()
+    fillDispersalStore()
     fillCoutryStore()
     setWindowOpen(true)
   }
@@ -278,7 +290,7 @@ const ProductMaster = () => {
   }
 
   const getProductLegGridData = ({ }) => {
-    const newData = { list: [{ recordId: 1, fromAmount: 1000.66, toAmount: 2000.97 }] }
+    const newData = { list: [{ recordId: 1, fromAmount: 1, toAmount: 10000 }] }
     setProductLegGridData({ ...newData })
   }
 
@@ -287,8 +299,18 @@ const ProductMaster = () => {
       list: [
         {
           recordId: 1,
+          controls: 'beneficiary',
+          format: 'Alpha',
+          securityLevel: 'Mandatory', //actual combo fills from SY.qryKVS?_database=3605
+          specialChars: '@',
+          fixedLength: 20,
+          minLength: 3,
+          maxLength: 20
+        },
+        {
+          recordId: 2,
           controls: 'phone',
-          format: 'Alfa',
+          format: 'Alpha',
           securityLevel: 'readOnly', //actual combo fills from SY.qryKVS?_database=3605
           specialChars: '@',
           fixedLength: 10,
@@ -296,9 +318,9 @@ const ProductMaster = () => {
           maxLength: 10
         },
         {
-          recordId: 2,
+          recordId: 3,
           controls: 'email',
-          format: 'Alfa+SP',
+          format: 'Alpha+SP',
           securityLevel: 'Optional',
           specialChars: '@',
           fixedLength: 10,
@@ -306,7 +328,7 @@ const ProductMaster = () => {
           maxLength: 10
         },
         {
-          recordId: 3,
+          recordId: 4,
           controls: 'Country',
           format: 'Numeric',
           securityLevel: 'Mandatory',
@@ -316,9 +338,9 @@ const ProductMaster = () => {
           maxLength: 10
         },
         {
-          recordId: 4,
+          recordId: 5,
           controls: 'City',
-          format: 'Alfa Numeric',
+          format: 'Alpha Numeric',
           securityLevel: 'hidden',
           specialChars: '@',
           fixedLength: 10,
@@ -398,9 +420,9 @@ const ProductMaster = () => {
   const fillCommissionStore = () => {
     const newData = {
       list: [
-        { commissionId: 1, commissionName: 'PCT', commission: 50 },
-        { commissionId: 2, commissionName: 'fixed', commission: 100 },
-        { commissionId: 3, commissionName: 'fixed (other charges)', commission: 150 }
+        { commissionId: 1, commissionRef: 'PCT', commissionName: 'percentage', commission: 0.5 },
+        { commissionId: 2, commissionRef: 'FIXED', commissionName: 'fixed', commission: 100 },
+        { commissionId: 3, commissionRef: 'FIXED-OTHER', commissionName: 'fixed (other charges)', commission: 150 }
       ]
     }
     setProductLegCommissionGridData({ ...newData })
@@ -476,6 +498,7 @@ const ProductMaster = () => {
           productAgentGridData={productAgentGridData}
           currencyStore={currencyStore}
           plantStore={plantStore}
+          dispersalStore={dispersalStore}
           countryStore={countryStore}
           maxAccess={access}
         />

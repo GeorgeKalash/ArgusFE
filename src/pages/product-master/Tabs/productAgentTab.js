@@ -6,7 +6,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const ProductAgentTab = ({ productAgentGridData, maxAccess }) => {
+const ProductAgentTab = ({ productAgentGridData, dispersalStore, maxAccess }) => {
   const columns = [
     {
       field: 'agent',
@@ -31,13 +31,19 @@ const ProductAgentTab = ({ productAgentGridData, maxAccess }) => {
         <Grid container gap={2}>
           <Grid container xs={12} spacing={2}>
             <Grid item xs={6}>
-              <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
+              <CustomTextField label='Reference' value={''} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField label='Name' value={'name 1'} readOnly={true} />
+              <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
-              <CustomComboBox name='dispersal' label='Dispersal' readOnly={false} required />
+              <CustomComboBox name='dispersalId'
+              label='Dispersal'
+              valueField='recordId'
+              displayField='name'
+              store={dispersalStore}
+              required='true'
+              />
             </Grid>
           </Grid>
           <Grid xs={12}>
