@@ -22,12 +22,14 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ContactSupportOutlined } from '@mui/icons-material'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { KVSRepository } from 'src/repositories/KVSRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
 import CityWindow from './Windows/CityWindow'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -35,10 +37,13 @@ const City = () => {
   const [countryStore, setCountryStore] = useState([])
 
   //states
-  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  //control
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
@@ -91,23 +96,7 @@ const City = () => {
   const handleSubmit = () => {
     cityValidation.handleSubmit()
   }
-
-  const getLabels = () => {
-    var parameters = '_dataset=' + ResourceIds.Cities
-
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log({ res })
-        setLabels(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
+ 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     var parameters = defaultParams + '&_countryId=0' + '&_stateId=0'
@@ -202,15 +191,23 @@ const City = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 50 })
-    fillCountryStore()
-    getLabels()
-  }, [])
+    if (!access)
+    getAccess(ResourceIds.Cities, setAccess)
+  else {
+    if (access.record.maxAccess > 0) {
+      getGridData({ _startAt: 0, _pageSize: 50 })
+      fillCountryStore()
+      getLabels(ResourceIds.Cities,setLabels)
+    } else {
+      setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    }
+  }
+}, [access])
   
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addCity} />
+        <GridToolbar onAdd={addCity} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -218,6 +215,7 @@ const City = () => {
           api={getGridData}
           onEdit={editCity}
           onDelete={delCity}
+          maxAccess={access}
           isLoading={false}
         />
       </Box>
@@ -231,6 +229,7 @@ const City = () => {
           labels={_labels}
           editMode={editMode}
           stateStore={stateStore}
+          maxAccess={access}
           countryStore={countryStore}
           fillStateStore={fillStateStore}
         />

@@ -11,7 +11,8 @@ const CityTab=({
     countryStore,
     stateStore,
     fillStateStore,
-    editMode
+    editMode,
+    maxAccess
 }) =>{
     return (
         <Grid container spacing={4}>
@@ -21,6 +22,7 @@ const CityTab=({
               label={labels.reference}
               value={cityValidation.values.reference}
               required
+              maxAccess={maxAccess}
               readOnly={editMode}
               onChange={cityValidation.handleChange}
               onClear={() => cityValidation.setFieldValue('reference', '')}
@@ -34,6 +36,7 @@ const CityTab=({
               label={labels.name}
               value={cityValidation.values.name}
               required
+              maxAccess={maxAccess}
               readOnly={editMode}
               onChange={cityValidation.handleChange}
               onClear={() => cityValidation.setFieldValue('name', '')}
@@ -50,6 +53,7 @@ const CityTab=({
               store={countryStore}
               value={countryStore.filter(item => item.recordId === cityValidation.values.countryId)[0]}// Ensure the value matches an option or set it to null
               required 
+              maxAccess={maxAccess}
               readOnly={editMode}
               onChange={(event, newValue) => {
                 cityValidation.setFieldValue('countryId', newValue?.recordId)
@@ -70,6 +74,7 @@ const CityTab=({
               store={stateStore}
               value={stateStore.filter(item => item.recordId === cityValidation.values.stateId)[0]}
               required
+              maxAccess={maxAccess}
               readOnly={editMode && cityValidation.values.stateId !== null}
               onChange={(event, newValue) => {
                 cityValidation.setFieldValue('stateId', newValue?.recordId)
