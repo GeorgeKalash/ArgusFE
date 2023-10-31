@@ -20,7 +20,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { getNewLegalStatuses, populateLegalStatuses } from 'src/Models/System/BusinessPartner/LegalStatuses'
+import { getNewLegalStatuses, populateLegalStatuses } from 'src/Models/BusinessPartner/LegalStatuses'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'

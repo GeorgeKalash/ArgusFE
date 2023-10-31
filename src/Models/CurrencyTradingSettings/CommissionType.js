@@ -5,8 +5,9 @@ const getNewCommissionType = () => {
   return {
     recordId: null,
     name: null,
-    reference: false,
-    type: false
+    reference: null,
+    type: null,
+    typeName:null
   }
 }
 
@@ -14,8 +15,9 @@ const populateCommissionType = obj => {
   return {
     recordId: obj.recordId,
     name: obj.name,
-    reference: obj.org,
-    type: obj.person
+    reference: obj.reference,
+    type: obj.type,
+    typeName: obj.typeName
   }
 }
 

@@ -15,7 +15,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { getNewCommissionType, populateCommissionType } from 'src/Models/CurrencyTradingSettings/CommissionType'
 import { KVSRepository } from 'src/repositories/KVSRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows
@@ -42,7 +45,8 @@ const CommissionType = () => {
     const _labels = {
         reference: labels && labels.find(item => item.key === 1).value,
         name: labels && labels.find(item => item.key === 2).value,
-        type: labels && labels.find(item => item.key === 3).value
+        type: labels && labels.find(item => item.key === 3).value,
+        comissiontype: labels && labels.find(item => item.key === 4).value,
       }
 
       const columns = [
@@ -58,7 +62,7 @@ const CommissionType = () => {
         },
         ,
         {
-          field: 'type',
+          field: 'typeName',
           headerName: _labels.type,
           flex: 1
         }
@@ -172,6 +176,7 @@ const CommissionType = () => {
     
       useEffect(() => {
         getGridData()
+        fillTypeStore()
         getLabels()
       }, [])
 

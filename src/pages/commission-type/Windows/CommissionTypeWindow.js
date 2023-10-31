@@ -1,7 +1,7 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CommissionTypeTab from 'src/pages/currencies/Tabs/CommissionTypeTab'
+import CommissionTypeTab from 'src/pages/commission-type/Tabs/CommissionTypeTab'
 
 const CommissionTypeWindow = ({
     onClose,
@@ -15,7 +15,7 @@ const CommissionTypeWindow = ({
 }) => {return (
     <Window
     id='CurrencyWindow'
-    Title={labels.currency}
+    Title={labels.comissiontype}
     onClose={onClose}
     width={width}
     height={height}
