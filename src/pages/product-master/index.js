@@ -269,7 +269,7 @@ const ProductMaster = () => {
 
   const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
 
-  const tabs = [{ label: 'Main' }, { label: 'Dispersal' }, { label: 'Leg' }, { label: 'Fields' }, { label: 'Agent' }]
+  const tabs = [{ label: 'Main' }, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => { }
 
