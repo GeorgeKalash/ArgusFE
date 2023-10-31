@@ -421,8 +421,8 @@ const ProductMaster = () => {
     const newData = {
       list: [
         { commissionId: 1, commissionRef: 'PCT', commissionName: 'percentage', commission: 0.5 },
-        { commissionId: 2, commissionRef: 'FIXED', commissionName: 'fixed', commission: 100 },
-        { commissionId: 3, commissionRef: 'FIXED-OTHER', commissionName: 'fixed (other charges)', commission: 150 }
+        { commissionId: 2, commissionRef: 'FIX', commissionName: 'fixed', commission: 100 },
+        { commissionId: 3, commissionRef: 'OTH', commissionName: 'fixed (other charges)', commission: 150 }
       ]
     }
     setProductLegCommissionGridData({ ...newData })
