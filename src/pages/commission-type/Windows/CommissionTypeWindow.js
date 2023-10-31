@@ -11,7 +11,8 @@ const CommissionTypeWindow = ({
     editMode,
     typeStore,
     commissiontypeValidation,
-    labels
+    labels,
+    maxAccess
 }) => {return (
     <Window
     id='CurrencyWindow'
@@ -29,6 +30,7 @@ const CommissionTypeWindow = ({
               commissiontypeValidation={commissiontypeValidation}
               typeStore={typeStore}
               editMode={editMode}
+              maxAccess={maxAccess}
            />
            </CustomTabPanel>
         </Window> 

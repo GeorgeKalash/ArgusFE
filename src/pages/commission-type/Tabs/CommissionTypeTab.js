@@ -9,7 +9,8 @@ const CommissionTypeTab=({
     labels,
     commissiontypeValidation,
     typeStore,
-    editMode
+    editMode,
+    maxAccess
 }) =>{
     return (
         <Grid container spacing={4}>
@@ -20,7 +21,8 @@ const CommissionTypeTab=({
               value={commissiontypeValidation.values.reference}
               required
               onChange={commissiontypeValidation.handleChange}
-              inputProps={{ maxLength: '3' }}
+              maxLength = '3'
+              maxAccess={maxAccess}
               onClear={() => commissiontypeValidation.setFieldValue('reference', '')}
               error={commissiontypeValidation.touched.reference && Boolean(commissiontypeValidation.errors.reference)}
               helperText={commissiontypeValidation.touched.reference && commissiontypeValidation.errors.reference}
@@ -32,7 +34,8 @@ const CommissionTypeTab=({
               label={labels.name}
               value={commissiontypeValidation.values.name}
               required
-              inputProps={{ maxLength: '30' }}
+              maxLength = '30'
+              maxAccess={maxAccess}
               onChange={commissiontypeValidation.handleChange}
               onClear={() => commissiontypeValidation.setFieldValue('name', '')}
               error={commissiontypeValidation.touched.name && Boolean(commissiontypeValidation.errors.name)}
@@ -48,6 +51,7 @@ const CommissionTypeTab=({
               store={typeStore}
               value={typeStore.filter(item => item.key === commissiontypeValidation.values.type)[0]}
               required
+              maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 commissiontypeValidation.setFieldValue('type', newValue?.key)
               }}

@@ -20,6 +20,7 @@ import { KVSRepository } from 'src/repositories/KVSRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
 import CommissionTypeWindow from './Windows/CommissionTypeWindow'
@@ -31,16 +32,20 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const CommissionType = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
-  
+    const { getLabels, getAccess } = useContext(ControlContext)
+
     //stores
     const [gridData, setGridData] = useState(null)
     const [typeStore, setTypeStore] = useState([])
 
     //states
-  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  //control
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
     const _labels = {
         reference: labels && labels.find(item => item.key === 1).value,
@@ -83,22 +88,6 @@ const CommissionType = () => {
     
       const handleSubmit = () => {
         commissiontypeValidation.handleSubmit()
-      }
-      
-      const getLabels = () => {
-        var parameters = '_dataset=' + ResourceIds.CommissionType
-    
-        getRequest({
-          extension: KVSRepository.getLabels,
-          parameters: parameters
-        })
-          .then(res => {
-            console.log('labels '+{ res })
-            setLabels(res.list)
-          })
-          .catch(error => {
-            setErrorMessage(error)
-          })
       }
       
       const getGridData = () => {
@@ -175,15 +164,23 @@ const CommissionType = () => {
       }
     
       useEffect(() => {
-        getGridData()
-        fillTypeStore()
-        getLabels()
-      }, [])
-
-      return (
+        if (!access)
+        getAccess(ResourceIds.CommissionType, setAccess)
+      else {
+        if (access.record.maxAccess > 0) {
+          getGridData()
+          fillTypeStore()
+          getLabels(ResourceIds.CommissionType,setLabels)
+        } else {
+          setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+        }
+      }
+    }, [access])
+      
+return (
         <>
           <Box>
-            <GridToolbar onAdd={addCommissionType} />
+            <GridToolbar onAdd={addCommissionType} maxAccess={access} />
             <Table
               columns={columns}
               gridData={gridData}
@@ -193,6 +190,7 @@ const CommissionType = () => {
               onDelete={delCommissionType}
               isLoading={false}
               pageSize={50}
+              maxAccess={access}
               paginationType='client'
             />
           </Box>
@@ -206,6 +204,7 @@ const CommissionType = () => {
              commissiontypeValidation={commissiontypeValidation}
              typeStore={typeStore}
              labels={_labels}
+             maxAccess={access}
                />
                 
              )}
