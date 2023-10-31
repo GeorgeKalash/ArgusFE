@@ -32,6 +32,7 @@ const ProductMasterWindow = ({
     productAgentGridData,
     currencyStore,
     plantStore,
+    dispersalStore,
     countryStore,
     maxAccess
 }) => {
@@ -72,14 +73,15 @@ const ProductMasterWindow = ({
                     setProductLegWindowOpen={setProductLegWindowOpen} 
                     currencyStore={currencyStore}
                     plantStore={plantStore}
+                    dispersalStore={dispersalStore}
                     maxAccess={maxAccess} 
                 />
             </CustomTabPanel>
             <CustomTabPanel index={3} value={activeTab}>
-                <ProductFieldTab productFieldGridData={productFieldGridData} maxAccess={maxAccess} />
+                <ProductFieldTab productFieldGridData={productFieldGridData} dispersalStore={dispersalStore} maxAccess={maxAccess} />
             </CustomTabPanel>
             <CustomTabPanel index={4} value={activeTab}>
-                <ProductAgentTab productAgentGridData={productAgentGridData} maxAccess={maxAccess} />
+                <ProductAgentTab productAgentGridData={productAgentGridData} dispersalStore={dispersalStore} maxAccess={maxAccess} />
             </CustomTabPanel>
         </Window>
     )

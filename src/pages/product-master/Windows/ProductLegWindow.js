@@ -23,7 +23,7 @@ const ProductMasterWindow = ({
   maxAccess
 }) => {
   return (
-    <Window id='ProductCommissionsWindow' Title='Commission' onClose={onClose} width={500} height={400}>
+    <Window id='ProductCommissionsWindow' Title='Commission' onClose={onClose} width={600} height={400}>
       <CustomTabPanel index={0} value={0}>
         <Box
           sx={{

@@ -72,6 +72,7 @@ const InlineEditGrid = ({
                           label={rowIndex === 0 ? column.header : ''}
                           placeholder={rowIndex != 0 ? column.header : ''}
                           size='small'
+                          autoComplete = 'off'
                           id={`cell-${rowIndex}-${columnIndex}`}
                           value={column.value}
                           onChange={(e) => handleCellEdit(rowIndex, columnIndex, e.target.value)}

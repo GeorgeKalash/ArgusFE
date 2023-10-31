@@ -20,6 +20,7 @@ const productLegTab = ({
   setProductLegWindowOpen,
   currencyStore,
   plantStore,
+  dispersalStore,
   maxAccess
 }) => {
   const columns = [
@@ -78,10 +79,10 @@ const productLegTab = ({
         <Grid container gap={2}>
           <Grid container xs={12} spacing={2}>
             <Grid item xs={6}>
-              <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
+              <CustomTextField label='Reference' value={''} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField label='Name' value={'name 1'} readOnly={true} />
+              <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
               <CustomComboBox
@@ -107,6 +108,7 @@ const productLegTab = ({
               valueField='recordId'
               displayField='name'
               store={currencyStore}
+              required='true'
               value={currencyStore.filter(item => item.recordId === productLegValidation.values.currencyId)[0]}
               onChange={(event, newValue) => {
                 productLegValidation.setFieldValue('currencyId', newValue?.recordId)
@@ -118,7 +120,21 @@ const productLegTab = ({
             />
             </Grid>
             <Grid item xs={6}>
-              <CustomComboBox name='dispersal' label='Dispersal' readOnly={false} required />
+              <CustomComboBox name='dispersalId'
+              label='Dispersal'
+              valueField='recordId'
+              displayField='name'
+              store={dispersalStore}
+              required='true'
+              value={dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
+              onChange={(event, newValue) => {
+                productLegValidation.setFieldValue('dispersalId', newValue?.recordId)
+              }}
+              error={
+                productLegValidation.touched.dispersalId && Boolean(productLegValidation.errors.dispersalId)
+              }
+              helperText={productLegValidation.touched.dispersalId && productLegValidation.errors.dispersalId}
+               />
             </Grid>
           </Grid>
           <Grid xs={12}>
