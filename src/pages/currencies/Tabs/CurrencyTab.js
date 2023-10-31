@@ -22,7 +22,7 @@ const CurrencyTab=({
               value={currencyValidation.values.reference}
               required
               onChange={currencyValidation.handleChange}
-              inputProps={{ maxLength: '3' }}
+              maxLength = '3'
               onClear={() => currencyValidation.setFieldValue('reference', '')}
               error={currencyValidation.touched.reference && Boolean(currencyValidation.errors.reference)}
               helperText={currencyValidation.touched.reference && currencyValidation.errors.reference}

@@ -287,7 +287,7 @@ const ProductMaster = () => {
 
   const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
 
-  const tabs = [{ label: 'Main' }, { label: 'Dispersal' }, { label: 'Leg' }, { label: 'Fields' }, { label: 'Agent' }]
+  const tabs = [{ label: 'Main' }, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => { }
 
@@ -440,8 +440,8 @@ const ProductMaster = () => {
     const newData = {
       list: [
         { commissionId: 1, commissionRef: 'PCT', commissionName: 'percentage', commission: 0.5 },
-        { commissionId: 2, commissionRef: 'FIXED', commissionName: 'fixed', commission: 100 },
-        { commissionId: 3, commissionRef: 'FIXED-OTHER', commissionName: 'fixed (other charges)', commission: 150 }
+        { commissionId: 2, commissionRef: 'FIX', commissionName: 'fixed', commission: 100 },
+        { commissionId: 3, commissionRef: 'OTH', commissionName: 'fixed (other charges)', commission: 150 }
       ]
     }
     setProductLegCommissionGridData({ ...newData })

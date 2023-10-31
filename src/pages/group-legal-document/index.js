@@ -23,9 +23,9 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import {
   getNewGroupLegalDocument,
   populateGroupLegalDocument
-} from 'src/Models/System/BusinessPartner/GroupLegalDocument'
-import { getNewCategoryId, populateCategoryId } from 'src/Models/System/BusinessPartner/Group'
-import { getNewGroup, populateGroup } from 'src/Models/System/BusinessPartner/CategoryID'
+} from 'src/Models/BusinessPartner/GroupLegalDocument'
+import { getNewCategoryId, populateCategoryId } from 'src/Models/BusinessPartner/Group'
+import { getNewGroup, populateGroup } from 'src/Models/BusinessPartner/CategoryID'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
