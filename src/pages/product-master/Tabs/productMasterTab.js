@@ -8,6 +8,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 const ProductMasterTab = ({
   productMasterValidation,
   typeStore,
+  functionStore,
   commissionBaseStore,
   languageStore,
   currencyStore,
@@ -52,6 +53,22 @@ const ProductMasterTab = ({
               displayField='value'
               store={typeStore}
               value={typeStore.filter(item => item.key === productMasterValidation.values.type)[0]}
+              required
+              onChange={(event, newValue) => {
+                productMasterValidation.setFieldValue('type', newValue?.key)
+              }}
+              error={Boolean(productMasterValidation.errors.type)}
+              helperText={productMasterValidation.errors.type}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomComboBox
+              name='function'
+              label='Function'
+              valueField='key'
+              displayField='value'
+              store={functionStore}
+              value={functionStore.filter(item => item.key === productMasterValidation.values.function)[0]}
               required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('type', newValue?.key)

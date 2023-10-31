@@ -44,6 +44,7 @@ const ProductMaster = () => {
   //stores
   const [gridData, setGridData] = useState([])
   const [typeStore, setTypeStore] = useState([])
+  const [functionStore, setFunctionStore] = useState([])
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
@@ -145,6 +146,7 @@ const ProductMaster = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       type: yup.string().required('This field is required'),
+      function: yup.string().required('This field is required'),
       correspondant: yup.string().nullable(),
       countryId: yup.string().required('This field is required'),
       currencyId: yup.string().nullable(),
@@ -184,6 +186,22 @@ const ProductMaster = () => {
       .then(res => {
         //ask about lang values
         setTypeStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+  
+  
+  const fillFunctionStore = () => {
+    var parameters = '_database=3605' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        //ask about lang values
+        setFunctionStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error.response.data)
@@ -277,6 +295,7 @@ const ProductMaster = () => {
     productMasterValidation.setValues({})
     productLegValidation.setValues({})
     fillTypeStore()
+    fillFunctionStore()
     fillLanguageStore()
     fillCommissionBaseStore()
     fillCurrencyStore()
@@ -486,6 +505,7 @@ const ProductMaster = () => {
           productMasterValidation={productMasterValidation}
           productLegValidation={productLegValidation}
           typeStore={typeStore}
+          functionStore={functionStore}
           commissionBaseStore={commissionBaseStore}
           languageStore={languageStore}
           productDispersalGridData={productDispersalGridData}

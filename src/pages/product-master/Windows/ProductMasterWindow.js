@@ -20,6 +20,7 @@ const ProductMasterWindow = ({
     productMasterValidation,
     productLegValidation,
     typeStore,
+    functionStore,
     commissionBaseStore,
     languageStore,
     productDispersalGridData,
@@ -53,6 +54,7 @@ const ProductMasterWindow = ({
                 <ProductMasterTab
                     productMasterValidation={productMasterValidation}
                     typeStore={typeStore}
+                    functionStore={functionStore}
                     commissionBaseStore={commissionBaseStore}
                     languageStore={languageStore}
                     currencyStore={currencyStore}
