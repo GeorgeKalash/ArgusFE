@@ -108,7 +108,6 @@ const productLegTab = ({
               valueField='recordId'
               displayField='name'
               store={currencyStore}
-              required='true'
               value={currencyStore.filter(item => item.recordId === productLegValidation.values.currencyId)[0]}
               onChange={(event, newValue) => {
                 productLegValidation.setFieldValue('currencyId', newValue?.recordId)
@@ -125,7 +124,6 @@ const productLegTab = ({
               valueField='recordId'
               displayField='name'
               store={dispersalStore}
-              required='true'
               value={dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
               onChange={(event, newValue) => {
                 productLegValidation.setFieldValue('dispersalId', newValue?.recordId)

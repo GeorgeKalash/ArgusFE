@@ -56,6 +56,7 @@ const ProductMaster = () => {
   const [productLegCommissionGridData, setProductLegCommissionGridData] = useState([]) //for productLegTab
   const [productFieldGridData, setProductFieldGridData] = useState([]) //for productFieldTab
   const [productAgentGridData, setProductAgentGridData] = useState([]) //for product agent tab
+  const [productCurrenciesGridData, setProductCurrenciesGridData] = useState([]) //for product agent tab
   const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
 
   //states
@@ -166,8 +167,6 @@ const ProductMaster = () => {
   })
 
   const productLegValidation = useFormik({
-    plantId: yup.string().required('This field is required'),
-    currencyId: yup.string().required('This field is required'),
   })
 
   const handleSubmit = () => {
@@ -287,7 +286,7 @@ const ProductMaster = () => {
 
   const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
 
-  const tabs = [{ label: 'Main' }, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
+  const tabs = [{ label: 'Main' }, {label: 'Currencies'}, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => { }
 
@@ -391,6 +390,26 @@ const ProductMaster = () => {
     setProductAgentGridData({ ...newData })
   }
 
+const getProductCurrenciesGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const newData = {
+      list: [
+        {
+          recordId: 1,
+          Currency: 'US DOLLAR'
+        },
+        {
+          recordId: 2,
+          Currency: 'INDIAN RUPEES'
+        },
+        {
+          recordId: 3,
+          Currency: 'UAE DIRHAMS'
+        }
+      ]
+    }
+    setProductCurrenciesGridData({ ...newData })
+  }
+
   const getProductDispersalGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const newData = {
       list: [
@@ -454,6 +473,9 @@ const ProductMaster = () => {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
 
+        //for currencies tab
+        getProductCurrenciesGridData({})
+
         //for product leg tab
         setProductLegWindowOpen(false)
         getProductLegGridData({})
@@ -508,6 +530,7 @@ const ProductMaster = () => {
           functionStore={functionStore}
           commissionBaseStore={commissionBaseStore}
           languageStore={languageStore}
+          productCurrenciesGridData={productCurrenciesGridData}
           productDispersalGridData={productDispersalGridData}
           productLegWindowOpen={productLegWindowOpen}
           productLegGridData={productLegGridData}

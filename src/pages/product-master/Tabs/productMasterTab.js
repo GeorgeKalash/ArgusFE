@@ -11,7 +11,6 @@ const ProductMasterTab = ({
   functionStore,
   commissionBaseStore,
   languageStore,
-  currencyStore,
   countryStore
 }) => {
 
@@ -117,23 +116,6 @@ const ProductMasterTab = ({
               helperText={productMasterValidation.errors.countryId}
             />
 
-          </Grid>
-          <Grid item xs={12}>
-            <CustomComboBox
-              name='currencyId'
-              label='Currency'
-              valueField='recordId'
-              displayField='name'
-              store={currencyStore}
-              value={currencyStore.filter(item => item.recordId === productMasterValidation.values.currencyId)[0]}
-              onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('currencyId', newValue?.recordId)
-              }}
-              error={
-                Boolean(productMasterValidation.errors.currencyId)
-              }
-              helperText={productMasterValidation.errors.currencyId}
-            />
           </Grid>
         </Grid>
         {/* Second Column */}
