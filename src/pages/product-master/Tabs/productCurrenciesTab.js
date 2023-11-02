@@ -6,11 +6,15 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const PoductCurrenciesTab = ({ productCurrenciesGridData, dispersalStore, maxAccess }) => {
+const PoductCurrenciesTab = ({ productCurrenciesGridData, maxAccess }) => {
   const columns = [
     {
+      field: 'Country',
+      headerName: 'Country',
+      flex: 1
+    },{
       field: 'Currency',
-      headerName: 'Currencies',
+      headerName: 'Currency',
       flex: 1
     }
   ]
@@ -31,15 +35,6 @@ const PoductCurrenciesTab = ({ productCurrenciesGridData, dispersalStore, maxAcc
             </Grid>
             <Grid item xs={6}>
               <CustomTextField label='Name' value={''} readOnly={true} />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomComboBox name='dispersalId'
-              label='Dispersal'
-              valueField='recordId'
-              displayField='name'
-              store={dispersalStore}
-              required='true'
-              />
             </Grid>
           </Grid>
           <Grid xs={12}>

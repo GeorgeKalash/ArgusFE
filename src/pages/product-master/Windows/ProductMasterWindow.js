@@ -59,12 +59,11 @@ const ProductMasterWindow = ({
                     functionStore={functionStore}
                     commissionBaseStore={commissionBaseStore}
                     languageStore={languageStore}
-                    countryStore={countryStore}
                     maxAccess={maxAccess} 
                 />
             </CustomTabPanel>
             <CustomTabPanel index={1} value={activeTab}>
-                <PoductCurrenciesTab productCurrenciesGridData={productCurrenciesGridData} dispersalStore={dispersalStore} maxAccess={maxAccess} />
+                <PoductCurrenciesTab productCurrenciesGridData={productCurrenciesGridData} maxAccess={maxAccess} />
             </CustomTabPanel>
             <CustomTabPanel index={2} value={activeTab}>
                 <ProductDispersalTab productDispersalGridData={productDispersalGridData} maxAccess={maxAccess} />

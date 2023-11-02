@@ -150,7 +150,6 @@ const ProductMaster = () => {
       function: yup.string().required('This field is required'),
       correspondant: yup.string().nullable(),
       countryId: yup.string().required('This field is required'),
-      currencyId: yup.string().nullable(),
       language: yup.string().required('This field is required'),
       interfaceId: yup.string().nullable(),
       commissionBase: yup.string().nullable(),
@@ -286,7 +285,7 @@ const ProductMaster = () => {
 
   const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
 
-  const tabs = [{ label: 'Main' }, {label: 'Currencies'}, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
+  const tabs = [{ label: 'Main' }, {label: 'Monetary'}, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => { }
 
@@ -395,14 +394,17 @@ const getProductCurrenciesGridData = ({ _startAt = 0, _pageSize = 50 }) => {
       list: [
         {
           recordId: 1,
+          Country: 'USA',
           Currency: 'US DOLLAR'
         },
         {
           recordId: 2,
+          Country: 'India',
           Currency: 'INDIAN RUPEES'
         },
         {
           recordId: 3,
+          Country: 'UAE',
           Currency: 'UAE DIRHAMS'
         }
       ]

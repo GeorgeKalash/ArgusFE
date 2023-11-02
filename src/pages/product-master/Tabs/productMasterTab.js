@@ -10,8 +10,7 @@ const ProductMasterTab = ({
   typeStore,
   functionStore,
   commissionBaseStore,
-  languageStore,
-  countryStore
+  languageStore
 }) => {
 
   return (
@@ -97,25 +96,6 @@ const ProductMasterTab = ({
               }
               helperText={productMasterValidation.errors.correspondant}
             />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomComboBox
-              name='countryId'
-              label='Country'
-              valueField='recordId'
-              displayField='name'
-              store={countryStore}
-              value={countryStore.filter(item => item.recordId === productMasterValidation.values.countryId)[0]}
-              required
-              onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('countryId', newValue?.recordId)
-              }}
-              error={
-                Boolean(productMasterValidation.errors.countryId)
-              }
-              helperText={productMasterValidation.errors.countryId}
-            />
-
           </Grid>
         </Grid>
         {/* Second Column */}
