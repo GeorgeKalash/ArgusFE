@@ -4,21 +4,11 @@ import { Grid, Box, Checkbox } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const PoductCurrenciesTab = ({ productCurrenciesGridData, maxAccess }) => {
+const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
   const columns = [
     {
       field: 'country',
       headerName: 'Country',
-      flex: 1
-    },
-    {
-      field: 'currency',
-      headerName: 'Currency',
-      flex: 1
-    },
-    {
-      field: 'dispersalType',
-      headerName: 'Dispersal Type',
       flex: 1
     },
     {
@@ -58,7 +48,7 @@ const PoductCurrenciesTab = ({ productCurrenciesGridData, maxAccess }) => {
           <Grid xs={12}>
             <Table
               columns={columns}
-              gridData={productCurrenciesGridData}
+              gridData={productCountriesGridData}
               rowId={['recordId']}
               isLoading={false}
               pagination={false}
@@ -75,4 +65,4 @@ const PoductCurrenciesTab = ({ productCurrenciesGridData, maxAccess }) => {
   )
 }
 
-export default PoductCurrenciesTab
+export default ProductCountriesTab

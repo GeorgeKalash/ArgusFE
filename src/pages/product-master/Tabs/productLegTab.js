@@ -84,7 +84,7 @@ const productLegTab = ({
             <Grid item xs={6}>
               <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomComboBox
               name='plantId'
               label='Plant'
@@ -101,7 +101,7 @@ const productLegTab = ({
               helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
             />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
             <CustomComboBox
               name='currencyId'
               label='Currency'
@@ -118,7 +118,7 @@ const productLegTab = ({
               helperText={productLegValidation.touched.currencyId && productLegValidation.errors.currencyId}
             />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomComboBox name='dispersalId'
               label='Dispersal'
               valueField='recordId'
