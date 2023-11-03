@@ -7,8 +7,13 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
   const columns = [
     {
-      field: 'country',
-      headerName: 'Country',
+      field: 'countryRef',
+      headerName: 'Country Ref',
+      flex: 1
+    },
+    {
+      field: 'countryName',
+      headerName: 'Country Name',
       flex: 1
     },
     {

@@ -395,27 +395,32 @@ const ProductMaster = () => {
       list: [
         {
           recordId: 1,
-          country: 'United States',
+          countryRef: 'USA',
+          countryName: 'United States',
           isInactive: false
         },
         {
           recordId: 2,
-          country: 'Lebanon',
+          countryRef: 'LB',
+          countryName: 'Lebanon',
           isInactive: true
         },
         {
           recordId: 3,
-          country: 'France',
+          countryRef: 'FR',
+          countryName: 'France',
           isInactive: true
         },
         {
           recordId: 4,
-          country: 'India',
+          countryRef: 'IND',
+          countryName: 'India',
           isInactive: false
         },
         {
           recordId: 5,
-          country: 'United Arab Emirates',
+          countryRef: 'UAE',
+          countryName: 'United Arab Emirates',
           isInactive: false
         }
       ]
