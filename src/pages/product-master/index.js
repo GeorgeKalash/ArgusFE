@@ -44,6 +44,7 @@ const ProductMaster = () => {
   //stores
   const [gridData, setGridData] = useState([])
   const [typeStore, setTypeStore] = useState([])
+  const [functionStore, setFunctionStore] = useState([])
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
@@ -55,6 +56,8 @@ const ProductMaster = () => {
   const [productLegCommissionGridData, setProductLegCommissionGridData] = useState([]) //for productLegTab
   const [productFieldGridData, setProductFieldGridData] = useState([]) //for productFieldTab
   const [productAgentGridData, setProductAgentGridData] = useState([]) //for product agent tab
+  const [productCountriesGridData, setProductCountriesGridData] = useState([]) //for countries tab
+  const [productCurrenciesGridData, setProductCurrenciesGridData] = useState([]) //for monetary tab
   const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
 
   //states
@@ -145,9 +148,9 @@ const ProductMaster = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       type: yup.string().required('This field is required'),
+      function: yup.string().required('This field is required'),
       correspondant: yup.string().nullable(),
       countryId: yup.string().required('This field is required'),
-      currencyId: yup.string().nullable(),
       language: yup.string().required('This field is required'),
       interfaceId: yup.string().nullable(),
       commissionBase: yup.string().nullable(),
@@ -164,8 +167,6 @@ const ProductMaster = () => {
   })
 
   const productLegValidation = useFormik({
-    plantId: yup.string().required('This field is required'),
-    currencyId: yup.string().required('This field is required'),
   })
 
   const handleSubmit = () => {
@@ -189,9 +190,25 @@ const ProductMaster = () => {
         setErrorMessage(error.response.data)
       })
   }
+  
+  
+  const fillFunctionStore = () => {
+    var parameters = '_database=3605' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        //ask about lang values
+        setFunctionStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
 
   const fillLanguageStore = () => {
-    var parameters = '_database=13' //add 'xml'.json and get _database values from there
+    var parameters = '_database=3606' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
@@ -269,7 +286,7 @@ const ProductMaster = () => {
 
   const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
 
-  const tabs = [{ label: 'Main' }, { label: 'Dispersal' }, { label: 'Leg' }, { label: 'Fields' }, { label: 'Agent' }]
+  const tabs = [{ label: 'Main' }, { label: 'Countries' }, {label: 'Monetary'}, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => { }
 
@@ -277,6 +294,7 @@ const ProductMaster = () => {
     productMasterValidation.setValues({})
     productLegValidation.setValues({})
     fillTypeStore()
+    fillFunctionStore()
     fillLanguageStore()
     fillCommissionBaseStore()
     fillCurrencyStore()
@@ -372,6 +390,75 @@ const ProductMaster = () => {
     setProductAgentGridData({ ...newData })
   }
 
+  const getProductCountriesGridData = () => {
+    const newData = {
+      list: [
+        {
+          recordId: 1,
+          country: 'United States',
+          isInactive: false
+        },
+        {
+          recordId: 2,
+          country: 'Lebanon',
+          isInactive: true
+        },
+        {
+          recordId: 3,
+          country: 'France',
+          isInactive: true
+        },
+        {
+          recordId: 4,
+          country: 'India',
+          isInactive: false
+        },
+        {
+          recordId: 5,
+          country: 'United Arab Emirates',
+          isInactive: false
+        }
+      ]
+    }
+    setProductCountriesGridData({ ...newData })
+  }
+
+  const getProductCurrenciesGridData = () => {
+    const newData = {
+      list: [
+        {
+          recordId: 1,
+          country: 'United States',
+          currency: 'US DOLLAR',
+          dispersalType: 'bank',
+          isInactive: false
+        },
+        {
+          recordId: 2,
+          country: 'United States',
+          currency: 'US DOLLAR',
+          dispersalType: 'cash',
+          isInactive: true
+        },
+        {
+          recordId: 3,
+          country: 'India',
+          currency: 'INDIAN RUPEES',
+          dispersalType: 'bank',
+          isInactive: false
+        },
+        {
+          recordId: 4,
+          country: 'United Arab Emirates',
+          currency: 'UAE DIRHAMS',
+          dispersalType: 'bank',
+          isInactive: true
+        }
+      ]
+    }
+    setProductCurrenciesGridData({ ...newData })
+  }
+
   const getProductDispersalGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const newData = {
       list: [
@@ -421,8 +508,8 @@ const ProductMaster = () => {
     const newData = {
       list: [
         { commissionId: 1, commissionRef: 'PCT', commissionName: 'percentage', commission: 0.5 },
-        { commissionId: 2, commissionRef: 'FIXED', commissionName: 'fixed', commission: 100 },
-        { commissionId: 3, commissionRef: 'FIXED-OTHER', commissionName: 'fixed (other charges)', commission: 150 }
+        { commissionId: 2, commissionRef: 'FIX', commissionName: 'fixed', commission: 100 },
+        { commissionId: 3, commissionRef: 'OTH', commissionName: 'fixed (other charges)', commission: 150 }
       ]
     }
     setProductLegCommissionGridData({ ...newData })
@@ -434,6 +521,12 @@ const ProductMaster = () => {
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
+
+        //for countries tab
+        getProductCountriesGridData({})
+
+        //for currencies tab
+        getProductCurrenciesGridData({})
 
         //for product leg tab
         setProductLegWindowOpen(false)
@@ -481,13 +574,16 @@ const ProductMaster = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           width={900}
-          height={350}
+          height={310}
           onSave={handleSubmit}
           productMasterValidation={productMasterValidation}
           productLegValidation={productLegValidation}
           typeStore={typeStore}
+          functionStore={functionStore}
           commissionBaseStore={commissionBaseStore}
           languageStore={languageStore}
+          productCountriesGridData={productCountriesGridData}
+          productCurrenciesGridData={productCurrenciesGridData}
           productDispersalGridData={productDispersalGridData}
           productLegWindowOpen={productLegWindowOpen}
           productLegGridData={productLegGridData}

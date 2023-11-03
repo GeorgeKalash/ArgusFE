@@ -8,10 +8,9 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 const ProductMasterTab = ({
   productMasterValidation,
   typeStore,
+  functionStore,
   commissionBaseStore,
-  languageStore,
-  currencyStore,
-  countryStore
+  languageStore
 }) => {
 
   return (
@@ -61,6 +60,22 @@ const ProductMasterTab = ({
             />
           </Grid>
           <Grid item xs={12}>
+            <CustomComboBox
+              name='function'
+              label='Function'
+              valueField='key'
+              displayField='value'
+              store={functionStore}
+              value={functionStore.filter(item => item.key === productMasterValidation.values.function)[0]}
+              required
+              onChange={(event, newValue) => {
+                productMasterValidation.setFieldValue('type', newValue?.key)
+              }}
+              error={Boolean(productMasterValidation.errors.type)}
+              helperText={productMasterValidation.errors.type}
+            />
+          </Grid>
+          <Grid item xs={12}>
             <CustomTextField
               name='correspondant'
               label='Correspondant'
@@ -80,42 +95,6 @@ const ProductMasterTab = ({
                 Boolean(productMasterValidation.errors.correspondant)
               }
               helperText={productMasterValidation.errors.correspondant}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomComboBox
-              name='countryId'
-              label='Country'
-              valueField='recordId'
-              displayField='name'
-              store={countryStore}
-              value={countryStore.filter(item => item.recordId === productMasterValidation.values.countryId)[0]}
-              required
-              onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('countryId', newValue?.recordId)
-              }}
-              error={
-                Boolean(productMasterValidation.errors.countryId)
-              }
-              helperText={productMasterValidation.errors.countryId}
-            />
-
-          </Grid>
-          <Grid item xs={12}>
-            <CustomComboBox
-              name='currencyId'
-              label='Currency'
-              valueField='recordId'
-              displayField='name'
-              store={currencyStore}
-              value={currencyStore.filter(item => item.recordId === productMasterValidation.values.currencyId)[0]}
-              onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('currencyId', newValue?.recordId)
-              }}
-              error={
-                Boolean(productMasterValidation.errors.currencyId)
-              }
-              helperText={productMasterValidation.errors.currencyId}
             />
           </Grid>
         </Grid>

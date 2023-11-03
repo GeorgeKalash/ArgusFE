@@ -84,7 +84,7 @@ const productLegTab = ({
             <Grid item xs={6}>
               <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomComboBox
               name='plantId'
               label='Plant'
@@ -101,14 +101,13 @@ const productLegTab = ({
               helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
             />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
             <CustomComboBox
               name='currencyId'
               label='Currency'
               valueField='recordId'
               displayField='name'
               store={currencyStore}
-              required='true'
               value={currencyStore.filter(item => item.recordId === productLegValidation.values.currencyId)[0]}
               onChange={(event, newValue) => {
                 productLegValidation.setFieldValue('currencyId', newValue?.recordId)
@@ -119,13 +118,12 @@ const productLegTab = ({
               helperText={productLegValidation.touched.currencyId && productLegValidation.errors.currencyId}
             />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomComboBox name='dispersalId'
               label='Dispersal'
               valueField='recordId'
               displayField='name'
               store={dispersalStore}
-              required='true'
               value={dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
               onChange={(event, newValue) => {
                 productLegValidation.setFieldValue('dispersalId', newValue?.recordId)
