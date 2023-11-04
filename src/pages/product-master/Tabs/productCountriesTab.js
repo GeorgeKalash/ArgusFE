@@ -3,35 +3,84 @@ import { Grid, Box, Checkbox } from '@mui/material'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+import { useState } from 'react'
 
 const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
+  // const columns = [
+  //   {
+  //     field: 'countryRef',
+  //     headerName: 'Country Ref',
+  //     flex: 1
+  //   },
+  //   {
+  //     field: 'countryName',
+  //     headerName: 'Country Name',
+  //     flex: 1
+  //   },
+  //   {
+  //     field: 'isInactive',
+  //     headerName: 'Is Inactive',
+  //     flex: 1,
+  //     renderCell: params => (
+  //       <Checkbox
+  //         color='primary'
+  //         checked={params.row.isInactive === true}
+  //         onChange={() => {
+  //           params.row.isInactive = !params.row.isInactive
+  //         }}
+  //       />
+  //     )
+  //   }
+  // ]
+
+  // //stores
+  // const [countriesData, setCountriesData] = useState([])
+
+  // const getCountriesData = () => {
+  //   var parameters = '_filter='
+  //   getRequest({
+  //     extension: SystemRepository.Country.qry,
+  //     parameters: parameters
+  //   })
+  //     .then(res => {
+  //       setCountriesData(res)
+  //       console.log(res)
+  //     })
+  //     .catch(error => {
+  //       setErrorMessage(error)
+  //     })
+  // }
+
+  // useEffect(() => {
+  //   getCountriesData()
+  // }, [])
+
   const columns = [
     {
-      field: 'countryRef',
-      headerName: 'Country Ref',
-      flex: 1
+      key: 1,
+      header: 'country Ref',
+      name: 'countryRef',
+      value: '',
+      fieldStore: productCountriesGridData.list,
+      selectedOptionDisplayProperties: ['countryRef'],
+      listOptionDisplayProperties: ['countryRef', 'countryName'],
+      valueProperty: 'recordId'
     },
     {
-      field: 'countryName',
-      headerName: 'Country Name',
-      flex: 1
+      key: 1,
+      header: 'country Name',
+      name: 'countryName',
+      value: '',
+      fieldStore: productCountriesGridData.list,
+      selectedOptionDisplayProperties: ['countryName'],
+      listOptionDisplayProperties: ['countryName', 'countryRef'],
+      valueProperty: 'recordId',
+      isReadOnly: 'true',
+      hasDefaultValue: 'true'
     },
-    {
-      field: 'isInactive',
-      headerName: 'Is Inactive',
-      flex: 1,
-      renderCell: params => (
-        <Checkbox
-          color='primary'
-          checked={params.row.isInactive === true}
-          onChange={() => {
-            params.row.isInactive = !params.row.isInactive
-          }}
-        />
-      )
-    }
+    { key: 2, header: 'Is inactive', name: 'isInactive', value: null }
   ]
-
   return (
     <>
       <Box
@@ -50,8 +99,8 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
               <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
           </Grid>
-          <Grid xs={12}>
-            <Table
+          <Grid xs={12} sx={{ display: 'flex', flex: 1 }}>
+            {/* <Table
               columns={columns}
               gridData={productCountriesGridData}
               rowId={['recordId']}
@@ -59,10 +108,10 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
               pagination={false}
               height={220}
               maxAccess={maxAccess} 
-            />
-            {/* <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
-              <InlineEditGrid columns={columns}/>
-            </Box> */}
+            /> */}
+            <Box sx={{ flex: 1, justifyContent: 'stretch' }}>
+              <InlineEditGrid columns={columns} />
+            </Box>
           </Grid>
         </Grid>
       </Box>
