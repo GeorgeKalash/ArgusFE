@@ -1,10 +1,11 @@
-import { Grid, Box, Checkbox } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 
 // ** Custom Imports
-import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-import { useState } from 'react'
+
+// import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+import CustomInlineDataGrid from 'src/components/Shared/InlineDataGrid'
+import { countriesGetUpdatedRowFunction, getValueForCountryName } from 'src/components/helpers/inlineEditGridHelper'
 
 const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
   // const columns = [
@@ -65,7 +66,8 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
       fieldStore: productCountriesGridData.list,
       selectedOptionDisplayProperties: ['countryRef'],
       listOptionDisplayProperties: ['countryRef', 'countryName'],
-      valueProperty: 'recordId'
+      valueProperty: 'recordId',
+      populatedBy: ''
     },
     {
       key: 1,
@@ -77,10 +79,12 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
       listOptionDisplayProperties: ['countryName', 'countryRef'],
       valueProperty: 'recordId',
       isReadOnly: 'true',
-      hasDefaultValue: 'true'
+      hasDefaultValue: 'true',
+      populatedBy: 'countryRef'
     },
     { key: 2, header: 'Is inactive', name: 'isInactive', value: null }
   ]
+
   return (
     <>
       <Box
@@ -109,8 +113,51 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
               height={220}
               maxAccess={maxAccess} 
             /> */}
-            <Box sx={{ flex: 1, justifyContent: 'stretch' }}>
+            {/* <Box sx={{ flex: 1, justifyContent: 'stretch' }}>
               <InlineEditGrid columns={columns} />
+            </Box> */}
+            <Box sx={{ width: '100%', height: '100%' }}>
+              <CustomInlineDataGrid
+                dataRows={[]}
+                getUpdatedRowFunction={row => countriesGetUpdatedRowFunction(row, productCountriesGridData.list)}
+                columns={[
+                  {
+                    field: 'countryRef',
+                    headerName: 'countryRef',
+                    width: 150,
+                    editable: true,
+                    type: 'singleSelect',
+                    valueOptions: productCountriesGridData.list,
+                    getOptionValue: value => value.countryRef,
+                    getOptionLabel: value => value.countryRef + '-' + value.countryName,
+                    valueFormatter: params => {
+                      const { id, value, field } = params
+
+                      return value
+                    },
+                    preProcessEditCellProps: params => {
+                      const hasError = params.props.value ? false : true
+
+                      return { ...params.props, error: hasError }
+                    }
+                  },
+                  {
+                    field: 'countryName',
+                    headerName: 'countryName',
+                    width: 150,
+                    type: 'string',
+                    editable: true,
+                    valueGetter: params => getValueForCountryName(params, productCountriesGridData.list)
+                  },
+                  {
+                    field: 'isInactive',
+                    headerName: 'Is Inactive?',
+                    type: 'boolean',
+                    width: 140,
+                    editable: true
+                  }
+                ]}
+              />
             </Box>
           </Grid>
         </Grid>
