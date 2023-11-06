@@ -59,6 +59,7 @@ const ProductMaster = () => {
   const [productCountriesGridData, setProductCountriesGridData] = useState([]) //for countries tab
   const [productCurrenciesGridData, setProductCurrenciesGridData] = useState([]) //for monetary tab
   const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
+  const [productSchedulesGridData, setProductSchedulesGridData] = useState([]) //for product dispersal tab
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -286,7 +287,16 @@ const ProductMaster = () => {
 
   const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
 
-  const tabs = [{ label: 'Main' }, { label: 'Countries' }, {label: 'Monetary'}, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
+  const tabs = [
+    { label: 'Main' }, 
+    { label: 'Countries' }, 
+    {label: 'Monetary'}, 
+    { label: 'Dispersal' }, 
+    { label: 'Schedules' }, 
+    { label: 'Fees' }, 
+    { label: 'Fields' }, 
+    { label: 'Agent' }
+  ]
 
   const delProductMaster = obj => { }
 
@@ -428,6 +438,42 @@ const ProductMaster = () => {
     setProductCountriesGridData({ ...newData })
   }
 
+  const getProductSchedulesData = () => {
+    const newData = {
+      list: [
+        {
+          recordId: 1,
+          plant: 'الرياض البطحاء',
+          currency: 'US DOLLAR',
+          dispersalMode: 'bank',
+          isInactive: false
+        },
+        {
+          recordId: 2,
+          plant: 'ALL',
+          currency: 'ALL',
+          dispersalMode: 'ALL',
+          isInactive: false
+        },
+        {
+          recordId: 3,
+          plant: 'الرياض البطحاء',
+          currency: 'INDIAN RUPEES',
+          dispersalMode: 'bank',
+          isInactive: false
+        },
+        {
+          recordId: 4,
+          plant: 'ALL',
+          currency: 'UAE DIRHAMS',
+          dispersalMode: 'bank',
+          isInactive: true
+        }
+      ]
+    }
+    setProductSchedulesGridData({ ...newData })
+  }
+
   const getProductCurrenciesGridData = () => {
     const newData = {
       list: [
@@ -539,9 +585,13 @@ const ProductMaster = () => {
 
         //for product field tab
         getProductFieldGridData({})
+        
+        //for schedules tab
+        getProductSchedulesData({})
 
         //for product agent tab
         getProductAgentGridData({})
+
 
         //for product dispersal tab
         getProductDispersalGridData({})
@@ -595,6 +645,7 @@ const ProductMaster = () => {
           productLegCommissionGridData={productLegCommissionGridData}
           editProductCommission={editProductCommission}
           setProductLegWindowOpen={setProductLegWindowOpen}
+          productSchedulesGridData={productSchedulesGridData}
           productFieldGridData={productFieldGridData}
           productAgentGridData={productAgentGridData}
           currencyStore={currencyStore}
