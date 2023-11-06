@@ -444,13 +444,15 @@ const ProductMaster = () => {
         {
           recordId: 1,
           plant: 'الرياض البطحاء',
+          country: 'UAE',
           currency: 'US DOLLAR',
-          dispersalMode: 'bank',
+          dispersalMode: 'EXPRESS',
           isInactive: false
         },
         {
           recordId: 2,
           plant: 'ALL',
+          country: 'ALL',
           currency: 'ALL',
           dispersalMode: 'ALL',
           isInactive: false
@@ -458,15 +460,17 @@ const ProductMaster = () => {
         {
           recordId: 3,
           plant: 'الرياض البطحاء',
+          country: 'UAE',
           currency: 'INDIAN RUPEES',
-          dispersalMode: 'bank',
+          dispersalMode: 'NTFS',
           isInactive: false
         },
         {
           recordId: 4,
           plant: 'ALL',
+          country: 'UAE',
           currency: 'UAE DIRHAMS',
-          dispersalMode: 'bank',
+          dispersalMode: 'CASH',
           isInactive: true
         }
       ]

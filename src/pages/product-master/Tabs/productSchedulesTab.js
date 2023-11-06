@@ -12,6 +12,11 @@ const PoductSchedulesTab = ({ productSchedulesGridData, maxAccess }) => {
       flex: 1
     },
     {
+      field: 'country',
+      headerName: 'Country',
+      flex: 1
+    },
+    {
       field: 'currency',
       headerName: 'Currency',
       flex: 1
