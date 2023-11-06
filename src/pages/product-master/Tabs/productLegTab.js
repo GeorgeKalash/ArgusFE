@@ -87,6 +87,7 @@ const productLegTab = ({
             <Grid item xs={4}>
               <CustomComboBox
               name='plantId'
+              readOnly={true}
               label='Plant'
               valueField='recordId'
               displayField='name'
@@ -104,6 +105,7 @@ const productLegTab = ({
             <Grid item xs={4}>
             <CustomComboBox
               name='currencyId'
+              readOnly={true}
               label='Currency'
               valueField='recordId'
               displayField='name'
@@ -119,7 +121,9 @@ const productLegTab = ({
             />
             </Grid>
             <Grid item xs={4}>
-              <CustomComboBox name='dispersalId'
+              <CustomComboBox 
+              name='dispersalId'
+              readOnly={true}
               label='Dispersal'
               valueField='recordId'
               displayField='name'
