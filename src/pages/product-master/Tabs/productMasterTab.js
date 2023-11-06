@@ -10,7 +10,8 @@ const ProductMasterTab = ({
   typeStore,
   functionStore,
   commissionBaseStore,
-  languageStore
+  languageStore,
+  labels
 }) => {
 
   return (
@@ -21,7 +22,7 @@ const ProductMasterTab = ({
           <Grid item xs={12}>
             <CustomTextField
               name='reference'
-              label='Reference'
+              label={labels.reference}
               value={productMasterValidation.values.reference}
               required
               readOnly={false}
@@ -34,7 +35,7 @@ const ProductMasterTab = ({
           <Grid item xs={12}>
             <CustomTextField
               name='name'
-              label='Name'
+              label={labels.name}
               value={productMasterValidation.values.name}
               required
               onChange={productMasterValidation.handleChange}
@@ -46,7 +47,7 @@ const ProductMasterTab = ({
           <Grid item xs={12}>
             <CustomComboBox
               name='type'
-              label='Type'
+              label={labels.type}
               valueField='key'
               displayField='value'
               store={typeStore}
@@ -62,23 +63,23 @@ const ProductMasterTab = ({
           <Grid item xs={12}>
             <CustomComboBox
               name='function'
-              label='Function'
+              label={labels.function}
               valueField='key'
               displayField='value'
               store={functionStore}
               value={functionStore.filter(item => item.key === productMasterValidation.values.function)[0]}
               required
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('type', newValue?.key)
+                productMasterValidation.setFieldValue('function', newValue?.key)
               }}
-              error={Boolean(productMasterValidation.errors.type)}
-              helperText={productMasterValidation.errors.type}
+              error={Boolean(productMasterValidation.errors.function)}
+              helperText={productMasterValidation.errors.function}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='correspondant'
-              label='Correspondant'
+              label={labels.correspondant}
               value={productMasterValidation.values.correspondant}
 
               //following are an example edit as needed
@@ -102,21 +103,20 @@ const ProductMasterTab = ({
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
             <CustomComboBox
-              name='languageName'
-              label='Language'
+              name='language'
+              label={labels.language}
               valueField='key'
               displayField='value'
               store={languageStore}
-              value={productMasterValidation.values.languageName}
+              value={languageStore.filter(item => item.key === productMasterValidation.values.language)[0]}
               required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('language', newValue?.key)
-                productMasterValidation.setFieldValue('languageName', newValue?.value)
               }}
               error={
-                Boolean(productMasterValidation.errors.languageName)
+                Boolean(productMasterValidation.errors.language)
               }
-              helperText={productMasterValidation.errors.languageName}
+              helperText={productMasterValidation.errors.language}
             />
           </Grid>
           <Grid item xs={12}>
@@ -125,27 +125,25 @@ const ProductMasterTab = ({
           <Grid item xs={12}>
             <CustomComboBox
               name='commissionBase'
-              label='Commission Base'
+              label={labels.commissionBase}
               valueField='key'
               displayField='value'
               store={commissionBaseStore}
-              value={productMasterValidation.values.commissionBaseName}
+              value={commissionBaseStore.filter(item => item.recordId === productMasterValidation.values.commissionBase)[0]}
+              required
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('commissionBase', newValue?.key)
-                productMasterValidation.setFieldValue('commissionBaseName', newValue?.value)
+                productMasterValidation.setFieldValue('commissionBase', newValue?.value)
               }}
               error={
-                                Boolean(productMasterValidation.errors.commissionBaseName)
+                productMasterValidation.errors.commissionBase
               }
-              helperText={
-                productMasterValidation.errors.commissionBaseName
-              }
+              helperText={productMasterValidation.errors.commissionBase}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='posMsg'
-              label='Message To Operator'
+              label={labels.messageToOperator}
               value={productMasterValidation.values.posMsg}
               readOnly={false}
               onChange={productMasterValidation.handleChange}
@@ -163,7 +161,7 @@ const ProductMasterTab = ({
                   onChange={productMasterValidation.handleChange}
                 />
               }
-              label='Activate Counter Message'
+              label={labels.activateCounterMessage}
             />
           </Grid>
           <Grid item xs={12}>
@@ -175,7 +173,7 @@ const ProductMasterTab = ({
                   onChange={productMasterValidation.handleChange}
                 />
               }
-              label='Is inactive'
+              label={labels.isInactive}
             />
           </Grid>
         </Grid>

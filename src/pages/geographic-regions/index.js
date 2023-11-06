@@ -116,7 +116,6 @@ const GeographicRegions = () => {
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
-        console.log({ error })
         setErrorMessage(error)
       })
   }

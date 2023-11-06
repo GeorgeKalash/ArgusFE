@@ -41,13 +41,14 @@ const ProductMasterWindow = ({
     plantStore,
     dispersalStore,
     countryStore,
-    maxAccess
+    maxAccess,
+    labels
 }) => {
 
     return (
         <Window
             id='ProductMasterWindow'
-            Title='Product Master'
+            Title={labels.productMaster}
             onClose={onClose}
             tabs={tabs}
             activeTab={activeTab}
@@ -64,6 +65,7 @@ const ProductMasterWindow = ({
                     commissionBaseStore={commissionBaseStore}
                     languageStore={languageStore}
                     maxAccess={maxAccess} 
+                    labels={labels}
                 />
             </CustomTabPanel>
             <CustomTabPanel index={1} value={activeTab}>
