@@ -27,9 +27,17 @@ const CustomDatePicker = ({
     autoFocus = false,
     disabled = false,
     readOnly = false,
+    editMode = false,
+    ...props
 }) => {
 
     const [openDatePicker, setOpenDatePicker] = useState(false)
+
+    const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+    const _readOnly = editMode ?
+        editMode && maxAccess < 3
+        : readOnly
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -45,7 +53,7 @@ const CustomDatePicker = ({
                 onClose={() => setOpenDatePicker(false)}
                 open={openDatePicker}
                 disabled={disabled}
-                readOnly={readOnly}
+                readOnly={_readOnly}
                 clearable //bug from mui not working for now
                 slotProps={{ // replacing clearable behaviour
                     textField: {
@@ -55,7 +63,7 @@ const CustomDatePicker = ({
                         error: error,
                         helperText: helperText,
                         InputProps: {
-                            endAdornment: !(readOnly || disabled) && (
+                            endAdornment: !(_readOnly || disabled) && (
                                 <>
                                     {value &&
                                         <InputAdornment>

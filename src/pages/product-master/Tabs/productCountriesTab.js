@@ -1,23 +1,36 @@
-import { Grid, Box } from '@mui/material'
+import { Grid, Box, Checkbox } from '@mui/material'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const ProductAgentTab = ({ productAgentGridData, dispersalStore, maxAccess }) => {
+const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
   const columns = [
     {
-      field: 'agent',
-      headerName: 'Agent',
+      field: 'countryRef',
+      headerName: 'Country Ref',
       flex: 1
+    },
+    {
+      field: 'countryName',
+      headerName: 'Country Name',
+      flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: 'Is Inactive',
+      flex: 1,
+      renderCell: params => (
+        <Checkbox
+          color='primary'
+          checked={params.row.isInactive === true}
+          onChange={() => {
+            params.row.isInactive = !params.row.isInactive
+          }}
+        />
+      )
     }
   ]
-
-  // const columns = [
-  //   { key: 0, header: 'Agent', name: 'agent', value: '' },
-  // ]
 
   return (
     <>
@@ -36,20 +49,11 @@ const ProductAgentTab = ({ productAgentGridData, dispersalStore, maxAccess }) =>
             <Grid item xs={6}>
               <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
-            <Grid item xs={6}>
-              <CustomComboBox name='dispersalId'
-              label='Dispersal'
-              valueField='recordId'
-              displayField='name'
-              store={dispersalStore}
-              required='true'
-              />
-            </Grid>
           </Grid>
           <Grid xs={12}>
             <Table
               columns={columns}
-              gridData={productAgentGridData}
+              gridData={productCountriesGridData}
               rowId={['recordId']}
               isLoading={false}
               pagination={false}
@@ -66,4 +70,4 @@ const ProductAgentTab = ({ productAgentGridData, dispersalStore, maxAccess }) =>
   )
 }
 
-export default ProductAgentTab
+export default ProductCountriesTab

@@ -12,11 +12,16 @@ import Window from 'src/components/Shared/Window'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const productLegTab = ({
+  productLegValidation,
   productLegWindowOpen,
   productLegGridData,
   productLegCommissionGridData,
   editProductCommission,
-  setProductLegWindowOpen
+  setProductLegWindowOpen,
+  currencyStore,
+  plantStore,
+  dispersalStore,
+  maxAccess
 }) => {
   const columns = [
     {
@@ -71,39 +76,90 @@ const productLegTab = ({
           height: '100%'
         }}
       >
-        <Grid container>
-          {/* First Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
-              <CustomTextField label='Reference' value={'reference 1'} readOnly={true} />
+        <Grid container gap={2}>
+          <Grid container xs={12} spacing={2}>
+            <Grid item xs={6}>
+              <CustomTextField label='Reference' value={''} readOnly={true} />
             </Grid>
-            <Grid item xs={12}>
-              <CustomComboBox name='plantName' label='Plant' readOnly={false} required />
+            <Grid item xs={6}>
+              <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
-            <Grid item xs={12}>
-              <CustomComboBox name='dispursal' label='Dispursal' readOnly={false} required />
+            <Grid item xs={3}>
+              <CustomComboBox
+              name='plantId'
+              readOnly={true}
+              label='Plant'
+              valueField='recordId'
+              displayField='name'
+              store={plantStore}
+              value={plantStore.filter(item => item.recordId === productLegValidation.values.plantId)[0]}
+              onChange={(event, newValue) => {
+                productLegValidation.setFieldValue('plantId', newValue?.recordId)
+              }}
+              error={
+                productLegValidation.touched.plantId && Boolean(productLegValidation.errors.plantId)
+              }
+              helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
+            />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomComboBox
+              name='countryId'
+              readOnly={true}
+              label='Country'
+            />
+            </Grid>
+            <Grid item xs={3}>
+            <CustomComboBox
+              name='currencyId'
+              readOnly={true}
+              label='Currency'
+              valueField='recordId'
+              displayField='name'
+              store={currencyStore}
+              value={currencyStore.filter(item => item.recordId === productLegValidation.values.currencyId)[0]}
+              onChange={(event, newValue) => {
+                productLegValidation.setFieldValue('currencyId', newValue?.recordId)
+              }}
+              error={
+                productLegValidation.touched.currencyId && Boolean(productLegValidation.errors.currencyId)
+              }
+              helperText={productLegValidation.touched.currencyId && productLegValidation.errors.currencyId}
+            />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomComboBox 
+              name='dispersalId'
+              readOnly={true}
+              label='Dispersal'
+              valueField='recordId'
+              displayField='name'
+              store={dispersalStore}
+              value={dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
+              onChange={(event, newValue) => {
+                productLegValidation.setFieldValue('dispersalId', newValue?.recordId)
+              }}
+              error={
+                productLegValidation.touched.dispersalId && Boolean(productLegValidation.errors.dispersalId)
+              }
+              helperText={productLegValidation.touched.dispersalId && productLegValidation.errors.dispersalId}
+               />
             </Grid>
           </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
-              <CustomTextField label='Name' value={'name 1'} readOnly={true} />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomComboBox name='currencyName' label='Currency' required />
-            </Grid>
+          <Grid xs={12}>
+            <Table
+              columns={columns}
+              gridData={productLegGridData}
+              rowId={['recordId']}
+              onEdit={editProductCommission}
+              isLoading={false}
+              pagination={false}
+              actionColumnHeader='Commissions'
+              height={180}
+              maxAccess={maxAccess} 
+            />
           </Grid>
         </Grid>
-        <Table
-          columns={columns}
-          gridData={productLegGridData}
-          rowId={['recordId']}
-          onEdit={editProductCommission}
-          isLoading={false}
-          pagination={false}
-          actionColumnHeader='Commissions'
-          height={180}
-        />
       </Box>
     </>
   )

@@ -3,13 +3,8 @@ import {
     Box,
     Autocomplete,
     TextField,
-    InputAdornment,
-    IconButton,
-    ListItem,
     Paper,
-    List,
 } from '@mui/material'
-import ClearIcon from '@mui/icons-material/Clear'
 
 const CustomPaper = (props) => {
 
@@ -38,7 +33,15 @@ const CustomLookup = ({
     autoFocus = false,
     disabled = false,
     readOnly = false,
+    editMode,
+    ...props
 }) => {
+
+    const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+    const _readOnly = editMode ?
+        editMode && maxAccess < 3
+        : readOnly
 
     return (
         <Box
@@ -99,8 +102,8 @@ const CustomLookup = ({
                                 helperText={helperText}
                             />
                         }
-                        readOnly={readOnly}
-                        freeSolo={readOnly}
+                        readOnly={_readOnly}
+                        freeSolo={_readOnly}
                         disabled={disabled}
                         sx={{ flex: 1 }}
                     />

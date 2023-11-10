@@ -12,12 +12,15 @@ import {
 import ClearIcon from '@mui/icons-material/Clear'
 
 // ** 3rd Party Imports
-import Draggable from 'react-draggable';
+import Draggable from 'react-draggable'
 
 // ** Custom Imports
-import WindowToolbar from './WindowToolbar';
+import WindowToolbar from './WindowToolbar'
 
 import { useSettings } from 'src/@core/hooks/useSettings'
+
+// ** Resources
+import { TrxType } from 'src/resources/AccessLevels'
 
 const Window = ({
     children,
@@ -29,16 +32,24 @@ const Window = ({
     setActiveTab,
     Title,
     onSave,
+    editMode = false,
+    ...props
 }) => {
 
     const { settings } = useSettings()
     const { navCollapsed } = settings
 
+    const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+
+    const windowToolbarVisible = editMode ?
+        maxAccess < TrxType.EDIT ? false : true
+        : maxAccess < TrxType.ADD ? false : true
+
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
-            onSave();
+            onSave()
         }
-    };
+    }
 
     const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
     const containerHeight = `calc(100vh - 136px)`
@@ -108,12 +119,14 @@ const Window = ({
                         <DialogContent sx={{ height: height, p: 0 }}>
                             {children}
                         </DialogContent>
-                        <WindowToolbar onSave={onSave} />
+                        {windowToolbarVisible &&
+                            <WindowToolbar onSave={onSave} />
+                        }
                     </Paper>
                 </Box>
             </Draggable>
         </Box>
-    );
-};
+    )
+}
 
-export default Window;
+export default Window

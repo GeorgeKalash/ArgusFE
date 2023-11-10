@@ -36,5 +36,10 @@
     "Customizer"
   ],
   "search-node-modules.path": "node_modules",
-  "markdown.extension.toc.updateOnSave": false
+  "[javascript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[ini]": {
+    "editor.defaultFormatter": "lkrms.inifmt"
+  },
 }

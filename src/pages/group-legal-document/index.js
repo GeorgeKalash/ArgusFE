@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
+import { Grid, Box} from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -11,10 +11,10 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+
+// ** Windows
+import GroupLegalDocumentWindow from './Windows/GroupLegalDocumentWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -23,14 +23,16 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import {
   getNewGroupLegalDocument,
   populateGroupLegalDocument
-} from 'src/Models/System/BusinessPartner/GroupLegalDocument'
-import { getNewCategoryId, populateCategoryId } from 'src/Models/System/BusinessPartner/Group'
-import { getNewGroup, populateGroup } from 'src/Models/System/BusinessPartner/CategoryID'
+} from 'src/Models/BusinessPartner/GroupLegalDocument'
+import { getNewCategoryId, populateCategoryId } from 'src/Models/BusinessPartner/Group'
+import { getNewGroup, populateGroup } from 'src/Models/BusinessPartner/CategoryID'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { KVSRepository } from 'src/repositories/KVSRepository'
 
 const GroupLegalDocument = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -41,29 +43,38 @@ const GroupLegalDocument = () => {
   const [groupStore, setGroupStore] = useState([])
 
   //states
+  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const _labels = {
+    group: labels && labels.find(item => item.key === 1).value,
+    categoryId: labels && labels.find(item => item.key === 2).value,
+    required: labels && labels.find(item => item.key === 3).value,
+    mandatory: labels && labels.find(item => item.key === 4).value,
+    groupLegalDocument: labels && labels.find(item => item.key === 5).value
+  }
+
   const columns = [
     {
       field: 'groupName',
-      headerName: 'Group Name ',
+      headerName: _labels.group,
       flex: 1
     },
     {
       field: 'incName',
-      headerName: 'Inc Name ',
+      headerName: _labels.categoryId,
       flex: 1
     },
     {
       field: 'required',
-      headerName: 'Required',
+      headerName: _labels.required,
       flex: 1
     },
     {
       field: 'mandatory',
-      headerName: 'Mandatory',
+      headerName: _labels.mandatory,
       flex: 1
     }
   ]
@@ -72,8 +83,8 @@ const GroupLegalDocument = () => {
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
-      groupName: yup.string().required('This field is required'),
-      incName: yup.string().required('This field is required'),
+      groupId: yup.string().required('This field is required'),
+      incId: yup.string().required('This field is required'),
       required: yup.string().required('This field is required'),
       mandatory: yup.string().required('This field is required')
     }),
@@ -86,12 +97,28 @@ const GroupLegalDocument = () => {
     groupLegalDocumentValidation.handleSubmit()
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
+  const getLabels = () => {
+    var parameters = '_dataset=' + ResourceIds.GroupLegalDocument
+
+    getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log({ res })
+        setLabels(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     var parameters = defaultParams
 
     getRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.qryGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.qry,
       parameters: parameters
     })
       .then(res => {
@@ -103,10 +130,10 @@ const GroupLegalDocument = () => {
       })
   }
 
-  const FillCategoryStore = () => {
+  const fillCategoryStore = () => {
     var parameters = `filter=`
     getRequest({
-      extension: BusinessPartnerRepository.CategoryID.qryINC,
+      extension: BusinessPartnerRepository.CategoryID.qry,
       parameters: parameters
     })
       .then(res => {
@@ -117,10 +144,10 @@ const GroupLegalDocument = () => {
       })
   }
 
-  const FillGroupStore = () => {
+  const fillGroupStore = () => {
     var parameters = `filter=`
     getRequest({
-      extension: BusinessPartnerRepository.Group.qryGRP,
+      extension: BusinessPartnerRepository.Group.qry,
       parameters: parameters
     })
       .then(res => {
@@ -134,7 +161,7 @@ const GroupLegalDocument = () => {
   const postGroupLegalDocument = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.setGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -151,7 +178,7 @@ const GroupLegalDocument = () => {
   const delGroupLegalDocument = obj => {
     console.log('jsonOBJ ' + JSON.stringify(obj))
     postRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.delGIN,
+      extension: BusinessPartnerRepository.GroupLegalDocument.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -165,9 +192,9 @@ const GroupLegalDocument = () => {
   }
 
   const addGroupLegalDocument = () => {
-    groupLegalDocumentValidation.setValues(getNewGroupLegalDocument())
-    FillCategoryStore()
-    FillGroupStore()
+    groupLegalDocumentValidation.setValues(getNewGroupLegalDocument)
+    fillCategoryStore()
+    fillGroupStore()
     setEditMode(false)
     setWindowOpen(true)
   }
@@ -175,17 +202,18 @@ const GroupLegalDocument = () => {
   const editGroupLegalDocument = obj => {
     console.log(obj)
     groupLegalDocumentValidation.setValues(populateGroupLegalDocument(obj))
-    FillCategoryStore()
-    FillGroupStore()
+    fillCategoryStore()
+    fillGroupStore()
     setEditMode(true)
     setWindowOpen(true)
   }
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
-    FillGroupStore()
-    FillCategoryStore()
-  })
-
+    getGridData({ _startAt: 0, _pageSize: 50 })
+    fillGroupStore()
+    fillCategoryStore()
+    getLabels()
+  },[])
+  
   return (
     <>
       <Box
@@ -207,89 +235,19 @@ const GroupLegalDocument = () => {
         />
       </Box>
       {windowOpen && (
-        <Window
-          id='GroupLegalDocumentWindow'
-          Title='Group Legal Document'
+        <GroupLegalDocumentWindow
+          labels={_labels}
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
+          editMode={editMode}
           onSave={handleSubmit}
-        >
-          <CustomTabPanel>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='groupId'
-                  label='Group Name'
-                  valueField='recordId'
-                  displayField='name'
-                  store={groupStore}
-                  value={groupLegalDocumentValidation.values.groupName}
-                  required
-                  readOnly={editMode}
-                  onChange={(event, newValue) => {
-                    groupLegalDocumentValidation.setFieldValue('groupId', newValue?.recordId)
-                    groupLegalDocumentValidation.setFieldValue('groupName', newValue?.name)
-                  }}
-                  error={
-                    groupLegalDocumentValidation.touched.groupName &&
-                    Boolean(groupLegalDocumentValidation.errors.groupName)
-                  }
-                  helperText={
-                    groupLegalDocumentValidation.touched.groupName && groupLegalDocumentValidation.errors.groupName
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='incId'
-                  label='Category ID'
-                  valueField='recordId'
-                  displayField='name'
-                  store={categoryStore}
-                  value={groupLegalDocumentValidation.values.incName}
-                  required
-                  readOnly={editMode}
-                  onChange={(event, newValue) => {
-                    groupLegalDocumentValidation.setFieldValue('incId', newValue?.recordId)
-                    groupLegalDocumentValidation.setFieldValue('incName', newValue?.name)
-                  }}
-                  error={
-                    groupLegalDocumentValidation.touched.incName && Boolean(groupLegalDocumentValidation.errors.incName)
-                  }
-                  helperText={
-                    groupLegalDocumentValidation.touched.incName && groupLegalDocumentValidation.errors.incName
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='required'
-                      checked={groupLegalDocumentValidation.values?.required}
-                      onChange={groupLegalDocumentValidation.handleChange}
-                    />
-                  }
-                  label='Required'
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='mandatory'
-                      checked={groupLegalDocumentValidation.values?.mandatory}
-                      onChange={groupLegalDocumentValidation.handleChange}
-                    />
-                  }
-                  label='Mandatory'
-                />
-              </Grid>
-            </Grid>
-          </CustomTabPanel>
-        </Window>
+          groupLegalDocumentValidation={groupLegalDocumentValidation}
+          categoryStore={categoryStore}
+          groupStore={groupStore}
+        />
       )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

@@ -1,49 +1,44 @@
-// ** MUI Imports
-import { Grid, Box } from '@mui/material'
+import { Grid, Box, Checkbox } from '@mui/material'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
-const ProductFieldTab = ({ productFieldGridData, dispersalStore, maxAccess }) => {
-  //stores
-
+const PoductSchedulesTab = ({ productSchedulesGridData, maxAccess }) => {
   const columns = [
     {
-      field: 'controls',
-      headerName: 'Controls',
+      field: 'plant',
+      headerName: 'Plant',
       flex: 1
     },
     {
-      field: 'format',
-      headerName: 'Format',
+      field: 'country',
+      headerName: 'Country',
       flex: 1
     },
     {
-      field: 'securityLevel',
-      headerName: 'securityLevel',
+      field: 'currency',
+      headerName: 'Currency',
       flex: 1
     },
     {
-      field: 'specialChars',
-      headerName: 'special Chars',
+      field: 'dispersalMode',
+      headerName: 'Dispersal Mode',
       flex: 1
     },
     {
-      field: 'fixedLength',
-      headerName: 'fixed Length',
-      flex: 1
-    },
-    {
-      field: 'minLength',
-      headerName: 'min Length',
-      flex: 1
-    },
-    {
-      field: 'maxLength',
-      headerName: 'max Length',
-      flex: 1
+      field: 'isInactive',
+      headerName: 'Is Inactive',
+      flex: 1,
+      renderCell: params => (
+        <Checkbox
+          color='primary'
+          checked={params.row.isInactive === true}
+          onChange={() => {
+            params.row.isInactive = !params.row.isInactive
+          }}
+        />
+      )
     }
   ]
 
@@ -64,26 +59,20 @@ const ProductFieldTab = ({ productFieldGridData, dispersalStore, maxAccess }) =>
             <Grid item xs={6}>
               <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
-            <Grid item xs={6}>
-              <CustomComboBox name='dispersalId'
-              label='Dispersal'
-              valueField='recordId'
-              displayField='name'
-              store={dispersalStore}
-              required='true'
-              />
-            </Grid>
           </Grid>
           <Grid xs={12}>
             <Table
               columns={columns}
-              gridData={productFieldGridData}
+              gridData={productSchedulesGridData}
               rowId={['recordId']}
               isLoading={false}
               pagination={false}
               height={220}
               maxAccess={maxAccess} 
             />
+            {/* <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
+              <InlineEditGrid columns={columns}/>
+            </Box> */}
           </Grid>
         </Grid>
       </Box>
@@ -91,4 +80,4 @@ const ProductFieldTab = ({ productFieldGridData, dispersalStore, maxAccess }) =>
   )
 }
 
-export default ProductFieldTab
+export default PoductSchedulesTab
