@@ -13,7 +13,8 @@ const CityWindow = ({
     countryStore,
     cityValidation,
     fillStateStore,
-    labels
+    labels,
+    maxAccess
 }) => {
     return (
         <Window
@@ -35,6 +36,7 @@ const CityWindow = ({
                   stateStore={stateStore}
                   editMode={editMode}
                   fillStateStore={fillStateStore}
+                  maxAccess={maxAccess}
                />
             </CustomTabPanel>
         </Window>

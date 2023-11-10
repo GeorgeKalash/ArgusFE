@@ -12,7 +12,8 @@ const GroupLegalDocumentWindow = ({
     groupStore,
     categoryStore,
     labels,
-    editMode
+    editMode,
+    maxAccess
 }) => {
     return (
         <Window
@@ -33,6 +34,7 @@ const GroupLegalDocumentWindow = ({
                   categoryStore={categoryStore}
                   groupStore={groupStore}
                   editMode={editMode}
+                  maxAccess={maxAccess}
                />
           </CustomTabPanel>
         </Window>
