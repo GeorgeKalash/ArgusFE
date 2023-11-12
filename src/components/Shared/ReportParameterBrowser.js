@@ -210,7 +210,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
           break
         case 6:
           //needs testing
-          ;<FormControlLabel
+          <FormControlLabel
             control={
               <Checkbox
                 name={field.key}
