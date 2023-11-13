@@ -32,10 +32,10 @@ export function getDefaultValue(currentColumn, data, setData) {
 }
 
 export const transformRowsForEditableGrid = dataRows => {
-  let seqNo = 0
+  let rowCount = 0
   if (dataRows && dataRows.length > 0) {
     return dataRows?.map(row => {
-      return { ...row, id: seqNo++ }
+      return { ...row, id: rowCount++ }
     })
   } else {
     return [{ id: 0 }]
@@ -50,10 +50,8 @@ export const getValueForCountryName = (params, productCountriesGridData) => {
 }
 
 export const countriesGetUpdatedRowFunction = (newRow, dataList) => {
-  const countryRef = newRow.countryRef
-  const record = dataList.find(entry => entry.countryRef === countryRef)
-  const newCountryName = record.countryName
-  const updatedRow = { ...newRow, countryName: newCountryName, isNew: false }
+  //any modifications 
+  const updatedRow = { ...newRow  }
 
   return updatedRow
 }

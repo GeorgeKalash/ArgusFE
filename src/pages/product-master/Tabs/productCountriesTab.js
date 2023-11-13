@@ -1,4 +1,6 @@
-import { Box, Grid } from '@mui/material'
+import { Autocomplete, Box, Button, Grid, MenuItem, Select, TextField, useMediaQuery, useTheme } from '@mui/material'
+import { useGridApiContext } from '@mui/x-data-grid'
+import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -8,82 +10,61 @@ import CustomInlineDataGrid from 'src/components/Shared/InlineDataGrid'
 import { countriesGetUpdatedRowFunction, getValueForCountryName } from 'src/components/helpers/inlineEditGridHelper'
 
 const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
-  // const columns = [
-  //   {
-  //     field: 'countryRef',
-  //     headerName: 'Country Ref',
-  //     flex: 1
-  //   },
-  //   {
-  //     field: 'countryName',
-  //     headerName: 'Country Name',
-  //     flex: 1
-  //   },
-  //   {
-  //     field: 'isInactive',
-  //     headerName: 'Is Inactive',
-  //     flex: 1,
-  //     renderCell: params => (
-  //       <Checkbox
-  //         color='primary'
-  //         checked={params.row.isInactive === true}
-  //         onChange={() => {
-  //           params.row.isInactive = !params.row.isInactive
-  //         }}
-  //       />
-  //     )
-  //   }
-  // ]
 
-  // //stores
-  // const [countriesData, setCountriesData] = useState([])
+  const [inlineGridData, setInlineGridData] = useState([])
 
-  // const getCountriesData = () => {
-  //   var parameters = '_filter='
-  //   getRequest({
-  //     extension: SystemRepository.Country.qry,
-  //     parameters: parameters
-  //   })
-  //     .then(res => {
-  //       setCountriesData(res)
-  //       console.log(res)
-  //     })
-  //     .catch(error => {
-  //       setErrorMessage(error)
-  //     })
-  // }
 
-  // useEffect(() => {
-  //   getCountriesData()
-  // }, [])
+  function CustomEditSelect(props) {
+    const {id, colDef, row,field , hasFocus,value} = props
+    const apiRef = useGridApiContext();
+    const [input, setInput] = useState(row.countryRef)
 
-  const columns = [
-    {
-      key: 1,
-      header: 'country Ref',
-      name: 'countryRef',
-      value: '',
-      fieldStore: productCountriesGridData.list,
-      selectedOptionDisplayProperties: ['countryRef'],
-      listOptionDisplayProperties: ['countryRef', 'countryName'],
-      valueProperty: 'recordId',
-      populatedBy: ''
-    },
-    {
-      key: 1,
-      header: 'country Name',
-      name: 'countryName',
-      value: '',
-      fieldStore: productCountriesGridData.list,
-      selectedOptionDisplayProperties: ['countryName'],
-      listOptionDisplayProperties: ['countryName', 'countryRef'],
-      valueProperty: 'recordId',
-      isReadOnly: 'true',
-      hasDefaultValue: 'true',
-      populatedBy: 'countryRef'
-    },
-    { key: 2, header: 'Is inactive', name: 'isInactive', value: null }
-  ]
+
+    const handleValueChanged = (e) => {
+
+      if(e && e.target.value)
+      {
+        apiRef.current.setEditCellValue({id, field, value: e.target.value})
+        setInput(e.target.value)
+      } else {
+
+        apiRef.current.setEditCellValue({id, field, value: ''})
+        //setInput('')
+      }
+    }
+   
+    useEffect(
+      ()=> {
+        if(!input) setInput('')
+      }
+      ,[input])
+
+    return(
+      <Autocomplete
+       openOnFocus
+       clearOnBlur
+       options={colDef.valueOptions || []}
+       getOptionLabel={(option) => option.countryRef}
+       onSelect={(e) => handleValueChanged(e)}
+       onChange={(e) => handleValueChanged(e)}
+       disableClearable={false}
+       inputValue={input}
+       renderInput={(inputParams) => {
+        return(
+          <TextField  variant="standard"  {...inputParams} />
+        )
+       }} 
+       renderOption={(optionProps,option) => (
+        <Box value={option.countryRef} component={'li'} {...optionProps} sx={{ '& > img': { mr: 2, flexShrink: 0 } }}>
+          {option.countryRef}-{option.countryName}
+        </Box>
+       )}
+       sx={{
+        width:'100%'
+       }}
+      />
+    )
+  }
 
   return (
     <>
@@ -118,13 +99,26 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
             </Box> */}
             <Box sx={{ width: '100%', height: '100%' }}>
               <CustomInlineDataGrid
+                // dataRows={productCountriesGridData.list}
                 dataRows={[]}
-                getUpdatedRowFunction={row => countriesGetUpdatedRowFunction(row, productCountriesGridData.list)}
+                newLineOnTab={true}
+                newLineField='isInactive'
                 columns={[
                   {
+                    field: 'recordId',
+                    headerName: 'recordId',
+                    type: 'number',
+                    editable: true,
+                    valueGetter:params => {
+                      if(params.row.recordId) return params.row.recordId
+                      return ''
+                    }
+                  },
+                  {
                     field: 'countryRef',
-                    headerName: 'countryRef',
-                    width: 150,
+                    headerName: 'country Ref',
+                    description:'the country reference',
+                    flex:1,
                     editable: true,
                     type: 'singleSelect',
                     valueOptions: productCountriesGridData.list,
@@ -135,27 +129,91 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
 
                       return value
                     },
-                    preProcessEditCellProps: params => {
-                      const hasError = params.props.value ? false : true
-
-                      return { ...params.props, error: hasError }
-                    }
+                    valueSetter:params => {
+                      let  countryName = productCountriesGridData.list.find(entry => entry.countryRef === params.value)?.countryName || ''
+                      return {...params.row,countryRef:params.value, countryName}
+                    },
+                    renderEditCell:(params) => (
+                      <CustomEditSelect {...params} />
+                    )
                   },
                   {
                     field: 'countryName',
-                    headerName: 'countryName',
-                    width: 150,
+                    headerName: 'country Name',
+                   flex:1,
                     type: 'string',
-                    editable: true,
-                    valueGetter: params => getValueForCountryName(params, productCountriesGridData.list)
+                    editable: false,
+                    // valueGetter: params => getValueForCountryName(params, productCountriesGridData.list),
                   },
                   {
                     field: 'isInactive',
                     headerName: 'Is Inactive?',
                     type: 'boolean',
-                    width: 140,
-                    editable: true
-                  }
+                    flex:1,
+                    editable: true,
+                    preProcessEditCellProps: params => {
+                      if(params.otherFieldsProps.countryRef.error)
+                      {
+                        return { ...params.props, error: true }
+                      }
+                    },
+                  },
+                  // {
+                  //   field: 'price',
+                  //   headerName: 'price',
+                  //   type: 'number',
+                  //  flex:1,
+                  //   editable: true,
+                  //   valueFormatter: params => {
+                  //     if (params.value == null) {
+                  //       return ''
+                  //     }
+                  //     return `${params.value.toLocaleString()} $`
+                  //   },
+                  //   valueSetter: params => {
+                  //     const price = params.value || 0;  
+                  //     const qty = params.row.qty || 0;
+                  //     return {...params.row,price:params.value, subtotal: price*qty}
+                  //   }
+                  // },
+                  // {
+                  //   field: 'qty',
+                  //   headerName: 'qty',
+                  //   type: 'number',
+                  //  flex:1,
+                  //   editable: true,
+                  //   valueSetter: params => {
+                  //     const price = params.row.price || 0;  
+                  //     const qty = params.value || 0;
+                  //     return {...params.row,qty:params.value, subtotal: price*qty}
+                  //   }
+                  // },
+                  // {
+                  //   field: 'subtotal',
+                  //   headerName: 'subtotal',
+                  //   type: 'number',
+                  //   flex:1,
+                  //   editable: false,
+                  //   valueGetter: params => {
+                  //     const price = params.row.price || 0;  
+                  //     const qty = params.row.qty || 0; 
+                  //     return price * qty;
+                  //   },
+                  //   colSpan:1,
+                    
+                  // },
+                  // {
+                  //   field: 'button',
+                  //   headerName: 'open',
+                  //   type: 'actions',
+                  //   renderCell: params => (
+                  //     <>
+                  //       <Button variant='contained' size='small' onClick={() => alert('clicked')} >
+                  //         Open
+                  //       </Button>
+                  //     </>
+                  //   )
+                  // }
                 ]}
               />
             </Box>
