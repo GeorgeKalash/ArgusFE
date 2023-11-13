@@ -7,59 +7,51 @@ import { Dialog } from '@mui/material'
 
 export default function CustomInlineDataGrid({
   dataRows,
+  setRows,
   columns,
   getUpdatedRowFunction,
   newLineOnTab,
   newLineField,
   hasCheckBoxSelection,
-  hideColumnMenu
+  hideColumnMenu,
 }) {
   const [editRowsModel, setEditRowsModel] = useState({})
   const apiRef = useGridApiRef()
   const [rowCount, setRowCount] = useState(dataRows.length)
-  const [rows, setRows] = useState(transformRowsForEditableGrid(dataRows))
+  // const [rows, setRows] = useState(transformRowsForEditableGrid(dataRows))
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
-
-  useEffect(() => {
-    setRows(transformRowsForEditableGrid(dataRows))
+  useEffect(()=>{
+    if(dataRows)
+    setRowCount(dataRows.length)
   }, [dataRows])
-
-  useEffect(()=> console.log(rows,'rows'),[rows])
 
   useEffect(() => {
     const handleCellKeyDownEvent = (params, event, details) => {
       if (newLineOnTab) {
-
-        if (rowCount == params.id && (event.key === 'Tab' || event.keyCode === 13)) {
-          if (params.field === newLineField) {
-            setRowCount(rowCount + 1)
+        if ((rowCount -1 ) == params.id && (event.key === 'Tab' || event.keyCode === 13)) {
+         if (params.field === newLineField) {
+           // setRowCount(rowCount + 1)
             let newId = rowCount + 1
-            setRows(oldRows => [...oldRows, { id: newId }])
-            apiRef.current.startRowEditMode({id: newId})
-            // apiRef.current.setCellFocus(newId, 'countryRef')
-            
+            setRows([...dataRows, { id: newId }])
           }
            return
-         
         } 
            return
       } 
-      
         return
-     
     }
 
     return apiRef.current.subscribeEvent('cellKeyDown', handleCellKeyDownEvent)
-  }, [apiRef, rowCount])
+  }, [apiRef,dataRows])
 
   const processRowUpdate = newRow => {
     // const updatedRow = getUpdatedRowFunction(newRow)
-    setRows(rows.map(row => (row.id === newRow.id ? newRow : row)))
+    setRows(dataRows.map(row => (row.id === newRow.id ? newRow : row)))
     // return updatedRow
     return newRow
   }
- console.log(apiRef.current, 'state')
+
   return (
     <div style={{ height: 250, width: '100%' }}>
       <DataGrid
@@ -76,7 +68,7 @@ export default function CustomInlineDataGrid({
         disableColumnMenu={hideColumnMenu ? hideColumnMenu : false}
         editRowsModel={editRowsModel}
         processRowUpdate={processRowUpdate}
-        rows={rows}
+        rows={dataRows}
         onProcessRowUpdateError={(error) => {
           alert(error)
         }}
@@ -107,9 +99,7 @@ export default function CustomInlineDataGrid({
             tabIndex: 1
           }
         }}
-        onRowEditCommit={(id,event) =>{
-          console.log('on edit commit', id, event)
-        }}
+
       />
       {
         deleteDialogOpen &&
@@ -117,8 +107,8 @@ export default function CustomInlineDataGrid({
          open={deleteDialogOpen}
          onClose={() => setDeleteDialogOpen([false, {}])}
          onConfirm={obj => {
-           if (rows.length > 1) {
-             setRows(rows.filter(rows => rows.id !== obj.id))
+           if (dataRows.length > 1) {
+             setRows(dataRows.filter(item => item.id !== obj.id))
              
            } else {
             setRows( [{ id: 0 }])

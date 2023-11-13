@@ -42,13 +42,6 @@ export const transformRowsForEditableGrid = dataRows => {
   }
 }
 
-export const getValueForCountryName = (params, productCountriesGridData) => {
-  const { api, cellMode, colDef, field, hasFocus, id, row, rowNode, tabIndex, value } = params
-  const record = productCountriesGridData.find(entry => entry.countryRef === row.countryRef)
-  if (record) return record?.countryName
-  else ''
-}
-
 export const countriesGetUpdatedRowFunction = (newRow, dataList) => {
   //any modifications 
   const updatedRow = { ...newRow  }

@@ -7,17 +7,17 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 // import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomInlineDataGrid from 'src/components/Shared/InlineDataGrid'
-import { countriesGetUpdatedRowFunction, getValueForCountryName } from 'src/components/helpers/inlineEditGridHelper'
+import { transformRowsForEditableGrid } from 'src/components/helpers/inlineEditGridHelper'
 
 const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
 
-  const [inlineGridData, setInlineGridData] = useState([])
+  const [inlineGridDataRows, setInlineGridDataRows] = useState([])
 
+  console.log(inlineGridDataRows, ' grid data ')
 
   function CustomEditSelect(props) {
     const {id, colDef, row,field , hasFocus,value} = props
     const apiRef = useGridApiContext();
-    const [input, setInput] = useState(row.countryRef)
 
 
     const handleValueChanged = (e) => {
@@ -25,20 +25,11 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
       if(e && e.target.value)
       {
         apiRef.current.setEditCellValue({id, field, value: e.target.value})
-        setInput(e.target.value)
       } else {
-
         apiRef.current.setEditCellValue({id, field, value: ''})
-        //setInput('')
       }
     }
    
-    useEffect(
-      ()=> {
-        if(!input) setInput('')
-      }
-      ,[input])
-
     return(
       <Autocomplete
        openOnFocus
@@ -48,7 +39,6 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
        onSelect={(e) => handleValueChanged(e)}
        onChange={(e) => handleValueChanged(e)}
        disableClearable={false}
-       inputValue={input}
        renderInput={(inputParams) => {
         return(
           <TextField  variant="standard"  {...inputParams} />
@@ -100,7 +90,8 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
             <Box sx={{ width: '100%', height: '100%' }}>
               <CustomInlineDataGrid
                 // dataRows={productCountriesGridData.list}
-                dataRows={[]}
+                dataRows={transformRowsForEditableGrid(inlineGridDataRows)}
+                setRows={setInlineGridDataRows}
                 newLineOnTab={true}
                 newLineField='isInactive'
                 columns={[
