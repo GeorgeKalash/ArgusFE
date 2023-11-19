@@ -2,33 +2,30 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Paper, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 
-// ** 3rd Party Imports
-import Draggable from 'react-draggable'
-
 // ** Custom Imports
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import CustomTextField from '../Inputs/CustomTextField'
+import CustomDatePicker from '../Inputs/CustomDatePicker'
+import Window from './Window'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import Window from './Window'
-import CustomTextField from '../Inputs/CustomTextField'
-import CustomDatePicker from '../Inputs/CustomDatePicker'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportName, functionStore }) => {
+const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, onSave, paramsArray, setParamsArray }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [parameters, setParameters] = useState(null)
   const [fields, setFields] = useState([])
   const [errorMessage, setErrorMessage] = useState(null)
-  const [paramsArray, setParamsArray] = useState([])
 
   const getParameterDefinition = () => {
     var parameters = '_reportName=' + reportName
@@ -69,7 +66,105 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
     }
   }
 
-  const getDataByClassId = () => {
+  const getComboBoxByClassId = field => {
+    switch (field.classId) {
+      case 0:
+        var parameters = `_database=${field.data}`
+        getRequest({
+          extension: SystemRepository.KeyValueStore,
+          parameters: parameters
+        })
+          .then(res => {
+            var _fieldKey = getFieldKey(field.key)
+            var _fieldValue = getFieldValue(field.key)
+
+            parametersValidation.setValues({
+              ...parametersValidation.values,
+              ..._fieldValue
+            })
+
+            fields.push(
+              <Grid item xs={12}>
+                <CustomComboBox
+                  name={field.key}
+                  label={field.caption}
+                  valueField='key'
+                  displayField='value'
+                  store={res.list}
+                  value={res.list.filter(item => item.value === _fieldKey)[0]}
+                  required={field.mandatory}
+                  onChange={(event, newValue) => {
+                    paramsArray.push({
+                      fieldId: field.id,
+                      fieldKey: field.key,
+                      value: newValue?.key,
+                      caption: field.caption,
+                      display: newValue.value
+                    })
+                    parametersValidation.setFieldValue(field.key, newValue?.key)
+                  }}
+                  sx={{ pt: 2 }}
+                />
+              </Grid>
+            )
+          })
+          .catch(error => {
+            setErrorMessage(error)
+          })
+        break
+
+      case 41101:
+        var parameters = '_filter='
+
+        getRequest({
+          extension: InventoryRepository.Site.qry,
+          parameters
+        })
+          .then(res => {
+            var _fieldKey = getFieldKey(field.key)
+            var _fieldValue = getFieldValue(field.key)
+
+            parametersValidation.setValues({
+              ...parametersValidation.values,
+              ..._fieldValue
+            })
+
+            fields.push(
+              <Grid item xs={12}>
+                <CustomComboBox
+                  name={field.key}
+                  label={field.caption}
+                  valueField='siteId'
+                  displayField='reference'
+                  store={res.list}
+                  value={res.list.filter(item => item.value === _fieldKey)[0]}
+                  required={field.mandatory}
+                  onChange={(event, newValue) => {
+                    paramsArray.push({
+                      fieldId: field.id,
+                      fieldKey: field.key,
+                      value: newValue?.key,
+                      caption: field.caption,
+                      display: newValue.value
+                    })
+                    parametersValidation.setFieldValue(field.key, newValue?.key)
+                  }}
+                  sx={{ pt: 2 }}
+                />
+              </Grid>
+            )
+          })
+          .catch(error => {
+            setErrorMessage(error)
+          })
+        break
+
+      default:
+        break
+    }
+  }
+
+  const getFieldsByClassId = () => {
     parameters.map(field => {
       switch (field.controlType) {
         case 1:
@@ -83,9 +178,12 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
                 onChange={(event, newValue) => {
                   paramsArray.push({
                     fieldId: field.id,
-                    value: newValue?.key
+                    fieldKey: field.key,
+                    value: newValue,
+                    caption: field.caption,
+                    display: newValue
                   })
-                  parametersValidation.setFieldValue(field.key, newValue?.key)
+                  parametersValidation.setFieldValue(field.key, newValue)
                 }}
                 onClear={() => parametersValidation.setFieldValue(field.key, '')}
               />
@@ -104,9 +202,12 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
                 onChange={(event, newValue) => {
                   paramsArray.push({
                     fieldId: field.id,
-                    value: newValue?.key
+                    fieldKey: field.key,
+                    value: newValue,
+                    caption: field.caption,
+                    display: newValue
                   })
-                  parametersValidation.setFieldValue(field.key, newValue?.key)
+                  parametersValidation.setFieldValue(field.key, newValue)
                 }}
                 onClear={() => parametersValidation.setFieldValue(field.key, '')}
               />
@@ -124,9 +225,12 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
                 onChange={(event, newValue) => {
                   paramsArray.push({
                     fieldId: field.id,
-                    value: newValue?.key
+                    fieldKey: field.key,
+                    value: newValue,
+                    caption: field.caption,
+                    display: newValue
                   })
-                  parametersValidation.setFieldValue(field.key, newValue?.key)
+                  parametersValidation.setFieldValue(field.key, newValue)
                 }}
                 onClear={() => parametersValidation.setFieldValue(field.key, '')}
               />
@@ -134,52 +238,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
           )
           break
         case 5:
-          switch (field.classId) {
-            case 0:
-              var parameters = `_database=${field.data}`
-              getRequest({
-                extension: SystemRepository.KeyValueStore,
-                parameters: parameters
-              })
-                .then(res => {
-                  var _fieldKey = getFieldKey(field.key)
-                  var _fieldValue = getFieldValue(field.key)
-
-                  parametersValidation.setValues({
-                    ...parametersValidation.values,
-                    ..._fieldValue
-                  })
-
-                  fields.push(
-                    <Grid item xs={12}>
-                      <CustomComboBox
-                        name={field.key}
-                        label={field.caption}
-                        valueField='key'
-                        displayField='value'
-                        store={res.list}
-                        value={res.list.filter(item => item.value === _fieldKey)[0]}
-                        required={field.mandatory}
-                        onChange={(event, newValue) => {
-                          paramsArray.push({
-                            fieldId: field.id,
-                            value: newValue?.key
-                          })
-                          parametersValidation.setFieldValue(field.key, newValue?.key)
-                        }}
-                        sx={{ pt: 2 }}
-                      />
-                    </Grid>
-                  )
-                })
-                .catch(error => {
-                  setErrorMessage(error)
-                })
-              break
-
-            default:
-              break
-          }
+          getComboBoxByClassId(field)
           break
         case 6:
           //CustomCheckBox might be needed
@@ -198,21 +257,26 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
 
   useEffect(() => {
     if (!parameters) getParameterDefinition()
-    if (parameters) getDataByClassId()
+    if (parameters) getFieldsByClassId()
   }, [parameters])
 
   const parametersValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-
+    enableReinitialize: true,
+    validateOnChange: true,
     validationSchema: yup.object({
       fromFunctionId: yup.string().required('This field is required'),
       toFunctionId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
+      setParamsArray(paramsArray)
       onSave({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })
+      onClose()
     }
   })
+
+  const clearValues = () => {
+    setParamsArray([])
+  }
 
   return (
     <>
@@ -224,6 +288,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
           width={600}
           height={height}
           onSave={parametersValidation.handleSubmit}
+          onClear={clearValues}
         >
           <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
             {fields && fields}
