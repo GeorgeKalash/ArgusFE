@@ -1,5 +1,6 @@
-import { Autocomplete, Box, Button, Grid, MenuItem, Select, TextField, useMediaQuery, useTheme } from '@mui/material'
-import { useGridApiContext } from '@mui/x-data-grid'
+import { Autocomplete, Box, Button, Grid, MenuItem, Select, TextField, Tooltip, tooltipClasses, useMediaQuery, useTheme } from '@mui/material'
+import { styled } from '@mui/system'
+import { GridEditInputCell, GridEditSingleSelectCell, GridRowModes, useGridApiContext } from '@mui/x-data-grid'
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 // ** Custom Imports
@@ -12,49 +13,86 @@ import { transformRowsForEditableGrid } from 'src/components/helpers/inlineEditG
 const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
 
   const [inlineGridDataRows, setInlineGridDataRows] = useState([])
-
+  const [newLineOnTab, setNewLineOnTab] = useState(true)
+  const [inlineDataErrorState, setInlineDataErrorState] = useState([])
   console.log(inlineGridDataRows, ' grid data ')
+  const [editRowsModel, setEditRowsModel] = useState({})
 
-  function CustomEditSelect(props) {
-    const {id, colDef, row,field , hasFocus,value} = props
+  function CustomEditSelect(customEditSelectProps) {
+    const { id, colDef, row, field, hasFocus, error, value: initialValue } = customEditSelectProps
+    const customProps = { ...customEditSelectProps, value: undefined }
     const apiRef = useGridApiContext();
-
 
     const handleValueChanged = (e) => {
 
-      if(e && e.target.value)
-      {
-        apiRef.current.setEditCellValue({id, field, value: e.target.value})
+      if (e && e.target.value) {
+        apiRef.current.setEditCellValue({ id, field, value: e.target.value })
       } else {
-        apiRef.current.setEditCellValue({id, field, value: ''})
+        //apiRef.current.setEditCellValue({ id, field, value: '' })
       }
     }
-   
-    return(
+
+    return (
       <Autocomplete
-       openOnFocus
-       clearOnBlur
-       options={colDef.valueOptions || []}
-       getOptionLabel={(option) => option.countryRef}
-       onSelect={(e) => handleValueChanged(e)}
-       onChange={(e) => handleValueChanged(e)}
-       disableClearable={false}
-       renderInput={(inputParams) => {
-        return(
-          <TextField  variant="standard"  {...inputParams} />
-        )
-       }} 
-       renderOption={(optionProps,option) => (
-        <Box value={option.countryRef} component={'li'} {...optionProps} sx={{ '& > img': { mr: 2, flexShrink: 0 } }}>
-          {option.countryRef}-{option.countryName}
-        </Box>
-       )}
-       sx={{
-        width:'100%'
-       }}
+        {...customProps}
+        //  value={initialVal? initialVal: undefined}
+        autoSelect
+        openOnFocus
+        autoFocus
+        options={colDef.valueOptions || []}
+        getOptionLabel={(option) => option.countryRef}
+        onSelect={(e) => handleValueChanged(e)}
+        onChange={(e) => handleValueChanged(e)}
+        disableClearable={false}
+        renderInput={(inputParams) => {
+          return (
+            <TextField autoFocus focused={hasFocus} placeholder={initialValue} variant="standard"  {...inputParams} />
+          )
+        }}
+        renderOption={(optionProps, option) => (
+          <MenuItem value={option.countryRef} {...optionProps} sx={{ '& > img': { mr: 2, flexShrink: 0 } }}>
+            {option.countryRef}-{option.countryName}
+          </MenuItem>
+        )}
+        sx={{
+          width: '100%',
+          border: 'transparent',
+          outline: 'transparent'
+        }}
       />
     )
   }
+
+
+  function preProcessCountryRefProps(params) {
+    const errorMessage = params?.props?.value ? null : 'this value is required';
+
+    return { ...params.props, error: errorMessage }
+  }
+
+  const StyledTooltip = styled(({ className, ...props }) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: 'red',
+      color: 'white'
+    }
+  }));
+
+  function renderEditCountryRef(params) {
+    const { error } = params;
+    if (error) {
+      setNewLineOnTab(false)
+    } else {
+      setNewLineOnTab(true)
+    }
+    return (
+      <StyledTooltip open={!!error} title={error}>
+        <CustomEditSelect {...params} />
+      </StyledTooltip>
+    );
+  }
+
 
   return (
     <>
@@ -75,15 +113,6 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
             </Grid>
           </Grid>
           <Grid xs={12} sx={{ display: 'flex', flex: 1 }}>
-            {/* <Table
-              columns={columns}
-              gridData={productCountriesGridData}
-              rowId={['recordId']}
-              isLoading={false}
-              pagination={false}
-              height={220}
-              maxAccess={maxAccess} 
-            /> */}
             {/* <Box sx={{ flex: 1, justifyContent: 'stretch' }}>
               <InlineEditGrid columns={columns} />
             </Box> */}
@@ -91,25 +120,28 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
               <CustomInlineDataGrid
                 // dataRows={productCountriesGridData.list}
                 dataRows={transformRowsForEditableGrid(inlineGridDataRows)}
-                setRows={setInlineGridDataRows}
+                setDataRows={setInlineGridDataRows}
+                // newLineOnTab={newLineOnTab}
                 newLineOnTab={true}
                 newLineField='isInactive'
+                requiredFields={['countryRef']}
+                editRowsModel={editRowsModel}
                 columns={[
                   {
                     field: 'recordId',
                     headerName: 'recordId',
                     type: 'number',
                     editable: true,
-                    valueGetter:params => {
-                      if(params.row.recordId) return params.row.recordId
+                    valueGetter: params => {
+                      if (params.row.recordId) return params.row.recordId
                       return ''
                     }
                   },
                   {
                     field: 'countryRef',
                     headerName: 'country Ref',
-                    description:'the country reference',
-                    flex:1,
+                    description: 'the country reference',
+                    flex: 1,
                     editable: true,
                     type: 'singleSelect',
                     valueOptions: productCountriesGridData.list,
@@ -117,34 +149,35 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
                     getOptionLabel: value => value.countryRef + '-' + value.countryName,
                     valueFormatter: params => {
                       const { id, value, field } = params
-
                       return value
                     },
-                    valueSetter:params => {
-                      let  countryName = productCountriesGridData.list.find(entry => entry.countryRef === params.value)?.countryName || ''
-                      return {...params.row,countryRef:params.value, countryName}
+                    valueSetter: params => {
+                      let countryName = productCountriesGridData.list.find(entry => entry.countryRef === params.value)?.countryName || ''
+                      return { ...params.row, countryRef: params.value, countryName }
                     },
-                    renderEditCell:(params) => (
-                      <CustomEditSelect {...params} />
-                    )
+                    // renderEditCell:(params) => (
+                    //   <StyledTooltip open={!!error} title={error}>
+                    //   <CustomEditSelect {...params} />
+                    //   </StyledTooltip>
+                    // ),
+                    renderEditCell: renderEditCountryRef,
+                    preProcessEditCellProps: preProcessCountryRefProps
                   },
                   {
                     field: 'countryName',
                     headerName: 'country Name',
-                   flex:1,
+                    flex: 1,
                     type: 'string',
                     editable: false,
-                    // valueGetter: params => getValueForCountryName(params, productCountriesGridData.list),
                   },
                   {
                     field: 'isInactive',
                     headerName: 'Is Inactive?',
                     type: 'boolean',
-                    flex:1,
+                    flex: 1,
                     editable: true,
                     preProcessEditCellProps: params => {
-                      if(params.otherFieldsProps.countryRef.error)
-                      {
+                      if (params.otherFieldsProps.countryRef.error) {
                         return { ...params.props, error: true }
                       }
                     },
@@ -162,7 +195,7 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
                   //     return `${params.value.toLocaleString()} $`
                   //   },
                   //   valueSetter: params => {
-                  //     const price = params.value || 0;  
+                  //     const price = params.value || 0;
                   //     const qty = params.row.qty || 0;
                   //     return {...params.row,price:params.value, subtotal: price*qty}
                   //   }
@@ -174,7 +207,7 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
                   //  flex:1,
                   //   editable: true,
                   //   valueSetter: params => {
-                  //     const price = params.row.price || 0;  
+                  //     const price = params.row.price || 0;
                   //     const qty = params.value || 0;
                   //     return {...params.row,qty:params.value, subtotal: price*qty}
                   //   }
@@ -186,12 +219,12 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
                   //   flex:1,
                   //   editable: false,
                   //   valueGetter: params => {
-                  //     const price = params.row.price || 0;  
-                  //     const qty = params.row.qty || 0; 
+                  //     const price = params.row.price || 0;
+                  //     const qty = params.row.qty || 0;
                   //     return price * qty;
                   //   },
                   //   colSpan:1,
-                    
+
                   // },
                   // {
                   //   field: 'button',

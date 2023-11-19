@@ -1,11 +1,15 @@
 import { Box, Checkbox, Grid } from '@mui/material'
+import { useState } from 'react'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomInlineDataGrid from 'src/components/Shared/InlineDataGrid'
-import { filterCountries, monetaryGetUpdatedRowFunction } from 'src/components/helpers/inlineEditGridHelper'
+import { filterCountries, monetaryGetUpdatedRowFunction, transformRowsForEditableGrid } from 'src/components/helpers/inlineEditGridHelper'
 
 const PoductCurrenciesTab = ({ productCurrenciesGridData, maxAccess }) => {
+  const [inlineGridDataRows, setInlineGridDataRows] = useState([])
+
+
   const columns = [
     {
       field: 'country',
@@ -97,7 +101,8 @@ const PoductCurrenciesTab = ({ productCurrenciesGridData, maxAccess }) => {
             </Box> */}
             <Box sx={{ width: '100%', height: '100%' }}>
               <CustomInlineDataGrid
-                dataRows={[]}
+                dataRows={transformRowsForEditableGrid(inlineGridDataRows)}
+                setDataRows={setInlineGridDataRows}
                 getUpdatedRowFunction={row => monetaryGetUpdatedRowFunction(row)}
                 columns={[
                   {
