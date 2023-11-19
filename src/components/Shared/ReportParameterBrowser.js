@@ -30,19 +30,6 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
   const [errorMessage, setErrorMessage] = useState(null)
   const [paramsArray, setParamsArray] = useState([])
 
-  const parametersValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-
-    validationSchema: yup.object({
-      fromFunctionId: yup.string().required('This field is required'),
-      toFunctionId: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      onSave({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })
-    }
-  })
-
   const getParameterDefinition = () => {
     var parameters = '_reportName=' + reportName
 
@@ -213,6 +200,19 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
     if (!parameters) getParameterDefinition()
     if (parameters) getDataByClassId()
   }, [parameters])
+
+  const parametersValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: false,
+
+    validationSchema: yup.object({
+      fromFunctionId: yup.string().required('This field is required'),
+      toFunctionId: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+      onSave({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })
+    }
+  })
 
   return (
     <>
