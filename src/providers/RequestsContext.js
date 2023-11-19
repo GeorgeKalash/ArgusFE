@@ -1,5 +1,5 @@
 // ** React Imports
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 // ** 3rd Party Imports
 import axios from "axios"
@@ -13,6 +13,8 @@ const RequestsProvider = ({ children }) => {
 
     const { user } = useContext(AuthContext)
     
+    const [isRefreshingToken, setRefreshingToken] = useState(false)
+
     const getRequest = async (body) => {
         const accessToken = await getAccessToken()
 
@@ -45,50 +47,66 @@ const RequestsProvider = ({ children }) => {
         }).then(res => res.data)
     }
 
-    const getAccessToken = async () => {
+    const getAccessToken = async () => {        
         return new Promise(async (resolve) => {
-
-            if (user?.expiresAt !== null) {
-
-                var dateNow = new Date()
-
-                if (user?.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
-
-                    var bodyFormData = new FormData()
-                    bodyFormData.append('record', JSON.stringify({ "accessToken": user.accessToken, "refreshToken": user.refreshToken }))
-
-                    try {
-                        const res = await axios({
-                            method: 'POST',
-                            url: process.env.NEXT_PUBLIC_AuthURL + 'MA.asmx/' + 'newAT',
-                            headers: {
-                                'authorization': 'Bearer ' + user.accessToken,
-                                "Content-Type": "multipart/form-data",
-                            },
-                            data: bodyFormData,
-                        })
-
-                        let newUser = {
-                            ...user,
-                            accessToken: res.data.record.accessToken,
-                            refreshToken: res.data.record.refreshToken,
-                            expiresAt: jwt(res.data.record.accessToken).exp,
-                        }
-
-                        if (window.localStorage.getItem('userData'))
-                            window.localStorage.setItem('userData', JSON.stringify(newUser))
-
-                        else
-                            window.sessionStorage.setItem('userData', JSON.stringify(newUser))
-
-                        resolve(res.data.record.accessToken)
-                    } catch {
-                        resolve('error getting new Access Token')
+            if (isRefreshingToken) {
+                const waitForRefresh = setInterval(() => {
+                    if (!isRefreshingToken) {
+                        clearInterval(waitForRefresh)
+                        resolve(user?.accessToken)
                     }
-                } else
-                    resolve(user?.accessToken)
-            } else
-                resolve(null)
+                }, 100)
+            } else {
+                setRefreshingToken(true)
+                if (user?.expiresAt !== null) {
+    
+                    var dateNow = new Date()
+    
+                    if (user?.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
+    
+                        var bodyFormData = new FormData()
+                        bodyFormData.append('record', JSON.stringify({ "accessToken": user.accessToken, "refreshToken": user.refreshToken }))
+    
+                        try {
+                            const res = await axios({
+                                method: 'POST',
+                                url: process.env.NEXT_PUBLIC_AuthURL + 'MA.asmx/' + 'newAT',
+                                headers: {
+                                    'authorization': 'Bearer ' + user.accessToken,
+                                    "Content-Type": "multipart/form-data",
+                                },
+                                data: bodyFormData,
+                            })
+    
+                            let newUser = {
+                                ...user,
+                                accessToken: res.data.record.accessToken,
+                                refreshToken: res.data.record.refreshToken,
+                                expiresAt: jwt(res.data.record.accessToken).exp,
+                            }
+    
+                            if (window.localStorage.getItem('userData'))
+                                window.localStorage.setItem('userData', JSON.stringify(newUser))
+    
+                            else
+                                window.sessionStorage.setItem('userData', JSON.stringify(newUser))
+    
+                                setRefreshingToken(false)
+                            resolve(res.data.record.accessToken)
+                        } catch {
+                            setRefreshingToken(false)
+                            resolve('error getting new Access Token')
+                        }
+                    } else {
+                        setRefreshingToken(false)
+                        resolve(user?.accessToken)
+                    }
+                } else {
+                    setRefreshingToken(false)
+                    resolve(null)
+                }
+            }
+
         })
     }
 
