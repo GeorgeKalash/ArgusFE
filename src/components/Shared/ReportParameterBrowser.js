@@ -14,7 +14,9 @@ import {
   Typography,
   IconButton,
   Button,
-  Grid
+  Grid,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 
@@ -57,12 +59,13 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
     validateOnChange: false,
 
     validationSchema: yup.object({
-      fromFunctionId: yup.string().required('This field is required'),
-      toFunctionId: yup.string().required('This field is required')
+      fromFunctionId: yup.object().required('This field is required'),
+      toFunctionId: yup.object().required('This field is required')
     }),
     onSubmit: values => {
       console.log({ values })
 
+      // 1|20230101^2|20231106^3|1
       // onSave({ _startAt: 0, _pageSize: 30, params: '' })
       // onClose()
     }
@@ -83,7 +86,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
       })
   }
 
-  const getFieldKey = (key) => {
+  const getFieldKey = key => {
     switch (key) {
       case 'toFunctionId':
         return parametersValidation.values?.toFunctionId
@@ -91,11 +94,11 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
         return parametersValidation.values?.fromFunctionId
 
       default:
-        break;
+        break
     }
   }
 
-  const getFieldValue = (key) => {
+  const getFieldValue = key => {
     switch (key) {
       case 'toFunctionId':
         return { toFunctionId: null }
@@ -103,14 +106,12 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
         return { fromFunctionId: null }
 
       default:
-        break;
+        break
     }
   }
 
   const getDataByClassId = () => {
-
-    parameters.map((field) => {
-
+    parameters.map(field => {
       switch (field.controlType) {
         case 1:
           fields.push(
@@ -165,13 +166,13 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
         case 5:
           switch (field.classId) {
             case 0:
+              console.log({ field })
               var parameters = `_database=${field.data}` //add 'xml'.json and get _database values from there
               getRequest({
                 extension: SystemRepository.KeyValueStore,
                 parameters: parameters
               })
                 .then(res => {
-
                   var _fieldKey = getFieldKey(field.key)
                   var _fieldValue = getFieldValue(field.key)
 
@@ -191,7 +192,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
                         value={res.list.filter(item => item.value === _fieldKey)[0]}
                         required={field.mandatory}
                         onChange={(event, newValue) => {
-                          parametersValidation.setFieldValue(field.key, newValue?.key)
+                          parametersValidation.setFieldValue(field.key, { key: field.id, value: newValue?.key })
                         }}
                         sx={{ pt: 2 }}
                       />
@@ -208,7 +209,17 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
           }
           break
         case 6:
-          //CustomCheckBox might be needed
+          //needs testing
+          <FormControlLabel
+            control={
+              <Checkbox
+                name={field.key}
+                checked={parametersValidation.values[field.key]}
+                onChange={parametersValidation.setFieldValue}
+              />
+            }
+            label={field.caption}
+          />
           break
         default:
           break
@@ -217,10 +228,8 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
   }
 
   useEffect(() => {
-    if (!parameters)
-      getParameterDefinition()
-    if (parameters)
-      getDataByClassId()
+    if (!parameters) getParameterDefinition()
+    if (parameters) getDataByClassId()
   }, [parameters])
 
   return (
