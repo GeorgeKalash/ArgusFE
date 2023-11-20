@@ -9,7 +9,7 @@
     "editor.defaultFormatter": "vscode.json-language-features"
   },
   // Extension: Git
-  "git.rebaseWhenSync": true,
+  // "git.rebaseWhenSync": true,
   "git.autofetch": true,
   "git.enableSmartCommit": true,
   // Extension: Prettier
@@ -36,10 +36,5 @@
     "Customizer"
   ],
   "search-node-modules.path": "node_modules",
-  "[javascript]": {
-    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
-  },
-  "[ini]": {
-    "editor.defaultFormatter": "lkrms.inifmt"
-  },
+  "markdown.extension.toc.updateOnSave": false
 }
