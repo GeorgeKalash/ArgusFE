@@ -4,9 +4,9 @@ const getNewCorrespondent = () => {
     name: null,
     reference: null,
     bpId: null,
-    tt:null,
-    inwards:null,
-    isInactive:null,
+    tt: false,
+    inwards: false,
+    isInactive: null
   }
 }
 
@@ -18,7 +18,7 @@ const populateCorrespondent = obj => {
     bpId: obj.bpId,
     tt: obj.tt,
     inwards: obj.inwards,
-    isInactive: obj.isInactive,
+    isInactive: obj.isInactive
   }
 }
 

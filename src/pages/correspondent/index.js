@@ -26,6 +26,7 @@ import CorrespondentWindow from './Windows/CorrespondentWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,14 +34,15 @@ const Correspondent = () => {
 
   //stores
   const [gridData, setGridData] = useState(null)
+  const [bpMasterDataStore, setBpMasterDataStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
-
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
+  const [inlineCountriesGridDataRows, setInlineCountriesGridDataRows] = useState([])
 
   //control
   const [labels, setLabels] = useState(null)
@@ -91,11 +93,7 @@ const Correspondent = () => {
     }
   ]
 
-  const tabs = [
-    { label: 'Main' }, 
-    { label: 'Countries' }, 
-    { label: 'Currencies'}, 
-  ]
+  const tabs = [{ label: 'Main' }, { label: 'Countries' }, { label: 'Currencies' }]
 
   const correspondentValidation = useFormik({
     enableReinitialize: false,
@@ -103,15 +101,32 @@ const Correspondent = () => {
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
-      bpId: yup.string().required('This field is required')
+      bpId: yup.string().required('This field is required'),
+      bpRef: yup.string().required('This field is required'),
+      bpName: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postCorrespondent(values)
     }
   })
 
+  const lookupBpMasterData = searchQry => {
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
+    getRequest({
+      extension: BusinessPartnerRepository.MasterData.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setBpMasterDataStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const handleSubmit = () => {
-    correspondentValidation.handleSubmit()
+    if (activeTab === 0) correspondentValidation.handleSubmit()
+    else if (activeTab === 1) console.log('inlineCountriesGridDataRows2', inlineCountriesGridDataRows)
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -130,6 +145,7 @@ const Correspondent = () => {
   }
 
   const postCorrespondent = obj => {
+    console.log(obj)
     const recordId = obj.recordId
     postRequest({
       extension: RemittanceSettingsRepository.Correspondent.set,
@@ -226,8 +242,13 @@ const Correspondent = () => {
           height={400}
           onSave={handleSubmit}
           editMode={editMode}
+          lookupBpMasterData={lookupBpMasterData}
+          bpMasterDataStore={bpMasterDataStore}
+          setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
           countryStore={countryStore}
+          inlineCountriesGridDataRows={inlineCountriesGridDataRows}
+          setInlineCountriesGridDataRows={setInlineCountriesGridDataRows}
           labels={_labels}
           maxAccess={access}
         />

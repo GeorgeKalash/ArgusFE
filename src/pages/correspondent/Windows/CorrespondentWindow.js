@@ -13,8 +13,13 @@ const CorrespondentWindow = ({
   height,
   onSave,
   editMode,
+  lookupBpMasterData,
+  bpMasterDataStore,
+  setBpMasterDataStore,
   correspondentValidation,
   countryStore,
+  inlineCountriesGridDataRows,
+  setInlineCountriesGridDataRows,
   labels,
   maxAccess
 }) => {
@@ -35,6 +40,9 @@ const CorrespondentWindow = ({
         <CorrespondentTab
           labels={labels}
           correspondentValidation={correspondentValidation}
+          lookupBpMasterData={lookupBpMasterData}
+          bpMasterDataStore={bpMasterDataStore}
+          setBpMasterDataStore={setBpMasterDataStore}
           editMode={editMode}
           maxAccess={maxAccess}
         />
@@ -42,6 +50,8 @@ const CorrespondentWindow = ({
       <CustomTabPanel index={1} value={activeTab}>
         <CorrespondentCountriesTab
           countryStore={countryStore}
+          inlineCountriesGridDataRows={inlineCountriesGridDataRows}
+          setInlineCountriesGridDataRows={setInlineCountriesGridDataRows}
           maxAccess={maxAccess}
         />
       </CustomTabPanel>

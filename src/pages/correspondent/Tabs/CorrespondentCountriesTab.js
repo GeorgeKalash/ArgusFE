@@ -1,4 +1,16 @@
-import { Autocomplete, Box, Button, Grid, MenuItem, Select, TextField, Tooltip, tooltipClasses, useMediaQuery, useTheme } from '@mui/material'
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Grid,
+  MenuItem,
+  Select,
+  TextField,
+  Tooltip,
+  tooltipClasses,
+  useMediaQuery,
+  useTheme
+} from '@mui/material'
 import { styled } from '@mui/system'
 import { GridEditInputCell, GridEditSingleSelectCell, GridRowModes, useGridApiContext } from '@mui/x-data-grid'
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -10,21 +22,22 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomInlineDataGrid from 'src/components/Shared/InlineDataGrid'
 import { transformRowsForEditableGrid } from 'src/components/helpers/inlineEditGridHelper'
 
-const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
-
-  const [inlineGridDataRows, setInlineGridDataRows] = useState([])
-  const [newLineOnTab, setNewLineOnTab] = useState(true)
+const CorrespondentCountriesTab = ({
+  countryStore,
+  inlineCountriesGridDataRows,
+  setInlineCountriesGridDataRows,
+  maxAccess
+}) => {
   const [inlineDataErrorState, setInlineDataErrorState] = useState([])
-  console.log(countryStore, ' countryStore ')
+  const [newLineOnTab, setNewLineOnTab] = useState(true)
   const [editRowsModel, setEditRowsModel] = useState({})
 
   function CustomEditSelect(customEditSelectProps) {
     const { id, colDef, row, field, hasFocus, error, value: initialValue } = customEditSelectProps
     const customProps = { ...customEditSelectProps, value: undefined }
-    const apiRef = useGridApiContext();
+    const apiRef = useGridApiContext()
 
-    const handleValueChanged = (e) => {
-
+    const handleValueChanged = e => {
       if (e && e.target.value) {
         apiRef.current.setEditCellValue({ id, field, value: e.target.value })
       } else {
@@ -35,19 +48,17 @@ const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
     return (
       <Autocomplete
         {...customProps}
-
-        //  value={initialVal? initialVal: undefined}
         autoSelect
         openOnFocus
         autoFocus
         options={colDef.valueOptions || []}
-        getOptionLabel={(option) => option.reference}
-        onSelect={(e) => handleValueChanged(e)}
-        onChange={(e) => handleValueChanged(e)}
+        getOptionLabel={option => option.reference}
+        onSelect={e => handleValueChanged(e)}
+        onChange={e => handleValueChanged(e)}
         disableClearable={false}
-        renderInput={(inputParams) => {
+        renderInput={inputParams => {
           return (
-            <TextField autoFocus focused={hasFocus} placeholder={initialValue} variant="standard"  {...inputParams} />
+            <TextField autoFocus focused={hasFocus} placeholder={initialValue} variant='standard' {...inputParams} />
           )
         }}
         renderOption={(optionProps, option) => (
@@ -64,24 +75,23 @@ const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
     )
   }
 
-
   function preProcessCountryRefProps(params) {
-    const errorMessage = params?.props?.value ? null : 'this value is required';
+    const errorMessage = params?.props?.value ? null : 'this value is required'
 
     return { ...params.props, error: errorMessage }
   }
 
-  const StyledTooltip = styled(({ className, ...props }) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: 'red',
-      color: 'white'
-    }
-  }));
+  const StyledTooltip = styled(({ className, ...props }) => <Tooltip {...props} classes={{ popper: className }} />)(
+    ({ theme }) => ({
+      [`& .${tooltipClasses.tooltip}`]: {
+        backgroundColor: 'red',
+        color: 'white'
+      }
+    })
+  )
 
   function renderEditCountryRef(params) {
-    const { error } = params;
+    const { error } = params
     if (error) {
       setNewLineOnTab(false)
     } else {
@@ -92,9 +102,8 @@ const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
       <StyledTooltip open={!!error} title={error}>
         <CustomEditSelect {...params} />
       </StyledTooltip>
-    );
+    )
   }
-
 
   return (
     <>
@@ -120,12 +129,8 @@ const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
             </Box> */}
             <Box sx={{ width: '100%', height: '100%' }}>
               <CustomInlineDataGrid
-
-                // dataRows={correspondentCountriesGridData.list}
-                dataRows={transformRowsForEditableGrid(inlineGridDataRows)}
-                setDataRows={setInlineGridDataRows}
-
-                // newLineOnTab={newLineOnTab}
+                dataRows={transformRowsForEditableGrid(inlineCountriesGridDataRows)}
+                setDataRows={setInlineCountriesGridDataRows}
                 newLineOnTab={true}
                 newLineField='countryName'
                 requiredFields={['countryRef']}
@@ -150,7 +155,9 @@ const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
                     editable: true,
                     type: 'singleSelect',
                     valueOptions: countryStore.list,
-                    getOptionValue: value => { value.reference},
+                    getOptionValue: value => {
+                      value.reference
+                    },
                     valueFormatter: params => {
                       const { id, value, field } = params
 
@@ -158,8 +165,9 @@ const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
                     },
                     valueSetter: params => {
                       let countryName = countryStore.list.find(entry => entry.reference === params.value)?.name || ''
-                      
-                      return { ...params.row, countryRef: params.value, countryName }
+                      let countryId = countryStore.list.find(entry => entry.reference === params.value)?.recordId || ''
+
+                      return { ...params.row, countryId, countryRef: params.value, countryName }
                     },
 
                     // renderEditCell:(params) => (
@@ -180,7 +188,7 @@ const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
                       if (params.otherFieldsProps.countryRef.error) {
                         return { ...params.props, error: true }
                       }
-                    },
+                    }
                   }
                 ]}
               />

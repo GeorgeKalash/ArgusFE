@@ -3,8 +3,17 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomLookup from 'src/components/Inputs/CustomLookup'
 
-const CorrespondentTab = ({ labels, correspondentValidation, editMode, maxAccess }) => {
+const CorrespondentTab = ({
+  labels,
+  correspondentValidation,
+  lookupBpMasterData,
+  bpMasterDataStore,
+  setBpMasterDataStore,
+  editMode,
+  maxAccess
+}) => {
   return (
     <Grid container spacing={4}>
       <Grid item xs={12}>
@@ -36,17 +45,31 @@ const CorrespondentTab = ({ labels, correspondentValidation, editMode, maxAccess
         />
       </Grid>
       <Grid item xs={12}>
-        <CustomTextField
-          name='path'
-          label={labels.path}
-          value={correspondentValidation.values.path}
+        <CustomLookup
+          name='bpRef'
           required
-          maxLength='100'
+          label={labels.bpRef}
+          valueField='reference'
+          displayField='name'
+          store={bpMasterDataStore}
+          setStore={setBpMasterDataStore}
+          firstValue={correspondentValidation.values.bpRef}
+          secondValue={correspondentValidation.values.bpName}
+          onLookup={lookupBpMasterData}
+          onChange={(event, newValue) => {
+            if (newValue) {
+              correspondentValidation.setFieldValue('bpId', newValue?.recordId)
+              correspondentValidation.setFieldValue('bpRef', newValue?.reference)
+              correspondentValidation.setFieldValue('bpName', newValue?.name)
+            } else {
+              correspondentValidation.setFieldValue('bpId', null)
+              correspondentValidation.setFieldValue('bpRef', null)
+              correspondentValidation.setFieldValue('bpName', null)
+            }
+          }}
+          error={correspondentValidation.touched.bpId && Boolean(correspondentValidation.errors.bpId)}
+          helperText={correspondentValidation.touched.bpId && correspondentValidation.errors.bpId}
           maxAccess={maxAccess}
-          onChange={correspondentValidation.handleChange}
-          onClear={() => correspondentValidation.setFieldValue('path', '')}
-          error={correspondentValidation.touched.path && Boolean(correspondentValidation.errors.path)}
-          helperText={correspondentValidation.touched.path && correspondentValidation.errors.path}
         />
       </Grid>
       <Grid item xs={12}>
