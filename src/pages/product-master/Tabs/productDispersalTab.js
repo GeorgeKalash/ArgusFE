@@ -60,11 +60,16 @@ const ProductDispersalTab = ({ productDispersalGridData, maxAccess }) => {
   //     )
   //   }
   // ]
-
+  const dispersalTypeStore = [
+    { key: 1, value: 'bank' },
+    { key: 2, value: 'cash' },
+    { key: 3, value: 'wallet' },
+    { key: 4, value: 'delivery' },
+  ]
   const columns = [
     { key: 0, header: 'Reference', name: 'reference', value: '' },
     { key: 0, header: 'Name', name: 'dispersalTypeId', value: '' },
-    { key: 1, header: 'Disp. Type', name: 'dispersalTypeId', value: null },
+    { key: 1, header: 'Disp. Type', name: 'dispersalTypeId',fieldStore:dispersalTypeStore, displayProperties:['value'], value: null },
     { key: 2, header: 'Is Default', name: 'isDefault ', value: false },
     { key: 2, header: 'Is Inactive', name: 'isInactive', value: false },
   ]

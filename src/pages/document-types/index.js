@@ -120,7 +120,7 @@ const DocumentTypes = () => {
 
   const documentTypesValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
 
     validationSchema: yup.object({
       // reference: yup.number()
