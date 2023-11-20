@@ -322,7 +322,7 @@ const DocumentTypeMaps = () => {
       <ReportParameterBrowser
         open={reportParamWindowOpen}
         onClose={() => setReportParamWindowOpen(false)}
-        onSave={() => console.log('SAVE')}
+        onSave={getGridData}
         reportName='SYDTM'
         functionStore={functionStore}
       />

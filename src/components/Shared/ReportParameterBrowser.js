@@ -13,10 +13,12 @@ import {
   Box,
   Typography,
   IconButton,
-  Button
+  Button,
+  Grid,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { makeStyles } from '@material-ui/core/styles'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -33,6 +35,9 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import Window from './Window'
+import CustomTextField from '../Inputs/CustomTextField'
+import CustomDatePicker from '../Inputs/CustomDatePicker'
 
 function PaperComponent(props) {
   return (
@@ -45,32 +50,24 @@ function PaperComponent(props) {
 const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportName, functionStore }) => {
   const { getRequest } = useContext(RequestsContext)
 
-  const [errorMessage, setErrorMessage] = useState(null)
   const [parameters, setParameters] = useState(null)
-
-  const useStyles = makeStyles(theme => ({
-    customBackdrop: {
-      left: 300,
-      top: 136,
-      pointerEvents: 'all',
-      backgroundColor: 'rgba(0, 0, 0, 0.1)'
-    }
-  }))
-
-  const classes = useStyles()
+  const [fields, setFields] = useState([])
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const parametersValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
 
     validationSchema: yup.object({
-      fromFunctionId: yup.string().required('This field is required'),
-      toFunctionId: yup.string().required('This field is required')
+      fromFunctionId: yup.object().required('This field is required'),
+      toFunctionId: yup.object().required('This field is required')
     }),
     onSubmit: values => {
       console.log({ values })
 
-      // postDocumentTypeMap(values)
+      // 1|20230101^2|20231106^3|1
+      // onSave({ _startAt: 0, _pageSize: 30, params: '' })
+      // onClose()
     }
   })
 
@@ -82,105 +79,175 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, onSave, reportNam
       parameters: parameters
     })
       .then(res => {
-        console.log({ res })
         setParameters(res.list)
       })
       .catch(error => {
-        console.log({ error })
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 
-  const handleClose = (event, reason) => {
-    if (reason && reason == 'backdropClick') return
-    onClose()
+  const getFieldKey = key => {
+    switch (key) {
+      case 'toFunctionId':
+        return parametersValidation.values?.toFunctionId
+      case 'fromFunctionId':
+        return parametersValidation.values?.fromFunctionId
+
+      default:
+        break
+    }
+  }
+
+  const getFieldValue = key => {
+    switch (key) {
+      case 'toFunctionId':
+        return { toFunctionId: null }
+      case 'fromFunctionId':
+        return { fromFunctionId: null }
+
+      default:
+        break
+    }
+  }
+
+  const getDataByClassId = () => {
+    parameters.map(field => {
+      switch (field.controlType) {
+        case 1:
+          fields.push(
+            <Grid item xs={12}>
+              <CustomTextField
+                name={field.key}
+                label={field.caption}
+                value={parametersValidation.values[field.key]} //??
+                required={field.mandatory}
+                onChange={(event, newValue) => {
+                  parametersValidation.setFieldValue(field.key, newValue?.key)
+                }}
+                onClear={() => parametersValidation.setFieldValue(field.key, '')}
+              />
+            </Grid>
+          )
+          break
+        case 2:
+          fields.push(
+            <Grid item xs={12}>
+              <CustomTextField
+                numberField //add necessary props
+                name={field.key}
+                label={field.caption}
+                value={parametersValidation.values[field.key]} //??
+                required={field.mandatory}
+                onChange={(event, newValue) => {
+                  parametersValidation.setFieldValue(field.key, newValue?.key)
+                }}
+                onClear={() => parametersValidation.setFieldValue(field.key, '')}
+              />
+            </Grid>
+          )
+          break
+        case 4:
+          // formatDateFromApi
+          fields.push(
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name={field.key}
+                label={field.caption}
+                value={parametersValidation.values[field.key]} //??
+                required={field.mandatory}
+                onChange={(event, newValue) => {
+                  parametersValidation.setFieldValue(field.key, newValue?.key)
+                }}
+                onClear={() => parametersValidation.setFieldValue(field.key, '')}
+              />
+            </Grid>
+          )
+          break
+        case 5:
+          switch (field.classId) {
+            case 0:
+              console.log({ field })
+              var parameters = `_database=${field.data}` //add 'xml'.json and get _database values from there
+              getRequest({
+                extension: SystemRepository.KeyValueStore,
+                parameters: parameters
+              })
+                .then(res => {
+                  var _fieldKey = getFieldKey(field.key)
+                  var _fieldValue = getFieldValue(field.key)
+
+                  parametersValidation.setValues({
+                    ...parametersValidation.values,
+                    ..._fieldValue
+                  })
+
+                  fields.push(
+                    <Grid item xs={12}>
+                      <CustomComboBox
+                        name={field.key}
+                        label={field.caption}
+                        valueField='key'
+                        displayField='value'
+                        store={res.list}
+                        value={res.list.filter(item => item.value === _fieldKey)[0]}
+                        required={field.mandatory}
+                        onChange={(event, newValue) => {
+                          parametersValidation.setFieldValue(field.key, { key: field.id, value: newValue?.key })
+                        }}
+                        sx={{ pt: 2 }}
+                      />
+                    </Grid>
+                  )
+                })
+                .catch(error => {
+                  setErrorMessage(error)
+                })
+              break
+
+            default:
+              break
+          }
+          break
+        case 6:
+          //needs testing
+          <FormControlLabel
+            control={
+              <Checkbox
+                name={field.key}
+                checked={parametersValidation.values[field.key]}
+                onChange={parametersValidation.setFieldValue}
+              />
+            }
+            label={field.caption}
+          />
+          break
+        default:
+          break
+      }
+    })
   }
 
   useEffect(() => {
-    getParameterDefinition()
-  }, [])
+    if (!parameters) getParameterDefinition()
+    if (parameters) getDataByClassId()
+  }, [parameters])
 
   return (
     <>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        maxWidth='sm'
-        PaperComponent={PaperComponent}
-        onKeyUp={e => {
-          const ENTER = 13
-
-          if (e.keyCode === ENTER) {
-            onSave()
-          }
-        }}
-        sx={{ left: 300, top: 136, pointerEvents: 'all' }}
-        BackdropProps={{
-          classes: {
-            root: classes.customBackdrop
-          }
-        }}
-      >
-        <DialogTitle
-          sx={{
-            cursor: 'move',
-            py: 2,
-            pl: 3,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}
-          id='draggable-dialog-title'
+      {open && (
+        <Window
+          id='DocumentTypeWindow'
+          Title='Document Type Map'
+          onClose={onClose}
+          width={600}
+          height={height}
+          onSave={parametersValidation.handleSubmit}
         >
-          <Box>
-            <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>Parameters</Typography>
-          </Box>
-          <Box>
-            <IconButton tabIndex={-1} edge='end' onClick={onClose} aria-label='clear input'>
-              <ClearIcon />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={{ width: 400, height: height, p: 3 }}>
-          {parameters &&
-            parameters.map(field => {
-              console.log(field.controlType)
-              switch (field.controlType) {
-                case 0:
-                  break
-                case 5:
-                  return (
-                    <CustomComboBox
-                      name={field.key}
-                      label={field.caption}
-                      valueField='key'
-                      displayField='value'
-                      store={functionStore}
-                      value={parametersValidation.values?.fromFunctionName}
-                      required={field.mandatory}
-                      onChange={(event, newValue) => {
-                        console.log({ newValue })
-                        parametersValidation.setFieldValue('fromFunctionId', newValue?.key)
-                        parametersValidation.setFieldValue('fromFunctionName', newValue?.value)
-                      }}
-                      sx={{ pt: 2 }}
-                      error={
-                        parametersValidation.touched.fromFunctionId &&
-                        Boolean(parametersValidation.errors.fromFunctionId)
-                      }
-                      helperText={
-                        parametersValidation.touched.fromFunctionId && parametersValidation.errors.fromFunctionId
-                      }
-                    />
-                  )
-
-                default:
-                  break
-              }
-            })}
-        </DialogContent>
-        <WindowToolbar onSave={parametersValidation.handleSubmit} />
-      </Dialog>
+          <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
+            {fields && fields}
+          </Grid>
+        </Window>
+      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

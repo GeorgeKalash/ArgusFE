@@ -8,4 +8,6 @@ export const ResourceIds = {
   ProductMaster : 36103,
   CommissionType: 35102,
   Interface: 36108,
+  Countries: 20101,
+  LegalStatus: 21108
 }
