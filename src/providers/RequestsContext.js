@@ -10,7 +10,7 @@ import { AuthContext } from 'src/providers/AuthContext'
 const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
-  const { user } = useContext(AuthContext)
+  const { user, setUser } = useContext(AuthContext)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -86,6 +86,7 @@ const RequestsProvider = ({ children }) => {
                 expiresAt: jwt(res.data.record.accessToken).exp
               }
 
+              setUser(newUser)
               if (window.localStorage.getItem('userData'))
                 window.localStorage.setItem('userData', JSON.stringify(newUser))
               else window.sessionStorage.setItem('userData', JSON.stringify(newUser))
