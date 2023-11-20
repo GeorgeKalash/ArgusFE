@@ -10,12 +10,12 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomInlineDataGrid from 'src/components/Shared/InlineDataGrid'
 import { transformRowsForEditableGrid } from 'src/components/helpers/inlineEditGridHelper'
 
-const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
+const CorrespondentCountriesTab = ({ countryStore, maxAccess }) => {
 
   const [inlineGridDataRows, setInlineGridDataRows] = useState([])
   const [newLineOnTab, setNewLineOnTab] = useState(true)
   const [inlineDataErrorState, setInlineDataErrorState] = useState([])
-  console.log(productCountriesGridData, ' productCountriesGridData ')
+  console.log(countryStore, ' countryStore ')
   const [editRowsModel, setEditRowsModel] = useState({})
 
   function CustomEditSelect(customEditSelectProps) {
@@ -35,12 +35,13 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
     return (
       <Autocomplete
         {...customProps}
+
         //  value={initialVal? initialVal: undefined}
         autoSelect
         openOnFocus
         autoFocus
         options={colDef.valueOptions || []}
-        getOptionLabel={(option) => option.countryRef}
+        getOptionLabel={(option) => option.reference}
         onSelect={(e) => handleValueChanged(e)}
         onChange={(e) => handleValueChanged(e)}
         disableClearable={false}
@@ -50,8 +51,8 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
           )
         }}
         renderOption={(optionProps, option) => (
-          <MenuItem value={option.countryRef} {...optionProps} sx={{ '& > img': { mr: 2, flexShrink: 0 } }}>
-            {option.countryRef}-{option.countryName}
+          <MenuItem value={option.reference} {...optionProps} sx={{ '& > img': { mr: 2, flexShrink: 0 } }}>
+            {option.reference} - {option.name}
           </MenuItem>
         )}
         sx={{
@@ -86,6 +87,7 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
     } else {
       setNewLineOnTab(true)
     }
+
     return (
       <StyledTooltip open={!!error} title={error}>
         <CustomEditSelect {...params} />
@@ -118,12 +120,14 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
             </Box> */}
             <Box sx={{ width: '100%', height: '100%' }}>
               <CustomInlineDataGrid
-                // dataRows={productCountriesGridData.list}
+
+                // dataRows={correspondentCountriesGridData.list}
                 dataRows={transformRowsForEditableGrid(inlineGridDataRows)}
                 setDataRows={setInlineGridDataRows}
+
                 // newLineOnTab={newLineOnTab}
                 newLineOnTab={true}
-                newLineField='isInactive'
+                newLineField='countryName'
                 requiredFields={['countryRef']}
                 editRowsModel={editRowsModel}
                 columns={[
@@ -134,6 +138,7 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
                     editable: true,
                     valueGetter: params => {
                       if (params.row.recordId) return params.row.recordId
+
                       return ''
                     }
                   },
@@ -144,17 +149,19 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
                     flex: 1,
                     editable: true,
                     type: 'singleSelect',
-                    valueOptions: productCountriesGridData.list,
-                    getOptionValue: value => value.countryRef,
-                    getOptionLabel: value => value.countryRef + '-' + value.countryName,
+                    valueOptions: countryStore.list,
+                    getOptionValue: value => { value.reference},
                     valueFormatter: params => {
                       const { id, value, field } = params
+
                       return value
                     },
                     valueSetter: params => {
-                      let countryName = productCountriesGridData.list.find(entry => entry.countryRef === params.value)?.countryName || ''
+                      let countryName = countryStore.list.find(entry => entry.reference === params.value)?.name || ''
+                      
                       return { ...params.row, countryRef: params.value, countryName }
                     },
+
                     // renderEditCell:(params) => (
                     //   <StyledTooltip open={!!error} title={error}>
                     //   <CustomEditSelect {...params} />
@@ -169,75 +176,12 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
                     flex: 1,
                     type: 'string',
                     editable: false,
-                  },
-                  {
-                    field: 'isInactive',
-                    headerName: 'Is Inactive?',
-                    type: 'boolean',
-                    flex: 1,
-                    editable: true,
                     preProcessEditCellProps: params => {
                       if (params.otherFieldsProps.countryRef.error) {
                         return { ...params.props, error: true }
                       }
                     },
-                  },
-                  // {
-                  //   field: 'price',
-                  //   headerName: 'price',
-                  //   type: 'number',
-                  //  flex:1,
-                  //   editable: true,
-                  //   valueFormatter: params => {
-                  //     if (params.value == null) {
-                  //       return ''
-                  //     }
-                  //     return `${params.value.toLocaleString()} $`
-                  //   },
-                  //   valueSetter: params => {
-                  //     const price = params.value || 0;
-                  //     const qty = params.row.qty || 0;
-                  //     return {...params.row,price:params.value, subtotal: price*qty}
-                  //   }
-                  // },
-                  // {
-                  //   field: 'qty',
-                  //   headerName: 'qty',
-                  //   type: 'number',
-                  //  flex:1,
-                  //   editable: true,
-                  //   valueSetter: params => {
-                  //     const price = params.row.price || 0;
-                  //     const qty = params.value || 0;
-                  //     return {...params.row,qty:params.value, subtotal: price*qty}
-                  //   }
-                  // },
-                  // {
-                  //   field: 'subtotal',
-                  //   headerName: 'subtotal',
-                  //   type: 'number',
-                  //   flex:1,
-                  //   editable: false,
-                  //   valueGetter: params => {
-                  //     const price = params.row.price || 0;
-                  //     const qty = params.row.qty || 0;
-                  //     return price * qty;
-                  //   },
-                  //   colSpan:1,
-
-                  // },
-                  // {
-                  //   field: 'button',
-                  //   headerName: 'open',
-                  //   type: 'actions',
-                  //   renderCell: params => (
-                  //     <>
-                  //       <Button variant='contained' size='small' onClick={() => alert('clicked')} >
-                  //         Open
-                  //       </Button>
-                  //     </>
-                  //   )
-                  // }
+                  }
                 ]}
               />
             </Box>
@@ -248,4 +192,4 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
   )
 }
 
-export default ProductCountriesTab
+export default CorrespondentCountriesTab

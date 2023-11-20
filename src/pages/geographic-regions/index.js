@@ -163,7 +163,7 @@ const GeographicRegions = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
+    getGridData({ _startAt: 0, _pageSize: 50 })
     getLabels()
   })
 
