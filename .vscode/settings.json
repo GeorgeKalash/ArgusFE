@@ -36,10 +36,10 @@
     "Customizer"
   ],
   "search-node-modules.path": "node_modules",
-  "[javascript]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[ini]": {
-    "editor.defaultFormatter": "lkrms.inifmt"
-  },
+  // "[javascript]": {
+  //   "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  // },
+  // "[ini]": {
+  //   "editor.defaultFormatter": "lkrms.inifmt"
+  // },
 }
