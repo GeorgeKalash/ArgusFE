@@ -7,22 +7,22 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Autocomplete, InputAdornment } from '@mui/material'
-import { getDefaultValue, getOptionLabel } from '../helpers/inlineEditGridHelper'
 
-const InlineEditGrid = ({ columns }) => {
+const InlineEditGrid = ({
+  columns
+}) => {
   const [data, setData] = useState([{ rowId: 0, columns }])
 
   const dispersalTypeStore = [
     { key: 1, value: 'bank' },
     { key: 2, value: 'cash' },
     { key: 3, value: 'wallet' },
-    { key: 4, value: 'delivery' }
+    { key: 4, value: 'delivery' },
   ]
 
   const handleCellEdit = (rowIndex, columnIndex, value) => {
     const updatedData = [...data]
     updatedData[rowIndex].columns[columnIndex].value = value
-    console.log(updatedData, 'updatedData')
     setData(updatedData)
   }
 
@@ -40,24 +40,25 @@ const InlineEditGrid = ({ columns }) => {
     }
   }
 
-  const handleDeleteRow = rowIndex => {
+  const handleDeleteRow = (rowIndex) => {
     if (data.length === 1) {
       setData([{ rowId: 0, columns }])
-    } else {
+    }
+    else {
       const updatedData = [...data]
       updatedData.splice(rowIndex, 1)
       setData(updatedData)
     }
   }
 
-  const handleSubmit = () => {
-    //NOT READY
+  const handleSubmit = () => { //NOT READY
     const dataWithoutRowId = data.map(({ rowId, ...rest }) => rest)
   }
 
   return (
     <Box sx={{ p: 4 }}>
       {data.map((row, rowIndex) => {
+
         return (
           <Grid container item key={row.rowId}>
             <Box display={'flex'}>
@@ -71,14 +72,11 @@ const InlineEditGrid = ({ columns }) => {
                           label={rowIndex === 0 ? column.header : ''}
                           placeholder={rowIndex != 0 ? column.header : ''}
                           size='small'
-                          autoComplete='off'
+                          autoComplete = 'off'
                           id={`cell-${rowIndex}-${columnIndex}`}
                           value={column.value}
-                          onChange={e => {
-                            handleCellEdit(rowIndex, columnIndex, e.target.value)
-                            if (column.onChange) column.onChange(e.target.value)
-                          }}
-                          onKeyDown={e => {
+                          onChange={(e) => handleCellEdit(rowIndex, columnIndex, e.target.value)}
+                          onKeyDown={(e) => {
                             if (e.key === 'Tab') {
                               e.preventDefault()
                               handleTabKey(e, rowIndex, columnIndex)
@@ -89,8 +87,8 @@ const InlineEditGrid = ({ columns }) => {
                             maxWidth: 150,
                             borderRadius: 0,
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: 0
-                            }
+                              borderRadius: 0,
+                            },
                           }}
                         />
                       )
@@ -99,26 +97,17 @@ const InlineEditGrid = ({ columns }) => {
                       return (
                         <Autocomplete
                           id={`cell-${rowIndex}-${columnIndex}`}
-                          options={column.fieldStore}
-                          defaultValue={column.hasDefaultValue ? getDefaultValue(column, data) : ''}
-                          getOptionLabel={option => getOptionLabel(option, column.selectedOptionDisplayProperties)}
-                          value={column.fieldStore?.find(item => item.key === column.value)}
-                          onChange={(event, newValue) => {
-                            if (newValue) handleCellEdit(rowIndex, columnIndex, newValue[column.valueProperty])
-                            else handleCellEdit(rowIndex, columnIndex, '')
-                          }}
-                          onKeyDown={e => {
+                          options={dispersalTypeStore}
+                          getOptionLabel={(option) => option.value}
+                          value={dispersalTypeStore.find((item) => item.key === column.value)}
+                          onChange={(event, newValue) => handleCellEdit(rowIndex, columnIndex, newValue?.key)}
+                          onKeyDown={(e) => {
                             if (e.key === 'Tab') {
-                              e.preventDefault()
-                              handleTabKey(e, rowIndex, columnIndex)
+                              e.preventDefault();
+                              handleTabKey(e, rowIndex, columnIndex);
                             }
                           }}
-                          renderOption={(props, option) => (
-                            <Box component='li' {...props}>
-                              {getOptionLabel(option, column.listOptionDisplayProperties)}
-                            </Box>
-                          )}
-                          renderInput={params => (
+                          renderInput={(params) => (
                             <TextField
                               {...params}
                               name={column.name}
@@ -130,15 +119,11 @@ const InlineEditGrid = ({ columns }) => {
                                 maxWidth: 170,
                                 borderRadius: 0,
                                 '& .MuiOutlinedInput-root': {
-                                  borderRadius: 0
-                                }
+                                  borderRadius: 0,
+                                },
                               }}
                             />
                           )}
-                          sx={{
-                            flexGrow: 3
-                          }}
-                          readOnly={column.isReadOnly ? Boolean(column.isReadOnly) : false}
                         />
                       )
 
@@ -149,59 +134,38 @@ const InlineEditGrid = ({ columns }) => {
                           value={column.header}
                           size='small'
                           id={`cell-${rowIndex}-${columnIndex}`}
-                          onChange={e => handleCellEdit(rowIndex, columnIndex, e.target.value)}
+                          onChange={(e) => handleCellEdit(rowIndex, columnIndex, e.target.value)}
                           sx={{
                             minWidth: 120,
                             maxWidth: 170,
                             borderRadius: 0,
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: 0
-                            }
+                              borderRadius: 0,
+                            },
                           }}
-                          onKeyDown={e => {
+                          onKeyDown={(e) => {
                             if (e.key === 'Tab') {
                               e.preventDefault()
                               handleTabKey(e, rowIndex, columnIndex)
                             }
                           }}
                           inputProps={{
-                            readOnly: true
+                            readOnly: true,
                           }}
                           InputProps={{
                             endAdornment: (
-                              <InputAdornment position='end'>
+                              <InputAdornment position="end">
                                 <FormControlLabel
                                   control={
                                     <Checkbox
                                       name={column.name}
                                       checked={column.value}
-                                      onChange={e => handleCellEdit(rowIndex, columnIndex, e.target.checked)}
+                                      onChange={(e) => handleCellEdit(rowIndex, columnIndex, e.target.checked)}
                                     />
                                   }
                                 />
                               </InputAdornment>
-                            )
-                          }}
-                        />
-                      )
-
-                    case 3:
-                      return (
-                        <TextField
-                          id={`cell-${rowIndex}-${columnIndex}`}
-                          label={rowIndex === 0 ? column.header : ''}
-                          defaultValue={column.defaultValue}
-                          InputProps={{
-                            readOnly: true
-                          }}
-                          size='small'
-                          sx={{
-                            minWidth: 120,
-                            maxWidth: 150,
-                            borderRadius: 0,
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: 0
-                            }
+                            ),
                           }}
                         />
                       )
@@ -212,7 +176,11 @@ const InlineEditGrid = ({ columns }) => {
                 })}
               </Grid>
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <IconButton onClick={() => handleDeleteRow(rowIndex)} size='small' color='error'>
+                <IconButton
+                  onClick={() => handleDeleteRow(rowIndex)}
+                  size="small"
+                  color="error"
+                >
                   <DeleteIcon />
                 </IconButton>
               </Box>

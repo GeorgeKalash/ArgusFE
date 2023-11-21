@@ -16,28 +16,23 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewCurrency, populateCurrency } from 'src/Models/System/currency'
-import { KVSRepository } from 'src/repositories/KVSRepository'
+import { getNewInterface, populateInterface } from 'src/Models/RemittanceSettings/Interface'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
-import CurrencyWindow from './Windows/CurrencyWindow'
+import InterfaceWindow from './Windows/InterfaceWindow'
 
 // ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const Currencies = () => {
+const Interface = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
   //stores
   const [gridData, setGridData] = useState(null)
-  const [decimalStore, setDecimalStore] = useState([])
-  const [profileStore, setProfileStore] = useState([])
-  const [currencyStore, setCurrencyStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -51,13 +46,9 @@ const Currencies = () => {
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
     name: labels && labels.find(item => item.key === 2).value,
-    foreignLanguage: labels && labels.find(item => item.key === 3).value,
-    decimals: labels && labels.find(item => item.key === 4).value,
-    profile: labels && labels.find(item => item.key === 5).value,
-    currencyType: labels && labels.find(item => item.key === 6).value,
-    sales: labels && labels.find(item => item.key === 7).value,
-    purchase: labels && labels.find(item => item.key === 8).value,
-    currency: labels && labels.find(item => item.key === 9).value
+    path: labels && labels.find(item => item.key === 3).value,
+    description: labels && labels.find(item => item.key === 4).value,
+    interface: labels && labels.find(item => item.key === 5).value
   }
 
   const columns = [
@@ -73,40 +64,39 @@ const Currencies = () => {
     },
     ,
     {
-      field: 'flName',
-      headerName: _labels.foreignLanguage,
+      field: 'path',
+      headerName: _labels.path,
       flex: 1
     },
     {
-      field: 'currencyTypeName',
-      headerName: _labels.currencyType,
+      field: 'description',
+      headerName: _labels.description,
       flex: 1
     }
   ]
 
-  const currencyValidation = useFormik({
+  const interfaceValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
-      decimals: yup.string().required('This field is required'),
-      profileId: yup.string().required('This field is required'),
-      currencyType: yup.string().required('This field is required')
+      path: yup.string().required('This field is required'),
+      description: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      postCurrency(values)
+      postInterface(values)
     }
   })
 
   const handleSubmit = () => {
-    currencyValidation.handleSubmit()
+    interfaceValidation.handleSubmit()
   }
 
   const getGridData = () => {
     var parameters = '_filter='
     getRequest({
-      extension: SystemRepository.Currency.qry,
+      extension: RemittanceSettingsRepository.Interface.qry,
       parameters: parameters
     })
       .then(res => {
@@ -117,40 +107,10 @@ const Currencies = () => {
       })
   }
 
-  const fillProfileStore = () => {
-    var parameters = '_database=6' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
-    })
-      .then(res => {
-        setProfileStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillCurrencyStore = () => {
-    var parameters = '_database=117' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillDecimalStore = () => {}
-
-  const postCurrency = obj => {
+  const postInterface = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: SystemRepository.Currency.set,
+      extension: RemittanceSettingsRepository.Interface.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -164,9 +124,9 @@ const Currencies = () => {
       })
   }
 
-  const delCurrency = obj => {
+  const delInterface = obj => {
     postRequest({
-      extension: SystemRepository.Currency.del,
+      extension: RemittanceSettingsRepository.Interface.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -178,36 +138,25 @@ const Currencies = () => {
       })
   }
 
-  const addCurrency = () => {
-    currencyValidation.setValues(getNewCurrency())
-    fillDecimalStore()
-    fillProfileStore()
-    fillCurrencyStore()
+  const addInterface = () => {
+    interfaceValidation.setValues(getNewInterface())
     setEditMode(false)
     setWindowOpen(true)
   }
 
-  const editCurrency = obj => {
-    currencyValidation.setValues(populateCurrency(obj))
-    fillDecimalStore()
-    fillProfileStore()
-    fillCurrencyStore()
+  const editInterface = obj => {
+    interfaceValidation.setValues(populateInterface(obj))
     setEditMode(true)
     setWindowOpen(true)
   }
 
   useEffect(() => {
      if (!access)
-    getAccess(ResourceIds.Currencies, setAccess)
+    getAccess(ResourceIds.Interface, setAccess)
   else {
     if (access.record.maxAccess > 0) {
       getGridData()
-      fillDecimalStore()
-      fillProfileStore()
-      fillCurrencyStore()
-      getLabels(ResourceIds.Currencies,setLabels)
-      const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
-      setDecimalStore(decimalDataSource) 
+      getLabels(ResourceIds.Interface,setLabels)
     } else {
       setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
     }
@@ -217,14 +166,14 @@ const Currencies = () => {
 return (
     <>
       <Box>
-        <GridToolbar onAdd={addCurrency} maxAccess={access}/>
+        <GridToolbar onAdd={addInterface} maxAccess={access}/>
         <Table
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={editCurrency}
-          onDelete={delCurrency}
+          onEdit={editInterface}
+          onDelete={delInterface}
           isLoading={false}
           pageSize={50}
           paginationType='client'
@@ -232,16 +181,13 @@ return (
         />
       </Box>
       {windowOpen && (
-        <CurrencyWindow
+        <InterfaceWindow
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
           onSave={handleSubmit}
           editMode={editMode}
-          currencyValidation={currencyValidation}
-          decimalStore={decimalStore}
-          profileStore={profileStore}
-          currencyStore={currencyStore}
+          interfaceValidation={interfaceValidation}
           labels={_labels}
           maxAccess={access}
         />
@@ -252,4 +198,4 @@ return (
   )
 }
 
-export default Currencies
+export default Interface

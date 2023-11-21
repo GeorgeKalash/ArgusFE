@@ -26,6 +26,7 @@ import {
 } from 'src/Models/BusinessPartner/GroupLegalDocument'
 import { getNewCategoryId, populateCategoryId } from 'src/Models/BusinessPartner/Group'
 import { getNewGroup, populateGroup } from 'src/Models/BusinessPartner/CategoryID'
+import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
@@ -36,6 +37,7 @@ import { KVSRepository } from 'src/repositories/KVSRepository'
 
 const GroupLegalDocument = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -43,10 +45,13 @@ const GroupLegalDocument = () => {
   const [groupStore, setGroupStore] = useState([])
 
   //states
-  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  //control
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   const _labels = {
     group: labels && labels.find(item => item.key === 1).value,
@@ -95,22 +100,6 @@ const GroupLegalDocument = () => {
 
   const handleSubmit = () => {
     groupLegalDocumentValidation.handleSubmit()
-  }
-
-  const getLabels = () => {
-    var parameters = '_dataset=' + ResourceIds.GroupLegalDocument
-
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log({ res })
-        setLabels(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -208,12 +197,20 @@ const GroupLegalDocument = () => {
     setWindowOpen(true)
   }
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 50 })
-    fillGroupStore()
-    fillCategoryStore()
-    getLabels()
-  },[])
-  
+     if (!access)
+    getAccess(ResourceIds.GroupLegalDocument, setAccess)
+  else {
+    if (access.record.maxAccess > 0) {
+      getGridData({ _startAt: 0, _pageSize: 50 })
+      fillGroupStore()
+      fillCategoryStore()
+      getLabels(ResourceIds.GroupLegalDocument,setLabels)  
+    } else {
+      setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    }
+  }
+}, [access])
+
   return (
     <>
       <Box
@@ -223,7 +220,7 @@ const GroupLegalDocument = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addGroupLegalDocument} />
+        <GridToolbar onAdd={addGroupLegalDocument} maxAccess={access}/>
         <Table
           columns={columns}
           gridData={gridData}
@@ -232,6 +229,7 @@ const GroupLegalDocument = () => {
           onEdit={editGroupLegalDocument}
           onDelete={delGroupLegalDocument}
           isLoading={false}
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
@@ -245,6 +243,7 @@ const GroupLegalDocument = () => {
           groupLegalDocumentValidation={groupLegalDocumentValidation}
           categoryStore={categoryStore}
           groupStore={groupStore}
+          maxAccess={access}
         />
       )}
 

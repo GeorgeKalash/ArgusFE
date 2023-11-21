@@ -11,9 +11,6 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
@@ -22,9 +19,8 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { getNewLegalStatuses, populateLegalStatuses } from 'src/Models/BusinessPartner/LegalStatuses'
 
-// ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
+// ** Windows
+import LegalStatusWindow from './Windows/LegalStatusWindow'
 
 const LegalStatus = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -158,44 +154,14 @@ const LegalStatus = () => {
         />
       </Box>
       {windowOpen && (
-        <Window
-          id='LegalStatusWindow'
-          Title='Legal Status'
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-        >
-          <CustomTabPanel>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='reference'
-                  label='Reference'
-                  value={legalStatusValidation.values.reference}
-                  required
-                  onChange={legalStatusValidation.handleChange}
-                  onClear={() => legalStatusValidation.setFieldValue('reference', '')}
-                  error={legalStatusValidation.touched.reference && Boolean(legalStatusValidation.errors.reference)}
-                  helperText={legalStatusValidation.touched.reference && legalStatusValidation.errors.reference}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='name'
-                  label='Name'
-                  value={legalStatusValidation.values.name}
-                  required
-                  onChange={legalStatusValidation.handleChange}
-                  onClear={() => legalStatusValidation.setFieldValue('name', '')}
-                  error={legalStatusValidation.touched.name && Boolean(legalStatusValidation.errors.name)}
-                  helperText={legalStatusValidation.touched.name && legalStatusValidation.errors.name}
-                />
-              </Grid>
-            </Grid>
-          </CustomTabPanel>
-        </Window>
-      )}
+       <LegalStatusWindow
+       onClose={() => setWindowOpen(false)}
+       width={600}
+       height={400}
+       onSave={handleSubmit}
+       legalStatusValidation={legalStatusValidation}
+       />
+       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
