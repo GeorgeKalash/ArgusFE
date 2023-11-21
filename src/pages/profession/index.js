@@ -157,11 +157,11 @@ const Professions = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       flName: yup.string().required('This field is required'),
-       monthlyIncome: yup
-      .number()
-      .transform((value, originalValue) => validateNumberField(value, originalValue))
-      .min(0, 'Value must be greater than or equal to 0')
-      .max(32767, 'Value must be less than or equal to 32,767'),
+       monthlyIncome:yup
+       .number()
+       .transform((value, originalValue) => validateNumberField(value, originalValue))
+       .min(0, 'Value must be greater than or equal to 0')
+       .max(32767, 'Value must be less than or equal to 32,767'),
       riskFactor: yup.string().required('This field is required'),
 
 

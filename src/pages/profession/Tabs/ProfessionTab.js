@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { getFormattedNumber} from 'src/lib/numberField-helper'
 
 const ProfessionTab=({
     labels,
@@ -79,9 +79,9 @@ const ProfessionTab=({
               label={labels.monthlyIncome}
               value={ProfessionValidation.values.monthlyIncome}
               required
-              type="number"
+              maxLength='13'
               maxAccess={maxAccess}
-              onChange={e => ProfessionValidation.setFieldValue('monthlyIncome', getFormattedNumber(e.target.value, 4))}
+              onChange={e => ProfessionValidation.setFieldValue('monthlyIncome', getFormattedNumber(e.target.value, 2))}
               onClear={() => ProfessionValidation.setFieldValue('monthlyIncome', '')}
               error={ProfessionValidation.touched.monthlyIncome && Boolean(ProfessionValidation.errors.monthlyIncome)}
               helperText={ProfessionValidation.touched.monthlyIncome && ProfessionValidation.errors.monthlyIncome}
