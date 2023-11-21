@@ -16,7 +16,8 @@ const CountryWindow = ({
     regionStore,
     width,
     height,
-    _labels
+    _labels,
+    maxAccess
 }) => {
     return (
         <Window id='CountryWindow' Title={_labels.country} onClose={onClose} width={width} height={height} 
@@ -27,6 +28,7 @@ const CountryWindow = ({
                     currencyStore={currencyStore}
                     regionStore={regionStore}
                     _labels={_labels}
+                    maxAccess={maxAccess}
                 />
             </CustomTabPanel>
         </Window>

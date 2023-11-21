@@ -8,7 +8,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 // ** Helpers
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
-const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels }) => {
+const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, maxAccess }) => {
     return (
         <>
             <Grid container spacing={4}>
@@ -54,7 +54,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels }) 
                         valueField='recordId'
                         displayField='name'
                         store={currencyStore}
-                        value={currencyStore.filter(item => item.key === countryValidation.values.currencyId)[0]}
+                        value={currencyStore.filter(item => item.recordId === countryValidation.values.currencyId)[0]}
                         onChange={(event, newValue) => {
                             countryValidation.setFieldValue('currencyId', newValue?.recordId)
                         }}
@@ -69,7 +69,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels }) 
                         valueField='recordId'
                         displayField='name'
                         store={regionStore}
-                        value={regionStore.filter(item => item.key === countryValidation.values.regionId)[0]}
+                        value={regionStore.filter(item => item.recordId === countryValidation.values.regionId)[0]}
                         onChange={(event, newValue) => {
                             countryValidation.setFieldValue('regionId', newValue?.recordId)
                         }}
@@ -93,11 +93,12 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels }) 
                         control={
                             <Checkbox
                                 name='isInactive'
+                                maxAccess={maxAccess}
                                 checked={countryValidation.values?.isInactive}
                                 onChange={countryValidation.handleChange}
                             />
                         }
-                        label='Is Inactive'
+                        label={_labels.isInactive}
                     />
                 </Grid>
             </Grid>

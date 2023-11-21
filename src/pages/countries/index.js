@@ -16,12 +16,12 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCountry, populateCountry } from 'src/Models/System/Country'
-import { KVSRepository } from 'src/repositories/KVSRepository'
 
 // ** Helpers
-import { validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import {getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -31,12 +31,16 @@ import CountryWindow from './Windows/CountryWindow'
 
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
+
+  //controls
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
 
   //states
-  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false) 
   const [errorMessage, setErrorMessage] = useState(null)
@@ -51,7 +55,8 @@ const Countries = () => {
     currencyName: labels && labels.find(item => item.key === 4).value,
     regionName: labels && labels.find(item => item.key === 5).value,
     ibanLength: labels && labels.find(item => item.key === 6).value,
-    country: labels && labels.find(item => item.key === 7).value
+    country: labels && labels.find(item => item.key === 7).value,
+    isInactive: labels && labels.find(item => item.key === 8).value
   }
 
   const columns = [
@@ -84,9 +89,9 @@ const Countries = () => {
       field: 'ibanLength',
       headerName: _labels.ibanLength,
       flex: 1,
-      align: 'right'
+      align: 'right',
 
-      //valueGetter: ({ row }) => getFormattedNumber(row?.ibanLength, 4)
+      valueGetter: ({ row }) => getFormattedNumber(row?.ibanLength, 4)
     }
   ]
 
@@ -106,6 +111,7 @@ const Countries = () => {
       name: yup.string().required('This field is required')
     }),
     onSubmit: values => {
+      console.log(values);
       values.ibanLength = getNumberWithoutCommas(values.ibanLength)
       postCountry(values)
     }
@@ -113,22 +119,6 @@ const Countries = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) countryValidation.handleSubmit()
-  }
-
-  const getLabels = () => {
-    var parameters = '_dataset=' + ResourceIds.Countries
-
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log({ res })
-        setLabels(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const getGridData = () => {
@@ -147,7 +137,6 @@ const Countries = () => {
   }
 
   const postCountry = obj => {
-    console.log(obj)
     const recordId = obj.recordId
     postRequest({
       extension: SystemRepository.Country.set,
@@ -197,11 +186,18 @@ const Countries = () => {
   }
 
   useEffect(() => {
-    getGridData()
-    fillCurrencyStore()
-    fillRegionStore({})
-    getLabels()
-  }, [])
+    if (!access) getAccess(ResourceIds.Countries, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData()
+        fillCurrencyStore()
+        fillRegionStore({})
+        getLabels(ResourceIds.Countries,setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
+    }
+  }, [access])
 
   const fillCurrencyStore = () => {
     var parameters = `_filter=`
@@ -242,7 +238,7 @@ const Countries = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addCountry} />
+        <GridToolbar onAdd={addCountry} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -253,6 +249,7 @@ const Countries = () => {
           isLoading={false}
           pageSize={50}
           paginationType='client'
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
@@ -268,6 +265,7 @@ const Countries = () => {
        tabs={tabs}
        activeTab={activeTab}
        setActiveTab={setActiveTab}
+       maxAccess={access}
        />
        )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
