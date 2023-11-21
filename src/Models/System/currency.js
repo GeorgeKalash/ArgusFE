@@ -9,7 +9,9 @@ const getNewCurrency = () => {
     sale: false,
     purchase: false,
     currencyType: null,
-    currencyTypeName: null
+    currencyTypeName: null,
+    isoCode: null,
+    symbol: null
   }
 }
 
@@ -24,7 +26,9 @@ const populateCurrency = obj => {
     sale: obj.sale,
     purchase: obj.purchase,
     currencyType: obj.currencyType,
-    currencyTypeName: obj.currencyTypeName
+    currencyTypeName: obj.currencyTypeName,
+    isoCode: obj.isoCode,
+    symbol: obj.symbol
   }
 }
 
