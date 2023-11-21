@@ -40,6 +40,7 @@ const CustomTextField = ({
           textAlign: numberField && 'right'
         }
       }}
+
       autoComplete={autoComplete}
       style={{ textAlign: 'right' }}
       InputProps={{
