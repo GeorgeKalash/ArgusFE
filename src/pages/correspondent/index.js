@@ -36,13 +36,25 @@ const Correspondent = () => {
   const [gridData, setGridData] = useState(null)
   const [bpMasterDataStore, setBpMasterDataStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
+  const [currencyStore, setCurrencyStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
+
+  //stated for countries inline edit grid
   const [inlineCountriesGridDataRows, setInlineCountriesGridDataRows] = useState([])
+  const [inlineCountriesDataErrorState, setInlineCountriesDataErrorState] = useState([])
+  const [newCountriesLineOnTab, setNewCountriesLineOnTab] = useState(true)
+  const [editCountriesRowsModel, setEditCountriesRowsModel] = useState({})
+
+  //stated for currencies inline edit grid
+  const [inlineCurrenciesGridDataRows, setInlineCurrenciesGridDataRows] = useState([])
+  const [inlineCurrenciesDataErrorState, setInlineCurrenciesDataErrorState] = useState([])
+  const [newCurrenciesLineOnTab, setNewCurrenciesLineOnTab] = useState(true)
+  const [editCurrenciesRowsModel, setEditCurrenciesRowsModel] = useState({})
 
   //control
   const [labels, setLabels] = useState(null)
@@ -52,8 +64,8 @@ const Correspondent = () => {
     reference: labels && labels.find(item => item.key === 1).value,
     name: labels && labels.find(item => item.key === 2).value,
     bpRef: labels && labels.find(item => item.key === 3).value,
-    tt: labels && labels.find(item => item.key === 4).value,
-    inwards: labels && labels.find(item => item.key === 5).value,
+    outward: labels && labels.find(item => item.key === 4).value,
+    inward: labels && labels.find(item => item.key === 5).value,
     isInactive: labels && labels.find(item => item.key === 6).value,
     correspondent: labels && labels.find(item => item.key === 7).value,
     country: labels && labels.find(item => item.key === 8).value,
@@ -77,13 +89,13 @@ const Correspondent = () => {
       flex: 1
     },
     {
-      field: 'tt',
-      headerName: _labels.tt,
+      field: 'outward',
+      headerName: _labels.outward,
       flex: 1
     },
     {
-      field: 'inwards',
-      headerName: _labels.inwards,
+      field: 'inward',
+      headerName: _labels.inward,
       flex: 1
     },
     {
@@ -97,13 +109,15 @@ const Correspondent = () => {
 
   const correspondentValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: true,
+    validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       bpId: yup.string().required('This field is required'),
       bpRef: yup.string().required('This field is required'),
-      bpName: yup.string().required('This field is required')
+      bpName: yup.string().required('This field is required'),
+      outward: yup.string().required('This field is required'),
+      inward: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postCorrespondent(values)
@@ -126,7 +140,11 @@ const Correspondent = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) correspondentValidation.handleSubmit()
-    else if (activeTab === 1) console.log('inlineCountriesGridDataRows2', inlineCountriesGridDataRows)
+    else if (activeTab === 1) {
+      console.log('inlineCountriesGridDataRows2', inlineCountriesGridDataRows)
+    } else if (activeTab === 2) {
+      console.log('currencies', inlineCurrenciesGridDataRows)
+    }
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -176,7 +194,7 @@ const Correspondent = () => {
       })
   }
 
-  const getCountryStore = () => {
+  const fillCountryStore = () => {
     var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Country.qry,
@@ -190,17 +208,46 @@ const Correspondent = () => {
       })
   }
 
+  const fillCurrencyStore = () => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: SystemRepository.Currency.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCurrencyStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const addCorrespondent = () => {
     correspondentValidation.setValues(getNewCorrespondent())
-    getCountryStore()
+    fillCountryStore()
+    fillCurrencyStore()
     setEditMode(false)
     setWindowOpen(true)
   }
 
-  const editCorrespondent = obj => {
-    correspondentValidation.setValues(populateCorrespondent(obj))
-    setEditMode(true)
-    setWindowOpen(true)
+  const getCorrespondentById = obj => {
+    const _recordId = obj.recordId
+    console.log(_recordId)
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.Correspondent.get,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res.record)
+        correspondentValidation.setValues(populateCorrespondent(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {
@@ -224,7 +271,7 @@ const Correspondent = () => {
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={editCorrespondent}
+          onEdit={getCorrespondentById}
           onDelete={delCorrespondent}
           isLoading={false}
           pageSize={50}
@@ -249,6 +296,21 @@ const Correspondent = () => {
           countryStore={countryStore}
           inlineCountriesGridDataRows={inlineCountriesGridDataRows}
           setInlineCountriesGridDataRows={setInlineCountriesGridDataRows}
+          inlineCountriesDataErrorState={inlineCountriesDataErrorState}
+          setInlineCountriesDataErrorState={setInlineCountriesDataErrorState}
+          newCountriesLineOnTab={newCountriesLineOnTab}
+          setNewCountriesLineOnTab={setNewCountriesLineOnTab}
+          editCountriesRowsModel={editCountriesRowsModel}
+          setEditCountriesRowsModel={setEditCountriesRowsModel}
+          currencyStore={currencyStore}
+          inlineCurrenciesGridDataRows={inlineCurrenciesGridDataRows}
+          setInlineCurrenciesGridDataRows={setInlineCurrenciesGridDataRows}
+          inlineCurrenciesDataErrorState={inlineCurrenciesDataErrorState}
+          setInlineCurrenciesDataErrorState={setInlineCurrenciesDataErrorState}
+          newCurrenciesLineOnTab={newCurrenciesLineOnTab}
+          setNewCurrenciesLineOnTab={setNewCurrenciesLineOnTab}
+          editCurrenciesRowsModel={editCurrenciesRowsModel}
+          setEditCurrenciesRowsModel={setEditCurrenciesRowsModel}
           labels={_labels}
           maxAccess={access}
         />

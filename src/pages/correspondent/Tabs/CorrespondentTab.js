@@ -76,24 +76,26 @@ const CorrespondentTab = ({
         <FormControlLabel
           control={
             <Checkbox
-              name='tt'
-              checked={correspondentValidation.values?.tt}
+              name='outward'
+              checked={correspondentValidation.values?.outward}
               onChange={correspondentValidation.handleChange}
+              maxAccess={maxAccess}
             />
           }
-          label={labels.tt}
+          label={labels.outward}
         />
       </Grid>
       <Grid item xs={12}>
         <FormControlLabel
           control={
             <Checkbox
-              name='inwards'
-              checked={correspondentValidation.values?.inwards}
-              onChange={correspondentValidation.inwards}
+              name='inward'
+              checked={correspondentValidation.values?.inward}
+              onChange={correspondentValidation.handleChange}
+              maxAccess={maxAccess}
             />
           }
-          label={labels.inwards}
+          label={labels.inward}
         />
       </Grid>
       <Grid item xs={12}>
@@ -102,12 +104,14 @@ const CorrespondentTab = ({
             <Checkbox
               name='isInactive'
               checked={correspondentValidation.values?.isInactive}
-              onChange={correspondentValidation.isInactive}
+              onChange={correspondentValidation.handleChange}
+              maxAccess={maxAccess}
             />
           }
           label={labels.isInactive}
         />
       </Grid>
+    
     </Grid>
   )
 }

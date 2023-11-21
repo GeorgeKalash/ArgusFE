@@ -18,9 +18,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { KVSRepository } from 'src/repositories/KVSRepository'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { getNewProductMaster, populateProductMaster } from 'src/Models/RemittanceSettings/ProductMaster'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -30,12 +27,16 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import ProductMasterWindow from './Windows/ProductMasterWindow'
 import ProductLegWindow from './Windows/ProductLegWindow'
 
+// ** Tabs
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getAccess } = useContext(ControlContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
 
   //controls
   const [access, setAccess] = useState(null)
@@ -58,30 +59,14 @@ const ProductMaster = () => {
   const [productCountriesGridData, setProductCountriesGridData] = useState([]) //for countries tab
   const [productCurrenciesGridData, setProductCurrenciesGridData] = useState([]) //for monetary tab
   const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
-  const [productSchedulesGridData, setProductSchedulesGridData] = useState([]) //for product dispersal tab
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [labels, setLabels] = useState(null)
 
   const [productLegWindowOpen, setProductLegWindowOpen] = useState(false) //for productLegTab
   
-  const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    type: labels && labels.find(item => item.key === 3).value,
-    function: labels && labels.find(item => item.key === 4).value,
-    correspondant: labels && labels.find(item => item.key === 5).value,
-    language: labels && labels.find(item => item.key === 6).value,
-    interface: labels && labels.find(item => item.key === 7).value,
-    commissionBase: labels && labels.find(item => item.key === 8).value,
-    messageToOperator: labels && labels.find(item => item.key === 9).value,
-    activateCounterMessage: labels && labels.find(item => item.key === 10).value,
-    isInactive: labels && labels.find(item => item.key === 11).value,
-    productMaster: labels && labels.find(item => item.key === 12).value
-  }
 
   const columns = [
     {
@@ -164,11 +149,11 @@ const ProductMaster = () => {
       name: yup.string().required('This field is required'),
       type: yup.string().required('This field is required'),
       function: yup.string().required('This field is required'),
-      correspondantId: yup.string().nullable(),
+      correspondant: yup.string().nullable(),
       countryId: yup.string().required('This field is required'),
       language: yup.string().required('This field is required'),
-      commissionBase: yup.string().required('This field is required'),
       interfaceId: yup.string().nullable(),
+      commissionBase: yup.string().nullable(),
       posMsg: yup.string().nullable(),
       posMsgIsActive: yup.string().nullable(),
       isInactive: yup.string().nullable(),
@@ -177,7 +162,6 @@ const ProductMaster = () => {
       // correspondant: yup.string().required('This field is required'),
     }),
     onSubmit: values => {
-      console.log('handle submit in productMasterValidation');
       postProductMaster(values)
     }
   })
@@ -186,28 +170,11 @@ const ProductMaster = () => {
   })
 
   const handleSubmit = () => {
-    console.log('handle submit');
-    console.log(activeTab);
     if (activeTab === 0) productMasterValidation.handleSubmit()
-    
-    //else if (activeTab === 2) productLegValidation.handleSubmit()
+    else if (activeTab === 2) productLegValidation.handleSubmit()
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: RemittanceSettingsRepository.ProductMaster.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
+  const getGridData = () => { }
 
   const fillTypeStore = () => {
     var parameters = '_database=3601' //add 'xml'.json and get _database values from there
@@ -317,39 +284,14 @@ const ProductMaster = () => {
       })
   }
 
-  const postProductMaster = obj => { 
-    console.log("postProductMaster"); console.log(obj); 
-    const recordId = obj.recordId
-    postRequest({
-      extension: RemittanceSettingsRepository.ProductMaster.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(true)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
+  const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
 
-  const tabs = [
-    { label: 'Main' }, 
-    { label: 'Countries' }, 
-    { label: 'Monetary'}, 
-    { label: 'Dispersal' }, 
-    { label: 'Schedules' }, 
-    { label: 'Fees' }, 
-    { label: 'Fields' }, 
-    { label: 'Agent' }
-  ]
+  const tabs = [{ label: 'Main' }, { label: 'Countries' }, {label: 'Monetary'}, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => { }
 
   const addProductMaster = () => {
-    productMasterValidation.setValues(getNewProductMaster())
+    productMasterValidation.setValues({})
     productLegValidation.setValues({})
     fillTypeStore()
     fillFunctionStore()
@@ -486,46 +428,6 @@ const ProductMaster = () => {
     setProductCountriesGridData({ ...newData })
   }
 
-  const getProductSchedulesData = () => {
-    const newData = {
-      list: [
-        {
-          recordId: 1,
-          plant: 'الرياض البطحاء',
-          country: 'UAE',
-          currency: 'US DOLLAR',
-          dispersalMode: 'EXPRESS',
-          isInactive: false
-        },
-        {
-          recordId: 2,
-          plant: 'ALL',
-          country: 'ALL',
-          currency: 'ALL',
-          dispersalMode: 'ALL',
-          isInactive: false
-        },
-        {
-          recordId: 3,
-          plant: 'الرياض البطحاء',
-          country: 'UAE',
-          currency: 'INDIAN RUPEES',
-          dispersalMode: 'NTFS',
-          isInactive: false
-        },
-        {
-          recordId: 4,
-          plant: 'ALL',
-          country: 'UAE',
-          currency: 'UAE DIRHAMS',
-          dispersalMode: 'CASH',
-          isInactive: true
-        }
-      ]
-    }
-    setProductSchedulesGridData({ ...newData })
-  }
-
   const getProductCurrenciesGridData = () => {
     const newData = {
       list: [
@@ -618,28 +520,11 @@ const ProductMaster = () => {
     setProductLegCommissionGridData({ ...newData })
   }
 
-  const getLabels = () => {
-    var parameters = '_dataset=' + ResourceIds.ProductMaster
-
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    })
-      .then(res => {
-        setLabels(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   useEffect(() => {
     if (!access)
       getAccess(ResourceIds.ProductMaster, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getLabels()
-
         getGridData({ _startAt: 0, _pageSize: 30 })
 
         //for countries tab
@@ -654,13 +539,9 @@ const ProductMaster = () => {
 
         //for product field tab
         getProductFieldGridData({})
-        
-        //for schedules tab
-        getProductSchedulesData({})
 
         //for product agent tab
         getProductAgentGridData({})
-
 
         //for product dispersal tab
         getProductDispersalGridData({})
@@ -714,7 +595,6 @@ const ProductMaster = () => {
           productLegCommissionGridData={productLegCommissionGridData}
           editProductCommission={editProductCommission}
           setProductLegWindowOpen={setProductLegWindowOpen}
-          productSchedulesGridData={productSchedulesGridData}
           productFieldGridData={productFieldGridData}
           productAgentGridData={productAgentGridData}
           currencyStore={currencyStore}
@@ -722,7 +602,6 @@ const ProductMaster = () => {
           dispersalStore={dispersalStore}
           countryStore={countryStore}
           maxAccess={access}
-          labels={_labels}
         />
       )}
 

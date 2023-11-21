@@ -6,7 +6,6 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import ProductMasterTab from 'src/pages/product-master/Tabs/productMasterTab'
 import ProductDispersalTab from 'src/pages/product-master/Tabs/productDispersalTab'
 import ProductLegTab from 'src/pages/product-master/Tabs/productLegTab'
-import ProductSchedulesTab from 'src/pages/product-master/Tabs/productSchedulesTab'
 import ProductFieldTab from 'src/pages/product-master/Tabs/productFieldTab'
 import ProductAgentTab from 'src/pages/product-master/Tabs/productAgentTab'
 import PoductCurrenciesTab from '../Tabs/productCurrenciesTab'
@@ -34,21 +33,19 @@ const ProductMasterWindow = ({
     productLegCommissionGridData,
     editProductCommission,
     setProductLegWindowOpen,
-    productSchedulesGridData,
     productFieldGridData,
     productAgentGridData,
     currencyStore,
     plantStore,
     dispersalStore,
     countryStore,
-    maxAccess,
-    labels
+    maxAccess
 }) => {
 
     return (
         <Window
             id='ProductMasterWindow'
-            Title={labels.productMaster}
+            Title='Product Master'
             onClose={onClose}
             tabs={tabs}
             activeTab={activeTab}
@@ -65,7 +62,6 @@ const ProductMasterWindow = ({
                     commissionBaseStore={commissionBaseStore}
                     languageStore={languageStore}
                     maxAccess={maxAccess} 
-                    labels={labels}
                 />
             </CustomTabPanel>
             <CustomTabPanel index={1} value={activeTab}>
@@ -78,9 +74,6 @@ const ProductMasterWindow = ({
                 <ProductDispersalTab productDispersalGridData={productDispersalGridData} maxAccess={maxAccess} />
             </CustomTabPanel>
             <CustomTabPanel index={4} value={activeTab}>
-                <ProductSchedulesTab productSchedulesGridData={productSchedulesGridData} dispersalStore={dispersalStore} maxAccess={maxAccess} />
-            </CustomTabPanel> 
-            <CustomTabPanel index={5} value={activeTab}>
                 <ProductLegTab
                     productLegValidation={productLegValidation}
                     productLegWindowOpen={productLegWindowOpen}
@@ -94,10 +87,10 @@ const ProductMasterWindow = ({
                     maxAccess={maxAccess} 
                 />
             </CustomTabPanel>
-            <CustomTabPanel index={6} value={activeTab}>
+            <CustomTabPanel index={5} value={activeTab}>
                 <ProductFieldTab productFieldGridData={productFieldGridData} dispersalStore={dispersalStore} maxAccess={maxAccess} />
             </CustomTabPanel>
-            <CustomTabPanel index={7} value={activeTab}>
+            <CustomTabPanel index={6} value={activeTab}>
                 <ProductAgentTab productAgentGridData={productAgentGridData} dispersalStore={dispersalStore} maxAccess={maxAccess} />
             </CustomTabPanel>
         </Window>

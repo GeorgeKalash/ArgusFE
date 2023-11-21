@@ -17,16 +17,16 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomInlineDataGrid from 'src/components/Shared/InlineDataGrid'
 import { transformRowsForEditableGrid } from 'src/components/helpers/inlineEditGridHelper'
 
-const CorrespondentCountriesTab = ({
-  countryStore,
-  inlineCountriesGridDataRows,
-  setInlineCountriesGridDataRows,
-  inlineCountriesDataErrorState,
-  setInlineCountriesDataErrorState,
-  newCountriesLineOnTab,
-  setNewCountriesLineOnTab,
-  editCountriesRowsModel,
-  setEditCountriesRowsModel,
+const CorrespondentCurrenciesTab = ({
+  currencyStore,
+  inlineCurrenciesGridDataRows,
+  setInlineCurrenciesGridDataRows,
+  inlineCurrenciesDataErrorState,
+  setInlineCurrenciesDataErrorState,
+  newCurrenciesLineOnTab,
+  setNewCurrenciesLineOnTab,
+  editCurrenciesRowsModel,
+  setEditCurrenciesRowsModel,
   maxAccess
 }) => {
   
@@ -91,9 +91,9 @@ const CorrespondentCountriesTab = ({
   function renderEditCountryRef(params) {
     const { error } = params
     if (error) {
-      setNewCountriesLineOnTab(false)
+      setNewCurrenciesLineOnTab(false)
     } else {
-      setNewCountriesLineOnTab(true)
+      setNewCurrenciesLineOnTab(true)
     }
 
     return (
@@ -127,12 +127,12 @@ const CorrespondentCountriesTab = ({
             </Box> */}
             <Box sx={{ width: '100%', height: '100%' }}>
               <CustomInlineDataGrid
-                dataRows={transformRowsForEditableGrid(inlineCountriesGridDataRows)}
-                setDataRows={setInlineCountriesGridDataRows}
+                dataRows={transformRowsForEditableGrid(inlineCurrenciesGridDataRows)}
+                setDataRows={setInlineCurrenciesGridDataRows}
                 newLineOnTab={true}
-                newLineField='countryName'
-                requiredFields={['countryRef']}
-                editRowsModel={editCountriesRowsModel}
+                newLineField='currencyName'
+                requiredFields={['currencyRef']}
+                editRowsModel={editCurrenciesRowsModel}
                 columns={[
                   {
                     field: 'recordId',
@@ -146,13 +146,13 @@ const CorrespondentCountriesTab = ({
                     }
                   },
                   {
-                    field: 'countryRef',
-                    headerName: 'country Ref',
-                    description: 'the country reference',
+                    field: 'currencyRef',
+                    headerName: 'currency Ref',
+                    description: 'the currency reference',
                     flex: 1,
                     editable: true,
                     type: 'singleSelect',
-                    valueOptions: countryStore.list,
+                    valueOptions: currencyStore.list,
                     getOptionValue: value => {
                       value.reference
                     },
@@ -162,10 +162,10 @@ const CorrespondentCountriesTab = ({
                       return value
                     },
                     valueSetter: params => {
-                      let countryName = countryStore.list.find(entry => entry.reference === params.value)?.name || ''
-                      let countryId = countryStore.list.find(entry => entry.reference === params.value)?.recordId || ''
+                      let currencyName = currencyStore.list.find(entry => entry.reference === params.value)?.name || ''
+                      let currencyId = currencyStore.list.find(entry => entry.reference === params.value)?.recordId || ''
 
-                      return { ...params.row, countryId, countryRef: params.value, countryName }
+                      return { ...params.row, currencyId, currencyRef: params.value, currencyName }
                     },
 
                     // renderEditCell:(params) => (
@@ -177,13 +177,13 @@ const CorrespondentCountriesTab = ({
                     preProcessEditCellProps: preProcessCountryRefProps
                   },
                   {
-                    field: 'countryName',
-                    headerName: 'country Name',
+                    field: 'currencyName',
+                    headerName: 'currency Name',
                     flex: 1,
                     type: 'string',
                     editable: false,
                     preProcessEditCellProps: params => {
-                      if (params.otherFieldsProps.countryRef.error) {
+                      if (params.otherFieldsProps.currencyRef.error) {
                         return { ...params.props, error: true }
                       }
                     }
@@ -198,4 +198,4 @@ const CorrespondentCountriesTab = ({
   )
 }
 
-export default CorrespondentCountriesTab
+export default CorrespondentCurrenciesTab
