@@ -42,6 +42,7 @@ export default function CustomInlineDataGrid({
 
             apiRef.current.startRowEditMode({ id: newId, fieldToFocus: 'countryRef' })
           }
+
           return
         } else if (params.field === newLineField && (event.key === 'Tab' || event.keyCode === 13)) {
           {
@@ -65,6 +66,7 @@ export default function CustomInlineDataGrid({
     // const updatedRow = getUpdatedRowFunction(newRow)
     setRows(rows.map(row => (row.id === newRow.id ? newRow : row)))
     setDataRows(rows.map(row => (row.id === newRow.id ? newRow : row)))
+
     return newRow
   }
 
@@ -84,6 +86,7 @@ export default function CustomInlineDataGrid({
         disableColumnMenu={hideColumnMenu ? hideColumnMenu : false}
         editRowsModel={editRowsModel}
         processRowUpdate={processRowUpdate}
+        
         // rows={dataRows}
         rows={rows}
         onProcessRowUpdateError={(error) => {
