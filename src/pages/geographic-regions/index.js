@@ -116,7 +116,6 @@ const GeographicRegions = () => {
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
-        console.log({ error })
         setErrorMessage(error)
       })
   }
@@ -164,7 +163,7 @@ const GeographicRegions = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
+    getGridData({ _startAt: 0, _pageSize: 50 })
     getLabels()
   })
 
