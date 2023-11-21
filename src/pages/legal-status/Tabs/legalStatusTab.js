@@ -19,6 +19,7 @@ const LegalStatusTab = ({ legalStatusValidation, _labels }) => {
                   onClear={() => legalStatusValidation.setFieldValue('reference', '')}
                   error={legalStatusValidation.touched.reference && Boolean(legalStatusValidation.errors.reference)}
                   helperText={legalStatusValidation.touched.reference && legalStatusValidation.errors.reference}
+                  maxLength='70'
                 />
               </Grid>
               <Grid item xs={12}>
@@ -31,6 +32,7 @@ const LegalStatusTab = ({ legalStatusValidation, _labels }) => {
                   onClear={() => legalStatusValidation.setFieldValue('name', '')}
                   error={legalStatusValidation.touched.name && Boolean(legalStatusValidation.errors.name)}
                   helperText={legalStatusValidation.touched.name && legalStatusValidation.errors.name}
+                  maxLength='70'
                 />
               </Grid>
             </Grid>

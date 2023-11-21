@@ -45,6 +45,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         onClear={() => countryValidation.setFieldValue('flName', '')}
                         error={countryValidation.touched.flName && Boolean(countryValidation.errors.flName)}
                         helperText={countryValidation.touched.flName && countryValidation.errors.flName}
+                        maxLength='30'
                     />
                 </Grid>
                 <Grid item xs={12}>

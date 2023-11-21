@@ -39,14 +39,13 @@ const Countries = () => {
 
   //stores
   const [gridData, setGridData] = useState([])
+  const [currencyStore, setCurrencyStore] = useState([])
+  const [regionStore, setRegionStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false) 
   const [errorMessage, setErrorMessage] = useState(null)
-  const [activeTab, setActiveTab] = useState(0)
-  const [currencyStore, setCurrencyStore] = useState([])
-  const [regionStore, setRegionStore] = useState([])
 
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
@@ -95,8 +94,6 @@ const Countries = () => {
     }
   ]
 
-  const tabs = []
-
   const countryValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
@@ -118,7 +115,7 @@ const Countries = () => {
   })
 
   const handleSubmit = () => {
-    if (activeTab === 0) countryValidation.handleSubmit()
+    countryValidation.handleSubmit()
   }
 
   const getGridData = () => {
@@ -169,7 +166,7 @@ const Countries = () => {
   }
 
   const addCountry = () => {
-    countryValidation.setValues(getNewCountry())
+    countryValidation.setValues(getNewCountry)
     fillCurrencyStore()
     fillRegionStore({})
     setEditMode(false)
@@ -262,9 +259,6 @@ const Countries = () => {
        currencyStore={currencyStore}
        regionStore={regionStore}
        _labels ={_labels}
-       tabs={tabs}
-       activeTab={activeTab}
-       setActiveTab={setActiveTab}
        maxAccess={access}
        />
        )}

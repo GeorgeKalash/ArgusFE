@@ -9,9 +9,6 @@ import LegalStatusTab from 'src/pages/legal-status/Tabs/legalStatusTab'
 const LegalStatusWindow = ({
     onClose,
     onSave,
-    tabs,
-    activeTab,
-    setActiveTab,
     legalStatusValidation,
     width,
     height,
@@ -19,8 +16,8 @@ const LegalStatusWindow = ({
 }) => {
     return (
       <Window id='LegalStatusWindow' Title={_labels.legalStatus} onClose={onClose} width={width} height={height} 
-      onSave={onSave} tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}>
-         <CustomTabPanel index={0} value={activeTab}>
+      onSave={onSave} legalStatusValidation={legalStatusValidation}>
+         <CustomTabPanel>
              <LegalStatusTab
                  legalStatusValidation={legalStatusValidation}
                  _labels={_labels}

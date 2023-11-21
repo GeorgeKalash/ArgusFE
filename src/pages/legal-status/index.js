@@ -41,7 +41,6 @@ const LegalStatus = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [activeTab, setActiveTab] = useState(0)
 
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
@@ -63,7 +62,6 @@ const LegalStatus = () => {
     }
   ]
 
-  const tabs = []
 
   const legalStatusValidation = useFormik({
     enableReinitialize: false,
@@ -79,7 +77,7 @@ const LegalStatus = () => {
   })
 
   const handleSubmit = () => {
-    if (activeTab === 0) legalStatusValidation.handleSubmit()
+    legalStatusValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -187,9 +185,6 @@ const LegalStatus = () => {
           onSave={handleSubmit}
           legalStatusValidation={legalStatusValidation}
           _labels={_labels}
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
