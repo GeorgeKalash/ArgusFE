@@ -9,5 +9,8 @@ export const ResourceIds = {
   CommissionType: 35102,
   Interface: 36108,
   Countries: 20101,
-  LegalStatus: 21108
+  LegalStatus: 21108,
+  Correspondent: 36101,
+  RelationType: 35101,
+  Profession: 35105
 }

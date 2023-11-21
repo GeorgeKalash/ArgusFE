@@ -54,6 +54,7 @@ const DocumentTypes = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
+
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -67,6 +68,7 @@ const DocumentTypes = () => {
     nuRange: labels && labels.find(item => item.key === 6).value,
     documentType: labels && labels.find(item => item.key === 7).value
   }
+
 
   const columns = [
     {
@@ -116,6 +118,8 @@ const DocumentTypes = () => {
     }
   ]
 
+
+
   const tabs = [{ label: _labels.documentType }, { label: 'Tab Two' }]
 
   const documentTypesValidation = useFormik({
@@ -155,12 +159,15 @@ const DocumentTypes = () => {
       parameters: parameters
     })
       .then(res => {
+        console.log(res)
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
+
+
 
   const fillIntegrationLogicStore = () => {
     var parameters = ''
@@ -251,6 +258,8 @@ const DocumentTypes = () => {
       })
   }
 
+
+
   const addDocumentType = () => {
     documentTypesValidation.resetForm()
     documentTypesValidation.setValues(getNewDocumentTypes())
@@ -273,6 +282,7 @@ const DocumentTypes = () => {
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
+
         fillSysFunctionsStore()
         fillActiveStatusStore()
         getLabels(ResourceIds.DocumentTypes, setLabels)
@@ -291,7 +301,7 @@ const DocumentTypes = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addDocumentType} maxAccess={access} />
+        <GridToolbar onAdd={addDocumentType}  maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -448,6 +458,7 @@ const DocumentTypes = () => {
           </CustomTabPanel> */}
         </Window>
       )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
