@@ -6,5 +6,7 @@ export const ResourceIds = {
   Currencies: 20106,
   GroupLegalDocument: 21109,
   ProductMaster: 36103,
-  CommissionType: 35102
+  CommissionType: 35102,
+  RelationType: 35101,
+  Profession: 35105
 }
