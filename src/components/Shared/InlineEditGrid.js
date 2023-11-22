@@ -1,193 +1,108 @@
-import React, { useState } from 'react'
-import TextField from '@mui/material/TextField'
-import Grid from '@mui/material/Grid'
-import Box from '@mui/material/Box'
-import Checkbox from '@mui/material/Checkbox'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import IconButton from '@mui/material/IconButton'
-import DeleteIcon from '@mui/icons-material/Delete'
-import { Autocomplete, InputAdornment } from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import { DataTable } from 'primereact/datatable'
+import { Column } from 'primereact/column'
+import { InputText } from 'primereact/inputtext'
+import { InputNumber } from 'primereact/inputnumber'
+import { Box } from '@mui/material'
 
-const InlineEditGrid = ({
-  columns
-}) => {
-  const [data, setData] = useState([{ rowId: 0, columns }])
+const InlineEditGrid = () => {
+  const [products, setProducts] = useState([
+    {
+      id: '1000',
+      code: 'f230fh0g3',
+      name: 'Bamboo Watch',
+      description: 'Product Description',
+      image: 'bamboo-watch.jpg',
+      price: 65,
+      category: 'Accessories',
+      quantity: 24,
+      inventoryStatus: 'INSTOCK',
+      rating: 5
+    }
+  ])
 
-  const dispersalTypeStore = [
-    { key: 1, value: 'bank' },
-    { key: 2, value: 'cash' },
-    { key: 3, value: 'wallet' },
-    { key: 4, value: 'delivery' },
+  const columns = [
+    { field: 'code', header: 'Code' },
+    { field: 'name', header: 'Name' },
+    { field: 'quantity', header: 'Quantity' },
+    { field: 'price', header: 'Price' }
   ]
 
-  const handleCellEdit = (rowIndex, columnIndex, value) => {
-    const updatedData = [...data]
-    updatedData[rowIndex].columns[columnIndex].value = value
-    setData(updatedData)
+  const isPositiveInteger = val => {
+    let str = String(val)
+
+    str = str.trim()
+
+    if (!str) {
+      return false
+    }
+
+    str = str.replace(/^0+/, '') || '0'
+    let n = Math.floor(Number(str))
+
+    return n !== Infinity && String(n) === str && n >= 0
   }
 
-  const handleTabKey = (event, rowIndex, columnIndex) => {
-    const rowLength = data[rowIndex].columns.length - 1
+  const onCellEditComplete = e => {
+    let { rowData, newValue, field, originalEvent: event } = e
 
-    if (columnIndex === rowLength) {
-      setData([...data, { rowId: data.length + 1, columns }])
-      setTimeout(() => {
-        document.getElementById(`cell-${rowIndex + 1}-0`).focus()
-      }, 0)
-    } else {
-      const nextRowIndex = columnIndex + 1
-      document.getElementById(`cell-${rowIndex}-${nextRowIndex}`).focus()
+    switch (field) {
+      case 'quantity':
+      case 'price':
+        if (isPositiveInteger(newValue)) rowData[field] = newValue
+        else event.preventDefault()
+        break
+
+      default:
+        if (newValue.trim().length > 0) rowData[field] = newValue
+        else event.preventDefault()
+        break
     }
   }
 
-  const handleDeleteRow = (rowIndex) => {
-    if (data.length === 1) {
-      setData([{ rowId: 0, columns }])
-    }
-    else {
-      const updatedData = [...data]
-      updatedData.splice(rowIndex, 1)
-      setData(updatedData)
-    }
+  const cellEditor = options => {
+    if (options.field === 'price') return priceEditor(options)
+    else return textEditor(options)
   }
 
-  const handleSubmit = () => { //NOT READY
-    const dataWithoutRowId = data.map(({ rowId, ...rest }) => rest)
+  const textEditor = options => {
+    return <InputText type='text' value={options.value} onChange={e => options.editorCallback(e.target.value)} />
   }
+
+  const priceEditor = options => {
+    return (
+      <InputNumber
+        value={options.value}
+        onValueChange={e => options.editorCallback(e.value)}
+        mode='currency'
+        currency='USD'
+        locale='en-US'
+      />
+    )
+  }
+
+  const priceBodyTemplate = rowData => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(rowData.price)
+  }
+  console.log({ products })
 
   return (
-    <Box sx={{ p: 4 }}>
-      {data.map((row, rowIndex) => {
-
-        return (
-          <Grid container item key={row.rowId}>
-            <Box display={'flex'}>
-              <Grid container item>
-                {row.columns.map((column, columnIndex) => {
-                  switch (column.key) {
-                    case 0:
-                      return (
-                        <TextField
-                          name={column.name}
-                          label={rowIndex === 0 ? column.header : ''}
-                          placeholder={rowIndex != 0 ? column.header : ''}
-                          size='small'
-                          autoComplete = 'off'
-                          id={`cell-${rowIndex}-${columnIndex}`}
-                          value={column.value}
-                          onChange={(e) => handleCellEdit(rowIndex, columnIndex, e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Tab') {
-                              e.preventDefault()
-                              handleTabKey(e, rowIndex, columnIndex)
-                            }
-                          }}
-                          sx={{
-                            minWidth: 120,
-                            maxWidth: 150,
-                            borderRadius: 0,
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: 0,
-                            },
-                          }}
-                        />
-                      )
-
-                    case 1:
-                      return (
-                        <Autocomplete
-                          id={`cell-${rowIndex}-${columnIndex}`}
-                          options={dispersalTypeStore}
-                          getOptionLabel={(option) => option.value}
-                          value={dispersalTypeStore.find((item) => item.key === column.value)}
-                          onChange={(event, newValue) => handleCellEdit(rowIndex, columnIndex, newValue?.key)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Tab') {
-                              e.preventDefault();
-                              handleTabKey(e, rowIndex, columnIndex);
-                            }
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              name={column.name}
-                              label={rowIndex === 0 ? column.header : ''}
-                              size='small'
-                              placeholder={rowIndex !== 0 ? column.header : ''}
-                              sx={{
-                                minWidth: 140,
-                                maxWidth: 170,
-                                borderRadius: 0,
-                                '& .MuiOutlinedInput-root': {
-                                  borderRadius: 0,
-                                },
-                              }}
-                            />
-                          )}
-                        />
-                      )
-
-                    case 2:
-                      return (
-                        <TextField
-                          fullWidth
-                          value={column.header}
-                          size='small'
-                          id={`cell-${rowIndex}-${columnIndex}`}
-                          onChange={(e) => handleCellEdit(rowIndex, columnIndex, e.target.value)}
-                          sx={{
-                            minWidth: 120,
-                            maxWidth: 170,
-                            borderRadius: 0,
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: 0,
-                            },
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Tab') {
-                              e.preventDefault()
-                              handleTabKey(e, rowIndex, columnIndex)
-                            }
-                          }}
-                          inputProps={{
-                            readOnly: true,
-                          }}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <FormControlLabel
-                                  control={
-                                    <Checkbox
-                                      name={column.name}
-                                      checked={column.value}
-                                      onChange={(e) => handleCellEdit(rowIndex, columnIndex, e.target.checked)}
-                                    />
-                                  }
-                                />
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      )
-
-                    default:
-                      return null
-                  }
-                })}
-              </Grid>
-              <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <IconButton
-                  onClick={() => handleDeleteRow(rowIndex)}
-                  size="small"
-                  color="error"
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </Box>
-          </Grid>
-        )
-      })}
+    <Box>
+      <DataTable value={products} editMode='cell' tableStyle={{ minWidth: '50rem' }}>
+        {columns.map(({ field, header }) => {
+          return (
+            <Column
+              key={field}
+              field={field}
+              header={header}
+              style={{ width: '25%' }}
+              body={field === 'price' && priceBodyTemplate}
+              editor={options => cellEditor(options)}
+              onCellEditComplete={onCellEditComplete}
+            />
+          )
+        })}
+      </DataTable>
     </Box>
   )
 }

@@ -35,9 +35,9 @@ import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/Do
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const DocumentTypes = () => {
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
@@ -133,7 +133,10 @@ const DocumentTypes = () => {
       name: yup.string().required('This field is required'),
       dgName: yup.string().required('This field is required'),
       activeStatusName: yup.string().required('This field is required'),
-      ilId: access && access.record?.controls?.find(item => item.controlId === "ilId")?.accessLevel == 2 ? yup.string() : yup.string().required('This field is required')
+      ilId:
+        access && access.record?.controls?.find(item => item.controlId === 'ilId')?.accessLevel == 2
+          ? yup.string()
+          : yup.string().required('This field is required')
     }),
     onSubmit: values => {
       // values.reference = getNumberWithoutCommas(values.reference)
@@ -268,8 +271,7 @@ const DocumentTypes = () => {
   }
 
   useEffect(() => {
-    if (!access)
-      getAccess(ResourceIds.DocumentTypes, setAccess)
+    if (!access) getAccess(ResourceIds.DocumentTypes, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
@@ -311,7 +313,7 @@ const DocumentTypes = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          width={600}
+          width={900}
           height={400}
           onSave={handleSubmit}
           maxAccess={access}
@@ -441,11 +443,11 @@ const DocumentTypes = () => {
               </Grid>
             </Grid>
           </CustomTabPanel>
-          {/* <CustomTabPanel index={1} value={activeTab}>
-            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
+          <CustomTabPanel index={1} value={activeTab}>
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
               <InlineEditGrid />
             </Box>
-          </CustomTabPanel> */}
+          </CustomTabPanel>
         </Window>
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
