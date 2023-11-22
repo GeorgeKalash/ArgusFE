@@ -1,104 +1,97 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import { InputText } from 'primereact/inputtext'
-import { InputNumber } from 'primereact/inputnumber'
 import { Box } from '@mui/material'
+import CustomTextField from '../Inputs/CustomTextField'
+
+// ** Third Party Imports
+import { useFormik } from 'formik'
+import * as yup from 'yup'
+import CustomComboBox from '../Inputs/CustomComboBox'
 
 const InlineEditGrid = () => {
-  const [products, setProducts] = useState([
-    {
-      id: '1000',
-      code: 'f230fh0g3',
-      name: 'Bamboo Watch',
-      description: 'Product Description',
-      image: 'bamboo-watch.jpg',
-      price: 65,
-      category: 'Accessories',
-      quantity: 24,
-      inventoryStatus: 'INSTOCK',
-      rating: 5
-    }
-  ])
-
   const columns = [
-    { field: 'code', header: 'Code' },
-    { field: 'name', header: 'Name' },
-    { field: 'quantity', header: 'Quantity' },
-    { field: 'price', header: 'Price' }
+    { field: 'textfield', header: 'Country Ref', name: 'countryRef', mandatory: true },
+    { field: 'textfield', header: 'Country Name', name: 'countryName' },
+    { field: 'combobox', header: 'State', name: 'state' }
   ]
 
-  const isPositiveInteger = val => {
-    let str = String(val)
+  const comboStore = [
+    { recordId: 0, name: 'zero' },
+    { recordId: 1, name: 'one' },
+    { recordId: 2, name: 'two' }
+  ]
 
-    str = str.trim()
-
-    if (!str) {
-      return false
-    }
-
-    str = str.replace(/^0+/, '') || '0'
-    let n = Math.floor(Number(str))
-
-    return n !== Infinity && String(n) === str && n >= 0
-  }
-
-  const onCellEditComplete = e => {
-    let { rowData, newValue, field, originalEvent: event } = e
-
+  const cellEditor = (field, row, rowKey) => {
+    if (!row.rowData) return
+    const fieldName = row.field
     switch (field) {
-      case 'quantity':
-      case 'price':
-        if (isPositiveInteger(newValue)) rowData[field] = newValue
-        else event.preventDefault()
-        break
+      case 'textfield':
+        return (
+          <CustomTextField
+            name={fieldName}
+            value={gridValidation.values.rows[rowKey][fieldName]}
+            onChange={event => {
+              const newValue = event.target.value
+              gridValidation.setFieldValue(`rows[${rowKey}].${fieldName}`, newValue)
+            }}
+            onClear={() => {
+              const updatedRows = [...gridValidation.values.rows]
+              updatedRows[rowKey][fieldName] = ''
+              gridValidation.setFieldValue('rows', updatedRows)
+            }}
+          />
+        )
+      case 'combobox':
+        return (
+          <CustomComboBox
+            name={fieldName}
+            store={comboStore}
+            valueField='recordId'
+            displayField='name'
+            getOptionBy={gridValidation.values.rows[rowKey][fieldName]}
+            value={comboStore.filter(item => item.recordId === gridValidation.values.rows[rowKey][fieldName])[0]}
+            onChange={(event, newValue) => {
+              gridValidation.setFieldValue(`rows[${rowKey}].${fieldName}`, newValue)
+            }}
+          />
+        )
 
       default:
-        if (newValue.trim().length > 0) rowData[field] = newValue
-        else event.preventDefault()
-        break
+        return
     }
   }
 
-  const cellEditor = options => {
-    if (options.field === 'price') return priceEditor(options)
-    else return textEditor(options)
-  }
-
-  const textEditor = options => {
-    return <InputText type='text' value={options.value} onChange={e => options.editorCallback(e.target.value)} />
-  }
-
-  const priceEditor = options => {
-    return (
-      <InputNumber
-        value={options.value}
-        onValueChange={e => options.editorCallback(e.value)}
-        mode='currency'
-        currency='USD'
-        locale='en-US'
-      />
-    )
-  }
-
-  const priceBodyTemplate = rowData => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(rowData.price)
-  }
-  console.log({ products })
+  const gridValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [
+        {
+          countryRef: 'USA',
+          countryName: 'United States',
+          state: 1
+        }
+      ]
+    },
+    validationSchema: yup.object({}),
+    onSubmit: values => {
+      console.log({ SUBMIT: values })
+    }
+  })
 
   return (
     <Box>
-      <DataTable value={products} editMode='cell' tableStyle={{ minWidth: '600px' }}>
-        {columns.map(({ field, header }) => {
+      <DataTable value={gridValidation.values.rows} editMode='cell' tableStyle={{ minWidth: '600px' }}>
+        {columns.map((column, i) => {
           return (
             <Column
-              key={field}
-              field={field}
-              header={header}
+              key={column.field}
+              field={column.name}
+              header={column.header}
               style={{ width: '25%' }}
-              body={field === 'price' && priceBodyTemplate}
-              editor={options => cellEditor(options)}
-              onCellEditComplete={onCellEditComplete}
+              editor={options => cellEditor(column.field, options, 0)} //replace 0
+              // onCellEditComplete={e => console.log({ EVENT: e })}
             />
           )
         })}
