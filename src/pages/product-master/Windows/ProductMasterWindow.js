@@ -27,6 +27,7 @@ const ProductMasterWindow = ({
     commissionBaseStore,
     languageStore,
     productCountriesGridData,
+    setProductCountriesGridData,
     productCurrenciesGridData,
     productDispersalGridData,
     productLegWindowOpen,

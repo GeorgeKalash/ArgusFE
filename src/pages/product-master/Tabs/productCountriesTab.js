@@ -10,12 +10,12 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomInlineDataGrid from 'src/components/Shared/InlineDataGrid'
 import { transformRowsForEditableGrid } from 'src/components/helpers/inlineEditGridHelper'
 
-const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
+const ProductCountriesTab = ({ productCountriesGridData,setProductCountriesGridData, maxAccess }) => {
 
-  const [inlineGridDataRows, setInlineGridDataRows] = useState([])
+  const [inlineGridDataRows, setInlineGridDataRows] = useState(productCountriesGridData.list)
   const [newLineOnTab, setNewLineOnTab] = useState(true)
   const [inlineDataErrorState, setInlineDataErrorState] = useState([])
-  console.log(inlineGridDataRows, ' grid data ')
+
   const [editRowsModel, setEditRowsModel] = useState({})
 
   function CustomEditSelect(customEditSelectProps) {
@@ -40,7 +40,7 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
         openOnFocus
         autoFocus
         options={colDef.valueOptions || []}
-        getOptionLabel={(option) => option.countryRef}
+        getOptionLabel={(option) => option.ref}
         onSelect={(e) => handleValueChanged(e)}
         onChange={(e) => handleValueChanged(e)}
         disableClearable={false}
@@ -50,8 +50,8 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
           )
         }}
         renderOption={(optionProps, option) => (
-          <MenuItem value={option.countryRef} {...optionProps} sx={{ '& > img': { mr: 2, flexShrink: 0 } }}>
-            {option.countryRef}-{option.countryName}
+          <MenuItem value={option.ref} {...optionProps} sx={{ '& > img': { mr: 2, flexShrink: 0 } }}>
+            {option.ref}-{option.name}
           </MenuItem>
         )}
         sx={{
@@ -94,6 +94,21 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
   }
 
 
+  const countriesList = [
+    { recordId: 1, ref: 'USA', name: 'United States' },
+    { recordId: 2, ref: 'LB', name: 'Lebanon' },
+    { recordId: 3, ref: 'EGY', name: 'Egypt' },
+    { recordId: 4, ref: 'JP', name: 'Japan' },
+    { recordId: 5, ref: 'FR', name: 'France' },
+    { recordId: 6, ref: 'IND', name: 'India' },
+    { recordId: 7, ref: 'UAE', name: 'United Arab Emirates' },
+  ]
+
+  useEffect(()=>{
+    setProductCountriesGridData(inlineGridDataRows)
+  },[inlineGridDataRows])
+
+
   return (
     <>
       <Box
@@ -118,7 +133,6 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
             </Box> */}
             <Box sx={{ width: '100%', height: '100%' }}>
               <CustomInlineDataGrid
-                // dataRows={productCountriesGridData.list}
                 dataRows={transformRowsForEditableGrid(inlineGridDataRows)}
                 setDataRows={setInlineGridDataRows}
                 // newLineOnTab={newLineOnTab}
@@ -144,22 +158,17 @@ const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
                     flex: 1,
                     editable: true,
                     type: 'singleSelect',
-                    valueOptions: productCountriesGridData.list,
-                    getOptionValue: value => value.countryRef,
-                    getOptionLabel: value => value.countryRef + '-' + value.countryName,
+                    valueOptions: countriesList,
+                    getOptionValue: value => value.ref,
+                    getOptionLabel: value => value.ref + '-' + value.name,
                     valueFormatter: params => {
                       const { id, value, field } = params
                       return value
                     },
                     valueSetter: params => {
-                      let countryName = productCountriesGridData.list.find(entry => entry.countryRef === params.value)?.countryName || ''
+                      let countryName = countriesList.find(entry => entry.ref === params.value)?.name || ''
                       return { ...params.row, countryRef: params.value, countryName }
                     },
-                    // renderEditCell:(params) => (
-                    //   <StyledTooltip open={!!error} title={error}>
-                    //   <CustomEditSelect {...params} />
-                    //   </StyledTooltip>
-                    // ),
                     renderEditCell: renderEditCountryRef,
                     preProcessEditCellProps: preProcessCountryRefProps
                   },

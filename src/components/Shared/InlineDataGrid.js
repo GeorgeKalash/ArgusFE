@@ -30,7 +30,6 @@ export default function CustomInlineDataGrid({
 
   useEffect(() => {
     const handleCellKeyDownEvent = (params, event, details) => {
-      console.log(newLineOnTab, 'newLineOnTab')
       if (newLineOnTab) {
         if ((rowCount - 1) == params.id && (event.key === 'Tab' || event.keyCode === 13)) {
           if (params.field === newLineField) {
@@ -52,7 +51,7 @@ export default function CustomInlineDataGrid({
           }
         }
       } else {
-        console.log('not new line')
+        //not new line
       }
 
       return

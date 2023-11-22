@@ -642,6 +642,7 @@ const ProductMaster = () => {
           commissionBaseStore={commissionBaseStore}
           languageStore={languageStore}
           productCountriesGridData={productCountriesGridData}
+          setProductCountriesGridData={setProductCountriesGridData}
           productCurrenciesGridData={productCurrenciesGridData}
           productDispersalGridData={productDispersalGridData}
           productLegWindowOpen={productLegWindowOpen}
