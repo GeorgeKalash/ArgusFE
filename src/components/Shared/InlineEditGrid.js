@@ -88,7 +88,7 @@ const InlineEditGrid = () => {
 
   return (
     <Box>
-      <DataTable value={products} editMode='cell' tableStyle={{ minWidth: '50rem' }}>
+      <DataTable value={products} editMode='cell' tableStyle={{ minWidth: '600px' }}>
         {columns.map(({ field, header }) => {
           return (
             <Column
