@@ -89,10 +89,25 @@ const InlineEditGrid = props => {
     const { key } = e
 
     if (key === 'Tab' && field === columns[columns.length - 1].field) {
-      if (rowIndex === gridValidation.values.rows.length - 1) {
+      console.log({ lastRowIsValid: lastRowIsValid() })
+      if (rowIndex === gridValidation.values.rows.length - 1 && lastRowIsValid()) {
         gridValidation.setFieldValue('rows', [...gridValidation.values.rows, defaultRow])
       }
     }
+  }
+
+  const lastRowIsValid = () => {
+    const lastRow = gridValidation.values.rows[gridValidation.values.rows.length - 1]
+
+    for (let i = 0; i < columns.length; i++) {
+      const columnName = columns[i].name
+
+      if (columns[i]?.mandatory && !lastRow[columnName]) {
+        return false
+      }
+    }
+
+    return true
   }
 
   const handleDelete = rowIndex => {
