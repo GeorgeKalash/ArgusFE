@@ -60,7 +60,7 @@ const InterfaceTab=({
               label={labels.description}
               value={interfaceValidation.values.description}
               required
-              maxLength = '100'
+              maxLength = '200'
               maxAccess={maxAccess}
               onChange={interfaceValidation.handleChange}
               onClear={() => interfaceValidation.setFieldValue('description', '')}

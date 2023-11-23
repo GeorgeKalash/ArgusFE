@@ -94,6 +94,7 @@ const GroupLegalDocument = () => {
       mandatory: yup.string().required('This field is required')
     }),
     onSubmit: values => {
+      console.log(values)
       postGroupLegalDocument(values)
     }
   })
