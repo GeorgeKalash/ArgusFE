@@ -147,6 +147,7 @@ const DocumentTypes = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) documentTypesValidation.handleSubmit()
+    if (activeTab === 1) gridValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
@@ -283,6 +284,32 @@ const DocumentTypes = () => {
       }
     }
   }, [access])
+
+  const gridValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [
+        {
+          name: 'test 1',
+          countryRef: 'USA',
+          countryName: 'United States',
+          stateId: 1,
+          stateName: 'State 1'
+        },
+        {
+          name: 'test 2',
+          countryRef: 'USA -2',
+          countryName: 'United States -2',
+          stateId: 2,
+          stateName: 'State 2'
+        }
+      ]
+    },
+    onSubmit: values => {
+      console.log({ SUBMIT: values })
+    }
+  })
 
   const mockUpStore = [
     { recordId: 0, name: 'State 0' },
@@ -494,6 +521,7 @@ const DocumentTypes = () => {
           <CustomTabPanel index={1} value={activeTab}>
             <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
               <InlineEditGrid
+                gridValidation={gridValidation}
                 columns={inlineGridColumns}
                 defaultRow={{
                   name: '',
@@ -502,22 +530,6 @@ const DocumentTypes = () => {
                   stateId: 1,
                   stateName: 'State 1'
                 }}
-                initialData={[
-                  {
-                    name: 'test 1',
-                    countryRef: 'USA',
-                    countryName: 'United States',
-                    stateId: 1,
-                    stateName: 'State 1'
-                  },
-                  {
-                    name: 'test 2',
-                    countryRef: 'USA -2',
-                    countryName: 'United States -2',
-                    stateId: 2,
-                    stateName: 'State 2'
-                  }
-                ]}
               />
             </Box>
           </CustomTabPanel>

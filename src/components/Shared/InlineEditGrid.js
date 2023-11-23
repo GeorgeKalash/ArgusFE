@@ -16,7 +16,7 @@ const InlineEditGrid = props => {
 
   const columns = props.columns
   const defaultRow = props.defaultRow
-  const initialData = props.initialData && props.initialData.length > 0 ? props.initialData : [defaultRow]
+  const gridValidation = props.gridValidation
 
   const cellEditor = (field, row, rowIndex, column) => {
     if (!row.rowData) return
@@ -64,6 +64,7 @@ const InlineEditGrid = props => {
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
             }}
             onChange={(event, newValue) => {
+              event.stopPropagation()
               gridValidation.setFieldValue(
                 `rows[${rowIndex}].${column.nameId}`,
                 newValue ? newValue[column.valueField] : newValue
@@ -85,20 +86,6 @@ const InlineEditGrid = props => {
         return
     }
   }
-
-  const gridValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      rows: initialData
-    },
-    validationSchema: yup.object({}),
-    onSubmit: values => {
-      console.log({ SUBMIT: values })
-    }
-  })
-
-  console.log({ gridValidation: gridValidation.values.rows })
 
   const handleKeyDown = (e, columnIndex, rowIndex) => {
     const { key } = e
