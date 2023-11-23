@@ -144,7 +144,7 @@ const InlineEditGrid = props => {
               field={column.name}
               header={column.header}
               style={{
-                minWidth: '25%'
+                width: column.width || '30%'
               }}
               body={row => {
                 return (

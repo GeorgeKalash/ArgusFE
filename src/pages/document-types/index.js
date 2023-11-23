@@ -332,7 +332,7 @@ const DocumentTypes = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          width={600}
+          width={680}
           height={400}
           onSave={handleSubmit}
           maxAccess={access}
