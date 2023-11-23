@@ -1,60 +1,73 @@
 const getFormattedNumber = (value, decimal) => {
+  if (!value) return
 
-    if (!value)
-        return
+  // Remove non-numeric and non-decimal characters
+  const sanitizedValue = value.toString().replace(/[^0-9.]/g, '')
 
-    // Remove non-numeric and non-decimal characters
-    const sanitizedValue = value.toString().replace(/[^0-9.]/g, '')
+  // Split the value into integer and decimal parts
+  const [integerPart, decimalPart] = sanitizedValue.split('.')
 
-    // Split the value into integer and decimal parts
-    const [integerPart, decimalPart] = sanitizedValue.split('.')
+  // Format the integer part with commas
+  const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
 
-    // Format the integer part with commas
-    const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
+  let formattedDecimalPart = ''
 
-    let formattedDecimalPart = '';
-
-    // If there is a decimal part
-    // ensure it has exactly as much decimal places as required
-    if (decimalPart !== undefined) {
-        if (decimal !== undefined) {
-            formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`;
-        } else {
-            formattedDecimalPart = `.${decimalPart}`;
-        }
+  // If there is a decimal part
+  // ensure it has exactly as much decimal places as required
+  if (decimalPart !== undefined) {
+    if (decimal !== undefined) {
+      formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`
+    } else {
+      formattedDecimalPart = `.${decimalPart}`
     }
+  }
 
-    // Combine the formatted parts
-    const formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
+  // Combine the formatted parts
+  const formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
 
-    return formattedValue
+  return formattedValue
+}
+
+
+
+function getFormattedNumberMax(number, digitsBeforePoint, digitsAfterPoint) {
+  if (!number) return
+  const value = number.toString().replace(/[^0-9.]/g, '')
+  var parts = value.split('.');
+
+  var beforePoint = parts[0].slice(0, digitsBeforePoint);
+  var afterPoint = (parts[1] || '').slice(0, digitsAfterPoint);
+   beforePoint = new Intl.NumberFormat('en-US').format(beforePoint)
+
+  if(value?.indexOf(".") > -1){
+    return beforePoint + '.'+ afterPoint;
+  }else{
+    return beforePoint ;
+
+  }
 }
 
 const validateNumberField = (value, originalValue) => {
-    if (typeof originalValue === 'string') {
-        // Remove commas from the value
-        const sanitizedValue = originalValue.replace(/,/g, '');
+  if (typeof originalValue === 'string') {
+    // Remove commas from the value
+    const sanitizedValue = originalValue.replace(/,/g, '')
 
-        // Handle decimals with or without leading zero
-        if (sanitizedValue.includes('.')) {
-            return parseFloat(sanitizedValue);
-        } else {
-            return parseInt(sanitizedValue, 10);
-        }
+    // Handle decimals with or without leading zero
+    if (sanitizedValue.includes('.')) {
+      return parseFloat(sanitizedValue)
+    } else {
+      return parseInt(sanitizedValue, 10)
     }
+  }
 
-    return value;
+  return value
 }
 
-const getNumberWithoutCommas = (value) => {
-    // Remove commas from the value string
-    const sanitizedValue = value.replace(/,/g, '')
+const getNumberWithoutCommas = value => {
+  // Remove commas from the value string
+  const sanitizedValue = value.replace(/,/g, '')
 
-    return sanitizedValue
+  return sanitizedValue
 }
 
-export {
-    getFormattedNumber,
-    validateNumberField,
-    getNumberWithoutCommas
-}
+export { getFormattedNumber, validateNumberField, getNumberWithoutCommas, getFormattedNumberMax }
