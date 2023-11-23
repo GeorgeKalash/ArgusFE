@@ -46,6 +46,7 @@ const InlineEditGrid = props => {
       case 'combobox':
         return (
           <Autocomplete
+            size='small'
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
             options={column.store}
@@ -99,10 +100,10 @@ const InlineEditGrid = props => {
 
   console.log({ gridValidation: gridValidation.values.rows })
 
-  const handleKeyDown = (e, field, rowIndex) => {
+  const handleKeyDown = (e, columnIndex, rowIndex) => {
     const { key } = e
-
-    if (key === 'Tab' && field === columns[columns.length - 1].field) {
+    console.log({ columns })
+    if (key === 'Tab' && columnIndex === columns.length - 1) {
       if (rowIndex === gridValidation.values.rows.length - 1 && lastRowIsValid()) {
         gridValidation.setFieldValue('rows', [...gridValidation.values.rows, defaultRow])
       }
@@ -148,7 +149,7 @@ const InlineEditGrid = props => {
   return (
     <Box>
       <DataTable value={gridValidation?.values?.rows} editMode='cell' tableStyle={{ minWidth: '600px' }}>
-        {columns.map(column => {
+        {columns.map((column, i) => {
           return (
             <Column
               key={column.field}
@@ -173,7 +174,7 @@ const InlineEditGrid = props => {
                 )
               }}
               editor={options => (
-                <Box onKeyDown={e => handleKeyDown(e, column.field, options.rowIndex)}>
+                <Box onKeyDown={e => handleKeyDown(e, i, options.rowIndex)}>
                   {cellEditor(column.field, options, options.rowIndex, column)}
                 </Box>
               )}
