@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import { Box, IconButton } from '@mui/material'
+import { Autocomplete, Box, IconButton, TextField } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CustomTextField from '../Inputs/CustomTextField'
 
@@ -44,27 +44,34 @@ const InlineEditGrid = props => {
         )
       case 'combobox':
         return (
-          <CustomComboBox
-            id={cellId}
+          <Autocomplete
             name={fieldName}
-            store={column.store}
-            valueField={column.valueField}
-            displayField={column.displayField}
-            getOptionBy={gridValidation.values.rows[rowIndex][`${fieldName}Id`]}
-            value={gridValidation.values.rows[rowIndex][`${fieldName}Id`]}
-            required={column?.mandatory}
-            onChange={(event, newValue) => {
-              console.log('ComboBox onChange:', event, newValue)
+            value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
+            options={column.store}
+            getOptionLabel={option => {
+              if (typeof option === 'object') return option[column.displayField]
+              else {
+                const selectedOption = column.store.find(item => {
+                  return item[column.valueField] === option
+                })
 
+                return selectedOption[column.displayField]
+              }
+            }}
+            isOptionEqualToValue={(option, value) => {
+              return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
+            }}
+            onChange={(event, newValue) => {
               gridValidation.setFieldValue(
-                `rows[${rowIndex}].${fieldName}Id`,
-                newValue ? newValue[valueField] : newValue
+                `rows[${rowIndex}].${column.nameId}`,
+                newValue ? newValue[column.valueField] : newValue
               )
               gridValidation.setFieldValue(
-                `rows[${rowIndex}].${fieldName}Name`,
-                newValue ? newValue[displayField] : newValue
+                `rows[${rowIndex}].${column.name}`,
+                newValue ? newValue[column.displayField] : newValue
               )
             }}
+            renderInput={params => <TextField {...params} required={column?.mandatory} />}
           />
         )
 
@@ -89,7 +96,6 @@ const InlineEditGrid = props => {
     const { key } = e
 
     if (key === 'Tab' && field === columns[columns.length - 1].field) {
-      console.log({ lastRowIsValid: lastRowIsValid() })
       if (rowIndex === gridValidation.values.rows.length - 1 && lastRowIsValid()) {
         gridValidation.setFieldValue('rows', [...gridValidation.values.rows, defaultRow])
       }
@@ -131,8 +137,6 @@ const InlineEditGrid = props => {
     handleDelete(rowIndex)
     closeDeleteDialog()
   }
-
-  console.log({ gridValidation: gridValidation.values })
 
   return (
     <Box>

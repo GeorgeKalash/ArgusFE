@@ -285,9 +285,9 @@ const DocumentTypes = () => {
   }, [access])
 
   const comboStore = [
-    { recordId: 0, name: 'zero' },
-    { recordId: 1, name: 'one' },
-    { recordId: 2, name: 'two' }
+    { recordId: 0, name: 'State 0' },
+    { recordId: 1, name: 'State 1' },
+    { recordId: 2, name: 'State 2' }
   ]
 
   const inlineGridColumns = [
@@ -296,7 +296,8 @@ const DocumentTypes = () => {
     {
       field: 'combobox',
       header: 'State',
-      name: 'state',
+      nameId: 'stateId',
+      name: 'stateName',
       store: comboStore,
       valueField: 'recordId',
       displayField: 'name'
@@ -486,8 +487,6 @@ const DocumentTypes = () => {
                     stateName: 'State 2'
                   }
                 ]}
-
-                // initialData={[]}
               />
             </Box>
           </CustomTabPanel>
