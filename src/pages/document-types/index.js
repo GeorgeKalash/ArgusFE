@@ -284,6 +284,25 @@ const DocumentTypes = () => {
     }
   }, [access])
 
+  const comboStore = [
+    { recordId: 0, name: 'zero' },
+    { recordId: 1, name: 'one' },
+    { recordId: 2, name: 'two' }
+  ]
+
+  const inlineGridColumns = [
+    { field: 'textfield', header: 'Country Ref', name: 'countryRef', mandatory: true },
+    { field: 'textfield', header: 'Country Name', name: 'countryName' },
+    {
+      field: 'combobox',
+      header: 'State',
+      name: 'state',
+      store: comboStore,
+      valueField: 'recordId',
+      displayField: 'name'
+    }
+  ]
+
   return (
     <>
       <Box
@@ -445,7 +464,31 @@ const DocumentTypes = () => {
           </CustomTabPanel>
           <CustomTabPanel index={1} value={activeTab}>
             <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-              <InlineEditGrid />
+              <InlineEditGrid
+                columns={inlineGridColumns}
+                defaultRow={{
+                  countryRef: '',
+                  countryName: '',
+                  stateId: 1,
+                  stateName: 'State 1'
+                }}
+                initialData={[
+                  {
+                    countryRef: 'USA',
+                    countryName: 'United States',
+                    stateId: 1,
+                    stateName: 'State 1'
+                  },
+                  {
+                    countryRef: 'USA -2',
+                    countryName: 'United States -2',
+                    stateId: 2,
+                    stateName: 'State 2'
+                  }
+                ]}
+
+                // initialData={[]}
+              />
             </Box>
           </CustomTabPanel>
         </Window>

@@ -11,20 +11,12 @@ import * as yup from 'yup'
 import CustomComboBox from '../Inputs/CustomComboBox'
 import DeleteDialog from './DeleteDialog'
 
-const InlineEditGrid = () => {
+const InlineEditGrid = props => {
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
 
-  const columns = [
-    { id: 0, field: 'textfield', header: 'Country Ref', name: 'countryRef', mandatory: true },
-    { id: 1, field: 'textfield', header: 'Country Name', name: 'countryName' },
-    { id: 2, field: 'combobox', header: 'State', name: 'state' }
-  ]
-
-  const comboStore = [
-    { recordId: 0, name: 'zero' },
-    { recordId: 1, name: 'one' },
-    { recordId: 2, name: 'two' }
-  ]
+  const columns = props.columns
+  const defaultRow = props.defaultRow
+  const initialData = props.initialData && props.initialData.length > 0 ? props.initialData : [defaultRow]
 
   const cellEditor = (field, row, rowIndex, column) => {
     if (!row.rowData) return
@@ -54,15 +46,22 @@ const InlineEditGrid = () => {
           <CustomComboBox
             id={cellId}
             name={fieldName}
-            store={comboStore}
-            valueField='recordId'
-            displayField='name'
+            store={column.store}
+            valueField={column.valueField}
+            displayField={column.displayField}
             getOptionBy={gridValidation.values.rows[rowIndex][`${fieldName}Id`]}
             value={gridValidation.values.rows[rowIndex][`${fieldName}Id`]}
             onChange={(event, newValue) => {
               console.log('ComboBox onChange:', event, newValue)
-              gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}Id`, newValue?.recordId)
-              gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}Name`, newValue?.name)
+
+              gridValidation.setFieldValue(
+                `rows[${rowIndex}].${fieldName}Id`,
+                newValue ? newValue[valueField] : newValue
+              )
+              gridValidation.setFieldValue(
+                `rows[${rowIndex}].${fieldName}Name`,
+                newValue ? newValue[displayField] : newValue
+              )
             }}
           />
         )
@@ -76,20 +75,7 @@ const InlineEditGrid = () => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
-      rows: [
-        {
-          countryRef: 'USA',
-          countryName: 'United States',
-          stateId: 1,
-          stateName: 'State 1'
-        },
-        {
-          countryRef: 'USA -2',
-          countryName: 'United States -2',
-          stateId: 2,
-          stateName: 'State 2'
-        }
-      ]
+      rows: initialData
     },
     validationSchema: yup.object({}),
     onSubmit: values => {
@@ -101,35 +87,15 @@ const InlineEditGrid = () => {
     const { key } = e
 
     if (key === 'Tab' && field === columns[columns.length - 1].field) {
-      // Check if the Tab press is on the last row
       if (rowIndex === gridValidation.values.rows.length - 1) {
-        // const newRow = {
-        //   countryRef: '',
-        //   countryName: '',
-        //   state: null // Assuming null for the initial state value
-        // }
-        const newRow = {
-          countryRef: '',
-          countryName: '',
-          stateId: 1,
-          stateName: 'State 1'
-        }
-
-        gridValidation.setFieldValue('rows', [...gridValidation.values.rows, newRow])
+        gridValidation.setFieldValue('rows', [...gridValidation.values.rows, defaultRow])
       }
     }
   }
 
   const handleDelete = rowIndex => {
     if (gridValidation.values.rows.length === 1) {
-      gridValidation.setFieldValue('rows', [
-        {
-          countryRef: '',
-          countryName: '',
-          stateId: 1,
-          stateName: 'State 1'
-        }
-      ])
+      gridValidation.setFieldValue('rows', [defaultRow])
     } else {
       const updatedRows = gridValidation.values.rows.filter((row, index) => index !== rowIndex)
       gridValidation.setFieldValue('rows', updatedRows)
