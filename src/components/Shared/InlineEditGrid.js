@@ -155,8 +155,6 @@ const InlineEditGrid = props => {
                 width: column.width || '200px'
               }}
               body={row => {
-                console.log(typeof row[column.name])
-
                 return (
                   <Box
                     style={{
