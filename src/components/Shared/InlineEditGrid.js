@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import { Autocomplete, Box, Checkbox, FormControlLabel, IconButton, TextField } from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, FormControlLabel, IconButton, TextField } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CustomTextField from '../Inputs/CustomTextField'
 import DeleteDialog from './DeleteDialog'
@@ -91,6 +91,12 @@ const InlineEditGrid = props => {
             }
           />
         )
+      case 'button':
+        return (
+          <Button sx={{ height: '30px' }} onClick={column.onClick} variant='contained'>
+            {column.text}
+          </Button>
+        )
 
       default:
         return
@@ -165,15 +171,22 @@ const InlineEditGrid = props => {
                           : 'none'
                     }}
                   >
+                    {column.field === 'button' && (
+                      <Button sx={{ height: '30px' }} onClick={column.onClick} variant='contained'>
+                        {column.text}
+                      </Button>
+                    )}
                     {typeof row[column.name] === 'boolean' ? JSON.stringify(row[column.name]) : row[column.name]}
                   </Box>
                 )
               }}
-              editor={options => (
-                <Box onKeyDown={e => handleKeyDown(e, i, options.rowIndex)}>
-                  {cellEditor(column.field, options, options.rowIndex, column)}
-                </Box>
-              )}
+              editor={options => {
+                return (
+                  <Box onKeyDown={e => handleKeyDown(e, i, options.rowIndex)}>
+                    {cellEditor(column.field, options, options.rowIndex, column)}
+                  </Box>
+                )
+              }}
             />
           )
         })}

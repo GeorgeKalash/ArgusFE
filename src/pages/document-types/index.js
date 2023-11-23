@@ -360,6 +360,13 @@ const DocumentTypes = () => {
       mandatory: true
     },
     {
+      field: 'button',
+      text: 'Press',
+      onClick: e => {
+        console.log('BUTTON ONCLICK')
+      }
+    },
+    {
       field: 'checkbox',
       header: 'Is Active',
       name: 'isActive'
