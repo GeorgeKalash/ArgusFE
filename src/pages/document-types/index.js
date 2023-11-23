@@ -295,14 +295,16 @@ const DocumentTypes = () => {
           countryRef: 'USA',
           countryName: 'United States',
           stateId: 1,
-          stateName: 'State 1'
+          stateName: 'State 1',
+          isActive: false
         },
         {
           name: 'test 2',
           countryRef: 'USA -2',
           countryName: 'United States -2',
           stateId: 2,
-          stateName: 'State 2'
+          stateName: 'State 2',
+          isActive: true
         }
       ]
     },
@@ -356,6 +358,11 @@ const DocumentTypes = () => {
       valueField: 'recordId',
       displayField: 'name',
       mandatory: true
+    },
+    {
+      field: 'checkbox',
+      header: 'Is Active',
+      name: 'isActive'
     }
   ]
 
@@ -528,7 +535,8 @@ const DocumentTypes = () => {
                   countryRef: '',
                   countryName: '',
                   stateId: 1,
-                  stateName: 'State 1'
+                  stateName: 'State 1',
+                  isActive: false
                 }}
               />
             </Box>

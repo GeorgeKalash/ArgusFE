@@ -1,14 +1,9 @@
 import React, { useState } from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import { Autocomplete, Box, IconButton, TextField } from '@mui/material'
+import { Autocomplete, Box, Checkbox, FormControlLabel, IconButton, TextField } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CustomTextField from '../Inputs/CustomTextField'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import CustomComboBox from '../Inputs/CustomComboBox'
 import DeleteDialog from './DeleteDialog'
 
 const InlineEditGrid = props => {
@@ -81,6 +76,21 @@ const InlineEditGrid = props => {
             renderInput={params => <TextField {...params} required={column?.mandatory} />}
           />
         )
+      case 'checkbox':
+        return (
+          <FormControlLabel
+            control={
+              <Checkbox
+                name={fieldName}
+                checked={gridValidation.values.rows[rowIndex][fieldName]}
+                value={gridValidation.values.rows[rowIndex][fieldName]}
+                onChange={(event, newValue) => {
+                  gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
+                }}
+              />
+            }
+          />
+        )
 
       default:
         return
@@ -89,7 +99,6 @@ const InlineEditGrid = props => {
 
   const handleKeyDown = (e, columnIndex, rowIndex) => {
     const { key } = e
-    console.log({ columns })
     if (key === 'Tab' && columnIndex === columns.length - 1) {
       if (rowIndex === gridValidation.values.rows.length - 1 && lastRowIsValid()) {
         gridValidation.setFieldValue('rows', [...gridValidation.values.rows, defaultRow])
@@ -146,6 +155,8 @@ const InlineEditGrid = props => {
                 width: column.width || '200px'
               }}
               body={row => {
+                console.log(typeof row[column.name])
+
                 return (
                   <Box
                     style={{
@@ -156,7 +167,7 @@ const InlineEditGrid = props => {
                           : 'none'
                     }}
                   >
-                    {row[column.name]}
+                    {typeof row[column.name] === 'boolean' ? JSON.stringify(row[column.name]) : row[column.name]}
                   </Box>
                 )
               }}
