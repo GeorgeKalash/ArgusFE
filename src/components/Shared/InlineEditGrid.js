@@ -30,6 +30,7 @@ const InlineEditGrid = props => {
             id={cellId} // Attach the unique identifier as the input's ID
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][fieldName]}
+            required={column?.mandatory}
             onChange={event => {
               const newValue = event.target.value
               gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
@@ -51,6 +52,7 @@ const InlineEditGrid = props => {
             displayField={column.displayField}
             getOptionBy={gridValidation.values.rows[rowIndex][`${fieldName}Id`]}
             value={gridValidation.values.rows[rowIndex][`${fieldName}Id`]}
+            required={column?.mandatory}
             onChange={(event, newValue) => {
               console.log('ComboBox onChange:', event, newValue)
 
@@ -82,6 +84,31 @@ const InlineEditGrid = props => {
       console.log({ SUBMIT: values })
     }
   })
+
+  const onCellEditComplete = (e, column) => {
+    let { rowData, field, originalEvent: event } = e
+
+    const newValue = rowData[field]
+
+    if (column?.mandatory)
+      if (newValue === '' || newValue === null) {
+        console.log('IT IS EMPTY')
+        event.preventDefault()
+      }
+
+    // switch (field) {
+    //   case 'quantity':
+    //   case 'price':
+    //     if (isPositiveInteger(newValue)) rowData[field] = newValue
+    //     else event.preventDefault()
+    //     break
+
+    //   default:
+    //     if (newValue.trim().length > 0) rowData[field] = newValue
+    //     else event.preventDefault()
+    //     break
+    // }
+  }
 
   const handleKeyDown = (e, field, rowIndex) => {
     const { key } = e
@@ -120,20 +147,32 @@ const InlineEditGrid = props => {
   return (
     <Box>
       <DataTable value={gridValidation.values.rows} editMode='cell' tableStyle={{ minWidth: '600px' }}>
-        {columns.map((column, i) => {
+        {columns.map(column => {
           return (
             <Column
               key={column.field}
               field={column.name}
               header={column.header}
-              style={{ minWidth: '25%' }}
+              style={{
+                minWidth: '25%'
+              }}
+              body={row => {
+                return (
+                  <Box
+                    style={{
+                      height: '30px',
+                      border: row[column.name] === '' && column?.mandatory ? '1px solid red' : 'none'
+                    }}
+                  >
+                    {row[column.name]}
+                  </Box>
+                )
+              }}
               editor={options => (
-                <div onKeyDown={e => handleKeyDown(e, column.field, options.rowIndex)}>
+                <Box onKeyDown={e => handleKeyDown(e, column.field, options.rowIndex)}>
                   {cellEditor(column.field, options, options.rowIndex, column)}
-                </div>
+                </Box>
               )}
-
-              // ... (previous code)
             />
           )
         })}

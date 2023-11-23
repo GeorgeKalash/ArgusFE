@@ -292,7 +292,7 @@ const DocumentTypes = () => {
 
   const inlineGridColumns = [
     { field: 'textfield', header: 'Country Ref', name: 'countryRef', mandatory: true },
-    { field: 'textfield', header: 'Country Name', name: 'countryName' },
+    { field: 'textfield', header: 'Country Name', name: 'countryName', mandatory: true },
     {
       field: 'combobox',
       header: 'State',
