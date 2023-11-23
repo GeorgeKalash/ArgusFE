@@ -57,7 +57,10 @@ const Currencies = () => {
     currencyType: labels && labels.find(item => item.key === 6).value,
     sales: labels && labels.find(item => item.key === 7).value,
     purchase: labels && labels.find(item => item.key === 8).value,
-    currency: labels && labels.find(item => item.key === 9).value
+    currency: labels && labels.find(item => item.key === 9).value,
+    isoCode: labels && labels.find(item => item.key === 10).value,
+    symbol: labels && labels.find(item => item.key === 11).value
+    
   }
 
   const columns = [
@@ -92,7 +95,9 @@ const Currencies = () => {
       name: yup.string().required('This field is required'),
       decimals: yup.string().required('This field is required'),
       profileId: yup.string().required('This field is required'),
-      currencyType: yup.string().required('This field is required')
+      currencyType: yup.string().required('This field is required'),
+      isoCode: yup.string().notRequired(),
+      symbol:yup.string().notRequired()
     }),
     onSubmit: values => {
       postCurrency(values)

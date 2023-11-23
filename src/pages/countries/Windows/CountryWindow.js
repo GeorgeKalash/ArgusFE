@@ -8,25 +8,24 @@ import CountryTab from 'src/pages/countries/Tabs/countryTab'
 const CountryWindow = ({
     onClose,
     onSave,
-    tabs,
-    activeTab,
-    setActiveTab,
     countryValidation,
     currencyStore,
     regionStore,
     width,
     height,
-    _labels
+    _labels,
+    maxAccess
 }) => {
     return (
         <Window id='CountryWindow' Title={_labels.country} onClose={onClose} width={width} height={height} 
-         onSave={onSave} tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}>
-            <CustomTabPanel index={0} value={activeTab}>
+         onSave={onSave} countryValidation={countryValidation}>
+            <CustomTabPanel>
                 <CountryTab
                     countryValidation={countryValidation}
                     currencyStore={currencyStore}
                     regionStore={regionStore}
                     _labels={_labels}
+                    maxAccess={maxAccess}
                 />
             </CustomTabPanel>
         </Window>
