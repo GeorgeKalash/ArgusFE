@@ -284,23 +284,51 @@ const DocumentTypes = () => {
     }
   }, [access])
 
-  const comboStore = [
+  const mockUpStore = [
     { recordId: 0, name: 'State 0' },
     { recordId: 1, name: 'State 1' },
     { recordId: 2, name: 'State 2' }
   ]
 
+  const countryStore = [
+    { recordId: 0, countryRef: 'USA', countryName: 'United State' },
+    { recordId: 1, countryRef: 'LEB', countryName: 'Lebanon' },
+    { recordId: 2, countryRef: 'EGY', countryName: 'Egypt' }
+  ]
+
   const inlineGridColumns = [
-    { field: 'textfield', header: 'Country Ref', name: 'countryRef', mandatory: true },
-    { field: 'textfield', header: 'Country Name', name: 'countryName', mandatory: true },
+    {
+      field: 'textfield',
+      header: 'Name',
+      name: 'name'
+    },
+    {
+      field: 'combobox',
+      header: 'Country Ref',
+      nameId: 'recordId',
+      name: 'countryRef',
+      mandatory: true,
+      store: countryStore,
+      valueField: 'recordId',
+      displayField: 'countryRef',
+      fieldToUpdate: 'countryName'
+    },
+    {
+      field: 'textfield',
+      header: 'Country Name',
+      name: 'countryName',
+      mandatory: true,
+      readOnly: true
+    },
     {
       field: 'combobox',
       header: 'State',
       nameId: 'stateId',
       name: 'stateName',
-      store: comboStore,
+      store: mockUpStore,
       valueField: 'recordId',
-      displayField: 'name'
+      displayField: 'name',
+      mandatory: true
     }
   ]
 
@@ -333,7 +361,7 @@ const DocumentTypes = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          width={680}
+          width={800}
           height={400}
           onSave={handleSubmit}
           maxAccess={access}
@@ -468,6 +496,7 @@ const DocumentTypes = () => {
               <InlineEditGrid
                 columns={inlineGridColumns}
                 defaultRow={{
+                  name: '',
                   countryRef: '',
                   countryName: '',
                   stateId: 1,
@@ -475,12 +504,14 @@ const DocumentTypes = () => {
                 }}
                 initialData={[
                   {
+                    name: 'test 1',
                     countryRef: 'USA',
                     countryName: 'United States',
                     stateId: 1,
                     stateName: 'State 1'
                   },
                   {
+                    name: 'test 2',
                     countryRef: 'USA -2',
                     countryName: 'United States -2',
                     stateId: 2,

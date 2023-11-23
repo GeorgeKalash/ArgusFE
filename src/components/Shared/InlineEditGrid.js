@@ -35,6 +35,7 @@ const InlineEditGrid = props => {
               const newValue = event.target.value
               gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
             }}
+            readOnly={column?.readOnly}
             onClear={() => {
               const updatedRows = [...gridValidation.values.rows]
               updatedRows[rowIndex][fieldName] = ''
@@ -70,6 +71,10 @@ const InlineEditGrid = props => {
                 `rows[${rowIndex}].${column.name}`,
                 newValue ? newValue[column.displayField] : newValue
               )
+              gridValidation.setFieldValue(
+                `rows[${rowIndex}].${column.fieldToUpdate}`,
+                newValue ? newValue[column.fieldToUpdate] : newValue
+              )
             }}
             renderInput={params => <TextField {...params} required={column?.mandatory} />}
           />
@@ -91,6 +96,8 @@ const InlineEditGrid = props => {
       console.log({ SUBMIT: values })
     }
   })
+
+  console.log({ gridValidation: gridValidation.values.rows })
 
   const handleKeyDown = (e, field, rowIndex) => {
     const { key } = e
@@ -140,7 +147,7 @@ const InlineEditGrid = props => {
 
   return (
     <Box>
-      <DataTable value={gridValidation.values.rows} editMode='cell' tableStyle={{ minWidth: '600px' }}>
+      <DataTable value={gridValidation?.values?.rows} editMode='cell' tableStyle={{ minWidth: '600px' }}>
         {columns.map(column => {
           return (
             <Column
@@ -148,14 +155,17 @@ const InlineEditGrid = props => {
               field={column.name}
               header={column.header}
               style={{
-                width: column.width || '30%'
+                width: column.width || '200px'
               }}
               body={row => {
                 return (
                   <Box
                     style={{
                       height: '30px',
-                      border: row[column.name] === '' && column?.mandatory ? '1px solid red' : 'none'
+                      border:
+                        (row[column.name] === '' || row[column.name] === null) && column?.mandatory
+                          ? '1px solid red'
+                          : 'none'
                     }}
                   >
                     {row[column.name]}
