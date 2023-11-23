@@ -85,31 +85,6 @@ const InlineEditGrid = props => {
     }
   })
 
-  const onCellEditComplete = (e, column) => {
-    let { rowData, field, originalEvent: event } = e
-
-    const newValue = rowData[field]
-
-    if (column?.mandatory)
-      if (newValue === '' || newValue === null) {
-        console.log('IT IS EMPTY')
-        event.preventDefault()
-      }
-
-    // switch (field) {
-    //   case 'quantity':
-    //   case 'price':
-    //     if (isPositiveInteger(newValue)) rowData[field] = newValue
-    //     else event.preventDefault()
-    //     break
-
-    //   default:
-    //     if (newValue.trim().length > 0) rowData[field] = newValue
-    //     else event.preventDefault()
-    //     break
-    // }
-  }
-
   const handleKeyDown = (e, field, rowIndex) => {
     const { key } = e
 
