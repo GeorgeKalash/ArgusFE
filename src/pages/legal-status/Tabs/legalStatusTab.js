@@ -5,7 +5,7 @@ import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 
-const LegalStatusTab = ({ legalStatusValidation, _labels }) => {
+const LegalStatusTab = ({ legalStatusValidation, _labels, editMode }) => {
     return (
         <>
             <Grid container spacing={4}>
@@ -20,6 +20,7 @@ const LegalStatusTab = ({ legalStatusValidation, _labels }) => {
                   error={legalStatusValidation.touched.reference && Boolean(legalStatusValidation.errors.reference)}
                   helperText={legalStatusValidation.touched.reference && legalStatusValidation.errors.reference}
                   maxLength='70'
+                  readOnly={editMode}
                 />
               </Grid>
               <Grid item xs={12}>

@@ -8,7 +8,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 // ** Helpers
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
-const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, maxAccess }) => {
+const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, maxAccess, editMode }) => {
     return (
         <>
             <Grid container spacing={4}>
@@ -17,6 +17,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         name='reference'
                         label={_labels.reference}
                         value={countryValidation.values.reference}
+                        readOnly={editMode}
                         required
                         onChange={countryValidation.handleChange}
                         onClear={() => countryValidation.setFieldValue('reference', '')}

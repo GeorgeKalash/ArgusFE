@@ -260,6 +260,7 @@ const Countries = () => {
        regionStore={regionStore}
        _labels ={_labels}
        maxAccess={access}
+       editMode={editMode}
        />
        )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

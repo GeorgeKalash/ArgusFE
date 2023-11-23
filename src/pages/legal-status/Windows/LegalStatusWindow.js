@@ -12,6 +12,7 @@ const LegalStatusWindow = ({
     legalStatusValidation,
     width,
     height,
+    editMode,
     _labels
 }) => {
     return (
@@ -21,6 +22,7 @@ const LegalStatusWindow = ({
              <LegalStatusTab
                  legalStatusValidation={legalStatusValidation}
                  _labels={_labels}
+                 editMode={editMode}
              />
          </CustomTabPanel>
      </Window>

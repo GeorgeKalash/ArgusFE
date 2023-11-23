@@ -185,6 +185,7 @@ const LegalStatus = () => {
           onSave={handleSubmit}
           legalStatusValidation={legalStatusValidation}
           _labels={_labels}
+          editMode={editMode}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

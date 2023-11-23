@@ -14,6 +14,7 @@ const CountryWindow = ({
     width,
     height,
     _labels,
+    editMode,
     maxAccess
 }) => {
     return (
@@ -26,6 +27,7 @@ const CountryWindow = ({
                     regionStore={regionStore}
                     _labels={_labels}
                     maxAccess={maxAccess}
+                    editMode={editMode}
                 />
             </CustomTabPanel>
         </Window>
