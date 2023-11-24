@@ -105,8 +105,7 @@ const Countries = () => {
         .min(0, 'Value must be greater than or equal to 0')
         .max(32767, 'Value must be less than or equal to 32,767'),
       reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      isInactive: yup.string().required('This field is required')
+      name: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       console.log(values);
@@ -177,6 +176,7 @@ const Countries = () => {
   const editCountry = obj => {
     console.log(obj)
     countryValidation.setValues(populateCountry(obj))
+    console.log(populateCountry(obj))
     fillCurrencyStore()
     fillRegionStore({})
     setEditMode(true)

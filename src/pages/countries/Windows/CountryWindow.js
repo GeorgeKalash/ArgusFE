@@ -19,7 +19,7 @@ const CountryWindow = ({
 }) => {
     return (
         <Window id='CountryWindow' Title={_labels.country} onClose={onClose} width={width} height={height} 
-         onSave={onSave} countryValidation={countryValidation}>
+         onSave={onSave}>
             <CustomTabPanel>
                 <CountryTab
                     countryValidation={countryValidation}

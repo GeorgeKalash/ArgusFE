@@ -24,7 +24,7 @@ const populateCountry = obj => {
     currencyId: obj.currencyId,
     regionId: obj.regionId,
     ibanLength: obj.ibanLength,
-    isInactive: obj.isInactive,
+    isInactive: obj.isInactive == null? false : obj.isInactive,
     currencyRef: obj.currencyRef,
     currencyName: obj.currencyName,
     regionRef: obj.regionRef,
