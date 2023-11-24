@@ -6,7 +6,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** Helpers
-import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 
 const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, maxAccess, editMode }) => {
     return (
@@ -84,7 +84,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         name='ibanLength'
                         label={_labels.ibanLength}
                         value={countryValidation.values.ibanLength}
-                        onChange={e => countryValidation.setFieldValue('ibanLength', getFormattedNumber(e.target.value, 4))}
+                        onChange={e => countryValidation.setFieldValue('ibanLength', getFormattedNumberMax(e.target.value, 5, 0))}
                         onClear={() => countryValidation.setFieldValue('ibanLength', '')}
                         error={countryValidation.touched.ibanLength && Boolean(countryValidation.errors.ibanLength)}
                         helperText={countryValidation.touched.ibanLength && countryValidation.errors.ibanLength}

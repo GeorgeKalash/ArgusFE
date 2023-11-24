@@ -21,7 +21,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCountry, populateCountry } from 'src/Models/System/Country'
 
 // ** Helpers
-import {getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -90,7 +90,7 @@ const Countries = () => {
       flex: 1,
       align: 'right',
 
-      valueGetter: ({ row }) => getFormattedNumber(row?.ibanLength, 4)
+      valueGetter: ({ row }) => getFormattedNumberMax(row?.ibanLength, 5, 0)
     }
   ]
 
@@ -175,6 +175,7 @@ const Countries = () => {
 
   const editCountry = obj => {
     console.log(obj)
+    obj.ibanLength = typeof obj.ibanLength !== undefined && getFormattedNumberMax(obj?.ibanLength, 5, 0)
     countryValidation.setValues(populateCountry(obj))
     console.log(populateCountry(obj))
     fillCurrencyStore()
