@@ -45,16 +45,10 @@ const Correspondent = () => {
   const [activeTab, setActiveTab] = useState(0)
 
   //stated for countries inline edit grid
-  const [inlineCountriesGridDataRows, setInlineCountriesGridDataRows] = useState([])
-  const [inlineCountriesDataErrorState, setInlineCountriesDataErrorState] = useState([])
-  const [newCountriesLineOnTab, setNewCountriesLineOnTab] = useState(true)
-  const [editCountriesRowsModel, setEditCountriesRowsModel] = useState({})
+  const [correspondentCountries, setCorrespondentCountries] = useState(null)
 
   //stated for currencies inline edit grid
-  const [inlineCurrenciesGridDataRows, setInlineCurrenciesGridDataRows] = useState([])
-  const [inlineCurrenciesDataErrorState, setInlineCurrenciesDataErrorState] = useState([])
-  const [newCurrenciesLineOnTab, setNewCurrenciesLineOnTab] = useState(true)
-  const [editCurrenciesRowsModel, setEditCurrenciesRowsModel] = useState({})
+  const [correspondentCurrencies, setCorrespondentCurrencies] = useState(null)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -108,8 +102,8 @@ const Correspondent = () => {
   const tabs = [{ label: 'Main' }, { label: 'Countries' }, { label: 'Currencies' }]
 
   const correspondentValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
+    enableReinitialize: true,
+    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
@@ -123,6 +117,216 @@ const Correspondent = () => {
       postCorrespondent(values)
     }
   })
+
+  // COUNTRIES TAB
+  const countriesGridValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [
+        {
+          corId: correspondentValidation.values ? correspondentValidation.values.recordId ? correspondentValidation.values.recordId : '' : '',
+
+          //countryId: '', throwing an error when having this
+          countryRef: '',
+          countryName: ''
+        }
+      ]
+    },
+    onSubmit: values => {
+      postCorrespondentCountries(values.rows)
+    }
+  })
+
+  const countriesInlineGridColumns = [
+    {
+      field: 'combobox',
+      header: 'Country Ref',
+      nameId: 'countryId',
+      name: 'countryRef',
+      mandatory: true,
+      store: countryStore.list,
+      valueField: 'recordId',
+      displayField: 'reference'
+
+      //fieldToUpdate: 'countryName'
+      //I want something similar to this to be able to affect many fields for the same row on selection
+      //[{'countryName','name'}],[{'countryId','recordId'}]
+    },
+    {
+      field: 'textfield',
+      header: 'Country Name',
+      name: 'countryName',
+      mandatory: false,
+      readOnly: true
+    }
+  ]
+
+  const postCorrespondentCountries = obj => {
+    const data = {
+      corId: correspondentValidation.values.recordId,
+      correspondentCountries: obj
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.CorrespondentCountry.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        getGridData({})
+        setWindowOpen(false)
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getCorrespondentCountries = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_corId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentCountry.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCorrespondentCountries(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  // CURRENCIES TAB
+  const currenciesGridValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [
+        {
+          corId: correspondentValidation.values ? correspondentValidation.values.recordId ? correspondentValidation.values.recordId : '' : '',
+
+          //currencyId: '', throwing an error when having this
+          currencyRef: '',
+          currencyName: '',
+          glCurrencyRef: '',
+          glCurrencyName: '',
+          outward: false,
+          inward: false,
+          bankDeposit: false,
+          deal: false,
+          isInactive: false,
+        }
+      ]
+    },
+    onSubmit: values => {
+      postCorrespondentCurrencies(values.rows)
+    }
+  })
+
+  const currenciesInlineGridColumns = [
+    {
+      field: 'combobox',
+      header: 'Currency Ref',
+      nameId: 'currencyId',
+      name: 'currencyRef',
+      mandatory: true,
+      store: currencyStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldToUpdate: 'currencyName'
+
+      //I want something similar to this to be able to affect many fields for the same row on selection
+      //[{'currencyName','name'}],[{'currencyId','recordId'}]
+    },
+    {
+      field: 'textfield',
+      header: 'Currency Name',
+      name: 'currencyName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'combobox',
+      header: 'GL Currency Ref',
+      nameId: 'glCurrencyId',
+      name: 'glCurrencyRef',
+      mandatory: true,
+      store: currencyStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldToUpdate: 'glCurrencyName'
+    },
+    {
+      field: 'textfield',
+      header: 'GL Currency Name',
+      name: 'glCurrencyName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'checkbox',
+      header: 'Outward',
+      name: 'outward'
+    },
+    {
+      field: 'checkbox',
+      header: 'Inward',
+      name: 'inward'
+    },
+    {
+      field: 'checkbox',
+      header: 'Bank Deposit',
+      name: 'bankDeposit'
+    },
+    {
+      field: 'checkbox',
+      header: 'Deal',
+      name: 'deal'
+    },
+    {
+      field: 'checkbox',
+      header: 'Is Inactive',
+      name: 'isInactive'
+    }
+  ]
+
+  const postCorrespondentCurrencies = obj => {
+    const data = {
+      corId: correspondentValidation.values.recordId,
+      correspondentCurrencies: obj
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.CorrespondentCurrency.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        getGridData({})
+        setWindowOpen(false)
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getCorrespondentCurrencies = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_corId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentCurrency.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCorrespondentCurrencies(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const lookupBpMasterData = searchQry => {
     var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
@@ -140,11 +344,9 @@ const Correspondent = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) correspondentValidation.handleSubmit()
-    else if (activeTab === 1) {
-      console.log('inlineCountriesGridDataRows2', inlineCountriesGridDataRows)
-    } else if (activeTab === 2) {
-      console.log('currencies', inlineCurrenciesGridDataRows)
-    }
+    else if (activeTab === 1) countriesGridValidation.handleSubmit()
+    else if (activeTab === 2) currenciesGridValidation.handleSubmit()
+    
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -163,7 +365,6 @@ const Correspondent = () => {
   }
 
   const postCorrespondent = obj => {
-    console.log(obj)
     const recordId = obj.recordId
     postRequest({
       extension: RemittanceSettingsRepository.Correspondent.set,
@@ -230,9 +431,16 @@ const Correspondent = () => {
     setWindowOpen(true)
   }
 
+  const popup = obj => {
+    fillCountryStore()
+    fillCurrencyStore()
+    getCorrespondentById(obj)
+    getCorrespondentCountries(obj)
+    getCorrespondentCurrencies(obj)
+  }
+
   const getCorrespondentById = obj => {
     const _recordId = obj.recordId
-    console.log(_recordId)
     const defaultParams = `_recordId=${_recordId}`
     var parameters = defaultParams
     getRequest({
@@ -240,7 +448,6 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log(res.record)
         correspondentValidation.setValues(populateCorrespondent(res.record))
         setEditMode(true)
         setWindowOpen(true)
@@ -256,11 +463,14 @@ const Correspondent = () => {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 50 })
         getLabels(ResourceIds.Correspondent, setLabels)
+        if (correspondentCountries) {
+          countriesGridValidation.setValues({ rows: correspondentCountries.rows })
+        }
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
-  }, [access])
+  }, [access, correspondentCountries])
 
   return (
     <>
@@ -271,7 +481,7 @@ const Correspondent = () => {
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={getCorrespondentById}
+          onEdit={popup}
           onDelete={delCorrespondent}
           isLoading={false}
           pageSize={50}
@@ -285,7 +495,7 @@ const Correspondent = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onClose={() => setWindowOpen(false)}
-          width={600}
+          width={900}
           height={400}
           onSave={handleSubmit}
           editMode={editMode}
@@ -293,24 +503,14 @@ const Correspondent = () => {
           bpMasterDataStore={bpMasterDataStore}
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
-          countryStore={countryStore}
-          inlineCountriesGridDataRows={inlineCountriesGridDataRows}
-          setInlineCountriesGridDataRows={setInlineCountriesGridDataRows}
-          inlineCountriesDataErrorState={inlineCountriesDataErrorState}
-          setInlineCountriesDataErrorState={setInlineCountriesDataErrorState}
-          newCountriesLineOnTab={newCountriesLineOnTab}
-          setNewCountriesLineOnTab={setNewCountriesLineOnTab}
-          editCountriesRowsModel={editCountriesRowsModel}
-          setEditCountriesRowsModel={setEditCountriesRowsModel}
-          currencyStore={currencyStore}
-          inlineCurrenciesGridDataRows={inlineCurrenciesGridDataRows}
-          setInlineCurrenciesGridDataRows={setInlineCurrenciesGridDataRows}
-          inlineCurrenciesDataErrorState={inlineCurrenciesDataErrorState}
-          setInlineCurrenciesDataErrorState={setInlineCurrenciesDataErrorState}
-          newCurrenciesLineOnTab={newCurrenciesLineOnTab}
-          setNewCurrenciesLineOnTab={setNewCurrenciesLineOnTab}
-          editCurrenciesRowsModel={editCurrenciesRowsModel}
-          setEditCurrenciesRowsModel={setEditCurrenciesRowsModel}
+
+          //countries tab - inline edit grid
+          countriesGridValidation={countriesGridValidation}
+          countriesInlineGridColumns={countriesInlineGridColumns}
+
+          //currencies tab - inline edit grid
+          currenciesGridValidation={currenciesGridValidation}
+          currenciesInlineGridColumns={currenciesInlineGridColumns}
           labels={_labels}
           maxAccess={access}
         />

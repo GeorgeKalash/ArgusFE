@@ -18,24 +18,16 @@ const CorrespondentWindow = ({
   bpMasterDataStore,
   setBpMasterDataStore,
   correspondentValidation,
-  countryStore,
-  inlineCountriesGridDataRows,
-  setInlineCountriesGridDataRows,
-  inlineCountriesDataErrorState,
-  setInlineCountriesDataErrorState,
-  newCountriesLineOnTab,
-  setNewCountriesLineOnTab,
-  editCountriesRowsModel,
-  setEditCountriesRowsModel,
-  currencyStore,
-  inlineCurrenciesGridDataRows,
-  setInlineCurrenciesGridDataRows,
-  inlineCurrenciesDataErrorState,
-  setInlineCurrenciesDataErrorState,
-  newCurrenciesLineOnTab,
-  setNewCurrenciesLineOnTab,
-  editCurrenciesRowsModel,
-  setEditCurrenciesRowsModel,
+
+  //countries tab - inline edit grid
+  countriesGridValidation,
+  countriesInlineGridColumns,
+
+  //currencies tab - inline edit grid
+  currenciesGridValidation,
+  currenciesInlineGridColumns,
+
+  
   labels,
   maxAccess
 }) => {
@@ -65,29 +57,17 @@ const CorrespondentWindow = ({
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <CorrespondentCountriesTab
-          countryStore={countryStore}
-          inlineCountriesGridDataRows={inlineCountriesGridDataRows}
-          setInlineCountriesGridDataRows={setInlineCountriesGridDataRows}
-          inlineCountriesDataErrorState={inlineCountriesDataErrorState}
-          setInlineCountriesDataErrorState={setInlineCountriesDataErrorState}
-          newCountriesLineOnTab={newCountriesLineOnTab}
-          setNewCountriesLineOnTab={setNewCountriesLineOnTab}
-          editCountriesRowsModel={editCountriesRowsModel}
-          setEditCountriesRowsModel={setEditCountriesRowsModel}
+          correspondentValidation={correspondentValidation}
+          countriesGridValidation={countriesGridValidation}
+          countriesInlineGridColumns={countriesInlineGridColumns}
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
         <CorrespondentCurrenciesTab
-          currencyStore={currencyStore}
-          inlineCurrenciesGridDataRows={inlineCurrenciesGridDataRows}
-          setInlineCurrenciesGridDataRows={setInlineCurrenciesGridDataRows}
-          inlineCurrenciesDataErrorState={inlineCurrenciesDataErrorState}
-          setInlineCurrenciesDataErrorState={setInlineCurrenciesDataErrorState}
-          newCurrenciesLineOnTab={newCurrenciesLineOnTab}
-          setNewCurrenciesLineOnTab={setNewCurrenciesLineOnTab}
-          editCurrenciesRowsModel={editCurrenciesRowsModel}
-          setEditCurrenciesRowsModel={setEditCurrenciesRowsModel}
+          correspondentValidation={correspondentValidation}
+          currenciesGridValidation={currenciesGridValidation}
+          currenciesInlineGridColumns={currenciesInlineGridColumns}
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
