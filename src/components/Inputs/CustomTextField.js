@@ -1,6 +1,7 @@
 // ** MUI Imports
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
+import { useEffect, useRef, useState } from 'react'
 
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type
@@ -15,6 +16,7 @@ const CustomTextField = ({
   numberField = false,
   editMode = false,
   maxLength = '',
+  position,
   ...props
 }) => {
 
@@ -24,8 +26,23 @@ const CustomTextField = ({
     editMode && maxAccess < 3
     : readOnly
 
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+      // Save the cursor position before the value changes
+      if (typeof inputRef.current.selectionStart  !==  undefined && position) {
+         inputRef.current.setSelectionRange(position, position);
+      }
+
+      console.log('After setSelectionRange:', inputRef.current.selectionStart);
+    }, [position]);
+
+
+
+
   return (
     <TextField
+      inputRef={inputRef}
       type={type}
       variant={variant}
       value={value}
@@ -35,6 +52,7 @@ const CustomTextField = ({
       inputProps={{
         readOnly: _readOnly,
         maxLength: maxLength,
+        inputMode: 'numeric',
         pattern: numberField && '[0-9]*', // Allow only numeric input
         style: {
           textAlign: numberField && 'right'
