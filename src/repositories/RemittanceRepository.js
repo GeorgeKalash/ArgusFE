@@ -30,5 +30,11 @@ export const RemittanceSettingsRepository = {
     get: service + 'getCCU',
     set2: service + 'set2CCU',
     del: service + 'delCCU'
+  },
+  CorrespondentAgents: {
+    qry: service + 'qryAGT',
+    get: service + 'getAGT',
+    set: service + 'setAGT',
+    del: service + 'delAGT'
   }
 }
