@@ -11,4 +11,8 @@ export const ResourceIds = {
   Countries: 20101,
   LegalStatus: 21108,
   Correspondent: 36101,
+  RelationType: 35101,
+  Profession: 35105,
+  SalaryRange: 35104,
+  CorrespondentAgents: 36102
 }

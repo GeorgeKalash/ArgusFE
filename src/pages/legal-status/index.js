@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -16,14 +16,23 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { getNewLegalStatuses, populateLegalStatuses } from 'src/Models/BusinessPartner/LegalStatuses'
+
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows
 import LegalStatusWindow from './Windows/LegalStatusWindow'
 
 const LegalStatus = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
+
+  //controls
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -33,18 +42,26 @@ const LegalStatus = () => {
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const _labels = {
+    reference: labels && labels.find(item => item.key === 1).value,
+    name: labels && labels.find(item => item.key === 2).value,
+    legalStatus: labels && labels.find(item => item.key === 3).value
+  }
+
+
   const columns = [
     {
       field: 'reference',
-      headerName: 'Reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: _labels.name,
       flex: 1
     }
   ]
+
 
   const legalStatusValidation = useFormik({
     enableReinitialize: false,
@@ -70,52 +87,50 @@ const LegalStatus = () => {
     var parameters = defaultParams
     console.log(parameters)
 
-        // var parameters = defaultParams + '&_dgId=0'
-        getRequest({
-            'extension': BusinessPartnerRepository.LegalStatus.qry,
-            'parameters': parameters,
-        })
-            .then((res) => {
-                setGridData({ ...res, _startAt })
-            })
-            .catch((error) => {
-                setErrorMessage(error)
-            })
-    }
+    // var parameters = defaultParams + '&_dgId=0'
+    getRequest({
+      extension: BusinessPartnerRepository.LegalStatus.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setGridData({ ...res, _startAt })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
-    const postLegalStatus = (obj) => {
-        const recordId = obj.recordId
-        postRequest({
-            'extension': BusinessPartnerRepository.LegalStatus.set,
-            'record': JSON.stringify(obj),
-        })
-            .then((res) => {
-                getGridData({})
-                setWindowOpen(false)
-                if (!recordId)
-                    toast.success('Record Added Successfully')
-                else
-                    toast.success('Record Edited Successfully')
-            })
-            .catch((error) => {
-                setErrorMessage(error)
-            })
-    }
+  const postLegalStatus = obj => {
+    const recordId = obj.recordId
+    postRequest({
+      extension: BusinessPartnerRepository.LegalStatus.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        getGridData({})
+        setWindowOpen(false)
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
-    const delLegalStatus = (obj) => {
-        postRequest({
-            'extension': BusinessPartnerRepository.LegalStatus.del,
-            'record': JSON.stringify(obj),
-        })
-            .then((res) => {
-                console.log({ res })
-                getGridData({})
-                toast.success('Record Deleted Successfully')
-            })
-            .catch((error) => {
-                setErrorMessage(error)
-            })
-    }
+  const delLegalStatus = obj => {
+    postRequest({
+      extension: BusinessPartnerRepository.LegalStatus.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        console.log({ res })
+        getGridData({})
+        toast.success('Record Deleted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const addLegalStatus = () => {
     legalStatusValidation.setValues(getNewLegalStatuses())
@@ -130,8 +145,16 @@ const LegalStatus = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
-  })
+    if (!access) getAccess(ResourceIds.LegalStatus, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData({ _startAt: 0, _pageSize: 30 })
+        getLabels(ResourceIds.LegalStatus,setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
+    }
+  }, [access])
 
   return (
     <>
@@ -142,7 +165,7 @@ const LegalStatus = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addLegalStatus} />
+        <GridToolbar onAdd={addLegalStatus} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -151,17 +174,19 @@ const LegalStatus = () => {
           onEdit={editLegalStatus}
           onDelete={delLegalStatus}
           isLoading={false}
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
-       <LegalStatusWindow
-       onClose={() => setWindowOpen(false)}
-       width={600}
-       height={400}
-       onSave={handleSubmit}
-       legalStatusValidation={legalStatusValidation}
-       />
-       )}
+        <LegalStatusWindow
+          onClose={() => setWindowOpen(false)}
+          width={600}
+          height={400}
+          onSave={handleSubmit}
+          legalStatusValidation={legalStatusValidation}
+          _labels={_labels}
+        />
+      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

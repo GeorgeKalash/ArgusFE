@@ -17,6 +17,12 @@ export const SystemRepository = {
     set: service + 'setDTM',
     del: service + 'delDTM'
   },
+  RelationType: {
+    qry: service + 'qryRT',
+    get: service + 'getRT',
+    set: service + 'setRT',
+    del: service + 'delRT'
+  },
   NumberRange: {
     snapshot: service + 'snapshotNRA'
   },

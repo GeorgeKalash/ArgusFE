@@ -136,6 +136,34 @@ const CurrencyTab=({
               label={labels.purchase}
             />
           </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='isoCode'
+              label={labels.isoCode}
+              value={currencyValidation.values.isoCode}
+              required
+              onChange={currencyValidation.handleChange}
+              maxLength = '3'
+              maxAccess={maxAccess}
+              onClear={() => currencyValidation.setFieldValue('isoCode', '')}
+              error={currencyValidation.touched.isoCode && Boolean(currencyValidation.errors.isoCode)}
+              helperText={currencyValidation.touched.isoCode && currencyValidation.errors.isoCode}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='symbol'
+              label={labels.symbol}
+              value={currencyValidation.values.symbol}
+              required
+              onChange={currencyValidation.handleChange}
+              maxLength = '5'
+              maxAccess={maxAccess}
+              onClear={() => currencyValidation.setFieldValue('symbol', '')}
+              error={currencyValidation.touched.symbol && Boolean(currencyValidation.errors.symbol)}
+              helperText={currencyValidation.touched.symbol && currencyValidation.errors.symbol}
+            />
+          </Grid>
         </Grid>
     )
 }
