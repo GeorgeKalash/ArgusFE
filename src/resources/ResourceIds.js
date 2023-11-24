@@ -14,5 +14,6 @@ export const ResourceIds = {
   RelationType: 35101,
   Profession: 35105,
   SalaryRange: 35104,
-  CorrespondentAgents: 36102
+  CorrespondentAgents: 36102,
+  CorrespondentAgentBranch: 36107
 }

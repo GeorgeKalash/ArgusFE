@@ -71,7 +71,7 @@ const [position, setPosition] = useState()
               maxAccess={maxAccess}
               onChange={e => {
                 const input = e.target;
-                const formattedValue = getFormattedNumberMax(input.value, 8, 2);
+                const formattedValue = input.value  ? getFormattedNumberMax(input.value, 8, 2) : input.value ;
 
                 // Save current cursor position
                 const currentPosition = input.selectionStart;
@@ -82,8 +82,7 @@ const [position, setPosition] = useState()
                 // Calculate the new cursor position based on the formatted value
                 const newCursorPosition =
                   currentPosition +
-                  (formattedValue.length - input.value.length);
-
+                  (formattedValue && formattedValue.length - input.value.length);
 
                 setPosition(newCursorPosition);
 

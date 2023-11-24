@@ -36,5 +36,12 @@ export const RemittanceSettingsRepository = {
     get: service + 'getAGT',
     set: service + 'setAGT',
     del: service + 'delAGT'
+  },
+  CorrespondentAgentBranches: {
+    qry: service + 'qryABR',
+    page: service + "pageABR",
+    get: service + 'getABR',
+    set: service + 'setABR',
+    del: service + 'delABR'
   }
 }
