@@ -98,6 +98,7 @@ const InlineEditGrid = props => {
           <FormControlLabel
             control={
               <Checkbox
+                id={cellId}
                 name={fieldName}
                 checked={gridValidation.values.rows[rowIndex][fieldName]}
                 value={gridValidation.values.rows[rowIndex][fieldName]}
@@ -110,7 +111,7 @@ const InlineEditGrid = props => {
         )
       case 'button':
         return (
-          <Button sx={{ height: '30px' }} onClick={column.onClick} variant='contained'>
+          <Button id={cellId} sx={{ height: '30px' }} onClick={column.onClick} variant='contained'>
             {column.text}
           </Button>
         )
@@ -240,10 +241,11 @@ const InlineEditGrid = props => {
         })}
         <Column
           key='actions'
+          ref={null}
           body={(rowData, column) => {
             return (
-              <div>
-                <IconButton icon='pi pi-trash' onClick={() => openDeleteDialog(column.rowIndex)}>
+              <div ref={null}>
+                <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => openDeleteDialog(column.rowIndex)}>
                   <DeleteIcon />
                 </IconButton>
               </div>
