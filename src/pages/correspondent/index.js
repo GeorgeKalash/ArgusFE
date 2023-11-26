@@ -99,7 +99,11 @@ const Correspondent = () => {
     }
   ]
 
-  const tabs = [{ label: 'Main' }, { label: 'Countries' }, { label: 'Currencies' }]
+  const tabs = [
+    { label: 'Main' },
+    { label: 'Countries', disabled: !editMode },
+    { label: 'Currencies', disabled: !editMode }
+  ]
 
   const correspondentValidation = useFormik({
     enableReinitialize: true,
