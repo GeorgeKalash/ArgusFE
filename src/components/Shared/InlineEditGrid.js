@@ -19,18 +19,28 @@ const InlineEditGrid = props => {
     const cellId = `table-cell-${rowIndex}-${column.id}` // Unique identifier for the cell
 
     switch (field) {
+      case 'incremented':
+        return (
+          <CustomTextField
+            id={cellId}
+            name={fieldName}
+            value={gridValidation.values.rows[rowIndex][fieldName]}
+            required={true}
+            readOnly={true}
+          />
+        )
       case 'textfield':
         return (
           <CustomTextField
-            id={cellId} // Attach the unique identifier as the input's ID
+            id={cellId}
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][fieldName]}
             required={column?.mandatory}
+            readOnly={column?.readOnly}
             onChange={event => {
               const newValue = event.target.value
               gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
             }}
-            readOnly={column?.readOnly}
             onClear={() => {
               const updatedRows = [...gridValidation.values.rows]
               updatedRows[rowIndex][fieldName] = ''
@@ -41,6 +51,7 @@ const InlineEditGrid = props => {
       case 'combobox':
         return (
           <Autocomplete
+            id={cellId}
             size='small'
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
@@ -51,8 +62,8 @@ const InlineEditGrid = props => {
                 const selectedOption = column.store.find(item => {
                   return item[column.valueField] === option
                 })
-
-                return selectedOption[column.displayField]
+                if (selectedOption) return selectedOption[column?.displayField]
+                else return ''
               }
             }}
             isOptionEqualToValue={(option, value) => {
@@ -113,7 +124,13 @@ const InlineEditGrid = props => {
     const { key } = e
     if (key === 'Tab' && columnIndex === columns.length - 1) {
       if (rowIndex === gridValidation.values.rows.length - 1 && lastRowIsValid()) {
-        gridValidation.setFieldValue('rows', [...gridValidation.values.rows, defaultRow])
+        gridValidation.setFieldValue('rows', [
+          ...gridValidation.values.rows,
+          {
+            ...defaultRow,
+            ...handleIncrementedFieldsOnAdd()
+          }
+        ])
       }
     }
   }
@@ -132,14 +149,61 @@ const InlineEditGrid = props => {
     return true
   }
 
+  const handleIncrementedFieldsOnAdd = () => {
+    const result = {}
+    for (let i = 0; i < columns.length; i++) {
+      if (columns[i].field === 'incremented') {
+        const fieldName = columns[i].name
+        const value = columns[i].valueSetter()
+        result[fieldName] = value
+      }
+    }
+
+    return result
+  }
+
+  const handleIncrementedFieldsOnDelete = () => {
+    const result = {}
+    for (let i = 0; i < columns.length; i++) {
+      if (columns[i].field === 'incremented') {
+        const fieldName = columns[i].name
+        const value = columns[i].valueSetter()
+        result[fieldName] = value
+      }
+    }
+
+    return result
+  }
+
   const handleDelete = rowIndex => {
-    if (gridValidation.values.rows.length === 1) {
+    const rows = gridValidation.values.rows
+
+    if (rows.length === 1) {
       gridValidation.setFieldValue('rows', [defaultRow])
     } else {
-      const updatedRows = gridValidation.values.rows.filter((row, index) => index !== rowIndex)
+      const updatedRows = rows.filter((row, index) => index !== rowIndex)
+      if (rows[rowIndex + 1]) {
+        // If not the last row, handle incremented fields for the replacement row
+        const incrementedFields = handleIncrementedFieldsOnDelete()
+
+        const updatedReplacementRow = {
+          ...rows[rowIndex + 1],
+          ...incrementedFields
+        }
+        updatedRows[rowIndex] = updatedReplacementRow
+      }
       gridValidation.setFieldValue('rows', updatedRows)
     }
   }
+
+  // const handleDelete = rowIndex => {
+  //   if (gridValidation.values.rows.length === 1) {
+  //     gridValidation.setFieldValue('rows', [defaultRow])
+  //   } else {
+  //     const updatedRows = gridValidation.values.rows.filter((row, index) => index !== rowIndex)
+  //     gridValidation.setFieldValue('rows', updatedRows)
+  //   }
+  // }
 
   const openDeleteDialog = rowIndex => {
     setDeleteDialogOpen([true, rowIndex])

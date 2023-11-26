@@ -122,19 +122,34 @@ const Correspondent = () => {
   const countriesGridValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
+
     initialValues: {
       rows: [
         {
+          seqNo: 1,
+          seqNo2: 'Seq Nu 2-1', // can send as 1; this is only an example of complex use of valueSetter
           corId: correspondentValidation.values
             ? correspondentValidation.values.recordId
               ? correspondentValidation.values.recordId
               : ''
             : '',
-
-          //countryId: '', throwing an error when having this
+          countryId: '',
           countryRef: '',
-          countryName: ''
+          countryName: '',
+          currencyName: ''
         }
+
+        // {
+        //   corId: correspondentValidation.values
+        //     ? correspondentValidation.values.recordId
+        //       ? correspondentValidation.values.recordId
+        //       : ''
+        //     : '',
+
+        //   //countryId: '', throwing an error when having this
+        //   countryRef: '',
+        //   countryName: ''
+        // }
       ]
     },
     onSubmit: values => {
@@ -143,6 +158,26 @@ const Correspondent = () => {
   })
 
   const countriesInlineGridColumns = [
+    {
+      field: 'incremented',
+      header: 'Seq Nu',
+      name: 'seqNo',
+      mandatory: true,
+      readOnly: true,
+      valueSetter: () => {
+        return countriesGridValidation.values.rows.length + 1
+      }
+    },
+    {
+      field: 'incremented',
+      header: 'Seq Nu 2',
+      name: 'seqNo2',
+      mandatory: true,
+      readOnly: true,
+      valueSetter: () => {
+        return `Seq Nu 2-${countriesGridValidation.values.rows.length + 1}`
+      }
+    },
     {
       field: 'combobox',
       header: 'Country Ref',
@@ -205,7 +240,6 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        countriesGridValidation.setValues({ rows: res.list })
         setCorrespondentCountries(res.list)
       })
       .catch(error => {
