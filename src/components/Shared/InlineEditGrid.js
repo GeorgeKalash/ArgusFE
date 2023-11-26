@@ -12,6 +12,7 @@ const InlineEditGrid = props => {
   const columns = props.columns
   const defaultRow = props.defaultRow
   const gridValidation = props.gridValidation
+  const tableWidth = props.width
 
   const cellEditor = (field, row, rowIndex, column) => {
     if (!row.rowData) return
@@ -90,7 +91,8 @@ const InlineEditGrid = props => {
                 }
               }
             }}
-            renderInput={params => <TextField {...params} required={column?.mandatory} />}
+            fullWidth={true}
+            renderInput={params => <TextField {...params} required={column?.mandatory} sx={{ flex: 1 }} />}
           />
         )
       case 'checkbox':
@@ -122,6 +124,7 @@ const InlineEditGrid = props => {
   }
 
   const handleKeyDown = (e, columnIndex, rowIndex) => {
+    console.log('handleKeyDown')
     const { key } = e
     if (key === 'Tab' && columnIndex === columns.length - 1) {
       if (rowIndex === gridValidation.values.rows.length - 1 && lastRowIsValid()) {
@@ -197,9 +200,13 @@ const InlineEditGrid = props => {
     closeDeleteDialog()
   }
 
+  console.log({ tableWidth })
+  console.log({ columns: columns.length })
+  console.log({ columnWidth: tableWidth / columns.length })
+
   return (
     <Box>
-      <DataTable value={gridValidation?.values?.rows} editMode='cell' tableStyle={{ minWidth: '600px' }}>
+      <DataTable value={gridValidation?.values?.rows} editMode='cell' tableStyle={{ minWidth: tableWidth }}>
         {columns.map((column, i) => {
           return (
             <Column
@@ -207,12 +214,12 @@ const InlineEditGrid = props => {
               field={column.name}
               header={column.header}
               style={{
-                width: column.width || '200px'
+                width: column.width || tableWidth / columns.length
               }}
               body={row => {
                 return (
                   <Box
-                    style={{
+                    sx={{
                       height: '30px',
                       border:
                         (row[column.name] === '' || row[column.name] === null) && column?.mandatory
@@ -231,7 +238,7 @@ const InlineEditGrid = props => {
               }}
               editor={options => {
                 return (
-                  <Box onKeyDown={e => handleKeyDown(e, i, options.rowIndex)}>
+                  <Box sx={{ display: 'flex' }} onKeyDown={e => handleKeyDown(e, i, options.rowIndex)}>
                     {cellEditor(column.field, options, options.rowIndex, column)}
                   </Box>
                 )

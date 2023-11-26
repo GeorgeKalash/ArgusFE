@@ -541,7 +541,7 @@ const Correspondent = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onClose={() => setWindowOpen(false)}
-          width={900}
+          width={1000}
           height={400}
           onSave={handleSubmit}
           editMode={editMode}

@@ -28,6 +28,7 @@ const CorrespondentCountriesTab = ({
             countryName: '',
             currencyName: ''
           }}
+          width={1000}
         />
       </Box>
     </>
