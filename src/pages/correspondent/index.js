@@ -125,7 +125,11 @@ const Correspondent = () => {
     initialValues: {
       rows: [
         {
-          corId: correspondentValidation.values ? correspondentValidation.values.recordId ? correspondentValidation.values.recordId : '' : '',
+          corId: correspondentValidation.values
+            ? correspondentValidation.values.recordId
+              ? correspondentValidation.values.recordId
+              : ''
+            : '',
 
           //countryId: '', throwing an error when having this
           countryRef: '',
@@ -191,6 +195,7 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
+        countriesGridValidation.setValues({ rows: res.list })
         setCorrespondentCountries(res.list)
       })
       .catch(error => {
@@ -205,7 +210,11 @@ const Correspondent = () => {
     initialValues: {
       rows: [
         {
-          corId: correspondentValidation.values ? correspondentValidation.values.recordId ? correspondentValidation.values.recordId : '' : '',
+          corId: correspondentValidation.values
+            ? correspondentValidation.values.recordId
+              ? correspondentValidation.values.recordId
+              : ''
+            : '',
 
           //currencyId: '', throwing an error when having this
           currencyRef: '',
@@ -216,7 +225,7 @@ const Correspondent = () => {
           inward: false,
           bankDeposit: false,
           deal: false,
-          isInactive: false,
+          isInactive: false
         }
       ]
     },
@@ -346,7 +355,6 @@ const Correspondent = () => {
     if (activeTab === 0) correspondentValidation.handleSubmit()
     else if (activeTab === 1) countriesGridValidation.handleSubmit()
     else if (activeTab === 2) currenciesGridValidation.handleSubmit()
-    
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -402,6 +410,7 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
+        console.log({ res })
         setCountryStore(res)
       })
       .catch(error => {
@@ -448,6 +457,7 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
+        console.log({ getCorrespondentById: res.record })
         correspondentValidation.setValues(populateCorrespondent(res.record))
         setEditMode(true)
         setWindowOpen(true)
@@ -463,14 +473,11 @@ const Correspondent = () => {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 50 })
         getLabels(ResourceIds.Correspondent, setLabels)
-        if (correspondentCountries) {
-          countriesGridValidation.setValues({ rows: correspondentCountries.rows })
-        }
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
-  }, [access, correspondentCountries])
+  }, [access])
 
   return (
     <>
@@ -503,11 +510,9 @@ const Correspondent = () => {
           bpMasterDataStore={bpMasterDataStore}
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
-
           //countries tab - inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
-
           //currencies tab - inline edit grid
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
