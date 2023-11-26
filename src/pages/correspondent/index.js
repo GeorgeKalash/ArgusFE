@@ -126,7 +126,11 @@ const Correspondent = () => {
   const countriesGridValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.countryId)
 
+      return isValid ? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
+    },
     initialValues: {
       rows: [
         {
@@ -142,21 +146,10 @@ const Correspondent = () => {
           countryName: '',
           currencyName: ''
         }
-
-        // {
-        //   corId: correspondentValidation.values
-        //     ? correspondentValidation.values.recordId
-        //       ? correspondentValidation.values.recordId
-        //       : ''
-        //     : '',
-
-        //   //countryId: '', throwing an error when having this
-        //   countryRef: '',
-        //   countryName: ''
-        // }
       ]
     },
     onSubmit: values => {
+      console.log({ values })
       postCorrespondentCountries(values.rows)
     }
   })
