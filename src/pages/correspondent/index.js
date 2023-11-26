@@ -176,7 +176,7 @@ const Correspondent = () => {
       }
     },
     {
-      field: 'combobox',
+      field: 'lookup',
       header: 'Country Ref',
       nameId: 'countryId',
       name: 'countryRef',
@@ -187,11 +187,37 @@ const Correspondent = () => {
       fieldsToUpdate: [
         { from: 'flName', to: 'countryName' },
         { from: 'currencyName', to: 'currencyName' }
+      ],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Country Ref' },
+        { key: 'flName', value: 'Full Name' },
+        { key: 'currencyName', value: 'Currency Name' }
       ]
-
-      //I want something similar to this to be able to affect many fields for the same row on selection
-      //[{'currencyName','name'}],[{'countryId','recordId'}]
     },
+
+    // {
+    //   field: 'combobox',
+    //   header: 'Country Ref',
+    //   nameId: 'countryId',
+    //   name: 'countryRef',
+    //   mandatory: true,
+    //   store: countryStore.list,
+    //   valueField: 'recordId',
+    //   displayField: 'reference',
+    //   fieldsToUpdate: [
+    //     { from: 'flName', to: 'countryName' },
+    //     { from: 'currencyName', to: 'currencyName' }
+    //   ]
+
+    //   // fieldsInDropDown: [
+    //   //   { key: 'reference', value: 'Country Ref' },
+    //   //   { key: 'flName', value: 'Full Name' },
+    //   //   { key: 'currencyName', value: 'Currency Name' }
+    //   // ]
+
+    //   //I want something similar to this to be able to affect many fields for the same row on selection
+    //   //[{'currencyName','name'}],[{'countryId','recordId'}]
+    // },
     {
       field: 'textfield',
       header: 'Country Name',
@@ -201,7 +227,7 @@ const Correspondent = () => {
     },
     {
       field: 'textfield',
-      header: 'Country Name',
+      header: 'Currency Name',
       name: 'currencyName',
       mandatory: false,
       readOnly: true
