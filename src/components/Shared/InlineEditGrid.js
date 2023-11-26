@@ -162,48 +162,26 @@ const InlineEditGrid = props => {
     return result
   }
 
-  const handleIncrementedFieldsOnDelete = () => {
-    const result = {}
+  const handleIncrementedFieldsOnDelete = (deletedRow, replacementRow) => {
     for (let i = 0; i < columns.length; i++) {
       if (columns[i].field === 'incremented') {
         const fieldName = columns[i].name
-        const value = columns[i].valueSetter()
-        result[fieldName] = value
+        replacementRow[fieldName] = deletedRow[fieldName]
       }
     }
-
-    return result
   }
 
   const handleDelete = rowIndex => {
-    const rows = gridValidation.values.rows
-
-    if (rows.length === 1) {
+    if (gridValidation.values.rows.length === 1) {
       gridValidation.setFieldValue('rows', [defaultRow])
     } else {
-      const updatedRows = rows.filter((row, index) => index !== rowIndex)
-      if (rows[rowIndex + 1]) {
-        // If not the last row, handle incremented fields for the replacement row
-        const incrementedFields = handleIncrementedFieldsOnDelete()
-
-        const updatedReplacementRow = {
-          ...rows[rowIndex + 1],
-          ...incrementedFields
-        }
-        updatedRows[rowIndex] = updatedReplacementRow
+      if (gridValidation.values.rows[rowIndex + 1]) {
+        handleIncrementedFieldsOnDelete(gridValidation.values.rows[rowIndex], gridValidation.values.rows[rowIndex + 1])
       }
+      const updatedRows = gridValidation.values.rows.filter((row, index) => index !== rowIndex)
       gridValidation.setFieldValue('rows', updatedRows)
     }
   }
-
-  // const handleDelete = rowIndex => {
-  //   if (gridValidation.values.rows.length === 1) {
-  //     gridValidation.setFieldValue('rows', [defaultRow])
-  //   } else {
-  //     const updatedRows = gridValidation.values.rows.filter((row, index) => index !== rowIndex)
-  //     gridValidation.setFieldValue('rows', updatedRows)
-  //   }
-  // }
 
   const openDeleteDialog = rowIndex => {
     setDeleteDialogOpen([true, rowIndex])
