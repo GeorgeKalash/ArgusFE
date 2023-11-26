@@ -68,10 +68,16 @@ const InlineEditGrid = props => {
                 `rows[${rowIndex}].${column.name}`,
                 newValue ? newValue[column.displayField] : newValue
               )
-              gridValidation.setFieldValue(
-                `rows[${rowIndex}].${column.fieldToUpdate}`,
-                newValue ? newValue[column.fieldToUpdate] : newValue
-              )
+
+              if (column.fieldsToUpdate && column.fieldsToUpdate.length > 0) {
+                const fieldsToUpdate = column.fieldsToUpdate
+                for (let i = 0; i < fieldsToUpdate.length; i++) {
+                  gridValidation.setFieldValue(
+                    `rows[${rowIndex}].${fieldsToUpdate[i].to}`,
+                    newValue ? newValue[fieldsToUpdate[i].from] : newValue
+                  )
+                }
+              }
             }}
             renderInput={params => <TextField {...params} required={column?.mandatory} />}
           />

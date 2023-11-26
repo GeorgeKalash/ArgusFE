@@ -340,7 +340,7 @@ const DocumentTypes = () => {
       store: countryStore,
       valueField: 'recordId',
       displayField: 'countryRef',
-      fieldToUpdate: 'countryName'
+      fieldsToUpdate: [{ from: 'countryName', to: 'countryName' }]
     },
     {
       field: 'textfield',

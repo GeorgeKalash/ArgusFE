@@ -1,6 +1,4 @@
-import {
-  Box,
-} from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
@@ -11,21 +9,25 @@ const CorrespondentCountriesTab = ({
   countriesInlineGridColumns,
   maxAccess
 }) => {
-
   return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-              <InlineEditGrid
-                gridValidation={countriesGridValidation}
-                columns={countriesInlineGridColumns}
-                defaultRow={{
-                  corId: correspondentValidation.values ? correspondentValidation.values.recordId ? correspondentValidation.values.recordId : '' : '',
-                  countryId: '',
-                  countryRef: '',
-                  countryName: ''
-                }}
-              />
-            </Box>
+        <InlineEditGrid
+          gridValidation={countriesGridValidation}
+          columns={countriesInlineGridColumns}
+          defaultRow={{
+            corId: correspondentValidation.values
+              ? correspondentValidation.values.recordId
+                ? correspondentValidation.values.recordId
+                : ''
+              : '',
+            countryId: '',
+            countryRef: '',
+            countryName: '',
+            currencyName: ''
+          }}
+        />
+      </Box>
     </>
   )
 }

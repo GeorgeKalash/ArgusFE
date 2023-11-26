@@ -151,16 +151,26 @@ const Correspondent = () => {
       mandatory: true,
       store: countryStore.list,
       valueField: 'recordId',
-      displayField: 'reference'
+      displayField: 'reference',
+      fieldsToUpdate: [
+        { from: 'flName', to: 'countryName' },
+        { from: 'currencyName', to: 'currencyName' }
+      ]
 
-      //fieldToUpdate: 'countryName'
       //I want something similar to this to be able to affect many fields for the same row on selection
-      //[{'countryName','name'}],[{'countryId','recordId'}]
+      //[{'currencyName','name'}],[{'countryId','recordId'}]
     },
     {
       field: 'textfield',
       header: 'Country Name',
       name: 'countryName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'textfield',
+      header: 'Country Name',
+      name: 'currencyName',
       mandatory: false,
       readOnly: true
     }
@@ -410,7 +420,6 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log({ res })
         setCountryStore(res)
       })
       .catch(error => {
@@ -457,7 +466,6 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log({ getCorrespondentById: res.record })
         correspondentValidation.setValues(populateCorrespondent(res.record))
         setEditMode(true)
         setWindowOpen(true)
