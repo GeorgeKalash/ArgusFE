@@ -31,6 +31,7 @@ const CorrespondentCurrenciesTab = ({
             //glCurrencyName: '',
 
             exchangeId: '',
+            exchangeRef: '',
             outward: false,
             inward: false,
             bankDeposit: false,
