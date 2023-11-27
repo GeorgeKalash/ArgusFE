@@ -330,7 +330,7 @@ const Correspondent = () => {
       header: 'Exchange Table',
       nameId: 'exchangeId',
       name: 'exchangeRef',
-      mandatory: true,
+      mandatory: false,
       store: exchangeTableStore.list,
       valueField: 'recordId',
       displayField: 'reference',
