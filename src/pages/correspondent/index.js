@@ -130,19 +130,19 @@ const Correspondent = () => {
     },
     initialValues: {
       rows: [
-        // {
-        //   seqNo: 1,
-        //   seqNo2: 'Seq Nu 2-1', // can send as 1; this is only an example of complex use of valueSetter
-        //   corId: correspondentValidation.values
-        //     ? correspondentValidation.values.recordId
-        //       ? correspondentValidation.values.recordId
-        //       : ''
-        //     : '',
-        //   countryId: '',
-        //   countryRef: '',
-        //   countryName: '',
-        //   currencyName: ''
-        // }
+        {
+          seqNo: 1,
+          seqNo2: 'Seq Nu 2-1', // can send as 1; this is only an example of complex use of valueSetter
+          corId: correspondentValidation.values
+            ? correspondentValidation.values.recordId
+              ? correspondentValidation.values.recordId
+              : ''
+            : '',
+          countryId: '',
+          countryRef: '',
+          countryName: '',
+          currencyName: ''
+        }
       ]
     },
     onSubmit: values => {
@@ -260,7 +260,7 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        countriesGridValidation.setValues({ rows: res.list })
+        if (res.list.length > 0) countriesGridValidation.setValues({ rows: res.list })
       })
       .catch(error => {
         setErrorMessage(error)
