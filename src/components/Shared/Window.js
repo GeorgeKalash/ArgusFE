@@ -94,7 +94,7 @@ const Window = ({
             {tabs && (
               <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
                 {tabs.map((tab, i) => (
-                  <Tab key={i} label={tab.label} />
+                  <Tab key={i} label={tab.label} disabled={tab?.disabled} />
                 ))}
               </Tabs>
             )}
