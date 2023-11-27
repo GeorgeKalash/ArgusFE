@@ -36,5 +36,9 @@ export const RemittanceSettingsRepository = {
     get: service + 'getAGT',
     set: service + 'setAGT',
     del: service + 'delAGT'
+  },
+  CorrespondentExchangeMap: {
+    qry: service + 'qryEXC',
+    set2: service + 'set2EXC'
   }
 }

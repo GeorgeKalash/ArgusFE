@@ -1,6 +1,4 @@
-import {
-  Box,
-} from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
@@ -11,34 +9,37 @@ const CorrespondentCurrenciesTab = ({
   currenciesInlineGridColumns,
   maxAccess
 }) => {
-
   return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-              <InlineEditGrid
-                gridValidation={currenciesGridValidation}
-                columns={currenciesInlineGridColumns}
-                defaultRow={{
-                  corId: correspondentValidation.values ? correspondentValidation.values.recordId ? correspondentValidation.values.recordId : '' : '',
-                  currencyId: '',
-                  currencyRef: '',
-                  
-                  //currencyName: '',
-                  glCurrencyId: '',
-                  glCurrencyRef: '',
-                  
-                  //glCurrencyName: '',
+        <InlineEditGrid
+          gridValidation={currenciesGridValidation}
+          columns={currenciesInlineGridColumns}
+          defaultRow={{
+            corId: correspondentValidation.values
+              ? correspondentValidation.values.recordId
+                ? correspondentValidation.values.recordId
+                : ''
+              : '',
+            currencyId: '',
+            currencyRef: '',
 
-                  exchangeId:'',
-                  outward: false,
-                  inward: false,
-                  bankDeposit: false,
-                  deal: false,
-                  isInactive: false
-                }}
-                width={1000}
-              />
-            </Box>
+            //currencyName: '',
+            glCurrencyId: '',
+            glCurrencyRef: '',
+
+            //glCurrencyName: '',
+
+            exchangeId: '',
+            outward: false,
+            inward: false,
+            bankDeposit: false,
+            deal: false,
+            isInactive: false
+          }}
+          width={1000}
+        />
+      </Box>
     </>
   )
 }
