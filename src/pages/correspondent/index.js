@@ -27,6 +27,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -37,15 +38,13 @@ const Correspondent = () => {
   const [bpMasterDataStore, setBpMasterDataStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
+  const [exchangeTableStore, setExchangeTableStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
-
-  //stated for currencies inline edit grid
-  const [correspondentCurrencies, setCorrespondentCurrencies] = useState(null)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -131,8 +130,8 @@ const Correspondent = () => {
     initialValues: {
       rows: [
         {
-          seqNo: 1,
-          seqNo2: 'Seq Nu 2-1', // can send as 1; this is only an example of complex use of valueSetter
+          //seqNo: 1,
+          //seqNo2: 'Seq Nu 2-1', // can send as 1; this is only an example of complex use of valueSetter
           corId: correspondentValidation.values
             ? correspondentValidation.values.recordId
               ? correspondentValidation.values.recordId
@@ -140,8 +139,7 @@ const Correspondent = () => {
             : '',
           countryId: '',
           countryRef: '',
-          countryName: '',
-          currencyName: ''
+          countryName: ''
         }
       ]
     },
@@ -152,28 +150,28 @@ const Correspondent = () => {
   })
 
   const countriesInlineGridColumns = [
+    // {
+    //   field: 'incremented',
+    //   header: 'Seq Nu',
+    //   name: 'seqNo',
+    //   mandatory: false,
+    //   readOnly: true,
+    //   valueSetter: () => {
+    //     return countriesGridValidation.values.rows.length + 1
+    //   }
+    // },
+    // {
+    //   field: 'incremented',
+    //   header: 'Seq Nu 2',
+    //   name: 'seqNo2',
+    //   mandatory: false,
+    //   readOnly: true,
+    //   valueSetter: () => {
+    //     return `Seq Nu 2-${countriesGridValidation.values.rows.length + 1}`
+    //   }
+    // },
     {
-      field: 'incremented',
-      header: 'Seq Nu',
-      name: 'seqNo',
-      mandatory: false,
-      readOnly: true,
-      valueSetter: () => {
-        return countriesGridValidation.values.rows.length + 1
-      }
-    },
-    {
-      field: 'incremented',
-      header: 'Seq Nu 2',
-      name: 'seqNo2',
-      mandatory: false,
-      readOnly: true,
-      valueSetter: () => {
-        return `Seq Nu 2-${countriesGridValidation.values.rows.length + 1}`
-      }
-    },
-    {
-      field: 'lookup',
+      field: 'combobox',
       header: 'Country Ref',
       nameId: 'countryId',
       name: 'countryRef',
@@ -181,51 +179,16 @@ const Correspondent = () => {
       store: countryStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      fieldsToUpdate: [
-        { from: 'flName', to: 'countryName' },
-        { from: 'currencyName', to: 'currencyName' }
-      ],
+      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Country Ref' },
-        { key: 'flName', value: 'Full Name' },
-        { key: 'currencyName', value: 'Currency Name' }
+        { key: 'flName', value: 'Foreign Language Name' }
       ]
     },
-
-    // {
-    //   field: 'combobox',
-    //   header: 'Country Ref',
-    //   nameId: 'countryId',
-    //   name: 'countryRef',
-    //   mandatory: true,
-    //   store: countryStore.list,
-    //   valueField: 'recordId',
-    //   displayField: 'reference',
-    //   fieldsToUpdate: [
-    //     { from: 'flName', to: 'countryName' },
-    //     { from: 'currencyName', to: 'currencyName' }
-    //   ]
-
-    //   // fieldsInDropDown: [
-    //   //   { key: 'reference', value: 'Country Ref' },
-    //   //   { key: 'flName', value: 'Full Name' },
-    //   //   { key: 'currencyName', value: 'Currency Name' }
-    //   // ]
-
-    //   //I want something similar to this to be able to affect many fields for the same row on selection
-    //   //[{'currencyName','name'}],[{'countryId','recordId'}]
-    // },
     {
       field: 'textfield',
       header: 'Country Name',
       name: 'countryName',
-      mandatory: false,
-      readOnly: true
-    },
-    {
-      field: 'textfield',
-      header: 'Currency Name',
-      name: 'currencyName',
       mandatory: false,
       readOnly: true
     }
@@ -271,6 +234,11 @@ const Correspondent = () => {
   const currenciesGridValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.currencyId)
+
+      return isValid ? {} : { rows: Array(values.rows.length).fill({ currencyId: 'Currency is required' }) }
+    },
     initialValues: {
       rows: [
         {
@@ -279,12 +247,14 @@ const Correspondent = () => {
               ? correspondentValidation.values.recordId
               : ''
             : '',
-
-          //currencyId: '', throwing an error when having this
+          currencyId: '',
           currencyRef: '',
           currencyName: '',
+          glCurrencyId: '',
           glCurrencyRef: '',
           glCurrencyName: '',
+          exchangeId: '',
+          exchangeRef:'',
           outward: false,
           inward: false,
           bankDeposit: false,
@@ -294,6 +264,7 @@ const Correspondent = () => {
       ]
     },
     onSubmit: values => {
+      console.log({ values })
       postCorrespondentCurrencies(values.rows)
     }
   })
@@ -301,42 +272,69 @@ const Correspondent = () => {
   const currenciesInlineGridColumns = [
     {
       field: 'combobox',
-      header: 'Currency Ref',
+      header: 'Currency',
       nameId: 'currencyId',
       name: 'currencyRef',
       mandatory: true,
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      fieldToUpdate: 'currencyName'
+      
+      //fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Ref' },
+        { key: 'name', value: 'Name' },
+        { key: 'flName', value: 'FL Name' }
+      ]
+    },
 
-      //I want something similar to this to be able to affect many fields for the same row on selection
-      //[{'currencyName','name'}],[{'currencyId','recordId'}]
-    },
-    {
-      field: 'textfield',
-      header: 'Currency Name',
-      name: 'currencyName',
-      mandatory: false,
-      readOnly: true
-    },
+    // {
+    //   field: 'textfield',
+    //   header: 'Name',
+    //   name: 'currencyName',
+    //   mandatory: false,
+    //   readOnly: true
+    // },
     {
       field: 'combobox',
-      header: 'GL Currency Ref',
+      header: 'GL Currency',
       nameId: 'glCurrencyId',
       name: 'glCurrencyRef',
       mandatory: true,
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      fieldToUpdate: 'glCurrencyName'
+      
+      //fieldsToUpdate: [{ from: 'name', to: 'GlCurrencyName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Ref' },
+        { key: 'name', value: 'Name' },
+        { key: 'flName', value: 'FL Name' }
+      ]
     },
+
+    // {
+    //   field: 'textfield',
+    //   header: 'Name',
+    //   name: 'GlCurrencyName',
+    //   mandatory: false,
+    //   readOnly: true
+    // },
+    
     {
-      field: 'textfield',
-      header: 'GL Currency Name',
-      name: 'glCurrencyName',
-      mandatory: false,
-      readOnly: true
+      field: 'combobox',
+      header: 'Exchange Table',
+      nameId: 'exchangeId',
+      name: 'exchangeRef',
+      mandatory: true,
+      store: exchangeTableStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldsToUpdate: [],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Ref' },
+        { key: 'name', value: 'Name' },
+      ]
     },
     {
       field: 'checkbox',
@@ -394,7 +392,7 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        setCorrespondentCurrencies(res.list)
+        if (res.list.length > 0) currenciesGridValidation.setValues({ rows: res.list })
       })
       .catch(error => {
         setErrorMessage(error)
@@ -495,10 +493,25 @@ const Correspondent = () => {
       })
   }
 
+  const fillExchangeTableStore = () => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: MultiCurrencyRepository.ExchangeTable.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setExchangeTableStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const addCorrespondent = () => {
     correspondentValidation.setValues(getNewCorrespondent())
     fillCountryStore()
     fillCurrencyStore()
+    fillExchangeTableStore()
     setEditMode(false)
     setWindowOpen(true)
   }
@@ -506,6 +519,7 @@ const Correspondent = () => {
   const popup = obj => {
     fillCountryStore()
     fillCurrencyStore()
+    fillExchangeTableStore()
     getCorrespondentById(obj)
     getCorrespondentCountries(obj)
     getCorrespondentCurrencies(obj)
@@ -572,9 +586,11 @@ const Correspondent = () => {
           bpMasterDataStore={bpMasterDataStore}
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
+
           //countries tab - inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
+
           //currencies tab - inline edit grid
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}

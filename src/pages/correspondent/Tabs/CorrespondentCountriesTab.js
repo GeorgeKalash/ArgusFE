@@ -16,8 +16,8 @@ const CorrespondentCountriesTab = ({
           gridValidation={countriesGridValidation}
           columns={countriesInlineGridColumns}
           defaultRow={{
-            seqNo: 1,
-            seqNo2: 'Seq Nu 2-1',
+            // seqNo: 1,
+            // seqNo2: 'Seq Nu 2-1',
             corId: correspondentValidation.values
               ? correspondentValidation.values.recordId
                 ? correspondentValidation.values.recordId
@@ -25,8 +25,7 @@ const CorrespondentCountriesTab = ({
               : '',
             countryId: '',
             countryRef: '',
-            countryName: '',
-            currencyName: ''
+            countryName: ''
           }}
           width={1000}
         />

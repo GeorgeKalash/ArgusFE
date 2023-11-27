@@ -95,6 +95,38 @@ const InlineEditGrid = props => {
                 }
               }
             }}
+            PaperComponent={props =>
+              column.columnsInDropDown &&
+              column.columnsInDropDown.length > 0 &&
+              CustomPaper(props, column.columnsInDropDown.length)
+            }
+            renderOption={(props, option) => {
+              if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
+                return (
+                  <Box>
+                    {props.id.endsWith('-0') && (
+                      <li className={props.className}>
+                        {column.columnsInDropDown.map((header, i) => {
+                          return (
+                            <Box key={i} sx={{ flex: 1 }}>
+                              {header.value.toUpperCase()}
+                            </Box>
+                          )
+                        })}
+                      </li>
+                    )}
+                    <li {...props}>
+                      {column.columnsInDropDown.map((header, i) => {
+                        return (
+                          <Box key={i} sx={{ flex: 1 }}>
+                            {option[header.key]}
+                          </Box>
+                        )
+                      })}
+                    </li>
+                  </Box>
+                )
+            }}
             fullWidth={true}
             renderInput={params => <TextField {...params} required={column?.mandatory} sx={{ flex: 1 }} />}
           />
@@ -222,8 +254,9 @@ const InlineEditGrid = props => {
 
   const lastRowIsValid = () => {
     const lastRow = gridValidation.values.rows[gridValidation.values.rows.length - 1]
-
+    console.log(columns);
     for (let i = 0; i < columns.length; i++) {
+      console.log(columns[i])
       const columnName = columns[i].name
 
       if (columns[i]?.mandatory && !lastRow[columnName]) {

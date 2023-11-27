@@ -22,16 +22,21 @@ const CorrespondentCurrenciesTab = ({
                   corId: correspondentValidation.values ? correspondentValidation.values.recordId ? correspondentValidation.values.recordId : '' : '',
                   currencyId: '',
                   currencyRef: '',
-                  currencyName: '',
+                  
+                  //currencyName: '',
                   glCurrencyId: '',
                   glCurrencyRef: '',
-                  glCurrencyName: '',
+                  
+                  //glCurrencyName: '',
+
+                  exchangeId:'',
                   outward: false,
                   inward: false,
                   bankDeposit: false,
                   deal: false,
                   isInactive: false
                 }}
+                width={1000}
               />
             </Box>
     </>
