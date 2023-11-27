@@ -283,7 +283,15 @@ const InlineEditGrid = props => {
 
   return (
     <Box>
-      <DataTable value={gridValidation?.values?.rows} editMode='cell' tableStyle={{ minWidth: tableWidth }}>
+      <DataTable
+        value={
+          gridValidation?.values?.rows && gridValidation?.values?.rows.length > 0
+            ? gridValidation?.values?.rows
+            : [defaultRow]
+        }
+        editMode='cell'
+        tableStyle={{ minWidth: tableWidth }}
+      >
         {columns.map((column, i) => {
           return (
             <Column

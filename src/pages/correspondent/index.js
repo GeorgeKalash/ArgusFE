@@ -44,9 +44,6 @@ const Correspondent = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
 
-  //stated for countries inline edit grid
-  const [correspondentCountries, setCorrespondentCountries] = useState(null)
-
   //stated for currencies inline edit grid
   const [correspondentCurrencies, setCorrespondentCurrencies] = useState(null)
 
@@ -133,19 +130,19 @@ const Correspondent = () => {
     },
     initialValues: {
       rows: [
-        {
-          seqNo: 1,
-          seqNo2: 'Seq Nu 2-1', // can send as 1; this is only an example of complex use of valueSetter
-          corId: correspondentValidation.values
-            ? correspondentValidation.values.recordId
-              ? correspondentValidation.values.recordId
-              : ''
-            : '',
-          countryId: '',
-          countryRef: '',
-          countryName: '',
-          currencyName: ''
-        }
+        // {
+        //   seqNo: 1,
+        //   seqNo2: 'Seq Nu 2-1', // can send as 1; this is only an example of complex use of valueSetter
+        //   corId: correspondentValidation.values
+        //     ? correspondentValidation.values.recordId
+        //       ? correspondentValidation.values.recordId
+        //       : ''
+        //     : '',
+        //   countryId: '',
+        //   countryRef: '',
+        //   countryName: '',
+        //   currencyName: ''
+        // }
       ]
     },
     onSubmit: values => {
@@ -263,7 +260,7 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        setCorrespondentCountries(res.list)
+        countriesGridValidation.setValues({ rows: res.list })
       })
       .catch(error => {
         setErrorMessage(error)
