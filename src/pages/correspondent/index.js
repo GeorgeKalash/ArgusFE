@@ -156,7 +156,7 @@ const Correspondent = () => {
       field: 'incremented',
       header: 'Seq Nu',
       name: 'seqNo',
-      mandatory: true,
+      mandatory: false,
       readOnly: true,
       valueSetter: () => {
         return countriesGridValidation.values.rows.length + 1
@@ -166,7 +166,7 @@ const Correspondent = () => {
       field: 'incremented',
       header: 'Seq Nu 2',
       name: 'seqNo2',
-      mandatory: true,
+      mandatory: false,
       readOnly: true,
       valueSetter: () => {
         return `Seq Nu 2-${countriesGridValidation.values.rows.length + 1}`
