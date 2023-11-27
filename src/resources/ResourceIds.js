@@ -15,5 +15,6 @@ export const ResourceIds = {
   Profession: 35105,
   SalaryRange: 35104,
   CorrespondentAgents: 36102,
-  CorrespondentAgentBranch: 36107
+  CorrespondentAgentBranch: 36107,
+  Address: 20102
 }
