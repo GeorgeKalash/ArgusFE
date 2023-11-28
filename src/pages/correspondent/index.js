@@ -119,7 +119,7 @@ const Correspondent = () => {
 
   // COUNTRIES TAB
   const countriesGridValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
       const isValid = values.rows.every(row => !!row.countryId)
@@ -253,7 +253,7 @@ const Correspondent = () => {
           glCurrencyRef: '',
           glCurrencyName: '',
           exchangeId: '',
-          exchangeRef:'',
+          exchangeRef: '',
           outward: false,
           inward: false,
           bankDeposit: false,
@@ -278,7 +278,7 @@ const Correspondent = () => {
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      
+
       //fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
@@ -303,7 +303,7 @@ const Correspondent = () => {
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      
+
       //fieldsToUpdate: [{ from: 'name', to: 'GlCurrencyName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
@@ -319,7 +319,7 @@ const Correspondent = () => {
     //   mandatory: false,
     //   readOnly: true
     // },
-    
+
     {
       field: 'combobox',
       header: _labels.exchange,
@@ -332,7 +332,7 @@ const Correspondent = () => {
       fieldsToUpdate: [],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
-        { key: 'name', value: 'Name' },
+        { key: 'name', value: 'Name' }
       ]
     },
     {
@@ -363,15 +363,12 @@ const Correspondent = () => {
     {
       field: 'button',
       text: _labels.exchange,
-      onClick: (e, row)=> {
-        
+      onClick: (e, row) => {
         exchangeMapValidation.setValues(getNewCorrExchangeMap())
-        setCurrencyMapWindowOpen(true);
-
+        setCurrencyMapWindowOpen(true)
       }
-    },
+    }
   ]
-
 
   const postCorrespondentCurrencies = obj => {
     const data = {
@@ -418,12 +415,11 @@ const Correspondent = () => {
       currencyId: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required')
     }),
-    onSubmit: values => {
-    }
+    onSubmit: values => {}
   })
 
   const handleExchangeMapSubmit = () => {
-    exchangeMapValidation.handleSubmit();
+    exchangeMapValidation.handleSubmit()
   }
 
   const exchangeMapsGridValidation = useFormik({
@@ -452,8 +448,8 @@ const Correspondent = () => {
       ]
     },
     onSubmit: values => {
-      console.log(values);
-      postExchangeMaps(values);
+      console.log(values)
+      postExchangeMaps(values)
     }
   })
 
@@ -484,7 +480,7 @@ const Correspondent = () => {
       fieldsToUpdate: [],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
-        { key: 'name', value: 'Name' },
+        { key: 'name', value: 'Name' }
       ]
     }
   ]
@@ -505,8 +501,6 @@ const Correspondent = () => {
   }
 
   const postExchangeMaps = obj => {
-    
-
     const data = {
       corId: correspondentValidation.values.recordId,
       countryId: correspondentValidation.values.recordId,
@@ -547,7 +541,6 @@ const Correspondent = () => {
     else if (activeTab === 1) countriesGridValidation.handleSubmit()
     else if (activeTab === 2) currenciesGridValidation.handleSubmit()
   }
-
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
@@ -732,11 +725,9 @@ const Correspondent = () => {
           bpMasterDataStore={bpMasterDataStore}
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
-
           //countries tab - inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
-
           //currencies tab - inline edit grid
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
