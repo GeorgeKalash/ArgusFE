@@ -16,6 +16,7 @@ const AgentBranchTab = ({ labels, agentBranchValidation, maxAccess, agentStore, 
           label={labels.agent}
           valueField='recordId'
           displayField='name'
+          required
           store={agentStore}
           value={agentStore?.filter(item => item.recordId === agentBranchValidation.values.agentId)[0] }
           onChange={(event, newValue) => {

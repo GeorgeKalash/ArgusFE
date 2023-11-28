@@ -20,6 +20,9 @@ const AgentBranchWindow = ({
   fillCountryStore,
   countryStore,
   stateStore,
+  lookupCity,
+  cityStore,
+  setCityStore,
   maxAccess
 }) => {
   return (
@@ -50,7 +53,10 @@ const AgentBranchWindow = ({
           countryStore={countryStore}
           stateStore={stateStore}
           labels={labels}
+          lookupCity={lookupCity}
           fillStateStore={fillStateStore}
+cityStore={cityStore}
+setCityStore={setCityStore}
           fillCountryStore={fillCountryStore}
           addressValidation={agentBranchValidation}
           maxAccess={maxAccess}
