@@ -29,7 +29,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import CurrencyMapWindow from './Windows/CurrencyMapWindow'
+import ExchangeMapWindow from './Windows/ExchangeMapWindow'
 
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -45,7 +45,7 @@ const Correspondent = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [currencyMapWindowOpen, setCurrencyMapWindowOpen] = useState(false)
+  const [exchangeMapWindowOpen, setExchangeMapWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
@@ -231,7 +231,7 @@ const Correspondent = () => {
 
   // CURRENCIES TAB
   const currenciesGridValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
       const isValid = values.rows.every(row => !!row.currencyId)
@@ -364,8 +364,9 @@ const Correspondent = () => {
       field: 'button',
       text: _labels.exchange,
       onClick: (e, row) => {
-        exchangeMapValidation.setValues(getNewCorrExchangeMap())
-        setCurrencyMapWindowOpen(true)
+        console.log(row);
+        exchangeMapValidation.setValues(row)
+        setExchangeMapWindowOpen(true)
       }
     }
   ]
@@ -415,11 +416,12 @@ const Correspondent = () => {
       currencyId: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required')
     }),
-    onSubmit: values => {}
+    onSubmit: values => {
+    }
   })
 
   const handleExchangeMapSubmit = () => {
-    exchangeMapValidation.handleSubmit()
+    exchangeMapsGridValidation.handleSubmit()
   }
 
   const exchangeMapsGridValidation = useFormik({
@@ -502,18 +504,18 @@ const Correspondent = () => {
 
   const postExchangeMaps = obj => {
     const data = {
-      corId: correspondentValidation.values.recordId,
-      countryId: correspondentValidation.values.recordId,
-      currencyId: correspondentValidation.values.recordId,
-      correspondentCurrencies: obj
+      corId: exchangeMapValidation.values.corId,
+      countryId: exchangeMapValidation.values.countryId,
+      currencyId: exchangeMapValidation.values.currencyId,
+      correspondentExchangeMaps: obj.rows
     }
+
     postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        getGridData({})
-        setWindowOpen(false)
+        setExchangeMapWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
@@ -725,10 +727,10 @@ const Correspondent = () => {
           bpMasterDataStore={bpMasterDataStore}
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
-          //countries tab - inline edit grid
+
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
-          //currencies tab - inline edit grid
+
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
           labels={_labels}
@@ -736,13 +738,14 @@ const Correspondent = () => {
         />
       )}
 
-      {currencyMapWindowOpen && (
-        <CurrencyMapWindow
-          onClose={() => setCurrencyMapWindowOpen(false)}
+      {exchangeMapWindowOpen && (
+        <ExchangeMapWindow
+          onClose={() => setExchangeMapWindowOpen(false)}
           onSave={handleExchangeMapSubmit}
           exchangeMapsGridValidation={exchangeMapsGridValidation}
           exchangeMapsInlineGridColumns={exchangeMapsInlineGridColumns}
           exchangeMapValidation={exchangeMapValidation}
+          currencyStore={currencyStore.list}
           countryStore={countryStore.list}
           getCurrenciesExchangeMaps={getCurrenciesExchangeMaps}
           maxAccess={access}

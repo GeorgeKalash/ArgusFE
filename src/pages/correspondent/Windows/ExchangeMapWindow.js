@@ -10,12 +10,13 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const CurrencyMapWindow = ({
+const ExchangeMapWindow = ({
   onClose,
   onSave,
   exchangeMapsGridValidation,
   exchangeMapsInlineGridColumns,
   exchangeMapValidation,
+  currencyStore,
   countryStore,
   getCurrenciesExchangeMaps,
   maxAccess
@@ -32,6 +33,24 @@ const CurrencyMapWindow = ({
         >
           <Grid container gap={2}>
             <Grid container xs={12} spacing={2}>
+            <Grid item xs={6}>
+                <CustomComboBox
+                  name='currencyId'
+                  label='Currency'
+                  valueField='recordId'
+                  displayField='name'
+                  readOnly='true'
+                  store={currencyStore}
+                  value={currencyStore.filter(item => item.recordId === exchangeMapValidation.values.currencyId)[0]} // Ensure the value matches an option or set it to null
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    exchangeMapValidation.setFieldValue('currencyId', newValue?.recordId)
+                  }}
+                  error={exchangeMapValidation.touched.currencyId && Boolean(exchangeMapValidation.errors.currencyId)}
+                  helperText={exchangeMapValidation.touched.currencyId && exchangeMapValidation.errors.currencyId}
+                />
+              </Grid>
               <Grid item xs={6}>
                 <CustomComboBox
                   name='countryId'
@@ -45,7 +64,7 @@ const CurrencyMapWindow = ({
                   onChange={(event, newValue) => {
                     exchangeMapValidation.setFieldValue('countryId', newValue?.recordId)
                     const selectedCountryId = newValue?.recordId || ''
-                    getCurrenciesExchangeMaps(1, 2, selectedCountryId) // Fetch and update state data based on the selected country
+                    getCurrenciesExchangeMaps(exchangeMapValidation.values.corId, exchangeMapValidation.values.currencyId, selectedCountryId) // Fetch and update state data based on the selected country
                   }}
                   error={exchangeMapValidation.touched.countryId && Boolean(exchangeMapValidation.errors.countryId)}
                   helperText={exchangeMapValidation.touched.countryId && exchangeMapValidation.errors.countryId}
@@ -80,4 +99,4 @@ const CurrencyMapWindow = ({
   )
 }
 
-export default CurrencyMapWindow
+export default ExchangeMapWindow
