@@ -29,7 +29,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import CurrencyMapWindow from './Windows/CurrencyMapWindow'
+import ExchangeMapWindow from './Windows/ExchangeMapWindow'
 
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -45,7 +45,7 @@ const Correspondent = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [currencyMapWindowOpen, setCurrencyMapWindowOpen] = useState(false)
+  const [exchangeMapWindowOpen, setExchangeMapWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
@@ -63,7 +63,14 @@ const Correspondent = () => {
     isInactive: labels && labels.find(item => item.key === 6).value,
     correspondent: labels && labels.find(item => item.key === 7).value,
     country: labels && labels.find(item => item.key === 8).value,
-    currency: labels && labels.find(item => item.key === 9).value
+    currency: labels && labels.find(item => item.key === 9).value,
+    glCurrency: labels && labels.find(item => item.key === 10).value,
+    exchangeTable: labels && labels.find(item => item.key === 11).value,
+    bankDeposit: labels && labels.find(item => item.key === 12).value,
+    deal: labels && labels.find(item => item.key === 13).value,
+    exchange: labels && labels.find(item => item.key === 14).value,
+    plant: labels && labels.find(item => item.key === 15).value,
+    exchangeMap: labels && labels.find(item => item.key === 16).value,
   }
 
   const columns = [
@@ -80,16 +87,6 @@ const Correspondent = () => {
     {
       field: 'bpRef',
       headerName: _labels.bpRef,
-      flex: 1
-    },
-    {
-      field: 'outward',
-      headerName: _labels.outward,
-      flex: 1
-    },
-    {
-      field: 'inward',
-      headerName: _labels.inward,
       flex: 1
     },
     {
@@ -113,9 +110,7 @@ const Correspondent = () => {
       name: yup.string().required('This field is required'),
       bpId: yup.string().required('This field is required'),
       bpRef: yup.string().required('This field is required'),
-      bpName: yup.string().required('This field is required'),
-      outward: yup.string().required('This field is required'),
-      inward: yup.string().required('This field is required')
+      bpName: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postCorrespondent(values)
@@ -124,7 +119,7 @@ const Correspondent = () => {
 
   // COUNTRIES TAB
   const countriesGridValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
       const isValid = values.rows.every(row => !!row.countryId)
@@ -176,7 +171,7 @@ const Correspondent = () => {
     // },
     {
       field: 'combobox',
-      header: 'Country Ref',
+      header: _labels.country,
       nameId: 'countryId',
       name: 'countryRef',
       mandatory: true,
@@ -191,7 +186,7 @@ const Correspondent = () => {
     },
     {
       field: 'textfield',
-      header: 'Country Name',
+      header: _labels.name,
       name: 'countryName',
       mandatory: false,
       readOnly: true
@@ -236,7 +231,7 @@ const Correspondent = () => {
 
   // CURRENCIES TAB
   const currenciesGridValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
       const isValid = values.rows.every(row => !!row.currencyId)
@@ -258,7 +253,7 @@ const Correspondent = () => {
           glCurrencyRef: '',
           glCurrencyName: '',
           exchangeId: '',
-          exchangeRef:'',
+          exchangeRef: '',
           outward: false,
           inward: false,
           bankDeposit: false,
@@ -276,14 +271,14 @@ const Correspondent = () => {
   const currenciesInlineGridColumns = [
     {
       field: 'combobox',
-      header: 'Currency',
+      header: _labels.currency,
       nameId: 'currencyId',
       name: 'currencyRef',
       mandatory: true,
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      
+
       //fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
@@ -301,14 +296,14 @@ const Correspondent = () => {
     // },
     {
       field: 'combobox',
-      header: 'GL Currency',
+      header: _labels.glCurrency,
       nameId: 'glCurrencyId',
       name: 'glCurrencyRef',
       mandatory: true,
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      
+
       //fieldsToUpdate: [{ from: 'name', to: 'GlCurrencyName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
@@ -324,10 +319,10 @@ const Correspondent = () => {
     //   mandatory: false,
     //   readOnly: true
     // },
-    
+
     {
       field: 'combobox',
-      header: 'Exchange Table',
+      header: _labels.exchange,
       nameId: 'exchangeId',
       name: 'exchangeRef',
       mandatory: false,
@@ -337,46 +332,44 @@ const Correspondent = () => {
       fieldsToUpdate: [],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
-        { key: 'name', value: 'Name' },
+        { key: 'name', value: 'Name' }
       ]
     },
     {
       field: 'checkbox',
-      header: 'Outward',
+      header: _labels.outward,
       name: 'outward'
     },
     {
       field: 'checkbox',
-      header: 'Inward',
+      header: _labels.inward,
       name: 'inward'
     },
     {
       field: 'checkbox',
-      header: 'Bank Deposit',
+      header: _labels.bankDeposit,
       name: 'bankDeposit'
     },
     {
       field: 'checkbox',
-      header: 'Deal',
+      header: _labels.deal,
       name: 'deal'
     },
     {
       field: 'checkbox',
-      header: 'Is Inactive',
+      header: _labels.isInactive,
       name: 'isInactive'
     },
     {
       field: 'button',
-      text: 'Exchange',
-      onClick: (e, row)=> {
-        
-        exchangeMapValidation.setValues(getNewCorrExchangeMap())
-        setCurrencyMapWindowOpen(true);
-
+      text: _labels.exchange,
+      onClick: (e, row) => {
+        console.log(row);
+        exchangeMapValidation.setValues(row)
+        setExchangeMapWindowOpen(true)
       }
-    },
+    }
   ]
-
 
   const postCorrespondentCurrencies = obj => {
     const data = {
@@ -428,7 +421,7 @@ const Correspondent = () => {
   })
 
   const handleExchangeMapSubmit = () => {
-    exchangeMapValidation.handleSubmit();
+    exchangeMapsGridValidation.handleSubmit()
   }
 
   const exchangeMapsGridValidation = useFormik({
@@ -450,20 +443,22 @@ const Correspondent = () => {
           currencyId: '',
           countryId: '',
           plantId: '',
-          exchangeId: ''
+          plantRef: '',
+          exchangeId: '',
+          exchangeRef: ''
         }
       ]
     },
     onSubmit: values => {
-      console.log(values);
-      postExchangeMaps(values);
+      console.log(values)
+      postExchangeMaps(values)
     }
   })
 
   const exchangeMapsInlineGridColumns = [
     {
       field: 'combobox',
-      header: 'Plant',
+      header: _labels.plant,
       nameId: 'plantId',
       name: 'plantRef',
       mandatory: true,
@@ -477,7 +472,7 @@ const Correspondent = () => {
     },
     {
       field: 'combobox',
-      header: 'Exchange Table',
+      header: _labels.exchangeTable,
       nameId: 'exchangeId',
       name: 'exchangeRef',
       mandatory: true,
@@ -487,7 +482,7 @@ const Correspondent = () => {
       fieldsToUpdate: [],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
-        { key: 'name', value: 'Name' },
+        { key: 'name', value: 'Name' }
       ]
     }
   ]
@@ -508,21 +503,19 @@ const Correspondent = () => {
   }
 
   const postExchangeMaps = obj => {
-    
-
     const data = {
-      corId: correspondentValidation.values.recordId,
-      countryId: correspondentValidation.values.recordId,
-      currencyId: correspondentValidation.values.recordId,
-      correspondentCurrencies: obj
+      corId: exchangeMapValidation.values.corId,
+      countryId: exchangeMapValidation.values.countryId,
+      currencyId: exchangeMapValidation.values.currencyId,
+      correspondentExchangeMaps: obj.rows
     }
+
     postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        getGridData({})
-        setWindowOpen(false)
+        setExchangeMapWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
@@ -550,7 +543,6 @@ const Correspondent = () => {
     else if (activeTab === 1) countriesGridValidation.handleSubmit()
     else if (activeTab === 2) currenciesGridValidation.handleSubmit()
   }
-
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
@@ -736,11 +728,9 @@ const Correspondent = () => {
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
 
-          //countries tab - inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
 
-          //currencies tab - inline edit grid
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
           labels={_labels}
@@ -748,13 +738,14 @@ const Correspondent = () => {
         />
       )}
 
-      {currencyMapWindowOpen && (
-        <CurrencyMapWindow
-          onClose={() => setCurrencyMapWindowOpen(false)}
+      {exchangeMapWindowOpen && (
+        <ExchangeMapWindow
+          onClose={() => setExchangeMapWindowOpen(false)}
           onSave={handleExchangeMapSubmit}
           exchangeMapsGridValidation={exchangeMapsGridValidation}
           exchangeMapsInlineGridColumns={exchangeMapsInlineGridColumns}
           exchangeMapValidation={exchangeMapValidation}
+          currencyStore={currencyStore.list}
           countryStore={countryStore.list}
           getCurrenciesExchangeMaps={getCurrenciesExchangeMaps}
           maxAccess={access}
