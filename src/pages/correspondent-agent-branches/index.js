@@ -12,6 +12,7 @@ import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { getNewAgentBranch, populateAgentBranch } from 'src/Models/RemittanceSettings/AgentBranch'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import toast from 'react-hot-toast'
 
 const Agent = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
@@ -28,7 +29,10 @@ const Agent = () => {
   //state
   const [activeTab, setActiveTab] = useState(0)
   const [countryStore, setCountryStore] = useState([])
+  const [cityStore, setCityStore] = useState([])
+
   const [stateStore, setStateStore] = useState([])
+  const [record, setRecord] = useState(null)
 
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -71,16 +75,19 @@ const Agent = () => {
     validationSchema: yup.object({
       agentId: yup.string().required('This field is required'),
       swiftCode: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required'),
-      stateId: yup.string().required('This field is required'),
-      street1: yup.string().required('This field is required')
+      name: activeTab === 1 && yup.string().required('This field is required'),
+      countryId: activeTab === 1 && yup.string().required('This field is required'),
+      stateId: activeTab === 1 && yup.string().required('This field is required'),
+      street1: activeTab === 1 && yup.string().required('This field is required'),
+      phone: activeTab === 1 && yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log('{ values }')
-
-      console.log({ values })
-      postAgentBranch(values)
+      console.log('{ values }' + activeTab)
+      if (activeTab === 0) {
+        postAgent(values)
+      } else {
+        postAgentBranch(values)
+      }
     }
   })
 
@@ -107,7 +114,7 @@ const Agent = () => {
     city:
       addressLabels && addressLabels.find(item => item.key === 8) && addressLabels.find(item => item.key === 8).value,
 
-    postCode:
+    postalCode:
       addressLabels && addressLabels.find(item => item.key === 9) && addressLabels.find(item => item.key === 9).value,
     phone:
       addressLabels && addressLabels.find(item => item.key === 10) && addressLabels.find(item => item.key === 10).value,
@@ -121,8 +128,8 @@ const Agent = () => {
 
   const columns = [
     {
-      field: 'agentId',
-      headerName: _labels.agnetId,
+      field: 'agentName',
+      headerName: _labels.name,
       flex: 1,
       editable: false
     },
@@ -136,61 +143,64 @@ const Agent = () => {
   const tabs = [{ label: 'Main' }, { label: 'Address' }]
 
   function addAgentBranch() {
+    setRecord(0)
     setActiveTab(0)
     agentBranchValidation.setValues({})
     agentBranchValidation.setValues(getNewAgentBranch)
     setWindowOpen(true)
   }
 
-  // useEffect(() => {
-  //   if (activeTab === 1){
-  //     // agentBranchValidation.setValues({})
-  //   var parameters = `_filter=` + '&_recordId=' + agentBranchValidation.values.addressId
-  //   getRequest({
-  //     extension: SystemRepository.Address.get,
-  //     parameters: parameters
-  //   })
-  //     .then(res => {
-
-  //       if (res) agentBranchValidation.setValues(populateAgentBranch(res.record))
-  //     })
-  //     .catch(error => {})}
-  // }, [activeTab])
-
   const editAgentBranch = obj => {
+    setActiveTab(0)
+
     // agentBranchValidation.setValues({})
     var parameters = `_filter=` + '&_recordId=' + obj.addressId
     var object = obj
-    getRequest({
-      extension: SystemRepository.Address.get,
-      parameters: parameters
-    })
-      .then(res => {
-
-        var result = res.record
-        fillStateStore()
-        object.name =  result.name
-        object.street1 =  result.street1
-        object.street2 =  result.street2
-        object.email1 =  result.email1
-        object.email2 =  result.email2
-        object.countryId =  result.countryId
-        object.cityId =  result.cityId
-        object.stateId =  result.stateId
-        object.phone =  result.phone
-        object.phone1 =  result.phone1
-        object.phone2 =  result.phone2
-        fillStateStore(result.countryId)
-        agentBranchValidation.setValues(populateAgentBranch(object))
-        setActiveTab(0)
-        setWindowOpen(true)
-
+    setRecord(0)
+    if (obj.addressId) {
+      getRequest({
+        extension: SystemRepository.Address.get,
+        parameters: parameters
       })
-      .catch(error => {})
+        .then(res => {
+          var result = res.record
 
+          object.name = result.name
+          object.street1 = result.street1
+          object.street2 = result.street2
+          object.email1 = result.email1
+          object.email2 = result.email2
+          object.countryId = result.countryId
+          object.stateName = result.stateName
+          object.cityId = result.cityId
+          object.cityName = result.city
+          object.stateId = result.stateId
+          object.phone = result.phone
+          object.phone1 = result.phone1
+          object.phone2 = result.phone2
+          object.postalCode = result.postalCode
+          fillStateStore(object.countryId)
+          console.log('omar')
+          console.log(object)
+          console.log('omar')
+          agentBranchValidation.setValues(populateAgentBranch(object))
+          lookupCity(object.cityName)
+
+          // setActiveTab(0)
+          // setWindowOpen(true)
+        })
+        .catch(error => {})
+    } else {
+      agentBranchValidation.setValues(populateAgentBranch(object))
+      setActiveTab(0)
+      setWindowOpen(true)
+    }
     // agentBranchValidation.setValues(populateAgentBranch(obj))
-
   }
+  useEffect(() => {
+    // setActiveTab(0)
+    stateStore.length > 0 && setWindowOpen(true)
+  }, [stateStore])
 
   const fillCountryStore = () => {
     var parameters = `_filter=`
@@ -241,23 +251,48 @@ const Agent = () => {
       })
   }
 
+  //post first tab
+  const postAgent = obj => {
+    var recordId = obj.recordId
+
+    postRequest({
+      extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+
+        // getGridData({})
+        setRecord(res.recordId)
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Editted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const postAgentBranch = obj => {
-    const recordId = obj.recordId
+    console.log(obj)
+    const object = obj
+    obj.recordId = obj.addressId > 0 ? obj.addressId : obj.recordId
+
     postRequest({
       extension: SystemRepository.Address.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        obj.addressId = res.recordId
-
+        obj.addressId = res.addressId > 0 ? res.addressId : res.recordId
+        object.recordId = record > 0 ? record : object.recordId
         postRequest({
           extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
-          record: JSON.stringify(obj)
+          record: JSON.stringify(object)
         })
           .then(res => {
             getGridData({})
             setWindowOpen(false)
-            if (!recordId) toast.success('Record Added Successfully')
+            setRecord(0)
+            if (!res.recordId)
+            toast.success('Record Added Successfully')
             else toast.success('Record Editted Successfully')
           })
           .catch(error => {
@@ -280,6 +315,22 @@ const Agent = () => {
       })
       .catch(error => {
         setErrorMessage(error)
+      })
+  }
+
+  const lookupCity = searchQry => {
+    setCityStore([])
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${agentBranchValidation.values.countryId}&_stateId=${agentBranchValidation.values.stateId}`
+    getRequest({
+      extension: SystemRepository.City.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res.list)
+        setCityStore(res.list)
+      })
+      .catch(error => {
+        // setErrorMessage(error)
       })
   }
 
@@ -315,6 +366,9 @@ const Agent = () => {
           countryStore={countryStore}
           stateStore={stateStore}
           fillStateStore={fillStateStore}
+          cityStore={cityStore}
+          setCityStore={setCityStore}
+          lookupCity={lookupCity}
           fillCountryStore={fillCountryStore}
           agentBranchValidation={agentBranchValidation}
           maxAccess={access}

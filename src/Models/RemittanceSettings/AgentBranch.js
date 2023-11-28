@@ -3,12 +3,13 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 const getNewAgentBranch = () => {
   return {
-    recordId: null,
     agentId: null,
     swiftCode: null,
     name: null,
     countryId: null,
+    stateId: null,
     cityId: null,
+    cityName: null,
     street1: null,
     street2: null,
     email1: null,
@@ -16,6 +17,8 @@ const getNewAgentBranch = () => {
     phone: null,
     phone2: null,
     phone3: null,
+    addressId: null,
+    postalCode:null
 
   }
 }
@@ -29,6 +32,7 @@ const populateAgentBranch = obj => {
     countryId: obj.countryId,
     stateId: obj.stateId,
     cityId: obj.cityId,
+    cityName: obj.cityName,
     street1: obj.street1,
     street2: obj.street2,
     email1: obj.email1,
@@ -36,7 +40,8 @@ const populateAgentBranch = obj => {
     phone: obj.phone,
     phone2: obj.phone2,
     phone3: obj.phone3,
-    addressId: obj.addressId
+    addressId: obj.addressId,
+    postalCode:obj.postalCode
   }
 }
 

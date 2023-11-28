@@ -1,14 +1,10 @@
 // ** MUI Imports
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
-import { useEffect, useState, useContext } from 'react'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { getNewAgentBranch, populateAgentBranch } from 'src/Models/RemittanceSettings/AgentBranch'
 
 const AddressTab = ({
   labels,
@@ -18,47 +14,11 @@ const AddressTab = ({
   stateStore,
   fillStateStore,
   fillCityStore,
+  lookupCity,
+  cityStore,
+  setCityStore,
   editMode
 }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const [cityStore, setCityStore] = useState([])
-  const [state, setState] = useState(0)
-
-  useEffect(() => {
-    console.log(addressValidation)
-    if (addressValidation.values.addressId) {
-      // var parameters = `_filter=` + '&_recordId=' + addressValidation.values.addressId
-      // getRequest({
-      //   extension: SystemRepository.Address.get,
-      //   parameters: parameters
-      // })
-      //   .then(res => {
-      //     // console.log(countryStore)
-      //     addressValidation.setValues(populateAgentBranch(res.record))
-
-      //     // addressValidation.setValues({ ...addressValidation.values, ...res.record })
-      //     console.log(addressValidation.values)
-
-      //   })
-      //   .catch(error => {})
-    }
-  }, [addressValidation.values.addressId])
-
-  const lookupCity = searchQry => {
-    setCityStore([])
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${addressValidation.values.countryId}&_stateId=${state}`
-    getRequest({
-      extension: SystemRepository.City.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setCityStore(res.list)
-      })
-      .catch(error => {
-        // setErrorMessage(error)
-      })
-  }
-
   return (
     <Grid container spacing={4}>
       <Grid item xs={6}>
@@ -79,6 +39,7 @@ const AddressTab = ({
           name='countryId'
           label={labels.country}
           valueField='countryId'
+          required
           displayField='name'
           store={countryStore}
           value={countryStore.filter(item => item.recordId === addressValidation.values.countryId)[0]}
@@ -105,27 +66,46 @@ const AddressTab = ({
           helperText={addressValidation.touched.street1 && addressValidation.errors.street1}
         />
       </Grid>
-      <Grid item xs={6}>
+      {/* <Grid item xs={6}>
+      {addressValidation.values.stateId}
         <CustomComboBox
           name='stateId'
           label={labels.state}
           valueField='stateId'
           displayField='name'
           store={stateStore}
+          // firstValue={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
           value={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
-          required
-          maxAccess={maxAccess}
           readOnly={editMode && addressValidation.values.stateId !== null}
           onChange={(event, newValue) => {
             addressValidation.setFieldValue('stateId', newValue?.recordId)
+            addressValidation.setFieldValue('stateName', newValue?.name)
+
             const selectedCountryId = newValue?.recordId || ''
-            fillCityStore(selectedCountryId)
+            //  fillCityStore(selectedCountryId)
           }}
           error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
           helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
         />
-      </Grid>
+      </Grid> */}
 
+      <Grid item xs={6}>
+      {stateStore &&  <CustomComboBox
+          name='stateId'
+          label={labels.state}
+          valueField='stateId'
+          required
+          displayField='name'
+          store={stateStore}
+          value={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
+          onChange={(event, newValue) => {
+            addressValidation.setFieldValue('stateId', newValue?.recordId)
+
+          }}
+          error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
+          helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
+        />}
+      </Grid>
       <Grid item xs={6}>
         <CustomTextField
           name='street2'
@@ -139,36 +119,28 @@ const AddressTab = ({
         />
       </Grid>
       <Grid item xs={6}>
-        {/* <CustomTextField
-          name='cityId'
-          label={labels.city}
-          value={addressValidation.values.cityId}
-          onChange={addressValidation.handleChange}
-          onClear={() => addressValidation.setFieldValue('cityId', '')}
-          error={addressValidation.touched.cityId && Boolean(addressValidation.errors.cityId)}
-          helperText={addressValidation.touched.cityId && addressValidation.errors.cityId}
-        /> */}
-
         <CustomLookup
           name='cityId'
           label={labels.city}
           value={addressValidation.values.cityId}
+          required
           valueField='name'
           store={cityStore}
+          firstValue={addressValidation.values.cityName}
           setStore={setCityStore}
           onLookup={lookupCity}
           onChange={(event, newValue) => {
             if (newValue) {
               addressValidation.setFieldValue('cityId', newValue?.recordId)
-              // addressValidation.setFieldValue('cityName', newValue?.cityName)
+              addressValidation.setFieldValue('cityName', newValue?.name)
             } else {
               addressValidation.setFieldValue('cityName', null)
-              // addressValidation.setFieldValue('cityName', null)
+              addressValidation.setFieldValue('cityName', null)
             }
           }}
           error={addressValidation.touched.cityId && Boolean(addressValidation.errors.cityId)}
           helperText={addressValidation.touched.cityId && addressValidation.errors.cityId}
-          // maxAccess={access}
+          maxAccess={maxAccess}
           // editMode={editMode}
         />
       </Grid>
@@ -187,13 +159,13 @@ const AddressTab = ({
       </Grid>
       <Grid item xs={6}>
         <CustomTextField
-          name='postCode'
-          label={labels.postCode}
-          value={addressValidation.values.postCode}
+          name='postalCode'
+          label={labels.postalCode}
+          value={addressValidation.values.postalCode}
           onChange={addressValidation.handleChange}
-          onClear={() => addressValidation.setFieldValue('postCode', '')}
-          error={addressValidation.touched.postCode && Boolean(addressValidation.errors.postCode)}
-          helperText={addressValidation.touched.postCode && addressValidation.errors.postCode}
+          onClear={() => addressValidation.setFieldValue('postalCode', '')}
+          error={addressValidation.touched.postalCode && Boolean(addressValidation.errors.postalCode)}
+          helperText={addressValidation.touched.postalCode && addressValidation.errors.postalCode}
         />
       </Grid>
       <Grid item xs={6}>
@@ -203,7 +175,6 @@ const AddressTab = ({
           placeholder='johndoe@email.com'
           label={labels.email2}
           value={addressValidation.values.email2}
-          maxLength='20'
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('email2', '')}
           error={addressValidation.touched.email2 && Boolean(addressValidation.errors.email2)}
@@ -212,10 +183,11 @@ const AddressTab = ({
       </Grid>
       <Grid item xs={6}>
         <CustomTextField
-          name='phone1'
+          name='phone'
           label={labels.phone}
           value={addressValidation.values.phone}
           maxLength='20'
+          required
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('phone', '')}
           error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
