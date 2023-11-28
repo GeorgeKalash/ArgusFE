@@ -191,6 +191,7 @@ const Agent = () => {
       setActiveTab(0)
       setWindowOpen(true)
     }
+    
     // agentBranchValidation.setValues(populateAgentBranch(obj))
   }
   useEffect(() => {
