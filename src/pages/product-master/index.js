@@ -33,6 +33,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { getNewProductMaster } from 'src/Models/RemittanceSettings/ProductMaster'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -85,7 +86,7 @@ const ProductMaster = () => {
       flex: 1
     },
     {
-      field: 'correspondant',
+      field: 'correspondent',
       headerName: 'Correspondant',
       flex: 1
     },
@@ -141,27 +142,18 @@ const ProductMaster = () => {
   ]
 
   const productMasterValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-
+    enableReinitialize: true,
+    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       type: yup.string().required('This field is required'),
       function: yup.string().required('This field is required'),
-      correspondant: yup.string().nullable(),
-      countryId: yup.string().required('This field is required'),
       language: yup.string().required('This field is required'),
-      interfaceId: yup.string().nullable(),
-      commissionBase: yup.string().nullable(),
-      posMsg: yup.string().nullable(),
-      posMsgIsActive: yup.string().nullable(),
-      isInactive: yup.string().nullable(),
-
-      //not needed if going to be conditionaly changed according to another field value
-      // correspondant: yup.string().required('This field is required'),
     }),
     onSubmit: values => {
+      console.log('form values');
+      console.log(values);
       postProductMaster(values)
     }
   })
@@ -291,7 +283,7 @@ const ProductMaster = () => {
   const delProductMaster = obj => { }
 
   const addProductMaster = () => {
-    productMasterValidation.setValues({})
+    productMasterValidation.setValues(getNewProductMaster())
     productLegValidation.setValues({})
     fillTypeStore()
     fillFunctionStore()
