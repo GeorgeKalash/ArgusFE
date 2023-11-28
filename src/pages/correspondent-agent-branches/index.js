@@ -152,8 +152,6 @@ const Agent = () => {
 
   const editAgentBranch = obj => {
     setActiveTab(0)
-
-    // agentBranchValidation.setValues({})
     var parameters = `_filter=` + '&_recordId=' + obj.addressId
     var object = obj
     setRecord(0)
@@ -180,9 +178,7 @@ const Agent = () => {
           object.phone2 = result.phone2
           object.postalCode = result.postalCode
           fillStateStore(object.countryId)
-          console.log('omar')
           console.log(object)
-          console.log('omar')
           agentBranchValidation.setValues(populateAgentBranch(object))
           lookupCity(object.cityName)
 

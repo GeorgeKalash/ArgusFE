@@ -66,35 +66,13 @@ const AddressTab = ({
           helperText={addressValidation.touched.street1 && addressValidation.errors.street1}
         />
       </Grid>
-      {/* <Grid item xs={6}>
-      {addressValidation.values.stateId}
-        <CustomComboBox
-          name='stateId'
-          label={labels.state}
-          valueField='stateId'
-          displayField='name'
-          store={stateStore}
-          // firstValue={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
-          value={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
-          readOnly={editMode && addressValidation.values.stateId !== null}
-          onChange={(event, newValue) => {
-            addressValidation.setFieldValue('stateId', newValue?.recordId)
-            addressValidation.setFieldValue('stateName', newValue?.name)
 
-            const selectedCountryId = newValue?.recordId || ''
-            //  fillCityStore(selectedCountryId)
-          }}
-          error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
-          helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
-        />
-      </Grid> */}
 
       <Grid item xs={6}>
       {stateStore &&  <CustomComboBox
           name='stateId'
           label={labels.state}
           valueField='stateId'
-          required
           displayField='name'
           store={stateStore}
           value={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
@@ -141,7 +119,6 @@ const AddressTab = ({
           error={addressValidation.touched.cityId && Boolean(addressValidation.errors.cityId)}
           helperText={addressValidation.touched.cityId && addressValidation.errors.cityId}
           maxAccess={maxAccess}
-          // editMode={editMode}
         />
       </Grid>
       <Grid item xs={6}>
