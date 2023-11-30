@@ -19,6 +19,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCurrency, populateCurrency } from 'src/Models/System/currency'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
 import CurrencyWindow from './Windows/CurrencyWindow'
@@ -30,6 +31,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
 
   //stores
   const [gridData, setGridData] = useState(null)
@@ -38,10 +40,13 @@ const Currencies = () => {
   const [currencyStore, setCurrencyStore] = useState([])
 
   //states
-  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  //control
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
@@ -52,7 +57,10 @@ const Currencies = () => {
     currencyType: labels && labels.find(item => item.key === 6).value,
     sales: labels && labels.find(item => item.key === 7).value,
     purchase: labels && labels.find(item => item.key === 8).value,
-    currency: labels && labels.find(item => item.key === 9).value
+    currency: labels && labels.find(item => item.key === 9).value,
+    isoCode: labels && labels.find(item => item.key === 10).value,
+    symbol: labels && labels.find(item => item.key === 11).value
+    
   }
 
   const columns = [
@@ -87,7 +95,9 @@ const Currencies = () => {
       name: yup.string().required('This field is required'),
       decimals: yup.string().required('This field is required'),
       profileId: yup.string().required('This field is required'),
-      currencyType: yup.string().required('This field is required')
+      currencyType: yup.string().required('This field is required'),
+      isoCode: yup.string().notRequired(),
+      symbol:yup.string().notRequired()
     }),
     onSubmit: values => {
       postCurrency(values)
@@ -96,22 +106,6 @@ const Currencies = () => {
 
   const handleSubmit = () => {
     currencyValidation.handleSubmit()
-  }
-  
-  const getLabels = () => {
-    var parameters = '_dataset=' + ResourceIds.Currencies
-
-    getRequest({
-      extension: KVSRepository.getLabels,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log('labels '+{ res })
-        setLabels(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const getGridData = () => {
@@ -208,19 +202,27 @@ const Currencies = () => {
   }
 
   useEffect(() => {
-    getGridData()
-    fillDecimalStore()
-    fillProfileStore()
-    fillCurrencyStore()
-    getLabels()
-    const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
-    setDecimalStore(decimalDataSource)
-  }, [])
-
-  return (
+     if (!access)
+    getAccess(ResourceIds.Currencies, setAccess)
+  else {
+    if (access.record.maxAccess > 0) {
+      getGridData()
+      fillDecimalStore()
+      fillProfileStore()
+      fillCurrencyStore()
+      getLabels(ResourceIds.Currencies,setLabels)
+      const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
+      setDecimalStore(decimalDataSource) 
+    } else {
+      setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    }
+  }
+}, [access])
+  
+return (
     <>
       <Box>
-        <GridToolbar onAdd={addCurrency} />
+        <GridToolbar onAdd={addCurrency} maxAccess={access}/>
         <Table
           columns={columns}
           gridData={gridData}
@@ -231,6 +233,7 @@ const Currencies = () => {
           isLoading={false}
           pageSize={50}
           paginationType='client'
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
@@ -245,6 +248,7 @@ const Currencies = () => {
           profileStore={profileStore}
           currencyStore={currencyStore}
           labels={_labels}
+          maxAccess={access}
         />
          
       )}

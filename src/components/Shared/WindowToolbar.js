@@ -1,22 +1,21 @@
 // ** MUI Imports
-import {
-    DialogActions,
-    Button
-} from '@mui/material'
+import { DialogActions, Button } from '@mui/material'
 
-const WindowToolbar = ({
-    onSave,
-}) => {
+const WindowToolbar = ({ onSave, onClear }) => {
+  return (
+    <DialogActions>
+      {onClear && (
+        <Button onClick={onClear} variant='contained'>
+          Clear
+        </Button>
+      )}
+      {onSave && (
+        <Button onClick={onSave} variant='contained'>
+          Submit
+        </Button>
+      )}
+    </DialogActions>
+  )
+}
 
-    return (
-        <>
-            {onSave &&
-                <DialogActions>
-                    <Button onClick={onSave} variant='contained'>Submit</Button>
-                </DialogActions>
-            }
-        </>
-    );
-};
-
-export default WindowToolbar;
+export default WindowToolbar

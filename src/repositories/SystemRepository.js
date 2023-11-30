@@ -17,6 +17,12 @@ export const SystemRepository = {
     set: service + 'setDTM',
     del: service + 'delDTM'
   },
+  RelationType: {
+    qry: service + 'qryRT',
+    get: service + 'getRT',
+    set: service + 'setRT',
+    del: service + 'delRT'
+  },
   NumberRange: {
     snapshot: service + 'snapshotNRA'
   },
@@ -36,7 +42,9 @@ export const SystemRepository = {
     qry: service + 'qryCIT',
     get: service + 'getCIT',
     set: service + 'setCIT',
-    del: service + 'delCIT'
+    del: service + 'delCIT',
+    snapshot: service + 'snapshotCIT'
+
   },
   Country: {
     qry: service + 'qryCO',
@@ -55,5 +63,12 @@ export const SystemRepository = {
     get: service + 'getPLT',
     set: service + 'setPLT',
     del: service + 'delPLT'
+  },
+  Address: {
+    qry: service + '',
+    get: service + 'getADD',
+    set: service + 'setADD',
+    del: service + ''
   }
+
 }

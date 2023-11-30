@@ -12,7 +12,7 @@ const DeleteDialog = (props) => {
 
     return (
         <Dialog
-            open={props.open[0]}
+            open={props.open[0] ? props.open[0] : false}
             onClose={props.onClose}
             fullWidth={true}
             maxWidth="xs"

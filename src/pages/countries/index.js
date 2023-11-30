@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Checkbox, FormControlLabel } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -11,68 +11,86 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCountry, populateCountry } from 'src/Models/System/Country'
 
 // ** Helpers
-import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
+import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
+
+// ** Windows
+import CountryWindow from './Windows/CountryWindow'
 
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
+
+  //controls
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
+  const [currencyStore, setCurrencyStore] = useState([])
+  const [regionStore, setRegionStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(false) 
   const [errorMessage, setErrorMessage] = useState(null)
-  const [currencyStore, setCurrencyStore] = useState([])
-  const [regionStore, setRegionStore] = useState([])
+
+  const _labels = {
+    reference: labels && labels.find(item => item.key === 1).value,
+    name: labels && labels.find(item => item.key === 2).value,
+    flName: labels && labels.find(item => item.key === 3).value,
+    currencyName: labels && labels.find(item => item.key === 4).value,
+    regionName: labels && labels.find(item => item.key === 5).value,
+    ibanLength: labels && labels.find(item => item.key === 6).value,
+    country: labels && labels.find(item => item.key === 7).value,
+    isInactive: labels && labels.find(item => item.key === 8).value
+  }
 
   const columns = [
     {
       field: 'reference',
-      headerName: 'Reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: _labels.name,
       flex: 1
     },
     {
       field: 'flName',
-      headerName: 'Foreign Language Name',
+      headerName: _labels.flName,
       flex: 1
     },
     {
       field: 'currencyName',
-      headerName: 'Currency',
+      headerName: _labels.currencyName,
       flex: 1
     },
     {
       field: 'regionName',
-      headerName: 'Region',
+      headerName: _labels.regionName,
       flex: 1
     },
     {
       field: 'ibanLength',
-      headerName: 'IBAN Length',
+      headerName: _labels.ibanLength,
       flex: 1,
-      align: 'right'
+      align: 'right',
 
-      //valueGetter: ({ row }) => getFormattedNumber(row?.ibanLength, 4)
+      valueGetter: ({ row }) => getFormattedNumberMax(row?.ibanLength, 5, 0)
     }
   ]
 
@@ -90,6 +108,7 @@ const Countries = () => {
       name: yup.string().required('This field is required')
     }),
     onSubmit: values => {
+      console.log(values);
       values.ibanLength = getNumberWithoutCommas(values.ibanLength)
       postCountry(values)
     }
@@ -115,7 +134,6 @@ const Countries = () => {
   }
 
   const postCountry = obj => {
-    console.log(obj)
     const recordId = obj.recordId
     postRequest({
       extension: SystemRepository.Country.set,
@@ -148,29 +166,39 @@ const Countries = () => {
   }
 
   const addCountry = () => {
-    countryValidation.setValues(getNewCountry())
-    FillCurrencyStore()
-    FillRegionStore({})
+    countryValidation.setValues(getNewCountry)
+    fillCurrencyStore()
+    fillRegionStore({})
     setEditMode(false)
     setWindowOpen(true)
   }
 
   const editCountry = obj => {
     console.log(obj)
+    obj.ibanLength = typeof obj.ibanLength !== undefined && getFormattedNumberMax(obj?.ibanLength, 5, 0)
     countryValidation.setValues(populateCountry(obj))
-    FillCurrencyStore()
-    FillRegionStore({})
+    console.log(populateCountry(obj))
+    fillCurrencyStore()
+    fillRegionStore({})
     setEditMode(true)
     setWindowOpen(true)
   }
 
   useEffect(() => {
-    getGridData()
-    FillCurrencyStore()
-    FillRegionStore({})
-  }, [])
+    if (!access) getAccess(ResourceIds.Countries, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData()
+        fillCurrencyStore()
+        fillRegionStore({})
+        getLabels(ResourceIds.Countries,setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
+    }
+  }, [access])
 
-  const FillCurrencyStore = () => {
+  const fillCurrencyStore = () => {
     var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Currency.qry,
@@ -178,13 +206,14 @@ const Countries = () => {
     })
       .then(res => {
         setCurrencyStore(res.list)
+        console.log(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
       })
-  }
+    }
 
-  const FillRegionStore = ({ _startAt = 0, _pageSize = 1000 }) => {
+  const fillRegionStore = ({ _startAt = 0, _pageSize = 1000 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     var parameters = defaultParams
     getRequest({
@@ -197,7 +226,7 @@ const Countries = () => {
       .catch(error => {
         setErrorMessage(error)
       })
-  }
+    }
 
   return (
     <>
@@ -208,7 +237,7 @@ const Countries = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addCountry} />
+        <GridToolbar onAdd={addCountry} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -219,113 +248,23 @@ const Countries = () => {
           isLoading={false}
           pageSize={50}
           paginationType='client'
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
-        <Window
-          id='CountryWindow'
-          Title='Country'
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-        >
-          <CustomTabPanel>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='reference'
-                  label='Reference'
-                  value={countryValidation.values.reference}
-                  required
-                  onChange={countryValidation.handleChange}
-                  onClear={() => countryValidation.setFieldValue('reference', '')}
-                  error={countryValidation.touched.reference && Boolean(countryValidation.errors.reference)}
-                  helperText={countryValidation.touched.reference && countryValidation.errors.reference}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='name'
-                  label='Name'
-                  value={countryValidation.values.name}
-                  required
-                  onChange={countryValidation.handleChange}
-                  onClear={() => countryValidation.setFieldValue('name', '')}
-                  error={countryValidation.touched.name && Boolean(countryValidation.errors.name)}
-                  helperText={countryValidation.touched.name && countryValidation.errors.name}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='flName'
-                  label='Foreign Language Name'
-                  value={countryValidation.values.flName}
-                  onChange={countryValidation.handleChange}
-                  onClear={() => countryValidation.setFieldValue('flName', '')}
-                  error={countryValidation.touched.flName && Boolean(countryValidation.errors.flName)}
-                  helperText={countryValidation.touched.flName && countryValidation.errors.flName}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='currencyId'
-                  label='Currency'
-                  valueField='recordId'
-                  displayField='name'
-                  store={currencyStore}
-                  value={countryValidation.values.currencyName}
-                  onChange={(event, newValue) => {
-                    countryValidation.setFieldValue('currencyId', newValue?.recordId)
-                    countryValidation.setFieldValue('currencyName', newValue?.name)
-                  }}
-                  error={countryValidation.touched.currencyName && Boolean(countryValidation.errors.currencyName)}
-                  helperText={countryValidation.touched.currencyName && countryValidation.errors.currencyName}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name='regionId'
-                  label='Region'
-                  valueField='recordId'
-                  displayField='name'
-                  store={regionStore}
-                  value={countryValidation.values.regionName}
-                  onChange={(event, newValue) => {
-                    countryValidation.setFieldValue('regionId', newValue?.recordId)
-                    countryValidation.setFieldValue('regionName', newValue?.name)
-                  }}
-                  error={countryValidation.touched.regionName && Boolean(countryValidation.errors.regionName)}
-                  helperText={countryValidation.touched.regionName && countryValidation.errors.regionName}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='ibanLength'
-                  label='IBAN Length'
-                  value={countryValidation.values.ibanLength}
-                  onChange={e => countryValidation.setFieldValue('ibanLength', getFormattedNumber(e.target.value, 4))}
-                  onClear={() => countryValidation.setFieldValue('ibanLength', '')}
-                  error={countryValidation.touched.ibanLength && Boolean(countryValidation.errors.ibanLength)}
-                  helperText={countryValidation.touched.ibanLength && countryValidation.errors.ibanLength}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='isInactive'
-                      checked={countryValidation.values?.isInactive}
-                      onChange={countryValidation.handleChange}
-                    />
-                  }
-                  label='Is Inactive'
-                />
-              </Grid>
-            </Grid>
-          </CustomTabPanel>
-        </Window>
-      )}
+       <CountryWindow
+       onClose={() => setWindowOpen(false)}
+       width={600}
+       height={400}
+       onSave={handleSubmit}
+       countryValidation={countryValidation}
+       currencyStore={currencyStore}
+       regionStore={regionStore}
+       _labels ={_labels}
+       maxAccess={access}
+       editMode={editMode}
+       />
+       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

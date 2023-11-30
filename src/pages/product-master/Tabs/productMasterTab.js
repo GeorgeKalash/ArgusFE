@@ -12,7 +12,6 @@ const ProductMasterTab = ({
   commissionBaseStore,
   languageStore
 }) => {
-
   return (
     <>
       <Grid container>
@@ -69,32 +68,23 @@ const ProductMasterTab = ({
               value={functionStore.filter(item => item.key === productMasterValidation.values.function)[0]}
               required
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('type', newValue?.key)
+                productMasterValidation.setFieldValue('function', newValue?.key)
               }}
-              error={Boolean(productMasterValidation.errors.type)}
-              helperText={productMasterValidation.errors.type}
+              error={Boolean(productMasterValidation.errors.function)}
+              helperText={productMasterValidation.errors.function}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='correspondant'
-              label='Correspondant'
-              value={productMasterValidation.values.correspondant}
+              name='correspondent'
+              label='Correspondent'
+              value={productMasterValidation.values.correspondent}
 
-              //following are an example edit as needed
-              //for more complex scenario a function can be passed 
-              //returning bool depending on set of if or switch
-              required={productMasterValidation.values.type === 1 ? true : false}
-              
-              //readOnly={productMasterValidation.values.type === 2 ? true : false}
-              // disabled={productMasterValidation.values.type === 2 ? true : false}
-
+              //required={productMasterValidation.values.type === 1 ? true : false}
               onChange={productMasterValidation.handleChange}
-              onClear={() => productMasterValidation.setFieldValue('correspondant', '')}
-              error={
-                Boolean(productMasterValidation.errors.correspondant)
-              }
-              helperText={productMasterValidation.errors.correspondant}
+              onClear={() => productMasterValidation.setFieldValue('correspondent', '')}
+              error={Boolean(productMasterValidation.errors.correspondent)}
+              helperText={productMasterValidation.errors.correspondent}
             />
           </Grid>
         </Grid>
@@ -102,21 +92,18 @@ const ProductMasterTab = ({
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
             <CustomComboBox
-              name='languageName'
-              label='Language'
+              name='language'
+              label='language'
               valueField='key'
               displayField='value'
               store={languageStore}
-              value={productMasterValidation.values.languageName}
+              value={languageStore.filter(item => item.key === productMasterValidation.values.language)[0]}
               required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('language', newValue?.key)
-                productMasterValidation.setFieldValue('languageName', newValue?.value)
               }}
-              error={
-                Boolean(productMasterValidation.errors.languageName)
-              }
-              helperText={productMasterValidation.errors.languageName}
+              error={Boolean(productMasterValidation.errors.language)}
+              helperText={productMasterValidation.errors.language}
             />
           </Grid>
           <Grid item xs={12}>
@@ -134,12 +121,8 @@ const ProductMasterTab = ({
                 productMasterValidation.setFieldValue('commissionBase', newValue?.key)
                 productMasterValidation.setFieldValue('commissionBaseName', newValue?.value)
               }}
-              error={
-                                Boolean(productMasterValidation.errors.commissionBaseName)
-              }
-              helperText={
-                productMasterValidation.errors.commissionBaseName
-              }
+              error={Boolean(productMasterValidation.errors.commissionBaseName)}
+              helperText={productMasterValidation.errors.commissionBaseName}
             />
           </Grid>
           <Grid item xs={12}>

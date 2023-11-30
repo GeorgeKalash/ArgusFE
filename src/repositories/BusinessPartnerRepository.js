@@ -24,5 +24,12 @@ export const BusinessPartnerRepository = {
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP'
+  },
+  MasterData: {
+    qry: service + 'qryMAS',
+    get: service + 'getMAS',
+    set: service + 'setMAS',
+    del: service + 'delMAS',
+    snapshot: service + 'snapshotMAS'
   }
 }

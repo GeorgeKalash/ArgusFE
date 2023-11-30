@@ -41,6 +41,7 @@ import { CommonProvider } from 'src/providers/CommonContext'
 import { MenuProvider } from 'src/providers/MenuContext'
 import { TabsProvider } from 'src/providers/TabsContext'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
+import { PrimeReactProvider } from 'primereact/api'
 
 // ** Styled Components
 import ReactHotToast from 'src/@core/styles/libs/react-hot-toast'
@@ -57,6 +58,10 @@ import 'prismjs/components/prism-tsx'
 // ** React Perfect Scrollbar Style
 import 'react-perfect-scrollbar/dist/css/styles.css'
 import 'src/iconify-bundle/icons-bundle-react'
+
+// ** PrimeReact Styles
+import 'primereact/resources/primereact.min.css'
+import 'primereact/resources/themes/saga-blue/theme.css'
 
 // ** Global css styles
 import '../../styles/globals.css'
@@ -94,15 +99,14 @@ const App = props => {
   const contentHeightFixed = Component.contentHeightFixed ?? false
 
   const getLayout =
-    Component.getLayout ?? (page =>
+    Component.getLayout ??
+    (page => (
       <MenuProvider>
         <UserLayout contentHeightFixed={contentHeightFixed}>
-          <TabsProvider>
-            {page}
-          </TabsProvider>
+          <TabsProvider>{page}</TabsProvider>
         </UserLayout>
       </MenuProvider>
-    )
+    ))
   const setConfig = Component.setConfig ?? undefined
   const authGuard = Component.authGuard ?? true
   const guestGuard = Component.guestGuard ?? false
@@ -132,11 +136,14 @@ const App = props => {
                         <ThemeComponent settings={settings}>
                           <Guard authGuard={authGuard} guestGuard={guestGuard}>
                             <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                              {getLayout(<Component {...pageProps} />)}
+                              <PrimeReactProvider>{getLayout(<Component {...pageProps} />)}</PrimeReactProvider>
                             </AclGuard>
                           </Guard>
                           <ReactHotToast>
-                            <Toaster position={settings.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />
+                            <Toaster
+                              position={settings.toastPosition}
+                              toastOptions={{ className: 'react-hot-toast' }}
+                            />
                           </ReactHotToast>
                         </ThemeComponent>
                       )

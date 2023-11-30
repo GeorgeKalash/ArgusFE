@@ -35,9 +35,9 @@ import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/Do
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const DocumentTypes = () => {
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
@@ -120,7 +120,7 @@ const DocumentTypes = () => {
 
   const documentTypesValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
 
     validationSchema: yup.object({
       // reference: yup.number()
@@ -133,7 +133,10 @@ const DocumentTypes = () => {
       name: yup.string().required('This field is required'),
       dgName: yup.string().required('This field is required'),
       activeStatusName: yup.string().required('This field is required'),
-      ilId: access && access.record?.controls?.find(item => item.controlId === "ilId")?.accessLevel == 2 ? yup.string() : yup.string().required('This field is required')
+      ilId:
+        access && access.record?.controls?.find(item => item.controlId === 'ilId')?.accessLevel == 2
+          ? yup.string()
+          : yup.string().required('This field is required')
     }),
     onSubmit: values => {
       // values.reference = getNumberWithoutCommas(values.reference)
@@ -144,6 +147,7 @@ const DocumentTypes = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) documentTypesValidation.handleSubmit()
+    if (activeTab === 1) gridValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
@@ -268,8 +272,7 @@ const DocumentTypes = () => {
   }
 
   useEffect(() => {
-    if (!access)
-      getAccess(ResourceIds.DocumentTypes, setAccess)
+    if (!access) getAccess(ResourceIds.DocumentTypes, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
@@ -281,6 +284,94 @@ const DocumentTypes = () => {
       }
     }
   }, [access])
+
+  const gridValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [
+        {
+          name: 'test 1',
+          countryRef: 'USA',
+          countryName: 'United States',
+          stateId: 1,
+          stateName: 'State 1',
+          isActive: false
+        },
+        {
+          name: 'test 2',
+          countryRef: 'USA -2',
+          countryName: 'United States -2',
+          stateId: 2,
+          stateName: 'State 2',
+          isActive: true
+        }
+      ]
+    },
+    onSubmit: values => {
+      console.log({ SUBMIT: values })
+    }
+  })
+
+  const mockUpStore = [
+    { recordId: 0, name: 'State 0' },
+    { recordId: 1, name: 'State 1' },
+    { recordId: 2, name: 'State 2' }
+  ]
+
+  const countryStore = [
+    { recordId: 0, countryRef: 'USA', countryName: 'United State' },
+    { recordId: 1, countryRef: 'LEB', countryName: 'Lebanon' },
+    { recordId: 2, countryRef: 'EGY', countryName: 'Egypt' }
+  ]
+
+  const inlineGridColumns = [
+    {
+      field: 'textfield',
+      header: 'Name',
+      name: 'name'
+    },
+    {
+      field: 'combobox',
+      header: 'Country Ref',
+      nameId: 'recordId',
+      name: 'countryRef',
+      mandatory: true,
+      store: countryStore,
+      valueField: 'recordId',
+      displayField: 'countryRef',
+      fieldsToUpdate: [{ from: 'countryName', to: 'countryName' }]
+    },
+    {
+      field: 'textfield',
+      header: 'Country Name',
+      name: 'countryName',
+      mandatory: true,
+      readOnly: true
+    },
+    {
+      field: 'combobox',
+      header: 'State',
+      nameId: 'stateId',
+      name: 'stateName',
+      store: mockUpStore,
+      valueField: 'recordId',
+      displayField: 'name',
+      mandatory: true
+    },
+    {
+      field: 'button',
+      text: 'Press',
+      onClick: e => {
+        console.log('BUTTON ONCLICK')
+      }
+    },
+    {
+      field: 'checkbox',
+      header: 'Is Active',
+      name: 'isActive'
+    }
+  ]
 
   return (
     <>
@@ -311,7 +402,7 @@ const DocumentTypes = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          width={600}
+          width={800}
           height={400}
           onSave={handleSubmit}
           maxAccess={access}
@@ -441,11 +532,22 @@ const DocumentTypes = () => {
               </Grid>
             </Grid>
           </CustomTabPanel>
-          {/* <CustomTabPanel index={1} value={activeTab}>
-            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
-              <InlineEditGrid />
+          <CustomTabPanel index={1} value={activeTab}>
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+              <InlineEditGrid
+                gridValidation={gridValidation}
+                columns={inlineGridColumns}
+                defaultRow={{
+                  name: '',
+                  countryRef: '',
+                  countryName: '',
+                  stateId: 1,
+                  stateName: 'State 1',
+                  isActive: false
+                }}
+              />
             </Box>
-          </CustomTabPanel> */}
+          </CustomTabPanel>
         </Window>
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

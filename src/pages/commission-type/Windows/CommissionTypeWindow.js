@@ -15,7 +15,7 @@ const CommissionTypeWindow = ({
     maxAccess
 }) => {return (
     <Window
-    id='CurrencyWindow'
+    id='CommissionTypeWindow'
     Title={labels.comissiontype}
     onClose={onClose}
     width={width}

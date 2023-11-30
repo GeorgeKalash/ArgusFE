@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -11,23 +11,28 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { ControlContext } from 'src/providers/ControlContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { getNewLegalStatuses, populateLegalStatuses } from 'src/Models/BusinessPartner/LegalStatuses'
 
-// ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
+
+// ** Windows
+import LegalStatusWindow from './Windows/LegalStatusWindow'
 
 const LegalStatus = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
+
+  //controls
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -37,18 +42,26 @@ const LegalStatus = () => {
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const _labels = {
+    reference: labels && labels.find(item => item.key === 1).value,
+    name: labels && labels.find(item => item.key === 2).value,
+    legalStatus: labels && labels.find(item => item.key === 3).value
+  }
+
+
   const columns = [
     {
       field: 'reference',
-      headerName: 'Reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: _labels.name,
       flex: 1
     }
   ]
+
 
   const legalStatusValidation = useFormik({
     enableReinitialize: false,
@@ -74,52 +87,50 @@ const LegalStatus = () => {
     var parameters = defaultParams
     console.log(parameters)
 
-        // var parameters = defaultParams + '&_dgId=0'
-        getRequest({
-            'extension': BusinessPartnerRepository.LegalStatus.qry,
-            'parameters': parameters,
-        })
-            .then((res) => {
-                setGridData({ ...res, _startAt })
-            })
-            .catch((error) => {
-                setErrorMessage(error)
-            })
-    }
+    // var parameters = defaultParams + '&_dgId=0'
+    getRequest({
+      extension: BusinessPartnerRepository.LegalStatus.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setGridData({ ...res, _startAt })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
-    const postLegalStatus = (obj) => {
-        const recordId = obj.recordId
-        postRequest({
-            'extension': BusinessPartnerRepository.LegalStatus.set,
-            'record': JSON.stringify(obj),
-        })
-            .then((res) => {
-                getGridData({})
-                setWindowOpen(false)
-                if (!recordId)
-                    toast.success('Record Added Successfully')
-                else
-                    toast.success('Record Edited Successfully')
-            })
-            .catch((error) => {
-                setErrorMessage(error)
-            })
-    }
+  const postLegalStatus = obj => {
+    const recordId = obj.recordId
+    postRequest({
+      extension: BusinessPartnerRepository.LegalStatus.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        getGridData({})
+        setWindowOpen(false)
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
-    const delLegalStatus = (obj) => {
-        postRequest({
-            'extension': BusinessPartnerRepository.LegalStatus.del,
-            'record': JSON.stringify(obj),
-        })
-            .then((res) => {
-                console.log({ res })
-                getGridData({})
-                toast.success('Record Deleted Successfully')
-            })
-            .catch((error) => {
-                setErrorMessage(error)
-            })
-    }
+  const delLegalStatus = obj => {
+    postRequest({
+      extension: BusinessPartnerRepository.LegalStatus.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        console.log({ res })
+        getGridData({})
+        toast.success('Record Deleted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const addLegalStatus = () => {
     legalStatusValidation.setValues(getNewLegalStatuses())
@@ -134,8 +145,16 @@ const LegalStatus = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 30 })
-  })
+    if (!access) getAccess(ResourceIds.LegalStatus, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData({ _startAt: 0, _pageSize: 30 })
+        getLabels(ResourceIds.LegalStatus,setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
+    }
+  }, [access])
 
   return (
     <>
@@ -146,7 +165,7 @@ const LegalStatus = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addLegalStatus} />
+        <GridToolbar onAdd={addLegalStatus} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -155,46 +174,19 @@ const LegalStatus = () => {
           onEdit={editLegalStatus}
           onDelete={delLegalStatus}
           isLoading={false}
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
-        <Window
-          id='LegalStatusWindow'
-          Title='Legal Status'
+        <LegalStatusWindow
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
           onSave={handleSubmit}
-        >
-          <CustomTabPanel>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='reference'
-                  label='Reference'
-                  value={legalStatusValidation.values.reference}
-                  required
-                  onChange={legalStatusValidation.handleChange}
-                  onClear={() => legalStatusValidation.setFieldValue('reference', '')}
-                  error={legalStatusValidation.touched.reference && Boolean(legalStatusValidation.errors.reference)}
-                  helperText={legalStatusValidation.touched.reference && legalStatusValidation.errors.reference}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='name'
-                  label='Name'
-                  value={legalStatusValidation.values.name}
-                  required
-                  onChange={legalStatusValidation.handleChange}
-                  onClear={() => legalStatusValidation.setFieldValue('name', '')}
-                  error={legalStatusValidation.touched.name && Boolean(legalStatusValidation.errors.name)}
-                  helperText={legalStatusValidation.touched.name && legalStatusValidation.errors.name}
-                />
-              </Grid>
-            </Grid>
-          </CustomTabPanel>
-        </Window>
+          legalStatusValidation={legalStatusValidation}
+          _labels={_labels}
+          editMode={editMode}
+        />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>

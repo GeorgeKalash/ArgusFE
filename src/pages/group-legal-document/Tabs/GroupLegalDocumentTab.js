@@ -9,7 +9,8 @@ const GroupLegalDocumentTab=({
     categoryStore,
     groupStore,
     labels,
-    editMode
+    editMode,
+    maxAccess
 }) =>{
     return (
         <>
@@ -23,6 +24,7 @@ const GroupLegalDocumentTab=({
                   store={groupStore}
                   value={groupStore.filter(item => item.recordId === groupLegalDocumentValidation.values.groupId)[0]}
                   required
+                  maxAccess={maxAccess}
                   readOnly={editMode}
                   onChange={(event, newValue) => {
                     groupLegalDocumentValidation.setFieldValue('groupId', newValue?.recordId)
@@ -45,6 +47,7 @@ const GroupLegalDocumentTab=({
                   store={categoryStore}
                   value={categoryStore.filter(item => item.recordId === groupLegalDocumentValidation.values.incId)[0]}
                   required
+                  maxAccess={maxAccess}
                   readOnly={editMode}
                   onChange={(event, newValue) => {
                     groupLegalDocumentValidation.setFieldValue('incId', newValue?.recordId)
@@ -62,6 +65,7 @@ const GroupLegalDocumentTab=({
                   control={
                     <Checkbox
                       name='required'
+                      maxAccess={maxAccess}
                       checked={groupLegalDocumentValidation.values?.required}
                       onChange={groupLegalDocumentValidation.handleChange}
                     />
@@ -74,6 +78,7 @@ const GroupLegalDocumentTab=({
                   control={
                     <Checkbox
                       name='mandatory'
+                      maxAccess={maxAccess}
                       checked={groupLegalDocumentValidation.values?.mandatory}
                       onChange={groupLegalDocumentValidation.handleChange}
                     />

@@ -6,5 +6,12 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getCOM',
     set: service + 'setCOM',
     del: service + 'delCOM'
+  },
+  SalaryRange: {
+    qry: service + 'qrySRA',
+    get: service + 'getSRA',
+    set: service + 'setSRA',
+    del: service + 'delSRA'
   }
+
 }

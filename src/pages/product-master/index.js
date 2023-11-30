@@ -33,6 +33,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { getNewProductMaster } from 'src/Models/RemittanceSettings/ProductMaster'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,7 +60,6 @@ const ProductMaster = () => {
   const [productCountriesGridData, setProductCountriesGridData] = useState([]) //for countries tab
   const [productCurrenciesGridData, setProductCurrenciesGridData] = useState([]) //for monetary tab
   const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
-  const [productSchedulesGridData, setProductSchedulesGridData] = useState([]) //for product dispersal tab
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -86,7 +86,7 @@ const ProductMaster = () => {
       flex: 1
     },
     {
-      field: 'correspondant',
+      field: 'correspondent',
       headerName: 'Correspondant',
       flex: 1
     },
@@ -142,27 +142,18 @@ const ProductMaster = () => {
   ]
 
   const productMasterValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-
+    enableReinitialize: true,
+    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       type: yup.string().required('This field is required'),
       function: yup.string().required('This field is required'),
-      correspondant: yup.string().nullable(),
-      countryId: yup.string().required('This field is required'),
       language: yup.string().required('This field is required'),
-      interfaceId: yup.string().nullable(),
-      commissionBase: yup.string().nullable(),
-      posMsg: yup.string().nullable(),
-      posMsgIsActive: yup.string().nullable(),
-      isInactive: yup.string().nullable(),
-
-      //not needed if going to be conditionaly changed according to another field value
-      // correspondant: yup.string().required('This field is required'),
     }),
     onSubmit: values => {
+      console.log('form values');
+      console.log(values);
       postProductMaster(values)
     }
   })
@@ -287,21 +278,12 @@ const ProductMaster = () => {
 
   const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
 
-  const tabs = [
-    { label: 'Main' }, 
-    { label: 'Countries' }, 
-    {label: 'Monetary'}, 
-    { label: 'Dispersal' }, 
-    { label: 'Schedules' }, 
-    { label: 'Fees' }, 
-    { label: 'Fields' }, 
-    { label: 'Agent' }
-  ]
+  const tabs = [{ label: 'Main' }, { label: 'Countries' }, {label: 'Monetary'}, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
 
   const delProductMaster = obj => { }
 
   const addProductMaster = () => {
-    productMasterValidation.setValues({})
+    productMasterValidation.setValues(getNewProductMaster())
     productLegValidation.setValues({})
     fillTypeStore()
     fillFunctionStore()
@@ -438,46 +420,6 @@ const ProductMaster = () => {
     setProductCountriesGridData({ ...newData })
   }
 
-  const getProductSchedulesData = () => {
-    const newData = {
-      list: [
-        {
-          recordId: 1,
-          plant: 'الرياض البطحاء',
-          country: 'UAE',
-          currency: 'US DOLLAR',
-          dispersalMode: 'EXPRESS',
-          isInactive: false
-        },
-        {
-          recordId: 2,
-          plant: 'ALL',
-          country: 'ALL',
-          currency: 'ALL',
-          dispersalMode: 'ALL',
-          isInactive: false
-        },
-        {
-          recordId: 3,
-          plant: 'الرياض البطحاء',
-          country: 'UAE',
-          currency: 'INDIAN RUPEES',
-          dispersalMode: 'NTFS',
-          isInactive: false
-        },
-        {
-          recordId: 4,
-          plant: 'ALL',
-          country: 'UAE',
-          currency: 'UAE DIRHAMS',
-          dispersalMode: 'CASH',
-          isInactive: true
-        }
-      ]
-    }
-    setProductSchedulesGridData({ ...newData })
-  }
-
   const getProductCurrenciesGridData = () => {
     const newData = {
       list: [
@@ -589,13 +531,9 @@ const ProductMaster = () => {
 
         //for product field tab
         getProductFieldGridData({})
-        
-        //for schedules tab
-        getProductSchedulesData({})
 
         //for product agent tab
         getProductAgentGridData({})
-
 
         //for product dispersal tab
         getProductDispersalGridData({})
@@ -649,7 +587,6 @@ const ProductMaster = () => {
           productLegCommissionGridData={productLegCommissionGridData}
           editProductCommission={editProductCommission}
           setProductLegWindowOpen={setProductLegWindowOpen}
-          productSchedulesGridData={productSchedulesGridData}
           productFieldGridData={productFieldGridData}
           productAgentGridData={productAgentGridData}
           currencyStore={currencyStore}

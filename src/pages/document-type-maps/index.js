@@ -46,6 +46,7 @@ const DocumentTypeMaps = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
+  const [paramsArray, setParamsArray] = useState([])
   const [reportParamWindowOpen, setReportParamWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
@@ -85,7 +86,6 @@ const DocumentTypeMaps = () => {
       dtId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      // console.log({ values })
       postDocumentTypeMap(values)
     }
   })
@@ -169,8 +169,7 @@ const DocumentTypeMaps = () => {
   }
 
   useEffect(() => {
-    if (!access)
-      getAccess(ResourceIds.DocumentTypeMaps, setAccess)
+    if (!access) getAccess(ResourceIds.DocumentTypeMaps, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30, params: '' })
@@ -194,6 +193,7 @@ const DocumentTypeMaps = () => {
           onAdd={addDocumentType}
           maxAccess={access}
           openRPB={() => setReportParamWindowOpen(true)}
+          paramsArray={paramsArray}
         />
         <Table
           columns={columns}
@@ -232,7 +232,12 @@ const DocumentTypeMaps = () => {
                 onChange={(event, newValue) => {
                   documentTypeMapsValidation.setFieldValue('fromFunctionId', newValue?.key)
                   documentTypeMapsValidation.setFieldValue('fromFunctionName', newValue?.value)
-                  fillDocumentTypeStore({ _startAt: 0, _pageSize: 30, _dgId: newValue?.key, callback: setFromDocumentTypeStore })
+                  fillDocumentTypeStore({
+                    _startAt: 0,
+                    _pageSize: 30,
+                    _dgId: newValue?.key,
+                    callback: setFromDocumentTypeStore
+                  })
                 }}
                 error={
                   documentTypeMapsValidation.touched.fromFunctionId &&
@@ -257,7 +262,9 @@ const DocumentTypeMaps = () => {
                   documentTypeMapsValidation.setFieldValue('fromDTId', newValue?.recordId)
                   documentTypeMapsValidation.setFieldValue('fromDTName', newValue?.name)
                 }}
-                error={documentTypeMapsValidation.touched.fromDTId && Boolean(documentTypeMapsValidation.errors.fromDTId)}
+                error={
+                  documentTypeMapsValidation.touched.fromDTId && Boolean(documentTypeMapsValidation.errors.fromDTId)
+                }
                 helperText={documentTypeMapsValidation.touched.fromDTId && documentTypeMapsValidation.errors.fromDTId}
                 maxAccess={access}
               />
@@ -274,7 +281,12 @@ const DocumentTypeMaps = () => {
                 onChange={(event, newValue) => {
                   documentTypeMapsValidation.setFieldValue('toFunctionId', newValue?.key)
                   documentTypeMapsValidation.setFieldValue('toFunctionName', newValue?.value)
-                  fillDocumentTypeStore({ _startAt: 0, _pageSize: 30, _dgId: newValue?.key, callback: setToDocumentTypeStore })
+                  fillDocumentTypeStore({
+                    _startAt: 0,
+                    _pageSize: 30,
+                    _dgId: newValue?.key,
+                    callback: setToDocumentTypeStore
+                  })
                 }}
                 error={
                   documentTypeMapsValidation.touched.toFunctionId &&
@@ -320,11 +332,12 @@ const DocumentTypeMaps = () => {
         </Window>
       )}
       <ReportParameterBrowser
+        reportName='SYDTM'
         open={reportParamWindowOpen}
         onClose={() => setReportParamWindowOpen(false)}
         onSave={getGridData}
-        reportName='SYDTM'
-        functionStore={functionStore}
+        paramsArray={paramsArray}
+        setParamsArray={setParamsArray}
       />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
