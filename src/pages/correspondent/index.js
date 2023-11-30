@@ -122,6 +122,7 @@ const Correspondent = () => {
     enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
+      console.log(values.rows)
       const isValid = values.rows.every(row => !!row.countryId)
 
       return isValid ? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
@@ -254,6 +255,7 @@ const Correspondent = () => {
           glCurrencyName: '',
           exchangeId: '',
           exchangeRef: '',
+          exchangeRef: '',
           outward: false,
           inward: false,
           bankDeposit: false,
@@ -278,6 +280,7 @@ const Correspondent = () => {
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
+
 
       //fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
       columnsInDropDown: [
@@ -319,6 +322,7 @@ const Correspondent = () => {
     //   mandatory: false,
     //   readOnly: true
     // },
+
 
     {
       field: 'combobox',
@@ -362,6 +366,10 @@ const Correspondent = () => {
     },
     {
       field: 'button',
+      text: 'Exchange',
+      onClick: (e, row) => {
+        exchangeMapValidation.setValues(getNewCorrExchangeMap())
+        setCurrencyMapWindowOpen(true)
       text: _labels.exchange,
       onClick: (e, row) => {
         console.log(row)
@@ -420,6 +428,7 @@ const Correspondent = () => {
   })
 
   const handleExchangeMapSubmit = () => {
+    exchangeMapValidation.handleSubmit()
     exchangeMapsGridValidation.handleSubmit()
   }
 
@@ -726,10 +735,12 @@ const Correspondent = () => {
           bpMasterDataStore={bpMasterDataStore}
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
+          //countries tab - inline edit grid
 
           //countries inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
+          //currencies tab - inline edit grid
 
           //currencies inline edit grid
           currenciesGridValidation={currenciesGridValidation}

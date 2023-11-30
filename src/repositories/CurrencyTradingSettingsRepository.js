@@ -12,6 +12,12 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getSRA',
     set: service + 'setSRA',
     del: service + 'delSRA'
+  },
+  SourceOfIncome: {
+    qry: service + 'qrySI',
+    page: service + 'qrySI',
+    get: service + 'getSI',
+    set: service + 'setSI',
+    del: service + 'delSI'
   }
-
 }

@@ -20,7 +20,6 @@ const Agent = () => {
 
   const [labels, setLabels] = useState(null)
   const [addressLabels, setAddressLabels] = useState(null)
-
   const [access, setAccess] = useState(null)
 
   //stores
