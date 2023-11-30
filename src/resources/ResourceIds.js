@@ -17,5 +17,6 @@ export const ResourceIds = {
   CorrespondentAgents: 36102,
   CorrespondentAgentBranch: 36107,
   Address: 20102,
-  GlobalExchangeBuyMap: 36112
+  GlobalExchangeBuyMap: 36112,
+  SourceOfIncome: 35103
 }
