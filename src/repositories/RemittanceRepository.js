@@ -39,7 +39,7 @@ export const RemittanceSettingsRepository = {
   },
   CorrespondentAgentBranches: {
     qry: service + 'qryABR',
-    page: service + "pageABR",
+    page: service + 'pageABR',
     get: service + 'getABR',
     set: service + 'setABR',
     del: service + 'delABR'
@@ -47,5 +47,9 @@ export const RemittanceSettingsRepository = {
   CorrespondentExchangeMap: {
     qry: service + 'qryEXC',
     set2: service + 'set2EXC'
+  },
+  CorrespondentExchangeBuyMap: {
+    qry: service + 'qryEXB',
+    set2: service + 'set2EXB'
   }
 }

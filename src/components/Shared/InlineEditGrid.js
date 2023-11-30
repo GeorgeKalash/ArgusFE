@@ -254,7 +254,7 @@ const InlineEditGrid = props => {
 
   const lastRowIsValid = () => {
     const lastRow = gridValidation.values.rows[gridValidation.values.rows.length - 1]
-    console.log(columns);
+    console.log(columns)
     for (let i = 0; i < columns.length; i++) {
       console.log(columns[i])
       const columnName = columns[i].name
