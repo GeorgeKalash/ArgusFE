@@ -54,6 +54,7 @@
     "dayjs": "^1.11.10",
     "devexpress-reporting": "^23.1.6",
     "devextreme": "^23.1.6",
+    "devextreme-dist": "^23.1.6",
     "devextreme-react": "^23.1.5",
     "draft-js": "0.11.7",
     "formik": "^2.4.4",
