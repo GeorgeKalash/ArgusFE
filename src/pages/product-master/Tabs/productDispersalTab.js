@@ -8,7 +8,8 @@ import { Grid, Box, Checkbox } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
-const ProductDispersalTab = ({ dispersalGridData, getDispersalsGridData, addProductDispersal, delProductDispersal, popupDispersal, onSave, maxAccess }) => {
+const ProductDispersalTab = ({ dispersalsGridData, getDispersalsGridData, addProductDispersal, delProductDispersal, popupDispersal, maxAccess }) => {
+ 
   const columns = [
     {
       field: 'reference',
@@ -21,7 +22,7 @@ const ProductDispersalTab = ({ dispersalGridData, getDispersalsGridData, addProd
       flex: 1
     },
     {
-      field: 'dispersalType',
+      field: 'dispersalTypeName',
       headerName: 'Dispersal Type',
       flex: 1
     },
@@ -49,7 +50,7 @@ const ProductDispersalTab = ({ dispersalGridData, getDispersalsGridData, addProd
         <GridToolbar onAdd={addProductDispersal} maxAccess={maxAccess} />
         <Table
           columns={columns}
-          gridData={dispersalGridData}
+          gridData={dispersalsGridData}
           rowId={['recordId']}
           api={getDispersalsGridData}
           onEdit={popupDispersal}
@@ -57,7 +58,7 @@ const ProductDispersalTab = ({ dispersalGridData, getDispersalsGridData, addProd
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          paginationType='client'
+          height={200}
         />
       </Box>
     </>

@@ -28,6 +28,18 @@ export const RemittanceSettingsRepository = {
     set: service + 'setPDI',
     del: service + 'delPDI'
   },
+  ProductSchedules: {
+    qry: service + 'qryPSC',
+    set2: service + 'set2PSC'
+  },
+  ProductScheduleRanges: {
+    qry: service + 'qryPSR',
+    set2: service + 'set2PSR'
+  },
+  ProductDispersalAgents: {
+    qry: service + 'qryPDA',
+    set2: service + 'set2PDA'
+  },
   Correspondent: {
     qry: service + 'qryCOR',
     get: service + 'getCOR',

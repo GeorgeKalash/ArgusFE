@@ -37,6 +37,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { getNewProductMaster, populateProductMaster } from 'src/Models/RemittanceSettings/ProductMaster'
 import { getNewProductDispersal, populateProductDispersal } from 'src/Models/RemittanceSettings/ProductDispersal'
+import { getNewProductScheduleRange, populateProductScheduleRange } from 'src/Models/RemittanceSettings/ProductScheduleRange'
 import ProductDispersalWindow from './Windows/ProductDispersalWindow'
 
 const ProductMaster = () => {
@@ -55,6 +56,7 @@ const ProductMaster = () => {
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
   const [interfaceStore, setInterfaceStore] = useState([])
+  const [agentsStore, setAgentsStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
   const [plantStore, setPlantStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
@@ -156,12 +158,14 @@ const ProductMaster = () => {
     }
   })
 
-  const productLegValidation = useFormik({})
 
   const handleSubmit = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
     else if (activeTab === 1) countriesGridValidation.handleSubmit()
     else if (activeTab === 2) monetariesGridValidation.handleSubmit()
+    else if (activeTab === 4) schedulesGridValidation.handleSubmit()
+    else if (activeTab === 5) scheduleRangeGridValidation.handleSubmit()
+    else if (activeTab === 7) agentsGridValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -201,7 +205,7 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setDispersalTypeStore(res.list)
+        setDispersalTypeStore(res)
       })
       .catch(error => {
         setErrorMessage(error.response.data)
@@ -281,6 +285,20 @@ const ProductMaster = () => {
       })
   }
 
+  const fillAgentsStore = () => {
+    var parameters = '_filter='
+    getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentAgents.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setAgentsStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const fillPlantStore = () => {
     var parameters = '_filter='
     getRequest({
@@ -288,22 +306,13 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setPlantStore(res.list)
+        setPlantStore(res)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const fillDispersalStore = () => {
-    const newData = {
-      list: [
-        { recordId: 1, reference: 'STD', name: 'standard' },
-        { recordId: 2, reference: 'EXP', name: 'express' }
-      ]
-    }
-    setDispersalStore(newData.list)
-  }
 
   const fillCoutryStore = () => {
     var parameters = '_filter='
@@ -340,6 +349,7 @@ const ProductMaster = () => {
     { label: 'Countries', disabled: !editMode },
     { label: 'Monetary', disabled: !editMode },
     { label: 'Dispersal', disabled: !editMode },
+    { label: 'Schedules', disabled: !editMode },
     { label: 'Amount range', disabled: !editMode },
     { label: 'Fields', disabled: !editMode },
     { label: 'Agent', disabled: !editMode }
@@ -361,14 +371,13 @@ const ProductMaster = () => {
 
   const addProductMaster = () => {
     productMasterValidation.setValues(getNewProductMaster())
-    productLegValidation.setValues({})
     fillTypeStore()
     fillFunctionStore()
     fillLanguageStore()
     fillCommissionBaseStore()
     fillInterfaceStore()
     fillPlantStore()
-    fillDispersalStore()
+    fillAgentsStore()
     fillCoutryStore()
     fillCurrencyStore()
     setWindowOpen(true)
@@ -381,12 +390,17 @@ const ProductMaster = () => {
     fillCommissionBaseStore()
     fillInterfaceStore()
     getProductMasterById(obj)
-    fillDispersalStore()
     fillCoutryStore()
+    fillPlantStore()
+    fillAgentsStore()
     fillCurrencyStore()
     fillDispersalTypeStore()
     getCorrespondentCountries(obj)
     getCorrespondentMonetaries(obj)
+    getDispersalsGridData(obj)
+    getProductSchedules(obj)
+    productLegValidation.setValues(getNewProductScheduleRange())
+    agentsHeaderValidation.setValues({dispersalId:null})
   }
 
   const getProductMasterById = obj => {
@@ -405,11 +419,6 @@ const ProductMaster = () => {
       .catch(error => {
         setErrorMessage(error)
       })
-  }
-
-  const getProductLegGridData = ({}) => {
-    const newData = { list: [{ recordId: 1, fromAmount: 1, toAmount: 10000 }] }
-    setProductLegGridData({ ...newData })
   }
 
   const getProductFieldGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -613,7 +622,6 @@ const ProductMaster = () => {
       ]
     },
     onSubmit: values => {
-      console.log({ values })
       postProductMonetaries(values.rows)
     }
   })
@@ -733,7 +741,6 @@ const ProductMaster = () => {
       isInactive: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log(values)
       postProductDispersal(values)
     }
   })
@@ -745,7 +752,7 @@ const ProductMaster = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData({})
+        getDispersalsGridData(obj)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Editted Successfully')
       })
@@ -754,15 +761,15 @@ const ProductMaster = () => {
       })
   }
 
-  const getDispersalsGridData = ({ _productId = 0 }) => {
-    const defaultParams = `_productId=${_productId}`
+  const getDispersalsGridData = obj => {
+    const defaultParams = `_productId=${obj.recordId}`
     var parameters = defaultParams
     getRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.qry,
       parameters: parameters
     })
       .then(res => {
-        setDispersalsGridData({})
+        setDispersalsGridData(res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -786,12 +793,9 @@ const ProductMaster = () => {
   
   const addProductDispersal = () => {
     productDispersalValidation.setValues(getNewProductDispersal(productMasterValidation.values.recordId))
-    console.log(productMasterValidation.values.recordId);
-    console.log(productDispersalValidation.values);
     setDispersalWindowOpen(true)
   }
 
-  
   const popupDispersal = obj => {
     getDispersalById(obj)
   }
@@ -818,6 +822,419 @@ const ProductMaster = () => {
     productDispersalValidation.handleSubmit()
   }
 
+  //SCHEDULES TAB - INLINE EDIT GRID
+  const schedulesGridValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.countryId)
+
+      return isValid ? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
+    },
+    initialValues: {
+      rows: [
+        {
+          productId: productMasterValidation.values
+            ? productMasterValidation.values.recordId
+              ? productMasterValidation.values.recordId
+              : ''
+            : '',
+            seqNo: 1,
+            plantId: '',
+            plantRef: '',
+            plantName: '',
+            countryId: '',
+            countryRef: '',
+            countryName: '',
+            currencyId: '',
+            currencyRef: '',
+            currencyName: '',
+            dispersalType: '',
+            dispersalTypeName: '',
+            isInactive: false
+        }
+      ]
+    },
+    onSubmit: values => {
+      postProductSchedules(values.rows)
+    }
+  })
+
+  const schedulesInlineGridColumns = [
+    {
+      field: 'incremented',
+      header: 'Seq No',
+      name: 'seqNo',
+      mandatory: false,
+      readOnly: true,
+      valueSetter: () => {
+        return schedulesGridValidation.values.rows.length + 1
+      }
+    },
+    {
+      field: 'button',
+      text: 'select',
+      onClick: (e, row) => {
+        productLegValidation.setValues(populateProductScheduleRange(row))
+        getCorrespondentScheduleRange(row)
+      }
+    },
+    {
+      field: 'combobox',
+      header: 'Country',
+      nameId: 'countryId',
+      name: 'countryRef',
+      mandatory: true,
+      store: countryStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Country Ref' },
+        { key: 'flName', value: 'Foreign Language Name' }
+      ]
+    },
+    {
+      field: 'textfield',
+      header: 'name',
+      name: 'countryName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'combobox',
+      header: 'plant',
+      nameId: 'plantId',
+      name: 'plantRef',
+      mandatory: true,
+      store: plantStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldsToUpdate: [{ from: 'name', to: 'plantName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Ref' },
+        { key: 'name', value: 'Name' }
+      ]
+    },
+    {
+      field: 'textfield',
+      header: 'name',
+      name: 'plantName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'combobox',
+      header: 'Currency',
+      nameId: 'currencyId',
+      name: 'currencyRef',
+      mandatory: true,
+      store: currencyStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Currency Ref' },
+        { key: 'name', value: 'Name' }
+      ]
+    },
+    {
+      field: 'textfield',
+      header: 'name',
+      name: 'currencyName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'combobox',
+      header: 'Dispersal',
+      nameId: 'dispersalId',
+      name: 'dispersalRef',
+      mandatory: true,
+      store: dispersalsGridData.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldsToUpdate: [
+        { from: 'name', to: 'dispersalName' }, 
+        { from: 'dispersalType', to: 'dispersalType' },
+        { from: 'dispersalTypeName', to: 'dispersalTypeName' }
+      ],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Ref' },
+        { key: 'name', value: 'Name' }
+      ]
+    },
+    {
+      field: 'textfield',
+      header: 'name',
+      name: 'dispersalName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'combobox',
+      header: 'Dispersal Type',
+      nameId: 'dispersalType',
+      name: 'dispersalTypeName',
+      mandatory: false,
+      store: dispersalTypeStore.list,
+      valueField: 'key',
+      displayField: 'value',
+      readOnly: true,
+    },
+    {
+      field: 'checkbox',
+      header: 'is inactive',
+      name: 'isInactive'
+    }
+  ]
+
+  const postProductSchedules = obj => {
+    const data = {
+      productId: productMasterValidation.values.recordId,
+      productSchedules: obj
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductSchedules.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getProductSchedules = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_productId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductSchedules.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0) schedulesGridValidation.setValues({ rows: res.list })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  //SCHEDULE LEG HEADER
+
+  const productLegValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      seqNo: yup.string().required('This field is required'),
+      plantId: yup.string().required('This field is required'),
+      currencyId: yup.string().required('This field is required'),
+      countryId: yup.string().required('This field is required'),
+      dispersalId: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+    }
+  })
+
+  //SCHEDULE RANGE INLINE EDIT GRID
+
+  const scheduleRangeGridValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.fromAmount)
+
+      return isValid ? {} : { rows: Array(values.rows.length).fill({ fromAmount: 'Country ID is required' }) }
+    },
+    initialValues: {
+      rows: [
+        {
+          productId: productLegValidation.values
+            ? productLegValidation.values.productId
+              ? productLegValidation.values.productId
+              : ''
+            : '',
+            seqNo:'',
+            rangeSeqNo: 1, //incremental 
+            fromAmount: '',
+            toAmount: ''
+        }
+      ]
+    },
+    onSubmit: values => {
+      postProductScheduleRange(values.rows)
+    }
+  })
+
+  const scheduleRangeInlineGridColumns = [
+    {
+      field: 'incremented',
+      header: 'Seq No',
+      name: 'rangeSeqNo',
+      mandatory: false,
+      readOnly: true,
+      valueSetter: () => {
+        return scheduleRangeGridValidation.values.rows.length + 1
+      }
+    },
+    {
+      field: 'textfield',
+      header: 'from amount',
+      name: 'fromAmount',
+      mandatory: true,
+      readOnly: false
+    },
+    {
+      field: 'textfield',
+      header: 'to amount',
+      name: 'toAmount',
+      mandatory: true,
+      readOnly: false
+    },
+    {
+      field: 'button',
+      text: 'commission',
+      onClick: (e, row) => {
+        productLegValidation.setValues(populateProductScheduleRange(row))
+        getCorrespondentScheduleRange(row)
+      }
+    },
+  ]
+
+  const postProductScheduleRange = obj => {
+    console.log(productLegValidation);
+
+    const data = {
+      productId: productLegValidation.values.productId,
+      seqNo: productLegValidation.values.seqNo,
+      productScheduleRanges: obj
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductScheduleRanges.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getCorrespondentScheduleRange = obj => {
+    const _productId = obj.productId
+    const _seqNo = obj.seqNo
+    const defaultParams = `_productId=${_productId}&_seqNo=${_seqNo}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductScheduleRanges.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0) scheduleRangeGridValidation.setValues({ rows: res.list })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  //AGENTS TAB
+  const agentsHeaderValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      dispersalId: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+    }
+  })
+
+  const agentsGridValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.agentId)
+
+      return isValid ? {} : { rows: Array(values.rows.length).fill({ agentId: 'Agent ID is required' }) }
+    },
+    initialValues: {
+      rows: [
+        {
+          dispersalId: agentsHeaderValidation.values
+            ? agentsHeaderValidation.values.dispersalId
+              ? agentsHeaderValidation.values.dispersalId
+              : ''
+            : '',
+            agentId:'',
+            agentName:''
+        }
+      ]
+    },
+    onSubmit: values => {
+      postProductAgents(values.rows)
+    }
+  })
+
+  const agentsInlineGridColumns = [
+    {
+      field: 'combobox',
+      header: 'Agents',
+      nameId: 'agentId',
+      name: 'agentName',
+      mandatory: false,
+      store: agentsStore.list,
+      valueField: 'recordId',
+      displayField: 'name',
+      fieldsToUpdate: [{ from: 'name', to: 'agentName' }],
+      columnsInDropDown: [
+        { key: 'name', value: '' }
+      ]
+    },
+  ]
+
+  const postProductAgents = obj => {
+    const data = {
+      dispersalId: productMasterValidation.values.recordId,
+      productSchedules: obj
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductDispersalAgents.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const onDispersalSelection = dispersalId => {
+    const dipersalId = dispersalId
+    const defaultParams = `_dispersalId=${dipersalId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductDispersalAgents.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0) agentsGridValidation.setValues({ rows: res.list })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+
+
+
+
+
   const editProductCommission = obj => {
     fillCommissionStore()
     setProductLegWindowOpen(true)
@@ -842,13 +1259,16 @@ const ProductMaster = () => {
 
         //for product leg tab
         setProductLegWindowOpen(false)
-        getProductLegGridData({})
 
         //for product field tab
         getProductFieldGridData({})
 
         //for product agent tab
         getProductAgentGridData({})
+
+        fillPlantStore()
+        fillCoutryStore()
+        fillCurrencyStore()
 
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
@@ -883,17 +1303,16 @@ const ProductMaster = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          width={900}
+          width={1050}
           height={310}
           onSave={handleSubmit}
           productMasterValidation={productMasterValidation}
-          productLegValidation={productLegValidation}
           typeStore={typeStore}
           functionStore={functionStore}
           commissionBaseStore={commissionBaseStore}
           interfaceStore={interfaceStore}
           languageStore={languageStore}
-
+          
           //countries inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
@@ -909,6 +1328,25 @@ const ProductMaster = () => {
           delProductDispersal={delProductDispersal}
           popupDispersal={popupDispersal}
           
+          //schedules inline edit grid
+          schedulesGridValidation={schedulesGridValidation}
+          schedulesInlineGridColumns={schedulesInlineGridColumns}
+          
+          //schedule ranges tab
+          productLegValidation={productLegValidation}
+          currencyStore={currencyStore}
+          plantStore={plantStore}
+          countryStore={countryStore}
+          dispersalStore={dispersalStore}
+          scheduleRangeGridValidation={scheduleRangeGridValidation}
+          scheduleRangeInlineGridColumns={scheduleRangeInlineGridColumns}
+
+          //agents tab inline edit grid
+          agentsHeaderValidation={agentsHeaderValidation}
+          agentsGridValidation={agentsGridValidation}
+          agentsInlineGridColumns={agentsInlineGridColumns}
+          onDispersalSelection={onDispersalSelection}
+
 
           productCountriesGridData={productCountriesGridData}
           productCurrenciesGridData={productCurrenciesGridData}
@@ -920,10 +1358,6 @@ const ProductMaster = () => {
           setProductLegWindowOpen={setProductLegWindowOpen}
           productFieldGridData={productFieldGridData}
           productAgentGridData={productAgentGridData}
-          currencyStore={currencyStore}
-          plantStore={plantStore}
-          dispersalStore={dispersalStore}
-          countryStore={countryStore}
           maxAccess={access}
         />
       )}
@@ -942,7 +1376,7 @@ const ProductMaster = () => {
           onClose={() => setDispersalWindowOpen(false)}
           onSave={handleDispersalSubmit}
           productDispersalValidation={productDispersalValidation}
-          dispersalTypeStore={dispersalTypeStore}
+          dispersalTypeStore={dispersalTypeStore.list}
           maxAccess={access}
         />
       )}

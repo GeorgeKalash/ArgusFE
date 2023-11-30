@@ -8,9 +8,7 @@ const PoductCurrenciesTab = ({
   monetariesGridValidation,
   monetariesInlineGridColumns,
   maxAccess
-}) => {
-  console.log(productMasterValidation.values);
-            
+}) => {    
   return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>

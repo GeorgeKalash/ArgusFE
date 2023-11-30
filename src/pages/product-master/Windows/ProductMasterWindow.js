@@ -10,6 +10,7 @@ import ProductFieldTab from 'src/pages/product-master/Tabs/productFieldTab'
 import ProductAgentTab from 'src/pages/product-master/Tabs/productAgentTab'
 import PoductCurrenciesTab from '../Tabs/productCurrenciesTab'
 import ProductCountriesTab from '../Tabs/productCountriesTab'
+import PoductSchedulesTab from '../Tabs/productSchedulesTab'
 
 const ProductMasterWindow = ({
   onClose,
@@ -20,13 +21,12 @@ const ProductMasterWindow = ({
   height,
   onSave,
   productMasterValidation,
-  productLegValidation,
   typeStore,
   functionStore,
   commissionBaseStore,
   interfaceStore,
   languageStore,
-
+  
   //countries inline edit grid
   countriesGridValidation,
   countriesInlineGridColumns,
@@ -34,13 +34,37 @@ const ProductMasterWindow = ({
   //monetary inline edit grid
   monetariesGridValidation,
   monetariesInlineGridColumns,
-
+  
   //dispersals tab
   dispersalsGridData,
   getDispersalsGridData,
   addProductDispersal,
   delProductDispersal,
   popupDispersal,
+  
+  //schedules tab
+  schedulesGridValidation,
+  schedulesInlineGridColumns,
+  
+  //amount ranges tab
+  productLegValidation,
+
+  //productLegsGridValidation,
+
+  //productLegsInlineGridColumns,
+  currencyStore,
+  plantStore,
+  countryStore,
+  dispersalStore,
+  scheduleRangeGridValidation,
+  scheduleRangeInlineGridColumns,
+
+  //product dispersal agents tab
+  agentsHeaderValidation,
+  agentsGridValidation,
+  agentsInlineGridColumns,
+  onDispersalSelection,
+
 
   productDispersalGridData,
   productLegWindowOpen,
@@ -50,10 +74,6 @@ const ProductMasterWindow = ({
   setProductLegWindowOpen,
   productFieldGridData,
   productAgentGridData,
-  currencyStore,
-  plantStore,
-  dispersalStore,
-  countryStore,
   maxAccess
 }) => {
 return (
@@ -107,32 +127,41 @@ return (
         />
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab}>
-        {/* <ProductLegTab
-          productLegValidation={productLegValidation}
-          productLegWindowOpen={productLegWindowOpen}
-          productLegGridData={productLegGridData}
-          productLegCommissionGridData={productLegCommissionGridData}
-          editProductCommission={editProductCommission}
-          setProductLegWindowOpen={setProductLegWindowOpen}
-          currencyStore={currencyStore}
-          plantStore={plantStore}
-          dispersalStore={dispersalStore}
-          maxAccess={maxAccess}
-        /> */}
+        <PoductSchedulesTab 
+          productMasterValidation={productMasterValidation} 
+          schedulesGridValidation={schedulesGridValidation} 
+          schedulesInlineGridColumns={schedulesInlineGridColumns} 
+          maxAccess={maxAccess} 
+        />
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab}>
+        <ProductLegTab
+          productLegValidation={productLegValidation} 
+          scheduleRangeGridValidation={scheduleRangeGridValidation}
+          scheduleRangeInlineGridColumns={scheduleRangeInlineGridColumns}
+          currencyStore={currencyStore.list}
+          plantStore={plantStore.list}
+          countryStore={countryStore.list}
+          dispersalStore={dispersalStore}
+          maxAccess={maxAccess}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel index={6} value={activeTab}>
         {/* <ProductFieldTab
           productFieldGridData={productFieldGridData}
           dispersalStore={dispersalStore}
           maxAccess={maxAccess}
         /> */}
       </CustomTabPanel>
-      <CustomTabPanel index={6} value={activeTab}>
-        {/* <ProductAgentTab
-          productAgentGridData={productAgentGridData}
-          dispersalStore={dispersalStore}
+      <CustomTabPanel index={7} value={activeTab}>
+        <ProductAgentTab
+          onDispersalSelection={onDispersalSelection}
+          dispersalsGridData={dispersalsGridData.list}
+          agentsHeaderValidation={agentsHeaderValidation}
+          agentsGridValidation={agentsGridValidation}
+          agentsInlineGridColumns={agentsInlineGridColumns}
           maxAccess={maxAccess}
-        /> */}
+        />
       </CustomTabPanel>
     </Window>
   )
