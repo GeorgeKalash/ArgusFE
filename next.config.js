@@ -8,6 +8,9 @@ const path = require('path')
 module.exports = {
   trailingSlash: true,
   reactStrictMode: false,
+  experimental: {
+    modern: true // Enable modern mode with ESM support
+  },
   webpack: config => {
     config.resolve.alias = {
       ...config.resolve.alias,
