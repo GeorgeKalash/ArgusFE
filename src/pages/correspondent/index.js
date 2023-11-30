@@ -70,7 +70,7 @@ const Correspondent = () => {
     deal: labels && labels.find(item => item.key === 13).value,
     exchange: labels && labels.find(item => item.key === 14).value,
     plant: labels && labels.find(item => item.key === 15).value,
-    exchangeMap: labels && labels.find(item => item.key === 16).value,
+    exchangeMap: labels && labels.find(item => item.key === 16).value
   }
 
   const columns = [
@@ -203,7 +203,7 @@ const Correspondent = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        getGridData({})
+        console.log(res)
         setWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
@@ -364,7 +364,7 @@ const Correspondent = () => {
       field: 'button',
       text: _labels.exchange,
       onClick: (e, row) => {
-        console.log(row);
+        console.log(row)
         exchangeMapValidation.setValues(row)
         setExchangeMapWindowOpen(true)
       }
@@ -416,8 +416,7 @@ const Correspondent = () => {
       currencyId: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required')
     }),
-    onSubmit: values => {
-    }
+    onSubmit: values => {}
   })
 
   const handleExchangeMapSubmit = () => {
@@ -728,9 +727,11 @@ const Correspondent = () => {
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
 
+          //countries inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
 
+          //currencies inline edit grid
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
           labels={_labels}

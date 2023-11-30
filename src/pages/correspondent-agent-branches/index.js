@@ -191,7 +191,7 @@ const Agent = () => {
       setActiveTab(0)
       setWindowOpen(true)
     }
-    
+
     // agentBranchValidation.setValues(populateAgentBranch(obj))
   }
   useEffect(() => {
@@ -257,7 +257,6 @@ const Agent = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-
         // getGridData({})
         setRecord(res.recordId)
         if (!recordId) toast.success('Record Added Successfully')
@@ -288,8 +287,7 @@ const Agent = () => {
             getGridData({})
             setWindowOpen(false)
             setRecord(0)
-            if (!res.recordId)
-            toast.success('Record Added Successfully')
+            if (!res.recordId) toast.success('Record Added Successfully')
             else toast.success('Record Editted Successfully')
           })
           .catch(error => {

@@ -9,9 +9,24 @@ export const RemittanceSettingsRepository = {
   },
   ProductMaster: {
     qry: service + 'qryPRO',
+    page: service + 'pagePRO',
     get: service + 'getPRO',
     set: service + 'setPRO',
     del: service + 'delPRO'
+  },
+  ProductCountries: {
+    qry: service + 'qryPCO',
+    set2: service + 'set2PCO'
+  },
+  ProductMonetaries: {
+    qry: service + 'qryPMO',
+    set2: service + 'set2PMO'
+  },
+  ProductDispersal: {
+    qry: service + 'qryPDI',
+    get: service + 'getPDI',
+    set: service + 'setPDI',
+    del: service + 'delPDI'
   },
   Correspondent: {
     qry: service + 'qryCOR',
@@ -39,7 +54,7 @@ export const RemittanceSettingsRepository = {
   },
   CorrespondentAgentBranches: {
     qry: service + 'qryABR',
-    page: service + "pageABR",
+    page: service + 'pageABR',
     get: service + 'getABR',
     set: service + 'setABR',
     del: service + 'delABR'

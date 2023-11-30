@@ -7,6 +7,7 @@ import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
+import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
@@ -18,6 +19,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -33,7 +35,9 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { getNewProductMaster } from 'src/Models/RemittanceSettings/ProductMaster'
+import { getNewProductMaster, populateProductMaster } from 'src/Models/RemittanceSettings/ProductMaster'
+import { getNewProductDispersal, populateProductDispersal } from 'src/Models/RemittanceSettings/ProductDispersal'
+import ProductDispersalWindow from './Windows/ProductDispersalWindow'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -44,10 +48,13 @@ const ProductMaster = () => {
 
   //stores
   const [gridData, setGridData] = useState([])
+  const [dispersalsGridData, setDispersalsGridData] = useState([])
   const [typeStore, setTypeStore] = useState([])
+  const [dispersalTypeStore, setDispersalTypeStore] = useState([])
   const [functionStore, setFunctionStore] = useState([])
   const [languageStore, setLanguageStore] = useState([])
   const [commissionBaseStore, setCommissionBaseStore] = useState([])
+  const [interfaceStore, setInterfaceStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
   const [plantStore, setPlantStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
@@ -63,11 +70,13 @@ const ProductMaster = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
+  const [editMode, setEditMode] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const [errorMessage, setErrorMessage] = useState(null)
-
-  const [productLegWindowOpen, setProductLegWindowOpen] = useState(false) //for productLegTab
   
+  const [productLegWindowOpen, setProductLegWindowOpen] = useState(false) //for productLegTab
+  const [dispersalWindowOpen, setDispersalWindowOpen] = useState(false)
+  const [dispersalEditMode, setDispersalEditMode] = useState(false)
 
   const columns = [
     {
@@ -81,28 +90,18 @@ const ProductMaster = () => {
       flex: 1
     },
     {
-      field: 'type',
+      field: 'typeName',
       headerName: 'Type',
       flex: 1
     },
     {
-      field: 'correspondent',
-      headerName: 'Correspondant',
+      field: 'functionName',
+      headerName: 'Function',
       flex: 1
     },
     {
-      field: 'country',
-      headerName: 'Country',
-      flex: 1
-    },
-    {
-      field: 'currency',
-      headerName: 'Currency',
-      flex: 1
-    },
-    {
-      field: 'language',
-      headerName: 'Language',
+      field: 'commissionBaseName',
+      headerName: 'Commission Base',
       flex: 1
     }
   ]
@@ -125,12 +124,12 @@ const ProductMaster = () => {
     {
       field: 'commissionRef',
       headerName: 'Commission Ref',
-      flex: 1,
+      flex: 1
     },
     {
       field: 'commissionName',
       headerName: 'Commission Name',
-      flex: 1,
+      flex: 1
     },
     {
       field: 'commission',
@@ -148,25 +147,37 @@ const ProductMaster = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       type: yup.string().required('This field is required'),
-      function: yup.string().required('This field is required'),
-      language: yup.string().required('This field is required'),
+      functionId: yup.string().required('This field is required'),
+      commissionBase: yup.string().required('This field is required'),
+      isInactive: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log('form values');
-      console.log(values);
       postProductMaster(values)
     }
   })
 
-  const productLegValidation = useFormik({
-  })
+  const productLegValidation = useFormik({})
 
   const handleSubmit = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
-    else if (activeTab === 2) productLegValidation.handleSubmit()
+    else if (activeTab === 1) countriesGridValidation.handleSubmit()
+    else if (activeTab === 2) monetariesGridValidation.handleSubmit()
   }
 
-  const getGridData = () => { }
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductMaster.page,
+      parameters: parameters
+    })
+      .then(res => {
+        setGridData({ ...res, _startAt })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const fillTypeStore = () => {
     var parameters = '_database=3601' //add 'xml'.json and get _database values from there
@@ -175,15 +186,28 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        //ask about lang values
         setTypeStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error.response.data)
       })
   }
-  
-  
+
+
+  const fillDispersalTypeStore = () => {
+    var parameters = '_database=3604' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        setDispersalTypeStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
   const fillFunctionStore = () => {
     var parameters = '_database=3605' //add 'xml'.json and get _database values from there
     getRequest({
@@ -236,7 +260,21 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setCurrencyStore(res.list)
+        setCurrencyStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillInterfaceStore = () => {
+    var parameters = '_filter='
+    getRequest({
+      extension: RemittanceSettingsRepository.Interface.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setInterfaceStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -258,7 +296,12 @@ const ProductMaster = () => {
   }
 
   const fillDispersalStore = () => {
-    const newData = { list: [{ recordId: 1, reference: 'STD', name: 'standard' },{ recordId: 2, reference: 'EXP', name: 'express' }] }
+    const newData = {
+      list: [
+        { recordId: 1, reference: 'STD', name: 'standard' },
+        { recordId: 2, reference: 'EXP', name: 'express' }
+      ]
+    }
     setDispersalStore(newData.list)
   }
 
@@ -269,18 +312,52 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setCountryStore(res.list)
+        setCountryStore(res)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const postProductMaster = obj => { console.log("postProductMaster"); console.log(obj); }
+  const postProductMaster = obj => {
+    const recordId = obj.recordId
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductMaster.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        getGridData({})
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Editted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
-  const tabs = [{ label: 'Main' }, { label: 'Countries' }, {label: 'Monetary'}, { label: 'Dispersal' }, { label: 'Amount range' }, { label: 'Fields' }, { label: 'Agent' }]
+  const tabs = [
+    { label: 'Main' },
+    { label: 'Countries', disabled: !editMode },
+    { label: 'Monetary', disabled: !editMode },
+    { label: 'Dispersal', disabled: !editMode },
+    { label: 'Amount range', disabled: !editMode },
+    { label: 'Fields', disabled: !editMode },
+    { label: 'Agent', disabled: !editMode }
+  ]
 
-  const delProductMaster = obj => { }
+  const delProductMaster = obj => {
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductMaster.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        getGridData({})
+        toast.success('Record Deleted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const addProductMaster = () => {
     productMasterValidation.setValues(getNewProductMaster())
@@ -289,17 +366,48 @@ const ProductMaster = () => {
     fillFunctionStore()
     fillLanguageStore()
     fillCommissionBaseStore()
-    fillCurrencyStore()
+    fillInterfaceStore()
     fillPlantStore()
     fillDispersalStore()
     fillCoutryStore()
+    fillCurrencyStore()
     setWindowOpen(true)
   }
 
-  const editProductMaster = obj => {
+  const popup = obj => {
+    fillTypeStore()
+    fillFunctionStore()
+    fillLanguageStore()
+    fillCommissionBaseStore()
+    fillInterfaceStore()
+    getProductMasterById(obj)
+    fillDispersalStore()
+    fillCoutryStore()
+    fillCurrencyStore()
+    fillDispersalTypeStore()
+    getCorrespondentCountries(obj)
+    getCorrespondentMonetaries(obj)
   }
 
-  const getProductLegGridData = ({ }) => {
+  const getProductMasterById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductMaster.get,
+      parameters: parameters
+    })
+      .then(res => {
+        productMasterValidation.setValues(populateProductMaster(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getProductLegGridData = ({}) => {
     const newData = { list: [{ recordId: 1, fromAmount: 1, toAmount: 10000 }] }
     setProductLegGridData({ ...newData })
   }
@@ -382,118 +490,332 @@ const ProductMaster = () => {
     setProductAgentGridData({ ...newData })
   }
 
-  const getProductCountriesGridData = () => {
-    const newData = {
-      list: [
+  //COUNTRIES TAB
+  const countriesGridValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.countryId)
+
+      return isValid ? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
+    },
+    initialValues: {
+      rows: [
         {
-          recordId: 1,
-          countryRef: 'USA',
-          countryName: 'United States',
-          isInactive: false
-        },
-        {
-          recordId: 2,
-          countryRef: 'LB',
-          countryName: 'Lebanon',
-          isInactive: true
-        },
-        {
-          recordId: 3,
-          countryRef: 'FR',
-          countryName: 'France',
-          isInactive: true
-        },
-        {
-          recordId: 4,
-          countryRef: 'IND',
-          countryName: 'India',
-          isInactive: false
-        },
-        {
-          recordId: 5,
-          countryRef: 'UAE',
-          countryName: 'United Arab Emirates',
+          productId: productMasterValidation.values
+            ? productMasterValidation.values.recordId
+              ? productMasterValidation.values.recordId
+              : ''
+            : '',
+          countryId: '',
+          countryRef: '',
+          countryName: '',
           isInactive: false
         }
       ]
+    },
+    onSubmit: values => {
+      postProductCountries(values.rows)
     }
-    setProductCountriesGridData({ ...newData })
+  })
+
+  const countriesInlineGridColumns = [
+    {
+      field: 'combobox',
+      header: 'Country',
+      nameId: 'countryId',
+      name: 'countryRef',
+      mandatory: true,
+      store: countryStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Country Ref' },
+        { key: 'flName', value: 'Foreign Language Name' }
+      ]
+    },
+    {
+      field: 'textfield',
+      header: 'name',
+      name: 'countryName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'checkbox',
+      header: 'is inactive',
+      name: 'isInactive'
+    },
+  ]
+
+  const postProductCountries = obj => {
+    const data = {
+      productId: productMasterValidation.values.recordId,
+      productCountries: obj
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductCountries.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
-  const getProductCurrenciesGridData = () => {
-    const newData = {
-      list: [
-        {
-          recordId: 1,
-          country: 'United States',
-          currency: 'US DOLLAR',
-          dispersalType: 'bank',
-          isInactive: false
-        },
-        {
-          recordId: 2,
-          country: 'United States',
-          currency: 'US DOLLAR',
-          dispersalType: 'cash',
-          isInactive: true
-        },
-        {
-          recordId: 3,
-          country: 'India',
-          currency: 'INDIAN RUPEES',
-          dispersalType: 'bank',
-          isInactive: false
-        },
-        {
-          recordId: 4,
-          country: 'United Arab Emirates',
-          currency: 'UAE DIRHAMS',
-          dispersalType: 'bank',
-          isInactive: true
-        }
-      ]
-    }
-    setProductCurrenciesGridData({ ...newData })
+  const getCorrespondentCountries = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_productId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductCountries.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0) countriesGridValidation.setValues({ rows: res.list })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
-  const getProductDispersalGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const newData = {
-      list: [
+  //MONETARY TAB  
+  const monetariesGridValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.countryId)
+
+      return isValid ? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
+    },
+    initialValues: {
+      rows: [
         {
-          recordId: 1,
-          reference: 'NTFS',
-          name: 'NTFS',
-          type: 'bank', //dispersal types fill from KVS 3604
-          isDefault: true,
-          isInactive: true
-        },
-        {
-          recordId: 2,
-          reference: 'CASH',
-          name: 'cash',
-          type: 'cash',
-          isDefault: true,
-          isInactive: false
-        },
-        {
-          recordId: 3,
-          reference: 'WALLET',
-          name: 'wallet (bitcoin)',
-          type: 'wallet',
-          isDefault: false,
-          isInactive: false
-        },
-        {
-          recordId: 4,
-          reference: 'CASH DLV',
-          name: 'cash delivery',
-          type: 'delivery',
-          isDefault: false,
-          isInactive: true
+          productId: productMasterValidation.values
+            ? productMasterValidation.values.recordId
+              ? productMasterValidation.values.recordId
+              : ''
+            : '',
+          countryId: '',
+          countryRef: '',
+          countryName: '',
+          currencyId: '',
+          currencyRef: '',
+          currencyName: '',
+          dispersalType: '',
+          dispersalTypeName: '',
+          isInactive: 'false'
         }
       ]
+    },
+    onSubmit: values => {
+      console.log({ values })
+      postProductMonetaries(values.rows)
     }
-    setProductDispersalGridData({ ...newData })
+  })
+
+  const monetariesInlineGridColumns = [
+    {
+      field: 'combobox',
+      header: 'Country',
+      nameId: 'countryId',
+      name: 'countryRef',
+      mandatory: true,
+      store: countryStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Country Ref' },
+        { key: 'flName', value: 'Foreign Language Name' }
+      ]
+    },
+    {
+      field: 'textfield',
+      header: 'name',
+      name: 'countryName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'combobox',
+      header: 'Currency',
+      nameId: 'currencyId',
+      name: 'currencyRef',
+      mandatory: true,
+      store: currencyStore.list,
+      valueField: 'recordId',
+      displayField: 'reference',
+      fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
+      columnsInDropDown: [
+        { key: 'reference', value: 'Currency Ref' },
+        { key: 'name', value: 'Name' }
+      ]
+    },
+    {
+      field: 'textfield',
+      header: 'name',
+      name: 'currencyName',
+      mandatory: false,
+      readOnly: true
+    },
+    {
+      field: 'combobox',
+      header: 'Dispersal Type',
+      nameId: 'dispersalType',
+      name: 'dispersalTypeName',
+      mandatory: false,
+      store: dispersalTypeStore.list,
+      valueField: 'key',
+      displayField: 'value',
+      fieldsToUpdate: [{ from: 'value', to: 'dispersalTypeName' }],
+      columnsInDropDown: [
+        { key: 'value', value: '' }
+      ]
+    },
+    {
+      field: 'checkbox',
+      header: 'is inactive',
+      name: 'isInactive'
+    }
+  ]
+
+  const postProductMonetaries = obj => {
+    const data = {
+      productId: productMasterValidation.values.recordId,
+      productMonetaries: obj
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductMonetaries.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getCorrespondentMonetaries = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_productId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductMonetaries.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0) monetariesGridValidation.setValues({ rows: res.list })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  //DISPERSAL TAB
+
+
+  const productDispersalValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      productId: yup.string().required('This field is required'),
+      reference: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required'),
+      dispersalType: yup.string().required('This field is required'),
+      isDefault: yup.string().required('This field is required'),
+      isInactive: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+      console.log(values)
+      postProductDispersal(values)
+    }
+  })
+
+  const postProductDispersal = obj => {
+    const recordId = obj.recordId
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductDispersal.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        getGridData({})
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Editted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getDispersalsGridData = ({ _productId = 0 }) => {
+    const defaultParams = `_productId=${_productId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductDispersal.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setDispersalsGridData({})
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const delProductDispersal = obj => {
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductDispersal.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        getGridData({})
+        toast.success('Record Deleted Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  
+  const addProductDispersal = () => {
+    productDispersalValidation.setValues(getNewProductDispersal(productMasterValidation.values.recordId))
+    console.log(productMasterValidation.values.recordId);
+    console.log(productDispersalValidation.values);
+    setDispersalWindowOpen(true)
+  }
+
+  
+  const popupDispersal = obj => {
+    getDispersalById(obj)
+  }
+
+  const getDispersalById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductDispersal.get,
+      parameters: parameters
+    })
+      .then(res => {
+        productDispersalValidation.setValues(populateProductDispersal(res.record))
+        setDispersalEditMode(true)
+        setDispersalWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const handleDispersalSubmit = () => {
+    productDispersalValidation.handleSubmit()
   }
 
   const editProductCommission = obj => {
@@ -513,17 +835,10 @@ const ProductMaster = () => {
   }
 
   useEffect(() => {
-    if (!access)
-      getAccess(ResourceIds.ProductMaster, setAccess)
+    if (!access) getAccess(ResourceIds.ProductMaster, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
-
-        //for countries tab
-        getProductCountriesGridData({})
-
-        //for currencies tab
-        getProductCurrenciesGridData({})
 
         //for product leg tab
         setProductLegWindowOpen(false)
@@ -535,8 +850,6 @@ const ProductMaster = () => {
         //for product agent tab
         getProductAgentGridData({})
 
-        //for product dispersal tab
-        getProductDispersalGridData({})
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -558,7 +871,7 @@ const ProductMaster = () => {
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={editProductMaster}
+          onEdit={popup}
           onDelete={delProductMaster}
           isLoading={false}
           maxAccess={access}
@@ -578,7 +891,25 @@ const ProductMaster = () => {
           typeStore={typeStore}
           functionStore={functionStore}
           commissionBaseStore={commissionBaseStore}
+          interfaceStore={interfaceStore}
           languageStore={languageStore}
+
+          //countries inline edit grid
+          countriesGridValidation={countriesGridValidation}
+          countriesInlineGridColumns={countriesInlineGridColumns}
+
+          //monetaries inline edit grid
+          monetariesGridValidation={monetariesGridValidation}
+          monetariesInlineGridColumns={monetariesInlineGridColumns}
+
+          //dispersals tab (grid)
+          dispersalsGridData={dispersalsGridData}
+          getDispersalsGridData={getDispersalsGridData}
+          addProductDispersal={addProductDispersal}
+          delProductDispersal={delProductDispersal}
+          popupDispersal={popupDispersal}
+          
+
           productCountriesGridData={productCountriesGridData}
           productCurrenciesGridData={productCurrenciesGridData}
           productDispersalGridData={productDispersalGridData}
@@ -602,6 +933,16 @@ const ProductMaster = () => {
           onClose={() => setProductLegWindowOpen(false)}
           commissionColumns={commissionColumns}
           productLegCommissionGridData={productLegCommissionGridData}
+          maxAccess={access}
+        />
+      )}
+
+      {dispersalWindowOpen && (
+        <ProductDispersalWindow
+          onClose={() => setDispersalWindowOpen(false)}
+          onSave={handleDispersalSubmit}
+          productDispersalValidation={productDispersalValidation}
+          dispersalTypeStore={dispersalTypeStore}
           maxAccess={access}
         />
       )}

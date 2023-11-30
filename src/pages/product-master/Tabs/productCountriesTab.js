@@ -1,70 +1,33 @@
-import { Grid, Box, Checkbox } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Custom Imports
-import Table from 'src/components/Shared/Table'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const ProductCountriesTab = ({ productCountriesGridData, maxAccess }) => {
-  const columns = [
-    {
-      field: 'countryRef',
-      headerName: 'Country Ref',
-      flex: 1
-    },
-    {
-      field: 'countryName',
-      headerName: 'Country Name',
-      flex: 1
-    },
-    {
-      field: 'isInactive',
-      headerName: 'Is Inactive',
-      flex: 1,
-      renderCell: params => (
-        <Checkbox
-          color='primary'
-          checked={params.row.isInactive === true}
-          onChange={() => {
-            params.row.isInactive = !params.row.isInactive
-          }}
-        />
-      )
-    }
-  ]
-
+const ProductCountriesTab = ({
+  productMasterValidation,
+  countriesGridValidation,
+  countriesInlineGridColumns,
+  maxAccess
+}) => {
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <Grid container gap={2}>
-          <Grid container xs={12} spacing={2}>
-            <Grid item xs={6}>
-              <CustomTextField label='Reference' value={''} readOnly={true} />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField label='Name' value={''} readOnly={true} />
-            </Grid>
-          </Grid>
-          <Grid xs={12}>
-            <Table
-              columns={columns}
-              gridData={productCountriesGridData}
-              rowId={['recordId']}
-              isLoading={false}
-              pagination={false}
-              height={220}
-              maxAccess={maxAccess} 
-            />
-            {/* <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', }}>
-              <InlineEditGrid columns={columns}/>
-            </Box> */}
-          </Grid>
-        </Grid>
+      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+        <InlineEditGrid
+          gridValidation={countriesGridValidation}
+          columns={countriesInlineGridColumns}
+          defaultRow={{
+            productId: productMasterValidation.values
+              ? productMasterValidation.values.recordId
+                ? productMasterValidation.values.recordId
+                : ''
+              : '',
+            countryId: '',
+            countryRef: '',
+            countryName: '',
+            isInactive: false
+          }}
+          width={900}
+        />
       </Box>
     </>
   )
