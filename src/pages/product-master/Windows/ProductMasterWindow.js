@@ -26,7 +26,10 @@ const ProductMasterWindow = ({
   commissionBaseStore,
   interfaceStore,
   languageStore,
-  
+  correspondentStore,
+  setCorrespondentStore,
+  lookupCorrespondent,
+
   //countries inline edit grid
   countriesGridValidation,
   countriesInlineGridColumns,
@@ -34,18 +37,18 @@ const ProductMasterWindow = ({
   //monetary inline edit grid
   monetariesGridValidation,
   monetariesInlineGridColumns,
-  
+
   //dispersals tab
   dispersalsGridData,
   getDispersalsGridData,
   addProductDispersal,
   delProductDispersal,
   popupDispersal,
-  
+
   //schedules tab
   schedulesGridValidation,
   schedulesInlineGridColumns,
-  
+
   //amount ranges tab
   productLegValidation,
 
@@ -65,7 +68,6 @@ const ProductMasterWindow = ({
   agentsInlineGridColumns,
   onDispersalSelection,
 
-
   productDispersalGridData,
   productLegWindowOpen,
   productLegGridData,
@@ -76,8 +78,7 @@ const ProductMasterWindow = ({
   productAgentGridData,
   maxAccess
 }) => {
-return (
-
+  return (
     <Window
       id='ProductMasterWindow'
       Title='Product Master'
@@ -98,45 +99,48 @@ return (
           interfaceStore={interfaceStore}
           languageStore={languageStore}
           maxAccess={maxAccess}
+          correspondentStore={correspondentStore}
+          setCorrespondentStore={setCorrespondentStore}
+          lookupCorrespondent={lookupCorrespondent}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <ProductCountriesTab 
-          productMasterValidation={productMasterValidation} 
-          countriesGridValidation={countriesGridValidation} 
-          countriesInlineGridColumns={countriesInlineGridColumns} 
-          maxAccess={maxAccess} 
+        <ProductCountriesTab
+          productMasterValidation={productMasterValidation}
+          countriesGridValidation={countriesGridValidation}
+          countriesInlineGridColumns={countriesInlineGridColumns}
+          maxAccess={maxAccess}
         />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <PoductCurrenciesTab 
-          productMasterValidation={productMasterValidation} 
-          monetariesGridValidation={monetariesGridValidation} 
-          monetariesInlineGridColumns={monetariesInlineGridColumns} 
-          maxAccess={maxAccess} 
+        <PoductCurrenciesTab
+          productMasterValidation={productMasterValidation}
+          monetariesGridValidation={monetariesGridValidation}
+          monetariesInlineGridColumns={monetariesInlineGridColumns}
+          maxAccess={maxAccess}
         />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
-        <ProductDispersalTab 
+        <ProductDispersalTab
           dispersalsGridData={dispersalsGridData}
           getDispersalsGridData={getDispersalsGridData}
           addProductDispersal={addProductDispersal}
           delProductDispersal={delProductDispersal}
           popupDispersal={popupDispersal}
-          maxAccess={maxAccess} 
+          maxAccess={maxAccess}
         />
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab}>
-        <PoductSchedulesTab 
-          productMasterValidation={productMasterValidation} 
-          schedulesGridValidation={schedulesGridValidation} 
-          schedulesInlineGridColumns={schedulesInlineGridColumns} 
-          maxAccess={maxAccess} 
+        <PoductSchedulesTab
+          productMasterValidation={productMasterValidation}
+          schedulesGridValidation={schedulesGridValidation}
+          schedulesInlineGridColumns={schedulesInlineGridColumns}
+          maxAccess={maxAccess}
         />
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab}>
         <ProductLegTab
-          productLegValidation={productLegValidation} 
+          productLegValidation={productLegValidation}
           scheduleRangeGridValidation={scheduleRangeGridValidation}
           scheduleRangeInlineGridColumns={scheduleRangeInlineGridColumns}
           currencyStore={currencyStore.list}

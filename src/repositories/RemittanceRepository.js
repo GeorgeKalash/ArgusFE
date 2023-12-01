@@ -44,7 +44,8 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryCOR',
     get: service + 'getCOR',
     set: service + 'setCOR',
-    del: service + 'delCOR'
+    del: service + 'delCOR',
+    snapshot: service + 'snapshotCOR'
   },
   CorrespondentCountry: {
     qry: service + 'qryCCO',
@@ -74,14 +75,5 @@ export const RemittanceSettingsRepository = {
   CorrespondentExchangeMap: {
     qry: service + 'qryEXC',
     set2: service + 'set2EXC'
-  },
-
-  CorrespondentExchangeBuyMap: {
-    qry: service + 'qryEXB',
-    set2: service + 'set2EXB'
-  },
-  currencyExchangeMap: {
-    qry: service + 'qryEXG',
-    set2: service + 'set2EXG'
   }
 }

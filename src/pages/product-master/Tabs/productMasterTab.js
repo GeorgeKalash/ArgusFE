@@ -4,13 +4,17 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import CustomLookup from 'src/components/Inputs/CustomLookup'
 
 const ProductMasterTab = ({
   productMasterValidation,
   typeStore,
   functionStore,
   commissionBaseStore,
+  correspondentStore,
+  setCorrespondentStore,
   interfaceStore,
+  lookupCorrespondent,
   languageStore,
   maxAccess
 }) => {
@@ -78,6 +82,37 @@ const ProductMasterTab = ({
             />
           </Grid>
           <Grid item xs={12}>
+            <CustomLookup
+              name='correspondentId'
+              // label={labels.correspondent}
+              label='Correspondent'
+              value={productMasterValidation.values.correspondent}
+              required
+              valueField='name'
+              store={setCorrespondentStore}
+              firstValue={productMasterValidation.values.cityName}
+              setStore={correspondentStore}
+              onLookup={lookupCorrespondent}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  productMasterValidation.setFieldValue('correspondentId', newValue?.recordId)
+                  productMasterValidation.setFieldValue('correspondentName', newValue?.name)
+                } else {
+                  productMasterValidation.setFieldValue('correspondentId', null)
+                  productMasterValidation.setFieldValue('correspondentName', null)
+                }
+              }}
+              error={
+                productMasterValidation.touched.correspondentId &&
+                Boolean(productMasterValidation.errors.correspondentId)
+              }
+              helperText={
+                productMasterValidation.touched.correspondentId && productMasterValidation.errors.correspondentId
+              }
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          {/* <Grid item xs={12}>
             <CustomTextField
               name='correspondent'
               label='Correspondent'
@@ -88,7 +123,7 @@ const ProductMasterTab = ({
               error={Boolean(productMasterValidation.errors.correspondent)}
               helperText={productMasterValidation.errors.correspondent}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>

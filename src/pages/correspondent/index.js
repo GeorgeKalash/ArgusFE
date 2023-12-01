@@ -368,16 +368,19 @@ const Correspondent = () => {
     {
       field: 'button',
       text: 'Exchange',
-      onClick: (e, row) => {
-      onClick: (e, row) => {
-        exchangeMapValidation.setValues(getNewCorrExchangeMap())
-        setCurrencyMapWindowOpen(true)
-      text: _labels.exchange,
+
+      // onClick: (e, row) => {
+      // onClick: (e, row) => {
+      //   exchangeMapValidation.setValues(getNewCorrExchangeMap())
+      //   setCurrencyMapWindowOpen(true)
+      // text: _labels.exchange,
       onClick: (e, row) => {
         console.log(row)
+        exchangeMapValidation.setValues({})
         exchangeMapValidation.setValues(row)
         setExchangeMapWindowOpen(true)
-        setCurrencyMapWindowOpen(true)
+
+        // setCurrencyMapWindowOpen(true)
       }
     }
   ]
@@ -501,6 +504,22 @@ const Correspondent = () => {
   ]
 
   const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
+    console.log('exchangeMapsGridValidation')
+
+    console.log(exchangeMapsGridValidation)
+    exchangeMapsGridValidation.setValues({
+      rows: [
+        {
+          corId: corId,
+          currencyId: '',
+          countryId: '',
+          plantId: '',
+          exchangeId: '',
+          plantRef: '',
+          exchangeRef: ''
+        }
+      ]
+    })
     const defaultParams = `_corId=${corId}&_currencyId=${currencyId}&_countryId=${countryId}`
     var parameters = defaultParams
     getRequest({
@@ -531,7 +550,7 @@ const Correspondent = () => {
     })
       .then(res => {
         // getGridData({})
-        setCurrencyMapWindowOpen(false)
+        setExchangeMapWindowOpen(false)
         if (!res.recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
