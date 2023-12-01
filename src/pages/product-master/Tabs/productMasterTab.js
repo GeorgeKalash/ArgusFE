@@ -83,24 +83,31 @@ const ProductMasterTab = ({
           </Grid>
           <Grid item xs={12}>
             <CustomLookup
-              name='correspondentId'
+              name='corId'
+
               // label={labels.correspondent}
               label='Correspondent'
-              value={productMasterValidation.values.correspondent}
+              value={productMasterValidation.values.correspondentId}
               required
               valueField='name'
-              store={setCorrespondentStore}
-              firstValue={productMasterValidation.values.cityName}
-              setStore={correspondentStore}
+              store={correspondentStore}
+              firstValue={productMasterValidation.values.correspondentName}
+              setStore={setCorrespondentStore}
               onLookup={lookupCorrespondent}
               onChange={(event, newValue) => {
+                console.log(newValue)
+                console.log(productMasterValidation)
                 if (newValue) {
                   productMasterValidation.setFieldValue('correspondentId', newValue?.recordId)
                   productMasterValidation.setFieldValue('correspondentName', newValue?.name)
+
+
                 } else {
                   productMasterValidation.setFieldValue('correspondentId', null)
                   productMasterValidation.setFieldValue('correspondentName', null)
                 }
+                console.log(productMasterValidation)
+
               }}
               error={
                 productMasterValidation.touched.correspondentId &&

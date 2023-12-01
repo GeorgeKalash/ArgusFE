@@ -158,13 +158,17 @@ const ProductMaster = () => {
       isInactive: yup.string().required('This field is required')
     }),
     onSubmit: values => {
+
       postProductMaster(values)
     }
   })
 
   const lookupCorrespondent = searchQry => {
-    setCityStore([])
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${agentBranchValidation.values.countryId}&_stateId=${agentBranchValidation.values.stateId}`
+
+    console.log()
+    setCorrespondentStore([])
+    if(searchQry){
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
     getRequest({
       extension: RemittanceSettingsRepository.Correspondent.snapshot,
       parameters: parameters
@@ -175,7 +179,7 @@ const ProductMaster = () => {
       })
       .catch(error => {
         // setErrorMessage(error)
-      })
+      })}
   }
 
   const handleSubmit = () => {
@@ -1409,21 +1413,26 @@ const ProductMaster = () => {
           commissionBaseStore={commissionBaseStore}
           interfaceStore={interfaceStore}
           languageStore={languageStore}
+
           //countries inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
+
           //monetaries inline edit grid
           monetariesGridValidation={monetariesGridValidation}
           monetariesInlineGridColumns={monetariesInlineGridColumns}
+
           //dispersals tab (grid)
           dispersalsGridData={dispersalsGridData}
           getDispersalsGridData={getDispersalsGridData}
           addProductDispersal={addProductDispersal}
           delProductDispersal={delProductDispersal}
           popupDispersal={popupDispersal}
+
           //schedules inline edit grid
           schedulesGridValidation={schedulesGridValidation}
           schedulesInlineGridColumns={schedulesInlineGridColumns}
+
           //schedule ranges tab
           productLegValidation={productLegValidation}
           currencyStore={currencyStore}
@@ -1432,6 +1441,7 @@ const ProductMaster = () => {
           dispersalStore={dispersalStore}
           scheduleRangeGridValidation={scheduleRangeGridValidation}
           scheduleRangeInlineGridColumns={scheduleRangeInlineGridColumns}
+
           //agents tab inline edit grid
           agentsHeaderValidation={agentsHeaderValidation}
           agentsGridValidation={agentsGridValidation}
