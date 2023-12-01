@@ -952,6 +952,7 @@ const ProductMaster = () => {
       text: 'select',
       onClick: (e, row) => {
         productLegValidation.setValues(populateProductScheduleRange(row))
+        resetScheduleRanges(row)
         getCorrespondentScheduleRange(row)
       }
     },
@@ -1143,6 +1144,25 @@ const ProductMaster = () => {
   })
 
   //SCHEDULE RANGE INLINE EDIT GRID
+  const resetScheduleRanges = () => {
+    scheduleRangeGridValidation.resetForm({
+      values: {
+        rows: [
+          {
+            productId: productLegValidation.values
+              ? productLegValidation.values.productId
+                ? productLegValidation.values.productId
+                : ''
+              : '',
+            seqNo: '',
+            rangeSeqNo: 1, //incremental
+            fromAmount: '',
+            toAmount: ''
+          }
+        ]
+      }
+    })
+  }
 
   const scheduleRangeGridValidation = useFormik({
     enableReinitialize: false,
@@ -1288,14 +1308,14 @@ const ProductMaster = () => {
 
   const rangeCommissionsInlineGridColumns = [
     {
-      field: 'commissionName',
+      field: 'textfield',
       header: 'Commission Type',
       name: 'commissionName',
       mandatory: true,
       readOnly: false
     },
     {
-      field: 'commission',
+      field: 'textfield',
       header: 'Commission',
       name: 'commission',
       mandatory: true,
@@ -1383,6 +1403,20 @@ const ProductMaster = () => {
   }
 
   //AGENTS TAB
+  const resetAgents = (dispersalId) => {
+    agentsGridValidation.resetForm({
+      values: {
+        rows: [
+          {
+            dispersalId: dispersalId,
+            agentId: '',
+            agentName: ''
+          }
+        ]
+      }
+    })
+  }
+
   const agentsHeaderValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
@@ -1459,7 +1493,10 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        if (res.list.length > 0) agentsGridValidation.setValues({ rows: res.list })
+        resetAgents(dispersalId)
+        if (res.list.length > 0) {
+          agentsGridValidation.setValues({ rows: res.list })
+        }
       })
       .catch(error => {
         setErrorMessage(error)
