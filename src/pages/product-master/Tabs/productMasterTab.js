@@ -84,6 +84,7 @@ const ProductMasterTab = ({
           <Grid item xs={12}>
             <CustomLookup
               name='correspondentId'
+
               // label={labels.correspondent}
               label='Correspondent'
               value={productMasterValidation.values.correspondent}
