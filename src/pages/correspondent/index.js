@@ -122,6 +122,8 @@ const Correspondent = () => {
     }
   })
 
+  // console.log(correspondentValidation)
+
   // COUNTRIES TAB
   const countriesGridValidation = useFormik({
     enableReinitialize: true,
@@ -210,8 +212,9 @@ const Correspondent = () => {
     })
       .then(res => {
         getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
+
+        // setWindowOpen(false)
+        if (!res.recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
@@ -388,7 +391,7 @@ const Correspondent = () => {
       .then(res => {
         getGridData({})
         setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
+        if (!res.recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
@@ -417,25 +420,28 @@ const Correspondent = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      corId: yup.string().required('This field is required'),
-      currencyId: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required')
+      // corId: yup.string().required('This field is required'),
+      // currencyId: yup.string().required('This field is required'),
+      // countryId: yup.string().required('This field is required')
     }),
-    onSubmit: values => {}
+    onSubmit: values => {
+      postExchangeMaps(values)
+    }
   })
 
   const handleExchangeMapSubmit = () => {
-    exchangeMapValidation.handleSubmit()
+    exchangeMapsGridValidation.handleSubmit()
   }
 
   const exchangeMapsGridValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validate: values => {
-      const isValid = values.rows.every(row => !!row.plantId)
 
-      return isValid ? {} : { rows: Array(values.rows.length).fill({ plantId: 'Plant is required' }) }
-    },
+    // validate: values => {
+    //   const isValid = values.rows.every(row => !!row.plantId)
+
+    //   return isValid ? {} : {} //{ rows: Array(values.rows.length).fill({ plantId: 'Plant is required' }) }
+    // },
     initialValues: {
       rows: [
         {
@@ -452,7 +458,7 @@ const Correspondent = () => {
       ]
     },
     onSubmit: values => {
-      console.log(values)
+      // console.log(values + 'value')
       postExchangeMaps(values)
     }
   })
@@ -505,20 +511,22 @@ const Correspondent = () => {
   }
 
   const postExchangeMaps = obj => {
+    console.log(obj)
+
     const data = {
-      corId: correspondentValidation.values.recordId,
-      countryId: correspondentValidation.values.recordId,
-      currencyId: correspondentValidation.values.recordId,
-      correspondentCurrencies: obj
+      corId: currenciesGridValidation.values.rows[0].corId,
+      countryId: exchangeMapValidation.values.countryId,
+      currencyId: currenciesGridValidation.values.rows[0].currencyId,
+      correspondentExchangeMaps: obj.rows
     }
     postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
+        // getGridData({})
+        setCurrencyMapWindowOpen(false)
+        if (!res.recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
@@ -750,6 +758,8 @@ const Correspondent = () => {
           countryStore={countryStore.list}
           getCurrenciesExchangeMaps={getCurrenciesExchangeMaps}
           maxAccess={access}
+          currenciesGridValidation={currenciesGridValidation}
+          countriesGridValidation={countriesGridValidation}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

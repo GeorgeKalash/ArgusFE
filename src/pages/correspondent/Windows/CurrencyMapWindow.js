@@ -15,11 +15,17 @@ const CurrencyMapWindow = ({
   onSave,
   exchangeMapsGridValidation,
   exchangeMapsInlineGridColumns,
+  countriesGridValidation,
   exchangeMapValidation,
+  currenciesGridValidation,
   countryStore,
   getCurrenciesExchangeMaps,
   maxAccess
 }) => {
+  console.log(countriesGridValidation)
+  console.log(exchangeMapsGridValidation)
+  console.log(currenciesGridValidation)
+
   return (
     <Window id='CurrencyMapsWindow' Title='Exchange Map' onClose={onClose} onSave={onSave} width={500} height={400}>
       <CustomTabPanel index={0} value={0}>
@@ -45,26 +51,26 @@ const CurrencyMapWindow = ({
                   onChange={(event, newValue) => {
                     exchangeMapValidation.setFieldValue('countryId', newValue?.recordId)
                     const selectedCountryId = newValue?.recordId || ''
-                    getCurrenciesExchangeMaps(1, 2, selectedCountryId) // Fetch and update state data based on the selected country
+                    getCurrenciesExchangeMaps(
+                      currenciesGridValidation.values.rows[0].corId,
+                      currenciesGridValidation.values.rows[0].currencyId,
+                      selectedCountryId
+                    ) // Fetch and update state data based on the selected country
                   }}
                   error={exchangeMapValidation.touched.countryId && Boolean(exchangeMapValidation.errors.countryId)}
                   helperText={exchangeMapValidation.touched.countryId && exchangeMapValidation.errors.countryId}
                 />
               </Grid>
             </Grid>
+            {/* {exchangeMapValidation.values.currencyId > 0 && ( */}
             <Grid xs={12}>
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                 <InlineEditGrid
                   gridValidation={exchangeMapsGridValidation}
                   columns={exchangeMapsInlineGridColumns}
                   defaultRow={{
-                    // corId: correspondentValidation.values
-                    //   ? correspondentValidation.values.recordId
-                    //     ? correspondentValidation.values.recordId
-                    //     : ''
-                    //   : '',
-                    corId: exchangeMapValidation.values.corId,
-                    currencyId: exchangeMapValidation.values.currencyId,
+                    corId: currenciesGridValidation.values.rows[0].corId,
+                    currencyId: currenciesGridValidation.values.rows[0].currencyId,
                     countryId: exchangeMapValidation.values.countryId,
                     plantId: '',
                     exchangeId: ''
@@ -73,6 +79,7 @@ const CurrencyMapWindow = ({
                 />
               </Box>
             </Grid>
+            {/* )} */}
           </Grid>
         </Box>
       </CustomTabPanel>
