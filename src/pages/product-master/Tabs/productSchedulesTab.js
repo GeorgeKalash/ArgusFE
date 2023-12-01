@@ -15,14 +15,14 @@ return (
         }}
       >
         <Grid container gap={2}>
-          <Grid container xs={12} spacing={2}>
+          {/* <Grid container xs={12} spacing={2}>
             <Grid item xs={6}>
               <CustomTextField label='Reference' value={''} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
               <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
-          </Grid>
+          </Grid> */}
           <Grid xs={12}>
             <InlineEditGrid
               gridValidation={schedulesGridValidation}

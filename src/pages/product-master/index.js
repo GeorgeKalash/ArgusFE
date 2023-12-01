@@ -335,6 +335,8 @@ const ProductMaster = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
+        console.log(res);
+        productMasterValidation.setFieldValue('recordId', res.recordId)
         getGridData({})
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Editted Successfully')
@@ -395,6 +397,10 @@ const ProductMaster = () => {
     fillAgentsStore()
     fillCurrencyStore()
     fillDispersalTypeStore()
+    resetCorrespondentCountries()
+    resetCorrespondentMonetaries()
+    resetDispersals()
+    resetProductSchedules()
     getCorrespondentCountries(obj)
     getCorrespondentMonetaries(obj)
     getDispersalsGridData(obj)
@@ -568,13 +574,32 @@ const ProductMaster = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
+        if (res) toast.success('Record Edited Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
+
+  const resetCorrespondentCountries = () => {
+    countriesGridValidation.resetForm({
+      values: {
+        rows: [
+          {
+            productId: productMasterValidation.values
+              ? productMasterValidation.values.recordId
+                ? productMasterValidation.values.recordId
+                : ''
+              : '',
+            countryId: '',
+            countryRef: '',
+            countryName: '',
+            isInactive: false
+          }
+        ]
+      }
+    });
+  };
 
   const getCorrespondentCountries = obj => {
     const _recordId = obj.recordId
@@ -617,7 +642,7 @@ const ProductMaster = () => {
           currencyName: '',
           dispersalType: '',
           dispersalTypeName: '',
-          isInactive: 'false'
+          isInactive: false
         }
       ]
     },
@@ -702,13 +727,37 @@ const ProductMaster = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
+        if (res) toast.success('Record Edited Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
+
+  const resetCorrespondentMonetaries = () => {
+    monetariesGridValidation.resetForm({
+      values: {
+        rows: [
+          {
+            productId: productMasterValidation.values
+              ? productMasterValidation.values.recordId
+                ? productMasterValidation.values.recordId
+                : ''
+              : '',
+            countryId: '',
+            countryRef: '',
+            countryName: '',
+            currencyId: '',
+            currencyRef: '',
+            currencyName: '',
+            dispersalType: '',
+            dispersalTypeName: '',
+            isInactive: false
+          }
+        ]
+      }
+    });
+  };
 
   const getCorrespondentMonetaries = obj => {
     const _recordId = obj.recordId
@@ -760,6 +809,10 @@ const ProductMaster = () => {
         setErrorMessage(error)
       })
   }
+
+  const resetDispersals = () => {
+    
+  };
 
   const getDispersalsGridData = obj => {
     const defaultParams = `_productId=${obj.recordId}`
@@ -999,13 +1052,41 @@ const ProductMaster = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
+        if (res) toast.success('Record Edited Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
+
+  const resetProductSchedules = () => {
+    schedulesGridValidation.resetForm({
+      values: {
+        rows: [
+          {
+            productId: productMasterValidation.values
+              ? productMasterValidation.values.recordId
+                ? productMasterValidation.values.recordId
+                : ''
+              : '',
+              seqNo: 1,
+              plantId: '',
+              plantRef: '',
+              plantName: '',
+              countryId: '',
+              countryRef: '',
+              countryName: '',
+              currencyId: '',
+              currencyRef: '',
+              currencyName: '',
+              dispersalType: '',
+              dispersalTypeName: '',
+              isInactive: false
+          }
+        ]
+      }
+    });
+  };
 
   const getProductSchedules = obj => {
     const _recordId = obj.recordId
@@ -1117,8 +1198,7 @@ const ProductMaster = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
+        if (res) toast.success('Record Edited Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
@@ -1206,8 +1286,7 @@ const ProductMaster = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
+        if (res) toast.success('Record Edited Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
