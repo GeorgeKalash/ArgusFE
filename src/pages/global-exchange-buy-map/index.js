@@ -33,21 +33,6 @@ const GlobalExchangeBuyMap = () => {
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
 
-  // useEffect(() => {
-  //   var parameters = `_filter=`
-  //   getRequest({
-  //     extension: SystemRepository.Currency.qry,
-  //     parameters: parameters
-  //   })
-  //     .then(res => {
-  //       setCurrencyStore(res.list)
-  //     })
-  //     .catch(error => {})
-
-  //   fillCountryStore()
-  //   fillExchangeTableStore()
-  // }, [])
-
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
     else {
@@ -124,39 +109,9 @@ const GlobalExchangeBuyMap = () => {
       ]
     },
     onSubmit: values => {
-      console.log(values)
       postExchangeMaps(values)
     }
   })
-
-  // const exchangeMapValidation = useFormik({
-  //   enableReinitialize: true,
-  //   validateOnChange: true,
-  //   validate: values => {
-  //     const isValid = values.rows.every(row => !!row.currencyId)
-
-  //     return isValid ? {} : { rows: Array(values.rows.length).fill({ plantId: 'Currency is required' }) }
-  //   },
-  //   initialValues: {
-  //     rows: [
-  //       {
-  //         // corId: correspondentValidation.values
-  //         //   ? correspondentValidation.values.recordId
-  //         //     ? correspondentValidation.values.recordId
-  //         //     : ''
-  //         //   : '',
-  //         currencyId: '',
-  //         countryId: '',
-  //         plantId: '',
-  //         exchangeId: ''
-  //       }
-  //     ]
-  //   },
-  //   onSubmit: values => {
-  //     console.log(values)
-  //     postExchangeMaps(values)
-  //   }
-  // })
 
   const _labels = {
     country: labels && labels.find(item => item.key === 1) && labels.find(item => item.key === 1).value,
@@ -181,7 +136,7 @@ const GlobalExchangeBuyMap = () => {
       })
   }
 
-  const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
+  const getCurrenciesExchangeMaps = (currencyId) => {
     exchangeMapsGridValidation.setValues({
       rows: [
         {
@@ -249,8 +204,6 @@ const GlobalExchangeBuyMap = () => {
     exchangeMapsGridValidation.handleSubmit()
   }
 
-  // console.log(exchangeMapsGridValidation)
-
   return (
     <Box>
       <CustomTabPanel index={0} value={0}>
@@ -277,10 +230,8 @@ const GlobalExchangeBuyMap = () => {
                   onChange={(event, newValue) => {
                     exchangeMapsGridValidation.setFieldValue('currencyId', newValue?.recordId)
                     const selectedCurrencyId = newValue?.recordId || ''
-                    getCurrenciesExchangeMaps(1, selectedCurrencyId, 0)
+                    getCurrenciesExchangeMaps(selectedCurrencyId)
                     setCurrencyId(selectedCurrencyId)
-
-                    console.log(exchangeMapsGridValidation)
                     exchangeMapsGridValidation.setFieldValue('currencyId', selectedCurrencyId)
 
                     // Fetch and update state data based on the selected country

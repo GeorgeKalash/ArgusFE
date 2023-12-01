@@ -943,6 +943,7 @@ const ProductMaster = () => {
       name: 'seqNo',
       mandatory: false,
       readOnly: true,
+      hidden: true,
       valueSetter: () => {
         return schedulesGridValidation.values.rows.length + 1
       }
@@ -1199,6 +1200,7 @@ const ProductMaster = () => {
       name: 'rangeSeqNo',
       mandatory: false,
       readOnly: true,
+      hidden: true,
       valueSetter: () => {
         return scheduleRangeGridValidation.values.rows.length + 1
       }
@@ -1470,7 +1472,7 @@ const ProductMaster = () => {
   const postProductAgents = obj => {
     const data = {
       dispersalId: productMasterValidation.values.recordId,
-      productSchedules: obj
+      productDispersalAgents: obj
     }
     postRequest({
       extension: RemittanceSettingsRepository.ProductDispersalAgents.set2,

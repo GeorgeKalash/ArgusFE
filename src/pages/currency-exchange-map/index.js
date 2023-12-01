@@ -155,7 +155,6 @@ const CurrencyExchangeMap = () => {
       ]
     },
     onSubmit: values => {
-      console.log(values)
       postExchangeMaps(values)
     }
   })
@@ -174,7 +173,7 @@ const CurrencyExchangeMap = () => {
       globalExchangeMaps: obj.rows
     }
     postRequest({
-      extension: RemittanceSettingsRepository.currencyExchangeMap.set2,
+      extension: RemittanceSettingsRepository.CurrencyExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -202,7 +201,7 @@ const CurrencyExchangeMap = () => {
     const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
     var parameters = defaultParams
     getRequest({
-      extension: RemittanceSettingsRepository.currencyExchangeMap.qry,
+      extension: RemittanceSettingsRepository.CurrencyExchangeMap.qry,
       parameters: parameters
     })
       .then(res => {
@@ -219,7 +218,7 @@ const CurrencyExchangeMap = () => {
   const exchangeMapsInlineGridColumns = [
     {
       field: 'combobox',
-      header: _labels.plan, //label
+      header: _labels.plant, //label
       nameId: 'plantId',
       name: 'plantName',
       mandatory: true,

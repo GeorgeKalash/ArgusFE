@@ -323,6 +323,7 @@ const InlineEditGrid = props => {
               key={column.field}
               field={column.name}
               header={column.header}
+              hidden={column.hidden}
               style={{
                 width: column.width || tableWidth / columns.length
               }}
