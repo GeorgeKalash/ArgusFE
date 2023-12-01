@@ -79,14 +79,13 @@ const City = () => {
 
   const cityValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required')
 
       // stateId: yup.string().nullable()
-
     }),
     onSubmit: values => {
       postCity(values)
@@ -96,7 +95,7 @@ const City = () => {
   const handleSubmit = () => {
     cityValidation.handleSubmit()
   }
- 
+
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     var parameters = defaultParams + '&_countryId=0' + '&_stateId=0'
@@ -147,7 +146,7 @@ const City = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData({ })
+        getGridData({})
         setWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Editted Successfully')
@@ -184,26 +183,25 @@ const City = () => {
     fillCountryStore()
 
     //console.log('countryId ' + obj['countryId'])
-    
+
     fillStateStore(obj['countryId'])
     setEditMode(true)
     setWindowOpen(true)
   }
 
   useEffect(() => {
-    if (!access)
-    getAccess(ResourceIds.Cities, setAccess)
-  else {
-    if (access.record.maxAccess > 0) {
-      getGridData({ _startAt: 0, _pageSize: 50 })
-      fillCountryStore()
-      getLabels(ResourceIds.Cities,setLabels)
-    } else {
-      setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    if (!access) getAccess(ResourceIds.Cities, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData({ _startAt: 0, _pageSize: 50 })
+        fillCountryStore()
+        getLabels(ResourceIds.Cities, setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
     }
-  }
-}, [access])
-  
+  }, [access])
+
   return (
     <>
       <Box>
