@@ -61,5 +61,12 @@ export const SystemRepository = {
     get: service + 'getPLT',
     set: service + 'setPLT',
     del: service + 'delPLT'
+  },
+  CityDistrict: {
+    qry: service + 'qryCDI',
+    get: service + 'getCDI',
+    set: service + 'setCDI',
+    del: service + 'delCDI',
+    page: service + 'pageCDI'
   }
 }
