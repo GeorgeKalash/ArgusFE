@@ -24,6 +24,8 @@ const populateProductMaster = obj => {
     type: obj.type,
     functionId: obj.functionId,
     correspondentId: obj.correspondentId,
+    correspondentName: obj.correspondentName,
+
     languages: obj.languages,
     commissionBase: obj.commissionBase,
     interfaceId: obj.interfaceId,

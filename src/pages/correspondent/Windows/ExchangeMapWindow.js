@@ -77,23 +77,20 @@ const ExchangeMapWindow = ({
             </Grid>
             <Grid xs={12}>
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                <InlineEditGrid
-                  gridValidation={exchangeMapsGridValidation}
-                  columns={exchangeMapsInlineGridColumns}
-                  defaultRow={{
-                    // corId: correspondentValidation.values
-                    //   ? correspondentValidation.values.recordId
-                    //     ? correspondentValidation.values.recordId
-                    //     : ''
-                    //   : '',
-                    corId: exchangeMapValidation.values.corId,
-                    currencyId: exchangeMapValidation.values.currencyId,
-                    countryId: exchangeMapValidation.values.countryId,
-                    plantId: '',
-                    exchangeId: ''
-                  }}
-                  width={500}
-                />
+                {exchangeMapValidation.values.countryId && (
+                  <InlineEditGrid
+                    gridValidation={exchangeMapsGridValidation}
+                    columns={exchangeMapsInlineGridColumns}
+                    defaultRow={{
+                      corId: exchangeMapValidation.values.corId,
+                      currencyId: exchangeMapValidation.values.currencyId,
+                      countryId: exchangeMapValidation.values.countryId,
+                      plantId: '',
+                      exchangeId: ''
+                    }}
+                    width={500}
+                  />
+                )}
               </Box>
             </Grid>
           </Grid>

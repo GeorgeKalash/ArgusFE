@@ -159,13 +159,17 @@ const ProductMaster = () => {
       isInactive: yup.string().required('This field is required')
     }),
     onSubmit: values => {
+
       postProductMaster(values)
     }
   })
 
   const lookupCorrespondent = searchQry => {
-    setCityStore([])
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${agentBranchValidation.values.countryId}&_stateId=${agentBranchValidation.values.stateId}`
+
+    console.log()
+    setCorrespondentStore([])
+    if(searchQry){
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
     getRequest({
       extension: RemittanceSettingsRepository.Correspondent.snapshot,
       parameters: parameters
@@ -176,7 +180,7 @@ const ProductMaster = () => {
       })
       .catch(error => {
         // setErrorMessage(error)
-      })
+      })}
   }
 
   const handleSubmit = () => {
