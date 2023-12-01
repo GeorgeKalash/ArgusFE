@@ -10,22 +10,17 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const CurrencyMapWindow = ({
+const ExchangeMapWindow = ({
   onClose,
   onSave,
   exchangeMapsGridValidation,
   exchangeMapsInlineGridColumns,
-  countriesGridValidation,
   exchangeMapValidation,
-  currenciesGridValidation,
+  currencyStore,
   countryStore,
   getCurrenciesExchangeMaps,
   maxAccess
 }) => {
-  console.log(countriesGridValidation)
-  console.log(exchangeMapsGridValidation)
-  console.log(currenciesGridValidation)
-
   return (
     <Window id='CurrencyMapsWindow' Title='Exchange Map' onClose={onClose} onSave={onSave} width={500} height={400}>
       <CustomTabPanel index={0} value={0}>
@@ -40,6 +35,24 @@ const CurrencyMapWindow = ({
             <Grid container xs={12} spacing={2}>
               <Grid item xs={6}>
                 <CustomComboBox
+                  name='currencyId'
+                  label='Currency'
+                  valueField='recordId'
+                  displayField='name'
+                  readOnly='true'
+                  store={currencyStore}
+                  value={currencyStore.filter(item => item.recordId === exchangeMapValidation.values.currencyId)[0]} // Ensure the value matches an option or set it to null
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    exchangeMapValidation.setFieldValue('currencyId', newValue?.recordId)
+                  }}
+                  error={exchangeMapValidation.touched.currencyId && Boolean(exchangeMapValidation.errors.currencyId)}
+                  helperText={exchangeMapValidation.touched.currencyId && exchangeMapValidation.errors.currencyId}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <CustomComboBox
                   name='countryId'
                   label='Country'
                   valueField='recordId'
@@ -52,8 +65,8 @@ const CurrencyMapWindow = ({
                     exchangeMapValidation.setFieldValue('countryId', newValue?.recordId)
                     const selectedCountryId = newValue?.recordId || ''
                     getCurrenciesExchangeMaps(
-                      currenciesGridValidation.values.rows[0].corId,
-                      currenciesGridValidation.values.rows[0].currencyId,
+                      exchangeMapValidation.values.corId,
+                      exchangeMapValidation.values.currencyId,
                       selectedCountryId
                     ) // Fetch and update state data based on the selected country
                   }}
@@ -62,15 +75,19 @@ const CurrencyMapWindow = ({
                 />
               </Grid>
             </Grid>
-            {/* {exchangeMapValidation.values.currencyId > 0 && ( */}
             <Grid xs={12}>
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                 <InlineEditGrid
                   gridValidation={exchangeMapsGridValidation}
                   columns={exchangeMapsInlineGridColumns}
                   defaultRow={{
-                    corId: currenciesGridValidation.values.rows[0].corId,
-                    currencyId: currenciesGridValidation.values.rows[0].currencyId,
+                    // corId: correspondentValidation.values
+                    //   ? correspondentValidation.values.recordId
+                    //     ? correspondentValidation.values.recordId
+                    //     : ''
+                    //   : '',
+                    corId: exchangeMapValidation.values.corId,
+                    currencyId: exchangeMapValidation.values.currencyId,
                     countryId: exchangeMapValidation.values.countryId,
                     plantId: '',
                     exchangeId: ''
@@ -79,7 +96,6 @@ const CurrencyMapWindow = ({
                 />
               </Box>
             </Grid>
-            {/* )} */}
           </Grid>
         </Box>
       </CustomTabPanel>
@@ -87,4 +103,4 @@ const CurrencyMapWindow = ({
   )
 }
 
-export default CurrencyMapWindow
+export default ExchangeMapWindow

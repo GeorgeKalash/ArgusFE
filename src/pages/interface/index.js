@@ -77,7 +77,7 @@ const Interface = () => {
 
   const interfaceValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
@@ -151,22 +151,21 @@ const Interface = () => {
   }
 
   useEffect(() => {
-     if (!access)
-    getAccess(ResourceIds.Interface, setAccess)
-  else {
-    if (access.record.maxAccess > 0) {
-      getGridData()
-      getLabels(ResourceIds.Interface,setLabels)
-    } else {
-      setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    if (!access) getAccess(ResourceIds.Interface, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData()
+        getLabels(ResourceIds.Interface, setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
     }
-  }
-}, [access])
-  
-return (
+  }, [access])
+
+  return (
     <>
       <Box>
-        <GridToolbar onAdd={addInterface} maxAccess={access}/>
+        <GridToolbar onAdd={addInterface} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -191,7 +190,6 @@ return (
           labels={_labels}
           maxAccess={access}
         />
-         
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>

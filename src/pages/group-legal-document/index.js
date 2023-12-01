@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box} from '@mui/material'
+import { Grid, Box } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -20,10 +20,7 @@ import GroupLegalDocumentWindow from './Windows/GroupLegalDocumentWindow'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import {
-  getNewGroupLegalDocument,
-  populateGroupLegalDocument
-} from 'src/Models/BusinessPartner/GroupLegalDocument'
+import { getNewGroupLegalDocument, populateGroupLegalDocument } from 'src/Models/BusinessPartner/GroupLegalDocument'
 import { getNewCategoryId, populateCategoryId } from 'src/Models/BusinessPartner/Group'
 import { getNewGroup, populateGroup } from 'src/Models/BusinessPartner/CategoryID'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -86,7 +83,7 @@ const GroupLegalDocument = () => {
 
   const groupLegalDocumentValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
     validationSchema: yup.object({
       groupId: yup.string().required('This field is required'),
       incId: yup.string().required('This field is required'),
@@ -198,19 +195,18 @@ const GroupLegalDocument = () => {
     setWindowOpen(true)
   }
   useEffect(() => {
-     if (!access)
-    getAccess(ResourceIds.GroupLegalDocument, setAccess)
-  else {
-    if (access.record.maxAccess > 0) {
-      getGridData({ _startAt: 0, _pageSize: 50 })
-      fillGroupStore()
-      fillCategoryStore()
-      getLabels(ResourceIds.GroupLegalDocument,setLabels)  
-    } else {
-      setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    if (!access) getAccess(ResourceIds.GroupLegalDocument, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData({ _startAt: 0, _pageSize: 50 })
+        fillGroupStore()
+        fillCategoryStore()
+        getLabels(ResourceIds.GroupLegalDocument, setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
     }
-  }
-}, [access])
+  }, [access])
 
   return (
     <>
@@ -221,7 +217,7 @@ const GroupLegalDocument = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addGroupLegalDocument} maxAccess={access}/>
+        <GridToolbar onAdd={addGroupLegalDocument} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}

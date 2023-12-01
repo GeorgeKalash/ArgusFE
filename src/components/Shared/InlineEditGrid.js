@@ -227,7 +227,7 @@ const InlineEditGrid = props => {
         )
       case 'button':
         return (
-          <Button id={cellId} sx={{ height: '30px' }} onClick={column.onClick} variant='contained'>
+          <Button id={cellId} sx={{ height: '30px' }} onClick={e => column.onClick(e, row.rowData)} variant='contained'>
             {column.text}
           </Button>
         )
@@ -338,7 +338,7 @@ const InlineEditGrid = props => {
                     }}
                   >
                     {column.field === 'button' && (
-                      <Button sx={{ height: '30px' }} onClick={column.onClick} variant='contained'>
+                      <Button sx={{ height: '30px' }} onClick={e => column.onClick(e, row)} variant='contained'>
                         {column.text}
                       </Button>
                     )}

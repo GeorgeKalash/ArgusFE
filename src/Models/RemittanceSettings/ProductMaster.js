@@ -4,16 +4,15 @@ const getNewProductMaster = () => {
     recordId: null,
     name: null,
     reference: null,
-    patypeth: null,
-    function:null,
-    correspondantId:null,
-    countryId:null,
-    language:null,
-    commissionBase:null,
-    interfaceId:null,
-    posMsg:null,
-    posMsgIsActive:null,
-    isInactive:null
+    type: null,
+    functionId: null,
+    correspondentId: null,
+    languages: null,
+    commissionBase: null,
+    interfaceId: null,
+    posMsg: null,
+    posMsgIsActive: false,
+    isInactive: false
   }
 }
 
@@ -23,14 +22,13 @@ const populateProductMaster = obj => {
     name: obj.name,
     reference: obj.reference,
     type: obj.type,
-    function: obj.function,
-    correspondantId: obj.correspondantId,
-    countryId: obj.countryId,
-    language: obj.language,
+    functionId: obj.functionId,
+    correspondentId: obj.correspondentId,
+    languages: obj.languages,
     commissionBase: obj.commissionBase,
     interfaceId: obj.interfaceId,
-    interfaceposMsgId: obj.posMsg,
-    posMsgIsActive: obj.posMsgIsActive,
+    posMsg: obj.posMsg,
+    posMsgIsActive: obj.posMsgIsActive == null ? false : obj.posMsgIsActive,
     isInactive: obj.isInactive
   }
 }
