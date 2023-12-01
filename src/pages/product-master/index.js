@@ -42,6 +42,7 @@ import {
   populateProductScheduleRange
 } from 'src/Models/RemittanceSettings/ProductScheduleRange'
 import ProductDispersalWindow from './Windows/ProductDispersalWindow'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -352,7 +353,6 @@ const ProductMaster = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log(res)
         productMasterValidation.setFieldValue('recordId', res.recordId)
         getGridData({})
         if (!recordId) toast.success('Record Added Successfully')
@@ -559,9 +559,6 @@ const ProductMaster = () => {
       ]
     },
     onSubmit: values => {
-      console.log(productMasterValidation.values.recordId)
-      console.log(values.rows)
-
       postProductCountries(values.rows)
     }
   })
@@ -690,13 +687,13 @@ const ProductMaster = () => {
       nameId: 'countryId',
       name: 'countryRef',
       mandatory: true,
-      store: countryStore.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
+      store: countriesGridValidation.values?.rows,
+      valueField: 'countryId',
+      displayField: 'countryRef',
+      fieldsToUpdate: [{ from: 'countryName', to: 'countryName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Country Ref' },
-        { key: 'flName', value: 'Foreign Language Name' }
+        { key: 'countryRef', value: 'Ref' },
+        { key: 'countryName', value: 'Name' }
       ]
     },
     {
@@ -1204,14 +1201,13 @@ const ProductMaster = () => {
       field: 'button',
       text: 'commission',
       onClick: (e, row) => {
-        productLegValidation.setValues(populateProductScheduleRange(row))
-        getCorrespondentScheduleRange(row)
+        productCommissionValidation.setValues(row)
+        getCorrespondentCommissions(row)
       }
     }
   ]
 
   const postProductScheduleRange = obj => {
-    console.log(productLegValidation)
 
     const data = {
       productId: productLegValidation.values.productId,
@@ -1245,6 +1241,145 @@ const ProductMaster = () => {
       .catch(error => {
         setErrorMessage(error)
       })
+  }
+
+  //COMMISSIONS WINDOW
+  const handleCommissionSubmit = () => {
+    commissionsGridValidation.handleSubmit()
+  }
+
+  const productCommissionValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      productId: yup.string().required('This field is required'),
+      seqNo: yup.string().required('This field is required'),
+      rangeSeqNo: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {}
+  })
+  
+  const commissionsGridValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validate: values => {
+      // const isValid = values.rows.every(row => !!row.commission)
+
+      // return isValid ? {} : { rows: Array(values.rows.length).fill({ commission: 'commission is required' }) }
+    },
+    initialValues: {
+      rows: [
+        {
+          productId: '',
+          seqNo: '',
+          rangeSeqNo: '',
+          commissionId: '',
+          commissionName: '',
+          commission: '',
+        }
+      ]
+    
+    },
+    onSubmit: values => {
+      console.log(values);
+      postProductRangeCommissions(values.rows)
+    }
+  })
+
+  const rangeCommissionsInlineGridColumns = [
+    {
+      field: 'commissionName',
+      header: 'Commission Type',
+      name: 'commissionName',
+      mandatory: true,
+      readOnly: false
+    },
+    {
+      field: 'commission',
+      header: 'Commission',
+      name: 'commission',
+      mandatory: true,
+      readOnly: false
+    }
+  ]
+
+  const postProductRangeCommissions = obj => {
+    
+    const data = {
+      productId: productCommissionValidation.values.productId,
+      seqNo: productCommissionValidation.values.seqNo,
+      rangeSeqNo: productCommissionValidation.values.seqNo,
+      productScheduleFees: obj.filter(item => item.commission > 0)
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductScheduleFees.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (res) toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getCorrespondentCommissions = obj => {
+    //step 1: get all commission types
+    var parameters = '_filter='
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.CommissionType.qry,
+      parameters: parameters
+    })
+      .then(commissionTypes => {
+        
+        //step 2: get all ranges commissions
+        const _productId = obj.productId
+        const _seqNo = obj.seqNo
+        const _rangeSeqNo = obj.rangeSeqNo
+        const defaultParams = `_productId=${_productId}&_seqNo=${_seqNo}&_rangeSeqNo=${_rangeSeqNo}`
+        var parameters = defaultParams
+        getRequest({
+          extension: RemittanceSettingsRepository.ProductScheduleFees.qry, //qryPSF
+          parameters: parameters
+        })
+          .then(commissionFees => {
+
+            // Create a mapping of commissionId to commissionFees entry for efficient lookup
+              const commissionFeesMap = commissionFees.list.reduce((acc, fee) => {
+                acc[fee.commissionId] = fee.commission;
+                
+                return acc;
+              }, {});
+
+              // Combine commissionTypes and commissionFees
+              const rows = commissionTypes.list.map(commissionType => {
+                const commissionValue = commissionFeesMap[commissionType.recordId] || 0;
+                
+                return {
+                  productId: obj.productId,
+                  seqNo: obj.seqNo,
+                  rangeSeqNo: obj.rangeSeqNo,
+                  commissionId: commissionType.recordId,
+                  commissionName: commissionType.name,
+                  commission: commissionValue
+                };
+              });
+
+              commissionsGridValidation.setValues({ rows })
+              setProductLegWindowOpen(true)
+          })
+          .catch(error => {
+            setErrorMessage(error)
+          })
+
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+
+    
+
+    //step 3: merge both
   }
 
   //AGENTS TAB
@@ -1331,22 +1466,6 @@ const ProductMaster = () => {
       })
   }
 
-  const editProductCommission = obj => {
-    fillCommissionStore()
-    setProductLegWindowOpen(true)
-  }
-
-  const fillCommissionStore = () => {
-    const newData = {
-      list: [
-        { commissionId: 1, commissionRef: 'PCT', commissionName: 'percentage', commission: 0.5 },
-        { commissionId: 2, commissionRef: 'FIX', commissionName: 'fixed', commission: 100 },
-        { commissionId: 3, commissionRef: 'OTH', commissionName: 'fixed (other charges)', commission: 150 }
-      ]
-    }
-    setProductLegCommissionGridData({ ...newData })
-  }
-
   useEffect(() => {
     if (!access) getAccess(ResourceIds.ProductMaster, setAccess)
     else {
@@ -1409,21 +1528,26 @@ const ProductMaster = () => {
           commissionBaseStore={commissionBaseStore}
           interfaceStore={interfaceStore}
           languageStore={languageStore}
+
           //countries inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
+
           //monetaries inline edit grid
           monetariesGridValidation={monetariesGridValidation}
           monetariesInlineGridColumns={monetariesInlineGridColumns}
+
           //dispersals tab (grid)
           dispersalsGridData={dispersalsGridData}
           getDispersalsGridData={getDispersalsGridData}
           addProductDispersal={addProductDispersal}
           delProductDispersal={delProductDispersal}
           popupDispersal={popupDispersal}
+
           //schedules inline edit grid
           schedulesGridValidation={schedulesGridValidation}
           schedulesInlineGridColumns={schedulesInlineGridColumns}
+
           //schedule ranges tab
           productLegValidation={productLegValidation}
           currencyStore={currencyStore}
@@ -1432,6 +1556,7 @@ const ProductMaster = () => {
           dispersalStore={dispersalStore}
           scheduleRangeGridValidation={scheduleRangeGridValidation}
           scheduleRangeInlineGridColumns={scheduleRangeInlineGridColumns}
+
           //agents tab inline edit grid
           agentsHeaderValidation={agentsHeaderValidation}
           agentsGridValidation={agentsGridValidation}
@@ -1443,7 +1568,6 @@ const ProductMaster = () => {
           productLegWindowOpen={productLegWindowOpen}
           productLegGridData={productLegGridData}
           productLegCommissionGridData={productLegCommissionGridData}
-          editProductCommission={editProductCommission}
           setProductLegWindowOpen={setProductLegWindowOpen}
           productFieldGridData={productFieldGridData}
           productAgentGridData={productAgentGridData}
@@ -1457,8 +1581,9 @@ const ProductMaster = () => {
       {productLegWindowOpen && (
         <ProductLegWindow
           onClose={() => setProductLegWindowOpen(false)}
-          commissionColumns={commissionColumns}
-          productLegCommissionGridData={productLegCommissionGridData}
+          onSave={handleCommissionSubmit}
+          rangeCommissionsInlineGridColumns={rangeCommissionsInlineGridColumns}
+          commissionsGridValidation={commissionsGridValidation}
           maxAccess={access}
         />
       )}

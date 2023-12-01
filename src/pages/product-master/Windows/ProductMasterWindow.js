@@ -72,7 +72,6 @@ const ProductMasterWindow = ({
   productLegWindowOpen,
   productLegGridData,
   productLegCommissionGridData,
-  editProductCommission,
   setProductLegWindowOpen,
   productFieldGridData,
   productAgentGridData,

@@ -16,7 +16,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { getNewCommissionType, populateCommissionType } from 'src/Models/CurrencyTradingSettings/CommissionType'
-import { KVSRepository } from 'src/repositories/KVSRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -26,8 +25,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CommissionTypeWindow from './Windows/CommissionTypeWindow'
 
 // ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const CommissionType = () => {

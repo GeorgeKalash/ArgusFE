@@ -36,6 +36,10 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryPSR',
     set2: service + 'set2PSR'
   },
+  ProductScheduleFees: {
+    qry: service + 'qryPSF',
+    set2: service + 'set2PSF'
+  },
   ProductDispersalAgents: {
     qry: service + 'qryPDA',
     set2: service + 'set2PDA'
