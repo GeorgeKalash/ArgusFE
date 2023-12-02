@@ -42,6 +42,7 @@ const CorrespondentCurrenciesTab = ({
           width={1000}
           allowDelete={!editMode}
           allowAddNewLine={!editMode}
+          onDelete={() => console.log('before delete')}
         />
       </Box>
     </>

@@ -17,7 +17,8 @@ const InlineEditGrid = ({
   gridValidation,
   tableWidth,
   allowDelete = true,
-  allowAddNewLine = true
+  allowAddNewLine = true,
+  onDelete
 }) => {
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
 
@@ -270,9 +271,7 @@ const InlineEditGrid = ({
 
   const lastRowIsValid = () => {
     const lastRow = gridValidation.values.rows[gridValidation.values.rows.length - 1]
-    console.log(columns)
     for (let i = 0; i < columns.length; i++) {
-      console.log(columns[i])
       const columnName = columns[i].name
 
       if (columns[i]?.mandatory && !lastRow[columnName]) {
@@ -327,6 +326,7 @@ const InlineEditGrid = ({
 
   const handleDeleteConfirmation = rowIndex => {
     handleDelete(rowIndex)
+    onDelete && onDelete()
     closeDeleteDialog()
   }
 
@@ -343,8 +343,6 @@ const InlineEditGrid = ({
                 width: column.width || tableWidth / columns.length
               }}
               body={row => {
-                console.log({ column })
-
                 return (
                   <Box
                     sx={{
