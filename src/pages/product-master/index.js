@@ -418,13 +418,13 @@ const ProductMaster = () => {
     fillAgentsStore()
     fillCurrencyStore()
     fillDispersalTypeStore()
-    resetCorrespondentCountries()
-    resetCorrespondentMonetaries()
+    resetCorrespondentCountries(obj.recordId)
+    resetCorrespondentMonetaries(obj.recordId)
     resetDispersals()
-    resetProductSchedules()
+    resetProductSchedules(obj.recordId)
     getCorrespondentCountries(obj)
     getCorrespondentMonetaries(obj)
-    getDispersalsGridData(obj)
+    getDispersalsGridData(obj.recordId)
     getProductSchedules(obj)
     productLegValidation.setValues(getNewProductScheduleRange())
     agentsHeaderValidation.setValues({ dispersalId: null })
@@ -614,16 +614,12 @@ const ProductMaster = () => {
       })
   }
 
-  const resetCorrespondentCountries = () => {
+  const resetCorrespondentCountries = (recordId) => {
     countriesGridValidation.resetForm({
       values: {
         rows: [
           {
-            productId: productMasterValidation.values
-              ? productMasterValidation.values.recordId
-                ? productMasterValidation.values.recordId
-                : ''
-              : '',
+            productId: recordId ? recordId : '',
             countryId: '',
             countryRef: '',
             countryName: '',
@@ -644,6 +640,7 @@ const ProductMaster = () => {
     })
       .then(res => {
         if (res.list.length > 0) countriesGridValidation.setValues({ rows: res.list })
+        else resetCorrespondentCountries(_recordId)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -658,26 +655,6 @@ const ProductMaster = () => {
       const isValid = values.rows.every(row => !!row.countryId)
 
       return isValid ? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
-    },
-    initialValues: {
-      rows: [
-        {
-          productId: productMasterValidation.values
-            ? productMasterValidation.values.recordId
-              ? productMasterValidation.values.recordId
-              : ''
-            : '',
-          countryId: '',
-          countryRef: '',
-          countryName: '',
-          currencyId: '',
-          currencyRef: '',
-          currencyName: '',
-          dispersalType: '',
-          dispersalTypeName: '',
-          isInactive: false
-        }
-      ]
     },
     onSubmit: values => {
       postProductMonetaries(values.rows)
@@ -765,16 +742,12 @@ const ProductMaster = () => {
       })
   }
 
-  const resetCorrespondentMonetaries = () => {
+  const resetCorrespondentMonetaries = (recordId) => {
     monetariesGridValidation.resetForm({
       values: {
         rows: [
           {
-            productId: productMasterValidation.values
-              ? productMasterValidation.values.recordId
-                ? productMasterValidation.values.recordId
-                : ''
-              : '',
+            productId: recordId ? recordId : '',
             countryId: '',
             countryRef: '',
             countryName: '',
@@ -800,6 +773,7 @@ const ProductMaster = () => {
     })
       .then(res => {
         if (res.list.length > 0) monetariesGridValidation.setValues({ rows: res.list })
+        else resetCorrespondentMonetaries(obj.recordId)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -826,14 +800,17 @@ const ProductMaster = () => {
 
   const postProductDispersal = obj => {
     const recordId = obj.recordId
+    const productId = obj.productId
     postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getDispersalsGridData(obj)
-        if (!recordId) toast.success('Record Added Successfully')
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+        }
         else toast.success('Record Editted Successfully')
+        getDispersalsGridData(productId)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -842,8 +819,8 @@ const ProductMaster = () => {
 
   const resetDispersals = () => {}
 
-  const getDispersalsGridData = obj => {
-    const defaultParams = `_productId=${obj.recordId}`
+  const getDispersalsGridData = productId => {
+    const defaultParams = `_productId=${productId}`
     var parameters = defaultParams
     getRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.qry,
@@ -863,8 +840,8 @@ const ProductMaster = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData({})
         toast.success('Record Deleted Successfully')
+        getDispersalsGridData(obj.productId)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -877,6 +854,7 @@ const ProductMaster = () => {
   }
 
   const popupDispersal = obj => {
+    console.log(obj);
     getDispersalById(obj)
   }
 
@@ -1088,16 +1066,12 @@ const ProductMaster = () => {
       })
   }
 
-  const resetProductSchedules = () => {
+  const resetProductSchedules = (recordId) => {
     schedulesGridValidation.resetForm({
       values: {
         rows: [
           {
-            productId: productMasterValidation.values
-              ? productMasterValidation.values.recordId
-                ? productMasterValidation.values.recordId
-                : ''
-              : '',
+            productId: recordId ? recordId : '',
             seqNo: 1,
             plantId: '',
             plantRef: '',
@@ -1127,6 +1101,7 @@ const ProductMaster = () => {
     })
       .then(res => {
         if (res.list.length > 0) schedulesGridValidation.setValues({ rows: res.list })
+        else resetProductSchedules(_recordId)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -1149,17 +1124,15 @@ const ProductMaster = () => {
   })
 
   //SCHEDULE RANGE INLINE EDIT GRID
-  const resetScheduleRanges = () => {
+  const resetScheduleRanges = (row) => {
+    console.log('resetScheduleRanges');
+    console.log(row);
     scheduleRangeGridValidation.resetForm({
       values: {
         rows: [
           {
-            productId: productLegValidation.values
-              ? productLegValidation.values.productId
-                ? productLegValidation.values.productId
-                : ''
-              : '',
-            seqNo: '',
+            productId: row.productId? row.productId : '',
+            seqNo: row.seqNo? row.seqNo : '',
             rangeSeqNo: 1, //incremental
             fromAmount: '',
             toAmount: ''
@@ -1263,6 +1236,7 @@ const ProductMaster = () => {
     })
       .then(res => {
         if (res.list.length > 0) scheduleRangeGridValidation.setValues({ rows: res.list })
+        else resetScheduleRanges(obj)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -1318,7 +1292,7 @@ const ProductMaster = () => {
       header: 'Commission Type',
       name: 'commissionName',
       mandatory: true,
-      readOnly: false
+      readOnly: true
     },
     {
       field: 'textfield',
