@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import { Autocomplete, Box, Button, Checkbox, FormControlLabel, IconButton, TextField, Paper } from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, IconButton, TextField, Paper, InputAdornment } from '@mui/material'
+import ClearIcon from '@mui/icons-material/Clear'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CustomTextField from '../Inputs/CustomTextField'
 import DeleteDialog from './DeleteDialog'
 import Icon from 'src/@core/components/icon'
-import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 const CustomPaper = (props, length) => {
   return <Paper sx={{ position: 'absolute', width: `${length}40%`, zIndex: 999, mt: 1 }} {...props} />
@@ -24,6 +25,46 @@ const InlineEditGrid = ({
   const tableWidth = width
 
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
+
+  const cellRender = (row, column) => {
+    switch (column.field) {
+      case 'numberfield':
+        return (
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            {row[column.name] === 0 ? row[column.name] : getFormattedNumber(row[column.name])}
+          </Box>
+        )
+      case 'checkbox':
+        return (
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            {row[column.name] ? <Icon icon='mdi:check-circle-outline' /> : <Icon icon='mdi:radiobox-blank' />}
+          </Box>
+        )
+      case 'button':
+        return (
+          <Button sx={{ height: '30px' }} onClick={e => column.onClick(e, row)} variant='contained'>
+            {column.text}
+          </Button>
+        )
+
+      default:
+        return row[column.name]
+    }
+  }
 
   const cellEditor = (field, row, rowIndex, column) => {
     if (!row.rowData) return
@@ -44,7 +85,6 @@ const InlineEditGrid = ({
       case 'textfield':
         return (
           <CustomTextField
-            type='number'
             id={cellId}
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][fieldName]}
@@ -58,6 +98,62 @@ const InlineEditGrid = ({
               const updatedRows = [...gridValidation.values.rows]
               updatedRows[rowIndex][fieldName] = ''
               gridValidation.setFieldValue('rows', updatedRows)
+            }}
+          />
+        )
+      case 'numberfield':
+        return (
+          <TextField
+            numberField={true}
+            id={cellId}
+            name={fieldName}
+            value={gridValidation.values.rows[rowIndex][fieldName]}
+            required={column?.mandatory}
+            onChange={event => {
+              const newValue = event.target.value
+              gridValidation.setFieldValue(
+                `rows[${rowIndex}].${fieldName}`,
+                handleNumberFieldNewValue(
+                  newValue,
+                  gridValidation.values.rows[rowIndex][fieldName],
+                  column?.min,
+                  column?.max
+                )
+              )
+            }}
+            onClear={() => {
+              const updatedRows = [...gridValidation.values.rows]
+              updatedRows[rowIndex][fieldName] = ''
+              gridValidation.setFieldValue('rows', updatedRows)
+            }}
+            variant='outlined'
+            size='small'
+            fullWidth={true}
+            inputProps={{
+              readOnly: column?.readOnly,
+              pattern: '[0-9]*',
+              style: {
+                textAlign: 'right'
+              }
+            }}
+            autoComplete='off'
+            style={{ textAlign: 'right' }}
+            InputProps={{
+              endAdornment:
+                column.readOnly ||
+                (gridValidation.values.rows[rowIndex][fieldName] != '0' &&
+                  gridValidation.values.rows[rowIndex][fieldName] != 0 && (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={() => gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, 0)}
+                        aria-label='clear input'
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ))
             }}
           />
         )
@@ -258,6 +354,15 @@ const InlineEditGrid = ({
     }
   }
 
+  const handleNumberFieldNewValue = (newValue, oldValue, min, max) => {
+    const regex = /^[0-9,]+$/
+    if (newValue && regex.test(newValue)) {
+      const _newValue = getNumberWithoutCommas(newValue)
+      if ((min && _newValue < min) || (max && _newValue > max)) return oldValue
+      else return getFormattedNumber(newValue)
+    }
+  }
+
   const handleKeyDown = (e, columnIndex, rowIndex) => {
     const { key } = e
     if (key === 'Tab' && columnIndex === columns.length - 1) {
@@ -357,28 +462,7 @@ const InlineEditGrid = ({
                           : 'none'
                     }}
                   >
-                    {column.field === 'checkbox' && (
-                      <Box
-                        sx={{
-                          height: '100%',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center'
-                        }}
-                      >
-                        {row[column.name] ? (
-                          <Icon icon='mdi:check-circle-outline' />
-                        ) : (
-                          <Icon icon='mdi:radiobox-blank' />
-                        )}
-                      </Box>
-                    )}
-                    {column.field === 'button' && (
-                      <Button sx={{ height: '30px' }} onClick={e => column.onClick(e, row)} variant='contained'>
-                        {column.text}
-                      </Button>
-                    )}
-                    {typeof row[column.name] != 'boolean' && row[column.name]}
+                    {cellRender(row, column)}
                   </Box>
                 )
               }}
