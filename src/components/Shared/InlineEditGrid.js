@@ -5,6 +5,7 @@ import { Autocomplete, Box, Button, Checkbox, FormControlLabel, IconButton, Text
 import DeleteIcon from '@mui/icons-material/Delete'
 import CustomTextField from '../Inputs/CustomTextField'
 import DeleteDialog from './DeleteDialog'
+import Icon from 'src/@core/components/icon'
 
 const CustomPaper = (props, length) => {
   return <Paper sx={{ position: 'absolute', width: `${length}40%`, zIndex: 999, mt: 1 }} {...props} />
@@ -211,19 +212,25 @@ const InlineEditGrid = props => {
         )
       case 'checkbox':
         return (
-          <FormControlLabel
-            control={
-              <Checkbox
-                id={cellId}
-                name={fieldName}
-                checked={gridValidation.values.rows[rowIndex][fieldName]}
-                value={gridValidation.values.rows[rowIndex][fieldName]}
-                onChange={(event, newValue) => {
-                  gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
-                }}
-              />
-            }
-          />
+          <Box
+            sx={{
+              flex: 1,
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Checkbox
+              id={cellId}
+              name={fieldName}
+              checked={gridValidation.values.rows[rowIndex][fieldName]}
+              value={gridValidation.values.rows[rowIndex][fieldName]}
+              onChange={(event, newValue) => {
+                gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
+              }}
+            />
+          </Box>
         )
       case 'button':
         return (
@@ -327,6 +334,8 @@ const InlineEditGrid = props => {
                 width: column.width || tableWidth / columns.length
               }}
               body={row => {
+                console.log({ column })
+
                 return (
                   <Box
                     sx={{
@@ -337,12 +346,28 @@ const InlineEditGrid = props => {
                           : 'none'
                     }}
                   >
+                    {column.field === 'checkbox' && (
+                      <Box
+                        sx={{
+                          height: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center'
+                        }}
+                      >
+                        {row[column.name] ? (
+                          <Icon icon='mdi:check-circle-outline' />
+                        ) : (
+                          <Icon icon='mdi:radiobox-blank' />
+                        )}
+                      </Box>
+                    )}
                     {column.field === 'button' && (
                       <Button sx={{ height: '30px' }} onClick={e => column.onClick(e, row)} variant='contained'>
                         {column.text}
                       </Button>
                     )}
-                    {typeof row[column.name] === 'boolean' ? JSON.stringify(row[column.name]) : row[column.name]}
+                    {typeof row[column.name] != 'boolean' && row[column.name]}
                   </Box>
                 )
               }}
