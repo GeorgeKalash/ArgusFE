@@ -300,9 +300,9 @@ const InlineEditGrid = props => {
     if (gridValidation.values.rows.length === 1) {
       gridValidation.setFieldValue('rows', [defaultRow])
     } else {
-      if (gridValidation.values.rows[rowIndex + 1]) {
-        handleIncrementedFieldsOnDelete(gridValidation.values.rows[rowIndex], gridValidation.values.rows[rowIndex + 1])
-      }
+      // if (gridValidation.values.rows[rowIndex + 1]) {
+      //   handleIncrementedFieldsOnDelete(gridValidation.values.rows[rowIndex], gridValidation.values.rows[rowIndex + 1])
+      // }
       const updatedRows = gridValidation.values.rows.filter((row, index) => index !== rowIndex)
       gridValidation.setFieldValue('rows', updatedRows)
     }
