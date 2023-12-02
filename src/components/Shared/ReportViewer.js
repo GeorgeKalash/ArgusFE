@@ -57,3 +57,60 @@ const ReportViewer = () => {
 }
 
 export default ReportViewer
+
+// const ReportViewer = () => {
+//   const reportUrl = ko.observable('');
+//   const previewModel = ko.observable();
+
+//   const callbacks = {
+//     CustomizeExportOptions: function (s, e) {
+//       e.HideExportOptionsPanel();
+//     },
+//   };
+
+//   const viewerRef = useRef(null);
+
+//   useEffect(() => {
+//     const fetchReport = async () => {
+//       try {
+//         const response = await axios.get('/api/reports', {
+//           params: {
+//             reportName: 'TestReport',
+//           },
+//         });
+
+//         const reportData = response.data.ReportData;
+//         previewModel().SetReportData(reportData);
+//         reportUrl(reportData.ReportName);
+//       } catch (error) {
+//         console.error('Error fetching report:', error);
+//       }
+//     };
+
+//     fetchReport();
+//   }, []);
+
+//   useEffect(() => {
+//     ko.applyBindings(
+//       {
+//         reportUrl: reportUrl,
+//         viewerModel: previewModel,
+//         // requestOptions: removed this line
+//         callbacks: callbacks,
+//       },
+//       viewerRef.current
+//     );
+
+//     return () => {
+//       ko.cleanNode(viewerRef.current);
+//     };
+//   }, [reportUrl]);
+
+//   return (
+//     <div>
+//       <div ref={viewerRef} data-bind='dxReportViewer: $data' style={{ width: '100%', height: '900px' }}></div>
+//     </div>
+//   );
+// };
+
+// export default ReportViewer;
