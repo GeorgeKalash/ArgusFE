@@ -207,7 +207,14 @@ const InlineEditGrid = props => {
                 )
             }}
             fullWidth={true}
-            renderInput={params => <TextField {...params} required={column?.mandatory} sx={{ flex: 1 }} />}
+            renderInput={params => (
+              <TextField
+                {...params}
+                onChange={e => (e.target.value ? column.onLookup && column.onLookup(e.target.value) : column.onClear())}
+                required={column?.mandatory}
+                sx={{ flex: 1 }}
+              />
+            )}
           />
         )
       case 'checkbox':
