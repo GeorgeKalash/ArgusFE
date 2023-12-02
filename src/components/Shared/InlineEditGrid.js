@@ -6,6 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import CustomTextField from '../Inputs/CustomTextField'
 import DeleteDialog from './DeleteDialog'
 import Icon from 'src/@core/components/icon'
+import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 const CustomPaper = (props, length) => {
   return <Paper sx={{ position: 'absolute', width: `${length}40%`, zIndex: 999, mt: 1 }} {...props} />
@@ -15,11 +16,13 @@ const InlineEditGrid = ({
   columns,
   defaultRow,
   gridValidation,
-  tableWidth,
+  width,
   allowDelete = true,
   allowAddNewLine = true,
   onDelete
 }) => {
+  const tableWidth = width
+
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
 
   const cellEditor = (field, row, rowIndex, column) => {
@@ -41,6 +44,7 @@ const InlineEditGrid = ({
       case 'textfield':
         return (
           <CustomTextField
+            type='number'
             id={cellId}
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][fieldName]}
