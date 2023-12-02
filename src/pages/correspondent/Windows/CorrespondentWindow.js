@@ -27,7 +27,6 @@ const CorrespondentWindow = ({
   currenciesGridValidation,
   currenciesInlineGridColumns,
 
-  
   labels,
   maxAccess
 }) => {
@@ -69,6 +68,7 @@ const CorrespondentWindow = ({
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
           maxAccess={maxAccess}
+          editMode={editMode}
         />
       </CustomTabPanel>
     </Window>

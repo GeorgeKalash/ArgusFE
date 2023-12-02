@@ -11,13 +11,15 @@ const CustomPaper = (props, length) => {
   return <Paper sx={{ position: 'absolute', width: `${length}40%`, zIndex: 999, mt: 1 }} {...props} />
 }
 
-const InlineEditGrid = props => {
+const InlineEditGrid = ({
+  columns,
+  defaultRow,
+  gridValidation,
+  tableWidth,
+  allowDelete = true,
+  allowAddNewLine = true
+}) => {
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
-
-  const columns = props.columns
-  const defaultRow = props.defaultRow
-  const gridValidation = props.gridValidation
-  const tableWidth = props.width
 
   const cellEditor = (field, row, rowIndex, column) => {
     if (!row.rowData) return
@@ -380,7 +382,10 @@ const InlineEditGrid = props => {
               }}
               editor={options => {
                 return (
-                  <Box sx={{ display: 'flex' }} onKeyDown={e => handleKeyDown(e, i, options.rowIndex)}>
+                  <Box
+                    sx={{ display: 'flex' }}
+                    onKeyDown={e => allowAddNewLine && handleKeyDown(e, i, options.rowIndex)}
+                  >
                     {cellEditor(column.field, options, options.rowIndex, column)}
                   </Box>
                 )
@@ -388,20 +393,22 @@ const InlineEditGrid = props => {
             />
           )
         })}
-        <Column
-          key='actions'
-          ref={null}
-          body={(rowData, column) => {
-            return (
-              <div ref={null}>
-                <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => openDeleteDialog(column.rowIndex)}>
-                  <DeleteIcon />
-                </IconButton>
-              </div>
-            )
-          }}
-          style={{ maxWidth: '60px' }}
-        />
+        {allowDelete && (
+          <Column
+            key='actions'
+            ref={null}
+            body={(rowData, column) => {
+              return (
+                <div ref={null}>
+                  <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => openDeleteDialog(column.rowIndex)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
+              )
+            }}
+            style={{ maxWidth: '60px' }}
+          />
+        )}
       </DataTable>
 
       <DeleteDialog

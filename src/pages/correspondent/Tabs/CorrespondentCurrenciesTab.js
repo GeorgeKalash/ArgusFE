@@ -7,7 +7,8 @@ const CorrespondentCurrenciesTab = ({
   correspondentValidation,
   currenciesGridValidation,
   currenciesInlineGridColumns,
-  maxAccess
+  maxAccess,
+  editMode
 }) => {
   return (
     <>
@@ -39,6 +40,8 @@ const CorrespondentCurrenciesTab = ({
             isInactive: false
           }}
           width={1000}
+          allowDelete={!editMode}
+          allowAddNewLine={!editMode}
         />
       </Box>
     </>
