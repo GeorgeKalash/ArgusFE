@@ -78,6 +78,12 @@ const LoginPage = () => {
     }
   })
 
+  const handleKeyDown = event => {
+    if (event.key === 'Enter') {
+      validation.handleSubmit()
+    }
+  }
+
   return (
     <>
       <Box className='content-center'>
@@ -93,7 +99,7 @@ const LoginPage = () => {
               p: 4
             }}
           />
-          <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }}>
+          <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
             <Grid container spacing={5}>
               <Grid item xs={12}>
                 <TextField
