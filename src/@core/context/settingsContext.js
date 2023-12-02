@@ -4,6 +4,9 @@ import { createContext, useState, useEffect } from 'react'
 // ** ThemeConfig Import
 import themeConfig from 'src/configs/themeConfig'
 
+// ** Hooks
+import { useAuth } from 'src/hooks/useAuth'
+
 const initialSettings = {
   themeColor: 'primary',
   mode: themeConfig.mode,
@@ -67,6 +70,9 @@ export const SettingsContext = createContext({
 export const SettingsProvider = ({ children, pageSettings }) => {
   // ** State
   const [settings, setSettings] = useState({ ...initialSettings })
+
+  const auth = useAuth()
+
   useEffect(() => {
     const restoredSettings = restoreSettings()
     if (restoredSettings) {
@@ -77,6 +83,7 @@ export const SettingsProvider = ({ children, pageSettings }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageSettings])
+
   useEffect(() => {
     if (settings.layout === 'horizontal' && settings.mode === 'semi-dark') {
       saveSettings({ ...settings, mode: 'light' })
@@ -86,6 +93,10 @@ export const SettingsProvider = ({ children, pageSettings }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.layout])
+
+  useEffect(() => {
+    saveSettings({ ...settings, direction: auth?.user?.languageId === 3 ? 'rtl' : 'ltr' })
+  }, [auth.user])
 
   const saveSettings = updatedSettings => {
     storeSettings(updatedSettings)
