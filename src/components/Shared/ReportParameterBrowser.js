@@ -20,7 +20,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, onSave, paramsArray, setParamsArray }) => {
+const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, paramsArray, setParamsArray }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [parameters, setParameters] = useState(null)
@@ -273,12 +273,6 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, onSav
     })
   }
 
-  const formatDataForApi = paramsArray => {
-    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
-
-    return formattedData
-  }
-
   useEffect(() => {
     if (!parameters) getParameterDefinition()
     if (parameters) getFieldsByClassId()
@@ -292,8 +286,6 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, onSav
       toFunctionId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      setParamsArray(paramsArray)
-      onSave({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })
       onClose()
     }
   })
