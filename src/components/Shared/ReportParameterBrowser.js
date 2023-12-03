@@ -274,7 +274,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
   }
 
   useEffect(() => {
-    if (!parameters) getParameterDefinition()
+    if (!parameters && fields.length === 0) getParameterDefinition()
     if (parameters) getFieldsByClassId()
   }, [parameters])
 
@@ -311,6 +311,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
           </Grid>
         </Window>
       )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
