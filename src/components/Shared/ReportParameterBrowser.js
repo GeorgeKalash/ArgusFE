@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -241,7 +241,31 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, onSav
           getComboBoxByClassId(field)
           break
         case 6:
-          //CustomCheckBox might be needed
+          fields.push(
+            <Grid item xs={12}>
+              <FormControlLabel
+                label={field.caption}
+                control={
+                  <Checkbox
+                    id={cellId}
+                    name={field.key}
+                    checked={parametersValidation.values[field.key]}
+                    value={[field.key]}
+                    onChange={(event, newValue) => {
+                      paramsArray.push({
+                        fieldId: field.id,
+                        fieldKey: field.key,
+                        value: newValue,
+                        caption: field.caption,
+                        display: newValue
+                      })
+                      parametersValidation.setFieldValue(field.key, newValue)
+                    }}
+                  />
+                }
+              />
+            </Grid>
+          )
           break
         default:
           break
