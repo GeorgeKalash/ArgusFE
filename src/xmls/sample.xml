@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-16"?>
+<ReportLayout ReportName="sample report" PaperKind="A4">
+  <ReportHeaderBand Name="ReportHeader" Height="425">
+    <XRTable Name="xrTable6" Width="424" />
+    <XRPictureBox Name="logo_data" Width="106" />
+    <XRLabel Name="addressMobile_data" Width="301" />
+    <XRLabel Name="addressName_data" Width="301" />
+    <XRLabel Name="taxNo_data" Width="301" />
+    <XRLabel Name="companyInfoName_data" Width="301" />
+    <XRLabel Name="addressEmail_data" Width="301" />
+    <XRLabel Name="addressStreet_data" Width="301" />
+    <XRCrossTab Name="crossTab" Width="700" />
+    <XRLabel Name="title_lbl" Width="1169" />
+  </ReportHeaderBand>
+  <DetailBand Name="Detail" Height="47" />
+  <TopMarginBand Name="TopMargin" Height="30" />
+  <BottomMarginBand Name="BottomMargin" Height="10" />
+  <ReportFooterBand Name="ReportFooter" Height="36">
+    <XRPageInfo Name="pagesNumber_lbl" Width="85" />
+    <XRLabel Name="printSignature" Width="676" />
+  </ReportFooterBand>
+</ReportLayout>

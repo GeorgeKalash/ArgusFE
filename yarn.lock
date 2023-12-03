@@ -1893,7 +1893,7 @@
   "resolved" "https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz"
   "version" "1.0.0"
 
-"devexpress-diagram@2.2.2":
+"devexpress-diagram@^2.2.2", "devexpress-diagram@2.2.2":
   "integrity" "sha512-wJvc9Q2lnha3BPFHMXoKYRiRmQP/W9rjZmjHAdp6N9yzyG32tUzoQEaa3U1f7feWSypWv2g28U+HO/xgNZN6FA=="
   "resolved" "https://registry.npmjs.org/devexpress-diagram/-/devexpress-diagram-2.2.2.tgz"
   "version" "2.2.2"

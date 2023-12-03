@@ -1,16 +1,10 @@
 import { useEffect, useRef } from 'react'
 import ko from 'knockout'
 
-const ReportViewer = ({ reportData, reportTemplate }) => {
-  const reportUrl = ko.observable('TestReport')
-  const previewModel = ko.observable()
+// import * as DevExpress from 'devexpress-reporting'
 
-  const callbacks = {
-    CustomizeExportOptions: function (s, e) {
-      e.HideExportOptionsPanel()
-      model.documentOptions.author('Me')
-    }
-  }
+const ReportViewer = ({ reportData, reportTemplate }) => {
+  const previewModel = ko.observable()
 
   const exportDocument = () => {
     previewModel().ExportTo('xlsx')
@@ -19,22 +13,16 @@ const ReportViewer = ({ reportData, reportTemplate }) => {
   const viewerRef = useRef(null)
 
   useEffect(() => {
-    // Set report data
-    previewModel().Data(reportData)
+    // Initialize the Knockout observables
+    const reportDataObservable = ko.observableArray(reportData)
 
-    // Set report template
-    previewModel().LoadDocument(reportTemplate)
+    // Create a preview model with the report template and data
+    const previewModel = new DevExpress.Reporting.Preview.PreviewModel(reportDataObservable, reportTemplate)
 
     // Apply bindings
-    ko.applyBindings(
-      {
-        reportUrl: reportUrl,
-        viewerModel: previewModel,
-        callbacks: callbacks
-      },
-      viewerRef.current
-    )
+    ko.applyBindings(previewModel, viewerRef.current)
 
+    // Clean up Knockout bindings on component unmount
     return () => {
       ko.cleanNode(viewerRef.current)
     }
