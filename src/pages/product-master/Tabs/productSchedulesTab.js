@@ -4,7 +4,7 @@ import { Grid, Box, Checkbox } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const PoductSchedulesTab = ({ productMasterValidation, schedulesGridValidation, schedulesInlineGridColumns, maxAccess }) => { 
+const ProductSchedulesTab = ({ productMasterValidation, schedulesGridValidation, schedulesInlineGridColumns, maxAccess }) => {
 return (
     <>
       <Box
@@ -28,7 +28,7 @@ return (
               gridValidation={schedulesGridValidation}
               columns={schedulesInlineGridColumns}
               defaultRow={{
-                
+
                 productId: productMasterValidation.values
                   ? productMasterValidation.values.recordId
                     ? productMasterValidation.values.recordId
@@ -44,6 +44,8 @@ return (
                 currencyId: '',
                 currencyRef: '',
                 currencyName: '',
+                dispersalId:'',
+                dispersalName:'',
                 dispersalType: '',
                 dispersalTypeName: '',
                 isInactive: false
@@ -57,4 +59,4 @@ return (
   )
 }
 
-export default PoductSchedulesTab
+export default ProductSchedulesTab

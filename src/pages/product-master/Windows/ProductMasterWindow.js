@@ -8,9 +8,9 @@ import ProductDispersalTab from 'src/pages/product-master/Tabs/productDispersalT
 import ProductLegTab from 'src/pages/product-master/Tabs/productLegTab'
 import ProductFieldTab from 'src/pages/product-master/Tabs/productFieldTab'
 import ProductAgentTab from 'src/pages/product-master/Tabs/productAgentTab'
-import PoductCurrenciesTab from '../Tabs/productCurrenciesTab'
+import ProductCurrenciesTab from '../Tabs/productCurrenciesTab'
 import ProductCountriesTab from '../Tabs/productCountriesTab'
-import PoductSchedulesTab from '../Tabs/productSchedulesTab'
+import ProductSchedulesTab from '../Tabs/productSchedulesTab'
 
 const ProductMasterWindow = ({
   onClose,
@@ -112,7 +112,7 @@ const ProductMasterWindow = ({
         />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <PoductCurrenciesTab
+        <ProductCurrenciesTab
           productMasterValidation={productMasterValidation}
           monetariesGridValidation={monetariesGridValidation}
           monetariesInlineGridColumns={monetariesInlineGridColumns}
@@ -130,7 +130,7 @@ const ProductMasterWindow = ({
         />
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab}>
-        <PoductSchedulesTab
+        <ProductSchedulesTab
           productMasterValidation={productMasterValidation}
           schedulesGridValidation={schedulesGridValidation}
           schedulesInlineGridColumns={schedulesInlineGridColumns}
