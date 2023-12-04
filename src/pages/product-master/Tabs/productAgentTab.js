@@ -6,14 +6,14 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const ProductAgentTab = ({ 
+const ProductAgentTab = ({
   onDispersalSelection,
   dispersalsGridData,
   agentsHeaderValidation,
   agentsGridValidation,
   agentsInlineGridColumns,
-  maxAccess 
-}) => {  
+  maxAccess
+}) => {
 return (
     <>
       <Box
@@ -47,7 +47,7 @@ return (
           </Grid>
           <Grid xs={12}>
             <InlineEditGrid
-              gridValidation={agentsGridValidation}
+              gridValidation={agentsHeaderValidation.values.dispersalId && agentsGridValidation}
               columns={agentsInlineGridColumns}
               defaultRow={{
                 dispersalId: agentsHeaderValidation.values

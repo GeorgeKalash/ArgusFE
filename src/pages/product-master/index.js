@@ -336,7 +336,7 @@ const ProductMaster = () => {
       })
   }
 
-  const fillCoutryStore = () => {
+  const fillCountryStore = () => {
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Country.qry,
@@ -359,8 +359,21 @@ const ProductMaster = () => {
       .then(res => {
         productMasterValidation.setFieldValue('recordId', res.recordId)
         getGridData({})
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
+        if (!recordId){
+
+        toast.success('Record Added Successfully')
+        productMasterValidation.setFieldValue("recordId", res.recordId)
+        resetCorrespondentCountries(res.recordId)
+        resetCorrespondentMonetaries(res.recordId)
+        resetScheduleRangeGridValidation(res.recordId)
+        resetProductSchedules(res.recordId)
+
+        setEditMode(true)
+
+        }else{
+          toast.success('Record Editted Successfully')
+        }
+
       })
       .catch(error => {
         setErrorMessage(error)
@@ -401,9 +414,13 @@ const ProductMaster = () => {
     fillInterfaceStore()
     fillPlantStore()
     fillAgentsStore()
-    fillCoutryStore()
+    fillCountryStore()
     fillCurrencyStore()
+    fillDispersalTypeStore()
     setWindowOpen(true)
+    setActiveTab(0)
+    agentsHeaderValidation.setValues({ dispersalId: null })
+
   }
 
   const popup = obj => {
@@ -413,7 +430,7 @@ const ProductMaster = () => {
     fillCommissionBaseStore()
     fillInterfaceStore()
     getProductMasterById(obj)
-    fillCoutryStore()
+    fillCountryStore()
     fillPlantStore()
     fillAgentsStore()
     fillCurrencyStore()
@@ -614,6 +631,8 @@ const ProductMaster = () => {
       })
   }
 
+
+
   const resetCorrespondentCountries = (recordId) => {
     countriesGridValidation.resetForm({
       values: {
@@ -624,6 +643,22 @@ const ProductMaster = () => {
             countryRef: '',
             countryName: '',
             isInactive: false
+          }
+        ]
+      }
+    })
+  }
+
+  const resetScheduleRangeGridValidation = (recordId) => {
+    scheduleRangeGridValidation.resetForm({
+      values: {
+        rows: [
+          {
+            productId: recordId ?recordId : '',
+            seqNo: row.seqNo? row.seqNo : '',
+            rangeSeqNo: 1, //incremental
+            fromAmount: '',
+            toAmount: ''
           }
         ]
       }
@@ -786,12 +821,12 @@ const ProductMaster = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      productId: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      dispersalType: yup.string().required('This field is required'),
-      isDefault: yup.string().required('This field is required'),
-      isInactive: yup.string().required('This field is required')
+      // productId: yup.string().required('This field is required'),
+      // reference: yup.string().required('This field is required'),
+      // name: yup.string().required('This field is required'),
+      // dispersalType: yup.string().required('This field is required'),
+      // isDefault: yup.string().required('This field is required'),
+      // isInactive: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postProductDispersal(values)
@@ -800,7 +835,7 @@ const ProductMaster = () => {
 
   const postProductDispersal = obj => {
     const recordId = obj.recordId
-    const productId = obj.productId
+    const productId = obj.productId  ? obj.productId : productMasterValidation.values.recordId
     postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.set,
       record: JSON.stringify(obj)
@@ -886,8 +921,12 @@ const ProductMaster = () => {
     validateOnChange: true,
     validate: values => {
       const isValid = values.rows.every(row => !!row.countryId)
+      const isValidCurrency = values.rows.every(row => !!row.currencyId)
+      const isValidPlantId = values.rows.every(row => !!row.plantId)
+      const isValidDispersalId = values.rows.every(row => !!row.dispersalId)
 
-      return isValid ? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
+
+      return (isValid && isValidPlantId && isValidCurrency && isValidDispersalId )? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
     },
     initialValues: {
       rows: [
@@ -907,6 +946,8 @@ const ProductMaster = () => {
           currencyId: '',
           currencyRef: '',
           currencyName: '',
+          dispersalId:'',
+          dispersalName :'',
           dispersalType: '',
           dispersalTypeName: '',
           isInactive: false
@@ -1082,6 +1123,9 @@ const ProductMaster = () => {
             currencyId: '',
             currencyRef: '',
             currencyName: '',
+            dispersalId: '',
+            dispersalName:'',
+            dispersalTypeId: '',
             dispersalType: '',
             dispersalTypeName: '',
             isInactive: false
@@ -1438,7 +1482,7 @@ const ProductMaster = () => {
       header: 'Agents',
       nameId: 'agentId',
       name: 'agentName',
-      mandatory: false,
+      mandatory: true,
       store: agentsStore.list,
       valueField: 'recordId',
       displayField: 'name',
@@ -1464,10 +1508,14 @@ const ProductMaster = () => {
       })
   }
 
+
   const onDispersalSelection = dispersalId => {
-    const dipersalId = dispersalId
-    const defaultParams = `_dispersalId=${dipersalId}`
+
+    const _dispersalId = dispersalId
+    const defaultParams = `_dispersalId=${_dispersalId}`
     var parameters = defaultParams
+    agentsGridValidation.setValues({ rows: [] })
+
     getRequest({
       extension: RemittanceSettingsRepository.ProductDispersalAgents.qry,
       parameters: parameters
@@ -1499,7 +1547,7 @@ const ProductMaster = () => {
         getProductAgentGridData({})
 
         fillPlantStore()
-        fillCoutryStore()
+        fillCountryStore()
         fillCurrencyStore()
 
         // fillCorrespondentStore()
