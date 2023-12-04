@@ -1258,7 +1258,7 @@ const ProductMaster = () => {
     }),
     onSubmit: values => {}
   })
-  
+
   const commissionsGridValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
@@ -1278,7 +1278,7 @@ const ProductMaster = () => {
           commission: '',
         }
       ]
-    
+
     },
     onSubmit: values => {
       console.log(values);
@@ -1304,7 +1304,7 @@ const ProductMaster = () => {
   ]
 
   const postProductRangeCommissions = obj => {
-    
+
     const data = {
       productId: productCommissionValidation.values.productId,
       seqNo: productCommissionValidation.values.seqNo,
@@ -1331,7 +1331,7 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(commissionTypes => {
-        
+
         //step 2: get all ranges commissions
         const _productId = obj.productId
         const _seqNo = obj.seqNo
@@ -1347,14 +1347,14 @@ const ProductMaster = () => {
             // Create a mapping of commissionId to commissionFees entry for efficient lookup
               const commissionFeesMap = commissionFees.list.reduce((acc, fee) => {
                 acc[fee.commissionId] = fee.commission;
-                
+
                 return acc;
               }, {});
 
               // Combine commissionTypes and commissionFees
               const rows = commissionTypes.list.map(commissionType => {
                 const commissionValue = commissionFeesMap[commissionType.recordId] || 0;
-                
+
                 return {
                   productId: obj.productId,
                   seqNo: obj.seqNo,
@@ -1377,7 +1377,7 @@ const ProductMaster = () => {
         setErrorMessage(error)
       })
 
-    
+
 
     //step 3: merge both
   }

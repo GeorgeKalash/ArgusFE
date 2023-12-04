@@ -264,8 +264,11 @@ const Correspondent = () => {
     enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
-      // const isValid = values.rows.every(row => !!row.currencyId)
-      // return isValid ? {} : { rows: Array(values.rows.length).fill({ currencyId: 'Currency is required' }) }
+      const isValid = values.rows.every(row => !!row.currencyId)
+      const isValidGlCurrencyId = values.rows.every(row => !!row.glCurrencyId)
+
+
+return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).fill({ currencyId: 'Currency is required' }) }
     },
     initialValues: {
       rows: [
@@ -502,11 +505,12 @@ const Correspondent = () => {
     enableReinitialize: false,
     validateOnChange: true,
 
-    // validate: values => {
-    //   const isValid = values.rows.every(row => !!row.plantId)
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.plantId)
+      const isValidExchangeId = values.rows.every(row => !!row.exchangeId)
 
-    //   return isValid ? {} : {} //{ rows: Array(values.rows.length).fill({ plantId: 'Plant is required' }) }
-    // },
+      return (isValid && isValidExchangeId) ? {} : { rows: Array(values.rows.length).fill({ plantId: 'Plant is required' }) }
+    },
     initialValues: {
       rows: [
         {
@@ -664,15 +668,15 @@ const Correspondent = () => {
         setEditMode(true)
         if (!recordId) {
           toast.success('Record Added Successfully')
+          if (res.recordId) {
+            correspondentValidation.setFieldValue('recordId', res.recordId)
+            resetCorrespondentCurrencies(res.recordId)
+            resetCorrespondentCountries(res.recordId)
+          }
         } else {
           toast.success('Record Editted Successfully')
         }
-        if (res.recordId) {
-          correspondentValidation.setFieldValue('recordId', res.recordId)
-          console.log(res.recordId)
-          setCorId(res.recordId)
-          console.log(correspondentValidation)
-        }
+
       })
       .catch(error => {
         setErrorMessage(error)
@@ -693,15 +697,12 @@ const Correspondent = () => {
       })
   }
 
-  const resetCorrespondentCountries = () => {
+  const resetCorrespondentCountries = (id) => {
     countriesGridValidation.setValues({
       rows: [
         {
-          corId: correspondentValidation.values
-            ? correspondentValidation.values.recordId
-              ? correspondentValidation.values.recordId
-              : ''
-            : '',
+          corId: id ? id : correspondentValidation.values
+          ? correspondentValidation.values.recordId : "",
           countryId: '',
           countryRef: '',
           countryName: ''
@@ -710,15 +711,12 @@ const Correspondent = () => {
     })
   }
 
-  const resetCorrespondentCurrencies = () => {
+  const resetCorrespondentCurrencies = (id) => {
     currenciesGridValidation.setValues({
       rows: [
         {
-          corId: correspondentValidation.values
-            ? correspondentValidation.values.recordId
-              ? correspondentValidation.values.recordId
-              : ''
-            : '',
+          corId: id ? id : correspondentValidation.values
+          ? correspondentValidation.values.recordId : "",
           currencyId: '',
           currencyRef: '',
           currencyName: '',
@@ -815,8 +813,8 @@ const Correspondent = () => {
   }
 
   const popup = obj => {
-    resetCorrespondentCountries()
-    resetCorrespondentCurrencies()
+    resetCorrespondentCountries(obj.recordId)
+    resetCorrespondentCurrencies(obj.recordId)
     resetCorrespondent()
     fillCountryStore()
     fillCurrencyStore()

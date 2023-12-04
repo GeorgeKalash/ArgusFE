@@ -83,38 +83,38 @@ const ProductMasterTab = ({
           </Grid>
           <Grid item xs={12}>
             <CustomLookup
-              name='correspondentId'
+              name='corId'
 
               // label={labels.correspondent}
               label='Correspondent'
-              value={productMasterValidation.values.correspondentId}
+              value={productMasterValidation.values.corId}
               required
               valueField='name'
               store={correspondentStore}
-              firstValue={productMasterValidation.values.correspondentName}
+              firstValue={productMasterValidation.values.corName}
               setStore={setCorrespondentStore}
               onLookup={lookupCorrespondent}
               onChange={(event, newValue) => {
                 console.log(newValue)
                 console.log(productMasterValidation)
                 if (newValue) {
-                  productMasterValidation.setFieldValue('correspondentId', newValue?.recordId)
-                  productMasterValidation.setFieldValue('correspondentName', newValue?.name)
+                  productMasterValidation.setFieldValue('corId', newValue?.recordId)
+                  productMasterValidation.setFieldValue('corName', newValue?.name)
 
 
                 } else {
-                  productMasterValidation.setFieldValue('correspondentId', null)
-                  productMasterValidation.setFieldValue('correspondentName', null)
+                  productMasterValidation.setFieldValue('corId', null)
+                  productMasterValidation.setFieldValue('corName', null)
                 }
                 console.log(productMasterValidation)
 
               }}
               error={
-                productMasterValidation.touched.correspondentId &&
-                Boolean(productMasterValidation.errors.correspondentId)
+                productMasterValidation.touched.corId &&
+                Boolean(productMasterValidation.errors.corId)
               }
               helperText={
-                productMasterValidation.touched.correspondentId && productMasterValidation.errors.correspondentId
+                productMasterValidation.touched.corId && productMasterValidation.errors.corId
               }
               maxAccess={maxAccess}
             />
