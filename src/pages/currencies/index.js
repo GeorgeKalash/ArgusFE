@@ -60,7 +60,6 @@ const Currencies = () => {
     currency: labels && labels.find(item => item.key === 9).value,
     isoCode: labels && labels.find(item => item.key === 10).value,
     symbol: labels && labels.find(item => item.key === 11).value
-    
   }
 
   const columns = [
@@ -89,7 +88,7 @@ const Currencies = () => {
 
   const currencyValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
@@ -97,7 +96,7 @@ const Currencies = () => {
       profileId: yup.string().required('This field is required'),
       currencyType: yup.string().required('This field is required'),
       isoCode: yup.string().notRequired(),
-      symbol:yup.string().notRequired()
+      symbol: yup.string().notRequired()
     }),
     onSubmit: values => {
       postCurrency(values)
@@ -202,27 +201,26 @@ const Currencies = () => {
   }
 
   useEffect(() => {
-     if (!access)
-    getAccess(ResourceIds.Currencies, setAccess)
-  else {
-    if (access.record.maxAccess > 0) {
-      getGridData()
-      fillDecimalStore()
-      fillProfileStore()
-      fillCurrencyStore()
-      getLabels(ResourceIds.Currencies,setLabels)
-      const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
-      setDecimalStore(decimalDataSource) 
-    } else {
-      setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    if (!access) getAccess(ResourceIds.Currencies, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData()
+        fillDecimalStore()
+        fillProfileStore()
+        fillCurrencyStore()
+        getLabels(ResourceIds.Currencies, setLabels)
+        const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
+        setDecimalStore(decimalDataSource)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
     }
-  }
-}, [access])
-  
-return (
+  }, [access])
+
+  return (
     <>
       <Box>
-        <GridToolbar onAdd={addCurrency} maxAccess={access}/>
+        <GridToolbar onAdd={addCurrency} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -250,7 +248,6 @@ return (
           labels={_labels}
           maxAccess={access}
         />
-         
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>

@@ -10,63 +10,18 @@ import Window from 'src/components/Shared/Window'
 
 // ** Helpers
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const productLegTab = ({
   productLegValidation,
-  productLegWindowOpen,
-  productLegGridData,
-  productLegCommissionGridData,
-  editProductCommission,
-  setProductLegWindowOpen,
+  scheduleRangeGridValidation,
+  scheduleRangeInlineGridColumns,
   currencyStore,
+  countryStore,
   plantStore,
   dispersalStore,
   maxAccess
 }) => {
-  const columns = [
-    {
-      field: 'fromAmount',
-      headerName: 'From Amount',
-      flex: 1,
-      align: 'right',
-      valueGetter: ({ row }) => getFormattedNumber(row?.fromAmount, 2)
-    },
-    {
-      field: 'toAmount',
-      headerName: 'To Amount',
-      flex: 1,
-      align: 'right',
-      valueGetter: ({ row }) => getFormattedNumber(row?.toAmount, 2)
-    }
-  ]
-
-  const commissionColumns = [
-    {
-      field: 'checkBox',
-      headerName: '',
-      flex: 0.5,
-      renderCell: params => (
-        <Checkbox
-          color='primary'
-          checked={params.row.checkBox === true}
-          onChange={() => {
-            params.row.checkBox = !params.row.checkBox
-          }}
-        />
-      )
-    },
-    {
-      field: 'commissionName',
-      headerName: 'Commission Name',
-      flex: 1
-    },
-    {
-      field: 'commission',
-      headerName: 'Commission',
-      flex: 1
-    }
-  ]
-
   return (
     <>
       <Box
@@ -78,74 +33,104 @@ const productLegTab = ({
       >
         <Grid container gap={2}>
           <Grid container xs={12} spacing={2}>
-            <Grid item xs={6}>
-              <CustomTextField label='Reference' value={''} readOnly={true} />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField label='Name' value={''} readOnly={true} />
-            </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <CustomComboBox
-              name='plantId'
-              label='Plant'
-              valueField='recordId'
-              displayField='name'
-              store={plantStore}
-              value={plantStore.filter(item => item.recordId === productLegValidation.values.plantId)[0]}
-              onChange={(event, newValue) => {
-                productLegValidation.setFieldValue('plantId', newValue?.recordId)
-              }}
-              error={
-                productLegValidation.touched.plantId && Boolean(productLegValidation.errors.plantId)
-              }
-              helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
-            />
+                name='plantId'
+                label='Plant'
+                valueField='recordId'
+                displayField='name'
+                readOnly={true}
+                store={plantStore}
+                value={
+                  plantStore.filter(
+                    item => item.recordId === (productLegValidation.values && productLegValidation.values.plantId)
+                  )[0]
+                }
+                onChange={(event, newValue) => {
+                  productLegValidation.setFieldValue('plantId', newValue?.recordId)
+                  console.log(productLegValidation)
+                }}
+                error={productLegValidation.touched.plantId && Boolean(productLegValidation.errors.plantId)}
+                helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
+              />
             </Grid>
-            <Grid item xs={4}>
-            <CustomComboBox
-              name='currencyId'
-              label='Currency'
-              valueField='recordId'
-              displayField='name'
-              store={currencyStore}
-              value={currencyStore.filter(item => item.recordId === productLegValidation.values.currencyId)[0]}
-              onChange={(event, newValue) => {
-                productLegValidation.setFieldValue('currencyId', newValue?.recordId)
-              }}
-              error={
-                productLegValidation.touched.currencyId && Boolean(productLegValidation.errors.currencyId)
-              }
-              helperText={productLegValidation.touched.currencyId && productLegValidation.errors.currencyId}
-            />
+            <Grid items xs={3}>
+              <CustomComboBox
+                name='countryId'
+                label='Country'
+                valueField='recordId'
+                displayField='name'
+                readOnly={true}
+                store={countryStore}
+                value={
+                  countryStore.filter(
+                    item => item.recordId === (productLegValidation.values && productLegValidation.values.countryId)
+                  )[0]
+                }
+                onChange={(event, newValue) => {
+                  productLegValidation.setFieldValue('countryId', newValue?.recordId)
+                }}
+                error={productLegValidation.touched.countryId && Boolean(productLegValidation.errors.countryId)}
+                helperText={productLegValidation.touched.countryId && productLegValidation.errors.countryId}
+              />
             </Grid>
-            <Grid item xs={4}>
-              <CustomComboBox name='dispersalId'
-              label='Dispersal'
-              valueField='recordId'
-              displayField='name'
-              store={dispersalStore}
-              value={dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
-              onChange={(event, newValue) => {
-                productLegValidation.setFieldValue('dispersalId', newValue?.recordId)
-              }}
-              error={
-                productLegValidation.touched.dispersalId && Boolean(productLegValidation.errors.dispersalId)
-              }
-              helperText={productLegValidation.touched.dispersalId && productLegValidation.errors.dispersalId}
-               />
+            <Grid item xs={3}>
+              <CustomComboBox
+                name='currencyId'
+                label='Currency'
+                valueField='recordId'
+                displayField='name'
+                readOnly={true}
+                store={currencyStore}
+                value={
+                  currencyStore.filter(
+                    item => item.recordId === (productLegValidation.values && productLegValidation.values.currencyId)
+                  )[0]
+                }
+                onChange={(event, newValue) => {
+                  productLegValidation.setFieldValue('currencyId', newValue?.recordId)
+                }}
+                error={productLegValidation.touched.currencyId && Boolean(productLegValidation.errors.currencyId)}
+                helperText={productLegValidation.touched.currencyId && productLegValidation.errors.currencyId}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomComboBox
+                name='dispersalId'
+                label='Dispersal'
+                valueField='recordId'
+                displayField='name'
+                readOnly={true}
+                store={dispersalStore}
+                value={dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
+                onChange={(event, newValue) => {
+                  productLegValidation.setFieldValue('dispersalId', newValue?.recordId)
+                }}
+                error={productLegValidation.touched.dispersalId && Boolean(productLegValidation.errors.dispersalId)}
+                helperText={productLegValidation.touched.dispersalId && productLegValidation.errors.dispersalId}
+              />
             </Grid>
           </Grid>
           <Grid xs={12}>
-            <Table
-              columns={columns}
-              gridData={productLegGridData}
-              rowId={['recordId']}
-              onEdit={editProductCommission}
-              isLoading={false}
-              pagination={false}
-              actionColumnHeader='Commissions'
-              height={180}
-              maxAccess={maxAccess} 
+            <InlineEditGrid
+              gridValidation={scheduleRangeGridValidation}
+              columns={scheduleRangeInlineGridColumns}
+              defaultRow={{
+                productId: productLegValidation.values
+                  ? productLegValidation.values.productId
+                    ? productLegValidation.values.productId
+                    : ''
+                  : '',
+                seqNo: productLegValidation.values
+                  ? productLegValidation.values.seqNo
+                    ? productLegValidation.values.seqNo
+                    : ''
+                  : '',
+                rangeSeqNo: 1, //incremental
+                fromAmount: '',
+                toAmount: ''
+              }}
+              width={900}
             />
           </Grid>
         </Grid>

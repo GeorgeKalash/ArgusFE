@@ -15,25 +15,26 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { getNewCommissionType, populateCommissionType } from 'src/Models/CurrencyTradingSettings/CommissionType'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
-import CommissionTypeWindow from './Windows/CommissionTypeWindow'
+import OutwardsWindow from './Windows/OutwardsWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { getNewOutwards, populateOutwards } from 'src/Models/RemittanceActivities/Outwards'
 
-const CommissionType = () => {
+const OutwardsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
   //stores
   const [gridData, setGridData] = useState(null)
-  const [typeStore, setTypeStore] = useState([])
+  const [countryStore, setCountryStore] = useState(null)
+  const [dispersalTypeStore, setDispersalTypeStore] = useState([])
+  const [currencyStore, setCurrencyStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -47,126 +48,137 @@ const CommissionType = () => {
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
     name: labels && labels.find(item => item.key === 2).value,
-    type: labels && labels.find(item => item.key === 3).value,
-    comissiontype: labels && labels.find(item => item.key === 4).value
+    foreignLanguage: labels && labels.find(item => item.key === 3).value,
   }
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'countryRef',
+      headerName: 'countryRef',
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'dispersalName',
+      headerName: 'dispersalName',
       flex: 1
     },
     ,
     {
-      field: 'typeName',
-      headerName: _labels.type,
+      field: 'currencyRef',
+      headerName: 'currencyRef',
+      flex: 1
+    },
+    {
+      field: 'agent',
+      headerName: 'agent',
       flex: 1
     }
   ]
 
-  const commissiontypeValidation = useFormik({
+  const outwardsValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      type: yup.string().required('This field is required')
+      countryId: yup.string().required('This field is required'),
+      dispersaType: yup.string().required('This field is required'),
+      currencyId: yup.string().required('This field is required'),
+      agentId: yup.string().required('This field is required'),
+      
     }),
     onSubmit: values => {
-      postCommissionType(values)
+     
     }
   })
 
   const handleSubmit = () => {
-    commissiontypeValidation.handleSubmit()
+    outwardsValidation.handleSubmit()
   }
 
   const getGridData = () => {
+    // var parameters = '_filter='
+    // getRequest({
+    //   extension: SystemRepository.Currency.qry,
+    //   parameters: parameters
+    // })
+    //   .then(res => {
+    //     setGridData(res)
+    //   })
+    //   .catch(error => {
+    //     setErrorMessage(error)
+    //   })
+  }
+
+
+  const fillCoutryStore = () => {
     var parameters = '_filter='
     getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.qry,
+      extension: SystemRepository.Country.qry,
       parameters: parameters
     })
       .then(res => {
-        setGridData(res)
+        setCountryStore(res)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const fillTypeStore = () => {
-    var parameters = '_database=3501' //add 'xml'.json and get _database values from there
+  const onCountrySelection = (countryId) => {
+    var parameters = '_database=3604' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
     })
       .then(res => {
-        setTypeStore(res.list)
+        setDispersalTypeStore(res)
       })
       .catch(error => {
-        setErrorMsetTypeStoreessage(error)
+        setErrorMessage(error.response.data)
       })
   }
 
-  const postCommissionType = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.set,
-      record: JSON.stringify(obj)
+  const onDispersalSelection = (countryId, dispersalType) => {
+    var parameters = '_filter='
+    getRequest({
+      extension: SystemRepository.Currency.qry,
+      parameters: parameters
     })
       .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
+        setCurrencyStore(res)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const delCommissionType = obj => {
-    postRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const delOutwards = obj => {
+    
   }
 
-  const addCommissionType = () => {
-    commissiontypeValidation.setValues(getNewCommissionType())
-    fillTypeStore()
+  const addOutwards = () => {
+    outwardsValidation.setValues(getNewOutwards())
+    fillCoutryStore()
     setEditMode(false)
     setWindowOpen(true)
   }
 
-  const editCommissionType = obj => {
-    commissiontypeValidation.setValues(populateCommissionType(obj))
-    fillTypeStore()
-    setEditMode(true)
-    setWindowOpen(true)
+  const editOutwards = obj => {
+     outwardsValidation.setValues(populateOutwards(obj))
+
+    // fillCoutryStore()
+    // setEditMode(true)
+    // setWindowOpen(true)
   }
 
   useEffect(() => {
-    if (!access) getAccess(ResourceIds.CommissionType, setAccess)
+    if (!access) getAccess(ResourceIds.Currencies, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData()
-        fillTypeStore()
-        getLabels(ResourceIds.CommissionType, setLabels)
+        fillCoutryStore()
+
+        //getLabels(ResourceIds.Currencies, setLabels)
+        
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -176,29 +188,33 @@ const CommissionType = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addCommissionType} maxAccess={access} />
+        <GridToolbar onAdd={addOutwards} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={editCommissionType}
-          onDelete={delCommissionType}
+          onEdit={editOutwards}
+          onDelete={delOutwards}
           isLoading={false}
           pageSize={50}
-          maxAccess={access}
           paginationType='client'
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
-        <CommissionTypeWindow
+        <OutwardsWindow
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
           onSave={handleSubmit}
           editMode={editMode}
-          commissiontypeValidation={commissiontypeValidation}
-          typeStore={typeStore}
+          outwardsValidation={outwardsValidation}
+          countryStore={countryStore}
+          onCountrySelection={onCountrySelection}
+          dispersalTypeStore={dispersalTypeStore}
+          onDispersalSelection={onDispersalSelection}
+          currencyStore={currencyStore}
           labels={_labels}
           maxAccess={access}
         />
@@ -208,4 +224,4 @@ const CommissionType = () => {
   )
 }
 
-export default CommissionType
+export default OutwardsTransfer

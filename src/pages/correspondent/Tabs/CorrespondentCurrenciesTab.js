@@ -7,6 +7,7 @@ const CorrespondentCurrenciesTab = ({
   correspondentValidation,
   currenciesGridValidation,
   currenciesInlineGridColumns,
+  corId,
   maxAccess,
   editMode
 }) => {

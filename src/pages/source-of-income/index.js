@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button, FormControlLabel } from '@mui/material'
+import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -15,23 +15,27 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { getNewAgents, populateAgents } from 'src/Models/RemittanceSettings/Agent'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { getNewSourceOfIncome, populateSourceOfIncome } from 'src/Models/CurrencyTradingSettings/SourceOfIncome'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
-import AgentWindow from './Windows/AgentWindow'
+import SourceOfIncomeWindow from './Windows/SourceOfIncomeWindow'
 
 // ** Helpers
+// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const Agent = () => {
+const SourceOfIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
   //stores
   const [gridData, setGridData] = useState(null)
+  const [incomeTypeStore, setIncomeTypeStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -43,37 +47,73 @@ const Agent = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    name: labels && labels.find(item => item.key === 1).value,
-    agents: labels && labels.find(item => item.key === 2).value
+    reference: labels && labels.find(item => item.key === 1).value,
+    name: labels && labels.find(item => item.key === 2).value,
+    foreignLanguage: labels && labels.find(item => item.key === 3).value,
+    incomeType: labels && labels.find(item => item.key === 4).value,
+    sourceOfIncome: labels && labels.find(item => item.key === 5).value
   }
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+    ,
+    {
+      field: 'flName',
+      headerName: _labels.foreignLanguage,
+      flex: 1
+    },
+    {
+      field: 'incomeTypeName',
+      headerName: _labels.incomeType,
       flex: 1
     }
   ]
 
-  const agentValidation = useFormik({
+  const sourceOfIncomeValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required')
+      reference: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required'),
+      flName: yup.string().required('This field is required'),
+      incomeType: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      postAgent(values)
+      postSourceOfIncome(values)
     }
   })
 
   const handleSubmit = () => {
-    agentValidation.handleSubmit()
+    sourceOfIncomeValidation.handleSubmit()
+  }
+
+  const fillIncomeStore = () => {
+    var parameters = '_database=3502' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        setIncomeTypeStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   const getGridData = () => {
     var parameters = '_filter='
     getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentAgents.qry,
+      extension: CurrencyTradingSettingsRepository.SourceOfIncome.page,
       parameters: parameters
     })
       .then(res => {
@@ -84,10 +124,10 @@ const Agent = () => {
       })
   }
 
-  const postAgent = obj => {
+  const postSourceOfIncome = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: RemittanceSettingsRepository.CorrespondentAgents.set,
+      extension: CurrencyTradingSettingsRepository.SourceOfIncome.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -101,9 +141,9 @@ const Agent = () => {
       })
   }
 
-  const delAgent = obj => {
+  const delSourceOfIncome = obj => {
     postRequest({
-      extension: RemittanceSettingsRepository.CorrespondentAgents.del,
+      extension: CurrencyTradingSettingsRepository.SourceOfIncome.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -115,24 +155,29 @@ const Agent = () => {
       })
   }
 
-  const addAgent = () => {
-    agentValidation.setValues(getNewAgents())
+  const addSourceOfIncome = () => {
+    sourceOfIncomeValidation.resetForm()
+    sourceOfIncomeValidation.setValues(getNewSourceOfIncome())
+    fillIncomeStore()
     setEditMode(false)
     setWindowOpen(true)
   }
 
-  const editAgent = obj => {
-    agentValidation.setValues(populateAgents(obj))
+  const editSourceOfIncome = obj => {
+    sourceOfIncomeValidation.resetForm()
+    sourceOfIncomeValidation.setValues(populateSourceOfIncome(obj))
+    fillIncomeStore()
     setEditMode(true)
     setWindowOpen(true)
   }
 
   useEffect(() => {
-    if (!access) getAccess(ResourceIds.CorrespondentAgents, setAccess)
+    if (!access) getAccess(ResourceIds.SourceOfIncome, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData()
-        getLabels(ResourceIds.CorrespondentAgents, setLabels)
+        fillIncomeStore()
+        getLabels(ResourceIds.SourceOfIncome, setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -142,14 +187,14 @@ const Agent = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addAgent} maxAccess={access} />
+        <GridToolbar onAdd={addSourceOfIncome} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={editAgent}
-          onDelete={delAgent}
+          onEdit={editSourceOfIncome}
+          onDelete={delSourceOfIncome}
           isLoading={false}
           pageSize={50}
           paginationType='client'
@@ -157,12 +202,13 @@ const Agent = () => {
         />
       </Box>
       {windowOpen && (
-        <AgentWindow
+        <SourceOfIncomeWindow
           onClose={() => setWindowOpen(false)}
           width={600}
           height={400}
           onSave={handleSubmit}
-          agentValidation={agentValidation}
+          sourceOfIncomeValidation={sourceOfIncomeValidation}
+          incomeTypeStore={incomeTypeStore}
           labels={_labels}
           maxAccess={access}
         />
@@ -172,4 +218,4 @@ const Agent = () => {
   )
 }
 
-export default Agent
+export default SourceOfIncome

@@ -4,13 +4,19 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import CustomLookup from 'src/components/Inputs/CustomLookup'
 
 const ProductMasterTab = ({
   productMasterValidation,
   typeStore,
   functionStore,
   commissionBaseStore,
-  languageStore
+  correspondentStore,
+  setCorrespondentStore,
+  interfaceStore,
+  lookupCorrespondent,
+  languageStore,
+  maxAccess
 }) => {
   return (
     <>
@@ -28,6 +34,7 @@ const ProductMasterTab = ({
               onClear={() => productMasterValidation.setFieldValue('reference', '')}
               error={Boolean(productMasterValidation.errors.reference)}
               helperText={productMasterValidation.errors.reference}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -60,54 +67,102 @@ const ProductMasterTab = ({
           </Grid>
           <Grid item xs={12}>
             <CustomComboBox
-              name='function'
+              name='functionId'
               label='Function'
               valueField='key'
               displayField='value'
               store={functionStore}
-              value={functionStore.filter(item => item.key === productMasterValidation.values.function)[0]}
+              value={functionStore.filter(item => item.key === productMasterValidation.values.functionId)[0]}
               required
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('function', newValue?.key)
+                productMasterValidation.setFieldValue('functionId', newValue?.key)
               }}
-              error={Boolean(productMasterValidation.errors.function)}
-              helperText={productMasterValidation.errors.function}
+              error={Boolean(productMasterValidation.errors.functionId)}
+              helperText={productMasterValidation.errors.functionId}
             />
           </Grid>
           <Grid item xs={12}>
+            <CustomLookup
+              name='corId'
+
+              // label={labels.correspondent}
+              label='Correspondent'
+              value={productMasterValidation.values.corId}
+              required
+              valueField='name'
+              store={correspondentStore}
+              firstValue={productMasterValidation.values.corName}
+              setStore={setCorrespondentStore}
+              onLookup={lookupCorrespondent}
+              onChange={(event, newValue) => {
+                console.log(newValue)
+                console.log(productMasterValidation)
+                if (newValue) {
+                  productMasterValidation.setFieldValue('corId', newValue?.recordId)
+                  productMasterValidation.setFieldValue('corName', newValue?.name)
+
+
+                } else {
+                  productMasterValidation.setFieldValue('corId', null)
+                  productMasterValidation.setFieldValue('corName', null)
+                }
+                console.log(productMasterValidation)
+
+              }}
+              error={
+                productMasterValidation.touched.corId &&
+                Boolean(productMasterValidation.errors.corId)
+              }
+              helperText={
+                productMasterValidation.touched.corId && productMasterValidation.errors.corId
+              }
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          {/* <Grid item xs={12}>
             <CustomTextField
               name='correspondent'
               label='Correspondent'
               value={productMasterValidation.values.correspondent}
-
-              //required={productMasterValidation.values.type === 1 ? true : false}
+              required={productMasterValidation.values.type === 1 ? true : false}
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('correspondent', '')}
               error={Boolean(productMasterValidation.errors.correspondent)}
               helperText={productMasterValidation.errors.correspondent}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
             <CustomComboBox
-              name='language'
-              label='language'
+              name='languages'
+              label='languages'
               valueField='key'
               displayField='value'
               store={languageStore}
-              value={languageStore.filter(item => item.key === productMasterValidation.values.language)[0]}
-              required
+              value={languageStore.filter(item => item.key === productMasterValidation.values.languages)[0]}
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('language', newValue?.key)
+                productMasterValidation.setFieldValue('languages', newValue?.key)
               }}
-              error={Boolean(productMasterValidation.errors.language)}
-              helperText={productMasterValidation.errors.language}
+              error={Boolean(productMasterValidation.errors.languages)}
+              helperText={productMasterValidation.errors.languages}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox name='interfaceId' label='Interface' />
+            <CustomComboBox
+              name='interfaceId'
+              label='Interface'
+              valueField='recordId'
+              displayField='name'
+              store={interfaceStore}
+              value={interfaceStore.filter(item => item.key === productMasterValidation.values.interfaceId)[0]}
+              onChange={(event, newValue) => {
+                productMasterValidation.setFieldValue('interfaceId', newValue?.key)
+              }}
+              error={Boolean(productMasterValidation.errors.interfaceId)}
+              helperText={productMasterValidation.errors.interfaceId}
+            />
           </Grid>
           <Grid item xs={12}>
             <CustomComboBox
@@ -116,13 +171,13 @@ const ProductMasterTab = ({
               valueField='key'
               displayField='value'
               store={commissionBaseStore}
-              value={productMasterValidation.values.commissionBaseName}
+              value={commissionBaseStore.filter(item => item.key === productMasterValidation.values.commissionBase)[0]}
+              required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('commissionBase', newValue?.key)
-                productMasterValidation.setFieldValue('commissionBaseName', newValue?.value)
               }}
-              error={Boolean(productMasterValidation.errors.commissionBaseName)}
-              helperText={productMasterValidation.errors.commissionBaseName}
+              error={Boolean(productMasterValidation.errors.commissionBase)}
+              helperText={productMasterValidation.errors.commissionBase}
             />
           </Grid>
           <Grid item xs={12}>

@@ -7,9 +7,13 @@ const CorrespondentCountriesTab = ({
   correspondentValidation,
   countriesGridValidation,
   countriesInlineGridColumns,
+  corId,
   maxAccess
 }) => {
-  return (
+
+  console.log(correspondentValidation.values.recordId)
+  
+return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
         <InlineEditGrid
