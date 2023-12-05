@@ -25,6 +25,7 @@ import OutwardsWindow from './Windows/OutwardsWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { getNewOutwards, populateOutwards } from 'src/Models/RemittanceActivities/Outwards'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 
 const OutwardsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -109,10 +110,10 @@ const OutwardsTransfer = () => {
   }
 
 
-  const fillCoutryStore = () => {
+  const fillCountryStore = () => {
     var parameters = '_filter='
     getRequest({
-      extension: SystemRepository.Country.qry,
+      extension: RemittanceOutwardsRepository.Country.qry,
       parameters: parameters
     })
       .then(res => {
@@ -123,10 +124,11 @@ const OutwardsTransfer = () => {
       })
   }
 
-  const onCountrySelection = (countryId) => {
-    var parameters = '_database=3604' //add 'xml'.json and get _database values from there
+  const onCountrySelection = (countryId) => { 
+    //get dispersals list
+    var parameters = `_countryId=${countryId}` 
     getRequest({
-      extension: SystemRepository.KeyValueStore,
+      extension: RemittanceOutwardsRepository.DispersalType.qry,
       parameters: parameters
     })
       .then(res => {
@@ -138,9 +140,10 @@ const OutwardsTransfer = () => {
   }
 
   const onDispersalSelection = (countryId, dispersalType) => {
-    var parameters = '_filter='
+    //get currencies list
+    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}` 
     getRequest({
-      extension: SystemRepository.Currency.qry,
+      extension: RemittanceOutwardsRepository.Currency.qry,
       parameters: parameters
     })
       .then(res => {
@@ -157,7 +160,7 @@ const OutwardsTransfer = () => {
 
   const addOutwards = () => {
     outwardsValidation.setValues(getNewOutwards())
-    fillCoutryStore()
+    fillCountryStore()
     setEditMode(false)
     setWindowOpen(true)
   }
@@ -165,7 +168,7 @@ const OutwardsTransfer = () => {
   const editOutwards = obj => {
      outwardsValidation.setValues(populateOutwards(obj))
 
-    // fillCoutryStore()
+    // fillCountryStore()
     // setEditMode(true)
     // setWindowOpen(true)
   }
@@ -175,7 +178,7 @@ const OutwardsTransfer = () => {
     else {
       if (access.record.maxAccess > 0) {
         getGridData()
-        fillCoutryStore()
+        fillCountryStore()
 
         //getLabels(ResourceIds.Currencies, setLabels)
         
