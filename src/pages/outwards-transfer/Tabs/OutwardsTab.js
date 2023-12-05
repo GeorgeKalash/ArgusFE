@@ -22,13 +22,13 @@ const OutwardsTab=({
             <CustomComboBox
               name='countryId'
               label='Country'
-              valueField='recordId'
-              displayField='reference'
+              valueField='countryId'
+              displayField='countryRef'
               store={countryStore}
-              value={countryStore.filter(item => item.recordId === outwardsValidation.values.countryId)[0]}
+              value={countryStore.filter(item => item.countryId === outwardsValidation.values.countryId)[0]}
               onChange={(event, newValue) => {
-                outwardsValidation.setFieldValue('countryId', newValue?.recordId)
-                onCountrySelection(newValue?.recordId);
+                outwardsValidation.setFieldValue('countryId', newValue?.countryId)
+                onCountrySelection(newValue?.countryId);
               }}
               error={Boolean(outwardsValidation.errors.countryId)}
               helperText={outwardsValidation.errors.countryId}
@@ -38,13 +38,13 @@ const OutwardsTab=({
             <CustomComboBox
               name='dispersalType'
               label='dispersal type'
-              valueField='key'
-              displayField='value'
+              valueField='dispersalType'
+              displayField='dispersalTypeName'
               store={dispersalTypeStore}
-              value={dispersalTypeStore?.filter(item => item.key === outwardsValidation.values.dispersalType)[0]}
+              value={dispersalTypeStore?.filter(item => item.dispersalType === outwardsValidation.values.dispersalType)[0]}
               onChange={(event, newValue) => {
-                outwardsValidation.setFieldValue('dispersalType', newValue?.key)
-                onDispersalSelection(newValue?.key);
+                outwardsValidation.setFieldValue('dispersalType', newValue?.dispersalType)
+                onDispersalSelection(outwardsValidation.values.countryId, newValue?.dispersalType);
               }}
               error={Boolean(outwardsValidation.errors.dispersalType)}
               helperText={outwardsValidation.errors.dispersalType}
@@ -54,12 +54,12 @@ const OutwardsTab=({
             <CustomComboBox
               name='currencyId'
               label='Currency'
-              valueField='recordId'
-              displayField='reference'
+              valueField='currencyId'
+              displayField='currencyRef'
               store={currencyStore}
-              value={currencyStore?.filter(item => item.recordId === outwardsValidation.values.currencyId)[0]}
+              value={currencyStore?.filter(item => item.currencyId === outwardsValidation.values.currencyId)[0]}
               onChange={(event, newValue) => {
-                outwardsValidation.setFieldValue('currencyId', newValue?.recordId)
+                outwardsValidation.setFieldValue('currencyId', newValue?.currencyId)
               }}
               error={Boolean(outwardsValidation.errors.currencyId)}
               helperText={outwardsValidation.errors.currencyId}
