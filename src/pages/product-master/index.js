@@ -972,7 +972,7 @@ const ProductMaster = () => {
       const isValid = true // values.rows.every(row => !!row.countryId)
       const isValidCurrency =true // values.rows.every(row => !!row.currencyId)
       const isValidPlantId = true // values.rows.every(row => !!row.plantId)
-      const isValidDispersalId = true    //values.rows.every(row => !!row.dispersalId)
+      const isValidDispersalId = values.rows.every(row => !!row.dispersalId)
 
 
       return (isValid && isValidPlantId && isValidCurrency && isValidDispersalId )? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
