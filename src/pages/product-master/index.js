@@ -187,6 +187,8 @@ const ProductMaster = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
     else if (activeTab === 1) countriesGridValidation.handleSubmit()
     else if (activeTab === 2) monetariesGridValidation.handleSubmit()
+    else if (activeTab === 3) dispersalsGridData.handleSubmit()
+
     else if (activeTab === 4) schedulesGridValidation.handleSubmit()
     else if (activeTab === 5) scheduleRangeGridValidation.handleSubmit()
     else if (activeTab === 7) agentsGridValidation.handleSubmit()
@@ -228,7 +230,14 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setDispersalTypeStore(res)
+        console.log(res.list)
+
+        const obj ={
+          dataset:0,
+          key: null,
+          language: 1,
+          value : "All"}
+          setDispersalTypeStore(prevArray => [obj, ...res.list]);
       })
       .catch(error => {
         setErrorMessage(error.response.data)
@@ -287,7 +296,16 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setCurrencyStore(res)
+        console.log(res.list)
+
+        const obj ={
+          flName :"all",
+          name : "All",
+          recordId: null,
+          reference:"All"}
+          setCurrencyStore(prevArray => [obj, ...res.list]);
+
+        // setCurrencyStore(res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -329,21 +347,38 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setPlantStore(res)
+        const obj ={
+          flName :"all",
+          name : "All",
+          recordId: null,
+          reference:"All"}
+          setPlantStore(prevArray => [obj, ...res.list]);
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const fillCountryStore = () => {
+  const fillCountryStore =  () => {
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Country.qry,
       parameters: parameters
     })
       .then(res => {
-        setCountryStore(res)
+        console.log(res.list)
+
+
+        const obj ={
+
+          "flName" : "All",
+          "isInactive" : true,
+          "name" : "All",
+          "recordId": null,
+          "reference": "All"}
+          setCountryStore(prevArray => [obj, ...res.list]);
+
+
       })
       .catch(error => {
         setErrorMessage(error)
@@ -424,6 +459,7 @@ const ProductMaster = () => {
   }
 
   const popup = obj => {
+    setActiveTab(0)
     fillTypeStore()
     fillFunctionStore()
     fillLanguageStore()
@@ -591,7 +627,7 @@ const ProductMaster = () => {
       nameId: 'countryId',
       name: 'countryRef',
       mandatory: true,
-      store: countryStore.list,
+      store: countryStore,
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
@@ -725,7 +761,7 @@ const ProductMaster = () => {
       nameId: 'currencyId',
       name: 'currencyRef',
       mandatory: true,
-      store: currencyStore.list,
+      store: currencyStore,
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
@@ -747,7 +783,7 @@ const ProductMaster = () => {
       nameId: 'dispersalType',
       name: 'dispersalTypeName',
       mandatory: false,
-      store: dispersalTypeStore.list,
+      store: dispersalTypeStore,
       valueField: 'key',
       displayField: 'value',
       fieldsToUpdate: [{ from: 'value', to: 'dispersalTypeName' }],
@@ -862,7 +898,20 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setDispersalsGridData(res)
+        const obj ={
+          dispersalType : null,
+          dispersalTypeName: "All",
+          isDefault: false,
+          isInactive: false,
+          name: "All",
+          productId : productId,
+          recordId : null,
+          reference :"All"
+          }
+          setDispersalsGridData(res);
+
+          setDispersalStore(prevArray => [obj, ...res.list]);
+
       })
       .catch(error => {
         setErrorMessage(error)
@@ -920,10 +969,10 @@ const ProductMaster = () => {
     enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
-      const isValid = values.rows.every(row => !!row.countryId)
-      const isValidCurrency = values.rows.every(row => !!row.currencyId)
-      const isValidPlantId = values.rows.every(row => !!row.plantId)
-      const isValidDispersalId = values.rows.every(row => !!row.dispersalId)
+      const isValid = true // values.rows.every(row => !!row.countryId)
+      const isValidCurrency =true // values.rows.every(row => !!row.currencyId)
+      const isValidPlantId = true // values.rows.every(row => !!row.plantId)
+      const isValidDispersalId = true    //values.rows.every(row => !!row.dispersalId)
 
 
       return (isValid && isValidPlantId && isValidCurrency && isValidDispersalId )? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
@@ -976,6 +1025,7 @@ const ProductMaster = () => {
       text: 'select',
       onClick: (e, row) => {
         productLegValidation.setValues(populateProductScheduleRange(row))
+console.log(productLegValidation)
         resetScheduleRanges(row)
         getCorrespondentScheduleRange(row)
       }
@@ -986,7 +1036,7 @@ const ProductMaster = () => {
       nameId: 'countryId',
       name: 'countryRef',
       mandatory: true,
-      store: countryStore.list,
+      store: countryStore,
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
@@ -1008,7 +1058,7 @@ const ProductMaster = () => {
       nameId: 'plantId',
       name: 'plantRef',
       mandatory: true,
-      store: plantStore.list,
+      store: plantStore,
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'plantName' }],
@@ -1030,7 +1080,7 @@ const ProductMaster = () => {
       nameId: 'currencyId',
       name: 'currencyRef',
       mandatory: true,
-      store: currencyStore.list,
+      store: currencyStore,
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
@@ -1052,7 +1102,7 @@ const ProductMaster = () => {
       nameId: 'dispersalId',
       name: 'dispersalRef',
       mandatory: true,
-      store: dispersalsGridData.list,
+      store: dispersalStore,
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [
@@ -1078,7 +1128,7 @@ const ProductMaster = () => {
       nameId: 'dispersalType',
       name: 'dispersalTypeName',
       mandatory: false,
-      store: dispersalTypeStore.list,
+      store: dispersalTypeStore,
       valueField: 'key',
       displayField: 'value',
       readOnly: true
@@ -1170,6 +1220,7 @@ const ProductMaster = () => {
   //SCHEDULE RANGE INLINE EDIT GRID
   const resetScheduleRanges = (row) => {
     console.log('resetScheduleRanges');
+    productLegValidation.setValues(row)
     console.log(row);
     scheduleRangeGridValidation.resetForm({
       values: {
@@ -1270,6 +1321,7 @@ const ProductMaster = () => {
   }
 
   const getCorrespondentScheduleRange = obj => {
+
     const _productId = obj.productId
     const _seqNo = obj.seqNo
     const defaultParams = `_productId=${_productId}&_seqNo=${_seqNo}`
@@ -1557,7 +1609,9 @@ const ProductMaster = () => {
     }
   }, [access])
 
-  return (
+console.log(gridData)
+
+return (
     <>
       <Box
         sx={{
@@ -1566,6 +1620,7 @@ const ProductMaster = () => {
           height: '100%'
         }}
       >
+
         <GridToolbar onAdd={addProductMaster} maxAccess={access} />
         <Table
           columns={columns}
@@ -1658,7 +1713,7 @@ const ProductMaster = () => {
           onClose={() => setDispersalWindowOpen(false)}
           onSave={handleDispersalSubmit}
           productDispersalValidation={productDispersalValidation}
-          dispersalTypeStore={dispersalTypeStore.list}
+          dispersalTypeStore={dispersalTypeStore}
           maxAccess={access}
         />
       )}

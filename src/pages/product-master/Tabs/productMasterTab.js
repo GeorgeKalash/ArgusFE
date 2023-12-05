@@ -156,14 +156,31 @@ const ProductMasterTab = ({
               valueField='recordId'
               displayField='name'
               store={interfaceStore}
-              value={interfaceStore.filter(item => item.key === productMasterValidation.values.interfaceId)[0]}
+
+              value={interfaceStore.filter(item => item.recordId === productMasterValidation.values.interfaceId)[0]}
+              required
+              onChange={(event, newValue) => {
+                productMasterValidation.setFieldValue('interfaceId', newValue?.recordId)
+              }}
+              error={ productMasterValidation.errors &&Boolean(productMasterValidation.errors.interfaceId)}
+              helperText={productMasterValidation.errors && productMasterValidation.errors.interfaceId}
+            />
+          </Grid>
+          {/* <Grid item xs={12}>
+            <CustomComboBox
+              name='interfaceId'
+              label='Interface'
+              valueField='recordId'
+              displayField='name'
+              store={interfaceStore}
+              value={interfaceStore.filter(item => item.recordId === productMasterValidation.values.interfaceId)[0]}
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('interfaceId', newValue?.key)
               }}
               error={Boolean(productMasterValidation.errors.interfaceId)}
               helperText={productMasterValidation.errors.interfaceId}
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={12}>
             <CustomComboBox
               name='commissionBase'

@@ -12,6 +12,7 @@ const ProductAgentTab = ({
   agentsHeaderValidation,
   agentsGridValidation,
   agentsInlineGridColumns,
+  dispersalStore,
   maxAccess
 }) => {
 return (
@@ -31,8 +32,8 @@ return (
                 label='Dispersal'
                 valueField='recordId'
                 displayField='reference'
-                store={dispersalsGridData}
-                value={dispersalsGridData?.filter(item => item.key === agentsHeaderValidation.values.dispersalId)[0]}
+                store={dispersalStore}
+                value={dispersalStore?.filter(item => item.key === agentsHeaderValidation.values.dispersalId)[0]}
                 required
                 onChange={(event, newValue) => {
                   console.log(newValue?.recordId);
