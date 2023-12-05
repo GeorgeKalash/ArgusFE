@@ -10,5 +10,11 @@ export const RemittanceOutwardsRepository = {
   Currency: {
     qry: service + 'qryPMO3'
   },
+  Agent: {
+    qry: service + 'qryPDA2'
+  },
+  ProductDispersalEngine: {
+    qry: service + 'qryPDE'
+  },
   
 }

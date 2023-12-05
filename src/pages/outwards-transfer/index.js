@@ -36,6 +36,7 @@ const OutwardsTransfer = () => {
   const [countryStore, setCountryStore] = useState(null)
   const [dispersalTypeStore, setDispersalTypeStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
+  const [agentsStore, setAgentsStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -154,6 +155,51 @@ const OutwardsTransfer = () => {
       })
   }
 
+  const onCurrencySelection = (countryId, dispersalType, currencyId) => {
+    //get agents list
+    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}` 
+    getRequest({
+      extension: RemittanceOutwardsRepository.Agent.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setAgentsStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  //_type=2&_functionId=1&_plantId=1&_countryId=124&_currencyId=90&_dispersalType=2&_amount=200&_agentId=4
+  const onAmountDataFill = (formFields) => {
+    console.log(formFields)
+
+    //get products list
+    // type, functionId, plantId, countryId, dispersalType, currencyId, amount, agentId
+    var type = 2;
+    var functionId = 1;
+    var plant = 1;
+    var countryId = formFields?.countryId
+    var currencyId = formFields?.currencyId
+    var dispersalType = formFields?.dispersalType
+    var agentId = formFields?.agentId
+    var amount = formFields?.amount
+
+
+     var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_agentId=${agentId}&_amount=${amount}` 
+
+    getRequest({
+      extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const delOutwards = obj => {
     
   }
@@ -218,6 +264,9 @@ const OutwardsTransfer = () => {
           dispersalTypeStore={dispersalTypeStore}
           onDispersalSelection={onDispersalSelection}
           currencyStore={currencyStore}
+          onCurrencySelection={onCurrencySelection}
+          agentsStore={agentsStore}
+          onAmountDataFill={onAmountDataFill}
           labels={_labels}
           maxAccess={access}
         />
