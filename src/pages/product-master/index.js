@@ -207,7 +207,7 @@ const ProductMaster = () => {
       })
   }
 
-  const fillTypeStore = () => {
+  const fillTypeStore = async () => {
     var parameters = '_database=3601' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
@@ -221,7 +221,7 @@ const ProductMaster = () => {
       })
   }
 
-  const fillDispersalTypeStore = () => {
+  const fillDispersalTypeStore = async () => {
     var parameters = '_database=3604' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
@@ -235,52 +235,52 @@ const ProductMaster = () => {
       })
   }
 
-  const fillFunctionStore = () => {
-    var parameters = '_database=3605' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
-    })
-      .then(res => {
-        //ask about lang values
-        setFunctionStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
-  }
+  const fillFunctionStore = async () => {
+    try {
+      var parameters = '_database=3605';
 
-  const fillLanguageStore = () => {
-    var parameters = '_database=3606' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
-    })
-      .then(res => {
-        //ask about lang values
-        setLanguageStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
-  }
+      const res = await getRequest({
+        extension: SystemRepository.KeyValueStore,
+        parameters: parameters
+      });
+  
+      setFunctionStore(res.list);
+    } catch (error) {
+      setErrorMessage(error.response.data);
+    }
+  };
+  
+  const fillLanguageStore = async () => {
+    try {
+      var parameters = '_database=3606';
 
-  const fillCommissionBaseStore = () => {
-    var parameters = '_database=3602' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
-    })
-      .then(res => {
-        //ask about lang values
-        setCommissionBaseStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
-  }
+      const res = await getRequest({
+        extension: SystemRepository.KeyValueStore,
+        parameters: parameters
+      });
+  
+      setLanguageStore(res.list);
+    } catch (error) {
+      setErrorMessage(error.response.data);
+    }
+  };
+  
+  const fillCommissionBaseStore = async () => {
+    try {
+      var parameters = '_database=3602';
 
-  const fillCurrencyStore = () => {
+      const res = await getRequest({
+        extension: SystemRepository.KeyValueStore,
+        parameters: parameters
+      });
+  
+      setCommissionBaseStore(res.list);
+    } catch (error) {
+      setErrorMessage(error.response.data);
+    }
+  };
+
+  const fillCurrencyStore = async () => {
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Currency.qry,
@@ -294,7 +294,7 @@ const ProductMaster = () => {
       })
   }
 
-  const fillInterfaceStore = () => {
+  const fillInterfaceStore = async () => {
     var parameters = '_filter='
     getRequest({
       extension: RemittanceSettingsRepository.Interface.qry,
@@ -308,7 +308,7 @@ const ProductMaster = () => {
       })
   }
 
-  const fillAgentsStore = () => {
+  const fillAgentsStore = async () => {
     var parameters = '_filter='
     getRequest({
       extension: RemittanceSettingsRepository.CorrespondentAgents.qry,
@@ -322,7 +322,7 @@ const ProductMaster = () => {
       })
   }
 
-  const fillPlantStore = () => {
+  const fillPlantStore = async () => {
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Plant.qry,
@@ -336,7 +336,7 @@ const ProductMaster = () => {
       })
   }
 
-  const fillCountryStore = () => {
+  const fillCountryStore = async () => {
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Country.qry,
@@ -423,31 +423,31 @@ const ProductMaster = () => {
 
   }
 
-  const popup = obj => {
-    fillTypeStore()
-    fillFunctionStore()
-    fillLanguageStore()
-    fillCommissionBaseStore()
-    fillInterfaceStore()
-    getProductMasterById(obj)
-    fillCountryStore()
-    fillPlantStore()
-    fillAgentsStore()
-    fillCurrencyStore()
-    fillDispersalTypeStore()
-    resetCorrespondentCountries(obj.recordId)
-    resetCorrespondentMonetaries(obj.recordId)
-    resetDispersals()
-    resetProductSchedules(obj.recordId)
-    getCorrespondentCountries(obj)
-    getCorrespondentMonetaries(obj)
-    getDispersalsGridData(obj.recordId)
-    getProductSchedules(obj)
-    productLegValidation.setValues(getNewProductScheduleRange())
-    agentsHeaderValidation.setValues({ dispersalId: null })
+  const popup = async(obj) => {
+    await fillTypeStore()
+    await fillFunctionStore();
+    await fillLanguageStore();
+    await fillCommissionBaseStore();
+    await fillInterfaceStore()
+    await getProductMasterById(obj)
+    await fillCountryStore()
+    await fillPlantStore()
+    await fillAgentsStore()
+    await fillCurrencyStore()
+    await fillDispersalTypeStore()
+    await resetCorrespondentCountries(obj.recordId)
+    await resetCorrespondentMonetaries(obj.recordId)
+    await resetDispersals()
+    await resetProductSchedules(obj.recordId)
+    await getCorrespondentCountries(obj)
+    await getCorrespondentMonetaries(obj)
+    await getDispersalsGridData(obj.recordId)
+    await getProductSchedules(obj)
+    await productLegValidation.setValues(getNewProductScheduleRange())
+    await agentsHeaderValidation.setValues({ dispersalId: null })
   }
 
-  const getProductMasterById = obj => {
+  const getProductMasterById = async (obj) => {
     const _recordId = obj.recordId
     const defaultParams = `_recordId=${_recordId}`
     var parameters = defaultParams
@@ -633,7 +633,7 @@ const ProductMaster = () => {
 
 
 
-  const resetCorrespondentCountries = (recordId) => {
+  const resetCorrespondentCountries = async (recordId) => {
     countriesGridValidation.resetForm({
       values: {
         rows: [
@@ -665,7 +665,7 @@ const ProductMaster = () => {
     })
   }
 
-  const getCorrespondentCountries = obj => {
+  const getCorrespondentCountries = async (obj) => {
     const _recordId = obj.recordId
     const defaultParams = `_productId=${_recordId}`
     var parameters = defaultParams
@@ -777,7 +777,7 @@ const ProductMaster = () => {
       })
   }
 
-  const resetCorrespondentMonetaries = (recordId) => {
+  const resetCorrespondentMonetaries = async (recordId) => {
     monetariesGridValidation.resetForm({
       values: {
         rows: [
@@ -798,7 +798,7 @@ const ProductMaster = () => {
     })
   }
 
-  const getCorrespondentMonetaries = obj => {
+  const getCorrespondentMonetaries = async (obj) => {
     const _recordId = obj.recordId
     const defaultParams = `_productId=${_recordId}`
     var parameters = defaultParams
@@ -852,9 +852,9 @@ const ProductMaster = () => {
       })
   }
 
-  const resetDispersals = () => {}
+  const resetDispersals = async () => {}
 
-  const getDispersalsGridData = productId => {
+  const getDispersalsGridData = async (productId) => {
     const defaultParams = `_productId=${productId}`
     var parameters = defaultParams
     getRequest({
@@ -1107,7 +1107,7 @@ const ProductMaster = () => {
       })
   }
 
-  const resetProductSchedules = (recordId) => {
+  const resetProductSchedules = async (recordId) => {
     schedulesGridValidation.resetForm({
       values: {
         rows: [
@@ -1135,7 +1135,7 @@ const ProductMaster = () => {
     })
   }
 
-  const getProductSchedules = obj => {
+  const getProductSchedules = async (obj) => {
     const _recordId = obj.recordId
     const defaultParams = `_productId=${_recordId}`
     var parameters = defaultParams
