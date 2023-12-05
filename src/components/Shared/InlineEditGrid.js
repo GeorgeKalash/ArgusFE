@@ -51,7 +51,7 @@ const InlineEditGrid = ({
               alignItems: 'center'
             }}
           >
-            {row[column.name] ? <Icon icon='mdi:check-circle-outline' /> : <Icon icon='mdi:radiobox-blank' />}
+            {row[column.name] ? <Icon icon='mdi:checkbox-marked' /> : <Icon icon='mdi:checkbox-blank-outline' />}
           </Box>
         )
       case 'button':
@@ -334,6 +334,7 @@ const InlineEditGrid = ({
             <Checkbox
               id={cellId}
               name={fieldName}
+              variant='rounded'
               checked={gridValidation.values.rows[rowIndex][fieldName]}
               value={gridValidation.values.rows[rowIndex][fieldName]}
               onChange={(event, newValue) => {
