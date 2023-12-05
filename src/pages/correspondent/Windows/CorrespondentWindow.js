@@ -69,6 +69,7 @@ const CorrespondentWindow = ({
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
           maxAccess={maxAccess}
+          editMode={editMode}
           corId={corId}
         />
       </CustomTabPanel>

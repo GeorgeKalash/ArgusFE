@@ -1,22 +1,70 @@
 import React, { useState } from 'react'
 import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
-import { Autocomplete, Box, Button, Checkbox, FormControlLabel, IconButton, TextField, Paper } from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, IconButton, TextField, Paper, InputAdornment } from '@mui/material'
+import ClearIcon from '@mui/icons-material/Clear'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CustomTextField from '../Inputs/CustomTextField'
 import DeleteDialog from './DeleteDialog'
+import Icon from 'src/@core/components/icon'
+import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 const CustomPaper = (props, length) => {
   return <Paper sx={{ position: 'absolute', width: `${length}40%`, zIndex: 999, mt: 1 }} {...props} />
 }
 
-const InlineEditGrid = props => {
+const InlineEditGrid = ({
+  columns,
+  defaultRow,
+  gridValidation,
+  width,
+  allowDelete = true,
+  allowAddNewLine = true,
+  onDelete
+}) => {
+  const tableWidth = width
+
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
 
-  const columns = props.columns
-  const defaultRow = props.defaultRow
-  const gridValidation = props.gridValidation
-  const tableWidth = props.width
+  const cellRender = (row, column) => {
+    switch (column.field) {
+      case 'numberfield':
+        return (
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            {row[column.name] === 0 ? row[column.name] : getFormattedNumber(row[column.name])}
+          </Box>
+        )
+      case 'checkbox':
+        return (
+          <Box
+            sx={{
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            {row[column.name] ? <Icon icon='mdi:check-circle-outline' /> : <Icon icon='mdi:radiobox-blank' />}
+          </Box>
+        )
+      case 'button':
+        return (
+          <Button sx={{ height: '30px' }} onClick={e => column.onClick(e, row)} variant='contained'>
+            {column.text}
+          </Button>
+        )
+
+      default:
+        return row[column.name]
+    }
+  }
 
   const cellEditor = (field, row, rowIndex, column) => {
     if (!row.rowData) return
@@ -50,6 +98,62 @@ const InlineEditGrid = props => {
               const updatedRows = [...gridValidation.values.rows]
               updatedRows[rowIndex][fieldName] = ''
               gridValidation.setFieldValue('rows', updatedRows)
+            }}
+          />
+        )
+      case 'numberfield':
+        return (
+          <TextField
+            numberField={true}
+            id={cellId}
+            name={fieldName}
+            value={gridValidation.values.rows[rowIndex][fieldName]}
+            required={column?.mandatory}
+            onChange={event => {
+              const newValue = event.target.value
+              gridValidation.setFieldValue(
+                `rows[${rowIndex}].${fieldName}`,
+                handleNumberFieldNewValue(
+                  newValue,
+                  gridValidation.values.rows[rowIndex][fieldName],
+                  column?.min,
+                  column?.max
+                )
+              )
+            }}
+            onClear={() => {
+              const updatedRows = [...gridValidation.values.rows]
+              updatedRows[rowIndex][fieldName] = ''
+              gridValidation.setFieldValue('rows', updatedRows)
+            }}
+            variant='outlined'
+            size='small'
+            fullWidth={true}
+            inputProps={{
+              readOnly: column?.readOnly,
+              pattern: '[0-9]*',
+              style: {
+                textAlign: 'right'
+              }
+            }}
+            autoComplete='off'
+            style={{ textAlign: 'right' }}
+            InputProps={{
+              endAdornment:
+                column.readOnly ||
+                (gridValidation.values.rows[rowIndex][fieldName] != '0' &&
+                  gridValidation.values.rows[rowIndex][fieldName] != 0 && (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={() => gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, 0)}
+                        aria-label='clear input'
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ))
             }}
           />
         )
@@ -206,24 +310,37 @@ const InlineEditGrid = props => {
                 )
             }}
             fullWidth={true}
-            renderInput={params => <TextField {...params} required={column?.mandatory} sx={{ flex: 1 }} />}
+            renderInput={params => (
+              <TextField
+                {...params}
+                onChange={e => (e.target.value ? column.onLookup && column.onLookup(e.target.value) : column.onClear())}
+                required={column?.mandatory}
+                sx={{ flex: 1 }}
+              />
+            )}
           />
         )
       case 'checkbox':
         return (
-          <FormControlLabel
-            control={
-              <Checkbox
-                id={cellId}
-                name={fieldName}
-                checked={gridValidation.values.rows[rowIndex][fieldName]}
-                value={gridValidation.values.rows[rowIndex][fieldName]}
-                onChange={(event, newValue) => {
-                  gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
-                }}
-              />
-            }
-          />
+          <Box
+            sx={{
+              flex: 1,
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Checkbox
+              id={cellId}
+              name={fieldName}
+              checked={gridValidation.values.rows[rowIndex][fieldName]}
+              value={gridValidation.values.rows[rowIndex][fieldName]}
+              onChange={(event, newValue) => {
+                gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
+              }}
+            />
+          </Box>
         )
       case 'button':
         return (
@@ -234,6 +351,15 @@ const InlineEditGrid = props => {
 
       default:
         return
+    }
+  }
+
+  const handleNumberFieldNewValue = (newValue, oldValue, min, max) => {
+    const regex = /^[0-9,]+$/
+    if (newValue && regex.test(newValue)) {
+      const _newValue = getNumberWithoutCommas(newValue)
+      if ((min && _newValue < min) || (max && _newValue > max)) return oldValue
+      else return getFormattedNumber(newValue)
     }
   }
 
@@ -254,9 +380,7 @@ const InlineEditGrid = props => {
 
   const lastRowIsValid = () => {
     const lastRow = gridValidation.values.rows[gridValidation.values.rows.length - 1]
-    console.log(columns)
     for (let i = 0; i < columns.length; i++) {
-      console.log(columns[i])
       const columnName = columns[i].name
 
       if (columns[i]?.mandatory && !lastRow[columnName]) {
@@ -293,9 +417,9 @@ const InlineEditGrid = props => {
     if (gridValidation.values.rows.length === 1) {
       gridValidation.setFieldValue('rows', [defaultRow])
     } else {
-      if (gridValidation.values.rows[rowIndex + 1]) {
-        handleIncrementedFieldsOnDelete(gridValidation.values.rows[rowIndex], gridValidation.values.rows[rowIndex + 1])
-      }
+      // if (gridValidation.values.rows[rowIndex + 1]) {
+      //   handleIncrementedFieldsOnDelete(gridValidation.values.rows[rowIndex], gridValidation.values.rows[rowIndex + 1])
+      // }
       const updatedRows = gridValidation.values.rows.filter((row, index) => index !== rowIndex)
       gridValidation.setFieldValue('rows', updatedRows)
     }
@@ -311,6 +435,7 @@ const InlineEditGrid = props => {
 
   const handleDeleteConfirmation = rowIndex => {
     handleDelete(rowIndex)
+    onDelete && onDelete()
     closeDeleteDialog()
   }
 
@@ -338,18 +463,16 @@ const InlineEditGrid = props => {
                           : 'none'
                     }}
                   >
-                    {column.field === 'button' && (
-                      <Button sx={{ height: '30px' }} onClick={e => column.onClick(e, row)} variant='contained'>
-                        {column.text}
-                      </Button>
-                    )}
-                    {typeof row[column.name] === 'boolean' ? JSON.stringify(row[column.name]) : row[column.name]}
+                    {cellRender(row, column)}
                   </Box>
                 )
               }}
               editor={options => {
                 return (
-                  <Box sx={{ display: 'flex' }} onKeyDown={e => handleKeyDown(e, i, options.rowIndex)}>
+                  <Box
+                    sx={{ display: 'flex' }}
+                    onKeyDown={e => allowAddNewLine && handleKeyDown(e, i, options.rowIndex)}
+                  >
                     {cellEditor(column.field, options, options.rowIndex, column)}
                   </Box>
                 )
@@ -357,20 +480,22 @@ const InlineEditGrid = props => {
             />
           )
         })}
-        <Column
-          key='actions'
-          ref={null}
-          body={(rowData, column) => {
-            return (
-              <div ref={null}>
-                <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => openDeleteDialog(column.rowIndex)}>
-                  <DeleteIcon />
-                </IconButton>
-              </div>
-            )
-          }}
-          style={{ maxWidth: '60px' }}
-        />
+        {allowDelete && (
+          <Column
+            key='actions'
+            ref={null}
+            body={(rowData, column) => {
+              return (
+                <div ref={null}>
+                  <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => openDeleteDialog(column.rowIndex)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
+              )
+            }}
+            style={{ maxWidth: '60px' }}
+          />
+        )}
       </DataTable>
 
       <DeleteDialog

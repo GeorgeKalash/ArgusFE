@@ -193,6 +193,7 @@ const DocumentTypeMaps = () => {
           onAdd={addDocumentType}
           maxAccess={access}
           openRPB={() => setReportParamWindowOpen(true)}
+          onGo={getGridData}
           paramsArray={paramsArray}
         />
         <Table
@@ -335,7 +336,6 @@ const DocumentTypeMaps = () => {
         reportName='SYDTM'
         open={reportParamWindowOpen}
         onClose={() => setReportParamWindowOpen(false)}
-        onSave={getGridData}
         paramsArray={paramsArray}
         setParamsArray={setParamsArray}
       />

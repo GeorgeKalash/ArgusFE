@@ -4,9 +4,15 @@ import { Box, Button, Grid, Typography } from '@mui/material'
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
 
-const GridToolbar = ({ onAdd, openRPB, paramsArray, ...props }) => {
+const GridToolbar = ({ onAdd, openRPB, onGo, paramsArray, ...props }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.NOACCESS
+
+  const formatDataForApi = paramsArray => {
+    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
+
+    return formattedData
+  }
 
   return (
     <Box>
@@ -25,8 +31,19 @@ const GridToolbar = ({ onAdd, openRPB, paramsArray, ...props }) => {
             </Button>
           </Box>
         )}
+        {onGo && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+            <Button
+              disabled={paramsArray.length === 0}
+              onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
+              variant='contained'
+            >
+              GO
+            </Button>
+          </Box>
+        )}
       </Box>
-      {(paramsArray && paramsArray.length) > 0 && (
+      {paramsArray && paramsArray.length > 0 && (
         <Box sx={{ pl: 2 }}>
           <Grid container>
             {paramsArray.map((param, i) => {

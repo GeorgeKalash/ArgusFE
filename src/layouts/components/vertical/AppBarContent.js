@@ -9,9 +9,10 @@ import Icon from 'src/@core/components/icon'
 import Autocomplete from 'src/layouts/components/Autocomplete'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
-import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
 import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
 import ShortcutsDropdown from 'src/@core/layouts/components/shared-components/ShortcutsDropdown'
+
+// import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
 
 // ** Hook Import
 import { useAuth } from 'src/hooks/useAuth'
@@ -130,12 +131,12 @@ const AppBarContent = props => {
         {auth.user && <Autocomplete hidden={hidden} settings={settings} />}
       </Box> */}
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
-        <LanguageDropdown settings={settings} saveSettings={saveSettings} />
-        <ModeToggler settings={settings} saveSettings={saveSettings} />
+        {/* <LanguageDropdown settings={settings} saveSettings={saveSettings} /> */}
+        {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
         {auth.user && (
           <>
-            <ShortcutsDropdown settings={settings} shortcuts={shortcuts} />
-            <NotificationDropdown settings={settings} notifications={notifications} />
+            {/* <ShortcutsDropdown settings={settings} shortcuts={shortcuts} /> */}
+            {/* <NotificationDropdown settings={settings} notifications={notifications} /> */}
             <UserDropdown settings={settings} />
           </>
         )}
