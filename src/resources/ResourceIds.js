@@ -20,5 +20,6 @@ export const ResourceIds = {
   Address: 20102,
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
-  SourceOfIncome:35103
+  SourceOfIncome:35103,
+  updateExchangerRates: 35106
 }
