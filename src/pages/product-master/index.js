@@ -187,6 +187,8 @@ const ProductMaster = () => {
     if (activeTab === 0) productMasterValidation.handleSubmit()
     else if (activeTab === 1) countriesGridValidation.handleSubmit()
     else if (activeTab === 2) monetariesGridValidation.handleSubmit()
+    else if (activeTab === 3) dispersalsGridData.handleSubmit()
+
     else if (activeTab === 4) schedulesGridValidation.handleSubmit()
     else if (activeTab === 5) scheduleRangeGridValidation.handleSubmit()
     else if (activeTab === 7) agentsGridValidation.handleSubmit()
@@ -228,7 +230,8 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setDispersalTypeStore(res)
+        console.log(res.list)
+        setDispersalTypeStore(res);
       })
       .catch(error => {
         setErrorMessage(error.response.data)
@@ -272,7 +275,6 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        //ask about lang values
         setCommissionBaseStore(res.list)
       })
       .catch(error => {
@@ -287,7 +289,10 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setCurrencyStore(res)
+        console.log(res.list)
+
+          setCurrencyStore(res);
+
       })
       .catch(error => {
         setErrorMessage(error)
@@ -329,21 +334,22 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setPlantStore(res)
+        setPlantStore(res);
+
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const fillCountryStore = () => {
+  const fillCountryStore =  () => {
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.Country.qry,
       parameters: parameters
     })
       .then(res => {
-        setCountryStore(res)
+        setCountryStore(res);
       })
       .catch(error => {
         setErrorMessage(error)
@@ -424,6 +430,7 @@ const ProductMaster = () => {
   }
 
   const popup = obj => {
+    setActiveTab(0)
     fillTypeStore()
     fillFunctionStore()
     fillLanguageStore()
@@ -655,7 +662,9 @@ const ProductMaster = () => {
         rows: [
           {
             productId: recordId ?recordId : '',
-            seqNo: row.seqNo? row.seqNo : '',
+            seqNo: '',
+
+            //seqNo: row.seqNo? row.seqNo : '',
             rangeSeqNo: 1, //incremental
             fromAmount: '',
             toAmount: ''
@@ -746,7 +755,7 @@ const ProductMaster = () => {
       header: 'Dispersal Type',
       nameId: 'dispersalType',
       name: 'dispersalTypeName',
-      mandatory: false,
+      mandatory: true,
       store: dispersalTypeStore.list,
       valueField: 'key',
       displayField: 'value',
@@ -845,6 +854,8 @@ const ProductMaster = () => {
           toast.success('Record Added Successfully')
         }
         else toast.success('Record Editted Successfully')
+
+        setDispersalWindowOpen(false)
         getDispersalsGridData(productId)
       })
       .catch(error => {
@@ -862,7 +873,10 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        setDispersalsGridData(res)
+          setDispersalsGridData(res);
+
+          setDispersalStore(res.list);
+
       })
       .catch(error => {
         setErrorMessage(error)
@@ -920,13 +934,9 @@ const ProductMaster = () => {
     enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
-      const isValid = values.rows.every(row => !!row.countryId)
-      const isValidCurrency = values.rows.every(row => !!row.currencyId)
-      const isValidPlantId = values.rows.every(row => !!row.plantId)
       const isValidDispersalId = values.rows.every(row => !!row.dispersalId)
 
-
-      return (isValid && isValidPlantId && isValidCurrency && isValidDispersalId )? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
+      return (isValidDispersalId )? {} : { rows: Array(values.rows.length).fill({ dispersalId: 'dispersalId is required' }) }
     },
     initialValues: {
       rows: [
@@ -985,7 +995,7 @@ const ProductMaster = () => {
       header: 'Country',
       nameId: 'countryId',
       name: 'countryRef',
-      mandatory: true,
+      mandatory: false,
       store: countryStore.list,
       valueField: 'recordId',
       displayField: 'reference',
@@ -1007,7 +1017,7 @@ const ProductMaster = () => {
       header: 'plant',
       nameId: 'plantId',
       name: 'plantRef',
-      mandatory: true,
+      mandatory: false,
       store: plantStore.list,
       valueField: 'recordId',
       displayField: 'reference',
@@ -1029,7 +1039,7 @@ const ProductMaster = () => {
       header: 'Currency',
       nameId: 'currencyId',
       name: 'currencyRef',
-      mandatory: true,
+      mandatory: false,
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
@@ -1170,6 +1180,7 @@ const ProductMaster = () => {
   //SCHEDULE RANGE INLINE EDIT GRID
   const resetScheduleRanges = (row) => {
     console.log('resetScheduleRanges');
+    productLegValidation.setValues(row)
     console.log(row);
     scheduleRangeGridValidation.resetForm({
       values: {
@@ -1270,6 +1281,7 @@ const ProductMaster = () => {
   }
 
   const getCorrespondentScheduleRange = obj => {
+
     const _productId = obj.productId
     const _seqNo = obj.seqNo
     const defaultParams = `_productId=${_productId}&_seqNo=${_seqNo}`
@@ -1557,7 +1569,9 @@ const ProductMaster = () => {
     }
   }, [access])
 
-  return (
+console.log(gridData)
+
+return (
     <>
       <Box
         sx={{
@@ -1566,6 +1580,7 @@ const ProductMaster = () => {
           height: '100%'
         }}
       >
+
         <GridToolbar onAdd={addProductMaster} maxAccess={access} />
         <Table
           columns={columns}

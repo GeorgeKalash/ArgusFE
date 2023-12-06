@@ -15,6 +15,9 @@ const OutwardsWindow = ({
     dispersalTypeStore,
     onDispersalSelection,
     currencyStore,
+    onCurrencySelection,
+    agentsStore,
+    onAmountDataFill,
     labels,
     maxAccess
 }) => {
@@ -37,6 +40,9 @@ return (
                   dispersalTypeStore={dispersalTypeStore?.list}
                   onDispersalSelection={onDispersalSelection}
                   currencyStore={currencyStore?.list}
+                  onCurrencySelection={onCurrencySelection}
+                  agentsStore={agentsStore?.list}
+                  onAmountDataFill={onAmountDataFill}
                   editMode={editMode}
                   maxAccess={maxAccess}
                />

@@ -25,6 +25,7 @@ import OutwardsWindow from './Windows/OutwardsWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { getNewOutwards, populateOutwards } from 'src/Models/RemittanceActivities/Outwards'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 
 const OutwardsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,6 +36,7 @@ const OutwardsTransfer = () => {
   const [countryStore, setCountryStore] = useState(null)
   const [dispersalTypeStore, setDispersalTypeStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
+  const [agentsStore, setAgentsStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -109,10 +111,10 @@ const OutwardsTransfer = () => {
   }
 
 
-  const fillCoutryStore = () => {
+  const fillCountryStore = () => {
     var parameters = '_filter='
     getRequest({
-      extension: SystemRepository.Country.qry,
+      extension: RemittanceOutwardsRepository.Country.qry,
       parameters: parameters
     })
       .then(res => {
@@ -123,10 +125,11 @@ const OutwardsTransfer = () => {
       })
   }
 
-  const onCountrySelection = (countryId) => {
-    var parameters = '_database=3604' //add 'xml'.json and get _database values from there
+  const onCountrySelection = (countryId) => { 
+    //get dispersals list
+    var parameters = `_countryId=${countryId}` 
     getRequest({
-      extension: SystemRepository.KeyValueStore,
+      extension: RemittanceOutwardsRepository.DispersalType.qry,
       parameters: parameters
     })
       .then(res => {
@@ -138,13 +141,59 @@ const OutwardsTransfer = () => {
   }
 
   const onDispersalSelection = (countryId, dispersalType) => {
-    var parameters = '_filter='
+    //get currencies list
+    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}` 
     getRequest({
-      extension: SystemRepository.Currency.qry,
+      extension: RemittanceOutwardsRepository.Currency.qry,
       parameters: parameters
     })
       .then(res => {
         setCurrencyStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const onCurrencySelection = (countryId, dispersalType, currencyId) => {
+    //get agents list
+    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}` 
+    getRequest({
+      extension: RemittanceOutwardsRepository.Agent.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setAgentsStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  //_type=2&_functionId=1&_plantId=1&_countryId=124&_currencyId=90&_dispersalType=2&_amount=200&_agentId=4
+  const onAmountDataFill = (formFields) => {
+    console.log(formFields)
+
+    //get products list
+    // type, functionId, plantId, countryId, dispersalType, currencyId, amount, agentId
+    var type = 2;
+    var functionId = 1;
+    var plant = 1;
+    var countryId = formFields?.countryId
+    var currencyId = formFields?.currencyId
+    var dispersalType = formFields?.dispersalType
+    var agentId = formFields?.agentId
+    var amount = formFields?.amount
+
+
+     var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_agentId=${agentId}&_amount=${amount}` 
+
+    getRequest({
+      extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        
       })
       .catch(error => {
         setErrorMessage(error)
@@ -157,7 +206,7 @@ const OutwardsTransfer = () => {
 
   const addOutwards = () => {
     outwardsValidation.setValues(getNewOutwards())
-    fillCoutryStore()
+    fillCountryStore()
     setEditMode(false)
     setWindowOpen(true)
   }
@@ -165,7 +214,7 @@ const OutwardsTransfer = () => {
   const editOutwards = obj => {
      outwardsValidation.setValues(populateOutwards(obj))
 
-    // fillCoutryStore()
+    // fillCountryStore()
     // setEditMode(true)
     // setWindowOpen(true)
   }
@@ -175,7 +224,7 @@ const OutwardsTransfer = () => {
     else {
       if (access.record.maxAccess > 0) {
         getGridData()
-        fillCoutryStore()
+        fillCountryStore()
 
         //getLabels(ResourceIds.Currencies, setLabels)
         
@@ -215,6 +264,9 @@ const OutwardsTransfer = () => {
           dispersalTypeStore={dispersalTypeStore}
           onDispersalSelection={onDispersalSelection}
           currencyStore={currencyStore}
+          onCurrencySelection={onCurrencySelection}
+          agentsStore={agentsStore}
+          onAmountDataFill={onAmountDataFill}
           labels={_labels}
           maxAccess={access}
         />

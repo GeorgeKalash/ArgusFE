@@ -34,7 +34,6 @@ const CustomTextField = ({
          inputRef.current.setSelectionRange(position, position);
       }
 
-      console.log('After setSelectionRange:', inputRef.current.selectionStart);
     }, [position]);
 
 

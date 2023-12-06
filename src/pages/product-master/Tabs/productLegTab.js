@@ -22,7 +22,9 @@ const productLegTab = ({
   dispersalStore,
   maxAccess
 }) => {
-  return (
+console.log(productLegValidation.values)
+
+return (
     <>
       <Box
         sx={{
@@ -31,17 +33,21 @@ const productLegTab = ({
           height: '100%'
         }}
       >
+
+
+
         <Grid container gap={2}>
-          <Grid container xs={12} spacing={2}>
-            <Grid item xs={3}>
+          <Grid container xs={12} spacing={3}>
+         {productLegValidation.values && productLegValidation.values.dispersalId  &&  <Grid item xs={3} >
               <CustomComboBox
                 name='plantId'
                 label='Plant'
                 valueField='recordId'
                 displayField='name'
+
                 readOnly={true}
                 store={plantStore}
-                value={
+                value={ plantStore &&
                   plantStore.filter(
                     item => item.recordId === (productLegValidation.values && productLegValidation.values.plantId)
                   )[0]
@@ -53,8 +59,8 @@ const productLegTab = ({
                 error={productLegValidation.touched.plantId && Boolean(productLegValidation.errors.plantId)}
                 helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
               />
-            </Grid>
-            <Grid items xs={3}>
+            </Grid>}
+            {productLegValidation.values && productLegValidation.values.dispersalId &&   <Grid item xs={3}>
               <CustomComboBox
                 name='countryId'
                 label='Country'
@@ -62,7 +68,7 @@ const productLegTab = ({
                 displayField='name'
                 readOnly={true}
                 store={countryStore}
-                value={
+                value={ countryStore &&
                   countryStore.filter(
                     item => item.recordId === (productLegValidation.values && productLegValidation.values.countryId)
                   )[0]
@@ -73,8 +79,8 @@ const productLegTab = ({
                 error={productLegValidation.touched.countryId && Boolean(productLegValidation.errors.countryId)}
                 helperText={productLegValidation.touched.countryId && productLegValidation.errors.countryId}
               />
-            </Grid>
-            <Grid item xs={3}>
+            </Grid>}
+           {productLegValidation.values && productLegValidation.values.dispersalId && <Grid item xs={3}>
               <CustomComboBox
                 name='currencyId'
                 label='Currency'
@@ -82,7 +88,7 @@ const productLegTab = ({
                 displayField='name'
                 readOnly={true}
                 store={currencyStore}
-                value={
+                value={ currencyStore &&
                   currencyStore.filter(
                     item => item.recordId === (productLegValidation.values && productLegValidation.values.currencyId)
                   )[0]
@@ -93,8 +99,9 @@ const productLegTab = ({
                 error={productLegValidation.touched.currencyId && Boolean(productLegValidation.errors.currencyId)}
                 helperText={productLegValidation.touched.currencyId && productLegValidation.errors.currencyId}
               />
-            </Grid>
-            <Grid item xs={3}>
+            </Grid>}
+
+          {productLegValidation.values  && productLegValidation.values.dispersalId && <Grid item xs={3}>
               <CustomComboBox
                 name='dispersalId'
                 label='Dispersal'
@@ -102,15 +109,16 @@ const productLegTab = ({
                 displayField='name'
                 readOnly={true}
                 store={dispersalStore}
-                value={dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
+                value={dispersalStore && dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
                 onChange={(event, newValue) => {
                   productLegValidation.setFieldValue('dispersalId', newValue?.recordId)
                 }}
                 error={productLegValidation.touched.dispersalId && Boolean(productLegValidation.errors.dispersalId)}
                 helperText={productLegValidation.touched.dispersalId && productLegValidation.errors.dispersalId}
               />
-            </Grid>
+            </Grid>}
           </Grid>
+          {productLegValidation.values && productLegValidation.values.dispersalId &&
           <Grid xs={12}>
             <InlineEditGrid
               gridValidation={scheduleRangeGridValidation}
@@ -132,7 +140,7 @@ const productLegTab = ({
               }}
               width={900}
             />
-          </Grid>
+          </Grid>}
         </Grid>
       </Box>
     </>

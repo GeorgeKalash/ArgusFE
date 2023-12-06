@@ -120,13 +120,15 @@ const ProductMasterWindow = ({
         />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
-        <ProductDispersalTab
+       <ProductDispersalTab
           dispersalsGridData={dispersalsGridData}
           getDispersalsGridData={getDispersalsGridData}
           addProductDispersal={addProductDispersal}
           delProductDispersal={delProductDispersal}
           popupDispersal={popupDispersal}
           maxAccess={maxAccess}
+          dispersalStore={dispersalStore}
+
         />
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab}>
@@ -159,10 +161,11 @@ const ProductMasterWindow = ({
       <CustomTabPanel index={7} value={activeTab}>
         <ProductAgentTab
           onDispersalSelection={onDispersalSelection}
-          dispersalsGridData={dispersalsGridData.list}
+          dispersalsGridData={dispersalsGridData}
           agentsHeaderValidation={agentsHeaderValidation}
           agentsGridValidation={agentsGridValidation}
           agentsInlineGridColumns={agentsInlineGridColumns}
+          dispersalStore={dispersalStore}
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
