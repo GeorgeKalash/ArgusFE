@@ -32,7 +32,8 @@ const ProductMasterWindow = ({
             <InlineEditGrid
               gridValidation={commissionsGridValidation}
               columns={rangeCommissionsInlineGridColumns}
-              />
+              allowDelete={false}
+              allowAddNewLine={false}/>
             </Grid>
           </Grid>
         </Box>

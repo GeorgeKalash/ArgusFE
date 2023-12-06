@@ -89,25 +89,22 @@ const ProductMasterTab = ({
               label='Correspondent'
               value={productMasterValidation.values.corId}
               required
-              valueField='name'
+              valueField='reference'
               store={correspondentStore}
-              firstValue={productMasterValidation.values.corName}
+              firstValue={productMasterValidation.values.corRef}
+              secondValue={productMasterValidation.values.corName}
               setStore={setCorrespondentStore}
               onLookup={lookupCorrespondent}
               onChange={(event, newValue) => {
-                console.log(newValue)
-                console.log(productMasterValidation)
                 if (newValue) {
                   productMasterValidation.setFieldValue('corId', newValue?.recordId)
+                  productMasterValidation.setFieldValue('corRef', newValue?.reference)
                   productMasterValidation.setFieldValue('corName', newValue?.name)
-
-
                 } else {
                   productMasterValidation.setFieldValue('corId', null)
+                  productMasterValidation.setFieldValue('corRef', null)
                   productMasterValidation.setFieldValue('corName', null)
                 }
-                console.log(productMasterValidation)
-
               }}
               error={
                 productMasterValidation.touched.corId &&
