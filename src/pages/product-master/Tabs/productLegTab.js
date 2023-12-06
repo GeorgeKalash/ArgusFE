@@ -22,11 +22,7 @@ const productLegTab = ({
   dispersalStore,
   maxAccess
 }) => {
-
-// console.log(currencyStore)
-// console.log(plantStore)
-// console.log(countryStore)
-
+console.log(productLegValidation.values)
 
 return (
     <>
@@ -42,7 +38,7 @@ return (
 
         <Grid container gap={2}>
           <Grid container xs={12} spacing={3}>
-         {productLegValidation.values && productLegValidation.values.plantId &&  plantStore &&  <Grid item xs={3} >
+         {productLegValidation.values && productLegValidation.values.dispersalId  &&  <Grid item xs={3} >
               <CustomComboBox
                 name='plantId'
                 label='Plant'
@@ -64,7 +60,7 @@ return (
                 helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
               />
             </Grid>}
-            {productLegValidation.values && productLegValidation.values.countryId &&   <Grid item xs={3}>
+            {productLegValidation.values && productLegValidation.values.dispersalId &&   <Grid item xs={3}>
               <CustomComboBox
                 name='countryId'
                 label='Country'
@@ -84,7 +80,7 @@ return (
                 helperText={productLegValidation.touched.countryId && productLegValidation.errors.countryId}
               />
             </Grid>}
-           {productLegValidation.values && productLegValidation.values.currencyId && <Grid item xs={3}>
+           {productLegValidation.values && productLegValidation.values.dispersalId && <Grid item xs={3}>
               <CustomComboBox
                 name='currencyId'
                 label='Currency'
@@ -122,6 +118,7 @@ return (
               />
             </Grid>}
           </Grid>
+          {productLegValidation.values && productLegValidation.values.dispersalId &&
           <Grid xs={12}>
             <InlineEditGrid
               gridValidation={scheduleRangeGridValidation}
@@ -143,7 +140,7 @@ return (
               }}
               width={900}
             />
-          </Grid>
+          </Grid>}
         </Grid>
       </Box>
     </>

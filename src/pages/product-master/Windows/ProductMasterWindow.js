@@ -144,9 +144,9 @@ const ProductMasterWindow = ({
           productLegValidation={productLegValidation}
           scheduleRangeGridValidation={scheduleRangeGridValidation}
           scheduleRangeInlineGridColumns={scheduleRangeInlineGridColumns}
-          currencyStore={currencyStore}
-          plantStore={plantStore}
-          countryStore={countryStore}
+          currencyStore={currencyStore.list}
+          plantStore={plantStore.list}
+          countryStore={countryStore.list}
           dispersalStore={dispersalStore}
           maxAccess={maxAccess}
         />
