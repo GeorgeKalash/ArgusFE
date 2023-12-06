@@ -8,4 +8,9 @@ export const RelationTypesRepository = {
     set: service + 'setRT',
     del: service + 'delRT'
   },
+  UpdateExchangeRates: {
+    qry: service + 'qryEX',
+    set2: service + 'set2EX'
+
+  },
 }

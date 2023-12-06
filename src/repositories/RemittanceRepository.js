@@ -87,5 +87,9 @@ export const RemittanceSettingsRepository = {
   CorrespondentExchangeBuyMap: {
     qry: service + 'qryEXB',
     set2: service + 'set2EXB'
+  },
+  UpdateExchangeRates: {
+    qry: service + 'qryEXG2',
+    set2: service + 'set2EXB'
   }
 }
