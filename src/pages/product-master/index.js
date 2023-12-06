@@ -166,7 +166,6 @@ const ProductMaster = () => {
 
   const lookupCorrespondent = searchQry => {
 
-    console.log()
     setCorrespondentStore([])
     if(searchQry){
     var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
@@ -175,7 +174,6 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log(res.list)
         setCorrespondentStore(res.list)
       })
       .catch(error => {
@@ -230,7 +228,6 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log(res.list)
         setDispersalTypeStore(res);
       })
       .catch(error => {
@@ -289,10 +286,7 @@ const ProductMaster = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log(res.list)
-
-          setCurrencyStore(res);
-
+        setCurrencyStore(res);
       })
       .catch(error => {
         setErrorMessage(error)
@@ -903,7 +897,6 @@ const ProductMaster = () => {
   }
 
   const popupDispersal = obj => {
-    console.log(obj);
     getDispersalById(obj)
   }
 
@@ -1179,9 +1172,7 @@ const ProductMaster = () => {
 
   //SCHEDULE RANGE INLINE EDIT GRID
   const resetScheduleRanges = (row) => {
-    console.log('resetScheduleRanges');
     productLegValidation.setValues(row)
-    console.log(row);
     scheduleRangeGridValidation.resetForm({
       values: {
         rows: [
@@ -1234,6 +1225,8 @@ const ProductMaster = () => {
       readOnly: true,
       hidden: true,
       valueSetter: () => {
+        console.log(scheduleRangeGridValidation.values.rows.length);
+
         return scheduleRangeGridValidation.values.rows.length + 1
       }
     },
@@ -1337,7 +1330,6 @@ const ProductMaster = () => {
 
     },
     onSubmit: values => {
-      console.log(values);
       postProductRangeCommissions(values.rows)
     }
   })
@@ -1364,7 +1356,7 @@ const ProductMaster = () => {
     const data = {
       productId: productCommissionValidation.values.productId,
       seqNo: productCommissionValidation.values.seqNo,
-      rangeSeqNo: productCommissionValidation.values.seqNo,
+      rangeSeqNo: productCommissionValidation.values.rangeSeqNo,
       productScheduleFees: obj.filter(item => item.commission > 0)
     }
     postRequest({
@@ -1569,7 +1561,6 @@ const ProductMaster = () => {
     }
   }, [access])
 
-console.log(gridData)
 
 return (
     <>
