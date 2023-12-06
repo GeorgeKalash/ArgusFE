@@ -89,7 +89,8 @@ export const RemittanceSettingsRepository = {
     set2: service + 'set2EXB'
   },
   UpdateExchangeRates: {
-    qry: service + 'qryEXG2',
+    get:  service + 'getEXB',
+    qry:  service + 'qryEXG2',
     set2: service + 'set2EXB'
   }
 }
