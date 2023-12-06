@@ -1,5 +1,6 @@
 import React from 'react'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { Grid, Box} from '@mui/material'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
@@ -15,6 +16,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RelationTypesRepository } from 'src/repositories/RelationTypesRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import toast from 'react-hot-toast'
 
 const  UpdateExchangeRates = () => {
 
@@ -36,7 +38,13 @@ const  UpdateExchangeRates = () => {
     }),
     initialValues: {
       currencyId: '',
-      countryId: ''
+      countryId: '',
+      exchangeId: '',
+      exchangeRef: '',
+      rateCalcMethodName: '',
+      rateAgainstName: '',
+      rateAgainstCurrencyRef:''
+
     },
     onSubmit: values => {}
   })
@@ -48,9 +56,12 @@ const  UpdateExchangeRates = () => {
      currency: labels && labels.find(item => item.key === 2) && labels.find(item => item.key === 2).value,
      exchangeTable: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
      RCM: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value,
-     rates: labels && labels.find(item => item.key === 5) && labels.find(item => item.key === 5).value,
-     sellMin: labels && labels.find(item => item.key === 6) && labels.find(item => item.key ===6).value,
+     rates: labels && labels.find(item => item.key === 6) && labels.find(item => item.key === 6).value,
+     sellMin: labels && labels.find(item => item.key === 5) && labels.find(item => item.key ===5).value,
      sellMax: labels && labels.find(item => item.key === 7) && labels.find(item => item.key === 7).value,
+     exchangeBuy: labels && labels.find(item => item.key === 10) && labels.find(item => item.key === 10).value,
+     against: labels && labels.find(item => item.key === 9) && labels.find(item => item.key === 9).value,
+     rate: labels && labels.find(item => item.key === 8) && labels.find(item => item.key === 8).value,
 
    }
 
@@ -185,13 +196,13 @@ const  UpdateExchangeRates = () => {
         fillCurrencyStore()
         fillCountryStore()
 
-        // fillExchangeTableStore()
-
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
   }, [access])
+
+
 
   useEffect(() => {
     if (
@@ -200,6 +211,7 @@ const  UpdateExchangeRates = () => {
       exchangeRatesValidation.values.countryId > 0
     ) {
       getExchangeRates(exchangeRatesValidation.values.currencyId, exchangeRatesValidation.values.countryId)
+      fillExchangeTableStore(exchangeRatesValidation.values.currencyId, exchangeRatesValidation.values.countryId)
     }
   }, [exchangeRatesValidation.values])
 
@@ -381,14 +393,36 @@ const handleSubmit = () => {
       })
   }
 
-  const fillExchangeTableStore = () => {
-    var parameters = `_filter=`
+  const fillExchangeTableStore = (currencyId , countryId) => {
+    const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
+    var parameters = defaultParams
     getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.qry,
+      extension: RemittanceSettingsRepository.UpdateExchangeRates.get,
       parameters: parameters
     })
       .then(res => {
-        setExchangeTableStore(res)
+        exchangeRatesValidation.setFieldValue('exchangeRef' , res.record.exchangeRef)
+        exchangeRatesValidation.setFieldValue('exchangeId' , res.record.exchangeId)
+
+
+console.log
+
+        const defaultParams = `_recordId=${res.record.exchangeId}`
+        var parameters = defaultParams
+        getRequest({
+          extension: MultiCurrencyRepository.ExchangeTable.get,
+          parameters: parameters
+        })
+          .then(res => {
+            exchangeRatesValidation.setFieldValue('rateAgainstName' , res.record.rateAgainstName)
+            exchangeRatesValidation.setFieldValue('rateAgainstCurrencyRef' , res.record.rateAgainstCurrencyRef)
+            exchangeRatesValidation.setFieldValue('rateCalcMethodName' , res.record.rateCalcMethodName)
+
+          })
+          .catch(error => {
+            // setErrorMessage(error)
+          })
+
       })
       .catch(error => {
         // setErrorMessage(error)
@@ -432,7 +466,19 @@ const handleSubmit = () => {
                 helperText={exchangeRatesValidation.touched.countryId && exchangeRatesValidation.errors.countryId}
               />
             </Grid>
-            <Grid item xs={6}></Grid>
+            <Grid item xs={6}>
+
+          <CustomTextField
+          name='exchange'
+          label={ _labels.exchangeBuy}
+          value={exchangeRatesValidation.values.exchangeRef}
+          readOnly="true"
+          onChange={exchangeRatesValidation.handleChange}
+          error={exchangeRatesValidation.touched.exchangeRef && Boolean(addressValidation.errors.exchangeRef)}
+          helperText={exchangeRatesValidation.touched.exchangeRef && addressValidation.errors.exchangeRef}
+        />
+          </Grid>
+
             <Grid item xs={6}>
               <CustomComboBox
                 name='currencyId'
@@ -456,6 +502,50 @@ const handleSubmit = () => {
                 helperText={exchangeRatesValidation.touched.currencyId && exchangeRatesValidation.errors.currencyId}
               />
             </Grid>
+            <Grid item xs={6}>
+
+          <CustomTextField
+          name='against'
+          label={ _labels.against}
+          value={exchangeRatesValidation.values.rateAgainstName}
+          readOnly="true"
+          onChange={exchangeRatesValidation.handleChange}
+          error={exchangeRatesValidation.touched.rateAgainstName && Boolean(addressValidation.errors.rateAgainstName)}
+          helperText={exchangeRatesValidation.touched.rateAgainstName && addressValidation.errors.rateAgainstName}
+        />
+          </Grid>
+          <Grid item xs={6}>
+
+
+          </Grid>
+          <Grid item xs={6}>
+
+          <CustomTextField
+          name='crm'
+          label={ _labels.RCM}
+          value={exchangeRatesValidation.values.rateCalcMethodName}
+          readOnly="true"
+          onChange={exchangeRatesValidation.handleChange}
+          error={exchangeRatesValidation.touched.rateCalcMethodName && Boolean(addressValidation.errors.rateCalcMethodName)}
+          helperText={exchangeRatesValidation.touched.rateCalcMethodName && addressValidation.errors.rateCalcMethodName}
+        />
+          </Grid>
+          <Grid item xs={6}>
+
+
+          </Grid>
+          <Grid item xs={6}>
+
+          <CustomTextField
+          name='rate'
+          label={ _labels.rate}
+          value={exchangeRatesValidation.values.rateAgainstCurrencyRef}
+          readOnly="true"
+          onChange={exchangeRatesValidation.handleChange}
+          error={exchangeRatesValidation.touched.rateAgainstCurrencyRef && Boolean(addressValidation.errors.rateAgainstCurrencyRef)}
+          helperText={exchangeRatesValidation.touched.rateAgainstCurrencyRef && addressValidation.errors.rateAgainstCurrencyRef}
+        />
+          </Grid>
           </Grid>
           {exchangeRatesValidation.values.currencyId > 0 && exchangeRatesValidation.values.countryId > 0 && (
             <Grid xs={12}>
