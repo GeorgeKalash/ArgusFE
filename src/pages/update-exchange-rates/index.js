@@ -150,21 +150,7 @@ const  UpdateExchangeRates = () => {
           : { rows: Array(values.rows && values.rows.length).fill({ minRate: 'Min Rate is required', maxRate: 'Max rate is required', rate: 'Rate is required' }) }
     },
 
-    // initialValues: {
-    //   rows: [
-    //     {
-    //       currencyId: exchangeRatesValidation.values.currencyId,
-    //       countryId: exchangeRatesValidation.values.countryId,
-    //       exchangeRef: '',
-    //       rateCalcMethod:"",
-    //       sellRate: '',
-    //       sellMax: '',
-    //       sellMin: '',
-    //       exchangeRef: '',
-    //       exchangeId: ''
-    //     }
-    //   ]
-    // },
+
     onSubmit: values => {
       postExchangeMaps(values)
     }
@@ -332,17 +318,12 @@ const getExchangeRatess = async (cuId, coId) => {
 
     const exchangeRows = await Promise.all(exchangePromises);
 
-    // if(exchangeRatesGridValidation.values.rows < 2){
-    //   exchangeRatesGridValidation.setValues({
-    //     rows: exchangeRows // Append new rows to the existing ones
-    //   });
-    // }else{
     exchangeRatesGridValidation.setValues((prevValues) => ({
       ...prevValues,
       rows: [...prevValues.rows, ...exchangeRows], // Append new rows to the existing ones
     }));
 
-  // }
+
 
     console.log(exchangeRatesGridValidation);
 
