@@ -56,38 +56,53 @@ const  UpdateExchangeRates = () => {
 
   const exchangeRatesInlineGridColumns = [
 
+    // {
+    //   field: 'combobox',
+    //   header: _labels.exchangeTable,
+    //   nameId: 'exchangeId',
+    //   name: 'exchangeRef',
+    //   mandatory: false,
+    //   readOnly: true,
+    //   store: exchangeTableStore.list,
+
+    //   valueField: 'recordId',
+    //   displayField: 'reference',
+    //   fieldsToUpdate: [],
+    //   columnsInDropDown: [
+    //     { key: 'reference', value: 'Ref' },
+    //     { key: 'name', value: 'Name' }
+    //   ]
+    // },
+
+    // {
+    //   field: 'combobox',
+    //   header: _labels.RCM,
+    //   nameId: 'rateCalcMethod',
+    //   name: 'rateCalcMethodName',
+    //   mandatory: false,
+    //   store: CrmStore,
+    //   valueField: 'key',
+    //   displayField: 'value',
+    //   readOnly: true
+    // },
     {
-      field: 'combobox',
+      field: 'textfield',
       header: _labels.exchangeTable,
       nameId: 'exchangeId',
       name: 'exchangeRef',
-      mandatory: false,
-      readOnly: true,
-      store: exchangeTableStore.list,
+      mandatory: true,
+      readOnly: true
 
-      valueField: 'recordId',
-      displayField: 'reference',
-      fieldsToUpdate: [],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
-        { key: 'name', value: 'Name' }
-      ]
     },
+
     {
-      field: 'combobox',
+      field: 'textfield',
       header: _labels.RCM,
       nameId: 'rateCalcMethod',
-      name: 'value',
-      mandatory: false,
-      readOnly: true,
-      store: CrmStore,
-      valueField: 'key',
-      displayField: 'value',
-      fieldsToUpdate: [],
-      columnsInDropDown: [
-        { key: 'value', value: 'Value' },
+      name: 'rateCalcMethodName',
+      mandatory: true,
+      readOnly: true
 
-      ]
     },
 
     {
@@ -123,16 +138,17 @@ const  UpdateExchangeRates = () => {
     enableReinitialize: true,
     validateOnChange: true,
 
-    // validate: values => {
-    //   const isValid = values.rows && values.rows.every(row => !!row.plantId)
-    //   const isValidExchangeId = values.rows && values.rows.every(row => !!row.exchangeId)
+    validate: values => {
+      const isValidMin = values.rows && values.rows.every(row => !!row.maxRate)
+      const isValidMax = values.rows && values.rows.every(row => !!row.minRate)
+      const isValidRate = values.rows && values.rows.every(row => !!row.rate)
 
-    //   return isValid // prevent Submit if not validate
-    //     ? isValidExchangeId
-    //       ? {}
-    //       : { rows: Array(values.rows && values.rows.length).fill({ plantId: 'Exchange is required' }) }
-    //     : { rows: Array(values.rows && values.rows.length).fill({ countryId: 'plant is required' }) }
-    // },
+      const isValidExchangeId = values.rows && values.rows.every(row => !!row.minRate)
+
+      return  (isValidMin && isValidMax & isValidRate )
+          ? {}
+          : { rows: Array(values.rows && values.rows.length).fill({ minRate: 'Min Rate is required', maxRate: 'Max rate is required', rate: 'Rate is required' }) }
+    },
 
     // initialValues: {
     //   rows: [
@@ -177,11 +193,13 @@ const  UpdateExchangeRates = () => {
    } else {
       if (access.record.maxAccess > 0) {
         getLabels(ResourceIds.updateExchangerRates, setLabels)
-        fillCRMStore()
+
+        // fillCRMStore()
 
         fillCurrencyStore()
         fillCountryStore()
-        fillExchangeTableStore()
+
+        // fillExchangeTableStore()
 
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
@@ -202,7 +220,6 @@ const  UpdateExchangeRates = () => {
 
 
   const getExchangeRates = (cuId, coId) => {
-    //step 1: get all commission types
     exchangeRatesGridValidation.setValues({rows: []})
     const defaultParams = `_currencyId=${cuId}&_countryId=${coId}`;
     const parameters = defaultParams;
@@ -212,10 +229,6 @@ const  UpdateExchangeRates = () => {
       parameters: parameters,
     }).then(exchangeTable => {
 
-        //step 2: get all ranges commissions
-        // const _productId = obj.productId
-        // const _seqNo = obj.seqNo
-        // const _rangeSeqNo = obj.rangeSeqNo
         var parameters = ''
         getRequest({
           extension: RelationTypesRepository.UpdateExchangeRates.qry,
@@ -232,7 +245,6 @@ const  UpdateExchangeRates = () => {
 
                 return acc;
               }, {});
-console.log(valuesMap)
 
 
               // Combine exchangeTable and values
@@ -245,6 +257,7 @@ console.log(valuesMap)
                   exchangeRef: exchange.exchangeRef,
                   exchangeName: exchange.exchangeName,
                   rateCalcMethod: exchange.rateCalcMethod,
+                  rateCalcMethodName: exchange.rateCalcMethodName,
                   rate: value.rate ? value.rate : '',
                   minRate: value.minRate ? value.minRate : '',
                   maxRate: value.maxRate? value.maxRate : '',
@@ -469,22 +482,9 @@ const handleSubmit = () => {
                 <InlineEditGrid
                   gridValidation={exchangeRatesGridValidation}
                   columns={exchangeRatesInlineGridColumns}
+                  allowDelete={false}
+                  allowAddNewLine={false}
 
-                  // defaultRow={{
-                  //   currencyId: exchangeRatesValidation.values.currencyId
-                  //     ? exchangeRatesValidation.values.currencyId
-                  //     : '',
-                  //   countryId: exchangeRatesValidation.values.countryId ? exchangeRatesValidation.values.countryId : '',
-                  //   exchangeId: exchangeRatesGridValidation.values.exchangeId
-                  //     ? exchangeRatesGridValidation.values.exchangeId
-                  //     : '',
-
-                  //   // rateCalcMethod: exchangeRatesGridValidation.values.rateCalcMethod
-                  //   //   ? exchangeRatesGridValidation.values.rateCalcMethod
-                  //   //   : '',
-                  //   countryName: '',
-                  //   exchangeRef: ''
-                  // }}
                   width={'1200'}
                 />
               </Box>

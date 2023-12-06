@@ -164,6 +164,7 @@ const InlineEditGrid = ({
             size='small'
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
+            readOnly={column?.readOnly}
             options={column.store}
             getOptionLabel={option => {
               if (typeof option === 'object') return option[column.displayField]
@@ -242,6 +243,7 @@ const InlineEditGrid = ({
             size='small'
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
+            readOnly={column?.readOnly}
             options={column.store}
             getOptionLabel={option => {
               if (typeof option === 'object') return option[column.displayField]
