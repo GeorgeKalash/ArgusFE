@@ -10,6 +10,7 @@ export const RelationTypesRepository = {
   },
   UpdateExchangeRates: {
     qry: service + 'qryEX',
+    get: service + 'getEX',
     set2: service + 'set2EX'
 
   },
