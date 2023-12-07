@@ -147,10 +147,6 @@ const Correspondent = () => {
       ]
     },
     onSubmit: values => {
-      console.log('{ values }')
-      console.log(correspondentValidation)
-      console.log(values)
-
       postCorrespondentCountries(values.rows)
     }
   })
@@ -201,15 +197,12 @@ const Correspondent = () => {
   ]
 
   const postCorrespondentCountries = obj => {
-    console.log('data')
-
+    
     const data = {
       corId: correspondentValidation.values.recordId,
       correspondentCountries: obj
     }
 
-    console.log(data)
-    console.log('data')
     postRequest({
       extension: RemittanceSettingsRepository.CorrespondentCountry.set2,
       record: JSON.stringify(data)
@@ -426,7 +419,6 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
     })
       .then(res => {
         getGridData({})
-        setWindowOpen(false)
         if (!res.recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
@@ -879,7 +871,7 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
           setActiveTab={setActiveTab}
           onClose={() => setWindowOpen(false)}
           width={1000}
-          height={400}
+          height={350}
           onSave={handleSubmit}
           editMode={editMode}
           lookupBpMasterData={lookupBpMasterData}
