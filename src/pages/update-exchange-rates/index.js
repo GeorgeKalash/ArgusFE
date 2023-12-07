@@ -67,35 +67,7 @@ const  UpdateExchangeRates = () => {
 
   const exchangeRatesInlineGridColumns = [
 
-    // {
-    //   field: 'combobox',
-    //   header: _labels.exchangeTable,
-    //   nameId: 'exchangeId',
-    //   name: 'exchangeRef',
-    //   mandatory: false,
-    //   readOnly: true,
-    //   store: exchangeTableStore.list,
 
-    //   valueField: 'recordId',
-    //   displayField: 'reference',
-    //   fieldsToUpdate: [],
-    //   columnsInDropDown: [
-    //     { key: 'reference', value: 'Ref' },
-    //     { key: 'name', value: 'Name' }
-    //   ]
-    // },
-
-    // {
-    //   field: 'combobox',
-    //   header: _labels.RCM,
-    //   nameId: 'rateCalcMethod',
-    //   name: 'rateCalcMethodName',
-    //   mandatory: false,
-    //   store: CrmStore,
-    //   valueField: 'key',
-    //   displayField: 'value',
-    //   readOnly: true
-    // },
     {
       field: 'textfield',
       header: _labels.exchangeTable,
