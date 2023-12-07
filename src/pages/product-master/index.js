@@ -951,6 +951,7 @@ const ProductMaster = () => {
           currencyName: '',
           dispersalId:'',
           dispersalName :'',
+          dispersalRef:'',
           dispersalType: '',
           dispersalTypeName: '',
           isInactive: false
@@ -1128,6 +1129,7 @@ const ProductMaster = () => {
             currencyName: '',
             dispersalId: '',
             dispersalName:'',
+            dispersalRef:'',
             dispersalTypeId: '',
             dispersalType: '',
             dispersalTypeName: '',
