@@ -43,7 +43,8 @@ const  UpdateExchangeRates = () => {
       exchangeRef: '',
       rateCalcMethodName: '',
       rateAgainstName: '',
-      rateAgainstCurrencyRef:''
+      rateAgainstCurrencyRef:'',
+      rate:  ''
 
     },
     onSubmit: values => {}
@@ -185,7 +186,8 @@ const  UpdateExchangeRates = () => {
       getExchangeRates(exchangeRatesValidation.values.currencyId, exchangeRatesValidation.values.countryId)
       fillExchangeTableStore(exchangeRatesValidation.values.currencyId, exchangeRatesValidation.values.countryId)
     }
-  }, [exchangeRatesValidation.values])
+  }, [exchangeRatesValidation.values.currencyId, exchangeRatesValidation.values.countryId ])
+
 
 
 
@@ -366,6 +368,13 @@ const handleSubmit = () => {
   }
 
   const fillExchangeTableStore = (currencyId , countryId) => {
+
+    exchangeRatesValidation.setFieldValue('rateAgainstName' , '')
+    exchangeRatesValidation.setFieldValue('rateAgainstCurrencyRef' , '')
+    exchangeRatesValidation.setFieldValue('rateCalcMethodName' , '')
+    exchangeRatesValidation.setFieldValue('rate' , '')
+    exchangeRatesValidation.setFieldValue('exchangeRef' , '')
+    exchangeRatesValidation.setFieldValue('exchangeId' ,'')
     const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
     var parameters = defaultParams
     getRequest({
@@ -377,8 +386,6 @@ const handleSubmit = () => {
         exchangeRatesValidation.setFieldValue('exchangeId' , res.record.exchangeId)
 
 
-console.log
-
         const defaultParams = `_recordId=${res.record.exchangeId}`
         var parameters = defaultParams
         getRequest({
@@ -389,6 +396,20 @@ console.log
             exchangeRatesValidation.setFieldValue('rateAgainstName' , res.record.rateAgainstName)
             exchangeRatesValidation.setFieldValue('rateAgainstCurrencyRef' , res.record.rateAgainstCurrencyRef)
             exchangeRatesValidation.setFieldValue('rateCalcMethodName' , res.record.rateCalcMethodName)
+
+          })
+          .catch(error => {
+            // setErrorMessage(error)
+          })
+
+          const dParams = `_exchangeId=${res.record.exchangeId}`
+          var parameters = dParams
+        getRequest({
+          extension: RelationTypesRepository.UpdateExchangeRates.get,
+          parameters: parameters
+        })
+          .then(res => {
+            exchangeRatesValidation.setFieldValue('rate' , res.record.rate)
 
           })
           .catch(error => {
@@ -511,11 +532,11 @@ console.log
           <CustomTextField
           name='rate'
           label={ _labels.rate}
-          value={exchangeRatesValidation.values.rateAgainstCurrencyRef}
+          value={exchangeRatesValidation.values.rate}
           readOnly="true"
           onChange={exchangeRatesValidation.handleChange}
-          error={exchangeRatesValidation.touched.rateAgainstCurrencyRef && Boolean(addressValidation.errors.rateAgainstCurrencyRef)}
-          helperText={exchangeRatesValidation.touched.rateAgainstCurrencyRef && addressValidation.errors.rateAgainstCurrencyRef}
+          error={exchangeRatesValidation.touched.rate && Boolean(addressValidation.errors.rate)}
+          helperText={exchangeRatesValidation.touched.rate && addressValidation.errors.rate}
         />
           </Grid>
           </Grid>
