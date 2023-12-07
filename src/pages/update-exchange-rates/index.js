@@ -13,7 +13,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import { RelationTypesRepository } from 'src/repositories/RelationTypesRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
@@ -146,7 +146,7 @@ const  UpdateExchangeRates = () => {
       items: obj.rows
     }
     postRequest({
-      extension: RelationTypesRepository.UpdateExchangeRates.set2,
+      extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -203,7 +203,7 @@ const  UpdateExchangeRates = () => {
 
         var parameters = ''
         getRequest({
-          extension: RelationTypesRepository.UpdateExchangeRates.qry,
+          extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.qry,
           parameters: parameters,
         }).then(values => {
           console.log(values)
@@ -280,7 +280,7 @@ const getExchangeRatess = async (cuId, coId) => {
       const parameters = defaultParams;
 
       const  exchangeResult =  getRequest({
-        extension: RelationTypesRepository.UpdateExchangeRates.qry,
+        extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.qry,
         parameters: parameters,
       });
 
@@ -405,7 +405,7 @@ const handleSubmit = () => {
           const dParams = `_exchangeId=${res.record.exchangeId}`
           var parameters = dParams
         getRequest({
-          extension: RelationTypesRepository.UpdateExchangeRates.get,
+          extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.get,
           parameters: parameters
         })
           .then(res => {

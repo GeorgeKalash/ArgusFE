@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RelationTypesRepository } from 'src/repositories/RelationTypesRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 import RelationTypeWindow from './Windows/RelationTypeWindow'
 
@@ -97,7 +97,7 @@ const RelationTypes = () => {
 
    const delRelationType = obj => {
     postRequest({
-      extension: RelationTypesRepository.RelationType.del,
+      extension: CurrencyTradingSettingsRepository.RelationType.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -122,7 +122,7 @@ const RelationTypes = () => {
     var parameters = defaultParams + '&_dgId=0'
 
     getRequest({
-      extension: RelationTypesRepository.RelationType.qry,
+      extension: CurrencyTradingSettingsRepository.RelationType.qry,
       parameters: parameters
     })
       .then(res => {
@@ -152,7 +152,7 @@ const RelationTypes = () => {
   const postRelationType = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: RelationTypesRepository.RelationType.set,
+      extension: CurrencyTradingSettingsRepository.RelationType.set,
       record: JSON.stringify(obj)
     })
       .then(res => {

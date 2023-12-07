@@ -19,5 +19,23 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getSI',
     set: service + 'setSI',
     del: service + 'delSI'
-  }
+  },
+  RelationType: {
+    qry: service + 'qryRT',
+    get: service + 'getRT',
+    set: service + 'setRT',
+    del: service + 'delRT'
+  },
+   UpdateExchangeRates: {
+    qry: service + 'qryEX',
+    get: service + 'getEX',
+    set2: service + 'set2EX'
+
+  },
+  Profession: {
+    qry: service + 'qryPRO',
+    get: service + 'getPRO',
+    set: service + 'setPRO',
+    del: service + 'delPRO'
+  },
 }
