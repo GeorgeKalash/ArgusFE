@@ -10,6 +10,7 @@ const OutwardsWindow = ({
     onSave,
     editMode,
     outwardsValidation,
+    plantStore,
     countryStore,
     onCountrySelection,
     dispersalTypeStore,
@@ -17,6 +18,7 @@ const OutwardsWindow = ({
     currencyStore,
     onCurrencySelection,
     agentsStore,
+    productsStore,
     onAmountDataFill,
     labels,
     maxAccess
@@ -35,6 +37,7 @@ return (
                <OutwardsTab
                   labels={labels}
                   outwardsValidation={outwardsValidation}
+                  plantStore={plantStore?.list}
                   countryStore={countryStore?.list}
                   onCountrySelection={onCountrySelection}
                   dispersalTypeStore={dispersalTypeStore?.list}
@@ -42,6 +45,7 @@ return (
                   currencyStore={currencyStore?.list}
                   onCurrencySelection={onCurrencySelection}
                   agentsStore={agentsStore?.list}
+                  productsStore={productsStore?.list}
                   onAmountDataFill={onAmountDataFill}
                   editMode={editMode}
                   maxAccess={maxAccess}
