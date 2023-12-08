@@ -175,7 +175,6 @@ const Correspondent = () => {
   ]
 
   const postCorrespondentCountries = obj => {
-    console.log('data')
 
     const data = {
       corId: correspondentValidation.values.recordId,
@@ -376,7 +375,6 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
     })
       .then(res => {
         getGridData({})
-        setWindowOpen(false)
         if (!res.recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
@@ -873,7 +871,7 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
           setActiveTab={setActiveTab}
           onClose={() => setWindowOpen(false)}
           width={1000}
-          height={400}
+          height={350}
           onSave={handleSubmit}
           editMode={editMode}
           lookupBpMasterData={lookupBpMasterData}

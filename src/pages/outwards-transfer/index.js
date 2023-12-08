@@ -33,10 +33,12 @@ const OutwardsTransfer = () => {
 
   //stores
   const [gridData, setGridData] = useState(null)
+  const [plantStore, setPlantStore] = useState(null)
   const [countryStore, setCountryStore] = useState(null)
   const [dispersalTypeStore, setDispersalTypeStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
   const [agentsStore, setAgentsStore] = useState([])
+  const [productsStore, setProductsStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -81,10 +83,14 @@ const OutwardsTransfer = () => {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
+      plantId: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required'),
-      dispersaType: yup.string().required('This field is required'),
+      dispersalType: yup.string().required('This field is required'),
       currencyId: yup.string().required('This field is required'),
       agentId: yup.string().required('This field is required'),
+      amount: yup.string().required('This field is required'),
+      productId: yup.string().required('This field is required'),
+      fees: yup.string().required('This field is required'),
       
     }),
     onSubmit: values => {
@@ -119,6 +125,20 @@ const OutwardsTransfer = () => {
     })
       .then(res => {
         setCountryStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+  
+  const fillPlantStore = () => {
+    var parameters = '_filter='
+    getRequest({
+      extension: SystemRepository.Plant.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setPlantStore(res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -178,7 +198,7 @@ const OutwardsTransfer = () => {
     // type, functionId, plantId, countryId, dispersalType, currencyId, amount, agentId
     var type = 2;
     var functionId = 1;
-    var plant = 1;
+    var plant = 4;
     var countryId = formFields?.countryId
     var currencyId = formFields?.currencyId
     var dispersalType = formFields?.dispersalType
@@ -193,12 +213,14 @@ const OutwardsTransfer = () => {
       parameters: parameters
     })
       .then(res => {
-        
+        setProductsStore(res);
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
+
+  
 
   const delOutwards = obj => {
     
@@ -207,6 +229,8 @@ const OutwardsTransfer = () => {
   const addOutwards = () => {
     outwardsValidation.setValues(getNewOutwards())
     fillCountryStore()
+
+    //setUserDefaultPlant()
     setEditMode(false)
     setWindowOpen(true)
   }
@@ -224,6 +248,7 @@ const OutwardsTransfer = () => {
     else {
       if (access.record.maxAccess > 0) {
         getGridData()
+        fillPlantStore()
         fillCountryStore()
 
         //getLabels(ResourceIds.Currencies, setLabels)
@@ -255,10 +280,11 @@ const OutwardsTransfer = () => {
         <OutwardsWindow
           onClose={() => setWindowOpen(false)}
           width={600}
-          height={400}
+          height={350}
           onSave={handleSubmit}
           editMode={editMode}
           outwardsValidation={outwardsValidation}
+          plantStore={plantStore}
           countryStore={countryStore}
           onCountrySelection={onCountrySelection}
           dispersalTypeStore={dispersalTypeStore}
@@ -266,6 +292,7 @@ const OutwardsTransfer = () => {
           currencyStore={currencyStore}
           onCurrencySelection={onCurrencySelection}
           agentsStore={agentsStore}
+          productsStore={productsStore}
           onAmountDataFill={onAmountDataFill}
           labels={_labels}
           maxAccess={access}
