@@ -6,7 +6,9 @@ const getNewProductMaster = () => {
     reference: null,
     type: null,
     functionId: null,
-    correspondentId: null,
+    corId: null,
+    corName: null,
+    corRef: null,
     languages: null,
     commissionBase: null,
     interfaceId: null,
@@ -26,7 +28,6 @@ const populateProductMaster = obj => {
     corId: obj.corId,
     corName: obj.corName,
     corRef: obj.corRef,
-
     languages: obj.languages,
     commissionBase: obj.commissionBase,
     interfaceId: obj.interfaceId,

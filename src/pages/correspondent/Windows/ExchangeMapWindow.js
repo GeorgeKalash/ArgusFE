@@ -13,22 +13,27 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 const ExchangeMapWindow = ({
   onClose,
   onSave,
+  countriesGridValidation,
   exchangeMapsGridValidation,
   exchangeMapsInlineGridColumns,
   exchangeMapValidation,
   currencyStore,
   countryStore,
   getCurrenciesExchangeMaps,
-  maxAccess
+  maxAccess,
+  labels
 }) => {
-  return (
-    <Window id='CurrencyMapsWindow' Title='Exchange Map' onClose={onClose} onSave={onSave} width={500} height={400}>
+  console.log(countriesGridValidation.values.rows)
+
+return (
+    <Window id='CurrencyMapsWindow' Title={labels.exchangeMap} onClose={onClose} onSave={onSave} width={500} height={400}>
       <CustomTabPanel index={0} value={0}>
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            height: '100%'
+            height: '100%',
+
           }}
         >
           <Grid container gap={2}>
@@ -36,7 +41,7 @@ const ExchangeMapWindow = ({
               <Grid item xs={6}>
                 <CustomComboBox
                   name='currencyId'
-                  label='Currency'
+                  label={labels.currency}
                   valueField='recordId'
                   displayField='name'
                   readOnly='true'
@@ -54,22 +59,23 @@ const ExchangeMapWindow = ({
               <Grid item xs={6}>
                 <CustomComboBox
                   name='countryId'
-                  label='Country'
-                  valueField='recordId'
-                  displayField='name'
-                  store={countryStore}
-                  value={countryStore.filter(item => item.recordId === exchangeMapValidation.values.countryId)[0]} // Ensure the value matches an option or set it to null
+                  label={labels.country}
+                  valueField='countryId'
+                  displayField='countryName'
+                  store={countriesGridValidation.values.rows}
+                  value={countriesGridValidation.values.rows.filter(item => item.countryId === exchangeMapValidation.values.countryId)[0]} // Ensure the value matches an option or set it to null
                   required
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
-                    exchangeMapValidation.setFieldValue('countryId', newValue?.recordId)
-                    const selectedCountryId = newValue?.recordId || ''
+                    exchangeMapValidation.setFieldValue('countryId', newValue?.countryId)
+                    const selectedCountryId = newValue?.countryId || ''
                     getCurrenciesExchangeMaps(
                       exchangeMapValidation.values.corId,
                       exchangeMapValidation.values.currencyId,
                       selectedCountryId
                     ) // Fetch and update state data based on the selected country
                   }}
+
                   error={exchangeMapValidation.touched.countryId && Boolean(exchangeMapValidation.errors.countryId)}
                   helperText={exchangeMapValidation.touched.countryId && exchangeMapValidation.errors.countryId}
                 />
@@ -88,6 +94,8 @@ const ExchangeMapWindow = ({
                       plantId: '',
                       exchangeId: ''
                     }}
+                    allowDelete={false}
+                    allowAddNewLine={false}
                     width={500}
                   />
                 )}

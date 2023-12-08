@@ -53,8 +53,8 @@ const  UpdateExchangeRates = () => {
   const _labels= {
 
 
-     country: labels && labels.find(item => item.key === 1) && labels.find(item => item.key === 1).value,
-     currency: labels && labels.find(item => item.key === 2) && labels.find(item => item.key === 2).value,
+     country: labels && labels.find(item => item.key === 1) && labels.find(item => item.key === 2).value,
+     currency: labels && labels.find(item => item.key === 2) && labels.find(item => item.key === 1).value,
      exchangeTable: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
      RCM: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value,
      rates: labels && labels.find(item => item.key === 6) && labels.find(item => item.key === 6).value,

@@ -10,7 +10,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const ProductDispersalTab = ({ dispersalsGridData, getDispersalsGridData, addProductDispersal, delProductDispersal, popupDispersal, maxAccess }) => {
 
-  console.log(dispersalsGridData)
 
   const columns = [
     {
