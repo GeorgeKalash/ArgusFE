@@ -5,6 +5,8 @@ export const SystemRepository = {
   getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
+  ReportLayout: service + 'qryRL',
+  ReportTemplate: service + 'qryRT',
   DocumentType: {
     qry: service + 'qryDT',
     get: service + 'getDT',
@@ -44,7 +46,6 @@ export const SystemRepository = {
     set: service + 'setCIT',
     del: service + 'delCIT',
     snapshot: service + 'snapshotCIT'
-
   },
   Country: {
     qry: service + 'qryCO',
@@ -70,5 +71,4 @@ export const SystemRepository = {
     set: service + 'setADD',
     del: service + ''
   }
-
 }
