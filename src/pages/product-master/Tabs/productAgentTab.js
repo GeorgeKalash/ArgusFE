@@ -36,11 +36,9 @@ return (
                 value={dispersalStore?.filter(item => item.key === agentsHeaderValidation.values.dispersalId)[0]}
                 required
                 onChange={(event, newValue) => {
-                  // console.log(newValue?.recordId);
                   agentsHeaderValidation.setFieldValue('dispersalId', newValue?.recordId)
                   onDispersalSelection(newValue?.recordId);
 
-                  // console.log(agentsHeaderValidation);
                 }}
                 error={Boolean(agentsHeaderValidation.errors.dispersalId)}
                 helperText={agentsHeaderValidation.errors.dispersalId}

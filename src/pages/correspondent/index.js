@@ -350,11 +350,6 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       text: 'Exchange',
       disabled: row => row.currencyId < 1,
 
-      // onClick: (e, row) => {
-      // onClick: (e, row) => {
-      //   exchangeMapValidation.setValues(getNewCorrExchangeMap())
-      //   setCurrencyMapWindowOpen(true)
-      // text: _labels.exchange,
       onClick: (e, row) => {
         console.log(row)
         exchangeMapValidation.setValues({})
@@ -362,10 +357,10 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
         if (row.currencyId) {
           fillExchangeTableStore(row.currencyId)
           exchangeMapValidation.setValues(row)
+          console.log(exchangeMapValidation)
           setExchangeMapWindowOpen(true)
         }
 
-        // setCurrencyMapWindowOpen(true)
       }
     }
   ]
@@ -442,8 +437,8 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
           countryId: '',
           plantId: '',
           plantRef: '',
-          exchangeId: '',
-          exchangeRef: ''
+          exchangeRef: '',
+          exchangeId: ''
         }
       ]
     },
@@ -457,7 +452,7 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
   }
 
   const exchangeMapsGridValidation = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
 
     validate: values => {
@@ -514,8 +509,9 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       name: 'exchangeRef',
       mandatory: true,
       store: exchangeTableStore.list,
+
       valueField: 'recordId',
-      displayField: 'name',
+      displayField: 'reference',
       fieldsToUpdate: [],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
@@ -527,7 +523,7 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
 
   const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
 
-    exchangeMapsGridValidation.setValues({rows: []})
+    // exchangeMapsGridValidation.setValues({rows: []})
     const parameters = '';
 
     getRequest({
@@ -566,7 +562,9 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
                   plantName:  plant.name,
                   exchangeId: value.exchangeId,
                   plantRef: plant.reference,
-                  exchangeRef: value.exchangeRef
+                  exchangeRef: value.exchangeRef ?  value.exchangeRef :'',
+                  exchangeName: value.exchangeName
+
                 };
               });
 

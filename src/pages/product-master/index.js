@@ -148,14 +148,13 @@ const[type, setType] = useState(0)
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: windowOpen && yup.string().required('This field is required'),
-      name: windowOpen && yup.string().required('This field is required'),
-      type: windowOpen && yup.string().required('This field is required'),
-
-       corId : windowOpen && type===1 ? yup.string().required('This field is required') :yup.string().notRequired(),
-      functionId: windowOpen && yup.string().required('This field is required'),
-      commissionBase: windowOpen && yup.string().required('This field is required'),
-      isInactive: windowOpen && yup.string().required('This field is required')
+      reference:  yup.string().required('This field is required'),
+      name:  yup.string().required('This field is required'),
+      type:  yup.string().required('This field is required'),
+      corId : type===1 ? yup.string().required('This field is required') : yup.string().notRequired(),
+      functionId:  yup.string().required('This field is required'),
+      commissionBase:  yup.string().required('This field is required'),
+      isInactive:  yup.string().required('This field is required')
     }),
     onSubmit: values => {
 

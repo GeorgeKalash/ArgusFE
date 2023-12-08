@@ -96,7 +96,7 @@ const ProductMasterWindow = ({
           lookupCorrespondent={lookupCorrespondent}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      {/* <CustomTabPanel index={1} value={activeTab}>
         <ProductCountriesTab
           productMasterValidation={productMasterValidation}
           countriesGridValidation={countriesGridValidation}
@@ -144,13 +144,13 @@ const ProductMasterWindow = ({
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={6} value={activeTab}>
+      <CustomTabPanel index={6} value={activeTab}> */}
         {/* <ProductFieldTab
           productFieldGridData={productFieldGridData}
           dispersalStore={dispersalStore}
           maxAccess={maxAccess}
         /> */}
-      </CustomTabPanel>
+      {/* </CustomTabPanel>
       <CustomTabPanel index={7} value={activeTab}>
         <ProductAgentTab
           onDispersalSelection={onDispersalSelection}
@@ -161,7 +161,7 @@ const ProductMasterWindow = ({
           dispersalStore={dispersalStore}
           maxAccess={maxAccess}
         />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
     </Window>
   )
 }

@@ -19,7 +19,6 @@ const ProductMasterTab = ({
   maxAccess
 }) => {
 
-
 return (
     <>
       <Grid container>
@@ -34,8 +33,8 @@ return (
               readOnly={false}
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('reference', '')}
-              error={Boolean(productMasterValidation.errors.reference)}
-              helperText={productMasterValidation.errors.reference}
+              error={productMasterValidation.touched.reference && Boolean(productMasterValidation.errors.reference)}
+              helperText={productMasterValidation.touched.reference && productMasterValidation.errors.reference}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -47,8 +46,8 @@ return (
               required
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('name', '')}
-              error={productMasterValidation.errors.name}
-              helperText={productMasterValidation.errors.name}
+              error={productMasterValidation.touched.name && Boolean(productMasterValidation.errors.reference)}
+              helperText={productMasterValidation.touched.name && productMasterValidation.errors.reference}
             />
           </Grid>
           <Grid item xs={12}>
@@ -66,8 +65,8 @@ return (
                 //  console.log("productMasterValidation")
                 productMasterValidation && productMasterValidation.setFieldValue('type', newValue?.key);
               }}
-              error={Boolean(productMasterValidation.errors.type)}
-              helperText={productMasterValidation.errors.type}
+              error={productMasterValidation.touched.type && Boolean(productMasterValidation.errors.type)}
+              helperText={productMasterValidation.touched.type && productMasterValidation.errors.type}
             />
           </Grid>
           <Grid item xs={12}>
@@ -82,8 +81,8 @@ return (
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('functionId', newValue?.key)
               }}
-              error={Boolean(productMasterValidation.errors.functionId)}
-              helperText={productMasterValidation.errors.functionId}
+              error={productMasterValidation.touched.functionId && Boolean(productMasterValidation.errors.functionId)}
+              helperText={productMasterValidation.touched.functionId && productMasterValidation.errors.functionId}
             />
           </Grid>
           <Grid item xs={12}>
@@ -147,8 +146,8 @@ return (
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('languages', newValue?.key)
               }}
-              error={Boolean(productMasterValidation.errors.languages)}
-              helperText={productMasterValidation.errors.languages}
+              error={productMasterValidation.touched.languages && Boolean(productMasterValidation.errors.languages)}
+              helperText={productMasterValidation.touched.languages && productMasterValidation.errors.languages}
             />
           </Grid>
           <Grid item xs={12}>
@@ -158,31 +157,17 @@ return (
               valueField='recordId'
               displayField='name'
               store={interfaceStore}
-
               value={interfaceStore.filter(item => item.recordId === productMasterValidation.values.interfaceId)[0]}
               required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('interfaceId', newValue?.recordId)
               }}
-              error={ productMasterValidation.errors &&Boolean(productMasterValidation.errors.interfaceId)}
-              helperText={productMasterValidation.errors && productMasterValidation.errors.interfaceId}
+              error={ productMasterValidation.touched && Boolean(productMasterValidation.errors.interfaceId)}
+              helperText={productMasterValidation.touched && productMasterValidation.errors.interfaceId}
             />
           </Grid>
-          {/* <Grid item xs={12}>
-            <CustomComboBox
-              name='interfaceId'
-              label='Interface'
-              valueField='recordId'
-              displayField='name'
-              store={interfaceStore}
-              value={interfaceStore.filter(item => item.recordId === productMasterValidation.values.interfaceId)[0]}
-              onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('interfaceId', newValue?.key)
-              }}
-              error={Boolean(productMasterValidation.errors.interfaceId)}
-              helperText={productMasterValidation.errors.interfaceId}
-            />
-          </Grid> */}
+
+
           <Grid item xs={12}>
             <CustomComboBox
               name='commissionBase'
@@ -193,10 +178,10 @@ return (
               value={commissionBaseStore.filter(item => item.key === productMasterValidation.values.commissionBase)[0]}
               required
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('commissionBase', newValue?.key)
+             productMasterValidation.setFieldValue('commissionBase', newValue?.key)
               }}
-              error={Boolean(productMasterValidation.errors.commissionBase)}
-              helperText={productMasterValidation.errors.commissionBase}
+              error={productMasterValidation.touched.commissionBase && Boolean(productMasterValidation.errors.commissionBase)}
+              helperText={productMasterValidation.touched.commissionBase && productMasterValidation.errors.commissionBase}
             />
           </Grid>
           <Grid item xs={12}>
@@ -207,8 +192,8 @@ return (
               readOnly={false}
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('posMsg', '')}
-              error={Boolean(productMasterValidation.errors.posMsg)}
-              helperText={productMasterValidation.errors.posMsg}
+              error={ productMasterValidation.errors && Boolean(productMasterValidation.errors.posMsg)}
+              helperText={productMasterValidation.errors && productMasterValidation.errors.posMsg}
             />
           </Grid>
           <Grid item xs={12}>

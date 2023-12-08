@@ -6,7 +6,6 @@ export const ResourceIds = {
   Currencies: 20106,
   GroupLegalDocument: 21109,
   ProductMaster: 36103,
-  ProductMaster: 36103,
   CommissionType: 35102,
   Interface: 36108,
   Countries: 20101,
@@ -21,5 +20,6 @@ export const ResourceIds = {
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
   SourceOfIncome:35103,
-  updateExchangerRates: 35106
+  updateExchangerRates: 35106,
+  ExchangeTables: 32101
 }

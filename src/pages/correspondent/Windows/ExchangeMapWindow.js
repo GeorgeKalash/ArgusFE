@@ -92,7 +92,8 @@ return (
                       currencyId: exchangeMapValidation.values.currencyId,
                       countryId: exchangeMapValidation.values.countryId,
                       plantId: '',
-                      exchangeId: ''
+                      exchangeId: '',
+                      exchangeRef: ''
                     }}
                     allowDelete={false}
                     allowAddNewLine={false}
