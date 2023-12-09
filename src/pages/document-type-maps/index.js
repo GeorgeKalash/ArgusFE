@@ -15,6 +15,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import Window from 'src/components/Shared/Window'
+import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -22,9 +23,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewDocumentTypeMaps, populateDocumentTypeMaps } from 'src/Models/System/DocumentTypeMaps'
-
-// ** Helpers
-import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'

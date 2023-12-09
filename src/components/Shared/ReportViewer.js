@@ -6,6 +6,7 @@ import { Autocomplete, Box, Button, TextField } from '@mui/material'
 
 // ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
@@ -23,6 +24,8 @@ const ReportViewer = ({ resourceId }) => {
   const [reportStore, setReportStore] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(null)
+  const [paramsArray, setParamsArray] = useState([])
+  const [reportParamWindowOpen, setReportParamWindowOpen] = useState(false)
   const [pdf, setPDF] = useState(null)
   const [xls, setXLS] = useState(null)
   const [csv, setCSV] = useState(null)
@@ -74,12 +77,13 @@ const ReportViewer = ({ resourceId }) => {
       })
   }
 
-  // const generateReport = () => {
+  // const generateReport = ({ params = '' }) => {
   //   const obj = {
-  //   ...selectedReport,
-  //   format: selectedFormat,
-  //   fileName: ''
-  // }
+  //     api_url: selectedReport.api_url + '?_params=',
+  //     assembly: selectedReport.assembly,
+  //     format: selectedFormat,
+  //     reportClass: selectedReport.reportClass
+  //   }
   //   postRequest({
   //     url: process.env.NEXT_PUBLIC_REPORT_URL,
   //     extension: ReportRepository.generateReport,
@@ -93,7 +97,7 @@ const ReportViewer = ({ resourceId }) => {
   //     })
   // }
 
-  const generateReport = () => {
+  const generateReport = ({ params = '' }) => {
     switch (selectedFormat) {
       case 1:
         setPDF('https://s3.eu-west-1.amazonaws.com/argus.erp/rptGLView.pdf')
@@ -115,6 +119,12 @@ const ReportViewer = ({ resourceId }) => {
     getReportTemplate()
   }, [])
 
+  const formatDataForApi = paramsArray => {
+    const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
+
+    return formattedData
+  }
+
   return (
     <>
       <Box
@@ -124,8 +134,13 @@ const ReportViewer = ({ resourceId }) => {
           height: '100%'
         }}
       >
-        <GridToolbar>
-          <Box sx={{ px: 2, display: 'flex', justifyContent: 'space-between' }}>
+        <GridToolbar
+          openRPB={() => setReportParamWindowOpen(true)}
+          disableRPB={!selectedReport?.parameters}
+          onGo={generateReport}
+          paramsArray={paramsArray}
+        >
+          <Box sx={{ pt: 2, px: 2, display: 'flex', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex' }}>
               <Autocomplete
                 size='small'
@@ -149,7 +164,7 @@ const ReportViewer = ({ resourceId }) => {
                 sx={{ ml: 2 }}
                 variant='contained'
                 disabled={!selectedReport || !selectedFormat}
-                onClick={() => generateReport()}
+                onClick={() => generateReport({ params: formatDataForApi(paramsArray) })}
               >
                 Generate Report
               </Button>
@@ -170,6 +185,14 @@ const ReportViewer = ({ resourceId }) => {
           </Box>
         )}
       </Box>
+      <ReportParameterBrowser
+        disabled={!selectedReport?.parameters}
+        reportName={selectedReport?.parameters}
+        open={reportParamWindowOpen}
+        onClose={() => setReportParamWindowOpen(false)}
+        paramsArray={paramsArray}
+        setParamsArray={setParamsArray}
+      />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
