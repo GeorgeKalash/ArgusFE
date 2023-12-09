@@ -11,8 +11,6 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
@@ -28,10 +26,6 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 // ** Windows
 import ProductMasterWindow from './Windows/ProductMasterWindow'
 import ProductLegWindow from './Windows/ProductLegWindow'
-
-// ** Tabs
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -74,6 +68,7 @@ const ProductMaster = () => {
   const [productCountriesGridData, setProductCountriesGridData] = useState([]) //for countries tab
   const [productCurrenciesGridData, setProductCurrenciesGridData] = useState([]) //for monetary tab
   const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
+const[type, setType] = useState(0)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -147,22 +142,31 @@ const ProductMaster = () => {
     }
   ]
 
+
+
   const productMasterValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      type: yup.string().required('This field is required'),
-      functionId: yup.string().required('This field is required'),
-      commissionBase: yup.string().required('This field is required'),
-      isInactive: yup.string().required('This field is required')
+      reference: windowOpen && yup.string().required('This field is required'),
+      name: windowOpen && yup.string().required('This field is required'),
+      type: windowOpen && yup.string().required('This field is required'),
+
+       corId : windowOpen && type===1 ? yup.string().required('This field is required') :yup.string().notRequired(),
+      functionId: windowOpen && yup.string().required('This field is required'),
+      commissionBase: windowOpen && yup.string().required('This field is required'),
+      isInactive: windowOpen && yup.string().required('This field is required')
     }),
     onSubmit: values => {
 
       postProductMaster(values)
     }
   })
+
+useEffect(()=>{
+setType(productMasterValidation.values && productMasterValidation.values.type)
+}, [productMasterValidation])
+
 
   const lookupCorrespondent = searchQry => {
 
@@ -1227,7 +1231,6 @@ const ProductMaster = () => {
       readOnly: true,
       hidden: true,
       valueSetter: () => {
-        console.log(scheduleRangeGridValidation.values.rows.length);
 
         return scheduleRangeGridValidation.values.rows.length + 1
       }

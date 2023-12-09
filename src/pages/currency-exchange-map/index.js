@@ -28,8 +28,6 @@ const CurrencyExchangeMap = () => {
   const [currencyStore, setCurrencyStore] = useState([])
   const [exchangeTableStore, setExchangeTableStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
-  const [plantStore, setPlantStore] = useState([])
-
   const [errorMessage, setErrorMessage] = useState()
   const [currencyId, setCurrencyId] = useState(0)
   const [access, setAccess] = useState(0)
@@ -42,8 +40,6 @@ const CurrencyExchangeMap = () => {
         getLabels(ResourceIds.currencyExchangeMap, setLabels)
         fillCurrencyStore()
         fillCountryStore()
-        fillPlantStore()
-        fillExchangeTableStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -76,27 +72,17 @@ const CurrencyExchangeMap = () => {
       })
   }
 
-  const fillPlantStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Plant.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setPlantStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
-  const fillExchangeTableStore = () => {
-    var parameters = `_filter=`
+  const fillExchangeTableStore = (id) => {
+    setExchangeTableStore({})
+
+    var parameters = `_currencyId=` + id
     getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.qry,
+      extension: MultiCurrencyRepository.ExchangeTable.qry2,
       parameters: parameters
     })
       .then(res => {
+        console.log(res)
         setExchangeTableStore(res)
       })
       .catch(error => {
@@ -118,6 +104,15 @@ const CurrencyExchangeMap = () => {
     onSubmit: values => {}
   })
 
+  useEffect(() => {
+    if (
+      exchangeMapsValidation.values &&
+      exchangeMapsValidation.values.currencyId > 0
+
+    ) {
+      fillExchangeTableStore(exchangeMapsValidation.values.currencyId)
+    }
+  }, [exchangeMapsValidation.values.currencyId])
   useEffect(() => {
     if (
       exchangeMapsValidation.values &&
@@ -163,7 +158,9 @@ const CurrencyExchangeMap = () => {
     country: labels && labels.find(item => item.key === 1) && labels.find(item => item.key === 1).value,
     currency: labels && labels.find(item => item.key === 2) && labels.find(item => item.key === 2).value,
     exchangeTable: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
-    plant: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value
+    plant: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value,
+    name: labels && labels.find(item => item.key === 5) && labels.find(item => item.key === 4).value
+
   }
 
   const postExchangeMaps = obj => {
@@ -184,54 +181,92 @@ const CurrencyExchangeMap = () => {
       })
   }
 
-  const getCurrenciesExchangeMaps = (currencyId, countryId) => {
-    exchangeMapsGridValidation.setValues({
-      rows: [
-        {
-          currencyId: currencyId,
-          countryId: countryId,
-          plantId: '',
-          countryName: '',
-          plantName: '',
-          exchangeRef: '',
-          exchangeId: ''
-        }
-      ]
-    })
-    const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
+
+
+
+  const getCurrenciesExchangeMaps = ( currencyId, countryId) => {
+
+    exchangeMapsGridValidation.setValues({rows: []})
+    const parameters = '';
+
+    getRequest({
+      extension: SystemRepository.Plant.qry,
+      parameters: parameters
+    }) .then(plants => {
+
+
+      const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
     var parameters = defaultParams
     getRequest({
       extension: RemittanceSettingsRepository.CurrencyExchangeMap.qry,
       parameters: parameters
-    })
-      .then(res => {
-        if (res.list.length > 0) {
-          exchangeMapsGridValidation.setValues({ rows: res.list })
-        }
+    }).then(values => {
+
+
+            // Create a mapping of commissionId to values entry for efficient lookup
+              const valuesMap = values.list.reduce((acc, fee) => {
+                // console.log(acc)
+                // console.log(fee)
+                acc[fee.plantId] = fee;
+
+                return acc;
+              }, {});
+
+             // Combine exchangeTable and values
+              const rows = plants.list.map(plant => {
+                const value = valuesMap[plant.recordId] || 0;
+
+                return {
+
+                  currencyId: currencyId,
+                  countryId: countryId,
+                  plantId:  plant.recordId,
+                  plantName:  plant.name,
+                  exchangeId: value.exchangeId ? value.exchangeId : '',
+                  plantRef:  plant.reference,
+                  exchangeRef: value.exchangeRef ? value.exchangeRef : ''
+                };
+              });
+
+              exchangeMapsGridValidation.setValues({ rows })
+
+          })
+          .catch(error => {
+            // setErrorMessage(error)
+          })
+
       })
       .catch(error => {
-        setErrorMessage(error)
+        // setErrorMessage(error)
       })
+
+
+
+    //step 3: merge both
   }
+
 
   //columns
   const exchangeMapsInlineGridColumns = [
     {
-      field: 'combobox',
+      field: 'textfield',
       header: _labels.plant, //label
-      nameId: 'plantId',
+      name: 'plantRef',
+      mandatory: true,
+      readOnly: true,
+
+
+    },
+    {
+      field: 'textfield',
+      header: _labels.name, //label
       name: 'plantName',
       mandatory: true,
-      store: plantStore.list,
+      readOnly: true,
 
-      valueField: 'recordId',
-      displayField: 'name',
 
-      columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
-        { key: 'name', value: 'Name' }
-      ]
     },
+
     {
       field: 'combobox',
       header: _labels.exchangeTable,
@@ -334,6 +369,8 @@ const CurrencyExchangeMap = () => {
                       countryName: '',
                       exchangeRef: ''
                     }}
+                    allowDelete={false}
+                    allowAddNewLine={false}
                     width={'1200'}
                   />
                 </Box>

@@ -18,7 +18,9 @@ const ProductMasterTab = ({
   languageStore,
   maxAccess
 }) => {
-  return (
+
+
+return (
     <>
       <Grid container>
         {/* First Column */}
@@ -59,7 +61,10 @@ const ProductMasterTab = ({
               value={typeStore.filter(item => item.key === productMasterValidation.values.type)[0]}
               required
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('type', newValue?.key)
+                // console.log("productMasterValidation")
+                // console.log(productMasterValidation)
+                //  console.log("productMasterValidation")
+                productMasterValidation && productMasterValidation.setFieldValue('type', newValue?.key);
               }}
               error={Boolean(productMasterValidation.errors.type)}
               helperText={productMasterValidation.errors.type}
@@ -88,7 +93,7 @@ const ProductMasterTab = ({
               // label={labels.correspondent}
               label='Correspondent'
               value={productMasterValidation.values.corId}
-              required
+              required={productMasterValidation.values.type === 1 ? true : false}
               valueField='reference'
               store={correspondentStore}
               firstValue={productMasterValidation.values.corRef}

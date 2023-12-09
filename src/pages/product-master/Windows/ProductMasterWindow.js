@@ -68,13 +68,6 @@ const ProductMasterWindow = ({
   agentsInlineGridColumns,
   onDispersalSelection,
 
-  productDispersalGridData,
-  productLegWindowOpen,
-  productLegGridData,
-  productLegCommissionGridData,
-  setProductLegWindowOpen,
-  productFieldGridData,
-  productAgentGridData,
   maxAccess
 }) => {
   return (

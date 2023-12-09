@@ -22,7 +22,6 @@ const productLegTab = ({
   dispersalStore,
   maxAccess
 }) => {
-console.log(productLegValidation.values)
 
 return (
     <>
