@@ -100,7 +100,7 @@ const ReportViewer = ({ resourceId }) => {
   const generateReport = ({ params = '' }) => {
     switch (selectedFormat) {
       case 1:
-        setPDF('https://s3.eu-west-1.amazonaws.com/argus.erp/rptGLView.pdf')
+        setPDF('https://s3.eu-west-1.amazonaws.com/argus.erp/e8605ac4b66b4678.pdf')
         break
       case 2:
         setXLS('https://s3.eu-west-1.amazonaws.com/argus.erp/CLIENT-FILE.xlsx')
