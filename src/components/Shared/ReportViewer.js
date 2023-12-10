@@ -23,7 +23,7 @@ const ReportViewer = ({ resourceId }) => {
   //states
   const [reportStore, setReportStore] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
-  const [selectedFormat, setSelectedFormat] = useState(null)
+  const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
   const [paramsArray, setParamsArray] = useState([])
   const [reportParamWindowOpen, setReportParamWindowOpen] = useState(false)
   const [pdf, setPDF] = useState(null)
@@ -98,7 +98,7 @@ const ReportViewer = ({ resourceId }) => {
   // }
 
   const generateReport = ({ params = '' }) => {
-    switch (selectedFormat) {
+    switch (selectedFormat.key) {
       case 1:
         setPDF('https://s3.eu-west-1.amazonaws.com/argus.erp/e8605ac4b66b4678.pdf')
         break
@@ -118,6 +118,13 @@ const ReportViewer = ({ resourceId }) => {
     getReportLayout()
     getReportTemplate()
   }, [])
+
+  useEffect(() => {
+    if (reportStore.length > 0 && !selectedReport)
+      setSelectedReport(() => {
+        return reportStore[0]
+      })
+  }, [reportStore])
 
   const formatDataForApi = paramsArray => {
     const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
@@ -145,20 +152,24 @@ const ReportViewer = ({ resourceId }) => {
               <Autocomplete
                 size='small'
                 options={reportStore}
+                value={selectedReport}
                 getOptionLabel={option => option.layoutName || option.caption || ''}
                 onChange={(e, newValue) => setSelectedReport(newValue)}
                 renderInput={params => (
                   <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
                 )}
                 sx={{ width: 300 }}
+                disableClearable
               />
               <Autocomplete
                 size='small'
                 options={ExportFormat}
+                value={selectedFormat}
                 getOptionLabel={option => option.value}
-                onChange={(e, newValue) => setSelectedFormat(newValue.key)}
+                onChange={(e, newValue) => setSelectedFormat(newValue)}
                 renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}
                 sx={{ width: 200, pl: 2 }}
+                disableClearable
               />
               <Button
                 sx={{ ml: 2 }}
