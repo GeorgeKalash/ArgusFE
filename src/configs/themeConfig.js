@@ -33,7 +33,7 @@ const themeConfig = {
   // ** Other Configs
   responsiveFontSizes: true /* true | false */,
   disableRipple: false /* true | false */,
-  disableCustomizer: false /* true | false */,
+  disableCustomizer: true /* true | false */,
   toastPosition: 'bottom-right' /* top-left | top-center | top-right | bottom-left | bottom-center | bottom-right */
 }
 
