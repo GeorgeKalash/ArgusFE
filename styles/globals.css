@@ -92,3 +92,16 @@ code[class*='language-'] {
   align-items: center;
   padding-bottom: 4px;
 }
+
+.p-datatable-thead {
+  position: sticky;
+  top: 0;
+  background-color: #fff; /* Set the background color as needed */
+  z-index: 1; /* Ensure the header appears above the content */
+}
+
+.p-datatable-tbody {
+  /* Add additional styles as needed */
+  overflow-y: auto;
+  max-height: 100px; /* Set the maximum height for the scrollable content */
+}

@@ -41,6 +41,7 @@ const  UpdateExchangeRates = () => {
       countryId: '',
       exchangeId: '',
       exchangeRef: '',
+      exchangeName: '',
       rateCalcMethodName: '',
       rateAgainstName: '',
       rateAgainstCurrencyRef:'',
@@ -79,6 +80,14 @@ const  UpdateExchangeRates = () => {
 
     },
 
+    {
+      field: 'textfield',
+      header: _labels.exchangeTable,
+      name: 'exchangeName',
+      mandatory: true,
+      readOnly: true
+
+    },
     {
       field: 'textfield',
       header: _labels.RCM,

@@ -410,6 +410,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
 
   const addProductMaster = () => {
     productMasterValidation.setValues(getNewProductMaster())
+    setDispersalsGridData([])
     fillTypeStore()
     fillFunctionStore()
     fillLanguageStore()
@@ -863,6 +864,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
   const resetDispersals = () => {}
 
   const getDispersalsGridData = productId => {
+    setDispersalsGridData([]);
     const defaultParams = `_productId=${productId}`
     var parameters = defaultParams
     getRequest({
