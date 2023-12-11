@@ -11,12 +11,12 @@ const ExchangeTableTab=({
     exchangeTableValidation,
     currencyStore,
     fCurrencyStore,
+    RCMStore,
     rateAgainstStore,
-    maxAccess
+    maxAccess,
+    setRateAgainst
 }) =>{
 
-
-const [position, setPosition] = useState()
 
     return (
         <Grid container spacing={4}>
@@ -59,48 +59,73 @@ const [position, setPosition] = useState()
               required
               onChange={(event, newValue) => {
 
-                exchangeTableValidation && exchangeTableValidation.setFieldValue('currencyId', newValue?.key);
+                exchangeTableValidation && exchangeTableValidation.setFieldValue('currencyId', newValue?.recordId);
               }}
-              error={exchangeTableValidation.touched.type && Boolean(exchangeTableValidation.errors.currencyId)}
-              helperText={exchangeTableValidation.touched.type && exchangeTableValidation.errors.currencyId}
+              error={exchangeTableValidation.touched.currencyId && Boolean(exchangeTableValidation.errors.currencyId)}
+              helperText={exchangeTableValidation.touched.currencyId && exchangeTableValidation.errors.currencyId}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomComboBox
-              name='rcm'
+              name='rateCalcMethod'
               label={labels.rcm}
-              valueField='recordId'
-              displayField='name'
-              store={rcmStore}
-              value={rcmStore.filter(item => item.recordId === exchangeTableValidation.values.rcm)[0]}
+              valueField='key'
+              displayField='value'
+              store={RCMStore}
+              value={RCMStore.filter(item => item.key === exchangeTableValidation.values.rateCalcMethod)[0]}
               required
               onChange={(event, newValue) => {
 
-                exchangeTableValidation && exchangeTableValidation.setFieldValue('type', newValue?.key);
+                exchangeTableValidation && exchangeTableValidation.setFieldValue('rateCalcMethod', newValue?.key);
               }}
-              error={exchangeTableValidation.touched.rcm && Boolean(exchangeTableValidation.errors.rcm)}
-              helperText={exchangeTableValidation.touched.rcm && exchangeTableValidation.errors.rcm}
+              error={exchangeTableValidation.touched.rateCalcMethod && Boolean(exchangeTableValidation.errors.rateCalcMethod)}
+              helperText={exchangeTableValidation.touched.rateCalcMethod && exchangeTableValidation.errors.rateCalcMethod}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomComboBox
               name='rateAgainst'
               label={labels.rateAgainst}
-              valueField='recordId'
-              displayField='name'
+              valueField='key'
+              displayField='value'
               store={rateAgainstStore}
-              value={rateAgainstStore.filter(item => item.recordId === exchangeTableValidation.values.rcm)[0]}
+              value={rateAgainstStore.filter(item => item.key === exchangeTableValidation.values.rateAgainst)[0]}
               required
               onChange={(event, newValue) => {
+                // exchangeTableValidation.setFieldValue('rateAgainst','');
+                exchangeTableValidation && exchangeTableValidation.setFieldValue('rateAgainst', newValue?.key);
 
-                exchangeTableValidation && exchangeTableValidation.setFieldValue('type', newValue?.key);
+                newValue?.key && setRateAgainst(newValue?.key)
+
+                exchangeTableValidation &&   newValue?.key=== 1 && exchangeTableValidation.setFieldValue('rateAgainstCurrencyId', '');
               }}
-              error={exchangeTableValidation.touched.rcm && Boolean(exchangeTableValidation.errors.rcm)}
-              helperText={exchangeTableValidation.touched.rcm && exchangeTableValidation.errors.rcm}
+              error={exchangeTableValidation.touched.rateAgainst && Boolean(exchangeTableValidation.errors.rateAgainst)}
+              helperText={exchangeTableValidation.touched.rateAgainst && exchangeTableValidation.errors.rateAgainst}
             />
           </Grid>
 
 
+          <Grid item xs={12}>
+            <CustomComboBox
+              name='rateAgainstCurrencyId'
+              label={labels.fCurrency}
+              valueField='recordId'
+              displayField='name'
+              store={currencyStore}
+
+              value={currencyStore.filter(item => item.recordId === exchangeTableValidation.values.rateAgainstCurrencyId)[0]}
+              required={exchangeTableValidation.values.rateAgainst ===2 && true}
+              readOnly={exchangeTableValidation.values.rateAgainst !==2 && true}
+
+              onChange={(event, newValue) => {
+
+                exchangeTableValidation && exchangeTableValidation.setFieldValue('rateAgainstCurrencyId', newValue?.recordId);
+
+              }}
+              error={exchangeTableValidation.touched.rateAgainstCurrencyId && Boolean(exchangeTableValidation.errors.rateAgainstCurrencyId)}
+              helperText={exchangeTableValidation.touched.rateAgainstCurrencyId && exchangeTableValidation.errors.rateAgainstCurrencyId}
+            />
+          </Grid>
 
           </Grid>
     )

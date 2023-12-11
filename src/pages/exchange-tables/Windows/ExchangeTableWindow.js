@@ -9,15 +9,16 @@ const ExchangeTableWindow = ({
     height,
     onSave,
     editMode,
-    typeStore,
     exchangeTableValidation,
     currencyStore,
-    FCurrencyStore,
+    fCurrencyStore,
+    rateAgainstStore,
+    RCMStore,
     labels,
+    setRateAgainst,
     maxAccess
 }) => {
 
-  console.log(exchangeTableValidation)
 
 return (
 
@@ -29,17 +30,17 @@ return (
     height={height}
     onSave={onSave}
     exchangeTableValidation={exchangeTableValidation}
-    typeStore={typeStore}
     >
          <CustomTabPanel>
            <ExchangeTableTab
               labels={labels}
               exchangeTableValidation={exchangeTableValidation}
-              typeStore={typeStore}
               maxAccess={maxAccess}
               currencyStore={currencyStore}
               fCurrencyStore={fCurrencyStore}
               rateAgainstStore={rateAgainstStore}
+              RCMStore={RCMStore}
+              setRateAgainst={setRateAgainst}
            />
            </CustomTabPanel>
         </Window>

@@ -10,7 +10,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import ExchangeTableWindow from './Windows/ExchangeTableWindow'
 import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
-import { getNewProfession, populateProfession } from 'src/Models/CurrencyTradingSettings/Profession'
+import { getNewExchangeTable, populateExchangeTable } from 'src/Models/FinancialsSettings/ExchangeTable'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -35,11 +35,14 @@ const ExchangeTables = () => {
   const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [rateAgainst, setRateAgainst] = useState(null)
 
 
   const [currencyStore, setCurrencyStore] = useState([])
   const [fCurrencyStore, setFCurrencyStore] = useState([])
-  const [rateAgainstStore, setRateAainstStore] = useState([])
+  const [RCMStore, setRCMStore] = useState([])
+
+  const [rateAgainstStore, setRateAgainstStore] = useState([])
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.ExchangeTables, setAccess)
@@ -48,7 +51,8 @@ const ExchangeTables = () => {
         getGridData({ _startAt: 0, _pageSize: 30 })
         getLabels(ResourceIds.ExchangeTables, setLabels)
         fillCurrencyStore()
-        fillCRMStore()
+        fillRCMStore()
+        fillRateAgainst()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -86,16 +90,16 @@ const ExchangeTables = () => {
     },
   ]
 
-  const addProfession = () => {
-    exchangeTableValidation.setValues(getNewProfession())
+  const addExchangeTable = () => {
+    exchangeTableValidation.setValues(getNewExchangeTable())
 
     // setEditMode(false)
     setWindowOpen(true)
   }
 
-  const delProfession = obj => {
+  const delExchangeTable = obj => {
     postRequest({
-      extension: CurrencyTradingSettingsRepository.Profession.del,
+      extension: MultiCurrencyRepository.ExchangeTable.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -107,15 +111,13 @@ const ExchangeTables = () => {
       })
   }
 
-  const editProfession = obj => {
-    console.log(obj.monthlyIncome)
-    getFormattedNumberMax(obj?.monthlyIncome,8,2)
-    obj.monthlyIncome = typeof obj.monthlyIncome !== undefined && getFormattedNumberMax(obj?.monthlyIncome,8,2)
-    console.log('test', obj)
-    exchangeTableValidation.setValues(populateProfession(obj))
-    console.log(obj)
+  const editExchangeTable = obj => {
 
-    // setEditMode(true)
+    exchangeTableValidation.setValues(populateExchangeTable(obj))
+
+      setRateAgainst(obj.rateAgainst)
+
+
     setWindowOpen(true)
   }
 
@@ -133,27 +135,27 @@ const ExchangeTables = () => {
       })
   }
 
-  const fillCRMStore = () => {
+  const fillRCMStore = () => {
     var parameters = '_database=19'
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
     })
       .then(res => {
-        setCrmSore(res.list)
+        setRCMStore(res.list)
       })
       .catch(error => {})
   }
 
 
-  const fillFCurrency = () => {
+  const fillRateAgainst = () => {
     var parameters = '_database=70'
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
     })
       .then(res => {
-        setFCurrencyStore(res.list)
+        setRateAgainstStore(res.list)
       })
       .catch(error => {})
   }
@@ -176,24 +178,32 @@ const ExchangeTables = () => {
 
   const exchangeTableValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: false,
+    validateOnChange: true,
+
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
+
       name: yup.string().required('This field is required'),
-      flName: yup.string().required('This field is required'),
-      monthlyIncome: yup.string().required('This field is required'),
-      riskFactor: yup.string().required('This field is required')
+
+      currencyId: yup.string().required('This field is required'),
+      rateCalcMethod: yup.string().required('This field is required'),
+
+       rateAgainst: yup.string().required('This field is required'),
+       rateAgainstCurrencyId: rateAgainst==2 && yup.string().required('This field is required')
+
+       // No validation when Rate Against is not 2
+
     }),
     onSubmit: values => {
       console.log({ values })
-      postProfession(values)
+      postExchangeTable(values)
     }
   })
 
-  const postProfession = obj => {
+  const postExchangeTable = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: CurrencyTradingSettingsRepository.Profession.set,
+      extension: MultiCurrencyRepository.ExchangeTable.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -220,7 +230,7 @@ const ExchangeTables = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addProfession} maxAccess={access} />
+        <GridToolbar onAdd={addExchangeTable} maxAccess={access} />
 
         <Table
           columns={columns}
@@ -229,8 +239,8 @@ const ExchangeTables = () => {
           api={getGridData}
           isLoading={false}
           maxAccess={access}
-          onEdit={editProfession}
-          onDelete={delProfession}
+          onEdit={editExchangeTable}
+          onDelete={delExchangeTable}
         />
       </Box>
 
@@ -243,9 +253,12 @@ const ExchangeTables = () => {
           exchangeTableValidation={exchangeTableValidation}
           currencyStore={currencyStore}
           fCurrencyStore={fCurrencyStore}
+          RCMStore={RCMStore}
           rateAgainstStore={rateAgainstStore}
           labels={_labels}
           maxAccess={access}
+          rateAgainst={rateAgainst}
+          setRateAgainst={setRateAgainst}
         />
       )}
     </>
