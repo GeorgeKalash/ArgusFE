@@ -4,7 +4,7 @@ import { Box, Button, Grid, Typography } from '@mui/material'
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
 
-const GridToolbar = ({ onAdd, openRPB, onGo, paramsArray, ...props }) => {
+const GridToolbar = ({ onAdd, openRPB, disableRPB = false, onGo, paramsArray, children, ...props }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.NOACCESS
 
@@ -16,8 +16,9 @@ const GridToolbar = ({ onAdd, openRPB, onGo, paramsArray, ...props }) => {
 
   return (
     <Box>
+      {children && children}
       <Box sx={{ display: 'flex', pb: 2 }}>
-        {addBtnVisible && (
+        {onAdd && addBtnVisible && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
             <Button onClick={onAdd} variant='contained'>
               Add
@@ -26,7 +27,7 @@ const GridToolbar = ({ onAdd, openRPB, onGo, paramsArray, ...props }) => {
         )}
         {openRPB && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Button onClick={openRPB} variant='contained'>
+            <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
               OPEN RPB
             </Button>
           </Box>

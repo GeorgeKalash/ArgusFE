@@ -9,23 +9,27 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 
 // ** Custom Imports
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import Window from 'src/components/Shared/Window'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import CustomTextField from '../Inputs/CustomTextField'
-import CustomDatePicker from '../Inputs/CustomDatePicker'
-import Window from './Window'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
-const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, paramsArray, setParamsArray }) => {
+const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, paramsArray, setParamsArray, disabled }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [parameters, setParameters] = useState(null)
   const [fields, setFields] = useState([])
   const [errorMessage, setErrorMessage] = useState(null)
+
+  //snaphot stores
+  const [itemSnapshotStore, setItemSnapshotStore] = useState([null])
 
   const initialParams = paramsArray
 
@@ -72,6 +76,52 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
       default:
         break
     }
+  }
+
+  const getCombo = ({ field, valueField, displayField, store, onChange }) => {
+    return (
+      <Grid item xs={12}>
+        <CustomComboBox
+          name={field.key}
+          label={field.caption}
+          valueField={valueField}
+          displayField={displayField}
+          store={store}
+          value={
+            parametersValidation?.values &&
+            parametersValidation?.values[field.key] &&
+            store.filter(item => item.key === parametersValidation?.values[field.key])[0]
+          }
+          required={field.mandatory}
+          onChange={(event, newValue) => {
+            onChange && onChange(newValue)
+            handleFieldChange({
+              fieldId: field.id,
+              fieldKey: field.key,
+              value: newValue?.key,
+              caption: field.caption,
+              display: newValue?.value
+            })
+            parametersValidation.setFieldValue([field.key], newValue?.key)
+          }}
+          sx={{ pt: 2 }}
+        />
+      </Grid>
+    )
+  }
+
+  const itemSnapshot = newValue => {
+    var parameters = '_categoryId=0&_msId=0&_filter=&_startAt=0&_size=30'
+    getRequest({
+      extension: InventoryRepository.Item.snapshot,
+      parameters
+    })
+      .then(res => {
+        return res.list
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   const getComboBoxByClassId = field => {
@@ -142,39 +192,96 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
               }
             })
 
-            fields.push(
-              <Grid item xs={12}>
-                <CustomComboBox
-                  name={field.key}
-                  label={field.caption}
-                  valueField='siteId'
-                  displayField='reference'
-                  store={res.list}
-                  value={
-                    parametersValidation?.values &&
-                    parametersValidation?.values[field.key] &&
-                    res.list.filter(item => item.key === parametersValidation?.values[field.key])[0]
-                  }
-                  required={field.mandatory}
-                  onChange={(event, newValue) => {
-                    handleFieldChange({
-                      fieldId: field.id,
-                      fieldKey: field.key,
-                      value: newValue?.key,
-                      caption: field.caption,
-                      display: newValue?.value
-                    })
-                    parametersValidation.setFieldValue([field.key], newValue?.key)
-                  }}
-                  sx={{ pt: 2 }}
-                />
-              </Grid>
-            )
+            fields.push(getCombo({ field, valueField: 'siteId', displayField: 'reference', store: res.list }))
           })
           .catch(error => {
             setErrorMessage(error)
           })
         break
+
+      case 41201:
+        fields.push(
+          getCombo({
+            field,
+            valueField: 'recordId',
+            displayField: 'reference',
+            itemSnapshotStore,
+            onChange: setItemSnapshotStore(itemSnapshot())
+          })
+        )
+        break
+
+      // case 41103:
+      //   var parameters = '_filter='
+
+      //   getRequest({
+      //     extension: InventoryRepository.Category.qry,
+      //     parameters
+      //   })
+      //     .then(res => {
+      //       var _fieldValue = getFieldValue(field.key)
+
+      //       parametersValidation.setValues(pre => {
+      //         return {
+      //           ...pre,
+      //           ..._fieldValue
+      //         }
+      //       })
+
+      //       fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
+      //     })
+      //     .catch(error => {
+      //       setErrorMessage(error)
+      //     })
+      //   break
+
+      // case 41102:
+      //   var parameters = '_filter='
+
+      //   getRequest({
+      //     extension: InventoryRepository.Measurement.qry,
+      //     parameters
+      //   })
+      //     .then(res => {
+      //       var _fieldValue = getFieldValue(field.key)
+
+      //       parametersValidation.setValues(pre => {
+      //         return {
+      //           ...pre,
+      //           ..._fieldValue
+      //         }
+      //       })
+
+      //       fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
+      //     })
+      //     .catch(error => {
+      //       setErrorMessage(error)
+      //     })
+      //   break
+
+      // case 51101:
+      //   var parameters = '_filter='
+
+      //   getRequest({
+      //     extension: SaleRepository.PriceLevel.qry,
+      //     parameters
+      //   })
+      //     .then(res => {
+      //       var _fieldValue = getFieldValue(field.key)
+
+      //       parametersValidation.setValues(pre => {
+      //         return {
+      //           ...pre,
+      //           ..._fieldValue
+      //         }
+      //       })
+
+      //       fields.push(getCombo({ field, valueField: 'siteId', displayField: 'reference', store: res.list }))
+      //     })
+      //     .catch(error => {
+      //       setErrorMessage(error)
+      //     })
+      //   break
 
       default:
         break
@@ -331,8 +438,8 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
   }
 
   useEffect(() => {
-    if (!parameters && fields.length === 0) getParameterDefinition()
-  }, [parameters])
+    if (!parameters && fields.length === 0 && !disabled) getParameterDefinition()
+  }, [parameters, disabled])
 
   useEffect(() => {
     if (!open) setFields([])
@@ -343,8 +450,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
     <>
       {open && (
         <Window
-          id='DocumentTypeWindow'
-          Title='Document Type Map'
+          id='RPBWindow'
           onClose={onClose}
           width={600}
           height={height}

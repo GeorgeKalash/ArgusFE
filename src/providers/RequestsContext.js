@@ -31,13 +31,14 @@ const RequestsProvider = ({ children }) => {
 
   const postRequest = async body => {
     const accessToken = await getAccessToken()
+    const url = body.url ? body.url : process.env.NEXT_PUBLIC_BASE_URL
 
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
 
     return axios({
       method: 'POST',
-      url: process.env.NEXT_PUBLIC_BASE_URL + body.extension,
+      url: url + body.extension,
       headers: {
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'multipart/form-data'

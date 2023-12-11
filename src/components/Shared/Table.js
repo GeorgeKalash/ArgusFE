@@ -294,7 +294,7 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
   }
 
   const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = height ? `${height}px` : `calc(100vh - 136px - 48px - ${paginationHeight})`
+  const tableHeight = height ? `${height}px` : `calc(100vh - 88px - 48px - ${paginationHeight})`
 
   useEffect(() => {
     console.log('enter useEffect')

@@ -97,7 +97,7 @@ const TabsProvider = ({ children }) => {
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={value} onChange={handleChange} aria-label='basic tabs example'>
+          <Tabs value={value} onChange={handleChange} aria-label='basic tabs example' sx={{ maxHeight: '40px' }}>
             {activeTabs.length > 0 &&
               activeTabs.map(
                 (activeTab, i) =>
@@ -118,6 +118,7 @@ const TabsProvider = ({ children }) => {
                         </IconButton>
                       }
                       iconPosition='end'
+                      sx={{ minHeight: '40px' }}
                     />
                   )
               )}
