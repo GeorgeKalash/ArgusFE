@@ -33,6 +33,8 @@ const ProductCurrenciesTab = ({
             isInactive: false
           }}
           width={900}
+
+
         />
       </Box>
     </>

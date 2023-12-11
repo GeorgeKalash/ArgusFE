@@ -23,10 +23,9 @@ const ExchangeMapWindow = ({
   maxAccess,
   labels
 }) => {
-  console.log(countriesGridValidation.values.rows)
 
 return (
-    <Window id='CurrencyMapsWindow' Title={labels.exchangeMap} onClose={onClose} onSave={onSave} width={500} height={400}>
+    <Window id='CurrencyMapsWindow' Title={labels.exchangeMap} onClose={onClose} onSave={onSave} width={800} height={400}>
       <CustomTabPanel index={0} value={0}>
         <Box
           sx={{
@@ -93,11 +92,12 @@ return (
                       countryId: exchangeMapValidation.values.countryId,
                       plantId: '',
                       exchangeId: '',
-                      exchangeRef: ''
+                      exchangeRef: '',
+                      exchangeName: ''
                     }}
                     allowDelete={false}
                     allowAddNewLine={false}
-                    width={500}
+                    width={800}
                   />
                 )}
               </Box>

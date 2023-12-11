@@ -159,7 +159,7 @@ const CurrencyExchangeMap = () => {
     currency: labels && labels.find(item => item.key === 2) && labels.find(item => item.key === 2).value,
     exchangeTable: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
     plant: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value,
-    name: labels && labels.find(item => item.key === 5) && labels.find(item => item.key === 4).value
+    name: labels && labels.find(item => item.key === 5) && labels.find(item => item.key === 5).value
 
   }
 

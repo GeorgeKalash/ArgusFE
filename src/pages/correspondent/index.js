@@ -257,6 +257,7 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
           glCurrencyName: '',
           exchangeId: '',
           exchangeRef: '',
+          exchangeName: '',
           outward: false,
           inward: false,
           bankDeposit: false,
@@ -407,6 +408,7 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
                 glCurrencyName: '',
                 exchangeId: '',
                 exchangeRef: '',
+                exchangeName: '',
                 outward: false,
                 inward: false,
                 bankDeposit: false,
@@ -433,9 +435,11 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
           corId: correspondentValidation.values ? correspondentValidation.values.recordId : '',
           currencyId: '',
           countryId: '',
+          countryName: '',
           plantId: '',
           plantRef: '',
           exchangeRef: '',
+          exchangeName:'',
           exchangeId: ''
         }
       ]
@@ -472,7 +476,8 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
           plantId: '',
           plantRef: '',
           exchangeId: '',
-          exchangeRef: ''
+          exchangeRef: '',
+          exchangeName: ''
         }
       ]
     },
@@ -500,6 +505,7 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       readOnly:true
 
     },
+
     {
       field: 'combobox',
       header: _labels.exchangeTable,
@@ -510,12 +516,23 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
 
       valueField: 'recordId',
       displayField: 'reference',
-      fieldsToUpdate: [],
+      fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
         { key: 'name', value: 'Name' }
       ]
+    },
+
+
+    {
+      field: 'textfield',
+      header: _labels.name,
+      name: 'exchangeName',
+      mandatory: false,
+      readOnly: true
     }
+
+
   ]
 
 
