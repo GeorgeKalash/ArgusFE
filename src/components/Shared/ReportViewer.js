@@ -12,7 +12,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ReportRepository } from 'src/repositories/ReportRepository'
+import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 
 // ** Statics
 import { ExportFormat } from 'src/statics/ExportFormat'
@@ -86,7 +86,7 @@ const ReportViewer = ({ resourceId }) => {
   //   }
   //   postRequest({
   //     url: process.env.NEXT_PUBLIC_REPORT_URL,
-  //     extension: ReportRepository.generateReport,
+  //     extension: DevExpressRepository.generateReport,
   //     record: JSON.stringify(obj)
   //   })
   //     .then(res => {
