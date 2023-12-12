@@ -999,13 +999,13 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       nameId: 'countryId',
       name: 'countryRef',
       mandatory: false,
-      store: countryStore.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
+      store: countriesGridValidation.values?.rows,
+      valueField: 'countryId',
+      displayField: 'countryRef',
+      fieldsToUpdate: [{ from: 'countryName', to: 'countryName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Country Ref' },
-        { key: 'flName', value: 'Foreign Language Name' }
+        { key: 'countryRef', value: 'Ref' },
+        { key: 'countryName', value: 'Name' }
       ]
     },
     {

@@ -31,7 +31,8 @@ return (
             countryRef: '',
             countryName: ''
           }}
-          width={1000}
+          scrollHeight={320}
+          width={950}
         />
       </Box>
     </>
