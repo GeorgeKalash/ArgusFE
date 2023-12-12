@@ -59,7 +59,8 @@ const CustomComboBox = ({
             //         return option
             // }}
             getOptionLabel={(option) => {
-               if(value ){
+              if(columnsInDropDown || typeof displayField =='object'){
+               if(value){
                 const selectedOption = store.find((item) => item[valueField] === option[valueField]);
                 if (selectedOption)
                 var text ='';
@@ -69,7 +70,7 @@ const CustomComboBox = ({
                     text += `${option[header]} `;
                   });
 
-return text
+                    return text
                  }
 
                 // const selectedOption = store.find((item) => item[valueField] === option[valueField]);
@@ -95,6 +96,14 @@ return search.trim(); // Trim to remove extra spaces
                 const selectedOption = store.find((item) => item[valueField] === option);
                 if (selectedOption) return selectedOption[displayField];
                 else return '';
+              }
+
+             }else{
+                if (typeof option === 'object')
+                        return option[displayField]
+                    else
+                        return option
+
               }
             }}
 
@@ -172,7 +181,7 @@ return search.trim(); // Trim to remove extra spaces
             sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
 
             renderOption={(props, option) => {
-              if (columnsInDropDown && columnsInDropDown.length > 0)
+              if (columnsInDropDown && columnsInDropDown.length > 0){
                 return (
                   <Box>
                     {props.id.endsWith('-0') && (
@@ -196,8 +205,18 @@ return search.trim(); // Trim to remove extra spaces
                       })}
                     </li>
                   </Box>
-                )
-            }}
+                )}else{
+                return( <Box>
+
+                  <li {...props}>
+                    {/* <Box sx={{ flex: 1 }}>{option[valueField]}</Box> */}
+                    <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
+                  </li>
+                </Box>)
+                }
+            }
+
+          }
             renderInput={(params) =>
                 <TextField
                     {...params}
