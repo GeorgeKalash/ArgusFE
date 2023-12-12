@@ -449,9 +449,10 @@ const handleSubmit = () => {
                 name='countryId'
                 label={_labels.country}
                 valueField='recordId'
-                displayField='flName'
 
-                // displayField={'reference', 'flName'}
+                // displayField='flName'
+
+                displayField={['reference','flName']}
                 store={countryStore}
                 columnsInDropDown= {[
                   { key: 'reference', value: 'Country Ref' },

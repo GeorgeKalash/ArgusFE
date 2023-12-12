@@ -59,8 +59,20 @@ const CustomComboBox = ({
             //         return option
             // }}
             getOptionLabel={(option) => {
-               if(value){
+               if(value ){
                 const selectedOption = store.find((item) => item[valueField] === option[valueField]);
+                if (selectedOption)
+                var text ='';
+
+                if(typeof displayField =='object'){
+                  displayField.forEach((header) => {
+                    text += `${option[header]} `;
+                  });
+
+return text
+                 }
+
+                // const selectedOption = store.find((item) => item[valueField] === option[valueField]);
                 if (selectedOption)
                  return selectedOption[displayField];
                 else return '';
@@ -86,71 +98,71 @@ return search.trim(); // Trim to remove extra spaces
               }
             }}
 
-//             getOptionLabel={option => {
-//  if(option.length ==1){
-//   console.log('option')
-//  }
-//                 if (typeof option === 'object'){
-//                   console.log(option[valueField])
-//                   console.log(option)
+            getOptionLabels={option => {
+ if(option.length ==1){
+  console.log('option')
+ }
+                if (typeof option === 'object'){
+                  console.log(option[valueField])
+                  console.log(option)
 
-//                         //  if (typeof displayField === 'object'){
-//                               // console.log('object')
+                        //  if (typeof displayField === 'object'){
+                              // console.log('object')
 
-//                               // if(option[displayField]){
-//                               //   let text ='';
-//                               //   { displayField.map((header, i) => {
-//                               //       text += `${option[header]} `
-//                               //   })}
+                              // if(option[displayField]){
+                              //   let text ='';
+                              //   { displayField.map((header, i) => {
+                              //       text += `${option[header]} `
+                              //   })}
 
-//                               //   return text;
-//                               // }
+                              //   return text;
+                              // }
 
-//                             // }else{
+                            // }else{
 
-//                             //   if(option[displayField]){
-//                             //   const selectedOption = store.find(item => {
-//                             //     return item[valueField] === option[valueField]
-//                             //   })
-//                             //   if (selectedOption)
-//                             //   return selectedOption[displayField]
-//                             //  }
-//                             // }else{
-//                             //      if(option[displayField] !=''){
-//                             //       let search ='';
-//                             //       {columnsInDropDown.map((header, i) => {
-//                             //         search += `${option[header.key]} `
-//                             //     })}
+                            //   if(option[displayField]){
+                            //   const selectedOption = store.find(item => {
+                            //     return item[valueField] === option[valueField]
+                            //   })
+                            //   if (selectedOption)
+                            //   return selectedOption[displayField]
+                            //  }
+                            // }else{
+                            //      if(option[displayField] !=''){
+                            //       let search ='';
+                            //       {columnsInDropDown.map((header, i) => {
+                            //         search += `${option[header.key]} `
+                            //     })}
 
-//                             //     return search;
-//                             //      }
-
-
-//                             // }
-
-//                   if (columnsInDropDown && columnsInDropDown.length > 0) {
-//                     let search ='';
-//                     {columnsInDropDown.map((header, i) => {
-//                         search += `${option[header.key]} `
-//                     })}
-
-//                     return search;
-
-//                    }
-
-//                    return `${option[displayField]}`
+                            //     return search;
+                            //      }
 
 
-//                   }else {
+                            // }
+
+                  if (columnsInDropDown && columnsInDropDown.length > 0) {
+                    let search ='';
+                    {columnsInDropDown.map((header, i) => {
+                        search += `${option[header.key]} `
+                    })}
+
+                    return search;
+
+                   }
+
+                   return `${option[displayField]}`
 
 
-//                       const selectedOption = store.find(item => {
-//                         return item[valueField] === option
-//                       })
-//                       if (selectedOption) return selectedOption[displayField]
-//                       else return ''
-//                    }
-//             }}
+                  }else {
+
+
+                      const selectedOption = store.find(item => {
+                        return item[valueField] === option
+                      })
+                      if (selectedOption) return selectedOption[displayField]
+                      else return ''
+                   }
+            }}
             isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
             onChange={onChange}
             fullWidth={fullWidth}
