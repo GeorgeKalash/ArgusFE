@@ -234,6 +234,7 @@ const InlineEditGrid = ({
             }}
             fullWidth={true}
             renderInput={params => <TextField {...params} required={column?.mandatory} sx={{ flex: 1 }} />}
+            openOnFocus
           />
         )
       case 'lookup':
