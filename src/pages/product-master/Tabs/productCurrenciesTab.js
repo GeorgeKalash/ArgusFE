@@ -32,6 +32,10 @@ const ProductCurrenciesTab = ({
             dispersalTypeName: '',
             isInactive: false
           }}
+
+          scrollHeight={280}
+
+          // scrollable={false}
           width={900}
 
 

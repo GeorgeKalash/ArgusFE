@@ -48,7 +48,8 @@ const GlobalExchangeBuyMap = () => {
           .catch(error => {})
 
         fillCountryStore()
-        fillExchangeTableStore()
+
+        // fillExchangeTableStore()
         getLabels(ResourceIds.GlobalExchangeBuyMap, setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
@@ -70,10 +71,11 @@ const GlobalExchangeBuyMap = () => {
       })
   }
 
-  const fillExchangeTableStore = () => {
-    var parameters = `_filter=`
+  const fillExchangeTableStore = (id) => {
+    setExchangeTableStore({})
+    var parameters = `_currencyId=` + id
     getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.qry,
+      extension: MultiCurrencyRepository.ExchangeTable.qry2,
       parameters: parameters
     })
       .then(res => {
@@ -103,7 +105,9 @@ const GlobalExchangeBuyMap = () => {
           currencyId: currencyId,
           countryId: '',
           countryName: '',
+          countryRef: '',
           exchangeRef: '', // validate red
+          exchangeName: '', // validate red
           exchangeId: ''
         }
       ]
@@ -116,7 +120,9 @@ const GlobalExchangeBuyMap = () => {
   const _labels = {
     country: labels && labels.find(item => item.key === 1) && labels.find(item => item.key === 1).value,
     currency: labels && labels.find(item => item.key === 2) && labels.find(item => item.key === 2).value,
-    exchangeTable: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value
+    exchangeTable: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
+    name: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value
+
   }
 
   const postExchangeMaps = obj => {
@@ -137,13 +143,16 @@ const GlobalExchangeBuyMap = () => {
   }
 
   const getCurrenciesExchangeMaps = (currencyId) => {
+    fillExchangeTableStore(currencyId)
     exchangeMapsGridValidation.setValues({
       rows: [
         {
           currencyId: '',
           countryId: '',
           countryName: '',
-          exchangeRef: '',
+          countryRef: '',
+          exchangeRef: '', // validate red
+          exchangeName: '', // validate red
           exchangeId: ''
         }
       ]
@@ -170,12 +179,13 @@ const GlobalExchangeBuyMap = () => {
       field: 'combobox',
       header: _labels.country, //label
       nameId: 'countryId',
-      name: 'countryName',
+      name: 'countryRef',
       mandatory: true,
       store: countryStore.list,
 
       valueField: 'recordId',
-      displayField: 'name',
+      displayField: 'reference',
+      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
 
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
@@ -183,21 +193,38 @@ const GlobalExchangeBuyMap = () => {
       ]
     },
     {
+      field: 'textfield',
+      header: _labels.name,
+      name: 'countryName',
+      mandatory: false,
+      readOnly: true
+    },
+
+    {
       field: 'combobox',
       header: _labels.exchangeTable,
       nameId: 'exchangeId',
       name: 'exchangeRef',
       mandatory: true,
 
-      store: exchangeTableStore.list,
+      store: exchangeTableStore.list ,
       valueField: 'recordId',
       displayField: 'reference',
-      fieldsToUpdate: [],
+      fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
+
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
         { key: 'name', value: 'Name' }
       ]
+    },
+    {
+      field: 'textfield',
+      header: _labels.name,
+      name: 'exchangeName',
+      mandatory: false,
+      readOnly: true
     }
+
   ]
 
   const handleSubmit = () => {
@@ -261,6 +288,8 @@ const GlobalExchangeBuyMap = () => {
                       exchangeRef: ''
                     }}
                     width={'1200'}
+                    scrollable={true}
+                    scrollHeight={560}
                   />
                 </Box>
                 <WindowToolbar onSave={handleSubmit} />

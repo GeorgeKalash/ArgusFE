@@ -18,6 +18,8 @@ const InlineEditGrid = ({
   defaultRow,
   gridValidation,
   width,
+  scrollHeight ,
+  scrollable = true,
   allowDelete = true,
   allowAddNewLine = true,
   onDelete
@@ -167,8 +169,20 @@ const InlineEditGrid = ({
             readOnly={column?.readOnly}
             options={column.store}
             getOptionLabel={option => {
-              if (typeof option === 'object') return option[column.displayField]
-              else {
+              if (typeof option === 'object'){
+
+              if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
+                let search ='';
+                {column.columnsInDropDown.map((header, i) => {
+                    search += `${option[header.key]} `
+                })}
+
+                return search;
+              }
+
+              return `${option[column.displayField]}`
+
+              }else{
                 const selectedOption = column.store.find(item => {
                   return item[column.valueField] === option
                 })
@@ -177,6 +191,9 @@ const InlineEditGrid = ({
               }
             }}
             isOptionEqualToValue={(option, value) => {
+              // console.log(column.valueField)
+              // console.log(option[column.valueField])
+
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
             }}
             onChange={(event, newValue) => {
@@ -444,7 +461,7 @@ const InlineEditGrid = ({
 
   return (
     <Box>
-      <DataTable value={gridValidation?.values?.rows} editMode='cell' tableStyle={{ minWidth: tableWidth }}>
+      <DataTable value={gridValidation?.values?.rows}  scrollable={scrollable } scrollHeight={scrollHeight}  editMode='cell' tableStyle={{ minWidth: tableWidth }}>
         {columns.map((column, i) => {
           return (
             <Column

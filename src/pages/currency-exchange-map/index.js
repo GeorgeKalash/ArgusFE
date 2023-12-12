@@ -372,6 +372,8 @@ const CurrencyExchangeMap = () => {
                     allowDelete={false}
                     allowAddNewLine={false}
                     width={'1200'}
+                    scrollable={true}
+                    scrollHeight={560}
                   />
                 </Box>
                 <WindowToolbar onSave={handleSubmit} />

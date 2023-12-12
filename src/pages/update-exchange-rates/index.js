@@ -449,8 +449,14 @@ const handleSubmit = () => {
                 name='countryId'
                 label={_labels.country}
                 valueField='recordId'
-                displayField='name'
+                displayField='flName'
+
+                // displayField={'reference', 'flName'}
                 store={countryStore}
+                columnsInDropDown= {[
+                  { key: 'reference', value: 'Country Ref' },
+                  { key: 'flName', value: 'Foreign Language Name' }
+                ]}
                 value={
                   countryStore?.filter(
                     item =>
@@ -557,7 +563,8 @@ const handleSubmit = () => {
                   columns={exchangeRatesInlineGridColumns}
                   allowDelete={false}
                   allowAddNewLine={false}
-
+                  scrollable={true}
+                  scrollHeight={560}
                   width={'1200'}
                 />
               </Box>
