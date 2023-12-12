@@ -43,6 +43,7 @@ const RequestsProvider = ({ children }) => {
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'multipart/form-data'
       },
+      LanguageId: user.languageId,
       data: bodyFormData
     }).then(res => res.data)
   }

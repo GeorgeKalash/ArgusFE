@@ -47,7 +47,7 @@ const Window = ({
   }
 
   const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
-  const containerHeight = `calc(100vh - 88px)`
+  const containerHeight = `calc(100vh - 48px)`
 
   return (
     <Box

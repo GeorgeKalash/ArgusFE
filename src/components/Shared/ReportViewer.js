@@ -12,7 +12,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ReportRepository } from 'src/repositories/ReportRepository'
+import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 
 // ** Statics
 import { ExportFormat } from 'src/statics/ExportFormat'
@@ -77,42 +77,43 @@ const ReportViewer = ({ resourceId }) => {
       })
   }
 
-  // const generateReport = ({ params = '' }) => {
-  //   const obj = {
-  //     api_url: selectedReport.api_url + '?_params=',
-  //     assembly: selectedReport.assembly,
-  //     format: selectedFormat,
-  //     reportClass: selectedReport.reportClass
-  //   }
-  //   postRequest({
-  //     url: process.env.NEXT_PUBLIC_REPORT_URL,
-  //     extension: ReportRepository.generateReport,
-  //     record: JSON.stringify(obj)
-  //   })
-  //     .then(res => {
-  //       console.log({ res })
-  //     })
-  //     .catch(error => {
-  //       setErrorMessage(error)
-  //     })
-  // }
-
   const generateReport = ({ params = '' }) => {
-    switch (selectedFormat.key) {
-      case 1:
-        setPDF('https://s3.eu-west-1.amazonaws.com/argus.erp/e8605ac4b66b4678.pdf')
-        break
-      case 2:
-        setXLS('https://s3.eu-west-1.amazonaws.com/argus.erp/CLIENT-FILE.xlsx')
-        break
-      case 3:
-        setCSV('https://s3.eu-west-1.amazonaws.com/argus.erp/CLIENT-FILE.csv')
-        break
-
-      default:
-        break
+    const obj = {
+      api_url: selectedReport.api_url + '?_params=',
+      assembly: selectedReport.assembly,
+      format: selectedFormat.key,
+      reportClass: selectedReport.reportClass
     }
+    postRequest({
+      url: process.env.NEXT_PUBLIC_REPORT_URL,
+      extension: DevExpressRepository.generate,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        console.log({ res })
+      })
+      .catch(error => {
+        console.log({ error })
+        setErrorMessage(error)
+      })
   }
+
+  // const generateReport = ({ params = '' }) => {
+  //   switch (selectedFormat.key) {
+  //     case 1:
+  //       setPDF('https://s3.eu-west-1.amazonaws.com/argus.erp/e8605ac4b66b4678.pdf')
+  //       break
+  //     case 2:
+  //       setXLS('https://s3.eu-west-1.amazonaws.com/argus.erp/CLIENT-FILE.xlsx')
+  //       break
+  //     case 3:
+  //       setCSV('https://s3.eu-west-1.amazonaws.com/argus.erp/CLIENT-FILE.csv')
+  //       break
+
+  //     default:
+  //       break
+  //   }
+  // }
 
   useEffect(() => {
     getReportLayout()
