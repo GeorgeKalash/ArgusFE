@@ -162,8 +162,8 @@ return (
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('interfaceId', newValue?.recordId)
               }}
-              error={ productMasterValidation.touched && Boolean(productMasterValidation.errors.interfaceId)}
-              helperText={productMasterValidation.touched && productMasterValidation.errors.interfaceId}
+              error={ productMasterValidation.touched.interfaceId && Boolean(productMasterValidation.errors.interfaceId)}
+              helperText={productMasterValidation.touched.interfaceId && productMasterValidation.errors.interfaceId}
             />
           </Grid>
 

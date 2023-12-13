@@ -145,7 +145,8 @@ const CurrencyExchangeMap = () => {
           countryName: '',
           plantName: '',
           exchangeRef: '',
-          exchangeId: ''
+          exchangeId: '',
+          exchangeName: ''
         }
       ]
     },
@@ -224,7 +225,8 @@ const CurrencyExchangeMap = () => {
                   plantName:  plant.name,
                   exchangeId: value.exchangeId ? value.exchangeId : '',
                   plantRef:  plant.reference,
-                  exchangeRef: value.exchangeRef ? value.exchangeRef : ''
+                  exchangeRef: value.exchangeRef ? value.exchangeRef : '',
+                  exchangeName: value.exchangeName ? value.exchangeName : ''
                 };
               });
 
@@ -277,12 +279,20 @@ const CurrencyExchangeMap = () => {
 
       valueField: 'recordId',
       displayField: 'reference',
-      fieldsToUpdate: [],
+      fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Ref' },
         { key: 'name', value: 'Name' }
       ]
+    },
+    {
+      field: 'textfield',
+      header: _labels.name,
+      name: 'exchangeName',
+      mandatory: false,
+      readOnly: true
     }
+
   ]
 
   const handleSubmit = () => {
@@ -367,7 +377,8 @@ const CurrencyExchangeMap = () => {
                         ? exchangeMapsGridValidation.values.plantId
                         : '',
                       countryName: '',
-                      exchangeRef: ''
+                      exchangeRef: '',
+                      exchangeName: ''
                     }}
                     allowDelete={false}
                     allowAddNewLine={false}

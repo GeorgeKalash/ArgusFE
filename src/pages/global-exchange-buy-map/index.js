@@ -32,6 +32,11 @@ const GlobalExchangeBuyMap = () => {
   const [currencyId, setCurrencyId] = useState(0)
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
+  const [height, setHeight] = useState(window.innerHeight)
+
+  useEffect(()=>{
+  setHeight(window.innerHeight)
+  },[])
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
@@ -46,7 +51,9 @@ const GlobalExchangeBuyMap = () => {
             setCurrencyStore(res.list)
           })
           .catch(error => {})
+          setHeight(window.innerHeight)
 
+          console.log(window.innerHeight)
         fillCountryStore()
 
         // fillExchangeTableStore()
@@ -271,8 +278,9 @@ const GlobalExchangeBuyMap = () => {
               </Grid>
             </Grid>
             {currencyId > 0 && (
-              <Grid xs={12}>
-                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+
+              <Grid xs={12} spacing={5}>
+                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' ,marginRight:'5px'}}>
                   <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
                     columns={exchangeMapsInlineGridColumns}
@@ -289,7 +297,7 @@ const GlobalExchangeBuyMap = () => {
                     }}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={560}
+                    scrollHeight={'70vh'}
                   />
                 </Box>
                 <WindowToolbar onSave={handleSubmit} />

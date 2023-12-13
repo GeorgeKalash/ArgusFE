@@ -147,17 +147,18 @@ const[type, setType] = useState(0)
   const productMasterValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
+    validationSchema: windowOpen && yup.object({
       reference:  yup.string().required('This field is required'),
       name:  yup.string().required('This field is required'),
       type:  yup.string().required('This field is required'),
-      corId : type===1 ? yup.string().required('This field is required') : yup.string().notRequired(),
       functionId:  yup.string().required('This field is required'),
+      interfaceId:  yup.string().required('This field is required'),
       commissionBase:  yup.string().required('This field is required'),
-      isInactive:  yup.string().required('This field is required')
+      isInactive:  yup.string().required('This field is required'),
+      corId : type===1 ? yup.string().required('This field is required') : yup.string().notRequired()
+
     }),
     onSubmit: values => {
-
       postProductMaster(values)
     }
   })
@@ -832,12 +833,12 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      // productId: yup.string().required('This field is required'),
-      // reference: yup.string().required('This field is required'),
-      // name: yup.string().required('This field is required'),
-      // dispersalType: yup.string().required('This field is required'),
-      // isDefault: yup.string().required('This field is required'),
-      // isInactive: yup.string().required('This field is required')
+      productId: yup.string().required('This field is required'),
+      reference: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required'),
+      dispersalType: yup.string().required('This field is required'),
+      isDefault: yup.string().required('This field is required'),
+      isInactive: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postProductDispersal(values)
