@@ -737,6 +737,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       nameId: 'currencyId',
       name: 'currencyRef',
       mandatory: true,
+      widthDropDown: '300',
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
