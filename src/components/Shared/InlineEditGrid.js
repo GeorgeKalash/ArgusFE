@@ -9,8 +9,10 @@ import DeleteDialog from './DeleteDialog'
 import Icon from 'src/@core/components/icon'
 import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
-const CustomPaper = (props, length) => {
-  return <Paper sx={{ position: 'absolute', width: `${length}40%`, zIndex: 999, mt: 1 }} {...props} />
+const CustomPaper = (props, widthDropDown) => {
+
+
+return <Paper sx={{ width: `${widthDropDown ? widthDropDown+'%' : 'auto'}` }} {...props} />
 }
 
 const InlineEditGrid = ({
@@ -220,7 +222,7 @@ const InlineEditGrid = ({
             PaperComponent={props =>
               column.columnsInDropDown &&
               column.columnsInDropDown.length > 0 &&
-              CustomPaper(props, column.columnsInDropDown.length)
+              CustomPaper(props, column.widthDropDown)
             }
             renderOption={(props, option) => {
               if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
@@ -230,7 +232,7 @@ const InlineEditGrid = ({
                       <li className={props.className}>
                         {column.columnsInDropDown.map((header, i) => {
                           return (
-                            <Box key={i} sx={{ flex: 1 }}>
+                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold'}}>
                               {header.value.toUpperCase()}
                             </Box>
                           )
@@ -252,6 +254,7 @@ const InlineEditGrid = ({
             fullWidth={true}
             renderInput={params => <TextField {...params} required={column?.mandatory} sx={{ flex: 1 }} />}
             openOnFocus
+
           />
         )
       case 'lookup':
@@ -300,7 +303,7 @@ const InlineEditGrid = ({
             PaperComponent={props =>
               column.columnsInDropDown &&
               column.columnsInDropDown.length > 0 &&
-              CustomPaper(props, column.columnsInDropDown.length)
+              CustomPaper(props, widthDropDown)
             }
             renderOption={(props, option) => {
               if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
