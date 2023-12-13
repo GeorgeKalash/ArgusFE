@@ -316,7 +316,12 @@ const CurrencyExchangeMap = () => {
                   name='countryId'
                   label={_labels.country}
                   valueField='recordId'
-                  displayField='name'
+                  displayField= {['reference', 'name']}
+                  columnsInDropDown= {[
+                    { key: 'reference', value: 'Currency Ref' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
+                  ]}
                   store={countryStore}
                   value={
                     countryStore?.filter(
@@ -340,7 +345,14 @@ const CurrencyExchangeMap = () => {
                   name='currencyId'
                   label={_labels.currency}
                   valueField='recordId'
-                  displayField='name'
+
+                  // displayField='name'
+
+                  displayField= {['reference', 'name']}
+                  columnsInDropDown= {[
+                    { key: 'reference', value: 'Currency Ref' },
+                    { key: 'name', value: 'Name' },
+                  ]}
                   store={currencyStore}
                   value={
                     currencyStore.filter(

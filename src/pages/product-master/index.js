@@ -1459,7 +1459,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
   const agentsHeaderValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
+    validationSchema: windowOpen && yup.object({
       dispersalId: yup.string().required('This field is required')
     }),
     onSubmit: values => {}

@@ -42,8 +42,7 @@ return (
                 name='plantId'
                 label='Plant'
                 valueField='recordId'
-                displayField='name'
-
+                displayField= {['reference', 'name']}
                 readOnly={true}
                 store={plantStore}
                 value={ plantStore &&
@@ -64,7 +63,7 @@ return (
                 name='countryId'
                 label='Country'
                 valueField='recordId'
-                displayField='name'
+                displayField= {['reference', 'name']}
                 readOnly={true}
                 store={countryStore}
                 value={ countryStore &&
@@ -84,7 +83,7 @@ return (
                 name='currencyId'
                 label='Currency'
                 valueField='recordId'
-                displayField='name'
+                displayField= {['reference', 'name']}
                 readOnly={true}
                 store={currencyStore}
                 value={ currencyStore &&
@@ -105,7 +104,7 @@ return (
                 name='dispersalId'
                 label='Dispersal'
                 valueField='recordId'
-                displayField='name'
+                displayField= {['reference', 'name']}
                 readOnly={true}
                 store={dispersalStore}
                 value={dispersalStore && dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}

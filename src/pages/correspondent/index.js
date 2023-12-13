@@ -140,7 +140,8 @@ const Correspondent = () => {
             : '',
           countryId: '',
           countryRef: '',
-          countryName: ''
+          countryName: '',
+          flName:''
         }
       ]
     },
@@ -212,6 +213,7 @@ const Correspondent = () => {
     })
       .then(res => {
         if (res.list.length > 0) {
+
           countriesGridValidation.setValues({ rows: res.list })
         } else {
           countriesGridValidation.setValues({
@@ -220,7 +222,8 @@ const Correspondent = () => {
                 corId: _recordId,
                 countryId: '',
                 countryRef: '',
-                countryName: ''
+                countryName: '',
+                flName: '',
               }
             ]
           })
@@ -712,7 +715,8 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
           ? correspondentValidation.values.recordId : "",
           countryId: '',
           countryRef: '',
-          countryName: ''
+          countryName: '',
+          flName: ''
         }
       ]
     })

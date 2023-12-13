@@ -31,7 +31,11 @@ return (
                 name='dispersalId'
                 label='Dispersal'
                 valueField='recordId'
-                displayField='reference'
+                displayField= {['reference', 'name']}
+                columnsInDropDown= {[
+                  { key: 'reference', value: 'Country Ref' },
+                  { key: 'name', value: 'Name' },
+                ]}
                 store={dispersalStore}
                 value={dispersalStore?.filter(item => item.key === agentsHeaderValidation.values.dispersalId)[0]}
                 required

@@ -42,7 +42,7 @@ return (
                   name='currencyId'
                   label={labels.currency}
                   valueField='recordId'
-                  displayField='name'
+                  displayField={['reference', 'name']}
                   readOnly='true'
                   store={currencyStore}
                   value={currencyStore.filter(item => item.recordId === exchangeMapValidation.values.currencyId)[0]} // Ensure the value matches an option or set it to null
@@ -60,7 +60,14 @@ return (
                   name='countryId'
                   label={labels.country}
                   valueField='countryId'
-                  displayField='countryName'
+                  displayField={['countryRef', 'countryName']}
+                  columnsInDropDown= {[
+                    { key: 'countryRef', value: 'Country Ref' },
+                    { key: 'countryName', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
+                  ]}
+
+                  // displayField='countryName'
                   store={countriesGridValidation.values.rows}
                   value={countriesGridValidation.values.rows.filter(item => item.countryId === exchangeMapValidation.values.countryId)[0]} // Ensure the value matches an option or set it to null
                   required

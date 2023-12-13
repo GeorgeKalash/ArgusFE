@@ -496,6 +496,10 @@ const handleSubmit = () => {
                 valueField='recordId'
                 displayField='name'
                 store={currencyStore}
+                columnsInDropDown= {[
+                  { key: 'reference', value: 'Currency Ref' },
+                  { key: 'name', value: 'Name' },
+                ]}
                 value={
                   currencyStore.filter(
                     item =>

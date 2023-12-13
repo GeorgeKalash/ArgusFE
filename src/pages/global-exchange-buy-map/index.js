@@ -32,11 +32,8 @@ const GlobalExchangeBuyMap = () => {
   const [currencyId, setCurrencyId] = useState(0)
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
-  const [height, setHeight] = useState(window.innerHeight)
 
-  useEffect(()=>{
-  setHeight(window.innerHeight)
-  },[])
+
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
@@ -51,7 +48,6 @@ const GlobalExchangeBuyMap = () => {
             setCurrencyStore(res.list)
           })
           .catch(error => {})
-          setHeight(window.innerHeight)
 
           console.log(window.innerHeight)
         fillCountryStore()
@@ -255,7 +251,11 @@ const GlobalExchangeBuyMap = () => {
                   name='currencyId'
                   label={_labels.currency}
                   valueField='recordId'
-                  displayField='name'
+                  displayField= {['reference', 'name']}
+                  columnsInDropDown= {[
+                    { key: 'reference', value: 'Currency Ref' },
+                    { key: 'name', value: 'Name' },
+                  ]}
                   store={currencyStore}
                   value={
                     currencyStore.filter(item => item.recordId === exchangeMapsGridValidation.values.currencyId)[0]
