@@ -100,7 +100,7 @@ const City = () => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     var parameters = defaultParams + '&_countryId=0' + '&_stateId=0'
     getRequest({
-      extension: SystemRepository.City.qry,
+      extension: SystemRepository.City.page,
       parameters: parameters
     })
       .then(res => {
