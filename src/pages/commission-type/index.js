@@ -87,10 +87,12 @@ const CommissionType = () => {
     commissiontypeValidation.handleSubmit()
   }
 
-  const getGridData = () => {
-    var parameters = '_filter='
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    var parameters = defaultParams
+
     getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.qry,
+      extension: CurrencyTradingSettingsRepository.CommissionType.page,
       parameters: parameters
     })
       .then(res => {
@@ -164,7 +166,7 @@ const CommissionType = () => {
     if (!access) getAccess(ResourceIds.CommissionType, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getGridData()
+        getGridData({ _startAt: 0, _pageSize: 50 })
         fillTypeStore()
         getLabels(ResourceIds.CommissionType, setLabels)
       } else {

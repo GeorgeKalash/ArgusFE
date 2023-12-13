@@ -3,6 +3,7 @@ const service = 'RTSET.asmx/'
 export const RemittanceSettingsRepository = {
   Interface: {
     qry: service + 'qryITF',
+    page: service + 'pageITF',
     get: service + 'getITF',
     set: service + 'setITF',
     del: service + 'delITF'
@@ -89,8 +90,8 @@ export const RemittanceSettingsRepository = {
     set2: service + 'set2EXB'
   },
   UpdateExchangeRates: {
-    get:  service + 'getEXB',
-    qry:  service + 'qryEXG2',
+    get: service + 'getEXB',
+    qry: service + 'qryEXG2',
     set2: service + 'set2EXB'
   }
 }

@@ -36,12 +36,14 @@ export const SystemRepository = {
   },
   Currency: {
     qry: service + 'qryCU',
+    page: service + 'pageCU',
     get: service + 'getCU',
     set: service + 'setCU',
     del: service + 'delCU'
   },
   City: {
     qry: service + 'qryCIT',
+    page: service + 'pageCIT',
     get: service + 'getCIT',
     set: service + 'setCIT',
     del: service + 'delCIT',

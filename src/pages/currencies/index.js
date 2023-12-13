@@ -107,10 +107,12 @@ const Currencies = () => {
     currencyValidation.handleSubmit()
   }
 
-  const getGridData = () => {
-    var parameters = '_filter='
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    var parameters = defaultParams
+
     getRequest({
-      extension: SystemRepository.Currency.qry,
+      extension: SystemRepository.Currency.page,
       parameters: parameters
     })
       .then(res => {
@@ -204,7 +206,7 @@ const Currencies = () => {
     if (!access) getAccess(ResourceIds.Currencies, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getGridData()
+        getGridData({ _startAt: 0, _pageSize: 50 })
         fillDecimalStore()
         fillProfileStore()
         fillCurrencyStore()

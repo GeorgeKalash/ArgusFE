@@ -105,7 +105,7 @@ const GroupLegalDocument = () => {
     var parameters = defaultParams
 
     getRequest({
-      extension: BusinessPartnerRepository.GroupLegalDocument.qry,
+      extension: BusinessPartnerRepository.GroupLegalDocument.page,
       parameters: parameters
     })
       .then(res => {
