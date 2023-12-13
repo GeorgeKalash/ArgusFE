@@ -46,8 +46,8 @@ return (
               required
               onChange={productMasterValidation.handleChange}
               onClear={() => productMasterValidation.setFieldValue('name', '')}
-              error={productMasterValidation.touched.name && Boolean(productMasterValidation.errors.reference)}
-              helperText={productMasterValidation.touched.name && productMasterValidation.errors.reference}
+              error={productMasterValidation.touched.name && Boolean(productMasterValidation.errors.name)}
+              helperText={productMasterValidation.touched.name && productMasterValidation.errors.name}
             />
           </Grid>
           <Grid item xs={12}>
@@ -94,6 +94,7 @@ return (
               value={productMasterValidation.values.corId}
               required={productMasterValidation.values.type === 1 ? true : false}
               valueField='reference'
+              displayField='name'
               store={correspondentStore}
               firstValue={productMasterValidation.values.corRef}
               secondValue={productMasterValidation.values.corName}

@@ -37,8 +37,8 @@ const ProductDispersalWindow = ({
                   readOnly={false}
                   onChange={productDispersalValidation.handleChange}
                   onClear={() => productDispersalValidation.setFieldValue('reference', '')}
-                  error={Boolean(productDispersalValidation.errors.reference)}
-                  helperText={productDispersalValidation.errors.reference}
+                  error={productDispersalValidation.touched.reference && Boolean(productDispersalValidation.errors.reference)}
+                  helperText={productDispersalValidation.touched.reference && productDispersalValidation.errors.reference}
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -51,8 +51,8 @@ const ProductDispersalWindow = ({
                   readOnly={false}
                   onChange={productDispersalValidation.handleChange}
                   onClear={() => productDispersalValidation.setFieldValue('name', '')}
-                  error={Boolean(productDispersalValidation.errors.name)}
-                  helperText={productDispersalValidation.errors.name}
+                  error={productDispersalValidation.touched.name && Boolean(productDispersalValidation.errors.name)}
+                  helperText={productDispersalValidation.touched.name && productDispersalValidation.errors.name}
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -68,8 +68,8 @@ const ProductDispersalWindow = ({
                   onChange={(event, newValue) => {
                     productDispersalValidation.setFieldValue('dispersalType', newValue?.key)
                   }}
-                  error={Boolean(productDispersalValidation.errors.dispersalType)}
-                  helperText={productDispersalValidation.errors.dispersalType}
+                  error={productDispersalValidation.touched.dispersalType && Boolean(productDispersalValidation.errors.dispersalType)}
+                  helperText={productDispersalValidation.touched.dispersalType && productDispersalValidation.errors.dispersalType}
                 />
               </Grid>
               <Grid item xs={12}>

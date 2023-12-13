@@ -452,10 +452,11 @@ const handleSubmit = () => {
 
                 // displayField='flName'
 
-                displayField={['reference','flName']}
+                displayField={['reference','name']}
                 store={countryStore}
                 columnsInDropDown= {[
                   { key: 'reference', value: 'Country Ref' },
+                  { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'Foreign Language Name' }
                 ]}
                 value={
