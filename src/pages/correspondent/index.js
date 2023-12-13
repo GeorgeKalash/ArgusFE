@@ -42,6 +42,7 @@ const Correspondent = () => {
   const [countryStore, setCountryStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
   const [exchangeTableStore, setExchangeTableStore] = useState([])
+  const [exchangeTableStoreAll, setExchangeTableStoreAll] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -311,7 +312,7 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       nameId: 'exchangeId',
       name: 'exchangeRef',
       mandatory: false,
-      store: exchangeTableStore.list,
+      store: exchangeTableStoreAll.list,
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [],
@@ -790,6 +791,21 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       })
   }
 
+  const fillExchangeTableStoreAll = () => {
+    setExchangeTableStoreAll({})
+    var parameters = `_filter=`
+    getRequest({
+      extension: MultiCurrencyRepository.ExchangeTable.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setExchangeTableStoreAll(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   // const fillPlantStore = () => {
   //   var parameters = `_filter=`
   //   getRequest({
@@ -827,7 +843,8 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
     fillCountryStore()
     fillCurrencyStore()
 
-    // fillExchangeTableStore()
+    fillExchangeTableStoreAll()
+
     // fillPlantStore()
     getCorrespondentById(obj)
     getCorrespondentCountries(obj)
