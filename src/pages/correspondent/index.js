@@ -163,7 +163,8 @@ const Correspondent = () => {
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Country Ref' },
+        { key: 'reference', value: 'Reference' },
+        { key: 'name', value: 'Name' },
         { key: 'flName', value: 'Foreign Language Name' }
       ]
     },
@@ -285,10 +286,9 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-
-      //fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
+      widthDropDown: '300',
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
         { key: 'flName', value: 'FL Name' }
       ]
@@ -302,10 +302,9 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-
-      //fieldsToUpdate: [{ from: 'name', to: 'GlCurrencyName' }],
+      widthDropDown: '300',
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
         { key: 'flName', value: 'FL Name' }
       ]
@@ -318,9 +317,10 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       store: exchangeTableStoreAll.list,
       valueField: 'recordId',
       displayField: 'reference',
+      widthDropDown: '300',
       fieldsToUpdate: [],
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
     },
@@ -517,12 +517,12 @@ return isValid  && isValidGlCurrencyId ? {} : { rows: Array(values.rows.length).
       name: 'exchangeRef',
       mandatory: true,
       store: exchangeTableStore.list,
-
+      widthDropDown: '200',
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
     },

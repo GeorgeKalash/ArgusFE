@@ -191,7 +191,7 @@ const GlobalExchangeBuyMap = () => {
       fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
 
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
     },
@@ -216,7 +216,7 @@ const GlobalExchangeBuyMap = () => {
       fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
 
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
     },
