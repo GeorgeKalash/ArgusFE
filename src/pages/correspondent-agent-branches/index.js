@@ -160,26 +160,26 @@ const Agent = () => {
         parameters: parameters
       })
         .then(res => {
-          var result = res.record
+          var object = res.record
 
-          object.name = result.name
-          object.street1 = result.street1
-          object.street2 = result.street2
-          object.email1 = result.email1
-          object.email2 = result.email2
-          object.countryId = result.countryId
-          object.stateName = result.stateName
-          object.cityId = result.cityId
-          object.cityName = result.city
-          object.stateId = result.stateId
-          object.phone = result.phone
-          object.phone1 = result.phone1
-          object.phone2 = result.phone2
-          object.postalCode = result.postalCode
+          // object.name = result.name
+          // object.street1 = result.street1
+          // object.street2 = result.street2
+          // object.email1 = result.email1
+          // object.email2 = result.email2
+          // object.countryId = result.countryId
+          // object.stateName = result.stateName
+          // object.cityId = result.cityId
+          // object.cityName = result.city
+          // object.stateId = result.stateId
+          // object.phone = result.phone
+          // object.phone1 = result.phone1
+          // object.phone2 = result.phone2
+          // object.postalCode = result.postalCode
           fillStateStore(object.countryId)
           console.log(object)
           agentBranchValidation.setValues(populateAgentBranch(object))
-          lookupCity(object.cityName)
+          lookupCity(object.city)
 
           // setActiveTab(0)
           // setWindowOpen(true)

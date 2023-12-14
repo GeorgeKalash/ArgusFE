@@ -83,7 +83,7 @@ const ExchangeTables = () => {
       editable: false
     },
     {
-      field: 'currency',
+      field: 'currencyRef',
       headerName: _labels.currency,
       flex: 1,
       editable: false
@@ -259,6 +259,7 @@ const ExchangeTables = () => {
           maxAccess={access}
           rateAgainst={rateAgainst}
           setRateAgainst={setRateAgainst}
+
         />
       )}
     </>

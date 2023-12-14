@@ -32,7 +32,7 @@ const populateAgentBranch = obj => {
     countryId: obj.countryId,
     stateId: obj.stateId,
     cityId: obj.cityId,
-    cityName: obj.cityName,
+    cityName: obj.city,
     street1: obj.street1,
     street2: obj.street2,
     email1: obj.email1,
