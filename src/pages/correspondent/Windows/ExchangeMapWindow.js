@@ -62,9 +62,8 @@ return (
                   valueField='countryId'
                   displayField={['countryRef', 'countryName']}
                   columnsInDropDown= {[
-                    { key: 'countryRef', value: 'Country Ref' },
+                    { key: 'countryRef', value: 'Reference' },
                     { key: 'countryName', value: 'Name' },
-                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
 
                   // displayField='countryName'

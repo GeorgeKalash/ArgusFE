@@ -33,7 +33,7 @@ return (
                 valueField='recordId'
                 displayField= {['reference', 'name']}
                 columnsInDropDown= {[
-                  { key: 'reference', value: 'Country Ref' },
+                  { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
                 ]}
                 store={dispersalStore}

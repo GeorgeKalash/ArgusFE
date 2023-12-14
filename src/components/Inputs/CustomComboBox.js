@@ -188,7 +188,7 @@ return search.trim(); // Trim to remove extra spaces
                       <li className={props.className}>
                         {columnsInDropDown.map((header, i) => {
                           return (
-                            <Box key={i} sx={{ flex: 1 }}>
+                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold'}}>
                               {header.value.toUpperCase()}
                             </Box>
                           )

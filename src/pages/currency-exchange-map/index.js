@@ -280,7 +280,7 @@ const CurrencyExchangeMap = () => {
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
     },

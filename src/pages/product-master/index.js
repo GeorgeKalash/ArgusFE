@@ -608,7 +608,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Country Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'flName', value: 'Foreign Language Name' }
       ]
     },
@@ -720,9 +720,10 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       store: countriesGridValidation.values?.rows,
       valueField: 'countryId',
       displayField: 'countryRef',
+      widthDropDown: '300',
       fieldsToUpdate: [{ from: 'countryName', to: 'countryName' }],
       columnsInDropDown: [
-        { key: 'countryRef', value: 'Ref' },
+        { key: 'countryRef', value: 'Reference' },
         { key: 'countryName', value: 'Name' }
       ]
     },
@@ -743,6 +744,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
+      widthDropDown: '300',
       fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Currency Ref' },
@@ -765,6 +767,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       store: dispersalTypeStore.list,
       valueField: 'key',
       displayField: 'value',
+      widthDropDown: '150',
       fieldsToUpdate: [{ from: 'value', to: 'dispersalTypeName' }],
       columnsInDropDown: [{ key: 'value', value: '' }]
     },
@@ -1006,9 +1009,10 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       store: countriesGridValidation.values?.rows,
       valueField: 'countryId',
       displayField: 'countryRef',
+      widthDropDown: '300',
       fieldsToUpdate: [{ from: 'countryName', to: 'countryName' }],
       columnsInDropDown: [
-        { key: 'countryRef', value: 'Ref' },
+        { key: 'countryRef', value: 'Reference' },
         { key: 'countryName', value: 'Name' }
       ]
     },
@@ -1028,9 +1032,10 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       store: plantStore.list,
       valueField: 'recordId',
       displayField: 'reference',
+      widthDropDown: '300',
       fieldsToUpdate: [{ from: 'name', to: 'plantName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
     },
@@ -1050,6 +1055,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
+      widthDropDown: '300',
       fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Currency Ref' },
@@ -1072,13 +1078,14 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       store: dispersalsGridData.list,
       valueField: 'recordId',
       displayField: 'reference',
+      widthDropDown: '300',
       fieldsToUpdate: [
         { from: 'name', to: 'dispersalName' },
         { from: 'dispersalType', to: 'dispersalType' },
         { from: 'dispersalTypeName', to: 'dispersalTypeName' }
       ],
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
     },

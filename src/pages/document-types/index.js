@@ -345,7 +345,7 @@ const DocumentTypes = () => {
     },
     {
       field: 'combobox',
-      header: 'Country Ref',
+      header: 'Reference',
       nameId: 'recordId',
       name: 'countryRef',
       mandatory: true,
