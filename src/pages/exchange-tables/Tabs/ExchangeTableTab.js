@@ -14,7 +14,8 @@ const ExchangeTableTab=({
     RCMStore,
     rateAgainstStore,
     maxAccess,
-    setRateAgainst
+    setRateAgainst,
+    rateAgainst
 }) =>{
 
 
@@ -122,8 +123,8 @@ const ExchangeTableTab=({
                 exchangeTableValidation && exchangeTableValidation.setFieldValue('rateAgainstCurrencyId', newValue?.recordId);
 
               }}
-              error={exchangeTableValidation.touched.rateAgainstCurrencyId && Boolean(exchangeTableValidation.errors.rateAgainstCurrencyId)}
-              helperText={exchangeTableValidation.touched.rateAgainstCurrencyId && exchangeTableValidation.errors.rateAgainstCurrencyId}
+              error={exchangeTableValidation.touched.rateAgainstCurrencyId && rateAgainst && Boolean(exchangeTableValidation.errors.rateAgainstCurrencyId)}
+              helperText={exchangeTableValidation.touched.rateAgainstCurrencyId && rateAgainstStore && exchangeTableValidation.errors.rateAgainstCurrencyId}
             />
           </Grid>
 

@@ -276,7 +276,6 @@ const CurrencyExchangeMap = () => {
       name: 'exchangeRef',
       mandatory: true,
       store: exchangeTableStore.list,
-      width: '500px',
       valueField: 'recordId',
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],

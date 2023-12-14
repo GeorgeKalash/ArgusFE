@@ -410,6 +410,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
   }
 
   const addProductMaster = () => {
+    setEditMode(false)
     productMasterValidation.setValues(getNewProductMaster())
     resetCorrespondentCountries('')
     resetCorrespondentMonetaries('')
@@ -467,17 +468,18 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
     })
       .then(res => {
         productMasterValidation.setValues(populateProductMaster(res.record))
-        countriesGridValidation.setValues({
-          rows: [
-            {
-              productId: res.record.recordId,
-              countryId: '',
-              countryRef: '',
-              countryName: '',
-              isInactive: false
-            }
-          ]
-        })
+
+        // countriesGridValidation.setValues({
+        //   rows: [
+        //     {
+        //       productId: res.record.recordId,
+        //       countryId: '',
+        //       countryRef: '',
+        //       countryName: '',
+        //       isInactive: false
+        //     }
+        //   ]
+        // })
 
         setEditMode(true)
         setWindowOpen(true)

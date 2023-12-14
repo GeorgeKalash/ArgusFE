@@ -13,6 +13,7 @@ const ExchangeTableWindow = ({
     currencyStore,
     fCurrencyStore,
     rateAgainstStore,
+    rateAgainst,
     RCMStore,
     labels,
     setRateAgainst,
@@ -41,6 +42,7 @@ return (
               rateAgainstStore={rateAgainstStore}
               RCMStore={RCMStore}
               setRateAgainst={setRateAgainst}
+              rateAgainst={rateAgainst}
            />
            </CustomTabPanel>
         </Window>
