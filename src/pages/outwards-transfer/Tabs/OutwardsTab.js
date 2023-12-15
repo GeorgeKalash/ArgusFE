@@ -40,9 +40,9 @@ const OutwardsTab=({
                 displayField='name'
                 store={plantStore}
                 required
-                value={plantStore.filter(item => item.plantId === outwardsValidation.values.plantId)[0]}
+                value={plantStore.filter(item => item.recordId === outwardsValidation.values.plantId)[0]}
                 onChange={(event, newValue) => {
-                  outwardsValidation.setFieldValue('plantId', newValue?.plantId)
+                  outwardsValidation.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={outwardsValidation.touched.plantId && Boolean(outwardsValidation.errors.plantId)}
                 helperText={outwardsValidation.touched.plantId && outwardsValidation.errors.plantId}
@@ -147,6 +147,7 @@ const OutwardsTab=({
 
               }}
               onBlur={() => {
+                console.log(outwardsValidation.values);
                 onAmountDataFill(outwardsValidation.values);
               }}
               onClear={() => outwardsValidation.setFieldValue('amount', '')}
