@@ -57,21 +57,23 @@ const CityTab = ({ labels, cityValidation, countryStore, stateStore, fillStateSt
         />
       </Grid>
       <Grid item xs={12}>
-        <CustomComboBox
-          name='stateId'
-          label={labels.state}
-          valueField='recordId'
-          displayField='name'
-          store={stateStore}
-          value={stateStore.filter(item => item.recordId === cityValidation.values.stateId)[0]}
-          maxAccess={maxAccess}
-          readOnly={editMode && cityValidation.values.stateId !== null}
-          onChange={(event, newValue) => {
-            cityValidation.setFieldValue('stateId', newValue?.recordId)
-          }}
-          error={cityValidation.touched.stateId && Boolean(cityValidation.errors.stateId)}
-          helperText={cityValidation.touched.stateId && cityValidation.errors.stateId}
-        />
+        {stateStore && (
+          <CustomComboBox
+            name='stateId'
+            label={labels.state}
+            valueField='recordId'
+            displayField='name'
+            store={stateStore}
+            value={stateStore.filter(item => item.recordId === cityValidation.values.stateId)[0]}
+            maxAccess={maxAccess}
+            readOnly={editMode && cityValidation.values.stateId !== null}
+            onChange={(event, newValue) => {
+              cityValidation.setFieldValue('stateId', newValue?.recordId)
+            }}
+            error={cityValidation.touched.stateId && Boolean(cityValidation.errors.stateId)}
+            helperText={cityValidation.touched.stateId && cityValidation.errors.stateId}
+          />
+        )}
       </Grid>
     </Grid>
   )

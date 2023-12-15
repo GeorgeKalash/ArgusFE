@@ -33,7 +33,7 @@ const City = () => {
 
   //stores
   const [gridData, setGridData] = useState([])
-  const [stateStore, setStateStore] = useState([])
+  const [stateStore, setStateStore] = useState(null)
   const [countryStore, setCountryStore] = useState([])
 
   //states
@@ -179,17 +179,28 @@ const City = () => {
   }
 
   const editCity = obj => {
-    cityValidation.setValues(populateCity(obj))
-    fillCountryStore()
-
-    //console.log('countryId ' + obj['countryId'])
-
-    fillStateStore(obj['countryId'])
-    setEditMode(true)
-    setWindowOpen(true)
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.City.get,
+      parameters: parameters
+    })
+      .then(res => {
+        setStateStore(null)
+        cityValidation.setValues(populateCity(res.record))
+        fillCountryStore()
+        fillStateStore(res.record.countryId)
+        setEditMode(true)
+        setWindowOpen(true)
+        console.log(stateStore)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
-
   useEffect(() => {
+    console.log('first use')
     if (!access) getAccess(ResourceIds.Cities, setAccess)
     else {
       if (access.record.maxAccess > 0) {
