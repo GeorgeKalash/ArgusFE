@@ -30,6 +30,7 @@ export const SystemRepository = {
   },
   GeographicRegion: {
     qry: service + 'qryRGN',
+    page: service + 'pageRGN',
     get: service + 'getRGN',
     set: service + 'setRGN',
     del: service + 'delRGN'
