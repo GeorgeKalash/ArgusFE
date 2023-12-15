@@ -147,9 +147,21 @@ const Interface = () => {
   }
 
   const editInterface = obj => {
-    interfaceValidation.setValues(populateInterface(obj))
-    setEditMode(true)
-    setWindowOpen(true)
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.Interface.get,
+      parameters: parameters
+    })
+      .then(res => {
+        interfaceValidation.setValues(populateInterface(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {

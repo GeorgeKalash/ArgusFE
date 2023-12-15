@@ -166,11 +166,23 @@ const SourceOfIncome = () => {
   }
 
   const editSourceOfIncome = obj => {
-    sourceOfIncomeValidation.resetForm()
-    sourceOfIncomeValidation.setValues(populateSourceOfIncome(obj))
-    fillIncomeStore()
-    setEditMode(true)
-    setWindowOpen(true)
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.SourceOfIncome.get,
+      parameters: parameters
+    })
+      .then(res => {
+        sourceOfIncomeValidation.resetForm()
+        sourceOfIncomeValidation.setValues(populateSourceOfIncome(res.record))
+        fillIncomeStore()
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {

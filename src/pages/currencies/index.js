@@ -194,12 +194,24 @@ const Currencies = () => {
   }
 
   const editCurrency = obj => {
-    currencyValidation.setValues(populateCurrency(obj))
-    fillDecimalStore()
-    fillProfileStore()
-    fillCurrencyStore()
-    setEditMode(true)
-    setWindowOpen(true)
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.Currency.get,
+      parameters: parameters
+    })
+      .then(res => {
+        currencyValidation.setValues(populateCurrency(res.record))
+        fillDecimalStore()
+        fillProfileStore()
+        fillCurrencyStore()
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {

@@ -187,12 +187,25 @@ const GroupLegalDocument = () => {
   }
 
   const editGroupLegalDocument = obj => {
-    console.log(obj)
-    groupLegalDocumentValidation.setValues(populateGroupLegalDocument(obj))
-    fillCategoryStore()
-    fillGroupStore()
-    setEditMode(true)
-    setWindowOpen(true)
+    const _groupId = obj.groupId
+    const _incId = obj.incId
+    const defaultParams = `_groupId=${_groupId}&_incId=${_incId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: BusinessPartnerRepository.GroupLegalDocument.get,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(obj)
+        groupLegalDocumentValidation.setValues(populateGroupLegalDocument(res.record))
+        fillCategoryStore()
+        fillGroupStore()
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
   useEffect(() => {
     if (!access) getAccess(ResourceIds.GroupLegalDocument, setAccess)

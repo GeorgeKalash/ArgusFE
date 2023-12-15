@@ -193,7 +193,6 @@ const City = () => {
         fillStateStore(res.record.countryId)
         setEditMode(true)
         setWindowOpen(true)
-        console.log(stateStore)
       })
       .catch(error => {
         setErrorMessage(error)
