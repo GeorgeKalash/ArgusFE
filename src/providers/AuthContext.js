@@ -98,6 +98,26 @@ const AuthProvider = ({ children }) => {
       // console.log({ getUS2: getUS2.data.record })
       // console.log({ signIn3: signIn3.data.record })
 
+
+      const defaultSettings = await axios({
+        method: 'GET',
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}SY.asmx/getDE?_key=dateFormat`,
+        headers: {
+          Authorization: 'Bearer ' + signIn3.data.record.accessToken,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      console.log("defaultSettings")
+      console.log(defaultSettings)
+
+      const defaultSet = {
+        dateFormat :  defaultSettings.data.record && defaultSettings.data.record.value
+      }
+
+      window.localStorage.setItem('default', JSON.stringify(defaultSet))
+
+
       const loggedUser = {
         accountId: getAC.data.record.accountId,
         userId: getUS2.data.record.recordId,
@@ -118,6 +138,7 @@ const AuthProvider = ({ children }) => {
       //   : null
       // console.log({ loggedUser })
       setUser({ ...loggedUser })
+
 
       params.rememberMe
         ? window.localStorage.setItem('userData', JSON.stringify(loggedUser))

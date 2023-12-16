@@ -85,7 +85,7 @@ const CorrespondentTab = ({
           label={labels.isInactive}
         />
       </Grid>
-    
+
     </Grid>
   )
 }

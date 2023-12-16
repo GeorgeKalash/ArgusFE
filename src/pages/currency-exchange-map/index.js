@@ -20,7 +20,7 @@ import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const CurrencyExchangeMap = () => {
+const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
@@ -409,4 +409,4 @@ const CurrencyExchangeMap = () => {
   )
 }
 
-export default CurrencyExchangeMap
+export default NumberRange
