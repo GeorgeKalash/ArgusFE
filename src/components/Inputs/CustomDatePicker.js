@@ -31,6 +31,8 @@ const CustomDatePicker = ({
     ...props
 }) => {
 
+  const dateFormat =  window.localStorage.getItem('default') && window.localStorage.getItem('default')['formatDate']
+
     const [openDatePicker, setOpenDatePicker] = useState(false)
 
     const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -48,7 +50,7 @@ const CustomDatePicker = ({
                 label={label}
                 fullWidth={fullWidth}
                 autoFocus={autoFocus}
-                format='MMM DD,YYYY'
+                format={dateFormat}
                 onChange={newValue => onChange(name, newValue)}
                 onClose={() => setOpenDatePicker(false)}
                 open={openDatePicker}

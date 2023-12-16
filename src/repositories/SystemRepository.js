@@ -26,7 +26,12 @@ export const SystemRepository = {
     del: service + 'delRT'
   },
   NumberRange: {
-    snapshot: service + 'snapshotNRA'
+    snapshot: service + 'snapshotNRA',
+    qry: service + 'qryNRA',
+    get: service + 'getNRA',
+    set: service + 'setNRA',
+    del: service + 'delNRA'
+
   },
   GeographicRegion: {
     qry: service + 'qryRGN',
