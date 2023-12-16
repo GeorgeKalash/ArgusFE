@@ -22,5 +22,7 @@ export const ResourceIds = {
   SourceOfIncome:35103,
   updateExchangerRates: 35106,
   ExchangeTables: 32101,
-  NumberRange: 20103
+  NumberRange: 20103,
+  BpRelationType: 21107,
+  IdCategories: 21106
 }
