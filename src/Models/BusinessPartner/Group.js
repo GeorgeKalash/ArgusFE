@@ -8,7 +8,7 @@ const getNewGroup = () => {
     name: null,
     nraId: null,
     nraRef: null,
-    NRADescription: null
+    nraDescription: null
   }
 }
 
@@ -18,8 +18,8 @@ const populateGroup = obj => {
     reference: obj.reference,
     name: obj.name,
     nraId: obj.nraId,
-    nraRef: obj.person,
-    NRADescription: obj.NRADescription
+    nraRef: obj.nraRef,
+    nraDescription: obj.nraDescription
   }
 }
 

@@ -31,17 +31,15 @@ const IdCategoryTab=({
 
           <Grid item xs={12}>
           <FormControlLabel
-          control={
+           control={
             <Checkbox
-            name="org"
+              name="org"
               checked={IdCategoryValidation.values?.org}
               onChange={IdCategoryValidation.handleChange}
               maxAccess={maxAccess}
             />
           }
-
           label={labels.org}
-
         />
       </Grid>
 
@@ -86,9 +84,7 @@ const IdCategoryTab=({
           label={labels.unique}
           />
       </Grid>
-
-
-          </Grid>
+     </Grid>
     )
 }
 

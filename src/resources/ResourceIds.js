@@ -24,5 +24,6 @@ export const ResourceIds = {
   ExchangeTables: 32101,
   NumberRange: 20103,
   BpRelationType: 21107,
-  IdCategories: 21106
+  IdCategories: 21106,
+ Groups:21101
 }
