@@ -192,13 +192,12 @@ const OutwardsTransfer = () => {
 
   //_type=2&_functionId=1&_plantId=1&_countryId=124&_currencyId=90&_dispersalType=2&_amount=200&_agentId=4
   const onAmountDataFill = (formFields) => {
-    console.log(formFields)
-
+    
     //get products list
     // type, functionId, plantId, countryId, dispersalType, currencyId, amount, agentId
     var type = 2;
     var functionId = 1;
-    var plant = 4;
+    var plant = formFields?.plantId;
     var countryId = formFields?.countryId
     var currencyId = formFields?.currencyId
     var dispersalType = formFields?.dispersalType
