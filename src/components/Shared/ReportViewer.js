@@ -27,8 +27,6 @@ const ReportViewer = ({ resourceId }) => {
   const [paramsArray, setParamsArray] = useState([])
   const [reportParamWindowOpen, setReportParamWindowOpen] = useState(false)
   const [pdf, setPDF] = useState(null)
-  const [xls, setXLS] = useState(null)
-  const [csv, setCSV] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
   const getReportLayout = () => {
@@ -90,10 +88,19 @@ const ReportViewer = ({ resourceId }) => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ res })
+        console.log({ generateReportRES: res })
+        switch (selectedFormat.key) {
+          case 1:
+            setPDF(res.recordId)
+            break
+
+          default:
+            window.location.href = res.recordId
+            break
+        }
       })
       .catch(error => {
-        console.log({ error })
+        console.log({ generateReportERROR: error })
         setErrorMessage(error)
       })
   }
@@ -148,47 +155,38 @@ const ReportViewer = ({ resourceId }) => {
           onGo={generateReport}
           paramsArray={paramsArray}
         >
-          <Box sx={{ pt: 2, px: 2, display: 'flex', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex' }}>
-              <Autocomplete
-                size='small'
-                options={reportStore}
-                value={selectedReport}
-                getOptionLabel={option => option.layoutName || option.caption || ''}
-                onChange={(e, newValue) => setSelectedReport(newValue)}
-                renderInput={params => (
-                  <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-                )}
-                sx={{ width: 300 }}
-                disableClearable
-              />
-              <Autocomplete
-                size='small'
-                options={ExportFormat}
-                value={selectedFormat}
-                getOptionLabel={option => option.value}
-                onChange={(e, newValue) => setSelectedFormat(newValue)}
-                renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}
-                sx={{ width: 200, pl: 2 }}
-                disableClearable
-              />
-              <Button
-                sx={{ ml: 2 }}
-                variant='contained'
-                disabled={!selectedReport || !selectedFormat}
-                onClick={() => generateReport({ params: formatDataForApi(paramsArray) })}
-              >
-                Generate Report
-              </Button>
-            </Box>
-            <Box sx={{ display: 'flex' }}>
-              <Button sx={{ ml: 2 }} variant='contained' disabled={!xls} href={xls}>
-                XLS
-              </Button>
-              <Button sx={{ ml: 2 }} variant='contained' disabled={!csv} href={csv}>
-                CSV
-              </Button>
-            </Box>
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
+            <Autocomplete
+              size='small'
+              options={reportStore}
+              value={selectedReport}
+              getOptionLabel={option => option.layoutName || option.caption || ''}
+              onChange={(e, newValue) => setSelectedReport(newValue)}
+              renderInput={params => (
+                <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
+              )}
+              sx={{ width: 300 }}
+              disableClearable
+            />
+            <Autocomplete
+              size='small'
+              options={ExportFormat}
+              value={selectedFormat}
+              getOptionLabel={option => option.value}
+              onChange={(e, newValue) => setSelectedFormat(newValue)}
+              renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}
+              sx={{ width: 200, pl: 2 }}
+              disableClearable
+            />
+            <Button
+              sx={{ ml: 2 }}
+              variant='contained'
+              disabled={!selectedReport || !selectedFormat}
+              onClick={() => generateReport({ params: formatDataForApi(paramsArray) })}
+              size='small'
+            >
+              Generate Report
+            </Button>
           </Box>
         </GridToolbar>
         {pdf && (

@@ -41,9 +41,9 @@ const RequestsProvider = ({ children }) => {
       url: url + body.extension,
       headers: {
         Authorization: 'Bearer ' + accessToken,
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
+        LanguageId: user.languageId
       },
-      LanguageId: user.languageId,
       data: bodyFormData
     }).then(res => res.data)
   }

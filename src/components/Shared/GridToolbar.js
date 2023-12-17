@@ -15,9 +15,9 @@ const GridToolbar = ({ onAdd, openRPB, disableRPB = false, onGo, paramsArray, ch
   }
 
   return (
-    <Box>
+    <Box display={'flex'} sx={{ justifyContent: 'space-between' }}>
       {children && children}
-      <Box sx={{ display: 'flex', pb: 2 }}>
+      <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
         {onAdd && addBtnVisible && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
             <Button onClick={onAdd} variant='contained'>
