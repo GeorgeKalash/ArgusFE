@@ -10,10 +10,7 @@ const CorrespondentCountriesTab = ({
   corId,
   maxAccess
 }) => {
-
-  console.log(correspondentValidation.values.recordId)
-  
-return (
+  return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
         <InlineEditGrid
