@@ -44,5 +44,9 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getIDT',
     set: service + 'setIDT',
     del: service + 'delIDT'
+  },
+  Defaults: {
+    qry: service + 'qryDE',
+    set2: service + 'set2DE',
   }
 }
