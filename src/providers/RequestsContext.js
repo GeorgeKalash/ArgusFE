@@ -1,5 +1,5 @@
 // ** React Imports
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 // ** 3rd Party Imports
 import axios from 'axios'
@@ -31,16 +31,18 @@ const RequestsProvider = ({ children }) => {
 
   const postRequest = async body => {
     const accessToken = await getAccessToken()
+    const url = body.url ? body.url : process.env.NEXT_PUBLIC_BASE_URL
 
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
 
     return axios({
       method: 'POST',
-      url: process.env.NEXT_PUBLIC_BASE_URL + body.extension,
+      url: url + body.extension,
       headers: {
         Authorization: 'Bearer ' + accessToken,
-        'Content-Type': 'multipart/form-data'
+        'Content-Type': 'multipart/form-data',
+        LanguageId: user.languageId
       },
       data: bodyFormData
     }).then(res => res.data)
@@ -55,14 +57,13 @@ const RequestsProvider = ({ children }) => {
       tokenRefreshQueue.push(resolveWrapper)
 
       // If a token refresh is not in progress, initiate it
-      if (!isRefreshingToken) {
-        isRefreshingToken = true
+      try {
+        if (user?.expiresAt !== null) {
+          var dateNow = new Date()
 
-        try {
-          if (user?.expiresAt !== null) {
-            var dateNow = new Date()
-
-            if (user?.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
+          if (user?.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
+            if (!isRefreshingToken) {
+              isRefreshingToken = true
               var bodyFormData = new FormData()
               bodyFormData.append(
                 'record',
@@ -99,36 +100,36 @@ const RequestsProvider = ({ children }) => {
               // Clear the queue and reset the flag
               tokenRefreshQueue = []
               isRefreshingToken = false
-            } else {
-              // If token is still valid, resolve all pending requests with the existing token
-              tokenRefreshQueue.forEach(queuedResolve => {
-                queuedResolve(user?.accessToken)
-              })
-
-              // Clear the queue and reset the flag
-              tokenRefreshQueue = []
-              isRefreshingToken = false
             }
           } else {
-            // If no expiration information, resolve all pending requests with null
+            // If token is still valid, resolve all pending requests with the existing token
             tokenRefreshQueue.forEach(queuedResolve => {
-              queuedResolve(null)
+              queuedResolve(user?.accessToken)
             })
 
             // Clear the queue and reset the flag
             tokenRefreshQueue = []
             isRefreshingToken = false
           }
-        } catch (error) {
-          // Handle error during token refresh
+        } else {
+          // If no expiration information, resolve all pending requests with null
           tokenRefreshQueue.forEach(queuedResolve => {
-            queuedResolve('error getting new Access Token')
+            queuedResolve(null)
           })
 
           // Clear the queue and reset the flag
           tokenRefreshQueue = []
           isRefreshingToken = false
         }
+      } catch (error) {
+        // Handle error during token refresh
+        tokenRefreshQueue.forEach(queuedResolve => {
+          queuedResolve('error getting new Access Token')
+        })
+
+        // Clear the queue and reset the flag
+        tokenRefreshQueue = []
+        isRefreshingToken = false
       }
     })
   }

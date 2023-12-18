@@ -18,6 +18,9 @@ export const ResourceIds = {
   CorrespondentAgentBranch: 36107,
   CityDistrict: 20206,
   Address: 20102,
-  GlobalExchangeBuyMap: 36112,
-  SourceOfIncome: 35103
+  GlobalExchangeBuyMap: 36114,
+  currencyExchangeMap: 36112,
+  SourceOfIncome:35103,
+  updateExchangerRates: 35106,
+  ExchangeTables: 32101
 }

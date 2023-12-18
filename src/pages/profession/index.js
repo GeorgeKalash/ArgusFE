@@ -6,8 +6,7 @@ import { useState } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ProfessionRepository } from 'src/repositories/ProfessionRepository'
-
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import ProfessionWindow from './Windows/ProfessionWindow'
 import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
@@ -105,7 +104,7 @@ const Professions = () => {
 
   const delProfession = obj => {
     postRequest({
-      extension: ProfessionRepository.Profession.del,
+      extension: CurrencyTradingSettingsRepository.Profession.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -134,7 +133,7 @@ const Professions = () => {
     var parameters = defaultParams + '&_dgId=0'
 
     getRequest({
-      extension: ProfessionRepository.Profession.qry,
+      extension: CurrencyTradingSettingsRepository.Profession.qry,
       parameters: parameters
     })
       .then(res => {
@@ -164,7 +163,7 @@ const Professions = () => {
   const postProfession = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: ProfessionRepository.Profession.set,
+      extension: CurrencyTradingSettingsRepository.Profession.set,
       record: JSON.stringify(obj)
     })
       .then(res => {

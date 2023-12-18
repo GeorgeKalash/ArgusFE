@@ -9,6 +9,7 @@ export const BusinessPartnerRepository = {
   },
   GroupLegalDocument: {
     qry: service + 'qryGIN',
+    page: service + 'pageGIN',
     get: service + 'getGIN',
     set: service + 'setGIN',
     del: service + 'delGIN'

@@ -3,12 +3,12 @@ import { Box } from '@mui/material'
 // ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const PoductCurrenciesTab = ({ 
+const ProductCurrenciesTab = ({
   productMasterValidation,
   monetariesGridValidation,
   monetariesInlineGridColumns,
   maxAccess
-}) => {    
+}) => {
   return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
@@ -16,7 +16,7 @@ const PoductCurrenciesTab = ({
           gridValidation={monetariesGridValidation}
           columns={monetariesInlineGridColumns}
           defaultRow={{
-            
+
             productId: productMasterValidation.values
               ? productMasterValidation.values.recordId
                 ? productMasterValidation.values.recordId
@@ -32,7 +32,13 @@ const PoductCurrenciesTab = ({
             dispersalTypeName: '',
             isInactive: false
           }}
+
+          scrollHeight={280}
+
+          // scrollable={false}
           width={900}
+
+
         />
       </Box>
     </>
@@ -40,4 +46,4 @@ const PoductCurrenciesTab = ({
 }
 
 
-export default PoductCurrenciesTab
+export default ProductCurrenciesTab

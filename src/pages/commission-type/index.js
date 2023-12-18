@@ -16,7 +16,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { getNewCommissionType, populateCommissionType } from 'src/Models/CurrencyTradingSettings/CommissionType'
-import { KVSRepository } from 'src/repositories/KVSRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -26,8 +25,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CommissionTypeWindow from './Windows/CommissionTypeWindow'
 
 // ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const CommissionType = () => {
@@ -90,10 +87,12 @@ const CommissionType = () => {
     commissiontypeValidation.handleSubmit()
   }
 
-  const getGridData = () => {
-    var parameters = '_filter='
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    var parameters = defaultParams
+
     getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.qry,
+      extension: CurrencyTradingSettingsRepository.CommissionType.page,
       parameters: parameters
     })
       .then(res => {
@@ -167,7 +166,7 @@ const CommissionType = () => {
     if (!access) getAccess(ResourceIds.CommissionType, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getGridData()
+        getGridData({ _startAt: 0, _pageSize: 50 })
         fillTypeStore()
         getLabels(ResourceIds.CommissionType, setLabels)
       } else {

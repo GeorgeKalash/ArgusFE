@@ -3,6 +3,7 @@ const service = 'RTSET.asmx/'
 export const RemittanceSettingsRepository = {
   Interface: {
     qry: service + 'qryITF',
+    page: service + 'pageITF',
     get: service + 'getITF',
     set: service + 'setITF',
     del: service + 'delITF'
@@ -36,6 +37,10 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryPSR',
     set2: service + 'set2PSR'
   },
+  ProductScheduleFees: {
+    qry: service + 'qryPSF',
+    set2: service + 'set2PSF'
+  },
   ProductDispersalAgents: {
     qry: service + 'qryPDA',
     set2: service + 'set2PDA'
@@ -44,7 +49,8 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryCOR',
     get: service + 'getCOR',
     set: service + 'setCOR',
-    del: service + 'delCOR'
+    del: service + 'delCOR',
+    snapshot: service + 'snapshotCOR'
   },
   CorrespondentCountry: {
     qry: service + 'qryCCO',
@@ -75,8 +81,17 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryEXC',
     set2: service + 'set2EXC'
   },
+  CurrencyExchangeMap: {
+    qry: service + 'qryEXG',
+    set2: service + 'set2EXG'
+  },
   CorrespondentExchangeBuyMap: {
     qry: service + 'qryEXB',
+    set2: service + 'set2EXB'
+  },
+  UpdateExchangeRates: {
+    get: service + 'getEXB',
+    qry: service + 'qryEXG2',
     set2: service + 'set2EXB'
   }
 }

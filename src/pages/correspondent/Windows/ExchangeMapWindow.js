@@ -13,32 +13,36 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 const ExchangeMapWindow = ({
   onClose,
   onSave,
+  countriesGridValidation,
   exchangeMapsGridValidation,
   exchangeMapsInlineGridColumns,
   exchangeMapValidation,
   currencyStore,
   countryStore,
   getCurrenciesExchangeMaps,
-  maxAccess
+  maxAccess,
+  labels
 }) => {
-  return (
-    <Window id='CurrencyMapsWindow' Title='Exchange Map' onClose={onClose} onSave={onSave} width={500} height={400}>
+
+return (
+    <Window id='CurrencyMapsWindow' Title={labels.exchangeMap} onClose={onClose} onSave={onSave} width={800} height={400}>
       <CustomTabPanel index={0} value={0}>
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            height: '100%'
+            height: '100%',
+
           }}
         >
           <Grid container gap={2}>
             <Grid container xs={12} spacing={2}>
-            <Grid item xs={6}>
+              <Grid item xs={6}>
                 <CustomComboBox
                   name='currencyId'
-                  label='Currency'
+                  label={labels.currency}
                   valueField='recordId'
-                  displayField='name'
+                  displayField={['reference', 'name']}
                   readOnly='true'
                   store={currencyStore}
                   value={currencyStore.filter(item => item.recordId === exchangeMapValidation.values.currencyId)[0]} // Ensure the value matches an option or set it to null
@@ -54,18 +58,29 @@ const ExchangeMapWindow = ({
               <Grid item xs={6}>
                 <CustomComboBox
                   name='countryId'
-                  label='Country'
-                  valueField='recordId'
-                  displayField='name'
-                  store={countryStore}
-                  value={countryStore.filter(item => item.recordId === exchangeMapValidation.values.countryId)[0]} // Ensure the value matches an option or set it to null
+                  label={labels.country}
+                  valueField='countryId'
+                  displayField={['countryRef', 'countryName']}
+                  columnsInDropDown= {[
+                    { key: 'countryRef', value: 'Reference' },
+                    { key: 'countryName', value: 'Name' },
+                  ]}
+
+                  // displayField='countryName'
+                  store={countriesGridValidation.values.rows}
+                  value={countriesGridValidation.values.rows.filter(item => item.countryId === exchangeMapValidation.values.countryId)[0]} // Ensure the value matches an option or set it to null
                   required
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
-                    exchangeMapValidation.setFieldValue('countryId', newValue?.recordId)
-                    const selectedCountryId = newValue?.recordId || ''
-                    getCurrenciesExchangeMaps(exchangeMapValidation.values.corId, exchangeMapValidation.values.currencyId, selectedCountryId) // Fetch and update state data based on the selected country
+                    exchangeMapValidation.setFieldValue('countryId', newValue?.countryId)
+                    const selectedCountryId = newValue?.countryId || ''
+                    getCurrenciesExchangeMaps(
+                      exchangeMapValidation.values.corId,
+                      exchangeMapValidation.values.currencyId,
+                      selectedCountryId
+                    ) // Fetch and update state data based on the selected country
                   }}
+
                   error={exchangeMapValidation.touched.countryId && Boolean(exchangeMapValidation.errors.countryId)}
                   helperText={exchangeMapValidation.touched.countryId && exchangeMapValidation.errors.countryId}
                 />
@@ -73,23 +88,24 @@ const ExchangeMapWindow = ({
             </Grid>
             <Grid xs={12}>
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                <InlineEditGrid
-                  gridValidation={exchangeMapsGridValidation}
-                  columns={exchangeMapsInlineGridColumns}
-                  defaultRow={{
-                    // corId: correspondentValidation.values
-                    //   ? correspondentValidation.values.recordId
-                    //     ? correspondentValidation.values.recordId
-                    //     : ''
-                    //   : '',
-                    corId: exchangeMapValidation.values.corId,
-                    currencyId: exchangeMapValidation.values.currencyId,
-                    countryId: exchangeMapValidation.values.countryId,
-                    plantId: '',
-                    exchangeId: ''
-                  }}
-                  width={500}
-                />
+                {exchangeMapValidation.values.countryId && (
+                  <InlineEditGrid
+                    gridValidation={exchangeMapsGridValidation}
+                    columns={exchangeMapsInlineGridColumns}
+                    defaultRow={{
+                      corId: exchangeMapValidation.values.corId,
+                      currencyId: exchangeMapValidation.values.currencyId,
+                      countryId: exchangeMapValidation.values.countryId,
+                      plantId: '',
+                      exchangeId: '',
+                      exchangeRef: '',
+                      exchangeName: ''
+                    }}
+                    allowDelete={false}
+                    allowAddNewLine={false}
+                    width={800}
+                  />
+                )}
               </Box>
             </Grid>
           </Grid>

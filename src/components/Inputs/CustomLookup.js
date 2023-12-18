@@ -46,8 +46,8 @@ const CustomLookup = ({
           sx={{
             flex: 1,
             '& .MuiAutocomplete-inputRoot': {
-              borderTopRightRadius: secondValue && 0,
-              borderBottomRightRadius: secondValue && 0
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0
             }
           }}
         >
@@ -65,7 +65,7 @@ const CustomLookup = ({
                 {props.id.endsWith('-0') && (
                   <li className={props.className}>
                     <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>
-                   {secondValue && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
+                    <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>
                   </li>
                 )}
                 <li {...props}>
@@ -93,33 +93,31 @@ const CustomLookup = ({
             sx={{ flex: 1 }}
           />
         </Box>
-        {secondValue && (
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              '& .MuiInputBase-root': {
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0
-              }
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            '& .MuiInputBase-root': {
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0
+            }
+          }}
+        >
+          <TextField
+            size={size}
+            variant={variant}
+            placeholder={displayField.toUpperCase()}
+            value={secondValue ? secondValue : ''}
+            required={required}
+            disabled={disabled}
+            InputProps={{
+              readOnly: true
             }}
-          >
-            <TextField
-              size={size}
-              variant={variant}
-              placeholder={displayField.toUpperCase()}
-              value={secondValue ? secondValue : ''}
-              required={required}
-              disabled={disabled}
-              InputProps={{
-                readOnly: true
-              }}
-              error={error}
-              helperText={helperText}
-              sx={{ flex: 1 }}
-            />
-          </Box>
-        )}
+            error={error}
+            helperText={helperText}
+            sx={{ flex: 1 }}
+          />
+        </Box>
       </Box>
     </Box>
   )

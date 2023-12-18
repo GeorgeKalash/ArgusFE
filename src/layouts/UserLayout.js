@@ -24,7 +24,6 @@ const UserLayout = ({ children, contentHeightFixed }) => {
   const { settings, saveSettings } = useSettings()
   const { menu } = useContext(MenuContext)
 
-
   // ** Vars for server side navigation
   // const { menuItems: verticalMenuItems } = ServerSideVerticalNavItems()
   // const { menuItems: horizontalMenuItems } = ServerSideHorizontalNavItems()
@@ -55,17 +54,18 @@ const UserLayout = ({ children, contentHeightFixed }) => {
 
           // Uncomment the below line when using server-side menu in vertical layout and comment the above line
           // navItems: verticalMenuItems
-        },
-        appBar: {
-          content: props => (
-            <VerticalAppBarContent
-              hidden={hidden}
-              settings={settings}
-              saveSettings={saveSettings}
-              toggleNavVisibility={props.toggleNavVisibility}
-            />
-          )
         }
+
+        // appBar: {
+        //   content: props => (
+        //     <VerticalAppBarContent
+        //       hidden={hidden}
+        //       settings={settings}
+        //       saveSettings={saveSettings}
+        //       toggleNavVisibility={props.toggleNavVisibility}
+        //     />
+        //   )
+        // }
       }}
     >
       {children}

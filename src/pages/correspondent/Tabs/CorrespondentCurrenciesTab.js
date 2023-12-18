@@ -7,7 +7,9 @@ const CorrespondentCurrenciesTab = ({
   correspondentValidation,
   currenciesGridValidation,
   currenciesInlineGridColumns,
-  maxAccess
+  corId,
+  maxAccess,
+  editMode
 }) => {
   return (
     <>
@@ -38,7 +40,9 @@ const CorrespondentCurrenciesTab = ({
             deal: false,
             isInactive: false
           }}
-          width={1000}
+          scrollHeight={320}
+          width={950}
+          onDelete={() => console.log('before delete')}
         />
       </Box>
     </>

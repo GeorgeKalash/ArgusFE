@@ -23,7 +23,7 @@ const productLegTab = ({
   maxAccess
 }) => {
 
-  return (
+return (
     <>
       <Box
         sx={{
@@ -32,105 +32,113 @@ const productLegTab = ({
           height: '100%'
         }}
       >
+
+
+
         <Grid container gap={2}>
-          <Grid container xs={12} spacing={2}>
-            
-            <Grid item xs={3}>
+          <Grid container xs={12} spacing={3}>
+         {productLegValidation.values && productLegValidation.values.dispersalId  &&  <Grid item xs={3} >
               <CustomComboBox
-              name='plantId'
-              label='Plant'
-              valueField='recordId'
-              displayField='name'
-              readOnly={true}
-              store={plantStore}
-              value={plantStore.filter(item => item.recordId === productLegValidation.values.plantId)[0]}
-              onChange={(event, newValue) => {
-                productLegValidation.setFieldValue('plantId', newValue?.recordId)
-                console.log(productLegValidation);
-              }}
-              error={
-                productLegValidation.touched.plantId && Boolean(productLegValidation.errors.plantId)
-              }
-              helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
-            />
-            </Grid>
-            <Grid items xs={3}>
+                name='plantId'
+                label='Plant'
+                valueField='recordId'
+                displayField= {['reference', 'name']}
+                readOnly={true}
+                store={plantStore}
+                value={ plantStore &&
+                  plantStore.filter(
+                    item => item.recordId === (productLegValidation.values && productLegValidation.values.plantId)
+                  )[0]
+                }
+                onChange={(event, newValue) => {
+                  productLegValidation.setFieldValue('plantId', newValue?.recordId)
+                  console.log(productLegValidation)
+                }}
+                error={productLegValidation.touched.plantId && Boolean(productLegValidation.errors.plantId)}
+                helperText={productLegValidation.touched.plantId && productLegValidation.errors.plantId}
+              />
+            </Grid>}
+            {productLegValidation.values && productLegValidation.values.dispersalId &&   <Grid item xs={3}>
               <CustomComboBox
                 name='countryId'
                 label='Country'
                 valueField='recordId'
-                displayField='name'
+                displayField= {['reference', 'name']}
                 readOnly={true}
                 store={countryStore}
-                value={countryStore.filter(item => item.recordId === productLegValidation.values.countryId)[0]}
+                value={ countryStore &&
+                  countryStore.filter(
+                    item => item.recordId === (productLegValidation.values && productLegValidation.values.countryId)
+                  )[0]
+                }
                 onChange={(event, newValue) => {
                   productLegValidation.setFieldValue('countryId', newValue?.recordId)
                 }}
-                error={
-                  productLegValidation.touched.countryId && Boolean(productLegValidation.errors.countryId)
-                }
+                error={productLegValidation.touched.countryId && Boolean(productLegValidation.errors.countryId)}
                 helperText={productLegValidation.touched.countryId && productLegValidation.errors.countryId}
               />
-            </Grid>
-            <Grid item xs={3}>
+            </Grid>}
+           {productLegValidation.values && productLegValidation.values.dispersalId && <Grid item xs={3}>
               <CustomComboBox
                 name='currencyId'
                 label='Currency'
                 valueField='recordId'
-                displayField='name'
+                displayField= {['reference', 'name']}
                 readOnly={true}
                 store={currencyStore}
-                value={currencyStore.filter(item => item.recordId === productLegValidation.values.currencyId)[0]}
+                value={ currencyStore &&
+                  currencyStore.filter(
+                    item => item.recordId === (productLegValidation.values && productLegValidation.values.currencyId)
+                  )[0]
+                }
                 onChange={(event, newValue) => {
                   productLegValidation.setFieldValue('currencyId', newValue?.recordId)
                 }}
-                error={
-                  productLegValidation.touched.currencyId && Boolean(productLegValidation.errors.currencyId)
-                }
+                error={productLegValidation.touched.currencyId && Boolean(productLegValidation.errors.currencyId)}
                 helperText={productLegValidation.touched.currencyId && productLegValidation.errors.currencyId}
               />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomComboBox name='dispersalId'
-              label='Dispersal'
-              valueField='recordId'
-              displayField='name'
-              readOnly={true}
-              store={dispersalStore}
-              value={dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
-              onChange={(event, newValue) => {
-                productLegValidation.setFieldValue('dispersalId', newValue?.recordId)
-              }}
-              error={
-                productLegValidation.touched.dispersalId && Boolean(productLegValidation.errors.dispersalId)
-              }
-              helperText={productLegValidation.touched.dispersalId && productLegValidation.errors.dispersalId}
-               />
-            </Grid>
+            </Grid>}
+
+          {productLegValidation.values  && productLegValidation.values.dispersalId && <Grid item xs={3}>
+              <CustomComboBox
+                name='dispersalId'
+                label='Dispersal'
+                valueField='recordId'
+                displayField= {['reference', 'name']}
+                readOnly={true}
+                store={dispersalStore}
+                value={dispersalStore && dispersalStore.filter(item => item.recordId === productLegValidation.values.dispersalId)[0]}
+                onChange={(event, newValue) => {
+                  productLegValidation.setFieldValue('dispersalId', newValue?.recordId)
+                }}
+                error={productLegValidation.touched.dispersalId && Boolean(productLegValidation.errors.dispersalId)}
+                helperText={productLegValidation.touched.dispersalId && productLegValidation.errors.dispersalId}
+              />
+            </Grid>}
           </Grid>
+          {productLegValidation.values && productLegValidation.values.dispersalId &&
           <Grid xs={12}>
             <InlineEditGrid
               gridValidation={scheduleRangeGridValidation}
               columns={scheduleRangeInlineGridColumns}
               defaultRow={{
-                
                 productId: productLegValidation.values
-                ? productLegValidation.values.productId
                   ? productLegValidation.values.productId
-                  : ''
-                : '',
-                  seqNo: productLegValidation.values
+                    ? productLegValidation.values.productId
+                    : ''
+                  : '',
+                seqNo: productLegValidation.values
                   ? productLegValidation.values.seqNo
                     ? productLegValidation.values.seqNo
                     : ''
                   : '',
-                  rangeSeqNo: 1, //incremental 
-                  fromAmount: '',
-                  toAmount: ''
+                rangeSeqNo: 1, //incremental
+                fromAmount: '',
+                toAmount: ''
               }}
               width={900}
             />
-          </Grid>
+          </Grid>}
         </Grid>
       </Box>
     </>

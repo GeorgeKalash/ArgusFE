@@ -1,6 +1,5 @@
 // ** MUI Imports
-import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
+import { Box, Button, IconButton } from '@mui/material'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
@@ -9,9 +8,10 @@ import Icon from 'src/@core/components/icon'
 import Autocomplete from 'src/layouts/components/Autocomplete'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
-import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
 import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
 import ShortcutsDropdown from 'src/@core/layouts/components/shared-components/ShortcutsDropdown'
+
+// import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
 
 // ** Hook Import
 import { useAuth } from 'src/hooks/useAuth'
@@ -118,6 +118,7 @@ const AppBarContent = props => {
 
   // ** Hook
   const auth = useAuth()
+  const { logout } = useAuth()
 
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
@@ -129,14 +130,22 @@ const AppBarContent = props => {
         ) : null}
         {auth.user && <Autocomplete hidden={hidden} settings={settings} />}
       </Box> */}
-      <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
-        <LanguageDropdown settings={settings} saveSettings={saveSettings} />
-        <ModeToggler settings={settings} saveSettings={saveSettings} />
+      <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center', maxHeight: '30px' }}>
+        {/* <LanguageDropdown settings={settings} saveSettings={saveSettings} /> */}
+        {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
         {auth.user && (
           <>
-            <ShortcutsDropdown settings={settings} shortcuts={shortcuts} />
-            <NotificationDropdown settings={settings} notifications={notifications} />
-            <UserDropdown settings={settings} />
+            {/* <ShortcutsDropdown settings={settings} shortcuts={shortcuts} /> */}
+            {/* <NotificationDropdown settings={settings} notifications={notifications} /> */}
+            {/* <UserDropdown settings={settings} /> */}
+
+            <Button
+              onClick={logout}
+              sx={{ py: 2, maxHeight: '30px', '& svg': { mr: 2, fontSize: '1.375rem', color: 'text.primary' } }}
+            >
+              <Icon icon='mdi:logout-variant' />
+              Logout
+            </Button>
           </>
         )}
       </Box>

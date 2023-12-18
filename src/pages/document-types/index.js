@@ -30,7 +30,8 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
 
 // ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+
 // import { defaultParams } from 'src/lib/defaults'
 
 // ** Resources
@@ -291,6 +292,7 @@ const DocumentTypes = () => {
     initialValues: {
       rows: [
         {
+          payment: 0,
           name: 'test 1',
           countryRef: 'USA',
           countryName: 'United States',
@@ -299,6 +301,7 @@ const DocumentTypes = () => {
           isActive: false
         },
         {
+          payment: 1000,
           name: 'test 2',
           countryRef: 'USA -2',
           countryName: 'United States -2',
@@ -309,7 +312,9 @@ const DocumentTypes = () => {
       ]
     },
     onSubmit: values => {
-      console.log({ SUBMIT: values })
+      values.rows.map(row => {
+        return (row.payment = JSON.parse(getNumberWithoutCommas(row.payment)))
+      })
     }
   })
 
@@ -327,13 +332,20 @@ const DocumentTypes = () => {
 
   const inlineGridColumns = [
     {
+      field: 'numberfield',
+      header: 'Payment',
+      name: 'payment',
+      min: 10,
+      max: 1000000
+    },
+    {
       field: 'textfield',
       header: 'Name',
       name: 'name'
     },
     {
       field: 'combobox',
-      header: 'Country Ref',
+      header: 'Reference',
       nameId: 'recordId',
       name: 'countryRef',
       mandatory: true,

@@ -16,7 +16,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { getNewCorrespondent, populateCorrespondent } from 'src/Models/RemittanceSettings/Correspondent'
-import { getNewCorrExchangeMap, populateCorrExchangeMap } from 'src/Models/RemittanceSettings/CorrExchangeMap'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 
@@ -37,11 +36,13 @@ const Correspondent = () => {
 
   //stores
   const [gridData, setGridData] = useState(null)
+  const [corId, setCorId] = useState(null)
+
   const [bpMasterDataStore, setBpMasterDataStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
   const [exchangeTableStore, setExchangeTableStore] = useState([])
-  const [plantStore, setPlantStore] = useState([])
+  const [exchangeTableStoreAll, setExchangeTableStoreAll] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -103,7 +104,7 @@ const Correspondent = () => {
   ]
 
   const correspondentValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
@@ -122,7 +123,6 @@ const Correspondent = () => {
     enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
-      console.log(values.rows)
       const isValid = values.rows.every(row => !!row.countryId)
 
       return isValid ? {} : { rows: Array(values.rows.length).fill({ countryId: 'Country ID is required' }) }
@@ -139,38 +139,19 @@ const Correspondent = () => {
             : '',
           countryId: '',
           countryRef: '',
-          countryName: ''
+          countryName: '',
+          flName: ''
         }
       ]
     },
     onSubmit: values => {
-      console.log({ values })
       postCorrespondentCountries(values.rows)
     }
   })
 
   const countriesInlineGridColumns = [
-    // {
-    //   field: 'incremented',
-    //   header: 'Seq Nu',
-    //   name: 'seqNo',
-    //   mandatory: false,
-    //   readOnly: true,
-    //   valueSetter: () => {
-    //     return countriesGridValidation.values.rows.length + 1
-    //   }
-    // },
-    // {
-    //   field: 'incremented',
-    //   header: 'Seq Nu 2',
-    //   name: 'seqNo2',
-    //   mandatory: false,
-    //   readOnly: true,
-    //   valueSetter: () => {
-    //     return `Seq Nu 2-${countriesGridValidation.values.rows.length + 1}`
-    //   }
-    // },
     {
+      id: 0,
       field: 'combobox',
       header: _labels.country,
       nameId: 'countryId',
@@ -181,11 +162,13 @@ const Correspondent = () => {
       displayField: 'reference',
       fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Country Ref' },
+        { key: 'reference', value: 'Reference' },
+        { key: 'name', value: 'Name' },
         { key: 'flName', value: 'Foreign Language Name' }
       ]
     },
     {
+      id: 1,
       field: 'textfield',
       header: _labels.name,
       name: 'countryName',
@@ -199,15 +182,20 @@ const Correspondent = () => {
       corId: correspondentValidation.values.recordId,
       correspondentCountries: obj
     }
+
     postRequest({
       extension: RemittanceSettingsRepository.CorrespondentCountry.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
-        console.log(res)
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
+        getGridData({})
+
+        // setWindowOpen(false)
+        if (!res.recordId) {
+          toast.success('Record Added Successfully')
+        } else {
+          toast.success('Record Edited Successfully')
+        }
       })
       .catch(error => {
         setErrorMessage(error)
@@ -216,6 +204,7 @@ const Correspondent = () => {
 
   const getCorrespondentCountries = obj => {
     const _recordId = obj.recordId
+    console.log('obj.recordId')
     const defaultParams = `_corId=${_recordId}`
     var parameters = defaultParams
     getRequest({
@@ -223,7 +212,21 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        if (res.list.length > 0) countriesGridValidation.setValues({ rows: res.list })
+        if (res.list.length > 0) {
+          countriesGridValidation.setValues({ rows: res.list })
+        } else {
+          countriesGridValidation.setValues({
+            rows: [
+              {
+                corId: _recordId,
+                countryId: '',
+                countryRef: '',
+                countryName: '',
+                flName: ''
+              }
+            ]
+          })
+        }
       })
       .catch(error => {
         setErrorMessage(error)
@@ -236,8 +239,11 @@ const Correspondent = () => {
     validateOnChange: true,
     validate: values => {
       const isValid = values.rows.every(row => !!row.currencyId)
+      const isValidGlCurrencyId = values.rows.every(row => !!row.glCurrencyId)
 
-      return isValid ? {} : { rows: Array(values.rows.length).fill({ currencyId: 'Currency is required' }) }
+      return isValid && isValidGlCurrencyId
+        ? {}
+        : { rows: Array(values.rows.length).fill({ currencyId: 'Currency is required' }) }
     },
     initialValues: {
       rows: [
@@ -255,7 +261,7 @@ const Correspondent = () => {
           glCurrencyName: '',
           exchangeId: '',
           exchangeRef: '',
-          exchangeRef: '',
+          exchangeName: '',
           outward: false,
           inward: false,
           bankDeposit: false,
@@ -265,7 +271,6 @@ const Correspondent = () => {
       ]
     },
     onSubmit: values => {
-      console.log({ values })
       postCorrespondentCurrencies(values.rows)
     }
   })
@@ -280,23 +285,13 @@ const Correspondent = () => {
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-
-
-      //fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
+      widthDropDown: '300',
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
         { key: 'flName', value: 'FL Name' }
       ]
     },
-
-    // {
-    //   field: 'textfield',
-    //   header: 'Name',
-    //   name: 'currencyName',
-    //   mandatory: false,
-    //   readOnly: true
-    // },
     {
       field: 'combobox',
       header: _labels.glCurrency,
@@ -306,36 +301,26 @@ const Correspondent = () => {
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-
-      //fieldsToUpdate: [{ from: 'name', to: 'GlCurrencyName' }],
+      widthDropDown: '300',
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
         { key: 'flName', value: 'FL Name' }
       ]
     },
-
-    // {
-    //   field: 'textfield',
-    //   header: 'Name',
-    //   name: 'GlCurrencyName',
-    //   mandatory: false,
-    //   readOnly: true
-    // },
-
-
     {
       field: 'combobox',
       header: _labels.exchange,
       nameId: 'exchangeId',
       name: 'exchangeRef',
       mandatory: false,
-      store: exchangeTableStore.list,
+      store: exchangeTableStoreAll.list,
       valueField: 'recordId',
       displayField: 'reference',
+      widthDropDown: '300',
       fieldsToUpdate: [],
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
     },
@@ -367,14 +352,18 @@ const Correspondent = () => {
     {
       field: 'button',
       text: 'Exchange',
-      onClick: (e, row) => {
-        exchangeMapValidation.setValues(getNewCorrExchangeMap())
-        setCurrencyMapWindowOpen(true)
-      text: _labels.exchange,
+      disabled: row => row.currencyId < 1,
+
       onClick: (e, row) => {
         console.log(row)
-        exchangeMapValidation.setValues(row)
-        setExchangeMapWindowOpen(true)
+        exchangeMapValidation.setValues({})
+
+        if (row.currencyId) {
+          fillExchangeTableStore(row.currencyId)
+          exchangeMapValidation.setValues(row)
+          console.log(exchangeMapValidation)
+          setExchangeMapWindowOpen(true)
+        }
       }
     }
   ]
@@ -390,8 +379,7 @@ const Correspondent = () => {
     })
       .then(res => {
         getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
+        if (!res.recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
@@ -408,7 +396,31 @@ const Correspondent = () => {
       parameters: parameters
     })
       .then(res => {
-        if (res.list.length > 0) currenciesGridValidation.setValues({ rows: res.list })
+        if (res.list.length > 0) {
+          currenciesGridValidation.setValues({ rows: res.list })
+        } else {
+          currenciesGridValidation.setValues({
+            rows: [
+              {
+                corId: _recordId,
+                currencyId: '',
+                currencyRef: '',
+                currencyName: '',
+                glCurrencyId: '',
+                glCurrencyRef: '',
+                glCurrencyName: '',
+                exchangeId: '',
+                exchangeRef: '',
+                exchangeName: '',
+                outward: false,
+                inward: false,
+                bankDeposit: false,
+                deal: false,
+                isInactive: false
+              }
+            ]
+          })
+        }
       })
       .catch(error => {
         setErrorMessage(error)
@@ -419,26 +431,42 @@ const Correspondent = () => {
   const exchangeMapValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      corId: yup.string().required('This field is required'),
-      currencyId: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {}
+
+    initialValues: {
+      rows: [
+        {
+          corId: correspondentValidation.values ? correspondentValidation.values.recordId : '',
+          currencyId: '',
+          countryId: '',
+          countryName: '',
+          plantId: '',
+          plantRef: '',
+          exchangeRef: '',
+          exchangeName: '',
+          exchangeId: ''
+        }
+      ]
+    },
+    onSubmit: values => {
+      postExchangeMaps(values)
+    }
   })
 
   const handleExchangeMapSubmit = () => {
-    exchangeMapValidation.handleSubmit()
     exchangeMapsGridValidation.handleSubmit()
   }
 
   const exchangeMapsGridValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
+
     validate: values => {
       const isValid = values.rows.every(row => !!row.plantId)
+      const isValidExchangeId = values.rows.every(row => !!row.exchangeId)
 
-      return isValid ? {} : { rows: Array(values.rows.length).fill({ plantId: 'Plant is required' }) }
+      return isValid && isValidExchangeId
+        ? {}
+        : { rows: Array(values.rows.length).fill({ plantId: 'Plant is required' }) }
     },
     initialValues: {
       rows: [
@@ -453,31 +481,33 @@ const Correspondent = () => {
           plantId: '',
           plantRef: '',
           exchangeId: '',
-          exchangeRef: ''
+          exchangeRef: '',
+          exchangeName: ''
         }
       ]
     },
     onSubmit: values => {
-      console.log(values)
+      // console.log(values + 'value')
       postExchangeMaps(values)
     }
   })
 
   const exchangeMapsInlineGridColumns = [
     {
-      field: 'combobox',
+      field: 'textfield',
       header: _labels.plant,
-      nameId: 'plantId',
       name: 'plantRef',
       mandatory: true,
-      store: plantStore.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
-        { key: 'name', value: 'Name' }
-      ]
+      readOnly: true
     },
+    {
+      field: 'textfield',
+      header: _labels.name,
+      name: 'plantName',
+      mandatory: true,
+      readOnly: true
+    },
+
     {
       field: 'combobox',
       header: _labels.exchangeTable,
@@ -485,32 +515,84 @@ const Correspondent = () => {
       name: 'exchangeRef',
       mandatory: true,
       store: exchangeTableStore.list,
+      widthDropDown: '200',
       valueField: 'recordId',
       displayField: 'reference',
-      fieldsToUpdate: [],
+      fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
       columnsInDropDown: [
-        { key: 'reference', value: 'Ref' },
+        { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ]
+    },
+
+    {
+      field: 'textfield',
+      header: _labels.name,
+      name: 'exchangeName',
+      mandatory: false,
+      readOnly: true
     }
   ]
 
   const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
-    const defaultParams = `_corId=${corId}&_currencyId=${currencyId}&_countryId=${countryId}`
-    var parameters = defaultParams
+    // exchangeMapsGridValidation.setValues({rows: []})
+    const parameters = ''
+
     getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentExchangeMap.qry,
+      extension: SystemRepository.Plant.qry,
       parameters: parameters
     })
-      .then(res => {
-        if (res.list.length > 0) exchangeMapsGridValidation.setValues({ rows: res.list })
+      .then(plants => {
+        const defaultParams = `_corId=${corId}&_currencyId=${currencyId}&_countryId=${countryId}`
+        const parameters = defaultParams
+
+        getRequest({
+          extension: RemittanceSettingsRepository.CorrespondentExchangeMap.qry,
+          parameters: parameters
+        })
+          .then(values => {
+            // Create a mapping of commissionId to values entry for efficient lookup
+            const valuesMap = values.list.reduce((acc, fee) => {
+              // console.log(acc)
+              // console.log(fee)
+              acc[fee.plantId] = fee
+
+              return acc
+            }, {})
+
+            // Combine exchangeTable and values
+            const rows = plants.list.map(plant => {
+              const value = valuesMap[plant.recordId] || 0
+
+              return {
+                corId: corId,
+                currencyId: currencyId,
+                countryId: countryId,
+                plantId: plant.recordId,
+                plantName: plant.name,
+                exchangeId: value.exchangeId,
+                plantRef: plant.reference,
+                exchangeRef: value.exchangeRef ? value.exchangeRef : '',
+                exchangeName: value.exchangeName
+              }
+            })
+
+            exchangeMapsGridValidation.setValues({ rows })
+          })
+          .catch(error => {
+            // setErrorMessage(error)
+          })
       })
       .catch(error => {
-        setErrorMessage(error)
+        // setErrorMessage(error)
       })
+
+    //step 3: merge both
   }
 
   const postExchangeMaps = obj => {
+    console.log(obj)
+
     const data = {
       corId: exchangeMapValidation.values.corId,
       countryId: exchangeMapValidation.values.countryId,
@@ -523,8 +605,9 @@ const Correspondent = () => {
       record: JSON.stringify(data)
     })
       .then(res => {
+        // getGridData({})
         setExchangeMapWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
+        if (!res.recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
@@ -568,6 +651,8 @@ const Correspondent = () => {
   }
 
   const postCorrespondent = obj => {
+    console.log(correspondentValidation)
+    console.log(obj)
     const recordId = obj.recordId
     postRequest({
       extension: RemittanceSettingsRepository.Correspondent.set,
@@ -575,9 +660,18 @@ const Correspondent = () => {
     })
       .then(res => {
         getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
+
+        setEditMode(true)
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+          if (res.recordId) {
+            correspondentValidation.setFieldValue('recordId', res.recordId)
+            resetCorrespondentCurrencies(res.recordId)
+            resetCorrespondentCountries(res.recordId)
+          }
+        } else {
+          toast.success('Record Editted Successfully')
+        }
       })
       .catch(error => {
         setErrorMessage(error)
@@ -596,6 +690,49 @@ const Correspondent = () => {
       .catch(error => {
         setErrorMessage(error)
       })
+  }
+
+  const resetCorrespondentCountries = id => {
+    countriesGridValidation.setValues({
+      rows: [
+        {
+          corId: id ? id : correspondentValidation.values ? correspondentValidation.values.recordId : '',
+          countryId: '',
+          countryRef: '',
+          countryName: '',
+          flName: ''
+        }
+      ]
+    })
+  }
+
+  const resetCorrespondentCurrencies = id => {
+    currenciesGridValidation.setValues({
+      rows: [
+        {
+          corId: id ? id : correspondentValidation.values ? correspondentValidation.values.recordId : '',
+          currencyId: '',
+          currencyRef: '',
+          currencyName: '',
+          glCurrencyId: '',
+          glCurrencyRef: '',
+          glCurrencyName: '',
+          exchangeId: '',
+          exchangeRef: '',
+          outward: false,
+          inward: false,
+          bankDeposit: false,
+          deal: false,
+          isInactive: false
+        }
+      ]
+    })
+  }
+
+  const resetCorrespondent = () => {
+    // correspondentValidation.resetForm({
+    //   values: {}
+    // })
   }
 
   const fillCountryStore = () => {
@@ -626,10 +763,11 @@ const Correspondent = () => {
       })
   }
 
-  const fillExchangeTableStore = () => {
-    var parameters = `_filter=`
+  const fillExchangeTableStore = id => {
+    setExchangeTableStore({})
+    var parameters = `_currencyId=` + id
     getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.qry,
+      extension: MultiCurrencyRepository.ExchangeTable.qry2,
       parameters: parameters
     })
       .then(res => {
@@ -640,35 +778,61 @@ const Correspondent = () => {
       })
   }
 
-  const fillPlantStore = () => {
+  const fillExchangeTableStoreAll = () => {
+    setExchangeTableStoreAll({})
     var parameters = `_filter=`
     getRequest({
-      extension: SystemRepository.Plant.qry,
+      extension: MultiCurrencyRepository.ExchangeTable.qry,
       parameters: parameters
     })
       .then(res => {
-        setPlantStore(res)
+        setExchangeTableStoreAll(res)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
+  // const fillPlantStore = () => {
+  //   var parameters = `_filter=`
+  //   getRequest({
+  //     extension: SystemRepository.Plant.qry,
+  //     parameters: parameters
+  //   })
+  //     .then(res => {
+  //       setPlantStore(res)
+  //     })
+  //     .catch(error => {
+  //       setErrorMessage(error)
+  //     })
+  // }
+
   const addCorrespondent = () => {
+    resetCorrespondentCountries()
+    resetCorrespondentCurrencies()
+    resetCorrespondent()
     correspondentValidation.setValues(getNewCorrespondent())
+
+    setActiveTab(0)
     fillCountryStore()
     fillCurrencyStore()
-    fillExchangeTableStore()
-    fillPlantStore()
+
+    // fillExchangeTableStore()
+    // fillPlantStore()
     setEditMode(false)
     setWindowOpen(true)
   }
 
   const popup = obj => {
+    resetCorrespondentCountries(obj.recordId)
+    resetCorrespondentCurrencies(obj.recordId)
+    resetCorrespondent()
     fillCountryStore()
     fillCurrencyStore()
-    fillExchangeTableStore()
-    fillPlantStore()
+
+    fillExchangeTableStoreAll()
+
+    // fillPlantStore()
     getCorrespondentById(obj)
     getCorrespondentCountries(obj)
     getCorrespondentCurrencies(obj)
@@ -728,7 +892,7 @@ const Correspondent = () => {
           setActiveTab={setActiveTab}
           onClose={() => setWindowOpen(false)}
           width={1000}
-          height={400}
+          height={350}
           onSave={handleSubmit}
           editMode={editMode}
           lookupBpMasterData={lookupBpMasterData}
@@ -747,6 +911,7 @@ const Correspondent = () => {
           currenciesInlineGridColumns={currenciesInlineGridColumns}
           labels={_labels}
           maxAccess={access}
+          corId={corId}
         />
       )}
 
@@ -761,6 +926,9 @@ const Correspondent = () => {
           countryStore={countryStore.list}
           getCurrenciesExchangeMaps={getCurrenciesExchangeMaps}
           maxAccess={access}
+          labels={_labels}
+          currenciesGridValidation={currenciesGridValidation}
+          countriesGridValidation={countriesGridValidation}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

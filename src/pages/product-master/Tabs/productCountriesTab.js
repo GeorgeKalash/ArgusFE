@@ -11,7 +11,7 @@ const ProductCountriesTab = ({
 }) => {
   return (
     <>
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
         <InlineEditGrid
           gridValidation={countriesGridValidation}
           columns={countriesInlineGridColumns}
@@ -26,6 +26,7 @@ const ProductCountriesTab = ({
             countryName: '',
             isInactive: false
           }}
+          scrollHeight={280}
           width={900}
         />
       </Box>

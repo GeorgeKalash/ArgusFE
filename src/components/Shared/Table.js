@@ -18,7 +18,7 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import DeleteDialog from './DeleteDialog'
 
 // ** Resources
-import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels';
+import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 
 const ODD_OPACITY = 0.2
 
@@ -258,20 +258,16 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
 
   const columns = props.columns
 
-  const shouldRemoveColumn = (column) => {
-    const match = columnsAccess && columnsAccess.find((item) => item.controlId === column.id)
+  const shouldRemoveColumn = column => {
+    const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
 
-    return match && match.accessLevel === ControlAccessLevel.Hidden;
+    return match && match.accessLevel === ControlAccessLevel.Hidden
   }
 
-  const filteredColumns = columns.filter((column) => !shouldRemoveColumn(column))
+  const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
   if (props.onEdit || props.onDelete) {
-
-    const deleteBtnVisible =
-      maxAccess ?
-        props.onDelete && maxAccess > TrxType.EDIT
-        : props.onDelete ? true : false
+    const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
 
     filteredColumns.push({
       field: actionColumnHeader,
@@ -298,27 +294,32 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
   }
 
   const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = height ? `${height}px` : `calc(100vh - 136px - 48px - ${paginationHeight})`
+  const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
   useEffect(() => {
+    console.log('enter useEffect')
     if (props.gridData && props.gridData.list) setGridData(props.gridData)
+    if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
+      console.log('enter if')
+      setPage(1)
+    }
   }, [props.gridData])
 
   return (
     <>
-      {maxAccess && maxAccess > TrxType.NOACCESS ?
+      {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
           <TableContainer
             sx={
               props.style
                 ? props.style
                 : {
-                  zIndex: 0
+                    zIndex: 0
 
-                  // marginBottom: 0,
-                  // pb: 0,
-                  // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
-                }
+                    // marginBottom: 0,
+                    // pb: 0,
+                    // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
+                  }
             }
           >
             {/* <ScrollableTable> */}
@@ -359,9 +360,9 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
             }}
           />
         </>
-        :
+      ) : (
         'NO ACCESS'
-      }
+      )}
     </>
   )
 }

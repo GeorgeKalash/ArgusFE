@@ -5,6 +5,8 @@ export const SystemRepository = {
   getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
+  ReportLayout: service + 'qryRL',
+  ReportTemplate: service + 'qryRT',
   DocumentType: {
     qry: service + 'qryDT',
     get: service + 'getDT',
@@ -34,17 +36,18 @@ export const SystemRepository = {
   },
   Currency: {
     qry: service + 'qryCU',
+    page: service + 'pageCU',
     get: service + 'getCU',
     set: service + 'setCU',
     del: service + 'delCU'
   },
   City: {
     qry: service + 'qryCIT',
+    page: service + 'pageCIT',
     get: service + 'getCIT',
     set: service + 'setCIT',
     del: service + 'delCIT',
     snapshot: service + 'snapshotCIT'
-
   },
   Country: {
     qry: service + 'qryCO',
@@ -77,5 +80,4 @@ export const SystemRepository = {
     set: service + 'setADD',
     del: service + ''
   }
-
 }

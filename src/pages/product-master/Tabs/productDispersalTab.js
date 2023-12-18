@@ -9,7 +9,8 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const ProductDispersalTab = ({ dispersalsGridData, getDispersalsGridData, addProductDispersal, delProductDispersal, popupDispersal, maxAccess }) => {
- 
+
+
   const columns = [
     {
       field: 'reference',

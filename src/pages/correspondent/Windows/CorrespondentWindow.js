@@ -26,8 +26,7 @@ const CorrespondentWindow = ({
   //currencies tab - inline edit grid
   currenciesGridValidation,
   currenciesInlineGridColumns,
-
-  
+  corId,
   labels,
   maxAccess
 }) => {
@@ -61,6 +60,7 @@ const CorrespondentWindow = ({
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
           maxAccess={maxAccess}
+          corId={corId}
         />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
@@ -69,6 +69,8 @@ const CorrespondentWindow = ({
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
           maxAccess={maxAccess}
+          editMode={editMode}
+          corId={corId}
         />
       </CustomTabPanel>
     </Window>

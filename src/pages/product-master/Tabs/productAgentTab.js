@@ -6,14 +6,15 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const ProductAgentTab = ({ 
+const ProductAgentTab = ({
   onDispersalSelection,
   dispersalsGridData,
   agentsHeaderValidation,
   agentsGridValidation,
   agentsInlineGridColumns,
-  maxAccess 
-}) => {  
+  dispersalStore,
+  maxAccess
+}) => {
 return (
     <>
       <Box
@@ -30,15 +31,18 @@ return (
                 name='dispersalId'
                 label='Dispersal'
                 valueField='recordId'
-                displayField='reference'
-                store={dispersalsGridData}
-                value={dispersalsGridData?.filter(item => item.key === agentsHeaderValidation.values.dispersalId)[0]}
+                displayField= {['reference', 'name']}
+                columnsInDropDown= {[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                ]}
+                store={dispersalStore}
+                value={dispersalStore?.filter(item => item.key === agentsHeaderValidation.values.dispersalId)[0]}
                 required
                 onChange={(event, newValue) => {
-                  console.log(newValue?.recordId);
                   agentsHeaderValidation.setFieldValue('dispersalId', newValue?.recordId)
                   onDispersalSelection(newValue?.recordId);
-                  console.log(agentsHeaderValidation);
+
                 }}
                 error={Boolean(agentsHeaderValidation.errors.dispersalId)}
                 helperText={agentsHeaderValidation.errors.dispersalId}
@@ -47,7 +51,7 @@ return (
           </Grid>
           <Grid xs={12}>
             <InlineEditGrid
-              gridValidation={agentsGridValidation}
+              gridValidation={agentsHeaderValidation.values.dispersalId && agentsGridValidation}
               columns={agentsInlineGridColumns}
               defaultRow={{
                 dispersalId: agentsHeaderValidation.values
