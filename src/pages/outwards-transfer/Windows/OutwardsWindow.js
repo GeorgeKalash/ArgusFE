@@ -21,6 +21,7 @@ const OutwardsWindow = ({
     productsStore,
     onAmountDataFill,
     labels,
+    setProductsWindowOpen,
     maxAccess
 }) => {
 return (
@@ -48,6 +49,7 @@ return (
                   productsStore={productsStore?.list}
                   onAmountDataFill={onAmountDataFill}
                   editMode={editMode}
+                  setProductsWindowOpen={setProductsWindowOpen}
                   maxAccess={maxAccess}
                />
                </CustomTabPanel>
