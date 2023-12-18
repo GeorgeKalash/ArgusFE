@@ -3,7 +3,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // **Tabs
-import CityDistrictTab from 'src/pages/countries/Tabs/CityDistrictTab'
+import CityDistrictTab from 'src/pages/city-districts/Tabs/CityDistrictTab'
 
 const CityDistrictWindow = ({
     onClose,

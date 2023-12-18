@@ -49,7 +49,7 @@ const CityDistricts = () => {
 
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,,
+    name: labels && labels.find(item => item.key === 2).value,
     country: labels && labels.find(item => item.key === 3).value,
     cityDistrict: labels && labels.find(item => item.key === 4).value
   }
@@ -146,18 +146,21 @@ const CityDistricts = () => {
   const addCityDistrict = () => {
     countryValidation.setValues(getNewCityDistrict)
     fillCountryStore()
-    //fill lookup??
     setEditMode(false)
     setWindowOpen(true)
+    
+    /*fill lookup??*/
   }
 
   const editCityDistrict = obj => {
     console.log(obj)
     countryValidation.setValues(populateCityDistrict(obj))
     fillCountryStore()
-    //fill lookup??
     setEditMode(true)
     setWindowOpen(true)
+
+    
+    //fill lookup??
   }
 
   useEffect(() => {
@@ -166,8 +169,9 @@ const CityDistricts = () => {
       if (access.record.maxAccess > 0) {
         getGridData()
         fillCountryStore()
-        //fill lookup??
         getLabels(ResourceIds.CityDistrict,setLabels)
+        
+        //fill lookup??
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -235,10 +239,12 @@ const CityDistricts = () => {
        onSave={handleSubmit}
        cityDistrictValidation={cityDistrictValidation}
        countryStore={countryStore}
-       //regionStore={regionStore}
        _labels ={_labels}
        maxAccess={access}
        editMode={editMode}
+
+       
+       //regionStore={regionStore}
        />
        )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
