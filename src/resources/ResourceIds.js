@@ -19,13 +19,14 @@ export const ResourceIds = {
   Address: 20102,
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
-  SourceOfIncome:35103,
+  SourceOfIncome: 35103,
   updateExchangerRates: 35106,
   ExchangeTables: 32101,
   NumberRange: 20103,
   BpRelationType: 21107,
   IdCategories: 21106,
- Groups:21101,
- SystemDefault:36115,
- SystemDefaults: 35108
+  Groups: 21101,
+  SystemDefault: 36115,
+  SystemDefaults: 35108,
+  IdTypes: 35109
 }
