@@ -37,5 +37,12 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getPRO',
     set: service + 'setPRO',
     del: service + 'delPRO'
+  },
+  IdTypes: {
+    qry: service + 'qryIDT',
+    page: service + 'pageIDT',
+    get: service + 'getIDT',
+    set: service + 'setIDT',
+    del: service + 'delIDT'
   }
 }
