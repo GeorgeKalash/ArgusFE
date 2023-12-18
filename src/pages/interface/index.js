@@ -15,7 +15,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewInterface, populateInterface } from 'src/Models/RemittanceSettings/Interface'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -147,9 +146,21 @@ const Interface = () => {
   }
 
   const editInterface = obj => {
-    interfaceValidation.setValues(populateInterface(obj))
-    setEditMode(true)
-    setWindowOpen(true)
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.Interface.get,
+      parameters: parameters
+    })
+      .then(res => {
+        interfaceValidation.setValues(populateInterface(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {

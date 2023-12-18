@@ -11,16 +11,16 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { KVSRepository } from 'src/repositories/KVSRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 import { getNewGeographicRegion, populateGeographicRegions } from 'src/Models/System/GeographicRegions'
+
+// ** Windows
+import GeographicRegionsWindow from './Windows/GeographicRegionsWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -30,16 +30,19 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const GeographicRegions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getLabels, getAccess } = useContext(ControlContext)
 
   //stores
   const [gridData, setGridData] = useState([])
 
   //states
-  const [labels, setLabels] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
-  const [activeTab, setActiveTab] = useState(0)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  //control
+  const [labels, setLabels] = useState(null)
+  const [access, setAccess] = useState(null)
 
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
@@ -84,7 +87,7 @@ const GeographicRegions = () => {
   })
 
   const handleSubmit = () => {
-    if (activeTab === 0) geographicRegionsValidation.handleSubmit()
+    geographicRegionsValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -92,11 +95,11 @@ const GeographicRegions = () => {
     var parameters = defaultParams
 
     getRequest({
-      extension: SystemRepository.GeographicRegion.qry,
+      extension: SystemRepository.GeographicRegion.page,
       parameters: parameters
     })
       .then(res => {
-        setGridData({ ...res, _startAt })
+        setGridData(res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -142,20 +145,17 @@ const GeographicRegions = () => {
   }
 
   const editGeographicRegion = obj => {
-    geographicRegionsValidation.setValues(populateGeographicRegions(obj))
-    setEditMode(true)
-    setWindowOpen(true)
-  }
-
-  const getLabels = () => {
-    var parameters = '_dataset=' + ResourceIds.GeographicRegions
-
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
     getRequest({
-      extension: KVSRepository.getLabels,
+      extension: SystemRepository.GeographicRegion.get,
       parameters: parameters
     })
       .then(res => {
-        setLabels(res.list)
+        geographicRegionsValidation.setValues(populateGeographicRegions(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -163,9 +163,16 @@ const GeographicRegions = () => {
   }
 
   useEffect(() => {
-    getGridData({ _startAt: 0, _pageSize: 50 })
-    getLabels()
-  })
+    if (!access) getAccess(ResourceIds.GeographicRegions, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData({ _startAt: 0, _pageSize: 50 })
+        getLabels(ResourceIds.GeographicRegions, setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+      }
+    }
+  }, [access])
 
   return (
     <>
@@ -176,7 +183,7 @@ const GeographicRegions = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addGeographicRegion} />
+        <GridToolbar onAdd={addGeographicRegion} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -185,53 +192,21 @@ const GeographicRegions = () => {
           onEdit={editGeographicRegion}
           onDelete={delGeographicRegion}
           isLoading={false}
-          pageSize={30}
+          pageSize={50}
+          maxAccess={access}
         />
       </Box>
       {windowOpen && (
-        <Window
-          id='GeographicRegionWindow'
-          Title={_labels.geographicRegion}
+        <GeographicRegionsWindow
           onClose={() => setWindowOpen(false)}
           width={500}
           height={300}
           onSave={handleSubmit}
-        >
-          <CustomTabPanel index={0} value={activeTab}>
-            <Grid container spacing={4}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='reference'
-                  label={_labels.reference}
-                  value={geographicRegionsValidation.values.reference}
-                  required
-                  readOnly={editMode}
-                  onChange={geographicRegionsValidation.handleChange}
-                  onClear={() => geographicRegionsValidation.setFieldValue('reference', '')}
-                  error={
-                    geographicRegionsValidation.touched.reference &&
-                    Boolean(geographicRegionsValidation.errors.reference)
-                  }
-                  helperText={
-                    geographicRegionsValidation.touched.reference && geographicRegionsValidation.errors.reference
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='name'
-                  label={_labels.name}
-                  value={geographicRegionsValidation.values.name}
-                  required
-                  onChange={geographicRegionsValidation.handleChange}
-                  onClear={() => geographicRegionsValidation.setFieldValue('name', '')}
-                  error={geographicRegionsValidation.touched.name && Boolean(geographicRegionsValidation.errors.name)}
-                  helperText={geographicRegionsValidation.touched.name && geographicRegionsValidation.errors.name}
-                />
-              </Grid>
-            </Grid>
-          </CustomTabPanel>
-        </Window>
+          editMode={editMode}
+          geographicRegionsValidation={geographicRegionsValidation}
+          labels={_labels}
+          maxAccess={access}
+        />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>

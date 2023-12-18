@@ -1,42 +1,45 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import RelationTypeTab from 'src/pages/profession/Tabs/ProfessionTab'
+ import NumberRangeTab from '../Tabs/NumberRangeTab'
 
-const ProfessionWindow = ({
+const NumberRangeWindow = ({
     onClose,
     width,
     height,
     onSave,
     editMode,
     typeStore,
-    ProfessionValidation,
+    NumberRangeValidation,
+    setRequired,
     labels,
     maxAccess
-}) => { console.log(ProfessionValidation)
+}) => { console.log(NumberRangeValidation)
 
 return (
 
     <Window
     id='RelationWindow'
-    Title={labels.profession}
+    Title={labels.title}
     onClose={onClose}
     width={width}
     height={height}
     onSave={onSave}
-    ProfessionValidation={ProfessionValidation}
+    NumberRangeValidation={NumberRangeValidation}
     typeStore={typeStore}
+
     >
          <CustomTabPanel>
-           <RelationTypeTab
+           <NumberRangeTab
               labels={labels}
-              ProfessionValidation={ProfessionValidation}
+              NumberRangeValidation={NumberRangeValidation}
               typeStore={typeStore}
               maxAccess={maxAccess}
+              setRequired={setRequired}
            />
            </CustomTabPanel>
         </Window>
      )
 }
 
-export default ProfessionWindow
+export default NumberRangeWindow

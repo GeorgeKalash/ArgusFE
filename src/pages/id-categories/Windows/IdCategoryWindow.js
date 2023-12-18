@@ -1,36 +1,36 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import RelationTypeTab from 'src/pages/profession/Tabs/ProfessionTab'
+import IdCategoryTab from '../Tabs/IdCategoryTab'
 
-const ProfessionWindow = ({
+const IdCategoryWindow = ({
     onClose,
     width,
     height,
     onSave,
     editMode,
     typeStore,
-    ProfessionValidation,
+    IdCategoryValidation,
     labels,
     maxAccess
-}) => { console.log(ProfessionValidation)
+}) => {
 
 return (
 
     <Window
-    id='RelationWindow'
-    Title={labels.profession}
+    id='test'
+    Title={labels.title}
     onClose={onClose}
     width={width}
     height={height}
     onSave={onSave}
-    ProfessionValidation={ProfessionValidation}
+    IdCategoryValidation={IdCategoryValidation}
     typeStore={typeStore}
     >
          <CustomTabPanel>
-           <RelationTypeTab
+           <IdCategoryTab
               labels={labels}
-              ProfessionValidation={ProfessionValidation}
+              IdCategoryValidation={IdCategoryValidation}
               typeStore={typeStore}
               maxAccess={maxAccess}
            />
@@ -39,4 +39,4 @@ return (
      )
 }
 
-export default ProfessionWindow
+export default IdCategoryWindow

@@ -25,6 +25,7 @@ import AgentWindow from './Windows/AgentWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const Agent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,6 +33,7 @@ const Agent = () => {
 
   //stores
   const [gridData, setGridData] = useState(null)
+  const [countryStore, setCountryStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -44,13 +46,26 @@ const Agent = () => {
 
   const _labels = {
     name: labels && labels.find(item => item.key === 1).value,
-    agents: labels && labels.find(item => item.key === 2).value
+    agents: labels && labels.find(item => item.key === 2).value,
+    country: labels && labels.find(item => item.key === 3).value,
+    countryRef: labels && labels.find(item => item.key === 4).value,
+    countryName: labels && labels.find(item => item.key === 5).value
   }
 
   const columns = [
     {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'countryRef',
+      headerName: _labels.countryRef,
+      flex: 1
+    },
+    {
+      field: 'countryName',
+      headerName: _labels.countryName,
       flex: 1
     }
   ]
@@ -59,7 +74,8 @@ const Agent = () => {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required')
+      name: yup.string().required('This field is required'),
+      countryId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postAgent(values)
@@ -70,14 +86,30 @@ const Agent = () => {
     agentValidation.handleSubmit()
   }
 
-  const getGridData = () => {
-    var parameters = '_filter='
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    var parameters = defaultParams
+
     getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentAgents.qry,
+      extension: RemittanceSettingsRepository.CorrespondentAgents.page,
       parameters: parameters
     })
       .then(res => {
         setGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillCountryStore = () => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: SystemRepository.Country.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCountryStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -117,21 +149,36 @@ const Agent = () => {
 
   const addAgent = () => {
     agentValidation.setValues(getNewAgents())
+    fillCountryStore()
     setEditMode(false)
     setWindowOpen(true)
   }
 
   const editAgent = obj => {
-    agentValidation.setValues(populateAgents(obj))
-    setEditMode(true)
-    setWindowOpen(true)
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentAgents.get,
+      parameters: parameters
+    })
+      .then(res => {
+        agentValidation.setValues(populateAgents(res.record))
+        fillCountryStore()
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CorrespondentAgents, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getGridData()
+        getGridData({ _startAt: 0, _pageSize: 50 })
+        fillCountryStore()
         getLabels(ResourceIds.CorrespondentAgents, setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
@@ -164,6 +211,7 @@ const Agent = () => {
           onSave={handleSubmit}
           agentValidation={agentValidation}
           labels={_labels}
+          countryStore={countryStore}
           maxAccess={access}
         />
       )}

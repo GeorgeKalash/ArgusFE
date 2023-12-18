@@ -32,5 +32,17 @@ export const BusinessPartnerRepository = {
     set: service + 'setMAS',
     del: service + 'delMAS',
     snapshot: service + 'snapshotMAS'
+  },
+  RelationTypes: {
+    qry: service + 'qryRLT',
+    get: service + 'getRLT',
+    set: service + 'setRLT',
+    del: service + 'delRLT',
+  },
+  Groups: {
+    qry: service + 'qryGRP',
+    get: service + 'getGRP',
+    set: service + 'setGRP',
+    del: service + 'delGRP',
   }
 }

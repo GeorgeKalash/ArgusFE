@@ -156,10 +156,22 @@ const CommissionType = () => {
   }
 
   const editCommissionType = obj => {
-    commissiontypeValidation.setValues(populateCommissionType(obj))
-    fillTypeStore()
-    setEditMode(true)
-    setWindowOpen(true)
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.CommissionType.get,
+      parameters: parameters
+    })
+      .then(res => {
+        commissiontypeValidation.setValues(populateCommissionType(res.record))
+        fillTypeStore()
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {
