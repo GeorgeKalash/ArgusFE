@@ -10,9 +10,7 @@ import Icon from 'src/@core/components/icon'
 import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 const CustomPaper = (props, widthDropDown) => {
-
-
-return <Paper sx={{ width: `${widthDropDown ? widthDropDown+'%' : 'auto'}` }} {...props} />
+  return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
 }
 
 const InlineEditGrid = ({
@@ -20,7 +18,7 @@ const InlineEditGrid = ({
   defaultRow,
   gridValidation,
   width,
-  scrollHeight ,
+  scrollHeight,
   scrollable = true,
   allowDelete = true,
   allowAddNewLine = true,
@@ -171,20 +169,20 @@ const InlineEditGrid = ({
             readOnly={column?.readOnly}
             options={column.store}
             getOptionLabel={option => {
-              if (typeof option === 'object'){
+              if (typeof option === 'object') {
+                if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
+                  let search = ''
+                  {
+                    column.columnsInDropDown.map((header, i) => {
+                      search += `${option[header.key]} `
+                    })
+                  }
 
-              if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
-                let search ='';
-                {column.columnsInDropDown.map((header, i) => {
-                    search += `${option[header.key]} `
-                })}
+                  return search
+                }
 
-                return search;
-              }
-
-              return `${option[column.displayField]}`
-
-              }else{
+                return `${option[column.displayField]}`
+              } else {
                 const selectedOption = column.store.find(item => {
                   return item[column.valueField] === option
                 })
@@ -232,7 +230,7 @@ const InlineEditGrid = ({
                       <li className={props.className}>
                         {column.columnsInDropDown.map((header, i) => {
                           return (
-                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold'}}>
+                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
                               {header.value.toUpperCase()}
                             </Box>
                           )
@@ -254,7 +252,6 @@ const InlineEditGrid = ({
             fullWidth={true}
             renderInput={params => <TextField {...params} required={column?.mandatory} sx={{ flex: 1 }} />}
             openOnFocus
-
           />
         )
       case 'lookup':
@@ -301,9 +298,7 @@ const InlineEditGrid = ({
               }
             }}
             PaperComponent={props =>
-              column.columnsInDropDown &&
-              column.columnsInDropDown.length > 0 &&
-              CustomPaper(props, widthDropDown)
+              column.columnsInDropDown && column.columnsInDropDown.length > 0 && CustomPaper(props, widthDropDown)
             }
             renderOption={(props, option) => {
               if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
@@ -465,7 +460,16 @@ const InlineEditGrid = ({
 
   return (
     <Box>
-      <DataTable value={gridValidation?.values?.rows}  scrollable={scrollable } scrollHeight={scrollHeight}  editMode='cell' tableStyle={{ minWidth: tableWidth }}>
+      <DataTable
+        value={gridValidation?.values?.rows}
+        scrollable={scrollable}
+        scrollHeight={scrollHeight}
+        editMode='cell'
+        tableStyle={{ minWidth: tableWidth }}
+        showGridlines
+        stripedRows
+        size='small'
+      >
         {columns.map((column, i) => {
           return (
             <Column

@@ -151,7 +151,7 @@ const VerticalNavHeader = props => {
                   </HeaderTitle> */}
           </LinkStyled>
         )}
-        <UserDropdown settings={settings} />
+        {(!navCollapsed || navHover) && <UserDropdown settings={settings} />}
       </Box>
       {hidden ? (
         <IconButton
