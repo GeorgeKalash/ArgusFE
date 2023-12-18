@@ -199,7 +199,6 @@ const City = () => {
       })
   }
   useEffect(() => {
-    console.log('first use')
     if (!access) getAccess(ResourceIds.Cities, setAccess)
     else {
       if (access.record.maxAccess > 0) {
