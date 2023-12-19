@@ -86,7 +86,7 @@ export const SystemRepository = {
     set: service + 'setADD',
     del: service + ''
   },
-  Plant: {
+  Plant2: {
     qry: service + 'qryPLT',
     get: service + 'getPLT',
     set: service + 'setPLT',
