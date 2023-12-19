@@ -71,7 +71,8 @@ export const SystemRepository = {
     qry: service + 'qryPLT',
     get: service + 'getPLT',
     set: service + 'setPLT',
-    del: service + 'delPLT'
+    del: service + 'delPLT',
+    page: service + 'pagePLT'
   },
   CityDistrict: {
     qry: service + 'qryCDI',
@@ -85,13 +86,6 @@ export const SystemRepository = {
     get: service + 'getADD',
     set: service + 'setADD',
     del: service + ''
-  },
-  Plant2: {
-    qry: service + 'qryPLT',
-    get: service + 'getPLT',
-    set: service + 'setPLT',
-    del: service + 'delPLT',
-    page: service + 'pagePLT'
   },
   PlantGroup: {
     qry: service + 'qryPLG'
