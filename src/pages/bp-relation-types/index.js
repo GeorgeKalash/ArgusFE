@@ -9,7 +9,7 @@ import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { getNew, populateRelationType } from 'src/Models/BusinessPartner/RelationTypes'
+import { getNewRelationType, populateRelationType } from 'src/Models/BusinessPartner/RelationTypes'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 
 // ** Resources
