@@ -16,6 +16,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewIdTypes, populateIdTypes } from 'src/Models/CurrencyTradingSettings/IdTypes'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -38,6 +39,9 @@ const IdTypes = () => {
 
   //stores
   const [gridData, setGridData] = useState([])
+  const [idtId, setidtId] = useState(null)
+  const [accessLevelStore, setaccesLevelStore] = useState([])
+  const [categoryStore, setCategoryStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -51,7 +55,10 @@ const IdTypes = () => {
     format: labels && labels.find(item => item.key === 3).value,
     length: labels && labels.find(item => item.key === 4).value,
     tab1: labels && labels.find(item => item.key === 5) && labels.find(item => item.key === 5).value,
-    tab2: labels && labels.find(item => item.key === 6) && labels.find(item => item.key === 6).value
+    tab2: labels && labels.find(item => item.key === 6) && labels.find(item => item.key === 6).value,
+    control: labels && labels.find(item => item.key === 7) && labels.find(item => item.key === 7).value,
+    accessLevel: labels && labels.find(item => item.key === 8) && labels.find(item => item.key === 8).value,
+    category: labels && labels.find(item => item.key === 9).value
   }
 
   const columns = [
@@ -81,15 +88,123 @@ const IdTypes = () => {
     validationSchema: yup.object({
       name: yup.string().required('This field is required'),
       format: yup.string().required('This field is required'),
-      length: yup.string().required('This field is required')
+      length: yup.string().required('This field is required'),
+      category: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postIdTypes(values)
     }
   })
 
+  // IDFields TAB(2nd tab)
+  const idFieldsvalidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validate: values => {
+      const isValid = values.rows.every(row => !!row.accessLevel)
+
+      return isValid ? {} : { rows: Array(values.rows.length).fill({ accessLevel: 'Access Level is required' }) }
+    },
+    initialValues: {
+      rows: [
+        {
+          idtId: idTypesValidation.values
+            ? idTypesValidation.values.recordId
+              ? idTypesValidation.values.recordId
+              : ''
+            : '',
+          controlId: '',
+          accessLevel: '',
+          accessLevelName: ''
+        }
+      ]
+    },
+    onSubmit: values => {
+      postIdFields(values.rows)
+    }
+  })
+
+  const idFieldsGridColumn = [
+    {
+      field: 'combobox',
+      header: _labels.accessLevel,
+      nameId: 'accessLevel',
+      name: 'accessLevelName',
+      mandatory: true,
+      store: accessLevelStore,
+      valueField: 'key',
+      displayField: 'value',
+      columnsInDropDown: [{ key: 'value', value: 'Value' }]
+    },
+    {
+      id: 1,
+      field: 'textfield',
+      header: _labels.control,
+      name: 'controlId',
+      mandatory: true
+    }
+  ]
+
+  const postIdFields = obj => {
+    console.log('recordId ' + idTypesValidation.values.recordId)
+    console.log('items ' + JSON.stringify(obj))
+
+    const data = {
+      idtId: idTypesValidation.values.recordId,
+      items: obj
+    }
+
+    postRequest({
+      extension: CurrencyTradingSettingsRepository.IdFields.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        getGridData({})
+
+        // setWindowOpen(false)
+        if (!res.recordId) {
+          toast.success('Record Added Successfully')
+        } else {
+          toast.success('Record Edited Successfully')
+        }
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getIdFields = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_idtId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.IdFields.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0) {
+          idFieldsvalidation.setValues({ rows: res.list })
+        } else {
+          idFieldsvalidation.setValues({
+            rows: [
+              {
+                idtId: _recordId,
+                controlId: '',
+                accessLevel: '',
+                accessLevelName: ''
+              }
+            ]
+          })
+        }
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const handleSubmit = () => {
     if (activeTab === 0) idTypesValidation.handleSubmit()
+    else if (activeTab === 1) idFieldsvalidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -108,6 +223,50 @@ const IdTypes = () => {
       })
   }
 
+  const resetIdFields = id => {
+    idFieldsvalidation.resetForm()
+    idFieldsvalidation.setValues({
+      rows: [
+        {
+          idtId: id ? id : idTypesValidation.values ? idTypesValidation.values.recordId : '',
+          controlId: '',
+          accessLevel: '',
+          accessLevelName: ''
+        }
+      ]
+    })
+  }
+
+  const fillAccessLevelStore = () => {
+    var parameters = '_database=3' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        //ask about lang values
+        setaccesLevelStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
+  const fillCategoryStore = () => {
+    var parameters = '_database=147' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        //ask about lang values
+        setCategoryStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
   const postIdTypes = obj => {
     const recordId = obj.recordId
     postRequest({
@@ -118,8 +277,12 @@ const IdTypes = () => {
         getGridData({})
         setEditMode(true)
         setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
+        if (!recordId) {
+          idTypesValidation.setFieldValue('recordId', res.recordId)
+          resetIdFields(res.recordId)
+          fillAccessLevelStore()
+          toast.success('Record Added Successfully')
+        } else toast.success('Record Editted Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
@@ -142,6 +305,11 @@ const IdTypes = () => {
 
   const addIdTypes = () => {
     idTypesValidation.setValues(getNewIdTypes())
+    resetIdFields()
+    console.log(idFieldsvalidation.values)
+    setidtId(null)
+    fillAccessLevelStore()
+    fillCategoryStore()
     setActiveTab(0)
     setEditMode(false)
     setWindowOpen(true)
@@ -156,7 +324,12 @@ const IdTypes = () => {
       parameters: parameters
     })
       .then(res => {
+        resetIdFields(obj.recordId)
+        setidtId(obj.recordId)
         idTypesValidation.setValues(populateIdTypes(res.record))
+        fillAccessLevelStore()
+        fillCategoryStore()
+        getIdFields(obj)
         setEditMode(true)
         setWindowOpen(true)
         setActiveTab(0)
@@ -172,6 +345,8 @@ const IdTypes = () => {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 50 })
         getLabels(ResourceIds.IdTypes, setLabels)
+        fillAccessLevelStore()
+        fillCategoryStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -204,10 +379,15 @@ const IdTypes = () => {
           onSave={handleSubmit}
           editMode={editMode}
           idTypesValidation={idTypesValidation}
+          idFieldsvalidation={idFieldsvalidation}
           labels={_labels}
           maxAccess={access}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          idtId={idtId}
+          idFieldsGridColumn={idFieldsGridColumn}
+          categoryStore={categoryStore}
+          accessLevelStore={accessLevelStore.list}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

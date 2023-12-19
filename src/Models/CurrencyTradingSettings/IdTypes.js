@@ -6,7 +6,8 @@ const getNewIdTypes = () => {
     recordId: null,
     name: null,
     format: null,
-    length: null
+    length: null,
+    category: null
   }
 }
 
@@ -15,7 +16,8 @@ const populateIdTypes = obj => {
     recordId: obj.recordId,
     name: obj.name,
     format: obj.format,
-    length: obj.length
+    length: obj.length,
+    category: obj.category
   }
 }
 
