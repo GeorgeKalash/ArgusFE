@@ -225,7 +225,6 @@ const CityDistricts = () => {
           onDelete={delCityDistrict}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
           maxAccess={access}
         />
       </Box>

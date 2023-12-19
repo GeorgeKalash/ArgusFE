@@ -87,10 +87,13 @@ export const SystemRepository = {
     del: service + ''
   },
   Plant: {
-    qry: service + 'qryPL',
-    get: service + 'getPL',
-    set: service + 'setPL',
-    del: service + 'delPL',
-    page: service + 'pagePL'
+    qry: service + 'qryPLT',
+    get: service + 'getPLT',
+    set: service + 'setPLT',
+    del: service + 'delPLT',
+    page: service + 'pagePLT'
+  },
+  PlantGroup: {
+    qry: service + 'qryPLG'
   }
 }
