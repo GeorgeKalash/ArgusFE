@@ -51,7 +51,8 @@ const CityDistricts = () => {
     reference: labels && labels.find(item => item.key === 1).value,
     name: labels && labels.find(item => item.key === 2).value,
     country: labels && labels.find(item => item.key === 3).value,
-    cityDistrict: labels && labels.find(item => item.key === 4).value
+    cityDistrict: labels && labels.find(item => item.key === 4).value,
+    city: labels && labels.find(item => item.key === 5).value
   }
 
   const columns = [
@@ -66,12 +67,12 @@ const CityDistricts = () => {
       flex: 1
     },
     {
-      field: 'country',
+      field: 'countryName',
       headerName: _labels.country,
       flex: 1
     },
     {
-      field: 'city',
+      field: 'cityName',
       headerName: _labels.city,
       flex: 1
     }
@@ -83,12 +84,12 @@ const CityDistricts = () => {
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
-      country: yup.string().required('This field is required'),
-      city: yup.string().required('This field is required')
+      countryId: yup.string().required('This field is required'),
+      cityId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       console.log(values)
-      postCountry(values)
+      postCityDistrict(values)
     }
   })
 
@@ -96,8 +97,9 @@ const CityDistricts = () => {
     cityDistrictValidation.handleSubmit()
   }
 
-  const getGridData = () => { //needs fix params
-    var parameters = '_filter='
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
     getRequest({
       extension: SystemRepository.CityDistrict.page,
       parameters: parameters
@@ -118,7 +120,7 @@ const CityDistricts = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData()
+        getGridData({})
         setWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
@@ -135,7 +137,7 @@ const CityDistricts = () => {
     })
       .then(res => {
         console.log({ res })
-        getGridData()
+        getGridData({})
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
@@ -144,34 +146,28 @@ const CityDistricts = () => {
   }
 
   const addCityDistrict = () => {
-    countryValidation.setValues(getNewCityDistrict)
+    cityDistrictValidation.setValues(getNewCityDistrict)
     fillCountryStore()
     setEditMode(false)
     setWindowOpen(true)
-    
-    /*fill lookup??*/
   }
 
   const editCityDistrict = obj => {
     console.log(obj)
-    countryValidation.setValues(populateCityDistrict(obj))
+    cityDistrictValidation.setValues(populateCityDistrict(obj))
     fillCountryStore()
+    lookupCity(obj.city)
     setEditMode(true)
     setWindowOpen(true)
-
-    
-    //fill lookup??
   }
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CityDistrict, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getGridData()
+        getGridData({ _startAt: 0, _pageSize: 30 })
         fillCountryStore()
         getLabels(ResourceIds.CityDistrict,setLabels)
-        
-        //fill lookup??
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -193,20 +189,22 @@ const CityDistricts = () => {
       })
   }
 
-  const fillRegionStore = ({ _startAt = 0, _pageSize = 1000 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams
+  const lookupCity = searchQry => {
+    setCityStore([])
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${cityDistrictValidation.values.countryId}&_stateId=0`
+    console.log(cityDistrictValidation.values.countryId)
     getRequest({
-      extension: SystemRepository.GeographicRegion.qry,
+      extension: SystemRepository.City.snapshot,
       parameters: parameters
     })
       .then(res => {
-        setRegionStore(res.list)
+        console.log(res.list)
+        setCityStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
       })
-  } //comment out 
+  }
 
   return (
     <>
@@ -239,12 +237,12 @@ const CityDistricts = () => {
        onSave={handleSubmit}
        cityDistrictValidation={cityDistrictValidation}
        countryStore={countryStore}
+       cityStore={cityStore}
+       setCityStore={setCityStore}
+       lookupCity={lookupCity}
        _labels ={_labels}
        maxAccess={access}
        editMode={editMode}
-
-       
-       //regionStore={regionStore}
        />
        )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

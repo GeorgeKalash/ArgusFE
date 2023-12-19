@@ -26,5 +26,6 @@ export const ResourceIds = {
   NumberRange: 20103,
   BpRelationType: 21107,
   IdCategories: 21106,
- Groups:21101
+  Groups:21101,
+  Plants:20110
 }

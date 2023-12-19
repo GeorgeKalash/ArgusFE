@@ -10,6 +10,9 @@ const CityDistrictWindow = ({
     onSave,
     cityDistrictValidation,
     countryStore,
+    cityStore,
+    setCityStore,
+    lookupCity,
     width,
     height,
     _labels,
@@ -23,6 +26,9 @@ const CityDistrictWindow = ({
                 <CityDistrictTab
                     cityDistrictValidation={cityDistrictValidation}
                     countryStore={countryStore}
+                    cityStore={cityStore}
+                    setCityStore={setCityStore}
+                    lookupCity={lookupCity}
                     _labels={_labels}
                     maxAccess={maxAccess}
                     editMode={editMode}

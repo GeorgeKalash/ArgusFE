@@ -4,7 +4,10 @@ const getNewCityDistrict = () => {
     reference: null,
     name: null,
     countryId: null,
-    cityId: null
+    cityId: null,
+    cityRef: null,
+    cityName: null,
+    countryName: null
   }
 }
 
@@ -14,7 +17,10 @@ const populateCityDistrict = obj => {
     reference: obj.reference,
     name: obj.name,
     countryId: obj.countryId,
-    cityId: obj.cityId
+    cityId: obj.cityId,
+    cityRef: obj.cityRef,
+    cityName: obj.cityName,
+    countryName: obj.countryName
   }
 }
 
