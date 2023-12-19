@@ -3,12 +3,12 @@ import { Box } from '@mui/material'
 // ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const IdFieldsTab = ({ idTypesValidation, idFieldsvalidation, idFieldsGridColumn, maxAccess, idtId }) => {
+const IdFieldsTab = ({ idTypesValidation, idFieldsValidation, idFieldsGridColumn, maxAccess, idtId }) => {
   return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
         <InlineEditGrid
-          gridValidation={idFieldsvalidation}
+          gridValidation={idFieldsValidation}
           maxAccess={maxAccess}
           columns={idFieldsGridColumn}
           defaultRow={{

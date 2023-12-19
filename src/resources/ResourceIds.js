@@ -30,5 +30,6 @@ export const ResourceIds = {
   SystemDefault: 36115,
   SystemDefaults: 35108,
   IdTypes: 35109,
-  Plants:20110
+  Plants: 20110,
+  BPMasterData: 21201
 }
