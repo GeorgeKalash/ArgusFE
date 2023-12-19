@@ -57,7 +57,7 @@ const Groups = () => {
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
     name: labels && labels.find(item => item.key === 2).value,
-    numberRange: labels && labels.find(item => item.key === 3).value,
+    nuRange: labels && labels.find(item => item.key === 3).value,
     title: labels && labels.find(item => item.key === 4).value,
     accountGroup: labels && labels.find(item => item.key === 5).value,
     typeName: labels && labels.find(item => item.key === 6).value,
