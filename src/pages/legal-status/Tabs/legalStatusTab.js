@@ -21,6 +21,7 @@ const LegalStatusTab = ({ legalStatusValidation, _labels, editMode }) => {
                   helperText={legalStatusValidation.touched.reference && legalStatusValidation.errors.reference}
                   maxLength='70'
                   readOnly={editMode}
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -34,6 +35,7 @@ const LegalStatusTab = ({ legalStatusValidation, _labels, editMode }) => {
                   error={legalStatusValidation.touched.name && Boolean(legalStatusValidation.errors.name)}
                   helperText={legalStatusValidation.touched.name && legalStatusValidation.errors.name}
                   maxLength='70'
+                  maxAccess={maxAccess}
                 />
               </Grid>
             </Grid>

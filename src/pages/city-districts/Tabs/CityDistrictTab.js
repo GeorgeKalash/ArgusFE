@@ -32,6 +32,7 @@ const CityDistrictTab = ({
             error={cityDistrictValidation.touched.reference && Boolean(cityDistrictValidation.errors.reference)}
             helperText={cityDistrictValidation.touched.reference && cityDistrictValidation.errors.reference}
             maxLength='10'
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
@@ -45,6 +46,7 @@ const CityDistrictTab = ({
             error={cityDistrictValidation.touched.name && Boolean(cityDistrictValidation.errors.name)}
             helperText={cityDistrictValidation.touched.name && cityDistrictValidation.errors.name}
             maxLength='40'
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
@@ -64,6 +66,7 @@ const CityDistrictTab = ({
             }}
             error={cityDistrictValidation.touched.countryId && Boolean(cityDistrictValidation.errors.countryId)}
             helperText={cityDistrictValidation.touched.countryId && cityDistrictValidation.errors.countryId}
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>

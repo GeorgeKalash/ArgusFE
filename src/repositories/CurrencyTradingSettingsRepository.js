@@ -48,5 +48,11 @@ export const CurrencyTradingSettingsRepository = {
   Defaults: {
     qry: service + 'qryDE',
     set2: service + 'set2DE',
+  },
+  Activity: {
+    qry: service + 'qryACT',
+    get: service + 'getACT',
+    set: service + 'setACT',
+    del: service + 'delACT'
   }
 }

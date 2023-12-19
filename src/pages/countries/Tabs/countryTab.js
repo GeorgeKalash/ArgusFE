@@ -23,6 +23,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         onClear={() => countryValidation.setFieldValue('reference', '')}
                         error={countryValidation.touched.reference && Boolean(countryValidation.errors.reference)}
                         helperText={countryValidation.touched.reference && countryValidation.errors.reference}
+                        maxAccess={maxAccess}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -35,6 +36,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         onClear={() => countryValidation.setFieldValue('name', '')}
                         error={countryValidation.touched.name && Boolean(countryValidation.errors.name)}
                         helperText={countryValidation.touched.name && countryValidation.errors.name}
+                        maxAccess={maxAccess}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -47,6 +49,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         error={countryValidation.touched.flName && Boolean(countryValidation.errors.flName)}
                         helperText={countryValidation.touched.flName && countryValidation.errors.flName}
                         maxLength='30'
+                        maxAccess={maxAccess}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -62,6 +65,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         }}
                         error={countryValidation.touched.currencyId && Boolean(countryValidation.errors.currencyId)}
                         helperText={countryValidation.touched.currencyId && countryValidation.errors.currencyId}
+                        maxAccess={maxAccess}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -77,6 +81,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         }}
                         error={countryValidation.touched.regionId && Boolean(countryValidation.errors.regionId)}
                         helperText={countryValidation.touched.regionId && countryValidation.errors.regionId}
+                        maxAccess={maxAccess}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -88,6 +93,7 @@ const CountryTab = ({ countryValidation, currencyStore, regionStore, _labels, ma
                         onClear={() => countryValidation.setFieldValue('ibanLength', '')}
                         error={countryValidation.touched.ibanLength && Boolean(countryValidation.errors.ibanLength)}
                         helperText={countryValidation.touched.ibanLength && countryValidation.errors.ibanLength}
+                        maxAccess={maxAccess}
                     />
                 </Grid>
                 <Grid item xs={12}>

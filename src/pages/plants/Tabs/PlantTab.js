@@ -30,6 +30,7 @@ const PlantTab = ({
             error={plantValidation.touched.reference && Boolean(plantValidation.errors.reference)}
             helperText={plantValidation.touched.reference && plantValidation.errors.reference}
             maxLength='4'
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
@@ -43,6 +44,7 @@ const PlantTab = ({
             error={plantValidation.touched.name && Boolean(plantValidation.errors.name)}
             helperText={plantValidation.touched.name && plantValidation.errors.name}
             maxLength='40'
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
@@ -55,6 +57,7 @@ const PlantTab = ({
             error={plantValidation.touched.licenseNo && Boolean(plantValidation.errors.licenseNo)}
             helperText={plantValidation.touched.licenseNo && plantValidation.errors.licenseNo}
             maxLength='40'
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
@@ -67,6 +70,7 @@ const PlantTab = ({
             error={plantValidation.touched.crNo && Boolean(plantValidation.errors.crNo)}
             helperText={plantValidation.touched.crNo && plantValidation.errors.crNo}
             maxLength='40'
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
@@ -82,6 +86,7 @@ const PlantTab = ({
             }}
             error={plantValidation.touched.costCenterId && Boolean(plantValidation.errors.costCenterId)}
             helperText={plantValidation.touched.costCenterId && plantValidation.errors.costCenterId}
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
@@ -97,6 +102,7 @@ const PlantTab = ({
             }}
             error={plantValidation.touched.groupId && Boolean(plantValidation.errors.groupId)}
             helperText={plantValidation.touched.groupId && plantValidation.errors.groupId}
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
@@ -116,6 +122,7 @@ const PlantTab = ({
             }}
             error={plantValidation.touched.segmentRef && Boolean(plantValidation.errors.segmentRef)}
             helperText={plantValidation.touched.segmentRef && plantValidation.errors.segmentRef}
+            maxAccess={maxAccess}
           />
         </Grid>
       </Grid>
