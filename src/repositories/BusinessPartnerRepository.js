@@ -17,6 +17,7 @@ export const BusinessPartnerRepository = {
   CategoryID: {
     qry: service + 'qryINC',
     get: service + 'getINC',
+    page: service + 'pageINC',
     set: service + 'setINC',
     del: service + 'delINC'
   },
@@ -35,12 +36,14 @@ export const BusinessPartnerRepository = {
   },
   RelationTypes: {
     qry: service + 'qryRLT',
+    page: service + 'pageRLT',
     get: service + 'getRLT',
     set: service + 'setRLT',
     del: service + 'delRLT',
   },
   Groups: {
     qry: service + 'qryGRP',
+    page: service + 'pageGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP',

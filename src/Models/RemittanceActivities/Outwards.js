@@ -10,6 +10,8 @@ const getNewOutwards = () => {
     amount: null,
     productId: null,
     fees: null,
+    baseAmount: null,
+    net: null,
   }
 }
 
@@ -24,7 +26,9 @@ const populateOutwards = obj => {
     agentId: obj.agentId,
     amount: obj.amount,
     productId: obj.productId,
-    fees: obj.fees
+    fees: obj.fees,
+    baseAmount: obj.baseAmount,
+    net: obj.net,
   }
 }
 

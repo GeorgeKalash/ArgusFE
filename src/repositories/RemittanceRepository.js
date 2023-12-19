@@ -94,5 +94,9 @@ export const RemittanceSettingsRepository = {
     get: service + 'getEXB',
     qry: service + 'qryEXG2',
     set2: service + 'set2EXB'
+  },
+  RtDefault: {
+    qry: service + 'qryDE',
+    set2: service + 'set2DE'
   }
 }

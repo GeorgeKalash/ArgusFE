@@ -121,7 +121,7 @@ const BpRelationTypes = () => {
     var parameters = defaultParams + '&_dgId=0'
 
     getRequest({
-      extension: BusinessPartnerRepository.RelationTypes.qry,
+      extension: BusinessPartnerRepository.RelationTypes.page,
       parameters: parameters
     })
       .then(res => {

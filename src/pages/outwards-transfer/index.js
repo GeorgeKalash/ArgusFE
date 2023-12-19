@@ -26,6 +26,7 @@ import OutwardsWindow from './Windows/OutwardsWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { getNewOutwards, populateOutwards } from 'src/Models/RemittanceActivities/Outwards'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import ProductsWindow from './Windows/ProductsWindow'
 
 const OutwardsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -39,11 +40,13 @@ const OutwardsTransfer = () => {
   const [currencyStore, setCurrencyStore] = useState([])
   const [agentsStore, setAgentsStore] = useState([])
   const [productsStore, setProductsStore] = useState([])
-
+  
   //states
   const [windowOpen, setWindowOpen] = useState(false)
+  const [productsWindowOpen, setProductsWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [selectedRow, setSelectedRow] = useState(null);
 
   //control
   const [labels, setLabels] = useState(null)
@@ -91,6 +94,7 @@ const OutwardsTransfer = () => {
       amount: yup.string().required('This field is required'),
       productId: yup.string().required('This field is required'),
       fees: yup.string().required('This field is required'),
+      baseAmount: yup.string().required('This field is required'),
       
     }),
     onSubmit: values => {
@@ -100,6 +104,16 @@ const OutwardsTransfer = () => {
 
   const handleSubmit = () => {
     outwardsValidation.handleSubmit()
+  }
+
+  const handleProductSelection = () => {
+    const selectedRowData = productsStore?.list.find((row) => row.productId === selectedRow);
+    console.log(selectedRowData);
+    outwardsValidation.setFieldValue('productId', selectedRowData?.productId)
+    outwardsValidation.setFieldValue('fees', selectedRowData?.fees)
+    outwardsValidation.setFieldValue('baseAmount', selectedRowData?.baseAmount)
+    outwardsValidation.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount)
+    setProductsWindowOpen(false);
   }
 
   const getGridData = () => {
@@ -294,6 +308,20 @@ const OutwardsTransfer = () => {
           productsStore={productsStore}
           onAmountDataFill={onAmountDataFill}
           labels={_labels}
+          setProductsWindowOpen={setProductsWindowOpen}
+          maxAccess={access}
+        />
+      )}
+
+      {productsWindowOpen && (
+        <ProductsWindow
+          onClose={() => setProductsWindowOpen(false)}
+          width={700}
+          height={200}
+          onSave={handleProductSelection}
+          gridData={productsStore}
+          setSelectedRow={setSelectedRow}
+          selectedRow={selectedRow}
           maxAccess={access}
         />
       )}

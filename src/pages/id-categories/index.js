@@ -116,7 +116,7 @@ const IdCategories = () => {
     var parameters = defaultParams + '&_dgId=0'
 
     getRequest({
-      extension: BusinessPartnerRepository.CategoryID.qry,
+      extension: BusinessPartnerRepository.CategoryID.page,
       parameters: parameters
     })
       .then(res => {

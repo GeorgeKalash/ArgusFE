@@ -130,7 +130,7 @@ const Groups = () => {
     var parameters = defaultParams + '&_dgId=0'
 
     getRequest({
-      extension: BusinessPartnerRepository.Groups.qry,
+      extension: BusinessPartnerRepository.Groups.page,
       parameters: parameters
     })
       .then(res => {
