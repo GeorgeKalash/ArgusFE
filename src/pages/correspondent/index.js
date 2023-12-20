@@ -580,11 +580,11 @@ const Correspondent = () => {
             exchangeMapsGridValidation.setValues({ rows })
           })
           .catch(error => {
-            // setErrorMessage(error)
+            setErrorMessage(error)
           })
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
 
     //step 3: merge both

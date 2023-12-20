@@ -115,7 +115,7 @@ const OutwardsTab=({
                 helperText={outwardsValidation.touched.currencyId && outwardsValidation.errors.currencyId}
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <CustomComboBox
                 name='agentId'
@@ -184,7 +184,7 @@ const OutwardsTab=({
               readOnly={true}
               store={productsStore}
               value={productsStore?.filter(item => item.productId === outwardsValidation.values.productId)[0]}
-              
+
               // onChange={(event, newValue) => {
               //   outwardsValidation.setFieldValue('productId', newValue?.productId)
               //   outwardsValidation.setFieldValue('fees', newValue?.fees)

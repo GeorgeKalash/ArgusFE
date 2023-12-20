@@ -12,6 +12,7 @@ import { useFormik } from 'formik'
 import { getNewSalaryRange, populateSalaryRange } from 'src/Models/CurrencyTradingSettings/SalaryRange'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -119,7 +120,7 @@ const RelationTypes = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 
@@ -203,6 +204,7 @@ maxAccess={access}
 
 
       )}
+    <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
 
 
     </>
