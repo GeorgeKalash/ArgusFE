@@ -1,3 +1,5 @@
+import { formatDateFromApi } from 'src/lib/date-helper'
+
 const getNewNumberRange = () => {
   return {
     recordId: null,
@@ -23,9 +25,8 @@ const populateNumberRange = obj => {
     current: obj.current,
     external: obj.external,
     dateRange: obj.dateRange,
-    startDate: obj.startDate,
-    endDate: obj.endDate
-
+    startDate: formatDateFromApi(obj.startDate),
+    endDate: formatDateFromApi(obj.endDate)
   }
 }
 
