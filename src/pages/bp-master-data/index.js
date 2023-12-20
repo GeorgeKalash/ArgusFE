@@ -42,6 +42,8 @@ const BPMasterData = () => {
   const [categoryStore, setCategoryStore] = useState([])
   const [groupStore, setGroupStore] = useState([])
   const [idCategoryStore, setIDCategoryStore] = useState([])
+  const [countryStore, setCountryStore] = useState([])
+  const [legalStatusStore, setLegalStatusStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -51,16 +53,23 @@ const BPMasterData = () => {
 
   const _labels = {
     general: labels && labels.find(item => item.key === 1).value,
-    category: labels && labels.find(item => item.key === 2).value,
-    group: labels && labels.find(item => item.key === 3).value,
-    reference: labels && labels.find(item => item.key === 4).value,
-    name: labels && labels.find(item => item.key === 5).value,
-    foreignLanguage: labels && labels.find(item => item.key === 6).value,
-    keywords: labels && labels.find(item => item.key === 7).value,
-    idCategory: labels && labels.find(item => item.key === 8).value,
-    defaultId: labels && labels.find(item => item.key === 9).value,
-    inactive: labels && labels.find(item => item.key === 10).value,
-    masterData: labels && labels.find(item => item.key === 11).value
+    group: labels && labels.find(item => item.key === 2).value,
+    reference: labels && labels.find(item => item.key === 3).value,
+    name: labels && labels.find(item => item.key === 4).value,
+    foreignLanguage: labels && labels.find(item => item.key === 5).value,
+    keywords: labels && labels.find(item => item.key === 6).value,
+    idCategory: labels && labels.find(item => item.key === 7).value,
+    defaultId: labels && labels.find(item => item.key === 8).value,
+    inactive: labels && labels.find(item => item.key === 9).value,
+    masterData: labels && labels.find(item => item.key === 10).value,
+    category: labels && labels.find(item => item.key === 11).value,
+    birthPlace: labels && labels.find(item => item.key === 12).value,
+    isBlackListed: labels && labels.find(item => item.key === 13).value,
+    nationalityRef: labels && labels.find(item => item.key === 14).value,
+    nationalityName: labels && labels.find(item => item.key === 15).value,
+    birthDate: labels && labels.find(item => item.key === 16).value,
+    nationalityId: labels && labels.find(item => item.key === 17).value,
+    legalStatus: labels && labels.find(item => item.key === 18).value
   }
 
   const columns = [
@@ -84,6 +93,21 @@ const BPMasterData = () => {
       field: 'flName',
       headerName: _labels.foreignLanguage,
       flex: 1
+    },
+    {
+      field: 'nationalityRef',
+      headerName: _labels.nationalityRef,
+      flex: 1
+    },
+    {
+      field: 'nationalityName',
+      headerName: _labels.nationalityName,
+      flex: 1
+    },
+    {
+      field: 'legalStatusName',
+      headerName: _labels.legalStatus,
+      flex: 1
     }
   ]
 
@@ -96,10 +120,12 @@ const BPMasterData = () => {
       category: yup.string().required('This field is required'),
       groupId: yup.string().required('This field is required'),
       reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
+      name: yup.string().required('This field is required'),
+      isInactive: yup.string(),
+      isBlackListed: yup.string()
     }),
     onSubmit: values => {
-      postIdTypes(values)
+      postBPMasterData(values)
     }
   })
 
@@ -108,11 +134,11 @@ const BPMasterData = () => {
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
     var parameters = defaultParams
 
     getRequest({
-      extension: BusinessPartnerRepository.BPMasterData.page,
+      extension: BusinessPartnerRepository.BPMasterData.qry,
       parameters: parameters
     })
       .then(res => {
@@ -124,6 +150,7 @@ const BPMasterData = () => {
   }
 
   const postBPMasterData = obj => {
+    console.log('enter')
     const recordId = obj.recordId
     postRequest({
       extension: BusinessPartnerRepository.BPMasterData.set,
@@ -163,8 +190,10 @@ const BPMasterData = () => {
     setEditMode(false)
     setWindowOpen(true)
     fillGroupStore()
-    fillIdCategoryStore()
+    fillIdCategoryStore(null)
     fillCategoryStore()
+    fillCountryStore()
+    filllegalStatusStore()
   }
 
   const editBPMasterData = obj => {
@@ -176,13 +205,15 @@ const BPMasterData = () => {
       parameters: parameters
     })
       .then(res => {
+        fillGroupStore()
+        fillIdCategoryStore(res.record.category)
+        fillCategoryStore()
+        fillCountryStore()
+        filllegalStatusStore()
         bpMasterDataValidation.setValues(populateBPMasterData(res.record))
         setEditMode(true)
         setWindowOpen(true)
         setActiveTab(0)
-        fillGroupStore()
-        fillIdCategoryStore()
-        fillCategoryStore()
       })
       .catch(error => {
         setErrorMessage(error)
@@ -196,7 +227,6 @@ const BPMasterData = () => {
       parameters: parameters
     })
       .then(res => {
-        //ask about lang values
         setCategoryStore(res.list)
       })
       .catch(error => {
@@ -211,7 +241,6 @@ const BPMasterData = () => {
       parameters: parameters
     })
       .then(res => {
-        //ask about lang values
         setGroupStore(res.list)
       })
       .catch(error => {
@@ -219,18 +248,62 @@ const BPMasterData = () => {
       })
   }
 
-  const fillIdCategoryStore = () => {
-    var parameters = `_filter=`
+  const fillIdCategoryStore = categId => {
+    setIDCategoryStore([])
+    var parameters = `_startAt=0&_pageSize=1000`
     getRequest({
-      extension: BusinessPartnerRepository.CategoryID,
+      extension: BusinessPartnerRepository.CategoryID.qry,
       parameters: parameters
     })
       .then(res => {
-        //ask about lang values
-        setIDCategoryStore(res.list)
+        var filteredList = []
+        if (categId != null) {
+          res.list.forEach(item => {
+            if (categId === 1 && item.person) {
+              filteredList.push(item)
+            }
+            if (categId === 2 && item.org) {
+              filteredList.push(item)
+            }
+            if (categId === 3 && item.group) {
+              filteredList.push(item)
+            }
+          })
+          setIDCategoryStore(filteredList)
+        }
+        console.log(filteredList)
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error.res)
+      })
+  }
+
+  const fillCountryStore = () => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: SystemRepository.Country.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCountryStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const filllegalStatusStore = () => {
+    const defaultParams = `_startAt=0&_pageSize=100`
+    var parameters = defaultParams
+    getRequest({
+      extension: BusinessPartnerRepository.LegalStatus.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setLegalStatusStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
       })
   }
 
@@ -240,6 +313,10 @@ const BPMasterData = () => {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 50 })
         getLabels(ResourceIds.BPMasterData, setLabels)
+        fillGroupStore()
+        fillCategoryStore()
+        fillCountryStore()
+        filllegalStatusStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -266,7 +343,7 @@ const BPMasterData = () => {
       {windowOpen && (
         <BPMasterDataWindow
           onClose={() => setWindowOpen(false)}
-          width={600}
+          width={800}
           height={400}
           tabs={tabs}
           onSave={handleSubmit}
@@ -275,6 +352,8 @@ const BPMasterData = () => {
           categoryStore={categoryStore}
           idCategoryStore={idCategoryStore}
           groupStore={groupStore}
+          countryStore={countryStore}
+          legalStatusStore={legalStatusStore}
           labels={_labels}
           maxAccess={access}
           activeTab={activeTab}

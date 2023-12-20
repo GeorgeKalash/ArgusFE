@@ -16,7 +16,16 @@ const getNewBPMasterData = () => {
     keywords: null,
     plId: null,
     shipAddressId: null,
-    billAddressId: null
+    billAddressId: null,
+    birthDate: null,
+    birthPlace: null,
+    nationalityId: null,
+    legalStatusId: null,
+    isBlackListed: null,
+    groupName: null,
+    nationalityName: null,
+    nationalityRef: null,
+    legalStatus: null
   }
 }
 
@@ -35,7 +44,16 @@ const populateBPMasterData = obj => {
     keywords: obj.keywords,
     plId: obj.plId,
     shipAddressId: obj.shipAddressId,
-    billAddressId: obj.billAddressId
+    billAddressId: obj.billAddressId,
+    birthDate: obj.birthDate,
+    birthPlace: obj.birthPlace,
+    nationalityId: obj.nationalityId,
+    legalStatusId: obj.legalStatusId,
+    isBlackListed: obj.isBlackListed,
+    groupName: obj.groupName,
+    nationalityName: obj.nationalityName,
+    nationalityRef: obj.nationalityRef,
+    legalStatus: obj.legalStatus
   }
 }
 
