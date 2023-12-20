@@ -31,5 +31,6 @@ export const ResourceIds = {
   SystemDefaults: 35108,
   IdTypes: 35109,
   Plants: 20110,
-  Activity: 35111
+  Activity: 35111,
+  ReleaseIndicators: 10105 
 }
