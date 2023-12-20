@@ -95,10 +95,10 @@ const ExchangeTableTab=({
               onChange={(event, newValue) => {
                 // exchangeTableValidation.setFieldValue('rateAgainst','');
                 exchangeTableValidation && exchangeTableValidation.setFieldValue('rateAgainst', newValue?.key);
+                console.log(exchangeTableValidation)
 
                 newValue?.key && setRateAgainst(newValue?.key)
-
-                exchangeTableValidation &&   newValue?.key=== 1 && exchangeTableValidation.setFieldValue('rateAgainstCurrencyId', '');
+                newValue?.key=== 1 && exchangeTableValidation.setFieldValue('rateAgainstCurrencyId', '');
               }}
               error={exchangeTableValidation.touched.rateAgainst && Boolean(exchangeTableValidation.errors.rateAgainst)}
               helperText={exchangeTableValidation.touched.rateAgainst && exchangeTableValidation.errors.rateAgainst}
@@ -114,17 +114,18 @@ const ExchangeTableTab=({
               displayField='name'
               store={currencyStore}
 
-              value={currencyStore.filter(item => item.recordId === exchangeTableValidation.values.rateAgainstCurrencyId)[0]}
+              value={exchangeTableValidation.values.rateAgainstCurrencyId && currencyStore.filter(item => item.recordId === exchangeTableValidation.values.rateAgainstCurrencyId)[0]}
               required={exchangeTableValidation.values.rateAgainst ===2 && true}
-              readOnly={exchangeTableValidation.values.rateAgainst !==2 && true}
+
+              readOnly={!exchangeTableValidation.values.rateAgainstCurrencyId && exchangeTableValidation.values.rateAgainst !==2 ? true : false}
 
               onChange={(event, newValue) => {
 
                 exchangeTableValidation && exchangeTableValidation.setFieldValue('rateAgainstCurrencyId', newValue?.recordId);
 
               }}
-              error={exchangeTableValidation.touched.rateAgainstCurrencyId && rateAgainst && Boolean(exchangeTableValidation.errors.rateAgainstCurrencyId)}
-              helperText={exchangeTableValidation.touched.rateAgainstCurrencyId && rateAgainstStore && exchangeTableValidation.errors.rateAgainstCurrencyId}
+              error={exchangeTableValidation.touched.rateAgainstCurrencyId  && Boolean(exchangeTableValidation.errors.rateAgainstCurrencyId)}
+              helperText={exchangeTableValidation.touched.rateAgainstCurrencyId  && exchangeTableValidation.errors.rateAgainstCurrencyId}
             />
           </Grid>
 
