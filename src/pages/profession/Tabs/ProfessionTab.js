@@ -69,7 +69,8 @@ return (
               label={labels.monthlyIncome}
               value={ProfessionValidation.values.monthlyIncome}
               required
-              readOnly
+
+              // readOnly
               maxAccess={maxAccess}
 
               onChange={e => {
