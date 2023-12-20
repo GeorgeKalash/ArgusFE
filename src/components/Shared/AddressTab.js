@@ -19,7 +19,10 @@ const AddressTab = ({
   setCityStore,
   editMode
 }) => {
-  return (
+
+  console.log(addressValidation)
+  
+return (
     <Grid container spacing={4}>
       <Grid item xs={6}>
         <CustomTextField
@@ -105,6 +108,7 @@ const AddressTab = ({
           valueField='name'
           store={cityStore}
           firstValue={addressValidation.values.cityName}
+
           setStore={setCityStore}
           onLookup={lookupCity}
           onChange={(event, newValue) => {

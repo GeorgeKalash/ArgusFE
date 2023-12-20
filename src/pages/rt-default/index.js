@@ -204,7 +204,9 @@ return (
           marginTop: '10px'
         }}
       >
-         <Grid item xs={6}>
+          <Grid container spacing={2} sx={{width : '50%'}}>
+      {/* First Row */}
+      <Grid item xs={12}>
                 <CustomLookup
                   name='rt-nra-product'
                   label={_labels.nuRange}
@@ -238,9 +240,17 @@ return (
                 />
               </Grid>
 
-
-              <WindowToolbar onSave={handleSubmit} />
-
+              </Grid>
+              <Grid sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          padding: 3,
+          textAlign: 'center',
+        }}>
+              <WindowToolbar onSave={handleSubmit}  />
+              </Grid>
       </Box>
 
 

@@ -5,8 +5,6 @@ import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { getFormattedNumberMax} from 'src/lib/numberField-helper'
-import { useState } from 'react'
 import {FormControlLabel} from '@mui/material'
 import {Checkbox} from '@mui/material'
 
@@ -17,7 +15,6 @@ const NumberRangeTab=({
 }) =>{
 
 
-const [position, setPosition] = useState()
 
     return (
         <Grid container spacing={4}>

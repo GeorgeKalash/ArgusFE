@@ -5,7 +5,6 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 // ** Helpers
-import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 
 const IdTypesTab = ({ labels, idTypesValidation, maxAccess }) => {
   return (

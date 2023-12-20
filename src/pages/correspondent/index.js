@@ -580,11 +580,11 @@ const Correspondent = () => {
             exchangeMapsGridValidation.setValues({ rows })
           })
           .catch(error => {
-            // setErrorMessage(error)
+            setErrorMessage(error)
           })
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
 
     //step 3: merge both
@@ -899,11 +899,13 @@ const Correspondent = () => {
           bpMasterDataStore={bpMasterDataStore}
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
+
           //countries tab - inline edit grid
 
           //countries inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
+
           //currencies tab - inline edit grid
 
           //currencies inline edit grid

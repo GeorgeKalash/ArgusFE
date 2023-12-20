@@ -17,6 +17,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const  UpdateExchangeRates = () => {
 
@@ -28,6 +29,7 @@ const  UpdateExchangeRates = () => {
   const [CrmStore , setCrmSore] = useState([])
   const { getLabels, getAccess } = useContext(ControlContext)
   const [labels, setLabels] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
    const exchangeRatesValidation = useFormik({
     enableReinitialize: false,
@@ -162,7 +164,7 @@ const  UpdateExchangeRates = () => {
         if (res) toast.success('Record Successfully')
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 
@@ -249,12 +251,12 @@ const  UpdateExchangeRates = () => {
               setProductLegWindowOpen(true)
           })
           .catch(error => {
-            // setErrorMessage(error)
+            setErrorMessage(error)
           })
 
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
 
 
@@ -322,9 +324,8 @@ const getExchangeRatess = async (cuId, coId) => {
 
     console.log(exchangeRatesGridValidation);
 
-    // setProductLegWindowOpen(true);
   } catch (error) {
-    // setErrorMessage(error);
+    setErrorMessage(error);
   }
 };
 
@@ -372,7 +373,7 @@ const handleSubmit = () => {
         setCountryStore(res.list)
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 
@@ -408,7 +409,7 @@ const handleSubmit = () => {
 
           })
           .catch(error => {
-            // setErrorMessage(error)
+            setErrorMessage(error)
           })
 
           const dParams = `_exchangeId=${res.record.exchangeId}`
@@ -422,12 +423,12 @@ const handleSubmit = () => {
 
           })
           .catch(error => {
-            // setErrorMessage(error)
+            setErrorMessage(error)
           })
 
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 
@@ -581,6 +582,8 @@ const handleSubmit = () => {
       </Box>
     </CustomTabPanel>
     <WindowToolbar />
+    <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+
   </Box>
   )
 }
