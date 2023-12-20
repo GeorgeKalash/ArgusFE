@@ -7,6 +7,7 @@ import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomLookup from 'src/components/Inputs/CustomLookup'
 
 const OutwardsTab=({
     labels,
@@ -19,8 +20,11 @@ const OutwardsTab=({
     currencyStore,
     onCurrencySelection,
     agentsStore,
-    productsStore,
+    correspondentStore,
+    setCorrespondentStore,
+    lookupCorrespondent,
     onAmountDataFill,
+    onIdNoBlur,
     editMode,
     setProductsWindowOpen,
     maxAccess
@@ -133,9 +137,77 @@ const OutwardsTab=({
                 helperText={outwardsValidation.touched.agentId && outwardsValidation.errors.agentId}
               />
             </Grid>
+
+            <Grid item xs={12}>
+              <CustomTextField
+                name='idNo'
+                label='Id No'
+                value={outwardsValidation.values.idNo}
+                readOnly={editMode}
+                required
+                onChange={outwardsValidation.handleChange}
+                onBlur={() => {
+                  if(outwardsValidation.values.idNo)
+                      onIdNoBlur(outwardsValidation.values.idNo);
+                }}
+                onClear={() => outwardsValidation.setFieldValue('idNo', '')}
+                error={outwardsValidation.touched.idNo && Boolean(outwardsValidation.errors.idNo)}
+                helperText={outwardsValidation.touched.idNo && outwardsValidation.errors.idNo}
+                maxLength='15'
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='cl_reference'
+                label='Client reference'
+                value={outwardsValidation.values.cl_reference}
+                readOnly
+                onChange={outwardsValidation.handleChange}
+                error={outwardsValidation.touched.cl_reference && Boolean(outwardsValidation.errors.cl_reference)}
+                helperText={outwardsValidation.touched.cl_reference && outwardsValidation.errors.cl_reference}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='cl_name'
+                label='Client Name'
+                value={outwardsValidation.values.cl_name}
+                readOnly
+                onChange={outwardsValidation.handleChange}
+                error={outwardsValidation.touched.cl_name && Boolean(outwardsValidation.errors.cl_name)}
+                helperText={outwardsValidation.touched.cl_name && outwardsValidation.errors.cl_name}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='idType'
+                label='ID type'
+                value={outwardsValidation.values.idType}
+                readOnly
+                onChange={outwardsValidation.handleChange}
+                error={outwardsValidation.touched.idType && Boolean(outwardsValidation.errors.idType)}
+                helperText={outwardsValidation.touched.idType && outwardsValidation.errors.idType}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='nationalityId'
+                label='Nationality'
+                value={outwardsValidation.values.nationalityId}
+                readOnly
+                onChange={outwardsValidation.handleChange}
+                error={outwardsValidation.touched.nationalityId && Boolean(outwardsValidation.errors.nationalityId)}
+                helperText={outwardsValidation.touched.nationalityId && outwardsValidation.errors.nationalityId}
+                maxAccess={maxAccess}
+              />
+            </Grid>
           </Grid>
           {/* Second Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+          <Grid container rowGap={2} xs={6} sx={{ px: 2}}>
             <Grid item xs={12}>
             <CustomTextField
               position={position}
@@ -165,7 +237,6 @@ const OutwardsTab=({
 
               }}
               onBlur={() => {
-                console.log(outwardsValidation.values);
                 if(outwardsValidation.values.amount)
                     onAmountDataFill(outwardsValidation.values);
               }}
@@ -175,27 +246,40 @@ const OutwardsTab=({
             />
             </Grid>
             <Grid item xs={12}>
-            <CustomComboBox
-              name='productId'
-              label='Product'
-              valueField='productId'
-              displayField='productName'
-              required
-              readOnly={true}
-              store={productsStore}
-              value={productsStore?.filter(item => item.productId === outwardsValidation.values.productId)[0]}
-              
-              // onChange={(event, newValue) => {
-              //   outwardsValidation.setFieldValue('productId', newValue?.productId)
-              //   outwardsValidation.setFieldValue('fees', newValue?.fees)
-              //   outwardsValidation.setFieldValue('baseAmount', newValue?.baseAmount)
-              //   outwardsValidation.setFieldValue('net', newValue?.fees + newValue?.baseAmount)
-              // }}
-              error={outwardsValidation.touched.productId && Boolean(outwardsValidation.errors.productId)}
-              helperText={outwardsValidation.touched.productId && outwardsValidation.errors.productId}
-            />
-            <Button onClick={() => setProductsWindowOpen(true)}>Open Popup</Button>
+              <CustomLookup
+                name='corId'
+                label='Correspondent'
+                value={outwardsValidation.values.corId}
+                required={false}
+                valueField='reference'
+                displayField='name'
+                store={correspondentStore}
+                firstValue={outwardsValidation.values.corRef}
+                secondValue={outwardsValidation.values.corName}
+                setStore={setCorrespondentStore}
+                onLookup={lookupCorrespondent}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    outwardsValidation.setFieldValue('corId', newValue?.recordId)
+                    outwardsValidation.setFieldValue('corRef', newValue?.reference)
+                    outwardsValidation.setFieldValue('corName', newValue?.name)
+                  } else {
+                    outwardsValidation.setFieldValue('corId', null)
+                    outwardsValidation.setFieldValue('corRef', null)
+                    outwardsValidation.setFieldValue('corName', null)
+                  }
+                }}
+                error={
+                  outwardsValidation.touched.corId &&
+                  Boolean(outwardsValidation.errors.corId)
+                }
+                helperText={
+                  outwardsValidation.touched.corId && outwardsValidation.errors.corId
+                }
+                maxAccess={maxAccess}
+              />
             </Grid>
+            <Button onClick={() => setProductsWindowOpen(true)}>Open Popup</Button>
             <Grid item xs={12}>
             <CustomTextField
               position={position}
