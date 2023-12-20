@@ -18,7 +18,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewActivity, populateActivity } from 'src/Models/CurrencyTradingSettings/Activity'
+import { getNewReleaseInd, populateReleaseInd } from 'src/Models/DocumentRelease/ReleaseIndicator'
 
 // ** Helpers
 import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
@@ -27,10 +27,10 @@ import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } fro
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows
-import ActivityWindow from './Windows/ActivityWindow'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import ReleaseIndicatorWindow from './Windows/ReleaseIndicatorWindow'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-const Activities = () => {
+const ReleaseIndicators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
@@ -40,7 +40,7 @@ const Activities = () => {
 
   //stores
   const [gridData, setGridData] = useState([])
-  const [industryStore, setIndustryStore] = useState([])
+  const [changeabilityStore, setChangeabilityStore] = useState([])
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -50,9 +50,10 @@ const Activities = () => {
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
     name: labels && labels.find(item => item.key === 2).value,
-    flName: labels && labels.find(item => item.key === 3).value,
-    industryId: labels && labels.find(item => item.key === 4).value,
-    activity: labels && labels.find(item => item.key === 5).value
+    id: labels && labels.find(item => item.key === 3).value,
+    changeability: labels && labels.find(item => item.key === 4).value,
+    isReleased: labels && labels.find(item => item.key === 5).value,
+    releaseInd: labels && labels.find(item => item.key === 6).value
   }
 
   const columns = [
@@ -67,34 +68,49 @@ const Activities = () => {
       flex: 1
     },
     {
-      field: 'flName',
-      headerName: _labels.flName,
+      field: 'recordId',
+      headerName: _labels.id,
+      flex: 1,
+      align: 'right',
+
+      //valueGetter: ({ row }) => getFormattedNumberMax(row?.recordId, 1, 0)
+    },
+    {
+      field: 'changeabilityName',
+      headerName: _labels.changeability,
       flex: 1
     }
   ]
 
-  const activityValidation = useFormik({
+  const releaseIndValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
-      industry: yup.string().required('This field is required')
+      recordId: yup
+      .number()
+        .required('This field is required')
+        .transform((value, originalValue) => validateNumberField(value, originalValue))
+        .min(0, 'Value must be greater than or equal to 0')
+        .max(9, 'Value must be less than or equal to 9'),
+      changeability: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       console.log(values)
-      postActivity(values)
+      postReleaseInd(values)
     }
   })
 
   const handleSubmit = () => {
-    activityValidation.handleSubmit()
+    releaseIndValidation.handleSubmit()
   }
 
-  const getGridData = () => {
-    var parameters = '_filter='
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
     getRequest({
-      extension: CurrencyTradingSettingsRepository.Activity.qry,
+      extension: DocumentReleaseRepository.ReleaseIndicator.page,
       parameters: parameters
     })
       .then(res => {
@@ -106,14 +122,14 @@ const Activities = () => {
       })
   }
 
-  const postActivity = obj => {
+  const postReleaseInd = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: CurrencyTradingSettingsRepository.Activity.set,
+      extension: DocumentReleaseRepository.ReleaseIndicator.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData()
+        getGridData({})
         setWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
@@ -123,14 +139,14 @@ const Activities = () => {
       })
   }
 
-  const delActivity = obj => {
+  const delReleaseInd = obj => {
     postRequest({
-      extension: CurrencyTradingSettingsRepository.Activity.del,
+      extension: DocumentReleaseRepository.ReleaseIndicator.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
         console.log({ res })
-        getGridData()
+        getGridData({})
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
@@ -138,50 +154,50 @@ const Activities = () => {
       })
   }
 
-  const addActivity = () => {
-    activityValidation.setValues(getNewActivity)
-    fillIndustryStore()
+  const addReleaseInd = () => {
+    releaseIndValidation.setValues(getNewReleaseInd)
+    fillChangeabilityStore()
     setEditMode(false)
     setWindowOpen(true)
   }
 
-  const editActivity = obj => {
+  const editReleaseInd = obj => {
     console.log(obj)
-    activityValidation.setValues(populateActivity(obj))
-    fillIndustryStore()
+    releaseIndValidation.setValues(populateReleaseInd(obj))
+    fillChangeabilityStore()
     setEditMode(true)
     setWindowOpen(true)
   }
 
   useEffect(() => {
-    if (!access) getAccess(ResourceIds.Activity, setAccess)
+    if (!access) getAccess(ResourceIds.ReleaseIndicators, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getGridData()
-        fillIndustryStore()
-        getLabels(ResourceIds.Activity,setLabels)
+        getGridData({ _startAt: 0, _pageSize: 30 })
+        fillChangeabilityStore()
+        getLabels(ResourceIds.ReleaseIndicators,setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
   }, [access])
 
-
-  const fillIndustryStore = () => {
-    var parameters = '_database=148' //add 'xml'.json and get _database values from there
+  const fillChangeabilityStore = () => {
+    var parameters = '_database=45' //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters
     })
       .then(res => {
-        setIndustryStore(res.list)
+        setChangeabilityStore(res.list)
+        console.log(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-
+ 
   return (
     <>
       <Box
@@ -191,28 +207,27 @@ const Activities = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addActivity} maxAccess={access} />
+        <GridToolbar onAdd={addReleaseInd} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={editActivity}
-          onDelete={delActivity}
+          onEdit={editReleaseInd}
+          onDelete={delReleaseInd}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
           maxAccess={access}
         />
       </Box>
       {windowOpen && (
-       <ActivityWindow
+       <ReleaseIndicatorWindow
        onClose={() => setWindowOpen(false)}
        width={600}
        height={400}
        onSave={handleSubmit}
-       activityValidation={activityValidation}
-       industryStore={industryStore}
+       releaseIndValidation={releaseIndValidation}
+       changeabilityStore={changeabilityStore}
        _labels ={_labels}
        maxAccess={access}
        editMode={editMode}
@@ -223,4 +238,4 @@ const Activities = () => {
   )
 }
 
-export default Activities
+export default ReleaseIndicators
