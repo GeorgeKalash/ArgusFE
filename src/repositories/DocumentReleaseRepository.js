@@ -8,6 +8,20 @@ export const DocumentReleaseRepository = {
     get: service + 'getIND',
     set: service + 'setIND',
     del: service + 'delIND'
+  },
+  ReleaseCode: {
+    page: service + 'pageCOD',
+    qry: service + 'qryCOD',
+    get: service + 'getCOD',
+    set: service + 'setCOD',
+    del: service + 'delCOD'
+  },
+  DRGroup: {
+    page: service + 'pageGRP',
+    qry: service + 'qryGRP',
+    get: service + 'getGRP',
+    set: service + 'setGRP',
+    del: service + 'delGRP'
   }
 
 }
