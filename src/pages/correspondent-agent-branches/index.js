@@ -13,6 +13,7 @@ import { useFormik } from 'formik'
 import { getNewAgentBranch, populateAgentBranch } from 'src/Models/RemittanceSettings/AgentBranch'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import toast from 'react-hot-toast'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const Agent = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
@@ -49,7 +50,7 @@ const Agent = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
   useEffect(() => {
@@ -160,26 +161,27 @@ const Agent = () => {
         parameters: parameters
       })
         .then(res => {
-          var object = res.record
+          var result = res.record
 
-          // object.name = result.name
-          // object.street1 = result.street1
-          // object.street2 = result.street2
-          // object.email1 = result.email1
-          // object.email2 = result.email2
-          // object.countryId = result.countryId
-          // object.stateName = result.stateName
-          // object.cityId = result.cityId
-          // object.cityName = result.city
-          // object.stateId = result.stateId
-          // object.phone = result.phone
-          // object.phone1 = result.phone1
-          // object.phone2 = result.phone2
+          object.name = result.name
+          object.street1 = result.street1
+          object.street2 = result.street2
+          object.email1 = result.email1
+          object.email2 = result.email2
+          object.countryId = result.countryId
+          object.stateName = result.stateName
+          object.cityId = result.cityId
+          object.cityName = result.city
+          object.stateId = result.stateId
+          object.phone = result.phone
+          object.phone1 = result.phone1
+          object.phone2 = result.phone2
+
           // object.postalCode = result.postalCode
           fillStateStore(object.countryId)
           console.log(object)
           agentBranchValidation.setValues(populateAgentBranch(object))
-          lookupCity(object.city)
+          agentBranchValidation.values.countryId &&  lookupCity(object.cityName)
 
           // setActiveTab(0)
           // setWindowOpen(true)
@@ -209,7 +211,7 @@ const Agent = () => {
         setCountryStore(res.list)
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 
@@ -324,7 +326,7 @@ const Agent = () => {
         setCityStore(res.list)
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 
@@ -368,6 +370,8 @@ const Agent = () => {
           maxAccess={access}
         />
       )}
+            <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+
     </>
   )
 }

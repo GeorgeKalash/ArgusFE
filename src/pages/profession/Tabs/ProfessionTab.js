@@ -5,6 +5,7 @@ import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useState } from 'react'
+import { handleChangeNumber } from 'src/lib/numberField-helper'
 
 const ProfessionTab=({
     labels,
@@ -13,9 +14,9 @@ const ProfessionTab=({
 }) =>{
 
 
-const [position, setPosition] = useState()
+const [position, setPosition] = useState(0)
 
-    return (
+return (
         <Grid container spacing={4}>
           <Grid item xs={12}>
             <CustomTextField
@@ -68,32 +69,47 @@ const [position, setPosition] = useState()
               label={labels.monthlyIncome}
               value={ProfessionValidation.values.monthlyIncome}
               required
+
+              // readOnly
               maxAccess={maxAccess}
+
               onChange={e => {
-                const input = e.target;
-                const formattedValue = input.value  ? getFormattedNumberMax(input.value, 8, 2) : input.value ;
-
-                // Save current cursor position
-                const currentPosition = input.selectionStart;
-
-                // Update field value
-                ProfessionValidation.setFieldValue('monthlyIncome', formattedValue);
-
-                // Calculate the new cursor position based on the formatted value
-                const newCursorPosition =
-                  currentPosition +
-                  (formattedValue && formattedValue.length - input.value.length);
-
-                setPosition(newCursorPosition);
-
+                handleChangeNumber(
+                  e.target,
+                  8, // digitsBeforePoint
+                  2, // digitsAfterPoint
+                  ProfessionValidation,
+                  setPosition,
+                  'monthlyIncome'
+                           );
               }}
 
-              // onChange={e => ProfessionValidation.setFieldValue('monthlyIncome', getFormattedNumberMax(e.target.value, 8,  2))}
+              // onChange={e => {
+              //   const input = e.target;
+              //   const formattedValue = input.value  ? getFormattedNumberMax(input.value, 8, 2) : input.value ;
+
+              //   // Save current cursor position
+              //   const currentPosition = input.selectionStart;
+
+              //   // Update field value
+              //   ProfessionValidation.setFieldValue('monthlyIncome', formattedValue);
+
+              //   // Calculate the new cursor position based on the formatted value
+              //   const newCursorPosition =
+              //     currentPosition +
+              //     (formattedValue && formattedValue.length - input.value.length);
+
+              //   setPosition(newCursorPosition);
+
+              // }}
+
               onClear={() => ProfessionValidation.setFieldValue('monthlyIncome', '')}
               error={ProfessionValidation.touched.monthlyIncome && Boolean(ProfessionValidation.errors.monthlyIncome)}
               helperText={ProfessionValidation.touched.monthlyIncome && ProfessionValidation.errors.monthlyIncome}
             />
           </Grid>
+
+
           <Grid item xs={12}>
             <CustomTextField
               name='riskFactor'

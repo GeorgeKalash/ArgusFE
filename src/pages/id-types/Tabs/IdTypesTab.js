@@ -6,7 +6,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** Helpers
-import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 
 const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore }) => {
   return (

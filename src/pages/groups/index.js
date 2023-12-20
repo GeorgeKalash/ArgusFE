@@ -7,7 +7,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import GroupsWindow from './Windows/GroupsWindow'
-import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import { getNewGroup, populateGroup } from 'src/Models/BusinessPartner/Group'
 import * as yup from 'yup'
@@ -137,7 +136,7 @@ const Groups = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 

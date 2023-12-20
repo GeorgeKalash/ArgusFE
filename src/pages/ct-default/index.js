@@ -26,6 +26,7 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { position } from 'stylis'
 
 const Defaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -217,8 +218,9 @@ return (
           marginTop: '10px'
         }}
       >
-          <Grid container xs={6}>
-         <Grid item xs={12}>
+         <Grid container spacing={2} sx={{width : '50%'}}>
+      {/* First Row */}
+      <Grid item xs={12}>
                 <CustomLookup
                   name='ct-nra-individual'
                   label={_labels.nri}
@@ -287,7 +289,16 @@ return (
               </Grid>
 
               </Grid>
-              <WindowToolbar onSave={handleSubmit} />
+              <Grid sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          padding: 3,
+          textAlign: 'center',
+        }}>
+              <WindowToolbar onSave={handleSubmit}  />
+              </Grid>
 
       </Box>
 
