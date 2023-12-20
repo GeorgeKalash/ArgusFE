@@ -6,7 +6,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
-const BPMasterDataTab = ({
+const GeneralTab = ({
   labels,
   bpMasterDataValidation,
   maxAccess,
@@ -237,4 +237,4 @@ const BPMasterDataTab = ({
   )
 }
 
-export default BPMasterDataTab
+export default GeneralTab

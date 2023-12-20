@@ -44,6 +44,7 @@ const BPMasterData = () => {
   const [idCategoryStore, setIDCategoryStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
   const [legalStatusStore, setLegalStatusStore] = useState([])
+  const [idNumberStore, setIdNumberStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -69,7 +70,9 @@ const BPMasterData = () => {
     nationalityName: labels && labels.find(item => item.key === 15).value,
     birthDate: labels && labels.find(item => item.key === 16).value,
     nationalityId: labels && labels.find(item => item.key === 17).value,
-    legalStatus: labels && labels.find(item => item.key === 18).value
+    legalStatus: labels && labels.find(item => item.key === 18).value,
+    idCategory: labels && labels.find(item => item.key === 19).value,
+    idNumber: labels && labels.find(item => item.key === 20).value
   }
 
   const columns = [
@@ -111,7 +114,7 @@ const BPMasterData = () => {
     }
   ]
 
-  const tabs = [{ label: _labels.general }]
+  const tabs = [{ label: _labels.general }, { label: _labels.idNumber, disabled: !editMode }]
 
   const bpMasterDataValidation = useFormik({
     enableReinitialize: false,
@@ -131,6 +134,7 @@ const BPMasterData = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) bpMasterDataValidation.handleSubmit()
+    else if (activeTab === 1) idNumberValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -160,6 +164,8 @@ const BPMasterData = () => {
         getGridData({})
         setEditMode(true)
         setWindowOpen(false)
+        resetIdNumber(res.recordId)
+        fillIdNumberStore(res.recordId)
         if (!recordId) {
           bpMasterDataValidation.setFieldValue('recordId', res.recordId)
           toast.success('Record Added Successfully')
@@ -194,6 +200,7 @@ const BPMasterData = () => {
     fillCategoryStore()
     fillCountryStore()
     filllegalStatusStore()
+    resetIdNumber()
   }
 
   const editBPMasterData = obj => {
@@ -210,6 +217,8 @@ const BPMasterData = () => {
         fillCategoryStore()
         fillCountryStore()
         filllegalStatusStore()
+        resetIdNumber(res.recordId)
+        fillIdNumberStore(res.recordId)
         bpMasterDataValidation.setValues(populateBPMasterData(res.record))
         setEditMode(true)
         setWindowOpen(true)
@@ -307,6 +316,113 @@ const BPMasterData = () => {
       })
   }
 
+  // IDNumber TAB
+  const idNumberGridColumn = [
+    {
+      field: 'textfield',
+      header: _labels.idCategory,
+      name: 'incName'
+    },
+    {
+      id: 1,
+      field: 'textfield',
+      header: _labels.idNumber,
+      name: 'incId'
+    }
+  ]
+
+  const idNumberValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [
+        {
+          bpId: bpMasterDataValidation.values
+            ? bpMasterDataValidation.values.recordId
+              ? bpMasterDataValidation.values.recordId
+              : ''
+            : '',
+          incId: '',
+          idNum: '',
+          incName: ''
+        }
+      ]
+    },
+    onSubmit: values => {
+      postIdNumber(values.rows)
+    }
+  })
+
+  const postIdNumber = obj => {
+    /*const data = {
+      idtId: idTypesValidation.values.recordId,
+      items: obj
+    }
+
+    postRequest({
+     extension: CurrencyTradingSettingsRepository.IdFields.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        getGridData({})
+
+        // setWindowOpen(false)
+        if (!res.recordId) {
+          toast.success('Record Added Successfully')
+        } else {
+          toast.success('Record Edited Successfully')
+        }
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })*/
+  }
+
+  const getIdNumber = obj => {
+    /*const _recordId = obj.recordId
+    const defaultParams = `_idtId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.IdFields.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0) {
+          idNumberValidation.setValues({ rows: res.list })
+        } else {
+          idNumberValidation.setValues({
+            rows: [
+              {
+                idtId: _recordId,
+                incId: '',
+                incName: '',
+                idNum: ''
+              }
+            ]
+          })
+        }
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })*/
+  }
+
+  const resetIdNumber = id => {
+    idNumberValidation.resetForm()
+    idNumberValidation.setValues({
+      rows: [
+        {
+          bpId: id ? id : bpMasterDataValidation.values ? bpMasterDataValidation.values.recordId : '',
+          incId: '',
+          incName: '',
+          idNum: ''
+        }
+      ]
+    })
+  }
+
+  const fillIdNumberStore = bpId => {}
+
   useEffect(() => {
     if (!access) getAccess(ResourceIds.BPMasterData, setAccess)
     else {
@@ -354,6 +470,9 @@ const BPMasterData = () => {
           groupStore={groupStore}
           countryStore={countryStore}
           legalStatusStore={legalStatusStore}
+          idNumberStore={idNumberStore}
+          idNumberGridColumn={idNumberGridColumn}
+          idNumberValidation={idNumberValidation}
           labels={_labels}
           maxAccess={access}
           activeTab={activeTab}
