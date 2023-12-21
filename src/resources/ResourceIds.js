@@ -32,5 +32,8 @@ export const ResourceIds = {
   IdTypes: 35109,
   Plants: 20110,
   Activity: 35111,
-  ReleaseIndicators: 10105 
+  ReleaseIndicators: 10105,
+  ClientMaster : 35201
+
+
 }
