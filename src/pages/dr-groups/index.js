@@ -335,6 +335,7 @@ const DRGroups = () => {
           _labels={_labels}
           maxAccess={access}
           editMode={editMode}
+          
           //Approver tab (grid)
           approverGridData={approverGridData}
           getApproverGridData={getApproverGridData}
