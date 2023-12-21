@@ -122,9 +122,7 @@ const BPMasterData = () => {
       category: yup.string().required('This field is required'),
       groupId: yup.string().required('This field is required'),
       reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      isInactive: yup.string(),
-      isBlackListed: yup.string()
+      name: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postBPMasterData(values)
@@ -161,11 +159,11 @@ const BPMasterData = () => {
       .then(res => {
         getGridData({})
         setEditMode(true)
-        setWindowOpen(false)
-        resetIdNumber(res.record.recordId)
+        resetIdNumber(res.recordId)
+        obj.recordId = res.recordId
         fillIdNumberStore(obj)
         if (!recordId) {
-          bpMasterDataValidation.setFieldValue('recordId', res.record.recordId)
+          bpMasterDataValidation.setFieldValue('recordId', res.recordId)
           toast.success('Record Added Successfully')
         } else toast.success('Record Editted Successfully')
       })
@@ -210,6 +208,8 @@ const BPMasterData = () => {
       parameters: parameters
     })
       .then(res => {
+        bpMasterDataValidation.setValues(populateBPMasterData(res.record))
+        console.log(populateBPMasterData(res.record))
         fillGroupStore()
         fillIdCategoryStore(res.record.category)
         fillCategoryStore()
@@ -217,7 +217,6 @@ const BPMasterData = () => {
         filllegalStatusStore()
         resetIdNumber(res.record.recordId)
         fillIdNumberStore(obj)
-        bpMasterDataValidation.setValues(populateBPMasterData(res.record))
         setEditMode(true)
         setWindowOpen(true)
         setActiveTab(0)
@@ -398,6 +397,7 @@ const BPMasterData = () => {
 
   const fillIdNumberStore = async obj => {
     try {
+      console.log(obj.recordId)
       const _recordId = obj.recordId
       const defaultParams = `_bpId=${_recordId}`
       var parameters = defaultParams
@@ -475,6 +475,7 @@ const BPMasterData = () => {
           bpMasterDataValidation={bpMasterDataValidation}
           categoryStore={categoryStore}
           idCategoryStore={idCategoryStore}
+          fillIdCategoryStore={fillIdCategoryStore}
           groupStore={groupStore}
           countryStore={countryStore}
           legalStatusStore={legalStatusStore}

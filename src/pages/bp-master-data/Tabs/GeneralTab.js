@@ -15,6 +15,7 @@ const GeneralTab = ({
   idCategoryStore,
   editMode,
   countryStore,
+  fillIdCategoryStore,
   legalStatusStore
 }) => {
   return (
@@ -35,6 +36,8 @@ const GeneralTab = ({
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation.setFieldValue('category', newValue?.key)
+                const selectedCategory = newValue?.key || ''
+                fillIdCategoryStore(selectedCategory) // Fetch and update state data based on the selected category
               }}
               error={bpMasterDataValidation.touched.category && Boolean(bpMasterDataValidation.errors.category)}
               helperText={bpMasterDataValidation.touched.category && bpMasterDataValidation.errors.category}
@@ -179,7 +182,7 @@ const GeneralTab = ({
               value={countryStore?.filter(item => item.recordId === bpMasterDataValidation.values.nationalityId)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
-                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
+                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('nationalityId', newValue?.recordId)
               }}
               error={
                 bpMasterDataValidation.touched.nationalityId && Boolean(bpMasterDataValidation.errors.nationalityId)
@@ -194,10 +197,10 @@ const GeneralTab = ({
               valueField='recordId'
               displayField='name'
               store={legalStatusStore}
-              value={legalStatusStore?.filter(item => item.recordId === bpMasterDataValidation.values.legalStatusId)[0]}
+              value={legalStatusStore?.filter(item => item.recordId === bpMasterDataValidation.values.nationalityId)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
-                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
+                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('legalStatusId', newValue?.recordId)
               }}
               error={
                 bpMasterDataValidation.touched.legalStatusId && Boolean(bpMasterDataValidation.errors.legalStatusId)
