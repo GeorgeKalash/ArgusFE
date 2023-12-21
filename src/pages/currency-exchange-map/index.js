@@ -234,12 +234,12 @@ const NumberRange = () => {
 
           })
           .catch(error => {
-            // setErrorMessage(error)
+            setErrorMessage(error)
           })
 
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
 
 

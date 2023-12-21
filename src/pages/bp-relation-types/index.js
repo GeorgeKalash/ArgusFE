@@ -5,7 +5,6 @@ import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -128,7 +127,7 @@ const BpRelationTypes = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 

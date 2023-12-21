@@ -17,7 +17,7 @@ const IdTypesWindow = ({
   idtId,
   maxAccess,
   idFieldsGridColumn,
-  idFieldsvalidation,
+  idFieldsValidation,
   categoryStore
 }) => {
   return (
@@ -45,7 +45,7 @@ const IdTypesWindow = ({
 
       <CustomTabPanel index={1} value={activeTab}>
         <IdFieldsTab
-          idFieldsvalidation={idFieldsvalidation}
+          idFieldsValidation={idFieldsValidation}
           idFieldsGridColumn={idFieldsGridColumn}
           idTypesValidation={idTypesValidation}
           maxAccess={maxAccess}

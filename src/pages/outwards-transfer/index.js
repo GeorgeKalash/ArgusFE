@@ -86,7 +86,7 @@ const OutwardsTransfer = () => {
   ]
 
   const outwardsValidation = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.string().required('This field is required'),
@@ -99,10 +99,10 @@ const OutwardsTransfer = () => {
       productId: yup.string().required('This field is required'),
       fees: yup.string().required('This field is required'),
       baseAmount: yup.string().required('This field is required'),
-      
+
     }),
     onSubmit: values => {
-     
+
     }
   })
 
@@ -147,7 +147,7 @@ const OutwardsTransfer = () => {
         setErrorMessage(error)
       })
   }
-  
+
   const fillPlantStore = () => {
     var parameters = '_filter='
     getRequest({
@@ -162,9 +162,9 @@ const OutwardsTransfer = () => {
       })
   }
 
-  const onCountrySelection = (countryId) => { 
+  const onCountrySelection = (countryId) => {
     //get dispersals list
-    var parameters = `_countryId=${countryId}` 
+    var parameters = `_countryId=${countryId}`
     getRequest({
       extension: RemittanceOutwardsRepository.DispersalType.qry,
       parameters: parameters
@@ -179,7 +179,7 @@ const OutwardsTransfer = () => {
 
   const onDispersalSelection = (countryId, dispersalType) => {
     //get currencies list
-    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}` 
+    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}`
     getRequest({
       extension: RemittanceOutwardsRepository.Currency.qry,
       parameters: parameters
@@ -194,7 +194,7 @@ const OutwardsTransfer = () => {
 
   const onCurrencySelection = (countryId, dispersalType, currencyId) => {
     //get agents list
-    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}` 
+    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}`
     getRequest({
       extension: RemittanceOutwardsRepository.Agent.qry,
       parameters: parameters
@@ -209,7 +209,7 @@ const OutwardsTransfer = () => {
 
   //_type=2&_functionId=1&_plantId=1&_countryId=124&_currencyId=90&_dispersalType=2&_amount=200&_agentId=4
   const onAmountDataFill = (formFields) => {
-    
+
     //get products list
     // type, functionId, plantId, countryId, dispersalType, currencyId, amount, agentId
     var type = 2;
@@ -293,10 +293,11 @@ const OutwardsTransfer = () => {
   }
 
   const delOutwards = obj => {
-    
+
   }
 
   const addOutwards = () => {
+    console.log(getNewOutwards())
     outwardsValidation.setValues(getNewOutwards())
     fillCountryStore()
 
@@ -322,7 +323,7 @@ const OutwardsTransfer = () => {
         fillCountryStore()
 
         //getLabels(ResourceIds.Currencies, setLabels)
-        
+
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }

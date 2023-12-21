@@ -119,7 +119,7 @@ const OutwardsTab=({
                 helperText={outwardsValidation.touched.currencyId && outwardsValidation.errors.currencyId}
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <CustomComboBox
                 name='agentId'

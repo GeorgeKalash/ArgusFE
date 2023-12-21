@@ -3,8 +3,6 @@ import { Grid } from '@mui/material'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { getFormattedNumberMax} from 'src/lib/numberField-helper'
-import { useState } from 'react'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 
 const GroupsTab=({
@@ -18,7 +16,6 @@ const GroupsTab=({
 }) =>{
 
 
-const [position, setPosition] = useState()
 
     return (
         <Grid container spacing={4}>
