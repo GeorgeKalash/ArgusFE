@@ -20,7 +20,9 @@ const BPMasterDataWindow = ({
   idCategoryStore,
   countryStore,
   legalStatusStore,
-  editMode
+  editMode,
+  idNumberValidation,
+  idNumberGridColumn
 }) => {
   return (
     <Window
@@ -38,7 +40,6 @@ const BPMasterDataWindow = ({
       countryStore={countryStore}
       legalStatusStore={legalStatusStore}
       idCategoryStore={idCategoryStore}
-      idNumberStore={idNumberStore}
       bpMasterDataValidation={bpMasterDataValidation}
       idNumberGridColumn={idNumberGridColumn}
       idNumberValidation={idNumberValidation}
@@ -60,7 +61,6 @@ const BPMasterDataWindow = ({
         <IDNumberTab
           bpMasterDataValidation={bpMasterDataValidation}
           idNumberValidation={idNumberValidation}
-          idNumberStore={idNumberStore}
           idNumberGridColumn={idNumberGridColumn}
           maxAccess={maxAccess}
         />

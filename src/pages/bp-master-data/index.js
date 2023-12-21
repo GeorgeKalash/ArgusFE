@@ -44,7 +44,6 @@ const BPMasterData = () => {
   const [idCategoryStore, setIDCategoryStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
   const [legalStatusStore, setLegalStatusStore] = useState([])
-  const [idNumberStore, setIdNumberStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -154,7 +153,6 @@ const BPMasterData = () => {
   }
 
   const postBPMasterData = obj => {
-    console.log('enter')
     const recordId = obj.recordId
     postRequest({
       extension: BusinessPartnerRepository.BPMasterData.set,
@@ -164,10 +162,10 @@ const BPMasterData = () => {
         getGridData({})
         setEditMode(true)
         setWindowOpen(false)
-        resetIdNumber(res.recordId)
-        fillIdNumberStore(res.recordId)
+        resetIdNumber(res.record.recordId)
+        fillIdNumberStore(obj)
         if (!recordId) {
-          bpMasterDataValidation.setFieldValue('recordId', res.recordId)
+          bpMasterDataValidation.setFieldValue('recordId', res.record.recordId)
           toast.success('Record Added Successfully')
         } else toast.success('Record Editted Successfully')
       })
@@ -217,8 +215,8 @@ const BPMasterData = () => {
         fillCategoryStore()
         fillCountryStore()
         filllegalStatusStore()
-        resetIdNumber(res.recordId)
-        fillIdNumberStore(res.recordId)
+        resetIdNumber(res.record.recordId)
+        fillIdNumberStore(obj)
         bpMasterDataValidation.setValues(populateBPMasterData(res.record))
         setEditMode(true)
         setWindowOpen(true)
@@ -257,34 +255,42 @@ const BPMasterData = () => {
       })
   }
 
-  const fillIdCategoryStore = categId => {
+  const fillIdCategoryStore = async categId => {
     setIDCategoryStore([])
-    var parameters = `_startAt=0&_pageSize=1000`
-    getRequest({
-      extension: BusinessPartnerRepository.CategoryID.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        var filteredList = []
-        if (categId != null) {
-          res.list.forEach(item => {
-            if (categId === 1 && item.person) {
-              filteredList.push(item)
-            }
-            if (categId === 2 && item.org) {
-              filteredList.push(item)
-            }
-            if (categId === 3 && item.group) {
-              filteredList.push(item)
-            }
-          })
-          setIDCategoryStore(filteredList)
-        }
-        console.log(filteredList)
+    const list = await filterIdCategory(categId)
+    setIDCategoryStore(list)
+  }
+
+  const filterIdCategory = async categId => {
+    try {
+      var parameters = `_startAt=0&_pageSize=1000`
+
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.CategoryID.qry,
+        parameters: parameters
       })
-      .catch(error => {
-        setErrorMessage(error.res)
-      })
+
+      var filteredList = []
+      if (categId != null) {
+        res.list.forEach(item => {
+          if (categId === 1 && item.person) {
+            filteredList.push(item)
+          }
+          if (categId === 2 && item.org) {
+            filteredList.push(item)
+          }
+          if (categId === 3 && item.group) {
+            filteredList.push(item)
+          }
+        })
+      }
+
+      return filteredList
+    } catch (error) {
+      setErrorMessage(error.res)
+
+      return []
+    }
   }
 
   const fillCountryStore = () => {
@@ -321,13 +327,14 @@ const BPMasterData = () => {
     {
       field: 'textfield',
       header: _labels.idCategory,
-      name: 'incName'
+      name: 'incName',
+      readOnly: true
     },
     {
       id: 1,
       field: 'textfield',
       header: _labels.idNumber,
-      name: 'incId'
+      name: 'idNum'
     }
   ]
 
@@ -354,20 +361,17 @@ const BPMasterData = () => {
   })
 
   const postIdNumber = obj => {
-    /*const data = {
-      idtId: idTypesValidation.values.recordId,
-      items: obj
-    }
+    const recordId = bpMasterDataValidation.values.recordId
 
-    postRequest({
-     extension: CurrencyTradingSettingsRepository.IdFields.set2,
-      record: JSON.stringify(data)
+    const postBody = Object.entries(obj).map(([key, value]) => {
+      return postRequest({
+        extension: BusinessPartnerRepository.MasterIDNum.set,
+        record: JSON.stringify(value)
+      })
     })
-      .then(res => {
-        getGridData({})
-
-        // setWindowOpen(false)
-        if (!res.recordId) {
+    Promise.all(postBody)
+      .then(() => {
+        if (!recordId) {
           toast.success('Record Added Successfully')
         } else {
           toast.success('Record Edited Successfully')
@@ -375,36 +379,7 @@ const BPMasterData = () => {
       })
       .catch(error => {
         setErrorMessage(error)
-      })*/
-  }
-
-  const getIdNumber = obj => {
-    /*const _recordId = obj.recordId
-    const defaultParams = `_idtId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.IdFields.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        if (res.list.length > 0) {
-          idNumberValidation.setValues({ rows: res.list })
-        } else {
-          idNumberValidation.setValues({
-            rows: [
-              {
-                idtId: _recordId,
-                incId: '',
-                incName: '',
-                idNum: ''
-              }
-            ]
-          })
-        }
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })*/
   }
 
   const resetIdNumber = id => {
@@ -421,7 +396,40 @@ const BPMasterData = () => {
     })
   }
 
-  const fillIdNumberStore = bpId => {}
+  const fillIdNumberStore = async obj => {
+    try {
+      const _recordId = obj.recordId
+      const defaultParams = `_bpId=${_recordId}`
+      var parameters = defaultParams
+
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.MasterIDNum.qry,
+        parameters: parameters
+      })
+      const list = await filterIdCategory(obj.category)
+
+      var listMIN = res.list.filter(y => {
+        return list.some(x => x.name === y.incName)
+      })
+
+      if (listMIN.length > 0) {
+        idNumberValidation.setValues({ rows: listMIN })
+      } else {
+        idNumberValidation.setValues({
+          rows: [
+            {
+              bpId: _recordId,
+              incId: '',
+              incName: '',
+              idNum: ''
+            }
+          ]
+        })
+      }
+    } catch (error) {
+      setErrorMessage(error)
+    }
+  }
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.BPMasterData, setAccess)
@@ -470,7 +478,6 @@ const BPMasterData = () => {
           groupStore={groupStore}
           countryStore={countryStore}
           legalStatusStore={legalStatusStore}
-          idNumberStore={idNumberStore}
           idNumberGridColumn={idNumberGridColumn}
           idNumberValidation={idNumberValidation}
           labels={_labels}

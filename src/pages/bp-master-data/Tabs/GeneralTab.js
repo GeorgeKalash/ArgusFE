@@ -148,7 +148,7 @@ const GeneralTab = ({
               valueField='recordId'
               displayField='name'
               store={idCategoryStore}
-              value={idCategoryStore?.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
+              value={idCategoryStore.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)

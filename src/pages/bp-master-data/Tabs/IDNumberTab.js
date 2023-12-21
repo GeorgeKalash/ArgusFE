@@ -3,7 +3,7 @@ import { Box } from '@mui/material'
 // ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
-const IDNumberTab = ({ bpMasterDataValidation, idNumberValidation, idNumberGridColumn, idNumberStore, maxAccess }) => {
+const IDNumberTab = ({ bpMasterDataValidation, idNumberValidation, idNumberGridColumn, maxAccess }) => {
   return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
@@ -21,8 +21,9 @@ const IDNumberTab = ({ bpMasterDataValidation, idNumberValidation, idNumberGridC
             incName: '',
             idNum: ''
           }}
-          scrollHeight={320}
-          width={550}
+          scrollHeight={350}
+          width={750}
+          allowDelete={false}
         />
       </Box>
     </>
