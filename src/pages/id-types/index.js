@@ -126,6 +126,12 @@ const IdTypes = () => {
 
   const idFieldsGridColumn = [
     {
+      field: 'textfield',
+      header: _labels.control,
+      name: 'controlId',
+      mandatory: true
+    },
+    {
       field: 'combobox',
       header: _labels.accessLevel,
       nameId: 'accessLevel',
@@ -135,13 +141,6 @@ const IdTypes = () => {
       valueField: 'key',
       displayField: 'value',
       columnsInDropDown: [{ key: 'value', value: 'Value' }]
-    },
-    {
-      id: 1,
-      field: 'textfield',
-      header: _labels.control,
-      name: 'controlId',
-      mandatory: true
     }
   ]
 
