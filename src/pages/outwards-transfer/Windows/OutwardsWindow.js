@@ -18,8 +18,11 @@ const OutwardsWindow = ({
     currencyStore,
     onCurrencySelection,
     agentsStore,
-    productsStore,
+    correspondentStore,
+    setCorrespondentStore,
+    lookupCorrespondent,
     onAmountDataFill,
+    onIdNoBlur,
     labels,
     setProductsWindowOpen,
     maxAccess
@@ -46,8 +49,11 @@ return (
                   currencyStore={currencyStore?.list}
                   onCurrencySelection={onCurrencySelection}
                   agentsStore={agentsStore?.list}
-                  productsStore={productsStore?.list}
+                  correspondentStore={correspondentStore}
+                  setCorrespondentStore={setCorrespondentStore}
+                  lookupCorrespondent={lookupCorrespondent}
                   onAmountDataFill={onAmountDataFill}
+                  onIdNoBlur={onIdNoBlur}
                   editMode={editMode}
                   setProductsWindowOpen={setProductsWindowOpen}
                   maxAccess={maxAccess}
