@@ -14,7 +14,7 @@ const NumberRangeTab=({
     maxAccess, setRequired
 }) =>{
 
-
+console.log('YES' ,NumberRangeValidation)
 
     return (
         <Grid container spacing={4}>
