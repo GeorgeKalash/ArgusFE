@@ -14,10 +14,9 @@ import toast from 'react-hot-toast'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { formatDateToApi } from 'src/lib/date-helper'
 
 const NumberRange = () => {
-
-
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -25,7 +24,6 @@ const NumberRange = () => {
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
   const [dateRequired, setDateRequired] = useState(null)
-
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -51,20 +49,17 @@ const NumberRange = () => {
     }
   }, [access])
 
-
-
   const _labels = {
-    reference: labels &&  labels.find(item => item.key === 1).value,
-    description: labels  &&  labels.find(item => item.key === 2).value,
+    reference: labels && labels.find(item => item.key === 1).value,
+    description: labels && labels.find(item => item.key === 2).value,
     min: labels && labels.find(item => item.key === 3).value,
-    max: labels &&   labels.find(item => item.key === 4).value,
-    current: labels &&   labels.find(item => item.key === 5).value,
-    external: labels &&   labels.find(item => item.key === 6).value,
-    dateRange: labels &&   labels.find(item => item.key === 7).value,
-    startDate: labels &&   labels.find(item => item.key === 8).value,
-    endDate: labels &&   labels.find(item => item.key === 9).value,
-    title: labels &&   labels.find(item => item.key === 10).value
-
+    max: labels && labels.find(item => item.key === 4).value,
+    current: labels && labels.find(item => item.key === 5).value,
+    external: labels && labels.find(item => item.key === 6).value,
+    dateRange: labels && labels.find(item => item.key === 7).value,
+    startDate: labels && labels.find(item => item.key === 8).value,
+    endDate: labels && labels.find(item => item.key === 9).value,
+    title: labels && labels.find(item => item.key === 10).value
   }
 
   const columns = [
@@ -90,8 +85,7 @@ const NumberRange = () => {
       field: 'max',
       headerName: _labels.max,
       flex: 1,
-      editable: false,
-
+      editable: false
     },
     {
       field: 'current',
@@ -121,9 +115,7 @@ const NumberRange = () => {
   }
 
   const editNumberRange = obj => {
-    console.log('test', obj)
     NumberRangeValidation.setValues(populateNumberRange(obj))
-    console.log(obj)
 
     setWindowOpen(true)
   }
@@ -147,18 +139,28 @@ const NumberRange = () => {
   const NumberRangeValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: windowOpen && yup.object({
-      reference: yup.string().required('This field is required'),
-      min: yup.string().required('This field is required'),
-      max: yup.string().required('This field is required'),
-      current: yup.string().required('This field is required'),
-      description: yup.string().required('This field is required'),
-      startDate: dateRequired && yup.string().required('This field is required'),
-      endDate: dateRequired && yup.string().required('This field is required'),
-
-    }),
+    validationSchema:
+      windowOpen &&
+      yup.object({
+        reference: yup.string().required('This field is required'),
+        min: yup.string().required('This field is required'),
+        max: yup.string().required('This field is required'),
+        current: yup.string().required('This field is required'),
+        description: yup.string().required('This field is required'),
+        startDate: dateRequired && yup.date().required('This field is required'),
+        endDate: dateRequired && yup.date().required('This field is required')
+      }),
     onSubmit: values => {
-      console.log({ values })
+      // IN CASE FORMIK DIDN'T CONVERT A DATE FROM DATE OBJ TO DATE STRING (FORMAT SENT TO API)
+      // USE THE COMMENTED OUT CODE, THIS WILL MANUALLY CONVERT THE DATE USING formatDateToApi
+      // AND SEND apiValues TO API
+      // var apiValues = values
+
+      // if (apiValues.startDate) apiValues.startDate = formatDateToApi(apiValues.startDate)
+      // if (apiValues.endDate) apiValues.endDate = formatDateToApi(apiValues.endDate)
+
+      // console.log({ apiValues })
+
       postNumberRange(values)
     }
   })
@@ -179,7 +181,6 @@ const NumberRange = () => {
         setErrorMessage(error)
       })
   }
-
 
   const handleSubmit = () => {
     NumberRangeValidation.handleSubmit()
