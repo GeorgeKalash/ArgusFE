@@ -31,6 +31,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { position } from 'stylis'
 import FieldSet from 'src/components/Shared/FieldSet';
+import { KVSRepository } from 'src/repositories/KVSRepository';
+import { CTCLRepository } from 'src/repositories/CTCLRepository';
+
 
 const Defaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -43,6 +46,11 @@ const Defaults = () => {
   const [countryStore, setCountryStore] = useState([])
   const [cityStore, setCityStore] = useState([])
   const[professionStore, setProfessionStore] = useState([])
+  const[salaryRangeStore, setSalaryRangeStore] = useState([])
+  const[incomeOfSourceStore, setIncomeOfSourceStore] = useState([])
+  const[smsLanguageStore, setSMSLanguageStore] = useState([])
+const [civilStatusStore, setCivilStatusStore]= useState([])
+const [genderStore, setGenderStore]= useState([])
 
   //stores
 
@@ -58,7 +66,12 @@ const Defaults = () => {
         getLabels(ResourceIds.ClientMaster, setLabels)
          fillType()
          fillCountryStore()
-
+         fillProfessionStore()
+         fillSalaryRangeStore()
+         fillIncomeOfSourceStore()
+         fillSMSLanguageStore()
+         fillGenderStore()
+         fillCivilStatusStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -118,32 +131,180 @@ const Defaults = () => {
 
 
   const clientIndividualFormValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
+    initialValues :{
+    reference: null,
+    isResident: null,
+    number:null,
+    type: null,
+    expiryDate:null,
+    issusDate:null,
+    countryId: null,
+    cityId: null,
+    whatsappNo: null,
+    sponsorName: null,
+    firstName: null,
+    lastName: null,
+    middleName: null,
+    familyName: null,
+    fl_firstName: null,
+    fl_lastName: null,
+    fl_middleName: null,
+    fl_familyName: null,
+    birthDate:null,
+    nationalityId: null,
+    nationality: null,
+    profession: null,
+    professionId: null,
+    cellPhone: null,
+    status: null,
+    oldReference: null,
+    salaryRange: null,
+    salaryRangeId: null,
+    riskLevel: null,
+    smsLanguage: null,
+    smsLanguageId: null,
+    incomeSourceId:null,
+    incomeSource: null,
+    civilStatus: null,
+    civilStatusId: null,
+    educationLevel: null,
+    educationLevelId:null,
+    gender: null,
+    genderId: null,
+    title: null,
+    titleId: null,
+    mobileVerified:false,
+    otpVerified:false,
+    coveredFace:false,
+    isEmployee: false,
+    isDiplomat:false,
+    isRelativeDiplomate:false,
+    relativeDiplomateInfo: null,
 
+
+
+
+   },
+   validationSchema: yup.object({
+
+    reference: yup.string().required('This field is required'),
+    isResident:  yup.string().required('This field is required'),
+    birthDate: yup.string().required('This field is required'),
+    expiryDate: yup.string().required('This field is required'),
+    countryId:  yup.string().required('This field is required'),
+    cityId:  yup.string().required('This field is required'),
+    firstName:  yup.string().required('This field is required'),
+    lastName:  yup.string().required('This field is required'),
+    nationalityId:  yup.string().required('This field is required'),
+    professionId: yup.string().required('This field is required'),
+    cellPhone:  yup.string().required('This field is required'),
+    status:  yup.string().required('This field is required'),
+    salaryRangeId:  yup.string().required('This field is required'),
+    smsLanguage:  yup.string().required('This field is required'),
+    smsLanguageId:  yup.string().required('This field is required'),
+    incomeSourceId: yup.string().required('This field is required'),
+    mobileVerified: yup.string().required('This field is required'),
+    otpVerified: yup.string().required('This field is required'),
+    coveredFace: yup.string().required('This field is required'),
+    isEmployee:  yup.string().required('This field is required'),
+    isDiplomat: yup.string().required('This field is required'),
+    isRelativeDiplomate: yup.string().required('This field is required'),
+    relativeDiplomateInfo:  yup.string().required('This field is required')
+  }),
     onSubmit: values => {
-
+console.log(values)
       postRtDefault(values)
     }
   })
 
 
+  console.log(clientIndividualFormValidation)
+
 
   const postRtDefault = obj => {
 
-   var data = []
-    Object.entries(obj).forEach(([key, value], i) => {
-      // console.log(`Key: ${key}, Value: ${value}`);
-      const newObj = { key: key  , value : value };
+console.log("obj" , obj)
 
-      // Push the new object into the array
-      data.push(newObj);
+    //CTCL
 
-    })
+        const obj1 ={
+         reference: obj.reference,
+         category: 1,
+         nationalityId: obj.nationalityId,
+         status: obj.status,
+         name: obj.firstName,
+         flName: obj.fl_firstName,
+         addressId: null
 
+      }
+
+         //CCTD
+        const obj2 ={
+          idCountryId: obj.countryId,
+          idCity: obj.cityId,
+          idExpiryDate: obj.expiryDate,
+          idIssusDate:obj.issusDate
+        }
+
+//CTCLI
+        const obj3 ={
+        firstName: obj.firstName,
+        lastName: obj.lastName,
+        middleName: obj.middleName,
+        familyName: obj.familyName,
+        fl_firstName: obj.fl_firstName,
+        fl_lastName: obj.fl_lastName,
+        fl_middleName: obj.fl_middleName,
+        fl_familyName: obj.fl_familyName,
+        birthDate: obj.birthDate,
+        professionId: obj.professionId,
+        cellPhone: obj.cellPhone,
+        isResident:obj.isResident
+      }
+
+      const obj4 ={
+        incomeSourceId : obj.incomeSourceId,
+        salaryRangeId: obj.salaryRangeId,
+        riskLevel:obj.riskLevel,
+        smsLanguage: obj.smsLanguage,
+        sponsorName: obj.sponsorName,
+        whatsappNo: obj.whatsappNo,
+        gender:obj.gender,
+        title:obj.title,
+        civilStatus: obj.civilStatus,
+        mobileVerificationsStatus: obj.mobileVerified,
+        educationLevel:obj.educationLevel,
+        isDiplomatic: obj.isDiplomat,
+        isRelativeDiplomate: obj.isRelativeDiplomate,
+        relativeDiplomateInfo: obj.relativeDiplomateInfo
+
+      }
+
+
+  //  var data = []
+  //   Object.entries(obj).forEach(([key, value], i) => {
+  //     // console.log(`Key: ${key}, Value: ${value}`);
+  //     const newObj = { key: key  , value : value };
+
+  //     // Push the new object into the array
+  //     data.push(newObj);
+
+  //   })
+
+  const data ={
+    clientMaster: obj1, //CTCL
+    clientID: obj2, //CTID
+    ClientIndividual: obj3, //CTCLI
+    clientRemittance: obj4
+  }
+
+
+  console.log(data)
       postRequest({
-        extension: CurrencyTradingSettingsRepository.Defaults.set2,
-        record:   JSON.stringify({  sysDefaults  : data })
+        extension: CTCLRepository.CtClientIndividual.set2,
+        record: JSON.stringify( data )         // JSON.stringify({  sysDefaults  : data })
       })
         .then(res => {
           if (res) toast.success('Record Successfully')
@@ -185,13 +346,15 @@ const Defaults = () => {
       })
   }
 
-  const fillCityStore = (cId) => {
-    var parameters = `_filter=_&countryId=`+cId
+  const lookupCity = searchQry => {
+    setCityStore([])
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${clientIndividualFormValidation.values.countryId}&_stateId=0`
     getRequest({
-      extension: SystemRepository.City.qry,
+      extension: SystemRepository.City.snapshot,
       parameters: parameters
     })
       .then(res => {
+        console.log(res.list)
         setCityStore(res.list)
       })
       .catch(error => {
@@ -199,10 +362,12 @@ const Defaults = () => {
       })
   }
 
+
+
   const fillProfessionStore = (cId) => {
     var parameters = `_filter=_&countryId=`+cId
     getRequest({
-      extension: SystemRepository.City.qry,
+      extension: CurrencyTradingSettingsRepository.Profession.qry,
       parameters: parameters
     })
       .then(res => {
@@ -212,6 +377,78 @@ const Defaults = () => {
         setErrorMessage(error)
       })
   }
+
+  const fillSalaryRangeStore = (cId) => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.SalaryRange.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setSalaryRangeStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+
+  const fillIncomeOfSourceStore = () => {
+    var parameters = `_filter=` //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.SourceOfIncome.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setIncomeOfSourceStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillSMSLanguageStore = () => {
+    var parameters = '_database=13' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        setSMSLanguageStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillGenderStore = () => {
+    var parameters = '_database=9' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        setGenderStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillCivilStatusStore = () => {
+    var parameters = '_database=1019' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        setCivilStatusStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
 
 return (
     <>
@@ -296,11 +533,11 @@ return (
                                     helperText={clientIndividualFormValidation.touched.typeId && clientIndividualFormValidation.errors.typeId}
                                 />
                </Grid>
-                <Grid item xs={12} >
+               <Grid item xs={12} >
             <CustomDatePicker
               name='expiryDate'
               label={_labels.expiryDate}
-              value={ clientIndividualFormValidation.values?.expiryDate}
+              value={clientIndividualFormValidation.values?.expiryDate}
               required={true}
               onChange={clientIndividualFormValidation.handleChange}
               onClear={() => clientIndividualFormValidation.setFieldValue('expiryDate', '')}
@@ -311,10 +548,11 @@ return (
 
           <Grid item xs={12} >
             <CustomDatePicker
-              name='birthDate'
+              name='issusDate'
               label={_labels.issusDate}
               value={ clientIndividualFormValidation.values?.issusDate}
-              required={true}
+
+              // required={true}
               onChange={clientIndividualFormValidation.handleChange}
               onClear={() => clientIndividualFormValidation.setFieldValue('issusDate', '')}
               error={clientIndividualFormValidation.touched.issusDate && Boolean(clientIndividualFormValidation.errors.issusDate)}
@@ -325,10 +563,11 @@ return (
           <Grid item xs={12}>
                                 <CustomComboBox
                                     name='countryId'
-                                    label={_labels.country}                                    valueField='recordId'
+                                    label={_labels.country}
+                                    valueField='recordId'
                                     displayField='name'
                                     store={countryStore}
-                                    value={clientIndividualFormValidation.values?.type}
+                                    value={countryStore.filter(item => item.recordId === clientIndividualFormValidation.values.countryId)[0]}
                                     required
                                     onChange={(event, newValue) => {
                                         clientIndividualFormValidation.setFieldValue('countryId', newValue?.recordId)
@@ -341,7 +580,7 @@ return (
 
 
                             <Grid item xs={12}>
-                                <CustomComboBox
+                                {/* <CustomComboBox
                                     name='cityId'
                                     label={_labels.city}                                    valueField='recordId'
                                     displayField='name'
@@ -355,34 +594,58 @@ return (
                                     error={clientIndividualFormValidation.touched.cityId && Boolean(clientIndividualFormValidation.errors.cityId)}
                                     helperText={clientIndividualFormValidation.touched.cityId && clientIndividualFormValidation.errors.cityId}
                                 />
+ */}
+
+<CustomLookup
+          name='cityId'
+          label={_labels.city}
+          value={clientIndividualFormValidation.values.cityId}
+          required
+          valueField='name'
+          store={cityStore}
+          firstValue={clientIndividualFormValidation.values.cityName}
+
+          setStore={setCityStore}
+          onLookup={lookupCity}
+          onChange={(event, newValue) => {
+            if (newValue) {
+              clientIndividualFormValidation.setFieldValue('cityId', newValue?.recordId)
+              clientIndividualFormValidation.setFieldValue('cityName', newValue?.name)
+            } else {
+              clientIndividualFormValidation.setFieldValue('cityId', null)
+              clientIndividualFormValidation.setFieldValue('cityName', null)
+            }
+          }}
+          error={clientIndividualFormValidation.touched.cityId && Boolean(clientIndividualFormValidation.errors.cityId)}
+          helperText={clientIndividualFormValidation.touched.cityId && clientIndividualFormValidation.errors.cityId}
+        />
                             </Grid>
                 </FieldSet>
                 <Grid container xs={12} sx={{paddingTop:'10px'}} spacing={2}
          >
             <Grid item xs={12} >
                 <CustomTextField
-              name='whatsapp'
+              name='whatsappNo'
               label={_labels.whatsapp}
-              value={clientIndividualFormValidation.values?.whatsapp}
+              value={clientIndividualFormValidation.values?.whatsappNo}
               required
               onChange={clientIndividualFormValidation.handleChange}
               maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('whatsapp', '')}
-              error={clientIndividualFormValidation.touched.whatsapp && Boolean(clientIndividualFormValidation.errors.whatsapp)}
-              helperText={clientIndividualFormValidation.touched.whatsapp && clientIndividualFormValidation.errors.whatsapp}
+              onClear={() => clientIndividualFormValidation.setFieldValue('whatsappNo', '')}
+              error={clientIndividualFormValidation.touched.whatsappNo && Boolean(clientIndividualFormValidation.errors.whatsappNo)}
+              helperText={clientIndividualFormValidation.touched.whatsappNo && clientIndividualFormValidation.errors.whatsappNo}
             />
             </Grid>
             <Grid item xs={12} >
               <CustomTextField
-              name='sponsor'
+              name='sponsorName'
               label={_labels.sponsor}
-              value={clientIndividualFormValidation.values?.sponsor}
-              required
+              value={clientIndividualFormValidation.values?.sponsorName}
               onChange={clientIndividualFormValidation.handleChange}
               maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('sponsor', '')}
-              error={clientIndividualFormValidation.touched.sponsor && Boolean(clientIndividualFormValidation.errors.sponsor)}
-              helperText={clientIndividualFormValidation.touched.sponsor && clientIndividualFormValidation.errors.sponsor}
+              onClear={() => clientIndividualFormValidation.setFieldValue('sponsorName', '')}
+              error={clientIndividualFormValidation.touched.sponsorName && Boolean(clientIndividualFormValidation.errors.sponsorName)}
+              helperText={clientIndividualFormValidation.touched.sponsorName && clientIndividualFormValidation.errors.sponsorName}
             />
             </Grid>
             </Grid>
@@ -398,56 +661,56 @@ return (
         <FieldSet title={_labels.name} >
              <Grid item xs={12} >
             <CustomTextField
-              name='name'
+              name='firstName'
               label={_labels.first}
-              value={clientIndividualFormValidation.values?.name}
+              value={clientIndividualFormValidation.values?.firstName}
               required
               onChange={clientIndividualFormValidation.handleChange}
               maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('reference', '')}
-              error={clientIndividualFormValidation.touched.name && Boolean(clientIndividualFormValidation.errors.name)}
-              helperText={clientIndividualFormValidation.touched.name && clientIndividualFormValidation.errors.name}
+              onClear={() => clientIndividualFormValidation.setFieldValue('firstName', '')}
+              error={clientIndividualFormValidation.touched.firstName && Boolean(clientIndividualFormValidation.errors.firstName)}
+              helperText={clientIndividualFormValidation.touched.firstName && clientIndividualFormValidation.errors.firstName}
             />
           </Grid>
 
           <Grid item xs={12} >
           <CustomTextField
-              name='last'
+              name='lastName'
               label={_labels.last}
-              value={clientIndividualFormValidation.values?.last}
+              value={clientIndividualFormValidation.values?.lastName}
               required
               onChange={clientIndividualFormValidation.handleChange}
               maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('family', '')}
-              error={clientIndividualFormValidation.touched.last && Boolean(clientIndividualFormValidation.errors.last)}
-              helperText={clientIndividualFormValidation.touched.last && clientIndividualFormValidation.errors.last}
+              onClear={() => clientIndividualFormValidation.setFieldValue('lastName', '')}
+              error={clientIndividualFormValidation.touched.lastName && Boolean(clientIndividualFormValidation.errors.lastName)}
+              helperText={clientIndividualFormValidation.touched.lastName && clientIndividualFormValidation.errors.lastName}
             />
           </Grid>
           <Grid item xs={12} >
           <CustomTextField
-              name='middle'
+              name='middleName'
               label={_labels.middle}
-              value={clientIndividualFormValidation.values?.middle}
-              required
+              value={clientIndividualFormValidation.values?.middleName}
+
               onChange={clientIndividualFormValidation.handleChange}
               maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('reference', '')}
-              error={clientIndividualFormValidation.touched.name && Boolean(clientIndividualFormValidation.errors.name)}
-              helperText={clientIndividualFormValidation.touched.name && clientIndividualFormValidation.errors.name}
+              onClear={() => clientIndividualFormValidation.setFieldValue('middleName', '')}
+              error={clientIndividualFormValidation.touched.middleName && Boolean(clientIndividualFormValidation.errors.middleName)}
+              helperText={clientIndividualFormValidation.touched.middleName && clientIndividualFormValidation.errors.middleName}
             />
           </Grid>
 
           <Grid item xs={12} >
           <CustomTextField
-              name='family'
+              name='familyName'
               label={_labels.family}
-              value={clientIndividualFormValidation.values?.family}
-              required
+              value={clientIndividualFormValidation.values?.familyName}
+
               onChange={clientIndividualFormValidation.handleChange}
               maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('family', '')}
-              error={clientIndividualFormValidation.touched.family && Boolean(clientIndividualFormValidation.errors.family)}
-              helperText={clientIndividualFormValidation.touched.family && clientIndividualFormValidation.errors.family}
+              onClear={() => clientIndividualFormValidation.setFieldValue('familyName', '')}
+              error={clientIndividualFormValidation.touched.familyName && Boolean(clientIndividualFormValidation.errors.familyName)}
+              helperText={clientIndividualFormValidation.touched.familyName && clientIndividualFormValidation.errors.familyName}
             />
           </Grid>
        </FieldSet>
@@ -456,56 +719,53 @@ return (
         <FieldSet title={_labels.name} >
              <Grid item xs={12} >
             <CustomTextField
-              name='name'
+              name='fl_firstName'
               label={_labels.first}
-              value={clientIndividualFormValidation.values?.name}
-              required
+              value={clientIndividualFormValidation.values?.fl_firstName}
+
               onChange={clientIndividualFormValidation.handleChange}
               maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('reference', '')}
-              error={clientIndividualFormValidation.touched.name && Boolean(clientIndividualFormValidation.errors.name)}
-              helperText={clientIndividualFormValidation.touched.name && clientIndividualFormValidation.errors.name}
+              onClear={() => clientIndividualFormValidation.setFieldValue('fl_firstName', '')}
+              error={clientIndividualFormValidation.touched.fl_firstName && Boolean(clientIndividualFormValidation.errors.fl_firstName)}
+              helperText={clientIndividualFormValidation.touched.fl_firstName && clientIndividualFormValidation.errors.fl_firstName}
             />
           </Grid>
 
           <Grid item xs={12} >
           <CustomTextField
-              name='last'
+              name='fl_lastName'
               label={_labels.last}
-              value={clientIndividualFormValidation.values?.last}
-              required
+              value={clientIndividualFormValidation.values?.fl_lastName}
+
               onChange={clientIndividualFormValidation.handleChange}
               maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('family', '')}
-              error={clientIndividualFormValidation.touched.last && Boolean(clientIndividualFormValidation.errors.last)}
-              helperText={clientIndividualFormValidation.touched.last && clientIndividualFormValidation.errors.last}
+              onClear={() => clientIndividualFormValidation.setFieldValue('fl_lastName', '')}
+              error={clientIndividualFormValidation.touched.fl_lastName && Boolean(clientIndividualFormValidation.errors.fl_lastName)}
+              helperText={clientIndividualFormValidation.touched.fl_lastName && clientIndividualFormValidation.errors.fl_lastName}
             />
           </Grid>
           <Grid item xs={12} >
           <CustomTextField
-              name='middle'
+              name='fl_middleName'
               label={_labels.middle}
-              value={clientIndividualFormValidation.values?.middle}
-              required
+              value={clientIndividualFormValidation.values?.fl_middleName}
+
               onChange={clientIndividualFormValidation.handleChange}
-              maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('reference', '')}
-              error={clientIndividualFormValidation.touched.name && Boolean(clientIndividualFormValidation.errors.name)}
-              helperText={clientIndividualFormValidation.touched.name && clientIndividualFormValidation.errors.name}
+              onClear={() => clientIndividualFormValidation.setFieldValue('fl_middleName', '')}
+              error={clientIndividualFormValidation.touched.fl_middleName && Boolean(clientIndividualFormValidation.errors.fl_middleName)}
+              helperText={clientIndividualFormValidation.touched.fl_middleName && clientIndividualFormValidation.errors.fl_middleName}
             />
           </Grid>
 
           <Grid item xs={12} >
           <CustomTextField
-              name='family'
+              name='fl_familyName'
               label={_labels.family}
-              value={clientIndividualFormValidation.values?.family}
-              required
+              value={clientIndividualFormValidation.values?.fl_familyName}
               onChange={clientIndividualFormValidation.handleChange}
-              maxLength = '10'
-              onClear={() => clientIndividualFormValidation.setFieldValue('family', '')}
-              error={clientIndividualFormValidation.touched.family && Boolean(clientIndividualFormValidation.errors.family)}
-              helperText={clientIndividualFormValidation.touched.family && clientIndividualFormValidation.errors.family}
+              onClear={() => clientIndividualFormValidation.setFieldValue('fl_familyName', '')}
+              error={clientIndividualFormValidation.touched.fl_familyName && Boolean(clientIndividualFormValidation.errors.fl_familyName)}
+              helperText={clientIndividualFormValidation.touched.fl_familyName && clientIndividualFormValidation.errors.fl_familyName}
             />
           </Grid>
        </FieldSet>
@@ -520,7 +780,7 @@ return (
                                     valueField='recordId'
                                     displayField='name'
                                     store={countryStore}
-                                    value={clientIndividualFormValidation.values?.nationalityId}
+                                    value={countryStore.filter(item => item.recordId === clientIndividualFormValidation.values.nationalityId)[0]}
                                     required
                                     onChange={(event, newValue) => {
                                         clientIndividualFormValidation.setFieldValue('nationalityId', newValue?.recordId)
@@ -535,11 +795,10 @@ return (
                                 <CustomComboBox
                                     name='professionId'
                                     label={_labels.profession}
-
                                     valueField='recordId'
                                     displayField='name'
                                     store={professionStore}
-                                    value={clientIndividualFormValidation.values?.professionId}
+                                    value={professionStore.filter(item => item.recordId === clientIndividualFormValidation.values.professionId)[0]}
                                     required
                                     onChange={(event, newValue) => {
                                         clientIndividualFormValidation.setFieldValue('professionId', newValue?.recordId)
@@ -602,11 +861,15 @@ return (
                                 <CustomComboBox
                                     name='salaryRangeId'
                                     label={_labels.salaryRange}
-
                                     valueField='recordId'
-                                    displayField='name'
-                                    store={countryStore}
-                                    value={clientIndividualFormValidation.values?.salaryRangeId}
+                                    displayField={['min', 'max']}
+                                    columnsInDropDown= {[
+                                      { key: 'min', value: 'min' },
+                                      { key: 'max', value: 'max' },
+                                    ]}
+                                    store={salaryRangeStore}
+                                    value={salaryRangeStore.filter(item => item.recordId === clientIndividualFormValidation.values.salaryRangeId)[0]}
+
                                     required
                                     onChange={(event, newValue) => {
                                         clientIndividualFormValidation.setFieldValue('salaryRangeId', newValue?.recordId)
@@ -619,13 +882,14 @@ return (
 
                             <Grid item xs={12}>
                                 <CustomComboBox
-                                    name='riskLevelId'
+                                    name='riskLevel'
                                     label={_labels.riskLevel}
-
+                                    readOnly //disabled
                                     valueField='recordId'
                                     displayField='name'
                                     store={countryStore}
-                                    value={clientIndividualFormValidation.values?.riskLevelId}
+                                    value={countryStore.filter(item => item.recordId === clientIndividualFormValidation.values.riskLevelId)[0]}
+
                                     required
                                     onChange={(event, newValue) => {
                                         clientIndividualFormValidation.setFieldValue('riskLevelId', newValue?.recordId)
@@ -640,14 +904,14 @@ return (
                                     name='smsLanguage'
                                     label={_labels.smsLanguage}
 
-                                    valueField='recordId'
-                                    displayField='name'
-                                    store={countryStore}
-                                    value={clientIndividualFormValidation.values?.smsLanguageId}
+                                    valueField='key'
+                                    displayField='value'
+                                    store={smsLanguageStore}
+                                    value={smsLanguageStore.filter(item => item.key === clientIndividualFormValidation.values.smsLanguageId)[0]}
                                     required
                                     onChange={(event, newValue) => {
-                                        clientIndividualFormValidation.setFieldValue('smsLanguageId', newValue?.recordId)
-                                        clientIndividualFormValidation.setFieldValue('smsLanguage', newValue?.name)
+                                        clientIndividualFormValidation.setFieldValue('smsLanguageId', newValue?.key)
+                                        clientIndividualFormValidation.setFieldValue('smsLanguage', newValue?.value)
                                     }}
                                     error={clientIndividualFormValidation.touched.smsLanguageId && Boolean(clientIndividualFormValidation.errors.smsLanguageId)}
                                     helperText={clientIndividualFormValidation.touched.smsLanguageId && clientIndividualFormValidation.errors.smsLanguageId}
@@ -656,20 +920,20 @@ return (
 
                             <Grid item xs={12}>
                                 <CustomComboBox
-                                    name='nationalityId'
-                                    label={_labels.nationality}
-
+                                    name='incomeSourceId'
+                                    label={_labels.incomeSource}
                                     valueField='recordId'
                                     displayField='name'
-                                    store={countryStore}
-                                    value={clientIndividualFormValidation.values?.nationalityId}
+                                    store={incomeOfSourceStore}
+                                    value={incomeOfSourceStore.filter(item => item.recordId === clientIndividualFormValidation.values.incomeSourceId)[0]}
+
                                     required
                                     onChange={(event, newValue) => {
-                                        clientIndividualFormValidation.setFieldValue('nationalityId', newValue?.recordId)
-                                        clientIndividualFormValidation.setFieldValue('nationalityName', newValue?.name)
+                                        clientIndividualFormValidation.setFieldValue('incomeSourceId', newValue?.recordId)
+                                        clientIndividualFormValidation.setFieldValue('incomeSource', newValue?.name)
                                     }}
-                                    error={clientIndividualFormValidation.touched.nationalityId && Boolean(clientIndividualFormValidation.errors.nationalityId)}
-                                    helperText={clientIndividualFormValidation.touched.nationalityId && clientIndividualFormValidation.errors.nationalityId}
+                                    error={clientIndividualFormValidation.touched.incomeSourceId && Boolean(clientIndividualFormValidation.errors.incomeSourceId)}
+                                    helperText={clientIndividualFormValidation.touched.incomeSourceId && clientIndividualFormValidation.errors.incomeSourceId}
                                 />
                             </Grid>
                             </Grid>
@@ -692,8 +956,8 @@ return (
         <FormControlLabel
           control={
             <Checkbox
-              name='otpVerified'
-              checked={clientIndividualFormValidation.values?.otpVerified}
+              name='OTPVerified'
+              checked={clientIndividualFormValidation.values?.OTPVerified}
               onChange={clientIndividualFormValidation.handleChange}
             />
           }
@@ -704,8 +968,8 @@ return (
         <FormControlLabel
           control={
             <Checkbox
-              name='isInactive'
-              checked={clientIndividualFormValidation.values?.isInactive}
+              name='coveredFace'
+              checked={clientIndividualFormValidation.values?.coveredFace}
               onChange={clientIndividualFormValidation.handleChange}
             />
           }
@@ -716,8 +980,8 @@ return (
         <FormControlLabel
           control={
             <Checkbox
-              name='isInactive'
-              checked={clientIndividualFormValidation.values?.isInactive}
+              name='isEmployee'
+              checked={clientIndividualFormValidation.values?.isEmployee}
               onChange={clientIndividualFormValidation.handleChange}
             />
           }
@@ -727,37 +991,19 @@ return (
 
                             </Grid>
                             <Grid container xs={6} spacing={2}  sx={{padding:'5px'}}>
-                            <Grid item xs={12}>
-                                <CustomComboBox
-                                    name='incomeSourceId'
-                                    label={_labels.incomeSource}
 
-                                    valueField='recordId'
-                                    displayField='name'
-                                    store={countryStore}
-                                    value={clientIndividualFormValidation.values?.incomeSourceId}
-                                    required
-                                    onChange={(event, newValue) => {
-                                        clientIndividualFormValidation.setFieldValue('incomeSourceId', newValue?.recordId)
-                                        clientIndividualFormValidation.setFieldValue('incomeSource', newValue?.name)
-                                    }}
-                                    error={clientIndividualFormValidation.touched.incomeSourceId && Boolean(clientIndividualFormValidation.errors.incomeSourceId)}
-                                    helperText={clientIndividualFormValidation.touched.incomeSourceId && clientIndividualFormValidation.errors.incomeSourceId}
-                                />
-                            </Grid>
                             <Grid item xs={12}>
                                 <CustomComboBox
-                                    name='civilStatusId'
+                                    name='civilStatus'
                                     label={_labels.civilStatus}
 
-                                    valueField='recordId'
-                                    displayField='name'
-                                    store={countryStore}
+                                    valueField='key'
+                                    displayField='value'
+                                    store={civilStatusStore}
                                     value={clientIndividualFormValidation.values?.civilStatusId}
-                                    required
                                     onChange={(event, newValue) => {
-                                        clientIndividualFormValidation.setFieldValue('civilStatusId', newValue?.recordId)
-                                        clientIndividualFormValidation.setFieldValue('civilStatus', newValue?.name)
+                                        clientIndividualFormValidation.setFieldValue('civilStatusId', newValue?.key)
+                                        clientIndividualFormValidation.setFieldValue('civilStatus', newValue?.value)
                                     }}
                                     error={clientIndividualFormValidation.touched.civilStatusId && Boolean(clientIndividualFormValidation.errors.civilStatusId)}
                                     helperText={clientIndividualFormValidation.touched.civilStatusId && clientIndividualFormValidation.errors.civilStatusId}
@@ -773,7 +1019,7 @@ return (
                                     displayField='name'
                                     store={countryStore}
                                     value={clientIndividualFormValidation.values?.educationLevelId}
-                                    required
+
                                     onChange={(event, newValue) => {
                                         clientIndividualFormValidation.setFieldValue('educationLevelId', newValue?.recordId)
                                         clientIndividualFormValidation.setFieldValue('educationLevel', newValue?.name)
@@ -784,16 +1030,15 @@ return (
                             </Grid>
                             <Grid item xs={12}>
                                 <CustomComboBox
-                                    name='genderId'
+                                    name='gender'
                                     label={_labels.gender}
-                                    valueField='recordId'
-                                    displayField='name'
-                                    store={countryStore}
+                                    valueField='key'
+                                    displayField='value'
+                                    store={genderStore}
                                     value={clientIndividualFormValidation.values?.genderId}
-                                    required
                                     onChange={(event, newValue) => {
-                                        clientIndividualFormValidation.setFieldValue('genderId', newValue?.recordId)
-                                        clientIndividualFormValidation.setFieldValue('gender', newValue?.name)
+                                        clientIndividualFormValidation.setFieldValue('genderId', newValue?.key)
+                                        clientIndividualFormValidation.setFieldValue('gender', newValue?.value)
                                     }}
                                     error={clientIndividualFormValidation.touched.genderId && Boolean(clientIndividualFormValidation.errors.genderId)}
                                     helperText={clientIndividualFormValidation.touched.genderId && clientIndividualFormValidation.errors.genderId}
@@ -802,13 +1047,12 @@ return (
 
                             <Grid item xs={12}>
                                 <CustomComboBox
-                                    name='titleId'
+                                    name='title'
                                     label={_labels.title}
                                     valueField='recordId'
                                     displayField='name'
                                     store={countryStore}
                                     value={clientIndividualFormValidation.values?.titleId}
-                                    required
                                     onChange={(event, newValue) => {
                                         clientIndividualFormValidation.setFieldValue('titleId', newValue?.recordId)
                                         clientIndividualFormValidation.setFieldValue('title', newValue?.name)
@@ -827,7 +1071,7 @@ return (
         <FormControlLabel
           control={
             <Checkbox
-              name='isDiplomat'
+              name='isDiplomatic'
               checked={clientIndividualFormValidation.values?.isInactive}
               onChange={clientIndividualFormValidation.handleChange}
             />
@@ -839,7 +1083,7 @@ return (
         <FormControlLabel
           control={
             <Checkbox
-              name='isDiplomatRelative'
+              name='isRelativeDiplomate'
               checked={clientIndividualFormValidation.values?.isInactive}
               onChange={clientIndividualFormValidation.handleChange}
             />
