@@ -6,7 +6,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
-const BPMasterDataTab = ({
+const GeneralTab = ({
   labels,
   bpMasterDataValidation,
   maxAccess,
@@ -148,7 +148,7 @@ const BPMasterDataTab = ({
               valueField='recordId'
               displayField='name'
               store={idCategoryStore}
-              value={idCategoryStore?.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
+              value={idCategoryStore.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
@@ -237,4 +237,4 @@ const BPMasterDataTab = ({
   )
 }
 
-export default BPMasterDataTab
+export default GeneralTab

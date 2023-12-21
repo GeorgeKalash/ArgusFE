@@ -13,7 +13,8 @@ const LegalStatusWindow = ({
     width,
     height,
     editMode,
-    _labels
+    _labels,
+    maxAccess
 }) => {
     return (
       <Window id='LegalStatusWindow' Title={_labels.legalStatus} onClose={onClose} width={width} height={height} 
@@ -23,6 +24,7 @@ const LegalStatusWindow = ({
                  legalStatusValidation={legalStatusValidation}
                  _labels={_labels}
                  editMode={editMode}
+                 maxAccess={maxAccess}
              />
          </CustomTabPanel>
      </Window>

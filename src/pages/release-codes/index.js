@@ -17,16 +17,20 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { getNewLegalStatuses, populateLegalStatuses } from 'src/Models/BusinessPartner/LegalStatuses'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { getNewReleaseCode, populateReleaseCode } from 'src/Models/DocumentRelease/ReleaseCode'
+
+// ** Helpers
+import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows
-import LegalStatusWindow from './Windows/LegalStatusWindow'
+import ReleaseCodeWindow from './Windows/ReleaseCodeWindow'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-const LegalStatus = () => {
+const ReleaseCodes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
@@ -39,15 +43,14 @@ const LegalStatus = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(false) 
   const [errorMessage, setErrorMessage] = useState(null)
 
   const _labels = {
     reference: labels && labels.find(item => item.key === 1).value,
     name: labels && labels.find(item => item.key === 2).value,
-    legalStatus: labels && labels.find(item => item.key === 3).value
+    releaseCode: labels && labels.find(item => item.key === 3).value
   }
-
 
   const columns = [
     {
@@ -62,48 +65,43 @@ const LegalStatus = () => {
     }
   ]
 
-
-  const legalStatusValidation = useFormik({
+  const releaseCodeValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
-
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      postLegalStatus(values)
+      console.log(values)
+      postReleaseCode(values)
     }
   })
 
   const handleSubmit = () => {
-    legalStatusValidation.handleSubmit()
+    releaseCodeValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    console.log(_startAt)
-    console.log(_pageSize)
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
-    console.log(parameters)
-
-    // var parameters = defaultParams + '&_dgId=0'
     getRequest({
-      extension: BusinessPartnerRepository.LegalStatus.qry,
+      extension: DocumentReleaseRepository.ReleaseCode.page,
       parameters: parameters
     })
       .then(res => {
-        setGridData({ ...res, _startAt })
+        setGridData(res)
+        console.log(res)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const postLegalStatus = obj => {
+  const postReleaseCode = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: BusinessPartnerRepository.LegalStatus.set,
+      extension: DocumentReleaseRepository.ReleaseCode.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -117,9 +115,9 @@ const LegalStatus = () => {
       })
   }
 
-  const delLegalStatus = obj => {
+  const delReleaseCode = obj => {
     postRequest({
-      extension: BusinessPartnerRepository.LegalStatus.del,
+      extension: DocumentReleaseRepository.ReleaseCode.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -132,30 +130,31 @@ const LegalStatus = () => {
       })
   }
 
-  const addLegalStatus = () => {
-    legalStatusValidation.setValues(getNewLegalStatuses())
+  const addReleaseCode = () => {
+    releaseCodeValidation.setValues(getNewReleaseCode)
     setEditMode(false)
     setWindowOpen(true)
   }
 
-  const editLegalStatus = obj => {
-    legalStatusValidation.setValues(populateLegalStatuses(obj))
+  const editReleaseCode = obj => {
+    console.log(obj)
+    releaseCodeValidation.setValues(populateReleaseCode(obj))
     setEditMode(true)
     setWindowOpen(true)
   }
 
   useEffect(() => {
-    if (!access) getAccess(ResourceIds.LegalStatus, setAccess)
+    if (!access) getAccess(ResourceIds.ReleaseCodes, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
-        getLabels(ResourceIds.LegalStatus,setLabels)
+        getLabels(ResourceIds.ReleaseCodes,setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
   }, [access])
-
+ 
   return (
     <>
       <Box
@@ -165,33 +164,34 @@ const LegalStatus = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addLegalStatus} maxAccess={access} />
+        <GridToolbar onAdd={addReleaseCode} maxAccess={access} />
         <Table
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={editLegalStatus}
-          onDelete={delLegalStatus}
+          onEdit={editReleaseCode}
+          onDelete={delReleaseCode}
           isLoading={false}
+          pageSize={50}
           maxAccess={access}
         />
       </Box>
       {windowOpen && (
-        <LegalStatusWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          legalStatusValidation={legalStatusValidation}
-          _labels={_labels}
-          editMode={editMode}
-          maxAccess={access}
-        />
-      )}
+       <ReleaseCodeWindow
+       onClose={() => setWindowOpen(false)}
+       width={600}
+       height={400}
+       onSave={handleSubmit}
+       releaseCodeValidation={releaseCodeValidation}
+       _labels ={_labels}
+       maxAccess={access}
+       editMode={editMode}
+       />
+       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
 
-export default LegalStatus
+export default ReleaseCodes

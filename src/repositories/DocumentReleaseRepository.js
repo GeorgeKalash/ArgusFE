@@ -22,6 +22,12 @@ export const DocumentReleaseRepository = {
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP'
+  },
+  GroupCode: { //DRGroupAprover
+    qry: service + 'qryGCO',
+    get: service + 'getGCO',
+    set: service + 'setGCO',
+    del: service + 'delGCO'
   }
 
 }

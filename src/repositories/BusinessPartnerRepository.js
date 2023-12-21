@@ -54,5 +54,12 @@ export const BusinessPartnerRepository = {
     get: service + 'getMAS',
     set: service + 'setMAS',
     del: service + 'delMAS'
+  },
+  MasterIDNum: {
+    qry: service + 'qryMIN',
+    page: service + 'pageMIN',
+    get: service + 'getMIN',
+    set: service + 'setMIN',
+    del: service + 'delMIN'
   }
 }

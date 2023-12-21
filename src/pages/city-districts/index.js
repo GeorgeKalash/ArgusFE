@@ -156,7 +156,8 @@ const CityDistricts = () => {
     console.log(obj)
     cityDistrictValidation.setValues(populateCityDistrict(obj))
     fillCountryStore()
-    lookupCity(obj.city)
+    
+    //lookupCity(obj.city)
     setEditMode(true)
     setWindowOpen(true)
   }
@@ -191,8 +192,11 @@ const CityDistricts = () => {
 
   const lookupCity = searchQry => {
     setCityStore([])
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${cityDistrictValidation.values.countryId}&_stateId=0`
+    console.log('city')
+    console.log(searchQry)
     console.log(cityDistrictValidation.values.countryId)
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${cityDistrictValidation.values.countryId}&_stateId=0`
+    
     getRequest({
       extension: SystemRepository.City.snapshot,
       parameters: parameters

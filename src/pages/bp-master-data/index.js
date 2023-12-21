@@ -69,7 +69,9 @@ const BPMasterData = () => {
     nationalityName: labels && labels.find(item => item.key === 15).value,
     birthDate: labels && labels.find(item => item.key === 16).value,
     nationalityId: labels && labels.find(item => item.key === 17).value,
-    legalStatus: labels && labels.find(item => item.key === 18).value
+    legalStatus: labels && labels.find(item => item.key === 18).value,
+    idCategory: labels && labels.find(item => item.key === 19).value,
+    idNumber: labels && labels.find(item => item.key === 20).value
   }
 
   const columns = [
@@ -111,7 +113,7 @@ const BPMasterData = () => {
     }
   ]
 
-  const tabs = [{ label: _labels.general }]
+  const tabs = [{ label: _labels.general }, { label: _labels.idNumber, disabled: !editMode }]
 
   const bpMasterDataValidation = useFormik({
     enableReinitialize: false,
@@ -131,6 +133,7 @@ const BPMasterData = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) bpMasterDataValidation.handleSubmit()
+    else if (activeTab === 1) idNumberValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -150,7 +153,6 @@ const BPMasterData = () => {
   }
 
   const postBPMasterData = obj => {
-    console.log('enter')
     const recordId = obj.recordId
     postRequest({
       extension: BusinessPartnerRepository.BPMasterData.set,
@@ -160,8 +162,10 @@ const BPMasterData = () => {
         getGridData({})
         setEditMode(true)
         setWindowOpen(false)
+        resetIdNumber(res.record.recordId)
+        fillIdNumberStore(obj)
         if (!recordId) {
-          bpMasterDataValidation.setFieldValue('recordId', res.recordId)
+          bpMasterDataValidation.setFieldValue('recordId', res.record.recordId)
           toast.success('Record Added Successfully')
         } else toast.success('Record Editted Successfully')
       })
@@ -194,6 +198,7 @@ const BPMasterData = () => {
     fillCategoryStore()
     fillCountryStore()
     filllegalStatusStore()
+    resetIdNumber()
   }
 
   const editBPMasterData = obj => {
@@ -210,6 +215,8 @@ const BPMasterData = () => {
         fillCategoryStore()
         fillCountryStore()
         filllegalStatusStore()
+        resetIdNumber(res.record.recordId)
+        fillIdNumberStore(obj)
         bpMasterDataValidation.setValues(populateBPMasterData(res.record))
         setEditMode(true)
         setWindowOpen(true)
@@ -248,34 +255,42 @@ const BPMasterData = () => {
       })
   }
 
-  const fillIdCategoryStore = categId => {
+  const fillIdCategoryStore = async categId => {
     setIDCategoryStore([])
-    var parameters = `_startAt=0&_pageSize=1000`
-    getRequest({
-      extension: BusinessPartnerRepository.CategoryID.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        var filteredList = []
-        if (categId != null) {
-          res.list.forEach(item => {
-            if (categId === 1 && item.person) {
-              filteredList.push(item)
-            }
-            if (categId === 2 && item.org) {
-              filteredList.push(item)
-            }
-            if (categId === 3 && item.group) {
-              filteredList.push(item)
-            }
-          })
-          setIDCategoryStore(filteredList)
-        }
-        console.log(filteredList)
+    const list = await filterIdCategory(categId)
+    setIDCategoryStore(list)
+  }
+
+  const filterIdCategory = async categId => {
+    try {
+      var parameters = `_startAt=0&_pageSize=1000`
+
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.CategoryID.qry,
+        parameters: parameters
       })
-      .catch(error => {
-        setErrorMessage(error.res)
-      })
+
+      var filteredList = []
+      if (categId != null) {
+        res.list.forEach(item => {
+          if (categId === 1 && item.person) {
+            filteredList.push(item)
+          }
+          if (categId === 2 && item.org) {
+            filteredList.push(item)
+          }
+          if (categId === 3 && item.group) {
+            filteredList.push(item)
+          }
+        })
+      }
+
+      return filteredList
+    } catch (error) {
+      setErrorMessage(error.res)
+
+      return []
+    }
   }
 
   const fillCountryStore = () => {
@@ -305,6 +320,115 @@ const BPMasterData = () => {
       .catch(error => {
         setErrorMessage(error)
       })
+  }
+
+  // IDNumber TAB
+  const idNumberGridColumn = [
+    {
+      field: 'textfield',
+      header: _labels.idCategory,
+      name: 'incName',
+      readOnly: true
+    },
+    {
+      id: 1,
+      field: 'textfield',
+      header: _labels.idNumber,
+      name: 'idNum'
+    }
+  ]
+
+  const idNumberValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [
+        {
+          bpId: bpMasterDataValidation.values
+            ? bpMasterDataValidation.values.recordId
+              ? bpMasterDataValidation.values.recordId
+              : ''
+            : '',
+          incId: '',
+          idNum: '',
+          incName: ''
+        }
+      ]
+    },
+    onSubmit: values => {
+      postIdNumber(values.rows)
+    }
+  })
+
+  const postIdNumber = obj => {
+    const recordId = bpMasterDataValidation.values.recordId
+
+    const postBody = Object.entries(obj).map(([key, value]) => {
+      return postRequest({
+        extension: BusinessPartnerRepository.MasterIDNum.set,
+        record: JSON.stringify(value)
+      })
+    })
+    Promise.all(postBody)
+      .then(() => {
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+        } else {
+          toast.success('Record Edited Successfully')
+        }
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const resetIdNumber = id => {
+    idNumberValidation.resetForm()
+    idNumberValidation.setValues({
+      rows: [
+        {
+          bpId: id ? id : bpMasterDataValidation.values ? bpMasterDataValidation.values.recordId : '',
+          incId: '',
+          incName: '',
+          idNum: ''
+        }
+      ]
+    })
+  }
+
+  const fillIdNumberStore = async obj => {
+    try {
+      const _recordId = obj.recordId
+      const defaultParams = `_bpId=${_recordId}`
+      var parameters = defaultParams
+
+      const res = await getRequest({
+        extension: BusinessPartnerRepository.MasterIDNum.qry,
+        parameters: parameters
+      })
+      const list = await filterIdCategory(obj.category)
+
+      var listMIN = res.list.filter(y => {
+        return list.some(x => x.name === y.incName)
+      })
+
+      if (listMIN.length > 0) {
+        idNumberValidation.setValues({ rows: listMIN })
+      } else {
+        idNumberValidation.setValues({
+          rows: [
+            {
+              bpId: _recordId,
+              incId: '',
+              incName: '',
+              idNum: ''
+            }
+          ]
+        })
+      }
+    } catch (error) {
+      setErrorMessage(error)
+    }
   }
 
   useEffect(() => {
@@ -354,6 +478,8 @@ const BPMasterData = () => {
           groupStore={groupStore}
           countryStore={countryStore}
           legalStatusStore={legalStatusStore}
+          idNumberGridColumn={idNumberGridColumn}
+          idNumberValidation={idNumberValidation}
           labels={_labels}
           maxAccess={access}
           activeTab={activeTab}
