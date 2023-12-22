@@ -197,7 +197,7 @@ const GeneralTab = ({
               valueField='recordId'
               displayField='name'
               store={legalStatusStore}
-              value={legalStatusStore?.filter(item => item.recordId === bpMasterDataValidation.values.nationalityId)[0]}
+              value={legalStatusStore?.filter(item => item.recordId === bpMasterDataValidation.values.legalStatusId)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation && bpMasterDataValidation.setFieldValue('legalStatusId', newValue?.recordId)

@@ -48,18 +48,18 @@ export const BusinessPartnerRepository = {
     set: service + 'setGRP',
     del: service + 'delGRP'
   },
-  BPMasterData: {
-    qry: service + 'qryMAS',
-    page: service + 'pageMAS',
-    get: service + 'getMAS',
-    set: service + 'setMAS',
-    del: service + 'delMAS'
-  },
   MasterIDNum: {
     qry: service + 'qryMIN',
     page: service + 'pageMIN',
     get: service + 'getMIN',
     set: service + 'setMIN',
     del: service + 'delMIN'
+  },
+  Relation: {
+    qry: service + 'qryREL',
+    page: service + 'pageREL',
+    get: service + 'getREL',
+    set: service + 'setREL',
+    del: service + 'delREL'
   }
 }
