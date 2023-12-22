@@ -147,10 +147,26 @@ const Activities = () => {
 
   const editActivity = obj => {
     console.log(obj)
-    activityValidation.setValues(populateActivity(obj))
     fillIndustryStore()
-    setEditMode(true)
-    setWindowOpen(true)
+    getActById(obj)
+  }
+
+  const getActById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.Activity.get,
+      parameters: parameters
+    })
+      .then(res => {
+        activityValidation.setValues(populateActivity(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {

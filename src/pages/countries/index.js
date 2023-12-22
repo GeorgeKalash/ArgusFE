@@ -121,7 +121,7 @@ const Countries = () => {
   const getGridData = () => {
     var parameters = '_filter='
     getRequest({
-      extension: SystemRepository.Country.qry,
+      extension: SystemRepository.Country.qry, //we can use page
       parameters: parameters
     })
       .then(res => {
@@ -175,14 +175,30 @@ const Countries = () => {
 
   const editCountry = obj => {
     console.log(obj)
-    obj.ibanLength = typeof obj.ibanLength !== undefined && getFormattedNumberMax(obj?.ibanLength, 5, 0)
-    countryValidation.setValues(populateCountry(obj))
-    console.log(populateCountry(obj))
     fillCurrencyStore()
     fillRegionStore({})
-    setEditMode(true)
-    setWindowOpen(true)
+    getCountryById(obj)
   }
+
+  
+  const getCountryById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.Country.get,
+      parameters: parameters
+    })
+      .then(res => {
+        res.ibanLength = typeof res.ibanLength !== undefined && getFormattedNumberMax(res?.ibanLength, 5, 0)
+        countryValidation.setValues(populateCountry(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  } 
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Countries, setAccess)
