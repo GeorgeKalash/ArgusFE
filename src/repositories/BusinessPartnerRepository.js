@@ -39,13 +39,27 @@ export const BusinessPartnerRepository = {
     page: service + 'pageRLT',
     get: service + 'getRLT',
     set: service + 'setRLT',
-    del: service + 'delRLT',
+    del: service + 'delRLT'
   },
   Groups: {
     qry: service + 'qryGRP',
     page: service + 'pageGRP',
     get: service + 'getGRP',
     set: service + 'setGRP',
-    del: service + 'delGRP',
+    del: service + 'delGRP'
+  },
+  BPMasterData: {
+    qry: service + 'qryMAS',
+    page: service + 'pageMAS',
+    get: service + 'getMAS',
+    set: service + 'setMAS',
+    del: service + 'delMAS'
+  },
+  MasterIDNum: {
+    qry: service + 'qryMIN',
+    page: service + 'pageMIN',
+    get: service + 'getMIN',
+    set: service + 'setMIN',
+    del: service + 'delMIN'
   }
 }

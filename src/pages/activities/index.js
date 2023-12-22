@@ -177,7 +177,7 @@ const Activities = () => {
         setIndustryStore(res.list)
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 

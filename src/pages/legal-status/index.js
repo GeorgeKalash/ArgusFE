@@ -186,6 +186,7 @@ const LegalStatus = () => {
           legalStatusValidation={legalStatusValidation}
           _labels={_labels}
           editMode={editMode}
+          maxAccess={access}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

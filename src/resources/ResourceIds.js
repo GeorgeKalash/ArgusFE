@@ -31,5 +31,15 @@ export const ResourceIds = {
   SystemDefaults: 35108,
   IdTypes: 35109,
   Plants: 20110,
-  Activity: 35111
+  BPMasterData: 21201,
+  Activity: 35111,
+  ReleaseIndicators: 10105,
+  ReleaseCodes: 10104,
+  DRGroups: 10103,
+  ClientMaster : 35201,
+  Characteristics : 10102,
+  Strategies : 10106,
+  Classes : 10101
+
+
 }

@@ -5,10 +5,8 @@ import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ExchangeTableWindow from './Windows/ExchangeTableWindow'
-import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import { getNewExchangeTable, populateExchangeTable } from 'src/Models/FinancialsSettings/ExchangeTable'
 import * as yup from 'yup'
@@ -172,7 +170,7 @@ const ExchangeTables = () => {
         setGridData({ ...res, _startAt })
       })
       .catch(error => {
-        // setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 

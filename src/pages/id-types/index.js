@@ -97,7 +97,7 @@ const IdTypes = () => {
   })
 
   // IDFields TAB(2nd tab)
-  const idFieldsvalidation = useFormik({
+  const idFieldsValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     validate: values => {
@@ -126,6 +126,12 @@ const IdTypes = () => {
 
   const idFieldsGridColumn = [
     {
+      field: 'textfield',
+      header: _labels.control,
+      name: 'controlId',
+      mandatory: true
+    },
+    {
       field: 'combobox',
       header: _labels.accessLevel,
       nameId: 'accessLevel',
@@ -135,13 +141,6 @@ const IdTypes = () => {
       valueField: 'key',
       displayField: 'value',
       columnsInDropDown: [{ key: 'value', value: 'Value' }]
-    },
-    {
-      id: 1,
-      field: 'textfield',
-      header: _labels.control,
-      name: 'controlId',
-      mandatory: true
     }
   ]
 
@@ -183,9 +182,9 @@ const IdTypes = () => {
     })
       .then(res => {
         if (res.list.length > 0) {
-          idFieldsvalidation.setValues({ rows: res.list })
+          idFieldsValidation.setValues({ rows: res.list })
         } else {
-          idFieldsvalidation.setValues({
+          idFieldsValidation.setValues({
             rows: [
               {
                 idtId: _recordId,
@@ -204,7 +203,7 @@ const IdTypes = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) idTypesValidation.handleSubmit()
-    else if (activeTab === 1) idFieldsvalidation.handleSubmit()
+    else if (activeTab === 1) idFieldsValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -224,8 +223,8 @@ const IdTypes = () => {
   }
 
   const resetIdFields = id => {
-    idFieldsvalidation.resetForm()
-    idFieldsvalidation.setValues({
+    idFieldsValidation.resetForm()
+    idFieldsValidation.setValues({
       rows: [
         {
           idtId: id ? id : idTypesValidation.values ? idTypesValidation.values.recordId : '',
@@ -306,7 +305,7 @@ const IdTypes = () => {
   const addIdTypes = () => {
     idTypesValidation.setValues(getNewIdTypes())
     resetIdFields()
-    console.log(idFieldsvalidation.values)
+    console.log(idFieldsValidation.values)
     setidtId(null)
     fillAccessLevelStore()
     fillCategoryStore()
@@ -379,7 +378,7 @@ const IdTypes = () => {
           onSave={handleSubmit}
           editMode={editMode}
           idTypesValidation={idTypesValidation}
-          idFieldsvalidation={idFieldsvalidation}
+          idFieldsValidation={idFieldsValidation}
           labels={_labels}
           maxAccess={access}
           activeTab={activeTab}

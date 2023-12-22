@@ -1,3 +1,30 @@
+export function handleChangeNumber(
+  inputValue,
+  digitsBeforePoint,
+  digitsAfterPoint,
+  setFormattedNumber,
+  setPosition,
+  param
+
+) {
+  const formattedValue = inputValue.value ?  getFormattedNumberMax(inputValue.value, digitsBeforePoint, digitsAfterPoint): inputValue.value;
+
+  // Save current cursor position
+  const currentPosition = inputValue.selectionStart;
+
+  // Update field value
+  validation.setFieldValue(param, formattedValue);
+  setFormattedNumber(formattedValue)
+
+  const newCursorPosition =
+   currentPosition +
+  (formattedValue && formattedValue.length - inputValue.value.length);
+
+  setPosition(newCursorPosition);
+
+
+}
+
 const getFormattedNumber = (value, decimal) => {
   if (!value) return
 

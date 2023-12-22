@@ -25,8 +25,9 @@ const populateNumberRange = obj => {
     current: obj.current,
     external: obj.external,
     dateRange: obj.dateRange,
-    startDate: formatDateFromApi(obj.startDate),
-    endDate: formatDateFromApi(obj.endDate)
+    startDate: obj.startDate && formatDateFromApi(obj.startDate),
+    endDate: obj.endDate   && formatDateFromApi(obj.endDate)
+
   }
 }
 
