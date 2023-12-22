@@ -1,4 +1,4 @@
-import { formatDateFromApi } from "src/lib/date-helper"
+import { formatDateFromApi } from 'src/lib/date-helper'
 
 const getNewNumberRange = () => {
   return {

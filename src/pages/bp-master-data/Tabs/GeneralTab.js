@@ -6,7 +6,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
-const BPMasterDataTab = ({
+const GeneralTab = ({
   labels,
   bpMasterDataValidation,
   maxAccess,
@@ -15,6 +15,7 @@ const BPMasterDataTab = ({
   idCategoryStore,
   editMode,
   countryStore,
+  fillIdCategoryStore,
   legalStatusStore
 }) => {
   return (
@@ -35,6 +36,8 @@ const BPMasterDataTab = ({
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation.setFieldValue('category', newValue?.key)
+                const selectedCategory = newValue?.key || ''
+                fillIdCategoryStore(selectedCategory) // Fetch and update state data based on the selected category
               }}
               error={bpMasterDataValidation.touched.category && Boolean(bpMasterDataValidation.errors.category)}
               helperText={bpMasterDataValidation.touched.category && bpMasterDataValidation.errors.category}
@@ -148,7 +151,7 @@ const BPMasterDataTab = ({
               valueField='recordId'
               displayField='name'
               store={idCategoryStore}
-              value={idCategoryStore?.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
+              value={idCategoryStore.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
@@ -179,7 +182,7 @@ const BPMasterDataTab = ({
               value={countryStore?.filter(item => item.recordId === bpMasterDataValidation.values.nationalityId)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
-                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
+                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('nationalityId', newValue?.recordId)
               }}
               error={
                 bpMasterDataValidation.touched.nationalityId && Boolean(bpMasterDataValidation.errors.nationalityId)
@@ -194,10 +197,10 @@ const BPMasterDataTab = ({
               valueField='recordId'
               displayField='name'
               store={legalStatusStore}
-              value={legalStatusStore?.filter(item => item.recordId === bpMasterDataValidation.values.legalStatusId)[0]}
+              value={legalStatusStore?.filter(item => item.recordId === bpMasterDataValidation.values.nationalityId)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
-                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
+                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('legalStatusId', newValue?.recordId)
               }}
               error={
                 bpMasterDataValidation.touched.legalStatusId && Boolean(bpMasterDataValidation.errors.legalStatusId)
@@ -237,4 +240,4 @@ const BPMasterDataTab = ({
   )
 }
 
-export default BPMasterDataTab
+export default GeneralTab
