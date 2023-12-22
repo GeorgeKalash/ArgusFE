@@ -37,7 +37,7 @@ CustomTabPanel.propTypes = {
   value: PropTypes.number.isRequired
 }
 
-const TabsProvider = ({ children }) => {
+const TabsProvider = ({ children, pageTitle }) => {
   // ** Hooks
   const router = useRouter()
 
@@ -47,7 +47,10 @@ const TabsProvider = ({ children }) => {
     return parts[parts.length - 1]
   }
 
-  var initialActiveTab = router.route === '/default' ? [] : [{ page: children, route: router.route, label: getLabel() }]
+  var initialActiveTab =
+    router.route === '/default'
+      ? []
+      : [{ page: children, route: router.route, label: pageTitle ? pageTitle : getLabel() }]
 
   // ** States
   const [activeTabs, setActiveTabs] = useState(initialActiveTab)
@@ -99,8 +102,8 @@ const TabsProvider = ({ children }) => {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label='basic tabs example' sx={{ maxHeight: '40px' }}>
             {activeTabs.length > 0 &&
-              activeTabs.map(
-                (activeTab, i) =>
+              activeTabs.map((activeTab, i) => {
+                return (
                   !activeTab.isDefault && (
                     <Tab
                       key={i}
@@ -121,7 +124,8 @@ const TabsProvider = ({ children }) => {
                       sx={{ minHeight: '40px' }}
                     />
                   )
-              )}
+                )
+              })}
           </Tabs>
         </Box>
         {activeTabs.length > 0 &&
