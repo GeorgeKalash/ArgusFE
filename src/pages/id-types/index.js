@@ -42,6 +42,7 @@ const IdTypes = () => {
   const [idtId, setidtId] = useState(null)
   const [accessLevelStore, setaccesLevelStore] = useState([])
   const [categoryStore, setCategoryStore] = useState([])
+  const [clientStore, setClientStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -58,7 +59,9 @@ const IdTypes = () => {
     tab2: labels && labels.find(item => item.key === 6) && labels.find(item => item.key === 6).value,
     control: labels && labels.find(item => item.key === 7) && labels.find(item => item.key === 7).value,
     accessLevel: labels && labels.find(item => item.key === 8) && labels.find(item => item.key === 8).value,
-    category: labels && labels.find(item => item.key === 9).value
+    category: labels && labels.find(item => item.key === 9).value,
+    clientFileExpiryType: labels && labels.find(item => item.key === 10).value,
+    clientFileLifeTime: labels && labels.find(item => item.key === 11).value
   }
 
   const columns = [
@@ -89,7 +92,9 @@ const IdTypes = () => {
       name: yup.string().required('This field is required'),
       format: yup.string().required('This field is required'),
       length: yup.string().required('This field is required'),
-      category: yup.string().required('This field is required')
+      category: yup.string().required('This field is required'),
+      clientFileExpiryType: yup.string().required('This field is required'),
+      clientFileLifeTime: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postIdTypes(values)
@@ -266,6 +271,21 @@ const IdTypes = () => {
       })
   }
 
+  const fillClientFileExpiryTypeStore = () => {
+    var parameters = '_database=149' //add 'xml'.json and get _database values from there
+    getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: parameters
+    })
+      .then(res => {
+        //ask about lang values
+        setClientStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
   const postIdTypes = obj => {
     const recordId = obj.recordId
     postRequest({
@@ -309,6 +329,7 @@ const IdTypes = () => {
     setidtId(null)
     fillAccessLevelStore()
     fillCategoryStore()
+    fillClientFileExpiryTypeStore()
     setActiveTab(0)
     setEditMode(false)
     setWindowOpen(true)
@@ -328,6 +349,7 @@ const IdTypes = () => {
         idTypesValidation.setValues(populateIdTypes(res.record))
         fillAccessLevelStore()
         fillCategoryStore()
+        fillClientFileExpiryTypeStore()
         getIdFields(obj)
         setEditMode(true)
         setWindowOpen(true)
@@ -346,6 +368,7 @@ const IdTypes = () => {
         getLabels(ResourceIds.IdTypes, setLabels)
         fillAccessLevelStore()
         fillCategoryStore()
+        fillClientFileExpiryTypeStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -386,6 +409,7 @@ const IdTypes = () => {
           idtId={idtId}
           idFieldsGridColumn={idFieldsGridColumn}
           categoryStore={categoryStore}
+          clientStore={clientStore}
           accessLevelStore={accessLevelStore.list}
         />
       )}
