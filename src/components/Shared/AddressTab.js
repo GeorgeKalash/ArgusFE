@@ -13,11 +13,13 @@ const AddressTab = ({
   countryStore,
   stateStore,
   fillStateStore,
-  fillCityStore,
   lookupCity,
   cityStore,
   setCityStore,
-  editMode
+  lookupCityDistrict,
+  cityDistrictStore,
+  setCityDistrictStore,
+  editMode // not used since all fields are editable in edit mode
 }) => {
 
   console.log(addressValidation)
@@ -50,6 +52,12 @@ return (
             addressValidation.setFieldValue('countryId', newValue?.recordId)
             const selectedCountryId = newValue?.recordId || ''
             fillStateStore(selectedCountryId)
+
+            // should empty state selection on delete country selection or changing it: 
+            //addressValidation.setFieldValue('stateId', null)
+            //should empty store existing data if we delete the selection not change it
+
+            //same for city (since city depends on country and state) and for city district(depends on city)
           }}
           error={addressValidation.touched.countryId && Boolean(addressValidation.errors.countryId)}
           helperText={addressValidation.touched.countryId && addressValidation.errors.countryId}
@@ -82,6 +90,7 @@ return (
           onChange={(event, newValue) => {
             addressValidation.setFieldValue('stateId', newValue?.recordId)
 
+            // should empty city selection and city district on change or delete this feild
           }}
           error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
           helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
@@ -99,26 +108,32 @@ return (
           helperText={addressValidation.touched.street2 && addressValidation.errors.street2}
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={6}>    
         <CustomLookup
           name='cityId'
           label={labels.city}
           value={addressValidation.values.cityId}
           required
-          valueField='name'
+          valueField='recordId'
+          displayField='name'
           store={cityStore}
-          firstValue={addressValidation.values.cityName}
+          firstValue={cityDistrictValidation.values.cityRef}
+          secondValue={cityDistrictValidation.values.cityName}
 
           setStore={setCityStore}
           onLookup={lookupCity}
           onChange={(event, newValue) => {
             if (newValue) {
-              addressValidation.setFieldValue('cityId', newValue?.recordId)
-              addressValidation.setFieldValue('cityName', newValue?.name)
+              cityDistrictValidation.setFieldValue('cityId', newValue?.recordId)
+              cityDistrictValidation.setFieldValue('cityRef', newValue?.reference)
+              cityDistrictValidation.setFieldValue('cityName', newValue?.name)
             } else {
-              addressValidation.setFieldValue('cityName', null)
-              addressValidation.setFieldValue('cityName', null)
+              cityDistrictValidation.setFieldValue('cityId', null)
+              cityDistrictValidation.setFieldValue('cityRef', null)
+              cityDistrictValidation.setFieldValue('cityName', null)
             }
+
+             // should empty city district selection on change or delete this field
           }}
           error={addressValidation.touched.cityId && Boolean(addressValidation.errors.cityId)}
           helperText={addressValidation.touched.cityId && addressValidation.errors.cityId}
@@ -139,14 +154,31 @@ return (
         />
       </Grid>
       <Grid item xs={6}>
-        <CustomTextField
-          name='postalCode'
-          label={labels.postalCode}
-          value={addressValidation.values.postalCode}
-          onChange={addressValidation.handleChange}
-          onClear={() => addressValidation.setFieldValue('postalCode', '')}
-          error={addressValidation.touched.postalCode && Boolean(addressValidation.errors.postalCode)}
-          helperText={addressValidation.touched.postalCode && addressValidation.errors.postalCode}
+      <CustomLookup
+          name='cityDistrictId'
+          label={labels.cityDistrict}
+          value={addressValidation.values.cityDistrictId}
+          valueField='recordId'
+          displayField='name'
+          store={cityDistrictStore}
+          firstValue={addressValidation.values.cityDistrictRef}
+          secondValue={addressValidation.values.cityDistrictName}
+          setStore={setCityDistrictStore}
+          onLookup={lookupCityDistrict}
+          onChange={(event, newValue) => {
+            if (newValue) {
+              addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)
+              addressValidation.setFieldValue('cityDistrictRef', newValue?.reference)
+              addressValidation.setFieldValue('cityDistrictName', newValue?.name)
+            } else {
+              addressValidation.setFieldValue('cityDistrictId', null)
+              addressValidation.setFieldValue('cityDistrictRef', null)
+              addressValidation.setFieldValue('cityDistrictName', null)
+            }
+          }}
+          error={addressValidation.touched.cityDistrictId && Boolean(addressValidation.errors.cityDistrictId)}
+          helperText={addressValidation.touched.cityDistrictId && addressValidation.errors.cityDistrictId}
+          maxAccess={maxAccess}
         />
       </Grid>
       <Grid item xs={6}>
@@ -164,6 +196,29 @@ return (
       </Grid>
       <Grid item xs={6}>
         <CustomTextField
+          name='postalCode'
+          label={labels.postalCode}
+          value={addressValidation.values.postalCode}
+          onChange={addressValidation.handleChange}
+          onClear={() => addressValidation.setFieldValue('postalCode', '')}
+          error={addressValidation.touched.postalCode && Boolean(addressValidation.errors.postalCode)}
+          helperText={addressValidation.touched.postalCode && addressValidation.errors.postalCode}
+        />
+      </Grid>
+      <Grid item xs={6}>
+        <CustomTextField
+          name='bldgNo'
+          label={labels.bldgNo}
+          value={addressValidation.values.bldgNo}
+          maxLength='10'
+          onChange={addressValidation.handleChange}
+          onClear={() => addressValidation.setFieldValue('nabldgNome', '')}
+          error={addressValidation.touched.bldgNo && Boolean(addressValidation.errors.bldgNo)}
+          helperText={addressValidation.touched.bldgNo && addressValidation.errors.bldgNo}
+        />
+      </Grid>
+      <Grid item xs={6}>
+        <CustomTextField
           name='phone'
           label={labels.phone}
           value={addressValidation.values.phone}
@@ -175,7 +230,18 @@ return (
           helperText={addressValidation.touched.phone && addressValidation.errors.phone}
         />
       </Grid>
-      <Grid xs={6}></Grid>
+      <Grid item xs={6}>
+        <CustomTextField
+          name='unitNo'
+          label={labels.unitNo}
+          value={addressValidation.values.unitNo}
+          maxLength='10'
+          onChange={addressValidation.handleChange}
+          onClear={() => addressValidation.setFieldValue('unitNo', '')}
+          error={addressValidation.touched.unitNo && Boolean(addressValidation.errors.unitNo)}
+          helperText={addressValidation.touched.unitNo && addressValidation.errors.unitNo}
+        />
+      </Grid>
       <Grid item xs={6}>
         <CustomTextField
           name='phone2'
@@ -188,7 +254,18 @@ return (
           helperText={addressValidation.touched.phone2 && addressValidation.errors.phone2}
         />
       </Grid>
-      <Grid xs={6}></Grid>
+      <Grid item xs={6}>
+        <CustomTextField
+          name='subNo'
+          label={labels.subNo}
+          value={addressValidation.values.subNo}
+          maxLength='10'
+          onChange={addressValidation.handleChange}
+          onClear={() => addressValidation.setFieldValue('subNo', '')}
+          error={addressValidation.touched.subNo && Boolean(addressValidation.errors.subNo)}
+          helperText={addressValidation.touched.subNo && addressValidation.errors.subNo}
+        />
+      </Grid>
       <Grid item xs={6}>
         <CustomTextField
           name='phone3'
@@ -201,6 +278,7 @@ return (
           helperText={addressValidation.touched.phone3 && addressValidation.errors.phone3}
         />
       </Grid>
+   
     </Grid>
   )
 }

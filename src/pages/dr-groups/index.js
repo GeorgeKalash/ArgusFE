@@ -17,12 +17,9 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewDRGroup, populateDRGroup } from 'src/Models/DocumentRelease/DRGroup'
 import { getNewGroupCode, populateGroupCode } from 'src/Models/DocumentRelease/GroupCode'
 
-// ** Helpers
-import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -31,7 +28,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import DRGroupWindow from './Windows/DRGroupWindow'
 import ApproverWindow from './Windows/ApproverWindow'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import { isNull } from '@antfu/utils'
 
 const DRGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -93,7 +89,7 @@ const DRGroups = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) drGroupValidation.handleSubmit()
-    else if (activeTab === 1) approverGridData.handleSubmit()
+    else if (activeTab === 1) approverValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -162,9 +158,25 @@ const DRGroups = () => {
     fillApproverComboStore({ _startAt: 0, _pageSize: 1000 })
     resetApprover()
     getApproverGridData(obj.recordId)
-    drGroupValidation.setValues(populateDRGroup(obj)) //USE GET BY ID OR NO? no need
-    setEditMode(true)
-    setWindowOpen(true)
+    getDRGroupById(obj)
+  }
+
+  const getDRGroupById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: DocumentReleaseRepository.DRGroup.get,
+      parameters: parameters
+    })
+      .then(res => {
+        drGroupValidation.setValues(populateDRGroup(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {
@@ -249,17 +261,12 @@ const DRGroups = () => {
     setApproverWindowOpen(true)
   }
 
-  const popupApprover = obj => {
-    console.log('popupApprover')
+  const editApprover = obj => {
     console.log(obj)
-
-    //getApproverById(obj)
-    approverValidation.setValues(populateGroupCode(obj))
-    setApproverEditMode(true)
-    setApproverWindowOpen(true)
+    getApproverById(obj)
   }
 
-  /* const getApproverById = obj => {
+   const getApproverById = obj => {
     const _codeId = obj.codeId
     const _groupId = obj.groupId
     const defaultParams = `_codeId=${_codeId}&_groupId=${_groupId}`
@@ -269,8 +276,6 @@ const DRGroups = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log('byId')
-        console.log(res.record)
         approverValidation.setValues(populateGroupCode(res.record))
         setApproverEditMode(true)
         setApproverWindowOpen(true)
@@ -278,7 +283,7 @@ const DRGroups = () => {
       .catch(error => {
         setErrorMessage(error)
       })
-  } */
+  } 
 
   const handleApproverSubmit = () => {
     approverValidation.handleSubmit()
@@ -341,7 +346,7 @@ const DRGroups = () => {
           getApproverGridData={getApproverGridData}
           addApprover={addApprover}
           delApprover={delApprover}
-          popupApprover={popupApprover}
+          editApprover={editApprover}
         />
       )}
       {approverWindowOpen && (

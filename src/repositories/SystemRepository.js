@@ -57,6 +57,7 @@ export const SystemRepository = {
   },
   Country: {
     qry: service + 'qryCO',
+    page: service + 'pageCO',
     get: service + 'getCO',
     set: service + 'setCO',
     del: service + 'delCO'

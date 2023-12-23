@@ -22,7 +22,8 @@ const BPMasterDataWindow = ({
   legalStatusStore,
   editMode,
   idNumberValidation,
-  idNumberGridColumn
+  idNumberGridColumn,
+  fillIdCategoryStore
 }) => {
   return (
     <Window
@@ -54,6 +55,7 @@ const BPMasterDataWindow = ({
           countryStore={countryStore}
           legalStatusStore={legalStatusStore}
           idCategoryStore={idCategoryStore}
+          fillIdCategoryStore={fillIdCategoryStore}
           editMode={editMode}
         />
       </CustomTabPanel>

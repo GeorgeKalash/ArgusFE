@@ -17,11 +17,8 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewReleaseCode, populateReleaseCode } from 'src/Models/DocumentRelease/ReleaseCode'
 
-// ** Helpers
-import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -138,9 +135,25 @@ const ReleaseCodes = () => {
 
   const editReleaseCode = obj => {
     console.log(obj)
-    releaseCodeValidation.setValues(populateReleaseCode(obj))
-    setEditMode(true)
-    setWindowOpen(true)
+    getReleaseCodeById(obj)
+  }
+
+  const getReleaseCodeById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: DocumentReleaseRepository.ReleaseCode.get,
+      parameters: parameters
+    })
+      .then(res => {      
+        releaseCodeValidation.setValues(populateReleaseCode(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {

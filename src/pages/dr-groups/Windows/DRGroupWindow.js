@@ -24,7 +24,7 @@ const DRGroupWindow = ({
   getApproverGridData,
   addApprover,
   delApprover,
-  popupApprover
+  editApprover
 }) => {
   return (
     <Window id='DRGroupWindow' Title={_labels.group} onClose={onClose} width={width} height={height} onSave={onSave} tabs={tabs}
@@ -39,7 +39,7 @@ const DRGroupWindow = ({
           getApproverGridData={getApproverGridData}
           addApprover={addApprover}
           delApprover={delApprover}
-          popupApprover={popupApprover}
+          editApprover={editApprover}
           maxAccess={maxAccess}
           _labels={_labels}
         />

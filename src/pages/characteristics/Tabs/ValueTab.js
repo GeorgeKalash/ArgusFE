@@ -6,18 +6,13 @@ import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
-const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {
+const ValueTab = ({ valueGridData, getValueGridData, addValue, delValue, editValue, maxAccess, _labels }) => {
 
 
   const columns = [
     {
-      field: 'codeRef',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'codeName',
-      headerName: _labels.name,
+      field: 'value',
+      headerName: _labels.value,
       flex: 1
     }
   ]
@@ -31,14 +26,14 @@ const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delAp
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addApprover} maxAccess={maxAccess} />
+        <GridToolbar onAdd={addValue} maxAccess={maxAccess} />
         <Table
           columns={columns}
-          gridData={approverGridData}
-          rowId={['codeId']}
-          api={getApproverGridData}
-          onEdit={editApprover}
-          onDelete={delApprover}
+          gridData={valueGridData}
+          rowId={['recordId']}
+          api={getValueGridData}
+          onEdit={editValue}
+          onDelete={delValue}
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
@@ -49,4 +44,4 @@ const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delAp
   )
 }
 
-export default ApproverTab
+export default ValueTab

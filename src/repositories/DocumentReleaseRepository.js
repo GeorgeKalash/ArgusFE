@@ -28,6 +28,20 @@ export const DocumentReleaseRepository = {
     get: service + 'getGCO',
     set: service + 'setGCO',
     del: service + 'delGCO'
+  },
+  CharacteristicsGeneral: {
+    qry: service + 'qryCHA',
+    get: service + 'getCHA',
+    set: service + 'setCHA',
+    del: service + 'delCHA'
+  },
+  CharacteristicsValues:
+  {
+    qry: service + 'qryCHV',
+    get: service + 'getCHV',
+    set: service + 'setCHV',
+    del: service + 'delCHV'
   }
+
 
 }
