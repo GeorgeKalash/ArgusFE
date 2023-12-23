@@ -21,7 +21,7 @@ export async function getServerSideProps(context) {
   var pageTitle
   switch (resourceId) {
     case '41403':
-      pageTitle = 'test report'
+      pageTitle = 'items list'
       break
 
     default:
