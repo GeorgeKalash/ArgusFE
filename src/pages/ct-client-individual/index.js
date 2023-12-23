@@ -94,6 +94,7 @@ const Defaults = () => {
     issusDate: labels && labels.find((item) => item.key === 8).value,
     country: labels && labels.find((item) => item.key === 9).value,
     city: labels && labels.find((item) => item.key === 10).value,
+    cityDistrict: labels && labels.find((item) => item.key === 55).value,
     first: labels && labels.find((item) => item.key === 11).value,
     last: labels && labels.find((item) => item.key === 12).value,
     middle: labels && labels.find((item) => item.key === 13).value,
@@ -127,16 +128,20 @@ const Defaults = () => {
     name: labels && labels.find((item) => item.key === 31).value,
     whatsapp: labels && labels.find((item) => item.key === 20).value,
     sponsor: labels && labels.find((item) => item.key === 21).value,
-    address: "Address Details",
-    workAddress: "Work Address Details",
-    street1: 'street1',
-    street2: 'street2',
-    email: 'email1',
-    email2: 'email2',
-    phone: 'phone1',
-    phone2: 'phone2',
-    phone3: 'phone3',
-    postalCode: 'postalCode'
+    address: labels && labels.find((item) => item.key === 43).value,
+    customerInformation: labels && labels.find((item) => item.key === 44).value,
+    workAddress:labels && labels.find((item) => item.key === 45).value,
+    street1:labels && labels.find((item) => item.key === 56).value,
+    street2: labels && labels.find((item) => item.key === 57).value,
+    email: labels && labels.find((item) => item.key === 48).value,
+    email2: labels && labels.find((item) => item.key === 49).value,
+    phone: labels && labels.find((item) => item.key === 46).value,
+    phone2: labels && labels.find((item) => item.key === 47).value,
+    phone3: labels && labels.find((item) => item.key === 50).value,
+    postalCode: labels && labels.find((item) => item.key === 54).value,
+    bldgNo :  labels && labels.find((item) => item.key === 51).value,
+    unitNo:  labels && labels.find((item) => item.key === 52).value,
+    subNo :  labels && labels.find((item) => item.key === 53).value,
   };
 
   const clientIndividualFormValidation = useFormik({
@@ -168,6 +173,7 @@ const Defaults = () => {
       professionId: null,
       cellPhone: null,
       status: null,
+      idtId: null,
       oldReference: null,
       salaryRange: null,
       salaryRangeId: null,
@@ -204,13 +210,18 @@ const Defaults = () => {
       phone2: null,
       phone3: null,
       addressId: null,
-      postalCode:null
+      postalCode:null,
+      cityDistrictId: null,
+      bldgNo: null,
+      unitNo: null,
+      subNo: null
 
     },
     validationSchema: yup.object({
       reference: yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
+      idtId: yup.string().required("This field is required"),
 
       expiryDate: yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
@@ -222,7 +233,6 @@ const Defaults = () => {
       cellPhone: yup.string().required("This field is required"),
       status: yup.string().required("This field is required"),
       salaryRangeId: yup.string().required("This field is required"),
-      smsLanguage: yup.string().required("This field is required"),
       smsLanguage: yup.string().required("This field is required"),
       incomeSourceId: yup.string().required("This field is required"),
 
@@ -263,7 +273,11 @@ const Defaults = () => {
       phone2: null,
       phone3: null,
       addressId: null,
-      postalCode:null
+      postalCode:null,
+      cityDistrictId: null,
+      bldgNo: null,
+      unitNo: null,
+      subNo: null
     },
     validationSchema: yup.object({
       // name:  yup.string().required('This field is required'),
@@ -315,7 +329,7 @@ const Defaults = () => {
       idExpiryDate: obj.expiryDate,
       issusDate: obj.issusDate,
       idNo : "1",
-      idtId: 5
+      idtId: obj.idtId   //5
     };
 
 
@@ -367,12 +381,55 @@ const Defaults = () => {
     };
 
 
+     const obj5 = {
+      name: obj.name,
+      countryId: obj.countryId,
+      stateId: obj.stateId,
+      cityId: obj.cityId,
+      cityName: obj.cityName,
+      street1: obj.street1,
+      street2: obj.street2,
+      email1: obj.email1,
+      email2: obj.email2,
+      phone: obj.phone,
+      phone2: obj.phone2,
+      phone3: obj.phone3,
+      addressId: obj.addressId,
+      postalCode:obj.postalCode,
+      cityDistrictId: obj.cityDistrictId,
+      bldgNo: obj.bldgNo,
+      unitNo: obj.unitNo,
+      subNo: obj.subNo
+     }
+
+     const obj6 = {
+      name: WorkAddressValidation.values.name,
+      countryId: WorkAddressValidation.values.countryId,
+      stateId: WorkAddressValidation.values.stateId,
+      cityId: WorkAddressValidation.values.cityId,
+      cityName: WorkAddressValidation.values.cityName,
+      street1: WorkAddressValidation.values.street1,
+      street2: WorkAddressValidation.values.street2,
+      email1: WorkAddressValidation.values.email1,
+      email2: WorkAddressValidation.values.email2,
+      phone: WorkAddressValidation.values.phone,
+      phone2: WorkAddressValidation.values.phone2,
+      phone3: WorkAddressValidation.values.phone3,
+      addressId: WorkAddressValidation.values.addressId,
+      postalCode:WorkAddressValidation.values.postalCode,
+      cityDistrictId: WorkAddressValidation.values.cityDistrictId,
+      bldgNo: WorkAddressValidation.values.bldgNo,
+      unitNo: WorkAddressValidation.values.unitNo,
+      subNo: WorkAddressValidation.values.subNo
+     }
 
     const data = {
       clientMaster: obj1, //CTCL
       clientID: obj2, //CTID
       ClientIndividual: obj3, //CTCLI
       clientRemittance: obj4,
+      address: obj5,
+      workAddress: obj6
 
     };
 
@@ -632,30 +689,48 @@ const Defaults = () => {
               <FieldSet title={_labels.id}>
               <Grid item xs={12}>
                   <CustomComboBox
-                    name="type"
+                    name="idtId"
                     label={_labels.type}
                     valueField="recordId"
                     displayField="name"
-                    store={types}
-                    value={clientIndividualFormValidation.values?.type}
+                    store={idTypeStore}
+                    value={
+                      countryStore.filter(
+                        (item) =>
+                          item.recordId ===
+                          clientIndividualFormValidation.values.idtId,
+                      )[0]
+                    }
                     required
                     onChange={(event, newValue) => {
+                      if(newValue){
                       clientIndividualFormValidation.setFieldValue(
-                        "typeId",
+                        "idtId",
                         newValue?.recordId,
                       );
                       clientIndividualFormValidation.setFieldValue(
                         "typeName",
                         newValue?.name,
-                      );
+                      );}else{
+
+                        clientIndividualFormValidation.setFieldValue(
+                          "idtId",
+                          '',
+                        );
+                        clientIndividualFormValidation.setFieldValue(
+                          "typeName",
+                          '',
+                        );
+
+                      }
                     }}
                     error={
-                      clientIndividualFormValidation.touched.typeId &&
-                      Boolean(clientIndividualFormValidation.errors.typeId)
+                      clientIndividualFormValidation.touched.idtId &&
+                      Boolean(clientIndividualFormValidation.errors.idtId)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.typeId &&
-                      clientIndividualFormValidation.errors.typeId
+                      clientIndividualFormValidation.touched.idtId &&
+                      clientIndividualFormValidation.errors.idtId
                     }
                   />
                 </Grid>
@@ -746,6 +821,7 @@ const Defaults = () => {
                     }
                     required
                     onChange={(event, newValue) => {
+                      if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "countryId",
                         newValue?.recordId,
@@ -753,7 +829,17 @@ const Defaults = () => {
                       clientIndividualFormValidation.setFieldValue(
                         "countryName",
                         newValue?.name,
-                      );
+                      );}else{
+                        clientIndividualFormValidation.setFieldValue(
+                          "countryId",
+                          '',
+                        );
+                        clientIndividualFormValidation.setFieldValue(
+                          "countryName",
+                          '',
+                        );
+
+                      }
                     }}
                     error={
                       clientIndividualFormValidation.touched.countryId &&
@@ -811,7 +897,7 @@ const Defaults = () => {
                   />
                 </Grid>
               </FieldSet>
-              <Grid container xs={12} sx={{ paddingTop: "10px" }} spacing={2}>
+              <Grid item xs={12} >
                 {/* <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityStore} row={1} orderedFields={['cityId' , 'street1' , 'street2', 'email2', 'phone', 'empty ' , 'phone2', 'empty'  ,'phone3']}/> */}
                 <FieldSet title={_labels.address}>
                <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityStore} lookupCity={lookupCity} stateStore={stateStore}  fillStateStore={fillStateStore}/>
@@ -863,6 +949,8 @@ const Defaults = () => {
                     }
                     required
                     onChange={(event, newValue) => {
+
+                      if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "salaryRangeId",
                         newValue?.recordId,
@@ -871,6 +959,17 @@ const Defaults = () => {
                         "salaryRange",
                         newValue?.name,
                       );
+                    }else{
+                      clientIndividualFormValidation.setFieldValue(
+                        "salaryRangeId",
+                        '',
+                      );
+                      clientIndividualFormValidation.setFieldValue(
+                        "salaryRange",
+                        '',
+                      );
+
+                    }
                     }}
                     error={
                       clientIndividualFormValidation.touched.salaryRangeId &&
@@ -902,6 +1001,8 @@ const Defaults = () => {
                     }
                     required
                     onChange={(event, newValue) => {
+
+                      if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "riskLevelId",
                         newValue?.recordId,
@@ -909,7 +1010,18 @@ const Defaults = () => {
                       clientIndividualFormValidation.setFieldValue(
                         "riskLevel",
                         newValue?.name,
-                      );
+                      );}else{
+
+                        clientIndividualFormValidation.setFieldValue(
+                          "riskLevelId",
+                          null,
+                        );
+                        clientIndividualFormValidation.setFieldValue(
+                          "riskLevel",
+                          null,
+                        );
+
+                      }
                     }}
                     error={
                       clientIndividualFormValidation.touched.riskLevelId &&
@@ -937,6 +1049,8 @@ const Defaults = () => {
                     }
                     required
                     onChange={(event, newValue) => {
+
+                      if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "smsLanguage",
                         newValue?.key,
@@ -945,6 +1059,17 @@ const Defaults = () => {
                         "smsLanguageName",
                         newValue?.value,
                       );
+                    }else{
+
+                        clientIndividualFormValidation.setFieldValue(
+                          "smsLanguage",
+                          '',
+                        );
+                        clientIndividualFormValidation.setFieldValue(
+                          "smsLanguageName",
+                          '',
+                        );
+                      }
                     }}
                     error={
                       clientIndividualFormValidation.touched.smsLanguage &&
@@ -971,6 +1096,17 @@ const Defaults = () => {
                     store={civilStatusStore}
                     value={clientIndividualFormValidation.values?.civilStatus}
                     onChange={(event, newValue) => {
+
+                      if(newValue){
+                        clientIndividualFormValidation.setFieldValue(
+                          "civilStatus",
+                          newValue?.key,
+                        );
+                        clientIndividualFormValidation.setFieldValue(
+                          "civilStatusName",
+                          newValue?.value,
+                        );
+                      }else{
                       clientIndividualFormValidation.setFieldValue(
                         "civilStatus",
                         newValue?.key,
@@ -979,6 +1115,8 @@ const Defaults = () => {
                         "civilStatusName",
                         newValue?.value,
                       );
+
+                      }
                     }}
                     error={
                       clientIndividualFormValidation.touched.civilStatus &&
@@ -1075,14 +1213,26 @@ const Defaults = () => {
                     store={countryStore}
                     value={clientIndividualFormValidation.values?.titleId}
                     onChange={(event, newValue) => {
+
+                      if(newValue){
                       clientIndividualFormValidation.setFieldValue(
-                        "titleId",
-                        newValue?.recordId,
+                        "civilStatus",
+                        newValue?.key,
                       );
                       clientIndividualFormValidation.setFieldValue(
-                        "title",
-                        newValue?.name,
+                        "civilStatusName",
+                        newValue?.value,
                       );
+                      }else{
+                        clientIndividualFormValidation.setFieldValue(
+                          "civilStatus",
+                          null,
+                        );
+                        clientIndividualFormValidation.setFieldValue(
+                          "civilStatusName",
+                          null,
+                        );
+                      }
                     }}
                     error={
                       clientIndividualFormValidation.touched.titleId &&
@@ -1233,7 +1383,7 @@ const Defaults = () => {
         <Grid item xs={6}>
           <Grid container xs={12} spacing={2}>
             <Grid item xs={12}>
-              <FieldSet title={_labels.name}>
+              <FieldSet title={_labels.customerInformation}>
                 <Grid item xs={3}>
                   <CustomTextField
                     name="firstName"
@@ -1445,6 +1595,8 @@ const Defaults = () => {
                   }
                   required
                   onChange={(event, newValue) => {
+
+                    if(newValue){
                     clientIndividualFormValidation.setFieldValue(
                       "nationalityId",
                       newValue?.recordId,
@@ -1452,7 +1604,19 @@ const Defaults = () => {
                     clientIndividualFormValidation.setFieldValue(
                       "nationalityName",
                       newValue?.name,
-                    );
+                    );}else{
+
+                      clientIndividualFormValidation.setFieldValue(
+                        "nationalityId",
+                        ''
+                      );
+                      clientIndividualFormValidation.setFieldValue(
+                        "nationalityName",
+                        '',
+                      );
+
+
+                    }
                   }}
                   error={
                     clientIndividualFormValidation.touched.nationalityId &&
@@ -1499,6 +1663,8 @@ const Defaults = () => {
                           clientIndividualFormValidation.values.gender,
                       )[0]
                     }                    onChange={(event, newValue) => {
+
+                      if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "genderId",
                         newValue?.key,
@@ -1507,6 +1673,17 @@ const Defaults = () => {
                         "gender",
                         newValue?.value,
                       );
+                    }else{
+
+                      clientIndividualFormValidation.setFieldValue(
+                        "genderId",
+                        '',
+                      );
+                      clientIndividualFormValidation.setFieldValue(
+                        "gender",
+                        '',
+                      );
+                    }
                     }}
                     error={
                       clientIndividualFormValidation.touched.genderId &&
@@ -1538,6 +1715,8 @@ const Defaults = () => {
                       )[0]
                     }
                     onChange={(event, newValue) => {
+
+                      if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "educationLevel",
                         newValue?.key,
@@ -1546,6 +1725,17 @@ const Defaults = () => {
                         "educationLevelName",
                         newValue?.Value,
                       );
+                    }else{
+                      clientIndividualFormValidation.setFieldValue(
+                        "educationLevel",
+                        null,
+                      );
+                      clientIndividualFormValidation.setFieldValue(
+                        "educationLevelName",
+                        null,
+                      );
+
+                      }
                     }}
                     error={
                       clientIndividualFormValidation.touched.educationLevel &&
@@ -1702,7 +1892,7 @@ const Defaults = () => {
                   }
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{marginTop: '15px'}}>
                 <CustomComboBox
                   name="professionId"
                   label={_labels.profession}
