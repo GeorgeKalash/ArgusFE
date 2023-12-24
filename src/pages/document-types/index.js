@@ -508,8 +508,10 @@ const DocumentTypes = () => {
                     documentTypesValidation.setFieldValue('activeStatusName', newValue?.value)
                   }}
                   error={
-                    documentTypesValidation.touched.activeStatusName &&
-                    Boolean(documentTypesValidation.errors.activeStatusName)
+                    (documentTypesValidation.touched.activeStatusName &&
+                      Boolean(documentTypesValidation.errors.activeStatusName)) ||
+                    (!documentTypesValidation.touched.activeStatusName &&
+                      documentTypesValidation.errors.activeStatusName)
                   }
                   helperText={
                     documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName
