@@ -272,7 +272,7 @@ const DocumentTypes = () => {
     setWindowOpen(true)
   }
 
-  useEffect(() => {
+  const initialLoad = () => {
     if (!access) getAccess(ResourceIds.DocumentTypes, setAccess)
     else {
       if (access.record.maxAccess > 0) {
@@ -284,6 +284,10 @@ const DocumentTypes = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
+  }
+
+  useEffect(() => {
+    initialLoad()
   }, [access])
 
   const gridValidation = useFormik({
@@ -394,7 +398,7 @@ const DocumentTypes = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addDocumentType} maxAccess={access} />
+        <GridToolbar onAdd={addDocumentType} maxAccess={access} initialLoad={initialLoad} />
         <Table
           columns={columns}
           gridData={gridData}

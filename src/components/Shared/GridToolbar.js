@@ -1,10 +1,11 @@
 // ** MUI Imports
 import { Box, Button, Grid, Typography } from '@mui/material'
+import Icon from 'src/@core/components/icon'
 
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
 
-const GridToolbar = ({ onAdd, openRPB, disableRPB = false, onGo, paramsArray, children, ...props }) => {
+const GridToolbar = ({ initialLoad, onAdd, openRPB, disableRPB = false, onGo, paramsArray, children, ...props }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.NOACCESS
 
@@ -18,6 +19,13 @@ const GridToolbar = ({ onAdd, openRPB, disableRPB = false, onGo, paramsArray, ch
     <Box display={'flex'} sx={{ justifyContent: 'space-between' }}>
       {children && children}
       <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
+        {initialLoad && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+            <Button onClick={initialLoad} variant='contained'>
+              <Icon icon='mdi:reload' />
+            </Button>
+          </Box>
+        )}
         {onAdd && addBtnVisible && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
             <Button onClick={onAdd} variant='contained'>
