@@ -510,7 +510,8 @@ const DocumentTypes = () => {
                   error={
                     (documentTypesValidation.touched.activeStatusName &&
                       Boolean(documentTypesValidation.errors.activeStatusName)) ||
-                    (!documentTypesValidation.touched.activeStatusName &&
+                    (editMode &&
+                      !documentTypesValidation.touched.activeStatusName &&
                       documentTypesValidation.errors.activeStatusName)
                   }
                   helperText={
