@@ -10,6 +10,9 @@ import { IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 
+// ** Third Party Import
+import { useTranslation } from 'react-i18next'
+
 const TabsContext = createContext()
 
 function CustomTabPanel(props) {
@@ -40,6 +43,7 @@ CustomTabPanel.propTypes = {
 const TabsProvider = ({ children, pageTitle }) => {
   // ** Hooks
   const router = useRouter()
+  const { t } = useTranslation('screens')
 
   const getLabel = () => {
     const parts = router.route.split('/')
@@ -89,7 +93,7 @@ const TabsProvider = ({ children, pageTitle }) => {
       else {
         const newValueState = activeTabs.length
         setActiveTabs(prevState => {
-          return [...prevState, { page: children, route: router.route, label: getLabel() }]
+          return [...prevState, { page: children, route: router.route, label: pageTitle ? pageTitle : getLabel() }]
         })
         setValue(newValueState)
       }
@@ -107,7 +111,7 @@ const TabsProvider = ({ children, pageTitle }) => {
                   !activeTab.isDefault && (
                     <Tab
                       key={i}
-                      label={activeTab?.label?.replace(/-/g, ' ')}
+                      label={t(activeTab?.label?.replace(/-/g, ' '))}
                       onClick={() => router?.push(activeTab.route)}
                       icon={
                         <IconButton

@@ -572,3 +572,5 @@ const DocumentTypes = () => {
 }
 
 export default DocumentTypes
+
+DocumentTypes.pageTitle = 'document types'
