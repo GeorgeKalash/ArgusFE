@@ -98,5 +98,33 @@ export const RemittanceSettingsRepository = {
   RtDefault: {
     qry: service + 'qryDE',
     set2: service + 'set2DE'
+  },
+  Profession: {
+    qry: service + 'qryPFN',
+    page: service + 'pagePFN',
+    get: service + 'getPFN',
+    set: service + 'setPFN',
+    del: service + 'delPFN'
+  },
+  ClientIndividual :{
+    qry: service + 'qryCLI'
+
+  },
+  SalaryRange :{
+    qry: service + 'qrySRA',
+    page: service + 'pageSRA',
+    get: service + 'getSRA',
+    set: service + 'setSRA',
+    del: service + 'delSRA'
+
+  },
+  SourceOfIncome: {
+    qry: service + 'qrySI',
+    page: service + 'pageSI',
+    get: service + 'getSI',
+    set: service + 'setSI',
+    del: service + 'delSI'
   }
+
+
 }

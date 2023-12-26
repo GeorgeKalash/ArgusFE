@@ -15,11 +15,11 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { getNewSourceOfIncome, populateSourceOfIncome } from 'src/Models/CurrencyTradingSettings/SourceOfIncome'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 // ** Windows
 import SourceOfIncomeWindow from './Windows/SourceOfIncomeWindow'
@@ -115,7 +115,7 @@ const SourceOfIncome = () => {
     var parameters = defaultParams
 
     getRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.page,
+      extension: RemittanceSettingsRepository.SourceOfIncome.page,
       parameters: parameters
     })
       .then(res => {
@@ -129,7 +129,7 @@ const SourceOfIncome = () => {
   const postSourceOfIncome = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.set,
+      extension: RemittanceSettingsRepository.SourceOfIncome.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -145,7 +145,7 @@ const SourceOfIncome = () => {
 
   const delSourceOfIncome = obj => {
     postRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.del,
+      extension: RemittanceSettingsRepository.SourceOfIncome.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -170,7 +170,7 @@ const SourceOfIncome = () => {
     const defaultParams = `_recordId=${_recordId}`
     var parameters = defaultParams
     getRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.get,
+      extension: RemittanceSettingsRepository.SourceOfIncome.get,
       parameters: parameters
     })
       .then(res => {
