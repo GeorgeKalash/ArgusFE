@@ -55,7 +55,7 @@ const BPMasterData = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-
+  const [defaultValue, setdefaultValue] = useState(null)
   const [relationWindowOpen, setRelationWindowOpen] = useState(false)
 
   const _labels = {
@@ -127,7 +127,7 @@ const BPMasterData = () => {
   const tabs = [{ label: _labels.general }, { label: _labels.idNumber, disabled: !editMode }, { label: _labels.relation, disabled: !editMode }]
 
   const bpMasterDataValidation = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       category: yup.string().required('This field is required'),
@@ -211,6 +211,7 @@ const BPMasterData = () => {
     filllegalStatusStore()
     resetIdNumber()
     setRelationGridData([])
+    setdefaultValue(null)
   }
 
   const editBPMasterData = obj => {
@@ -223,7 +224,6 @@ const BPMasterData = () => {
     })
       .then(res => {
         bpMasterDataValidation.setValues(populateBPMasterData(res.record))
-        console.log(populateBPMasterData(res.record))
         fillGroupStore()
         fillIdCategoryStore(res.record.category)
         fillCategoryStore()
@@ -233,6 +233,8 @@ const BPMasterData = () => {
         fillIdNumberStore(obj)
         getRelationGridData(obj.recordId)
         fillRelationComboStore()
+        setdefaultValue(null)
+        if (obj.defaultInc != null){getDefault(obj)}
         setEditMode(true)
         setWindowOpen(true)
         setActiveTab(0)
@@ -337,6 +339,25 @@ const BPMasterData = () => {
       })
   }
 
+  const getDefault = obj => {
+    const bpId = obj.recordId
+    const incId = obj.defaultInc
+    var parameters =`_bpId=${bpId}&_incId=${incId}`
+
+    getRequest({
+      extension: BusinessPartnerRepository.MasterIDNum.get,
+      parameters: parameters
+    })
+    .then(res => {
+      if (res.record && res.record.idNum != null) {
+        setdefaultValue(res.record.idNum)
+      }
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   // IDNumber TAB
   const idNumberGridColumn = [
     {
@@ -413,7 +434,6 @@ const BPMasterData = () => {
 
   const fillIdNumberStore = async obj => {
     try {
-      console.log(obj.recordId)
       const _recordId = obj.recordId
       const defaultParams = `_bpId=${_recordId}`
       var parameters = defaultParams
@@ -447,17 +467,17 @@ const BPMasterData = () => {
     }
   }
 
+
   //Relation Tab
   const relationValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       toBPId: yup.string().required('This field is required'),
-      toBPName: yup.string().required('This field is required'),
-      relationId: yup.string().required('This field is required'),
-      relationName: yup.string().required('This field is required')
+      relationId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
+      console.log('relation values '+ JSON.stringify(values))
       postRelation(values)
     }
   })
@@ -489,8 +509,10 @@ const BPMasterData = () => {
   }
 
   const postRelation = obj => {
+    console.log('enter')
     const recordId = obj.recordId
     const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
+    obj.fromBPId=bpId
     postRequest({
       extension: BusinessPartnerRepository.Relation.set,
       record: JSON.stringify(obj)
@@ -518,6 +540,7 @@ const BPMasterData = () => {
       parameters: parameters
     })
       .then(res => {
+        console.log('get '+JSON.stringify())
         relationValidation.setValues(populateRelation(res.record))
         setRelationWindowOpen(true)
       })
@@ -531,13 +554,14 @@ const BPMasterData = () => {
   }
 
   const delRelation = obj => {
+    const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
     postRequest({
       extension: BusinessPartnerRepository.Relation.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
         toast.success('Record Deleted Successfully')
-        getRelationGridData(obj.recordId)
+        getRelationGridData(bpId)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -629,6 +653,7 @@ const BPMasterData = () => {
           groupStore={groupStore}
           countryStore={countryStore}
           legalStatusStore={legalStatusStore}
+          defaultValue={defaultValue}
 
           //ID Number Tab
           idNumberGridColumn={idNumberGridColumn}

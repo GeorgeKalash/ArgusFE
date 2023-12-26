@@ -41,22 +41,19 @@ const BPRelationWindow = ({
               valueField='reference'
               displayField='name'
               store={businessPartnerStore}
-              
-              //firstValue={relationValidation.values.corRef}
-              //secondValue={relationValidation.values.corName}
+              firstValue={relationValidation.values.toBPRef}
+              secondValue={relationValidation.values.toBPName}
               setStore={setBusinessPartnerStore}
               onLookup={lookupBusinessPartner}
               onChange={(event, newValue) => {
                 if (newValue) {
                   relationValidation.setFieldValue('toBPId', newValue?.recordId)
-
-                  //relationValidation.setFieldValue('corRef', newValue?.reference)
-                  //relationValidation.setFieldValue('corName', newValue?.name)
+                  relationValidation.setFieldValue('toBPRef', newValue?.reference)
+                  relationValidation.setFieldValue('toBPName', newValue?.name)
                 } else {
                   relationValidation.setFieldValue('toBPId', null)
-
-                  //relationValidation.setFieldValue('corRef', null)
-                  //relationValidation.setFieldValue('corName', null)
+                  relationValidation.setFieldValue('toBPRef', null)
+                  relationValidation.setFieldValue('toBPName', null)
                 }
               }}
               error={

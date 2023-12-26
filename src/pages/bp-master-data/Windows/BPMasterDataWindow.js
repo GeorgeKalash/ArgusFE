@@ -29,6 +29,7 @@ const BPMasterDataWindow = ({
   getRelationGridData,
   addRelation,
   delRelation,
+  defaultValue,
   popupRelation
 }) => {
   return (
@@ -63,6 +64,7 @@ const BPMasterDataWindow = ({
           idCategoryStore={idCategoryStore}
           fillIdCategoryStore={fillIdCategoryStore}
           editMode={editMode}
+          defaultValue={defaultValue}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
