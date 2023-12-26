@@ -11,7 +11,7 @@ const CustomLookup = ({
   label,
   firstValue,
   secondValue,
-  secondDisplayField= false,
+  secondDisplayField= true,
   store = [],
   setStore,
   valueField = 'key',

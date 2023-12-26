@@ -89,7 +89,8 @@ const DRGroups = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) drGroupValidation.handleSubmit()
-    else if (activeTab === 1) approverValidation.handleSubmit()
+    
+    //else if (activeTab === 1) approverValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {

@@ -80,7 +80,8 @@ const Agent = () => {
       countryId: activeTab === 1 && yup.string().required('This field is required'),
       stateId: activeTab === 1 && yup.string().required('This field is required'),
       street1: activeTab === 1 && yup.string().required('This field is required'),
-      phone: activeTab === 1 && yup.string().required('This field is required')
+      phone: activeTab === 1 && yup.string().required('This field is required'),
+      cityId: activeTab === 1 && yup.string().required('This field is required')
     }),
     onSubmit: values => {
       console.log('{ values }' + activeTab)
@@ -120,12 +121,20 @@ const Agent = () => {
     phone:
       addressLabels && addressLabels.find(item => item.key === 10) && addressLabels.find(item => item.key === 10).value,
     phone2:
-      addressLabels && addressLabels.find(item => item.key === 12) && addressLabels.find(item => item.key === 11).value,
+      addressLabels && addressLabels.find(item => item.key === 11) && addressLabels.find(item => item.key === 11).value,
     phone3:
       addressLabels && addressLabels.find(item => item.key === 12) && addressLabels.find(item => item.key === 12).value,
     address:
       addressLabels && addressLabels.find(item => item.key === 13) && addressLabels.find(item => item.key === 13).value,
 
+    cityDistrict:
+      addressLabels && addressLabels.find(item => item.key === 14) && addressLabels.find(item => item.key === 14).value,
+    bldgNo:
+      addressLabels && addressLabels.find(item => item.key === 15) && addressLabels.find(item => item.key === 15).value,
+    unitNo:
+      addressLabels && addressLabels.find(item => item.key === 16) && addressLabels.find(item => item.key === 16).value,
+    subNo:
+      addressLabels && addressLabels.find(item => item.key === 17) && addressLabels.find(item => item.key === 17).value
   }
 
   const columns = [
@@ -156,6 +165,8 @@ const Agent = () => {
     setActiveTab(0)
     var parameters = `_filter=` + '&_recordId=' + obj.addressId
     var object = obj
+    console.log('here')
+    console.log(obj)
     setRecord(0)
     if (obj.addressId) {
       getRequest({
@@ -164,6 +175,7 @@ const Agent = () => {
       })
         .then(res => {
           var result = res.record
+          console.log(result)
 
           object.name = result.name
           object.street1 = result.street1
@@ -178,12 +190,19 @@ const Agent = () => {
           object.phone = result.phone
           object.phone1 = result.phone1
           object.phone2 = result.phone2
+          object.postalCode = result.postalCode
+          object.cityDistrictId = result.cityDistrictId
+          object.cityDistrictName = result.cityDistrict
+          object.bldgNo = result.bldgNo
+          object.unitNo = result.unitNo
+          object.subNo = result.subNo
 
-          // object.postalCode = result.postalCode
           fillStateStore(object.countryId)
           console.log(object)
           agentBranchValidation.setValues(populateAgentBranch(object))
-          agentBranchValidation.values.countryId && lookupCity(object.cityName)
+
+          //agentBranchValidation.values.countryId && lookupCity(object.cityName)
+          //agentBranchValidation.values.cityId && lookupCityDistrict(object.cityDistrictName)
 
           // setActiveTab(0)
           // setWindowOpen(true)
@@ -194,8 +213,6 @@ const Agent = () => {
       setActiveTab(0)
       setWindowOpen(true)
     }
-
-    // agentBranchValidation.setValues(populateAgentBranch(obj))
   }
   useEffect(() => {
     // setActiveTab(0)
@@ -260,7 +277,7 @@ const Agent = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        // getGridData({})
+        getGridData({})
         setRecord(res.recordId)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Editted Successfully')
@@ -270,18 +287,28 @@ const Agent = () => {
       })
   }
 
+  //ADDRESS TAB
+
   const postAgentBranch = obj => {
     console.log(obj)
     const object = obj
+    const Id = object.recordId
     obj.recordId = obj.addressId > 0 ? obj.addressId : obj.recordId
+    console.log('object')
+    console.log(object)
+    console.log(Id)
 
     postRequest({
       extension: SystemRepository.Address.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        obj.addressId = res.addressId > 0 ? res.addressId : res.recordId
-        object.recordId = record > 0 ? record : object.recordId
+        //obj.addressId = res.addressId > 0 ? res.addressId : res.recordId
+
+        //console.log(record)
+        //object.recordId = record > 0 ? record : object.recordId
+        object.recordId = Id
+        console.log(object.recordId)
         postRequest({
           extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
           record: JSON.stringify(object)
@@ -303,17 +330,20 @@ const Agent = () => {
   }
 
   const fillStateStore = countryId => {
+    setStateStore([])
     var parameters = `_countryId=${countryId}`
-    getRequest({
-      extension: SystemRepository.State.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setStateStore(res.list)
+    if (countryId) {
+      getRequest({
+        extension: SystemRepository.State.qry,
+        parameters: parameters
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+        .then(res => {
+          setStateStore(res.list)
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
+    }
   }
 
   const lookupCity = searchQry => {
