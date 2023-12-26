@@ -40,7 +40,8 @@ export const ResourceIds = {
   Characteristics : 10102,
   Strategies : 10106,
   Classes : 10101,
-  SmsTemplates : 20130
+  SmsTemplates : 20130,
+  SmsFunctionTemplates : 20131
 
 
 }

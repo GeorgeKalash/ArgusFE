@@ -79,8 +79,8 @@ const SmsTemplate = () => {
     smsTemplatesValidation.handleSubmit()
   }
 
-  const getGridData = () => {
-    const defaultParams = `filter=`
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     var parameters = defaultParams
 
     getRequest({
@@ -155,7 +155,7 @@ const SmsTemplate = () => {
     if (!access) getAccess(ResourceIds.SmsTemplates, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getGridData()
+        getGridData({ _startAt: 0, _pageSize: 50 })
         getLabels(ResourceIds.SmsTemplates, setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })

@@ -98,5 +98,14 @@ export const SystemRepository = {
     set: service + 'setSMT',
     del: service + 'delSMT',
     page: service + 'pageSMT'
+  },
+  SystemFunction:{
+    qry: service + 'qryFUN',
+    get: service + 'getFUN',
+    set: service + 'setFUN',
+    set2: service + 'set2FUN'
+  },
+  SMSFunctionTemplate:{
+    qry: service + 'qrySFT'
   }
 }
