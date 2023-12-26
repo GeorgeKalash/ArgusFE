@@ -35,6 +35,8 @@ import { KVSRepository } from "src/repositories/KVSRepository";
 import { RTCLRepository } from "src/repositories/RTCLRepository";
 import AddressTab from "src/components/Shared/AddressTab";
 import { CTIDRepository } from "src/repositories/CTIDRepository";
+import { RemittanceSettingsRepository } from "src/repositories/RemittanceRepository";
+import { CurrencyTradingClientRepository } from "src/repositories/CurrencyTradingClientRepository";
 
 const Defaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext);
@@ -76,6 +78,7 @@ const Defaults = () => {
         fillCivilStatusStore();
         fillEducationStore();
         fillIdTypeStore()
+
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" });
       }
@@ -146,11 +149,14 @@ const Defaults = () => {
 
   const clientIndividualFormValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: true,
-    initialValues: {
+    validateOnChange: true, // Trigger validation on change
+    validateOnBlur: true,     initialValues: {
       reference: null,
       isResident: false,
       number: null,
+      numberEncrypt: null,
+      numberVerified: null,
+      numberVerifiedEncrypt: null,
       type: null,
       expiryDate: null,
       issusDate: null,
@@ -172,6 +178,8 @@ const Defaults = () => {
       profession: null,
       professionId: null,
       cellPhone: null,
+      cellPhoneRepeat: null,
+
       status: null,
       idtId: null,
       oldReference: null,
@@ -222,7 +230,9 @@ const Defaults = () => {
       isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
-
+      number:  yup.string().required("This field is required"),
+      numberRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('number'), null], 'Number must match'),
       expiryDate: yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
       cityId: yup.string().required("This field is required"),
@@ -231,6 +241,8 @@ const Defaults = () => {
       nationalityId: yup.string().required("This field is required"),
       professionId: yup.string().required("This field is required"),
       cellPhone: yup.string().required("This field is required"),
+      cellPhoneRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
       status: yup.string().required("This field is required"),
       salaryRangeId: yup.string().required("This field is required"),
       smsLanguage: yup.string().required("This field is required"),
@@ -527,9 +539,9 @@ const Defaults = () => {
   };
 
   const fillProfessionStore = (cId) => {
-    var parameters = `_filter=_&countryId=` + cId;
+    var parameters = `_filter=_&profession=36116`;
     getRequest({
-      extension: CurrencyTradingSettingsRepository.Profession.qry,
+      extension: RemittanceSettingsRepository.Profession.qry,
       parameters: parameters,
     })
       .then((res) => {
@@ -540,10 +552,10 @@ const Defaults = () => {
       });
   };
 
-  const fillSalaryRangeStore = (cId) => {
-    var parameters = `_filter=`;
+  const fillSalaryRangeStore = () => {
+    var parameters = `_filter=_&salaryRange=36118`;
     getRequest({
-      extension: CurrencyTradingSettingsRepository.SalaryRange.qry,
+      extension: RemittanceSettingsRepository.SalaryRange.qry,
       parameters: parameters,
     })
       .then((res) => {
@@ -555,9 +567,9 @@ const Defaults = () => {
   };
 
   const fillIncomeOfSourceStore = () => {
-    var parameters = `_filter=`; //add 'xml'.json and get _database values from there
+    var parameters = `_filter=_&sourceOfIncome=36117`;
     getRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.qry,
+      extension: RemittanceSettingsRepository.SourceOfIncome.qry,
       parameters: parameters,
     })
       .then((res) => {
@@ -597,7 +609,7 @@ const Defaults = () => {
   };
 
   const fillGenderStore = () => {
-    var parameters = "_database=9"; //add 'xml'.json and get _database values from there
+    var parameters = "_database=1014"; //add 'xml'.json and get _database values from there
     getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: parameters,
@@ -609,6 +621,7 @@ const Defaults = () => {
         setErrorMessage(error);
       });
   };
+
 
   const fillCivilStatusStore = () => {
     var parameters = "_database=1019"; //add 'xml'.json and get _database values from there
@@ -623,6 +636,45 @@ const Defaults = () => {
         setErrorMessage(error);
       });
   };
+
+
+  const encryptFirstFourDigits = (e) => {
+    const input = e.target.value
+    const showLength = Math.max(0, input.length - 4);
+
+    // Check if input has at least four digits
+
+  const maskedValue =
+    '*'.repeat(showLength) + input.substring(showLength);
+     clientIndividualFormValidation.setFieldValue("numberEncrypt", maskedValue)
+
+    //  clientIndividualFormValidation.setFieldValue("numberEncrypt", input)
+
+
+  };
+
+  const handleCopy = (event) => {
+    event.preventDefault();
+  };
+
+
+
+
+  const encryptFirstFourDigitsRepeat = (e) => {
+    const input = e.target.value
+    const showLength = Math.max(0, input.length - 4);
+
+    // Check if input has at least four digits
+
+  const maskedValue =
+    '*'.repeat(showLength) + input.substring(showLength);
+     clientIndividualFormValidation.setFieldValue("numberRepeatEncrypt", maskedValue)
+
+    //  clientIndividualFormValidation.setFieldValue("numberRepeat", input)
+
+
+  };
+
 
   return (
     <>
@@ -738,12 +790,16 @@ const Defaults = () => {
                   <CustomTextField
                     name="number"
                     label={_labels.number}
-                    value={clientIndividualFormValidation.values?.number}
+                    value={clientIndividualFormValidation.values?.numberEncrypt}
                     required
-                    onChange={clientIndividualFormValidation.handleChange}
-                    maxLength="10"
-                    onClear={() =>
+                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptFirstFourDigits(e)  }}
+                    onCopy={handleCopy}
+
+                    // maxLength="10"
+                    onClear={() =>{
                       clientIndividualFormValidation.setFieldValue("number", "")
+                      clientIndividualFormValidation.setFieldValue("numberEncrypt", "")}
+
                     }
                     error={
                       clientIndividualFormValidation.touched.number &&
@@ -755,7 +811,31 @@ const Defaults = () => {
                     }
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name="numberRepeat"
+                    label={_labels.number}
+                    value={clientIndividualFormValidation.values?.numberRepeatEncrypt}
+                    required
+                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptFirstFourDigitsRepeat(e)  }}
+                    onBlur={clientIndividualFormValidation.handleBlur}
 
+                    // maxLength="10"
+                    onClear={() =>{
+                      clientIndividualFormValidation.setFieldValue("numberRepeat", "")
+                      clientIndividualFormValidation.setFieldValue("numberRepeatEncrypt", "")}
+
+                    }
+                    error={
+                      clientIndividualFormValidation.touched.numberRepeat &&
+                      Boolean(clientIndividualFormValidation.errors.numberRepeat)
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.numberRepeat &&
+                      clientIndividualFormValidation.errors.numberRepeat
+                    }
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name="expiryDate"
@@ -1096,7 +1176,7 @@ const Defaults = () => {
                     valueField="key"
                     displayField="value"
                     store={civilStatusStore}
-                    value={clientIndividualFormValidation.values?.civilStatus}
+                    value={clientIndividualFormValidation.values?.civilStatusName}
                     onChange={(event, newValue) => {
 
                       if(newValue){
@@ -1135,23 +1215,25 @@ const Defaults = () => {
 
                 <Grid item xs={12}>
                 <CustomTextField
-                  name="status"
+                  name="statusName"
                   label={_labels.status}
-                  value={clientIndividualFormValidation.values?.status}
+                  value={clientIndividualFormValidation.values?.statusName}
                   required
                   type="number"
                   onChange={clientIndividualFormValidation.handleChange}
                   maxLength="10"
                   onClear={() =>
-                    clientIndividualFormValidation.setFieldValue("status", "")
+                    clientIndividualFormValidation.setFieldValue("statusName", "")
                   }
+                  readonly
+
                   error={
-                    clientIndividualFormValidation.touched.status &&
-                    Boolean(clientIndividualFormValidation.errors.status)
+                    clientIndividualFormValidation.touched.statusName &&
+                    Boolean(clientIndividualFormValidation.errors.statusName)
                   }
                   helperText={
-                    clientIndividualFormValidation.touched.status &&
-                    clientIndividualFormValidation.errors.status
+                    clientIndividualFormValidation.touched.statusName &&
+                    clientIndividualFormValidation.errors.statusName
                   }
                 />
               </Grid>
@@ -1253,6 +1335,7 @@ const Defaults = () => {
                     control={
                       <Checkbox
                         name="mobileVerified"
+                        disabled={true}
 
                         // checked={clientIndividualFormValidation.values?.isInactive}
                         onChange={clientIndividualFormValidation.handleChange}
@@ -1267,6 +1350,7 @@ const Defaults = () => {
                     control={
                       <Checkbox
                         name="OTPVerified"
+                        disabled={true}
                         checked={
                           clientIndividualFormValidation.values?.OTPVerified
                         }
@@ -1275,11 +1359,13 @@ const Defaults = () => {
                     }
                     label={_labels?.otpVerified}
                   />
-                </Grid>
+                </Grid>{}
                 <Grid item xs={12}>
                   <FormControlLabel
                     control={
                       <Checkbox
+                        disabled={clientIndividualFormValidation.values.genderId ===2 ? false : true}
+
                         name="coveredFace"
                         checked={
                           clientIndividualFormValidation.values?.coveredFace
@@ -1384,8 +1470,58 @@ const Defaults = () => {
 
         <Grid item xs={6}>
           <Grid container xs={12} spacing={2}>
+
             <Grid item xs={12} >
               <FieldSet title={_labels.customerInformation}>
+              <Grid item xs={6}>
+                <CustomTextField
+                  name="cellPhone"
+                  label={_labels.cellPhone}
+                  value={clientIndividualFormValidation.values?.cellPhone}
+                  required
+                  onChange={clientIndividualFormValidation.handleChange}
+                  maxLength="10"
+                  onClear={() =>
+                    clientIndividualFormValidation.setFieldValue(
+                      "cellPhone",
+                      "",
+                    )
+                  }
+                  error={
+                    clientIndividualFormValidation.touched.cellPhone &&
+                    Boolean(clientIndividualFormValidation.errors.cellPhone)
+                  }
+                  helperText={
+                    clientIndividualFormValidation.touched.cellPhone &&
+                    clientIndividualFormValidation.errors.cellPhone
+                  }
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <CustomTextField
+                  name="cellPhoneRepeat"
+                  label={_labels.cellPhone}
+                  value={clientIndividualFormValidation.values?.cellPhoneRepeat}
+                  required
+                  onChange={clientIndividualFormValidation.handleChange}
+                  onClear={() =>
+                    clientIndividualFormValidation.setFieldValue(
+                      "cellPhoneRepeat",
+                      "",
+                    )
+                  }
+                  error={
+                    clientIndividualFormValidation.touched.cellPhoneRepeat &&
+                    Boolean(clientIndividualFormValidation.errors.cellPhoneRepeat)
+                  }
+                  onBlur={clientIndividualFormValidation.handleBlur}
+
+                  helperText={
+                    clientIndividualFormValidation.touched.cellPhoneRepeat &&
+                    clientIndividualFormValidation.errors.cellPhoneRepeat
+                  }
+                />
+              </Grid>
                 <Grid item xs={3}>
                   <CustomTextField
                     name="firstName"
@@ -1870,7 +2006,7 @@ const Defaults = () => {
                     }
                   />
                 </Grid>
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                 <CustomTextField
                   name="cellPhone"
                   label={_labels.cellPhone}
@@ -1893,7 +2029,7 @@ const Defaults = () => {
                     clientIndividualFormValidation.errors.cellPhone
                   }
                 />
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} sx={{marginTop: '15px'}}>
                 <CustomComboBox
                   name="professionId"

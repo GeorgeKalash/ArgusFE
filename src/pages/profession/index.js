@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import ProfessionWindow from './Windows/ProfessionWindow'
 import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
@@ -16,6 +15,7 @@ import toast from 'react-hot-toast'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 const Professions = () => {
 
@@ -104,7 +104,7 @@ const Professions = () => {
 
   const delProfession = obj => {
     postRequest({
-      extension: CurrencyTradingSettingsRepository.Profession.del,
+      extension: RemittanceSettingsRepository.Profession.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -133,7 +133,7 @@ const Professions = () => {
     var parameters = defaultParams + '&_dgId=0'
 
     getRequest({
-      extension: CurrencyTradingSettingsRepository.Profession.qry,
+      extension: RemittanceSettingsRepository.Profession.qry,
       parameters: parameters
     })
       .then(res => {
@@ -163,7 +163,7 @@ const Professions = () => {
   const postProfession = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: CurrencyTradingSettingsRepository.Profession.set,
+      extension: RemittanceSettingsRepository.Profession.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
