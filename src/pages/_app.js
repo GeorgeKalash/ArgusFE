@@ -103,7 +103,7 @@ const App = props => {
     (page => (
       <MenuProvider>
         <UserLayout contentHeightFixed={contentHeightFixed}>
-          <TabsProvider>{page}</TabsProvider>
+          <TabsProvider pageTitle={Component.pageTitle ?? pageProps.pageTitle}>{page}</TabsProvider>
         </UserLayout>
       </MenuProvider>
     ))

@@ -1,6 +1,10 @@
+// ** React Imports
+import { useState } from 'react'
+
 // ** MUI Imports
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
+import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 
 // ** 3rd Party Imports
 import Draggable from 'react-draggable'
@@ -29,6 +33,8 @@ const Window = ({
 }) => {
   const { settings } = useSettings()
   const { navCollapsed } = settings
+
+  const [expanded, setExpanded] = useState(false)
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
@@ -63,13 +69,23 @@ const Window = ({
         alignItems: 'center'
       }}
     >
-      <Draggable handle='#draggable-dialog-title' cancel={'[class*="MuiDialogContent-root"]'} bounds='parent'>
+      <Draggable
+        handle='#draggable-dialog-title'
+        cancel={'[class*="MuiDialogContent-root"]'}
+        bounds='parent'
+        sx={{
+          width: expanded && '100%',
+          minHeight: expanded && '100%',
+          backgroundColor: 'red'
+        }}
+      >
         <Box sx={{ position: 'relative' }}>
           <Paper
             onKeyDown={handleKeyDown}
             sx={{
-              width: width,
-              minHeight: height
+              width: expanded ? containerWidth : width, // Expand width to 100% when expanded
+              minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
+              // ... (other styles)
             }}
           >
             <DialogTitle
@@ -86,6 +102,9 @@ const Window = ({
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>{Title}</Typography>
               </Box>
               <Box>
+                <IconButton tabIndex={-1} edge='end' onClick={() => setExpanded(!expanded)} aria-label='expand'>
+                  <OpenInFullIcon /> {/* Add the icon for expanding */}
+                </IconButton>
                 <IconButton tabIndex={-1} edge='end' onClick={onClose} aria-label='clear input'>
                   <ClearIcon />
                 </IconButton>
@@ -98,7 +117,9 @@ const Window = ({
                 ))}
               </Tabs>
             )}
-            <DialogContent sx={{ height: height, p: 0 }}>{children}</DialogContent>
+            <DialogContent sx={{ height: expanded ? `calc(100vh - 48px - 180px)` : height, p: 0 }}>
+              {children}
+            </DialogContent>
             {windowToolbarVisible && <WindowToolbar onSave={onSave} onClear={onClear} />}
           </Paper>
         </Box>

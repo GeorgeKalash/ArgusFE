@@ -6,6 +6,7 @@ import themeConfig from 'src/configs/themeConfig'
 
 // ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 
 const initialSettings = {
   themeColor: 'primary',
@@ -70,6 +71,7 @@ export const SettingsContext = createContext({
 export const SettingsProvider = ({ children, pageSettings }) => {
   // ** State
   const [settings, setSettings] = useState({ ...initialSettings })
+  const { i18n } = useTranslation()
 
   const auth = useAuth()
 
@@ -95,7 +97,23 @@ export const SettingsProvider = ({ children, pageSettings }) => {
   }, [settings.layout])
 
   useEffect(() => {
-    saveSettings({ ...settings, direction: auth?.user?.languageId === 3 ? 'rtl' : 'ltr' })
+    switch (auth?.user?.languageId) {
+      case 1:
+        i18n.changeLanguage('en')
+        saveSettings({ ...settings, direction: 'ltr' })
+        break
+      case 2:
+        i18n.changeLanguage('ar')
+        saveSettings({ ...settings, direction: 'rtl' })
+        break
+      case 3:
+        i18n.changeLanguage('fr')
+        saveSettings({ ...settings, direction: 'ltr' })
+        break
+
+      default:
+        break
+    }
   }, [auth.user])
 
   const saveSettings = updatedSettings => {
