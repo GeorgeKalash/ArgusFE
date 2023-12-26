@@ -27,8 +27,9 @@ const FieldSet = ({
           }} >
             <Typography variant="h6" style={{
               position: 'absolute',
-              top: '-15px', // Adjust as needed to control the distance from the border
-              backgroundColor: '#fff', // Set the background color to match the container
+              fontSize:'14px',
+              top: '-13px', // Adjust as needed to control the distance from the border
+              backgroundColor: '#F4F5FA', // Set the background color to match the container
               padding: '0 10px', // Adjust as needed
             }}>{title}</Typography>
                    {children}

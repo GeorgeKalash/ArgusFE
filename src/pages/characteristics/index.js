@@ -118,7 +118,8 @@ const Characteristics = () => {
 
   const handleSubmit = () => {
     if (activeTab === 0) characteristicValidation.handleSubmit()
-    else if (activeTab === 1) valueValidation.handleSubmit()
+    
+    //else if (activeTab === 1) valueValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
