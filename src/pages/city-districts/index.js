@@ -20,8 +20,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCityDistrict, populateCityDistrict } from 'src/Models/System/CityDistrict'
 
-// ** Helpers
-import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -154,13 +152,27 @@ const CityDistricts = () => {
 
   const editCityDistrict = obj => {
     console.log(obj)
-    cityDistrictValidation.setValues(populateCityDistrict(obj))
     fillCountryStore()
-    
-    //lookupCity(obj.city)
-    setEditMode(true)
-    setWindowOpen(true)
+    getCityDistrictById(obj)
   }
+
+  const getCityDistrictById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.CityDistrict.get,
+      parameters: parameters
+    })
+      .then(res => {
+        cityDistrictValidation.setValues(populateCityDistrict(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  } 
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CityDistrict, setAccess)

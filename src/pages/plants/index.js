@@ -20,8 +20,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewPlant, populatePlant } from 'src/Models/System/Plant'
 
-// ** Helpers
-import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -162,12 +160,28 @@ const Plants = () => {
 
   const editPlant = obj => {
     console.log(obj)
-    plantValidation.setValues(populatePlant(obj))
     fillCostCenterStore()
     fillPlantGroupStore()
     fillSegmentStore()
-    setEditMode(true)
-    setWindowOpen(true)
+    getPlantById(obj)
+  }
+
+  const getPlantById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.Plant.get,
+      parameters: parameters
+    })
+      .then(res => {
+        plantValidation.setValues(populatePlant(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {
