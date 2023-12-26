@@ -61,7 +61,8 @@ const IdTypes = () => {
     accessLevel: labels && labels.find(item => item.key === 8) && labels.find(item => item.key === 8).value,
     category: labels && labels.find(item => item.key === 9).value,
     clientFileExpiryType: labels && labels.find(item => item.key === 10).value,
-    clientFileLifeTime: labels && labels.find(item => item.key === 11).value
+    clientFileLifeTime: labels && labels.find(item => item.key === 11).value,
+    isDiplomat: labels && labels.find(item => item.key === 12).value
   }
 
   const columns = [
@@ -86,7 +87,7 @@ const IdTypes = () => {
   const tabs = [{ label: _labels.tab1 }, { label: _labels.tab2, disabled: !editMode }]
 
   const idTypesValidation = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required('This field is required'),
@@ -94,7 +95,8 @@ const IdTypes = () => {
       length: yup.string().required('This field is required'),
       category: yup.string().required('This field is required'),
       clientFileExpiryType: yup.string().required('This field is required'),
-      clientFileLifeTime: yup.string().required('This field is required')
+      clientFileLifeTime: yup.string().required('This field is required'),
+      isDiplomat: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postIdTypes(values)
@@ -150,9 +152,6 @@ const IdTypes = () => {
   ]
 
   const postIdFields = obj => {
-    console.log('recordId ' + idTypesValidation.values.recordId)
-    console.log('items ' + JSON.stringify(obj))
-
     const data = {
       idtId: idTypesValidation.values.recordId,
       items: obj
@@ -325,7 +324,6 @@ const IdTypes = () => {
   const addIdTypes = () => {
     idTypesValidation.setValues(getNewIdTypes())
     resetIdFields()
-    console.log(idFieldsValidation.values)
     setidtId(null)
     fillAccessLevelStore()
     fillCategoryStore()
@@ -373,6 +371,7 @@ const IdTypes = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
   return (

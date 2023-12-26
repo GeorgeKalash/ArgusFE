@@ -374,7 +374,7 @@ const InlineEditGrid = ({
   }
 
   const handleNumberFieldNewValue = (newValue, oldValue, min, max) => {
-    const regex = /^[0-9,]+$/
+    const regex = /^[0-9,]+(\.\d+)?$/
     if (newValue && regex.test(newValue)) {
       const _newValue = getNumberWithoutCommas(newValue)
       if ((min && _newValue < min) || (max && _newValue > max)) return oldValue
