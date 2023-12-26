@@ -3,7 +3,6 @@ const getNewPlant = () => {
     recordId: null,
     reference: null,
     name: null,
-    addressId: null,
     segmentRef: null,
     licenseNo: null,
     crNo: null,
@@ -11,7 +10,27 @@ const getNewPlant = () => {
     costCenterName: null,
     groupId: null,
     groupName: null,
-    segmentName: null
+    segmentName: null,
+
+    addName: null,
+    countryId: null,
+    stateId: null,
+    cityId: null,
+    cityName: null,
+    street1: null,
+    street2: null,
+    email1: null,
+    email2: null,
+    phone: null,
+    phone2: null,
+    phone3: null,
+    addressId: null,
+    postalCode:null,
+    cityDistrictId: null,
+    cityDistrictName:null,
+    bldgNo: null,
+    unitNo: null,
+    subNo: null
   }
 }
 
@@ -20,7 +39,6 @@ const populatePlant = obj => {
     recordId: obj.recordId,
     reference: obj.reference,
     name: obj.name,
-    addressId: obj.addressId,
     segmentRef: obj.segmentRef,
     licenseNo: obj.licenseNo,
     crNo: obj.crNo,
@@ -28,7 +46,27 @@ const populatePlant = obj => {
     costCenterName: obj.costCenterName,
     groupId: obj.groupId,
     groupName: obj.groupName,
-    segmentName: obj.segmentName
+    segmentName: obj.segmentName,
+
+    addName: obj.name,
+    countryId: obj.countryId,
+    stateId: obj.stateId,
+    cityId: obj.cityId,
+    cityName: obj.city,
+    street1: obj.street1,
+    street2: obj.street2,
+    email1: obj.email1,
+    email2: obj.email2,
+    phone: obj.phone,
+    phone2: obj.phone2,
+    phone3: obj.phone3,
+    addressId: obj.addressId,
+    postalCode:obj.postalCode,
+    cityDistrictId: obj.cityDistrictId,
+    cityDistrictName:obj.cityDistrict,
+    bldgNo: obj.bldgNo,
+    unitNo: obj.unitNo,
+    subNo: obj.subNo
   }
 }
 

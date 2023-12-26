@@ -63,7 +63,6 @@ const AgentBranchWindow = ({
           fillCountryStore={fillCountryStore}
           addressValidation={agentBranchValidation}
           maxAccess={maxAccess}
-          agentStore={agentStore}
           lookupCityDistrict={lookupCityDistrict}
           cityDistrictStore={cityDistrictStore}
           setCityDistrictStore={setCityDistrictStore}

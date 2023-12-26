@@ -98,7 +98,7 @@ const Agent = () => {
     swiftCode: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
     title: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value,
 
-    name:
+    addName:
       addressLabels && addressLabels.find(item => item.key === 1) && addressLabels.find(item => item.key === 1).value,
     street1:
       addressLabels && addressLabels.find(item => item.key === 2) && addressLabels.find(item => item.key === 2).value,
@@ -292,22 +292,25 @@ const Agent = () => {
   const postAgentBranch = obj => {
     console.log(obj)
     const object = obj
-    const Id = object.recordId
+
+    //const Id = object.recordId
     obj.recordId = obj.addressId > 0 ? obj.addressId : obj.recordId
     console.log('object')
     console.log(object)
-    console.log(Id)
+    
+    //console.log(Id)
 
     postRequest({
       extension: SystemRepository.Address.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        //obj.addressId = res.addressId > 0 ? res.addressId : res.recordId
+        obj.addressId = res.addressId > 0 ? res.addressId : res.recordId
 
         //console.log(record)
-        //object.recordId = record > 0 ? record : object.recordId
-        object.recordId = Id
+        object.recordId = record > 0 ? record : object.recordId
+
+        //object.recordId = Id
         console.log(object.recordId)
         postRequest({
           extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
