@@ -3,6 +3,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GeneralTab from 'src/pages/bp-master-data/Tabs/GeneralTab'
 import IDNumberTab from 'src/pages/bp-master-data/Tabs/IDNumberTab'
+import RelationTab from 'src/pages/bp-master-data/Tabs/RelationTab'
 
 const BPMasterDataWindow = ({
   onClose,
@@ -23,7 +24,13 @@ const BPMasterDataWindow = ({
   editMode,
   idNumberValidation,
   idNumberGridColumn,
-  fillIdCategoryStore
+  fillIdCategoryStore,
+  relationGridData,
+  getRelationGridData,
+  addRelation,
+  delRelation,
+  defaultValue,
+  popupRelation
 }) => {
   return (
     <Window
@@ -57,6 +64,7 @@ const BPMasterDataWindow = ({
           idCategoryStore={idCategoryStore}
           fillIdCategoryStore={fillIdCategoryStore}
           editMode={editMode}
+          defaultValue={defaultValue}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
@@ -64,6 +72,17 @@ const BPMasterDataWindow = ({
           bpMasterDataValidation={bpMasterDataValidation}
           idNumberValidation={idNumberValidation}
           idNumberGridColumn={idNumberGridColumn}
+          maxAccess={maxAccess}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel index={2} value={activeTab}>
+        <RelationTab
+          relationGridData={relationGridData}
+          getRelationGridData={getRelationGridData}
+          addRelation={addRelation}
+          delRelation={delRelation}
+          popupRelation={popupRelation}
+          labels={labels}
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
