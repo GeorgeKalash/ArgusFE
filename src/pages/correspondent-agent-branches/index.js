@@ -30,6 +30,7 @@ const Agent = () => {
   const [activeTab, setActiveTab] = useState(0)
   const [countryStore, setCountryStore] = useState([])
   const [cityStore, setCityStore] = useState([])
+  const [cityDistrictStore, setCityDistrictStore] = useState([])
 
   const [stateStore, setStateStore] = useState([])
   const [record, setRecord] = useState(null)
@@ -123,7 +124,8 @@ const Agent = () => {
     phone3:
       addressLabels && addressLabels.find(item => item.key === 12) && addressLabels.find(item => item.key === 12).value,
     address:
-      addressLabels && addressLabels.find(item => item.key === 13) && addressLabels.find(item => item.key === 13).value
+      addressLabels && addressLabels.find(item => item.key === 13) && addressLabels.find(item => item.key === 13).value,
+
   }
 
   const columns = [
@@ -181,7 +183,7 @@ const Agent = () => {
           fillStateStore(object.countryId)
           console.log(object)
           agentBranchValidation.setValues(populateAgentBranch(object))
-          agentBranchValidation.values.countryId &&  lookupCity(object.cityName)
+          agentBranchValidation.values.countryId && lookupCity(object.cityName)
 
           // setActiveTab(0)
           // setWindowOpen(true)
@@ -330,6 +332,23 @@ const Agent = () => {
       })
   }
 
+  const lookupCityDistrict = searchQry => {
+    setCityDistrictStore([])
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${agentBranchValidation.values.cityId}`
+
+    getRequest({
+      extension: SystemRepository.CityDistrict.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res.list)
+        setCityDistrictStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   return (
     <>
       <Box>
@@ -365,13 +384,15 @@ const Agent = () => {
           cityStore={cityStore}
           setCityStore={setCityStore}
           lookupCity={lookupCity}
+          cityDistrictStore={cityDistrictStore}
+          setCityDistrictStore={setCityDistrictStore}
+          lookupCityDistrict={lookupCityDistrict}
           fillCountryStore={fillCountryStore}
           agentBranchValidation={agentBranchValidation}
           maxAccess={access}
         />
       )}
-            <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

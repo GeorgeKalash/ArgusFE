@@ -80,7 +80,8 @@ export const SystemRepository = {
     get: service + 'getCDI',
     set: service + 'setCDI',
     del: service + 'delCDI',
-    page: service + 'pageCDI'
+    page: service + 'pageCDI',
+    snapshot: service + 'snapshotCDI'
   },
   Address: {
     qry: service + '',
