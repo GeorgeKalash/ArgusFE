@@ -695,7 +695,7 @@ const Defaults = () => {
                     displayField="name"
                     store={idTypeStore}
                     value={
-                      countryStore.filter(
+                      idTypeStore.filter(
                         (item) =>
                           item.recordId ===
                           clientIndividualFormValidation.values.idtId,
@@ -863,6 +863,8 @@ const Defaults = () => {
                     valueField="name"
                     store={cityStore}
                     firstValue={clientIndividualFormValidation.values.cityName}
+
+                   secondDisplayField={false}
                     setStore={setCityStore}
                     onLookup={lookupCity}
                     onChange={(event, newValue) => {
@@ -897,7 +899,7 @@ const Defaults = () => {
                   />
                 </Grid>
               </FieldSet>
-              <Grid item xs={12} >
+              <Grid item xs={12} sx={{marginTop:'20px'}}>
                 {/* <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityStore} row={1} orderedFields={['cityId' , 'street1' , 'street2', 'email2', 'phone', 'empty ' , 'phone2', 'empty'  ,'phone3']}/> */}
                 <FieldSet title={_labels.address}>
                <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityStore} lookupCity={lookupCity} stateStore={stateStore}  fillStateStore={fillStateStore}/>
@@ -1382,7 +1384,7 @@ const Defaults = () => {
 
         <Grid item xs={6}>
           <Grid container xs={12} spacing={2}>
-            <Grid item xs={12}>
+            <Grid item xs={12} >
               <FieldSet title={_labels.customerInformation}>
                 <Grid item xs={3}>
                   <CustomTextField
@@ -1929,10 +1931,13 @@ const Defaults = () => {
               </Grid>
               </FieldSet>
 
+
+     <Grid sx={{marginTop: '20px'}}>
               <FieldSet title={_labels.workAddress}>
               <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityStore} lookupCity={lookupCity} stateStore={stateStore}  fillStateStore={fillStateStore}/>
 
                </FieldSet>
+               </Grid>
             </Grid>
 
 
