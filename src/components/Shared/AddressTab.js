@@ -23,7 +23,7 @@ const AddressTab = ({
 }) => {
 
   console.log(addressValidation)
-  
+
 return (
     <Grid container spacing={4}>
       <Grid item xs={6}>
@@ -53,7 +53,7 @@ return (
             const selectedCountryId = newValue?.recordId || ''
             fillStateStore(selectedCountryId)
 
-            // should empty state selection on delete country selection or changing it: 
+            // should empty state selection on delete country selection or changing it:
             //addressValidation.setFieldValue('stateId', null)
             //should empty store existing data if we delete the selection not change it
 
@@ -80,7 +80,10 @@ return (
 
 
       <Grid item xs={6}>
-      {stateStore &&  <CustomComboBox
+      {
+
+      //stateStore &&
+       <CustomComboBox
           name='stateId'
           label={labels.state}
           valueField='stateId'
@@ -108,7 +111,7 @@ return (
           helperText={addressValidation.touched.street2 && addressValidation.errors.street2}
         />
       </Grid>
-      <Grid item xs={6}>    
+      {/* <Grid item xs={6}>
         <CustomLookup
           name='cityId'
           label={labels.city}
@@ -139,7 +142,7 @@ return (
           helperText={addressValidation.touched.cityId && addressValidation.errors.cityId}
           maxAccess={maxAccess}
         />
-      </Grid>
+      </Grid> */}
       <Grid item xs={6}>
         <CustomTextField
           name='email'
@@ -278,7 +281,7 @@ return (
           helperText={addressValidation.touched.phone3 && addressValidation.errors.phone3}
         />
       </Grid>
-   
+
     </Grid>
   )
 }

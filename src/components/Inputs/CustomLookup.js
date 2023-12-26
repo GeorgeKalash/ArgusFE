@@ -2,7 +2,7 @@
 import { Box, Autocomplete, TextField, Paper } from '@mui/material'
 
 const CustomPaper = props => {
-  return <Paper sx={{ position: 'absolute', width: '200%', zIndex: 999, mt: 1 }} {...props} />
+  return <Paper sx={{ position: 'absolute', width: '100%', zIndex: 999, mt: 1 }} {...props} />
 }
 
 const CustomLookup = ({
@@ -11,6 +11,7 @@ const CustomLookup = ({
   label,
   firstValue,
   secondValue,
+  secondDisplayField= false,
   store = [],
   setStore,
   valueField = 'key',
@@ -45,10 +46,12 @@ const CustomLookup = ({
         <Box
           sx={{
             flex: 1,
-            '& .MuiAutocomplete-inputRoot': {
-              borderTopRightRadius: 0,
-              borderBottomRightRadius: 0
-            }
+            ...(secondDisplayField && {
+              '& .MuiAutocomplete-inputRoot': {
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0
+              }
+            })
           }}
         >
           <Autocomplete
@@ -64,13 +67,13 @@ const CustomLookup = ({
               <Box>
                 {props.id.endsWith('-0') && (
                   <li className={props.className}>
-                    <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>
-                    <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>
+                   { secondDisplayField && <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>}
+                    { secondDisplayField && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
                   </li>
                 )}
                 <li {...props}>
                   <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
-                  <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
+                  { secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box> }
                 </li>
               </Box>
             )}
@@ -93,7 +96,7 @@ const CustomLookup = ({
             sx={{ flex: 1 }}
           />
         </Box>
-        <Box
+       { secondDisplayField &&   <Box
           sx={{
             flex: 1,
             display: 'flex',
@@ -117,7 +120,7 @@ const CustomLookup = ({
             helperText={helperText}
             sx={{ flex: 1 }}
           />
-        </Box>
+        </Box>}
       </Box>
     </Box>
   )
