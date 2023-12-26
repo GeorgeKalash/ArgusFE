@@ -8,9 +8,10 @@ const getNewIdTypes = () => {
     format: null,
     length: null,
     category: null,
+    isDiplomat: false,
     clientFileLifeTime: null,
     clientFileExpiryType: null,
-    clientFileExpiryTypeName: null
+    clientFileExpiryTypeName: null,
   }
 }
 
@@ -21,6 +22,7 @@ const populateIdTypes = obj => {
     format: obj.format,
     length: obj.length,
     category: obj.category,
+    isDiplomat: obj.isDiplomat,
     clientFileLifeTime: obj.clientFileLifeTime,
     clientFileExpiryType: obj.clientFileExpiryType,
     clientFileExpiryTypeName: obj.clientFileExpiryTypeName

@@ -105,6 +105,19 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           helperText={idTypesValidation.touched.clientFileLifeTime && idTypesValidation.errors.clientFileLifeTime}
         />
       </Grid>
+      <Grid item xs={12}>
+        <FormControlLabel
+          control={
+            <Checkbox
+               name='isDiplomat'
+               maxAccess={maxAccess}
+               checked={idTypesValidation.values?.isDiplomat}
+               onChange={idTypesValidation.handleChange}
+            />
+          }
+        label={labels.isDiplomat}
+        />
+      </Grid>
     </Grid>
   )
 }
