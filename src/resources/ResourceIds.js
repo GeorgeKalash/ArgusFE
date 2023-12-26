@@ -39,7 +39,8 @@ export const ResourceIds = {
   ClientMaster : 35201,
   Characteristics : 10102,
   Strategies : 10106,
-  Classes : 10101
+  Classes : 10101,
+  SmsTemplates : 20130
 
 
 }
