@@ -272,7 +272,7 @@ const DocumentTypes = () => {
     setWindowOpen(true)
   }
 
-  useEffect(() => {
+  const initialLoad = () => {
     if (!access) getAccess(ResourceIds.DocumentTypes, setAccess)
     else {
       if (access.record.maxAccess > 0) {
@@ -284,6 +284,10 @@ const DocumentTypes = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
+  }
+
+  useEffect(() => {
+    initialLoad()
   }, [access])
 
   const gridValidation = useFormik({
@@ -394,7 +398,7 @@ const DocumentTypes = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addDocumentType} maxAccess={access} />
+        <GridToolbar onAdd={addDocumentType} maxAccess={access} initialLoad={initialLoad} />
         <Table
           columns={columns}
           gridData={gridData}
@@ -504,8 +508,11 @@ const DocumentTypes = () => {
                     documentTypesValidation.setFieldValue('activeStatusName', newValue?.value)
                   }}
                   error={
-                    documentTypesValidation.touched.activeStatusName &&
-                    Boolean(documentTypesValidation.errors.activeStatusName)
+                    (documentTypesValidation.touched.activeStatusName &&
+                      Boolean(documentTypesValidation.errors.activeStatusName)) ||
+                    (editMode &&
+                      !documentTypesValidation.touched.activeStatusName &&
+                      documentTypesValidation.errors.activeStatusName)
                   }
                   helperText={
                     documentTypesValidation.touched.activeStatusName && documentTypesValidation.errors.activeStatusName
@@ -568,3 +575,5 @@ const DocumentTypes = () => {
 }
 
 export default DocumentTypes
+
+DocumentTypes.pageTitle = 'document types'

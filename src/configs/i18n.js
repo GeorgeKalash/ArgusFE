@@ -17,7 +17,7 @@ i18n
     lng: 'en',
     backend: {
       /* translation file path */
-      loadPath: '/locales/{{lng}}.json'
+      loadPath: '/locales/{{lng}}/{{ns}}.json'
     },
     fallbackLng: 'en',
     debug: false,

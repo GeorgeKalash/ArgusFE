@@ -10,6 +10,9 @@ import { IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 
+// ** Third Party Import
+import { useTranslation } from 'react-i18next'
+
 const TabsContext = createContext()
 
 function CustomTabPanel(props) {
@@ -37,9 +40,10 @@ CustomTabPanel.propTypes = {
   value: PropTypes.number.isRequired
 }
 
-const TabsProvider = ({ children }) => {
+const TabsProvider = ({ children, pageTitle }) => {
   // ** Hooks
   const router = useRouter()
+  const { t } = useTranslation('screens')
 
   const getLabel = () => {
     const parts = router.route.split('/')
@@ -47,7 +51,10 @@ const TabsProvider = ({ children }) => {
     return parts[parts.length - 1]
   }
 
-  var initialActiveTab = router.route === '/default' ? [] : [{ page: children, route: router.route, label: getLabel() }]
+  var initialActiveTab =
+    router.route === '/default'
+      ? []
+      : [{ page: children, route: router.route, label: pageTitle ? pageTitle : getLabel() }]
 
   // ** States
   const [activeTabs, setActiveTabs] = useState(initialActiveTab)
@@ -86,7 +93,7 @@ const TabsProvider = ({ children }) => {
       else {
         const newValueState = activeTabs.length
         setActiveTabs(prevState => {
-          return [...prevState, { page: children, route: router.route, label: getLabel() }]
+          return [...prevState, { page: children, route: router.route, label: pageTitle ? pageTitle : getLabel() }]
         })
         setValue(newValueState)
       }
@@ -99,12 +106,12 @@ const TabsProvider = ({ children }) => {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label='basic tabs example' sx={{ maxHeight: '40px' }}>
             {activeTabs.length > 0 &&
-              activeTabs.map(
-                (activeTab, i) =>
+              activeTabs.map((activeTab, i) => {
+                return (
                   !activeTab.isDefault && (
                     <Tab
                       key={i}
-                      label={activeTab?.label?.replace(/-/g, ' ')}
+                      label={t(activeTab?.label?.replace(/-/g, ' '))}
                       onClick={() => router?.push(activeTab.route)}
                       icon={
                         <IconButton
@@ -121,7 +128,8 @@ const TabsProvider = ({ children }) => {
                       sx={{ minHeight: '40px' }}
                     />
                   )
-              )}
+                )
+              })}
           </Tabs>
         </Box>
         {activeTabs.length > 0 &&
