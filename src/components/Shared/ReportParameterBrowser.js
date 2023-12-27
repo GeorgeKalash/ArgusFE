@@ -437,6 +437,29 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
     setParamsArray([])
   }
 
+  // const clearValues = () => {
+  //   setParamsArray([])
+  //   // parametersValidation.resetForm()
+
+  //   console.log({ parameters })
+  //   console.log({ fields })
+  //   parameters.map(param => {
+  //     console.log({ param })
+  //     parametersValidation.setFieldValue(`${param.key}`, null)
+  //   })
+  //   // console.log({ fields })
+  //   setFields([])
+  //   // getFieldsByClassId()
+  // }
+
+  // useEffect(() => {
+  //   console.log({ parametersValidation: parametersValidation.values })
+  // }, [parametersValidation])
+
+  // useEffect(() => {
+  //   if (parameters && fields.length === 0) getFieldsByClassId()
+  // }, [fields])
+
   useEffect(() => {
     if (!parameters && fields.length === 0 && !disabled) getParameterDefinition()
   }, [parameters, disabled])
