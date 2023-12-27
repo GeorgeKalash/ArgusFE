@@ -17,6 +17,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCharGeneral, populateCharGeneral } from 'src/Models/DocumentRelease/CharacteristicsGeneral'
 import { getNewCharValue, populateCharValue } from 'src/Models/DocumentRelease/CharacteristicsValues'
@@ -26,6 +27,7 @@ import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } fr
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 
 // ** Windows
 import CharacteristicWindow from './Windows/CharacteristicWindow'
@@ -36,7 +38,8 @@ import { isNull } from '@antfu/utils'
 const Characteristics = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
-
+  const { getAllKvsByDataset } = useContext(CommonContext)
+  
   //controls
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
@@ -213,17 +216,10 @@ const Characteristics = () => {
   }
 
   const fillDataTypeStore = () => {
-    var parameters = '_database=46' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.DR_CHA_DATA_TYPE,
+      callback: setDataTypeStore
     })
-      .then(res => {
-        setDataTypeStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
    const fillCurrencyStore = () => {

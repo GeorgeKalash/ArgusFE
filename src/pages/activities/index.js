@@ -17,6 +17,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewActivity, populateActivity } from 'src/Models/CurrencyTradingSettings/Activity'
 
@@ -29,10 +30,12 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Windows
 import ActivityWindow from './Windows/ActivityWindow'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { DataSets } from 'src/resources/DataSets'
 
 const Activities = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //controls
   const [labels, setLabels] = useState(null)
@@ -184,17 +187,10 @@ const Activities = () => {
 
 
   const fillIndustryStore = () => {
-    var parameters = '_database=148' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.INDUSTRY,
+      callback: setIndustryStore
     })
-      .then(res => {
-        setIndustryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
 

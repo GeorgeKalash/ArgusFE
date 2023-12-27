@@ -5,6 +5,7 @@ import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ExchangeTableWindow from './Windows/ExchangeTableWindow'
 import { useFormik } from 'formik'
@@ -15,12 +16,14 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 
 const ExchangeTables = () => {
 
 
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -134,28 +137,18 @@ const ExchangeTables = () => {
   }
 
   const fillRCMStore = () => {
-    var parameters = '_database=19'
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.MC_RATE_CALC_METHOD,
+      callback: setRCMStore
     })
-      .then(res => {
-        setRCMStore(res.list)
-      })
-      .catch(error => {})
   }
 
 
   const fillRateAgainst = () => {
-    var parameters = '_database=70'
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.MC_RATE_AGAINST,
+      callback: setRateAgainstStore
     })
-      .then(res => {
-        setRateAgainstStore(res.list)
-      })
-      .catch(error => {})
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {

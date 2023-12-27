@@ -15,12 +15,14 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewBPMasterData, populateBPMasterData } from 'src/Models/BusinessPartner/BPMasterData'
 import { getNewRelation, populateRelation } from 'src/Models/BusinessPartner/Relation'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
+import { DataSets } from 'src/resources/DataSets'
 
 // ** Windows
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
@@ -31,9 +33,11 @@ import BPRelationWindow from './Windows/BPRelationWindow'
 import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
+
 const BPMasterData = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -245,17 +249,10 @@ const BPMasterData = () => {
   }
 
   const fillCategoryStore = () => {
-    var parameters = '_database=49' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.BP_CATEGORY,
+      callback: setCategoryStore
     })
-      .then(res => {
-        setCategoryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillGroupStore = () => {

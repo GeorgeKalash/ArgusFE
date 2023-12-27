@@ -19,7 +19,9 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewCurrency, populateCurrency } from 'src/Models/System/currency'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 
 // ** Windows
 import CurrencyWindow from './Windows/CurrencyWindow'
@@ -32,6 +34,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //stores
   const [gridData, setGridData] = useState(null)
@@ -124,31 +127,17 @@ const Currencies = () => {
   }
 
   const fillProfileStore = () => {
-    var parameters = '_database=6' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.CURRENCY_PROFILE,
+      callback: setProfileStore
     })
-      .then(res => {
-        setProfileStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const fillCurrencyStore = () => {
-    var parameters = '_database=117' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.CURRENCY_TYPE,
+      callback: setCurrencyStore
     })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const fillDecimalStore = () => {}

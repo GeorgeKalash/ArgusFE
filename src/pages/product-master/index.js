@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
+import { Box, Checkbox } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -16,6 +16,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
@@ -29,6 +30,7 @@ import ProductLegWindow from './Windows/ProductLegWindow'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 import { getNewProductMaster, populateProductMaster } from 'src/Models/RemittanceSettings/ProductMaster'
 import { getNewProductDispersal, populateProductDispersal } from 'src/Models/RemittanceSettings/ProductDispersal'
 import {
@@ -41,6 +43,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //controls
   const [access, setAccess] = useState(null)
@@ -68,7 +71,7 @@ const ProductMaster = () => {
   const [productCountriesGridData, setProductCountriesGridData] = useState([]) //for countries tab
   const [productCurrenciesGridData, setProductCurrenciesGridData] = useState([]) //for monetary tab
   const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
-const[type, setType] = useState(0)
+  const[type, setType] = useState(0)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -108,42 +111,6 @@ const[type, setType] = useState(0)
     }
   ]
 
-  const commissionColumns = [
-    {
-      field: 'checkBox',
-      headerName: '',
-      flex: 0.5,
-      renderCell: params => (
-        <Checkbox
-          color='primary'
-          checked={params.row.checkBox === true}
-          onChange={() => {
-            params.row.checkBox = !params.row.checkBox
-          }}
-        />
-      )
-    },
-    {
-      field: 'commissionRef',
-      headerName: 'Commission Ref',
-      flex: 1
-    },
-    {
-      field: 'commissionName',
-      headerName: 'Commission Name',
-      flex: 1
-    },
-    {
-      field: 'commission',
-      headerName: 'Commission',
-      flex: 1,
-      align: 'right',
-      valueGetter: ({ row }) => getFormattedNumber(row?.commission, 2)
-    }
-  ]
-
-
-
   const productMasterValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
@@ -156,7 +123,6 @@ const[type, setType] = useState(0)
       commissionBase:  yup.string().required('This field is required'),
       isInactive:  yup.string().required('This field is required'),
       corId : type===1 ? yup.string().required('This field is required') : yup.string().notRequired()
-
     }),
     onSubmit: values => {
       postProductMaster(values)
@@ -212,75 +178,38 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
   }
 
   const fillTypeStore = () => {
-    var parameters = '_database=3601' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.RT_Product_Type,
+      callback: setTypeStore
     })
-      .then(res => {
-        setTypeStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillDispersalTypeStore = () => {
-    var parameters = '_database=3604' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.RT_Dispersal_Type,
+      callback: setDispersalTypeStore
     })
-      .then(res => {
-        setDispersalTypeStore(res);
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillFunctionStore = () => {
-    var parameters = '_database=3605' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.RT_Function,
+      callback: setFunctionStore
     })
-      .then(res => {
-        //ask about lang values
-        setFunctionStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillLanguageStore = () => {
-    var parameters = '_database=3606' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.RT_Language,
+      callback: setLanguageStore
     })
-      .then(res => {
-        //ask about lang values
-        setLanguageStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillCommissionBaseStore = () => {
-    var parameters = '_database=3602' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.RT_Commission_Base,
+      callback: setCommissionBaseStore
     })
-      .then(res => {
-        setCommissionBaseStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillCurrencyStore = () => {
@@ -468,19 +397,6 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
     })
       .then(res => {
         productMasterValidation.setValues(populateProductMaster(res.record))
-
-        // countriesGridValidation.setValues({
-        //   rows: [
-        //     {
-        //       productId: res.record.recordId,
-        //       countryId: '',
-        //       countryRef: '',
-        //       countryName: '',
-        //       isInactive: false
-        //     }
-        //   ]
-        // })
-
         setEditMode(true)
         setWindowOpen(true)
       })
@@ -496,7 +412,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
           recordId: 1,
           controls: 'beneficiary',
           format: 'Alpha',
-          securityLevel: 'Mandatory', //actual combo fills from SY.qryKVS?_database=3605
+          securityLevel: 'Mandatory', 
           specialChars: '@',
           fixedLength: 20,
           minLength: 3,
@@ -506,7 +422,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
           recordId: 2,
           controls: 'phone',
           format: 'Alpha',
-          securityLevel: 'readOnly', //actual combo fills from SY.qryKVS?_database=3605
+          securityLevel: 'readOnly', 
           specialChars: '@',
           fixedLength: 10,
           minLength: 3,
@@ -547,25 +463,6 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
     setProductFieldGridData({ ...newData })
   }
 
-  const getProductAgentGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const newData = {
-      list: [
-        {
-          recordId: 1,
-          agent: 'ABC'
-        },
-        {
-          recordId: 2,
-          agent: 'DEF'
-        },
-        {
-          recordId: 3,
-          agent: 'GHI'
-        }
-      ]
-    }
-    setProductAgentGridData({ ...newData })
-  }
 
   //COUNTRIES TAB
   const countriesGridValidation = useFormik({
@@ -764,7 +661,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       nameId: 'dispersalType',
       name: 'dispersalTypeName',
       mandatory: true,
-      store: dispersalTypeStore.list,
+      store: dispersalTypeStore,
       valueField: 'key',
       displayField: 'value',
       widthDropDown: '150',
@@ -1102,7 +999,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
       nameId: 'dispersalType',
       name: 'dispersalTypeName',
       mandatory: false,
-      store: dispersalTypeStore.list,
+      store: dispersalTypeStore,
       valueField: 'key',
       displayField: 'value',
       readOnly: true
@@ -1568,9 +1465,6 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
         //for product field tab
         getProductFieldGridData({})
 
-        //for product agent tab
-        getProductAgentGridData({})
-
         fillPlantStore()
         fillCountryStore()
         fillCurrencyStore()
@@ -1686,7 +1580,7 @@ return (
           onClose={() => setDispersalWindowOpen(false)}
           onSave={handleDispersalSubmit}
           productDispersalValidation={productDispersalValidation}
-          dispersalTypeStore={dispersalTypeStore.list}
+          dispersalTypeStore={dispersalTypeStore}
           maxAccess={access}
         />
       )}

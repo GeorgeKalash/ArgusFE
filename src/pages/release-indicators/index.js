@@ -17,6 +17,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewReleaseInd, populateReleaseInd } from 'src/Models/DocumentRelease/ReleaseIndicator'
 
@@ -25,6 +26,7 @@ import { validateNumberField } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 
 // ** Windows
 import ReleaseIndicatorWindow from './Windows/ReleaseIndicatorWindow'
@@ -33,6 +35,7 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 const ReleaseIndicators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //controls
   const [labels, setLabels] = useState(null)
@@ -199,18 +202,10 @@ const ReleaseIndicators = () => {
   }, [access])
 
   const fillChangeabilityStore = () => {
-    var parameters = '_database=45' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.DR_CHANGEABILITY,
+      callback: setChangeabilityStore
     })
-      .then(res => {
-        setChangeabilityStore(res.list)
-        console.log(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   return (

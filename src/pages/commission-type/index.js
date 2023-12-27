@@ -15,10 +15,12 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { getNewCommissionType, populateCommissionType } from 'src/Models/CurrencyTradingSettings/CommissionType'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
@@ -30,6 +32,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 const CommissionType = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //stores
   const [gridData, setGridData] = useState(null)
@@ -104,17 +107,10 @@ const CommissionType = () => {
   }
 
   const fillTypeStore = () => {
-    var parameters = '_database=3501' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.CT_COMMISSION_TYPES,
+      callback: setTypeStore
     })
-      .then(res => {
-        setTypeStore(res.list)
-      })
-      .catch(error => {
-        setErrorMsetTypeStoreessage(error)
-      })
   }
 
   const postCommissionType = obj => {
