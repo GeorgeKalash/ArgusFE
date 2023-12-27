@@ -174,9 +174,6 @@ const  UpdateExchangeRates = () => {
    } else {
       if (access.record.maxAccess > 0) {
         getLabels(ResourceIds.updateExchangerRates, setLabels)
-
-        // fillCRMStore()
-
         fillCurrencyStore()
         fillCountryStore()
 
@@ -329,26 +326,12 @@ const getExchangeRatess = async (cuId, coId) => {
   }
 };
 
-// console.log(exchangeRatesGridValidation);
-
 const handleSubmit = () => {
   exchangeRatesGridValidation.handleSubmit()
 }
 
 // Usage of getExchangeRates
 // getExchangeRates(yourCuId, yourCoId);
-
-  const fillCRMStore = () => {
-    var parameters = '_database=19'
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
-    })
-      .then(res => {
-        setCrmSore(res.list)
-      })
-      .catch(error => {})
-  }
 
 
   const fillCurrencyStore = () => {

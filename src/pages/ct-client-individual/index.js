@@ -11,10 +11,8 @@ import * as yup from "yup";
 import toast from "react-hot-toast";
 
 // ** Custom Imports
-import Table from "src/components/Shared/Table";
 import CustomComboBox from "src/components/Inputs/CustomComboBox";
 import ErrorWindow from "src/components/Shared/ErrorWindow";
-import Window from "src/components/Shared/Window";
 import WindowToolbar from "src/components/Shared/WindowToolbar";
 import CustomTextField from "src/components/Inputs/CustomTextField";
 import CustomDatePicker from "src/components/Inputs/CustomDatePicker";
@@ -28,6 +26,7 @@ import CustomLookup from "src/components/Inputs/CustomLookup";
 
 // ** Resources
 import { ResourceIds } from "src/resources/ResourceIds";
+import { DataSets } from 'src/resources/DataSets'
 import { CurrencyTradingSettingsRepository } from "src/repositories/CurrencyTradingSettingsRepository";
 import { position } from "stylis";
 import FieldSet from "src/components/Shared/FieldSet";
@@ -41,6 +40,7 @@ import { CurrencyTradingClientRepository } from "src/repositories/CurrencyTradin
 const Defaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext);
   const { getLabels, getAccess } = useContext(ControlContext);
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //control
   const [labels, setLabels] = useState(null);
@@ -581,60 +581,32 @@ const Defaults = () => {
   };
 
   const fillEducationStore = () => {
-    var parameters = "_database=150"; //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters,
+    getAllKvsByDataset({
+      _dataset: DataSets.EDUCATION_LEVEL,
+      callback: setEducationStore
     })
-      .then((res) => {
-        setEducationStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
   };
 
   const fillSMSLanguageStore = () => {
-    var parameters = "_database=13"; //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters,
+    getAllKvsByDataset({
+      _dataset: DataSets.LANGUAGE,
+      callback: setSMSLanguageStore
     })
-      .then((res) => {
-        setSMSLanguageStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
   };
 
   const fillGenderStore = () => {
-    var parameters = "_database=1014"; //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters,
+    getAllKvsByDataset({
+      _dataset: DataSets.GENDER,
+      callback: setGenderStore
     })
-      .then((res) => {
-        setGenderStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
   };
 
 
   const fillCivilStatusStore = () => {
-    var parameters = "_database=1019"; //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters,
+    getAllKvsByDataset({
+      _dataset: DataSets.CIVIL_STATUS,
+      callback: setCivilStatusStore
     })
-      .then((res) => {
-        setCivilStatusStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
   };
 
 

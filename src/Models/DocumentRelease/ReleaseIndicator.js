@@ -5,7 +5,7 @@ const getNewReleaseInd = () => {
     name: null,
     reference: null,
     changeabilityName: null,   
-    changeability: null, // SY.qryKVS?_database=45
+    changeability: null, 
     isReleased: false
   }
 }

@@ -16,6 +16,7 @@ const MenuProvider = ({ children }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [menu, setMenu] = useState([])
+  const [lastOpenedPage, setLastOpenedPage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
   const getMenu = async () => {
@@ -58,6 +59,7 @@ const MenuProvider = ({ children }) => {
                 id: commandLine.id,
                 title: commandLine.name,
                 path: `/${commandLine.nextAPI}`,
+                name: commandLine.name,
 
                 // path: `/${commandLine.nextAPI ? commandLine.nextAPI : commandLine.api.replace(/\.aspx$/, "").toLowerCase()}`,
                 iconName: commandLine.addToBookmarks && 'FavIcon'
@@ -121,7 +123,9 @@ const MenuProvider = ({ children }) => {
 
   const values = {
     menu,
-    handleBookmark
+    handleBookmark,
+    lastOpenedPage,
+    setLastOpenedPage
   }
 
   return (

@@ -8,8 +8,6 @@ export const CurrencyTradingSettingsRepository = {
     set: service + 'setCOM',
     del: service + 'delCOM'
   },
-
-
   RelationType: {
     qry: service + 'qryRT',
     get: service + 'getRT',

@@ -19,7 +19,9 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewIdTypes, populateIdTypes } from 'src/Models/CurrencyTradingSettings/IdTypes'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 
 // ** Windows
 import IdTypesWindow from './Windows/IdTypesWindow'
@@ -32,7 +34,8 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 const IdTypes = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { getAllKvsByDataset } = useContext(CommonContext)
+  
   //control
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
@@ -241,48 +244,24 @@ const IdTypes = () => {
   }
 
   const fillAccessLevelStore = () => {
-    var parameters = '_database=3' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.RT_Language,
+      callback: setaccesLevelStore
     })
-      .then(res => {
-        //ask about lang values
-        setaccesLevelStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillCategoryStore = () => {
-    var parameters = '_database=147' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.ID_CATEGORY,
+      callback: setCategoryStore
     })
-      .then(res => {
-        //ask about lang values
-        setCategoryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillClientFileExpiryTypeStore = () => {
-    var parameters = '_database=149' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.FILE_EMPIRY_TYPE,
+      callback: setClientStore
     })
-      .then(res => {
-        //ask about lang values
-        setClientStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const postIdTypes = obj => {

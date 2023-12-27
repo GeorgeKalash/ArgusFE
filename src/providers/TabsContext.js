@@ -1,5 +1,5 @@
 // ** React Imports
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useEffect, useState, useContext } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
@@ -12,6 +12,9 @@ import PropTypes from 'prop-types'
 
 // ** Third Party Import
 import { useTranslation } from 'react-i18next'
+
+// ** Context
+import { MenuContext } from 'src/providers/MenuContext'
 
 const TabsContext = createContext()
 
@@ -44,6 +47,7 @@ const TabsProvider = ({ children, pageTitle }) => {
   // ** Hooks
   const router = useRouter()
   const { t } = useTranslation('screens')
+  const { menu, lastOpenedPage } = useContext(MenuContext)
 
   const getLabel = () => {
     const parts = router.route.split('/')
@@ -51,10 +55,31 @@ const TabsProvider = ({ children, pageTitle }) => {
     return parts[parts.length - 1]
   }
 
+  const findNode = (nodes, targetRouter) => {
+    for (const node of nodes) {
+      if (node.children) {
+        const result = findNode(node.children, targetRouter)
+        if (result) {
+          return result
+        }
+      } else if (node.path && node.path === targetRouter) {
+        return node.name
+      }
+    }
+
+    return null
+  }
+
   var initialActiveTab =
     router.route === '/default'
       ? []
-      : [{ page: children, route: router.route, label: pageTitle ? pageTitle : getLabel() }]
+      : [
+          {
+            page: children,
+            route: router.route,
+            label: pageTitle ? pageTitle : findNode(menu, router.route)
+          }
+        ]
 
   // ** States
   const [activeTabs, setActiveTabs] = useState(initialActiveTab)
@@ -93,7 +118,10 @@ const TabsProvider = ({ children, pageTitle }) => {
       else {
         const newValueState = activeTabs.length
         setActiveTabs(prevState => {
-          return [...prevState, { page: children, route: router.route, label: pageTitle ? pageTitle : getLabel() }]
+          return [
+            ...prevState,
+            { page: children, route: router.route, label: lastOpenedPage ? lastOpenedPage.name : getLabel() }
+          ]
         })
         setValue(newValueState)
       }

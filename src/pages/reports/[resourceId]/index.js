@@ -14,24 +14,24 @@ const Reports = () => {
 
 export default Reports
 
-export async function getServerSideProps(context) {
-  const { params } = context
-  const { resourceId } = params
+// export async function getServerSideProps(context) {
+//   const { params } = context
+//   const { resourceId } = params
 
-  var pageTitle
-  switch (resourceId) {
-    case '41403':
-      pageTitle = 'items list'
-      break
+//   var pageTitle
+//   switch (resourceId) {
+//     case '41401':
+//       pageTitle = 'items list'
+//       break
 
-    default:
-      pageTitle = 'report page'
-      break
-  }
+//     default:
+//       pageTitle = 'report page'
+//       break
+//   }
 
-  return {
-    props: {
-      pageTitle: pageTitle
-    } // will be passed to the page component as props
-  }
-}
+//   return {
+//     props: {
+//       pageTitle: pageTitle
+//     } // will be passed to the page component as props
+//   }
+// }
