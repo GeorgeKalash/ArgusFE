@@ -17,6 +17,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewActivity, populateActivity } from 'src/Models/CurrencyTradingSettings/Activity'
 
@@ -29,10 +30,12 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Windows
 import ActivityWindow from './Windows/ActivityWindow'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { DataSets } from 'src/resources/DataSets'
 
 const Activities = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //controls
   const [labels, setLabels] = useState(null)
@@ -147,10 +150,26 @@ const Activities = () => {
 
   const editActivity = obj => {
     console.log(obj)
-    activityValidation.setValues(populateActivity(obj))
     fillIndustryStore()
-    setEditMode(true)
-    setWindowOpen(true)
+    getActById(obj)
+  }
+
+  const getActById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.Activity.get,
+      parameters: parameters
+    })
+      .then(res => {
+        activityValidation.setValues(populateActivity(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {
@@ -168,17 +187,10 @@ const Activities = () => {
 
 
   const fillIndustryStore = () => {
-    var parameters = '_database=148' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.INDUSTRY,
+      callback: setIndustryStore
     })
-      .then(res => {
-        setIndustryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
 

@@ -89,7 +89,7 @@ const LegalStatus = () => {
 
     // var parameters = defaultParams + '&_dgId=0'
     getRequest({
-      extension: BusinessPartnerRepository.LegalStatus.qry,
+      extension: BusinessPartnerRepository.LegalStatus.page,
       parameters: parameters
     })
       .then(res => {
@@ -139,10 +139,26 @@ const LegalStatus = () => {
   }
 
   const editLegalStatus = obj => {
-    legalStatusValidation.setValues(populateLegalStatuses(obj))
-    setEditMode(true)
-    setWindowOpen(true)
+    getLegalStatusById(obj)
   }
+
+  const getLegalStatusById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: BusinessPartnerRepository.LegalStatus.get,
+      parameters: parameters
+    })
+      .then(res => {
+        legalStatusValidation.setValues(populateLegalStatuses(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  } 
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.LegalStatus, setAccess)

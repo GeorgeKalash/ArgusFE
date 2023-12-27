@@ -5,7 +5,7 @@ const getNewActivity = () => {
     name: null,
     reference: null,
     flName: null,
-    industry: null //actual combo fills from SY.qryKVS?_database=148
+    industry: null
   }
 }
 

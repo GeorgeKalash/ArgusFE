@@ -15,23 +15,29 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewBPMasterData, populateBPMasterData } from 'src/Models/BusinessPartner/BPMasterData'
+import { getNewRelation, populateRelation } from 'src/Models/BusinessPartner/Relation'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
+import { DataSets } from 'src/resources/DataSets'
 
 // ** Windows
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
+import BPRelationWindow from './Windows/BPRelationWindow'
 
 // ** Helpers
 // import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
+
 const BPMasterData = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -44,12 +50,17 @@ const BPMasterData = () => {
   const [idCategoryStore, setIDCategoryStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
   const [legalStatusStore, setLegalStatusStore] = useState([])
-
+  const [relationGridData, setRelationGridData] = useState([])
+  const [relationStore, setRelationStore] = useState([])
+  const [businessPartnerStore, setBusinessPartnerStore] = useState([])
+  
   //states
   const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [defaultValue, setdefaultValue] = useState(null)
+  const [relationWindowOpen, setRelationWindowOpen] = useState(false)
 
   const _labels = {
     general: labels && labels.find(item => item.key === 1).value,
@@ -71,7 +82,11 @@ const BPMasterData = () => {
     nationalityId: labels && labels.find(item => item.key === 17).value,
     legalStatus: labels && labels.find(item => item.key === 18).value,
     idCategory: labels && labels.find(item => item.key === 19).value,
-    idNumber: labels && labels.find(item => item.key === 20).value
+    idNumber: labels && labels.find(item => item.key === 20).value,
+    relation: labels && labels.find(item => item.key === 21).value,
+    businessPartner: labels && labels.find(item => item.key === 22).value,
+    from: labels && labels.find(item => item.key === 23).value,
+    to: labels && labels.find(item => item.key === 24).value
   }
 
   const columns = [
@@ -107,24 +122,22 @@ const BPMasterData = () => {
       flex: 1
     },
     {
-      field: 'legalStatusName',
+      field: 'legalStatus',
       headerName: _labels.legalStatus,
       flex: 1
     }
   ]
 
-  const tabs = [{ label: _labels.general }, { label: _labels.idNumber, disabled: !editMode }]
+  const tabs = [{ label: _labels.general }, { label: _labels.idNumber, disabled: !editMode }, { label: _labels.relation, disabled: !editMode }]
 
   const bpMasterDataValidation = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       category: yup.string().required('This field is required'),
       groupId: yup.string().required('This field is required'),
       reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      isInactive: yup.string(),
-      isBlackListed: yup.string()
+      name: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postBPMasterData(values)
@@ -134,6 +147,7 @@ const BPMasterData = () => {
   const handleSubmit = () => {
     if (activeTab === 0) bpMasterDataValidation.handleSubmit()
     else if (activeTab === 1) idNumberValidation.handleSubmit()
+    else if (activeTab === 2) relationGridData.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -141,7 +155,7 @@ const BPMasterData = () => {
     var parameters = defaultParams
 
     getRequest({
-      extension: BusinessPartnerRepository.BPMasterData.qry,
+      extension: BusinessPartnerRepository.MasterData.qry,
       parameters: parameters
     })
       .then(res => {
@@ -155,17 +169,18 @@ const BPMasterData = () => {
   const postBPMasterData = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: BusinessPartnerRepository.BPMasterData.set,
+      extension: BusinessPartnerRepository.MasterData.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
         getGridData({})
         setEditMode(true)
-        setWindowOpen(false)
-        resetIdNumber(res.record.recordId)
+        resetIdNumber(res.recordId)
+        obj.recordId = res.recordId
         fillIdNumberStore(obj)
+        getRelationGridData(obj.recordId)
         if (!recordId) {
-          bpMasterDataValidation.setFieldValue('recordId', res.record.recordId)
+          bpMasterDataValidation.setFieldValue('recordId', res.recordId)
           toast.success('Record Added Successfully')
         } else toast.success('Record Editted Successfully')
       })
@@ -176,7 +191,7 @@ const BPMasterData = () => {
 
   const delBPMasterData = obj => {
     postRequest({
-      extension: BusinessPartnerRepository.BPMasterData.del,
+      extension: BusinessPartnerRepository.MasterData.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -199,6 +214,8 @@ const BPMasterData = () => {
     fillCountryStore()
     filllegalStatusStore()
     resetIdNumber()
+    setRelationGridData([])
+    setdefaultValue(null)
   }
 
   const editBPMasterData = obj => {
@@ -206,10 +223,11 @@ const BPMasterData = () => {
     const defaultParams = `_recordId=${_recordId}`
     var parameters = defaultParams
     getRequest({
-      extension: BusinessPartnerRepository.BPMasterData.get,
+      extension: BusinessPartnerRepository.MasterData.get,
       parameters: parameters
     })
       .then(res => {
+        bpMasterDataValidation.setValues(populateBPMasterData(res.record))
         fillGroupStore()
         fillIdCategoryStore(res.record.category)
         fillCategoryStore()
@@ -217,7 +235,10 @@ const BPMasterData = () => {
         filllegalStatusStore()
         resetIdNumber(res.record.recordId)
         fillIdNumberStore(obj)
-        bpMasterDataValidation.setValues(populateBPMasterData(res.record))
+        getRelationGridData(obj.recordId)
+        fillRelationComboStore()
+        setdefaultValue(null)
+        if (obj.defaultInc != null){getDefault(obj)}
         setEditMode(true)
         setWindowOpen(true)
         setActiveTab(0)
@@ -228,17 +249,10 @@ const BPMasterData = () => {
   }
 
   const fillCategoryStore = () => {
-    var parameters = '_database=49' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.BP_CATEGORY,
+      callback: setCategoryStore
     })
-      .then(res => {
-        setCategoryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillGroupStore = () => {
@@ -316,6 +330,25 @@ const BPMasterData = () => {
     })
       .then(res => {
         setLegalStatusStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getDefault = obj => {
+    const bpId = obj.recordId
+    const incId = obj.defaultInc
+    var parameters =`_bpId=${bpId}&_incId=${incId}`
+
+    getRequest({
+      extension: BusinessPartnerRepository.MasterIDNum.get,
+      parameters: parameters
+    })
+    .then(res => {
+      if (res.record && res.record.idNum != null) {
+        setdefaultValue(res.record.idNum)
+      }
       })
       .catch(error => {
         setErrorMessage(error)
@@ -431,6 +464,137 @@ const BPMasterData = () => {
     }
   }
 
+
+  //Relation Tab
+  const relationValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      toBPId: yup.string().required('This field is required'),
+      relationId: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+      console.log('relation values '+ JSON.stringify(values))
+      postRelation(values)
+    }
+  })
+
+  const addRelation = () => {
+    relationValidation.setValues(getNewRelation(bpMasterDataValidation.values.recordId))
+    setRelationWindowOpen(true)
+  }
+
+  const popupRelation = obj => {
+    getRelationById(obj)
+  }
+
+  const getRelationGridData = bpId => {
+    setRelationGridData([])
+    const defaultParams = `_bpId=${bpId}`
+    var parameters = defaultParams
+
+    getRequest({
+      extension: BusinessPartnerRepository.Relation.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setRelationGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const postRelation = obj => {
+    console.log('enter')
+    const recordId = obj.recordId
+    const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
+    obj.fromBPId=bpId
+    postRequest({
+      extension: BusinessPartnerRepository.Relation.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+        }
+        else toast.success('Record Editted Successfully')
+
+        setRelationWindowOpen(false)
+        getRelationGridData(bpId)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getRelationById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: BusinessPartnerRepository.Relation.get,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log('get '+JSON.stringify())
+        relationValidation.setValues(populateRelation(res.record))
+        setRelationWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const handleRelationSubmit = () => {
+    relationValidation.handleSubmit()
+  }
+
+  const delRelation = obj => {
+    const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
+    postRequest({
+      extension: BusinessPartnerRepository.Relation.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        toast.success('Record Deleted Successfully')
+        getRelationGridData(bpId)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillRelationComboStore = () => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: BusinessPartnerRepository.RelationTypes.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setRelationStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
+  const lookupBusinessPartner = searchQry => {
+
+    setBusinessPartnerStore([])
+    if(searchQry){
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
+    getRequest({
+      extension: BusinessPartnerRepository.MasterData.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setBusinessPartnerStore(res.list)
+      })
+      .catch(error => {
+         setErrorMessage(error)
+      })}
+  }
   useEffect(() => {
     if (!access) getAccess(ResourceIds.BPMasterData, setAccess)
     else {
@@ -473,18 +637,45 @@ const BPMasterData = () => {
           tabs={tabs}
           onSave={handleSubmit}
           editMode={editMode}
-          bpMasterDataValidation={bpMasterDataValidation}
-          categoryStore={categoryStore}
-          idCategoryStore={idCategoryStore}
-          groupStore={groupStore}
-          countryStore={countryStore}
-          legalStatusStore={legalStatusStore}
-          idNumberGridColumn={idNumberGridColumn}
-          idNumberValidation={idNumberValidation}
           labels={_labels}
           maxAccess={access}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+
+          //General Tab
+          bpMasterDataValidation={bpMasterDataValidation}
+          categoryStore={categoryStore}
+          idCategoryStore={idCategoryStore}
+          fillIdCategoryStore={fillIdCategoryStore}
+          groupStore={groupStore}
+          countryStore={countryStore}
+          legalStatusStore={legalStatusStore}
+          defaultValue={defaultValue}
+
+          //ID Number Tab
+          idNumberGridColumn={idNumberGridColumn}
+          idNumberValidation={idNumberValidation}
+
+          //Relation Tab
+          relationGridData={relationGridData}
+          getRelationGridData={getRelationGridData}
+          delRelation={delRelation}
+          addRelation={addRelation}
+          popupRelation={popupRelation}
+        />
+      )}
+
+       {relationWindowOpen && (
+        <BPRelationWindow
+          onClose={() => setRelationWindowOpen(false)}
+          onSave={handleRelationSubmit}
+          relationValidation={relationValidation}
+          relationStore={relationStore}
+          businessPartnerStore={businessPartnerStore}
+          setBusinessPartnerStore={setBusinessPartnerStore}
+          lookupBusinessPartner={lookupBusinessPartner}
+          labels={_labels}
+          maxAccess={access}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

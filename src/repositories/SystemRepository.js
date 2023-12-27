@@ -57,6 +57,7 @@ export const SystemRepository = {
   },
   Country: {
     qry: service + 'qryCO',
+    page: service + 'pageCO',
     get: service + 'getCO',
     set: service + 'setCO',
     del: service + 'delCO'
@@ -79,7 +80,8 @@ export const SystemRepository = {
     get: service + 'getCDI',
     set: service + 'setCDI',
     del: service + 'delCDI',
-    page: service + 'pageCDI'
+    page: service + 'pageCDI',
+    snapshot: service + 'snapshotCDI'
   },
   Address: {
     qry: service + '',
@@ -89,5 +91,21 @@ export const SystemRepository = {
   },
   PlantGroup: {
     qry: service + 'qryPLG'
+  },
+  SMSTemplate:{
+    qry: service + 'qrySMT',
+    get: service + 'getSMT',
+    set: service + 'setSMT',
+    del: service + 'delSMT',
+    page: service + 'pageSMT'
+  },
+  SystemFunction:{
+    qry: service + 'qryFUN',
+    get: service + 'getFUN',
+    set: service + 'setFUN',
+    set2: service + 'set2FUN'
+  },
+  SMSFunctionTemplate:{
+    qry: service + 'qrySFT'
   }
 }

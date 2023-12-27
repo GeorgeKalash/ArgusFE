@@ -6,7 +6,7 @@ import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
-const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, popupApprover, maxAccess, _labels }) => {
+const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {
 
 
   const columns = [
@@ -37,7 +37,7 @@ const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delAp
           gridData={approverGridData}
           rowId={['codeId']}
           api={getApproverGridData}
-          onEdit={popupApprover}
+          onEdit={editApprover}
           onDelete={delApprover}
           isLoading={false}
           maxAccess={maxAccess}

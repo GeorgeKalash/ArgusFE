@@ -6,13 +6,13 @@ import { useState } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import SalaryRangeWindow from './Windows/SalaryRangeWindow'
 import { useFormik } from 'formik'
 import { getNewSalaryRange, populateSalaryRange } from 'src/Models/CurrencyTradingSettings/SalaryRange'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -88,7 +88,7 @@ const RelationTypes = () => {
 
    const delSalaryRange = obj => {
     postRequest({
-      extension: CurrencyTradingSettingsRepository.SalaryRange.del,
+      extension: RemittanceSettingsRepository.SalaryRange.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -113,7 +113,7 @@ const RelationTypes = () => {
     var parameters = defaultParams + '&_dgId=0'
 
     getRequest({
-      extension: CurrencyTradingSettingsRepository.SalaryRange.qry,
+      extension: RemittanceSettingsRepository.SalaryRange.qry,
       parameters: parameters
     })
       .then(res => {
@@ -142,7 +142,7 @@ const RelationTypes = () => {
   const postSalaryRange = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: CurrencyTradingSettingsRepository.SalaryRange.set,
+      extension: RemittanceSettingsRepository.SalaryRange.set,
       record: JSON.stringify(obj)
     })
       .then(res => {

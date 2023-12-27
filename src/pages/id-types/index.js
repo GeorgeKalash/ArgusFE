@@ -19,7 +19,9 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewIdTypes, populateIdTypes } from 'src/Models/CurrencyTradingSettings/IdTypes'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 
 // ** Windows
 import IdTypesWindow from './Windows/IdTypesWindow'
@@ -32,7 +34,8 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 const IdTypes = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { getAllKvsByDataset } = useContext(CommonContext)
+  
   //control
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
@@ -42,6 +45,7 @@ const IdTypes = () => {
   const [idtId, setidtId] = useState(null)
   const [accessLevelStore, setaccesLevelStore] = useState([])
   const [categoryStore, setCategoryStore] = useState([])
+  const [clientStore, setClientStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -58,7 +62,10 @@ const IdTypes = () => {
     tab2: labels && labels.find(item => item.key === 6) && labels.find(item => item.key === 6).value,
     control: labels && labels.find(item => item.key === 7) && labels.find(item => item.key === 7).value,
     accessLevel: labels && labels.find(item => item.key === 8) && labels.find(item => item.key === 8).value,
-    category: labels && labels.find(item => item.key === 9).value
+    category: labels && labels.find(item => item.key === 9).value,
+    clientFileExpiryType: labels && labels.find(item => item.key === 10).value,
+    clientFileLifeTime: labels && labels.find(item => item.key === 11).value,
+    isDiplomat: labels && labels.find(item => item.key === 12).value
   }
 
   const columns = [
@@ -83,13 +90,16 @@ const IdTypes = () => {
   const tabs = [{ label: _labels.tab1 }, { label: _labels.tab2, disabled: !editMode }]
 
   const idTypesValidation = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required('This field is required'),
       format: yup.string().required('This field is required'),
       length: yup.string().required('This field is required'),
-      category: yup.string().required('This field is required')
+      category: yup.string().required('This field is required'),
+      clientFileExpiryType: yup.string().required('This field is required'),
+      clientFileLifeTime: yup.string().required('This field is required'),
+      isDiplomat: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postIdTypes(values)
@@ -145,9 +155,6 @@ const IdTypes = () => {
   ]
 
   const postIdFields = obj => {
-    console.log('recordId ' + idTypesValidation.values.recordId)
-    console.log('items ' + JSON.stringify(obj))
-
     const data = {
       idtId: idTypesValidation.values.recordId,
       items: obj
@@ -237,33 +244,24 @@ const IdTypes = () => {
   }
 
   const fillAccessLevelStore = () => {
-    var parameters = '_database=3' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.RT_Language,
+      callback: setaccesLevelStore
     })
-      .then(res => {
-        //ask about lang values
-        setaccesLevelStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
   }
 
   const fillCategoryStore = () => {
-    var parameters = '_database=147' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.ID_CATEGORY,
+      callback: setCategoryStore
     })
-      .then(res => {
-        //ask about lang values
-        setCategoryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
+  }
+
+  const fillClientFileExpiryTypeStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.FILE_EMPIRY_TYPE,
+      callback: setClientStore
+    })
   }
 
   const postIdTypes = obj => {
@@ -305,10 +303,10 @@ const IdTypes = () => {
   const addIdTypes = () => {
     idTypesValidation.setValues(getNewIdTypes())
     resetIdFields()
-    console.log(idFieldsValidation.values)
     setidtId(null)
     fillAccessLevelStore()
     fillCategoryStore()
+    fillClientFileExpiryTypeStore()
     setActiveTab(0)
     setEditMode(false)
     setWindowOpen(true)
@@ -328,6 +326,7 @@ const IdTypes = () => {
         idTypesValidation.setValues(populateIdTypes(res.record))
         fillAccessLevelStore()
         fillCategoryStore()
+        fillClientFileExpiryTypeStore()
         getIdFields(obj)
         setEditMode(true)
         setWindowOpen(true)
@@ -346,10 +345,12 @@ const IdTypes = () => {
         getLabels(ResourceIds.IdTypes, setLabels)
         fillAccessLevelStore()
         fillCategoryStore()
+        fillClientFileExpiryTypeStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
   return (
@@ -386,6 +387,7 @@ const IdTypes = () => {
           idtId={idtId}
           idFieldsGridColumn={idFieldsGridColumn}
           categoryStore={categoryStore}
+          clientStore={clientStore}
           accessLevelStore={accessLevelStore.list}
         />
       )}

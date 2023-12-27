@@ -5,6 +5,7 @@ const getNewAgentBranch = () => {
   return {
     agentId: null,
     swiftCode: null,
+
     name: null,
     countryId: null,
     stateId: null,
@@ -18,8 +19,12 @@ const getNewAgentBranch = () => {
     phone2: null,
     phone3: null,
     addressId: null,
-    postalCode:null
-
+    postalCode:null,
+    cityDistrictId: null,
+    cityDistrictName:null,
+    bldgNo: null,
+    unitNo: null,
+    subNo: null
   }
 }
 
@@ -28,6 +33,7 @@ const populateAgentBranch = obj => {
     recordId: obj.recordId,
     agentId: obj.agentId,
     swiftCode: obj.swiftCode,
+
     name: obj.name,
     countryId: obj.countryId,
     stateId: obj.stateId,
@@ -41,7 +47,12 @@ const populateAgentBranch = obj => {
     phone2: obj.phone2,
     phone3: obj.phone3,
     addressId: obj.addressId,
-    postalCode:obj.postalCode
+    postalCode:obj.postalCode,
+    cityDistrictId: obj.cityDistrictId,
+    cityDistrictName:obj.cityDistrictName,
+    bldgNo: obj.bldgNo,
+    unitNo: obj.unitNo,
+    subNo: obj.subNo
   }
 }
 

@@ -17,14 +17,16 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import { CommonContext } from 'src/providers/CommonContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewReleaseInd, populateReleaseInd } from 'src/Models/DocumentRelease/ReleaseIndicator'
 
 // ** Helpers
-import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { validateNumberField } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 
 // ** Windows
 import ReleaseIndicatorWindow from './Windows/ReleaseIndicatorWindow'
@@ -33,6 +35,7 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 const ReleaseIndicators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //controls
   const [labels, setLabels] = useState(null)
@@ -44,7 +47,7 @@ const ReleaseIndicators = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false) 
+  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
   const _labels = {
@@ -71,7 +74,7 @@ const ReleaseIndicators = () => {
       field: 'recordId',
       headerName: _labels.id,
       flex: 1,
-      align: 'right',
+      align: 'right'
 
       //valueGetter: ({ row }) => getFormattedNumberMax(row?.recordId, 1, 0)
     },
@@ -89,7 +92,7 @@ const ReleaseIndicators = () => {
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
       recordId: yup
-      .number()
+        .number()
         .required('This field is required')
         .transform((value, originalValue) => validateNumberField(value, originalValue))
         .min(0, 'Value must be greater than or equal to 0')
@@ -163,10 +166,26 @@ const ReleaseIndicators = () => {
 
   const editReleaseInd = obj => {
     console.log(obj)
-    releaseIndValidation.setValues(populateReleaseInd(obj))
     fillChangeabilityStore()
-    setEditMode(true)
-    setWindowOpen(true)
+    getCharById(obj)
+  }
+
+  const getCharById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: DocumentReleaseRepository.ReleaseIndicator.get,
+      parameters: parameters
+    })
+      .then(res => {
+        releaseIndValidation.setValues(populateReleaseInd(res.record))
+        setEditMode(true)
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   useEffect(() => {
@@ -175,7 +194,7 @@ const ReleaseIndicators = () => {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
         fillChangeabilityStore()
-        getLabels(ResourceIds.ReleaseIndicators,setLabels)
+        getLabels(ResourceIds.ReleaseIndicators, setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -183,21 +202,12 @@ const ReleaseIndicators = () => {
   }, [access])
 
   const fillChangeabilityStore = () => {
-    var parameters = '_database=45' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.DR_CHANGEABILITY,
+      callback: setChangeabilityStore
     })
-      .then(res => {
-        setChangeabilityStore(res.list)
-        console.log(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
- 
   return (
     <>
       <Box
@@ -221,18 +231,18 @@ const ReleaseIndicators = () => {
         />
       </Box>
       {windowOpen && (
-       <ReleaseIndicatorWindow
-       onClose={() => setWindowOpen(false)}
-       width={600}
-       height={400}
-       onSave={handleSubmit}
-       releaseIndValidation={releaseIndValidation}
-       changeabilityStore={changeabilityStore}
-       _labels ={_labels}
-       maxAccess={access}
-       editMode={editMode}
-       />
-       )}
+        <ReleaseIndicatorWindow
+          onClose={() => setWindowOpen(false)}
+          width={600}
+          height={400}
+          onSave={handleSubmit}
+          releaseIndValidation={releaseIndValidation}
+          changeabilityStore={changeabilityStore}
+          _labels={_labels}
+          maxAccess={access}
+          editMode={editMode}
+        />
+      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

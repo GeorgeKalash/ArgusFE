@@ -6,8 +6,9 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 // ** Helpers
+import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 
-const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore }) => {
+const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clientStore }) => {
   return (
     <Grid container spacing={4}>
       <Grid item xs={12}>
@@ -69,6 +70,52 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore }) => 
           }}
           error={idTypesValidation.touched.category && Boolean(idTypesValidation.errors.category)}
           helperText={idTypesValidation.touched.category && idTypesValidation.errors.category}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <CustomComboBox
+          name='clientFileExpiryType'
+          label={labels.clientFileExpiryType}
+          valueField='key'
+          displayField='value'
+          store={clientStore}
+          value={clientStore.filter(item => item.key === idTypesValidation.values.clientFileExpiryType)[0]}
+          required
+          maxAccess={maxAccess}
+          onChange={(event, newValue) => {
+            idTypesValidation && idTypesValidation.setFieldValue('clientFileExpiryType', newValue?.key)
+          }}
+          error={
+            idTypesValidation.touched.clientFileExpiryType && Boolean(idTypesValidation.errors.clientFileExpiryType)
+          }
+          helperText={idTypesValidation.touched.clientFileExpiryType && idTypesValidation.errors.clientFileExpiryType}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <CustomTextField
+          name='clientFileLifeTime'
+          label={labels.clientFileLifeTime}
+          value={idTypesValidation.values.clientFileLifeTime}
+          required
+          maxAccess={maxAccess}
+          onChange={idTypesValidation.handleChange}
+          onClear={() => idTypesValidation.setFieldValue('clientFileLifeTime', '')}
+          error={idTypesValidation.touched.clientFileLifeTime && Boolean(idTypesValidation.errors.clientFileLifeTime)}
+          helperText={idTypesValidation.touched.clientFileLifeTime && idTypesValidation.errors.clientFileLifeTime}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <FormControlLabel
+          control={
+            <Checkbox
+               name='isDiplomat'
+               maxAccess={maxAccess}
+               checked={idTypesValidation.values?.isDiplomat}
+               onChange={idTypesValidation.handleChange}
+            />
+          }
+        label={labels.isDiplomat}
         />
       </Grid>
     </Grid>
