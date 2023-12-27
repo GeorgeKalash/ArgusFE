@@ -4,6 +4,7 @@ export const CTCLRepository = {
 
 
   CtClientIndividual: {
+    snapshot : service + "snapshotCL",
     set2: service + 'set2CLR',
 
   },
