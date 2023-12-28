@@ -97,7 +97,8 @@ export const SystemRepository = {
     get: service + 'getSMT',
     set: service + 'setSMT',
     del: service + 'delSMT',
-    page: service + 'pageSMT'
+    page: service + 'pageSMT',
+    snapshot: service + 'snapshotSMT'
   },
   SystemFunction:{
     qry: service + 'qryFUN',

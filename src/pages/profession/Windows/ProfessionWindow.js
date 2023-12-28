@@ -1,15 +1,14 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import RelationTypeTab from 'src/pages/profession/Tabs/ProfessionTab'
+import ProfessionTab from 'src/pages/profession/Tabs/ProfessionTab'
 
 const ProfessionWindow = ({
     onClose,
     width,
     height,
     onSave,
-    editMode,
-    typeStore,
+    diplomatStore,
     ProfessionValidation,
     labels,
     maxAccess
@@ -25,13 +24,12 @@ return (
     height={height}
     onSave={onSave}
     ProfessionValidation={ProfessionValidation}
-    typeStore={typeStore}
     >
          <CustomTabPanel>
-           <RelationTypeTab
+           <ProfessionTab
               labels={labels}
               ProfessionValidation={ProfessionValidation}
-              typeStore={typeStore}
+              diplomatStore={diplomatStore}
               maxAccess={maxAccess}
            />
            </CustomTabPanel>

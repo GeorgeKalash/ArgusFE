@@ -43,14 +43,6 @@ const BPMasterDataWindow = ({
       height={height}
       onSave={onSave}
       setActiveTab={setActiveTab}
-      categoryStore={categoryStore}
-      groupStore={groupStore}
-      countryStore={countryStore}
-      legalStatusStore={legalStatusStore}
-      idCategoryStore={idCategoryStore}
-      bpMasterDataValidation={bpMasterDataValidation}
-      idNumberGridColumn={idNumberGridColumn}
-      idNumberValidation={idNumberValidation}
     >
       <CustomTabPanel index={0} value={activeTab}>
         <GeneralTab

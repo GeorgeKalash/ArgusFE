@@ -52,6 +52,8 @@ const IdTypes = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [type, setType] = useState(0)
+
 
   const _labels = {
     IdTypes: labels && labels.find(item => item.key === 1).value,
@@ -98,7 +100,7 @@ const IdTypes = () => {
       length: yup.string().required('This field is required'),
       category: yup.string().required('This field is required'),
       clientFileExpiryType: yup.string().required('This field is required'),
-      clientFileLifeTime: yup.string().required('This field is required'),
+      clientFileLifeTime: type===1 ? yup.string().required('This field is required') : yup.string().notRequired(),
       isDiplomat: yup.string().required('This field is required')
     }),
     onSubmit: values => {
