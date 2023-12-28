@@ -3,14 +3,15 @@ import { Grid } from '@mui/material'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { getFormattedNumberMax} from 'src/lib/numberField-helper'
 import { useState } from 'react'
 import { handleChangeNumber } from 'src/lib/numberField-helper'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 const ProfessionTab=({
     labels,
     ProfessionValidation,
-    maxAccess
+    maxAccess,
+    diplomatStore
 }) =>{
 
 
@@ -60,7 +61,7 @@ return (
               helperText={ProfessionValidation.touched.flName && ProfessionValidation.errors.flName}
             />
           </Grid>
-
+          
           <Grid item xs={12}>
             <CustomTextField
               position={position}
@@ -109,6 +110,7 @@ return (
             />
           </Grid>
 
+        
 
           <Grid item xs={12}>
             <CustomTextField
@@ -122,6 +124,24 @@ return (
               onClear={() => ProfessionValidation.setFieldValue('riskFactor', '')}
               error={ProfessionValidation.touched.riskFactor && Boolean(ProfessionValidation.errors.riskFactor)}
               helperText={ProfessionValidation.touched.riskFactor && ProfessionValidation.errors.riskFactor}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <CustomComboBox
+              name='diplomatStatus'
+              label={labels.diplomatStatus}
+              valueField='key'
+              displayField='value'
+              store={diplomatStore}
+              value={diplomatStore.filter(item => item.key === ProfessionValidation.values.diplomatStatus)[0]}
+              required
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                ProfessionValidation.setFieldValue('diplomatStatus', newValue?.key)
+              }}
+              error={ProfessionValidation.touched.diplomatStatus && Boolean(ProfessionValidation.errors.diplomatStatus)}
+              helperText={ProfessionValidation.touched.diplomatStatus && ProfessionValidation.errors.diplomatStatus}
             />
           </Grid>
 
