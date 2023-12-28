@@ -46,7 +46,23 @@ const SmsFunctionTemplate = () => {
     templateName: labels && labels.find(item => item.key === 3).value
   }
 
+  const lookupTemplate = searchQry => {
 
+    setTemplateStore([])
+    if(searchQry){
+    var parameters = `_filter=${searchQry}`
+    getRequest({
+      extension: SystemRepository.SMSTemplate.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setTemplateStore(res.list)
+      })
+      .catch(error => {
+         setErrorMessage(error)
+      })}
+  }
+    
   const columns = [
     {
         field: 'textfield',
@@ -65,19 +81,22 @@ const SmsFunctionTemplate = () => {
         width: 200, 
     },
     {
-      field: 'CustomLookup',
+      field: 'templateName',
       header: _labels.templateName,
       nameId: 'templateId',
       name: 'templateName',
-
-      //store: templateStore,
+      customComponent: CustomLookup,
+      onLookup: { lookupTemplate },
+      setStore: templateStore,
       valueField: 'templateId',
       displayField: 'templateName',
       columnsInDropDown: [{ key: 'templateId', value: 'templateName' }],
-      width: 250, 
-    }
-];
+      width: 250,
+      readOnly:false,
+      disabled:false,
 
+    },
+];
 
   const smsFunctionTemplatesValidation = useFormik({
     enableReinitialize: false,
@@ -147,23 +166,7 @@ const SmsFunctionTemplate = () => {
     }
   };
   
-  const lookupTemplate = searchQry => {
 
-    setTemplateStore([])
-    if(searchQry){
-    var parameters = `_filter=${searchQry}`
-    getRequest({
-      extension: SystemRepository.SMSTemplate.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setTemplateStore(res.list)
-      })
-      .catch(error => {
-         setErrorMessage(error)
-      })}
-  }
-    
     const postSmsFunctionTemplates = obj => {
       /* const recordId = obj.recordId
        postRequest({
