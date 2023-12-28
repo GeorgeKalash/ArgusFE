@@ -144,8 +144,14 @@ const AddressTab = ({
               label={labels.country}
               valueField='countryId'
               required
-              displayField='name'
+              displayField={['reference','name']}
               store={countryStore}
+              columnsInDropDown= {[
+                { key: 'reference', value: 'Ref' },
+                { key: 'name', value: 'Name' },
+
+                // { key: 'flName', value: 'Foreign Language Name' }
+              ]}
               value={countryStore.filter(item => item.recordId === addressValidation.values.countryId)[0]}
               onChange={(event, newValue) => {
                 addressValidation.setFieldValue('countryId', newValue?.recordId)
@@ -164,7 +170,7 @@ const AddressTab = ({
           </Grid>
           <Grid item xs={12}>
             {
-              
+
               //stateStore &&
               <CustomComboBox
                 name='stateId'
