@@ -1,6 +1,8 @@
 // ** React Imports
 import { useEffect, useState, useContext } from 'react'
 
+import CustomLookup from 'src/components/Inputs/CustomLookup'
+
 // ** MUI Imports
 import {Box } from '@mui/material'
 
@@ -24,17 +26,15 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
-  //stores
-  const [gridData, setGridData] = useState([])
-
   //states
-  const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [templateStore, setTemplateStore] = useState([])
 
   //control
   const [labels, setLabels] = useState(null)
@@ -43,114 +43,159 @@ const SmsFunctionTemplate = () => {
   const _labels = {
     functionId: labels && labels.find(item => item.key === 1).value,
     name: labels && labels.find(item => item.key === 2).value,
-    smsTemplate: labels && labels.find(item => item.key === 3).value
+    templateName: labels && labels.find(item => item.key === 3).value
   }
 
+  const lookupTemplate = searchQry => {
+
+    setTemplateStore([])
+    if(searchQry){
+    var parameters = `_filter=${searchQry}`
+    getRequest({
+      extension: SystemRepository.SMSTemplate.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setTemplateStore(res.list)
+      })
+      .catch(error => {
+         setErrorMessage(error)
+      })}
+  }
+    
   const columns = [
     {
-      field: 'funtionId',
-      headerName: _labels.functionId,
-      flex: 1
+        field: 'textfield',
+        header: _labels.functionId,
+        name: 'functionId',
+        mandatory: true,
+        readOnly: true,
+        width: 150, 
     },
     {
-      field: 'name',
-      headerName: _labels.name,
-      flex: 1
+        field: 'textfield',
+        header: _labels.name,
+        name: 'functionName',
+        mandatory: true,
+        readOnly: true,
+        width: 200, 
     },
     {
-      field: 'templateId',
-      headerName: _labels.templateId,
-      flex: 1
-    }
-  ]
+      field: 'templateName',
+      header: _labels.templateName,
+      nameId: 'templateId',
+      name: 'templateName',
+      customComponent: CustomLookup,
+      onLookup: { lookupTemplate },
+      setStore: templateStore,
+      valueField: 'templateId',
+      displayField: 'templateName',
+      columnsInDropDown: [{ key: 'templateId', value: 'templateName' }],
+      width: 250,
+      readOnly:false,
+      disabled:false,
+
+    },
+];
 
   const smsFunctionTemplatesValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
+    validate: values => {
+    },
+    initialValues: {
+      rows: [
+        {
+          functionId:''
+        }
+      ]
+
+    },
     onSubmit: values => {
-        postSmsFunctionTemplates(values)
+      postSmsFunctionTemplates(values.rows)
     }
   })
 
-  const handleSubmit = () => {
-    smsFunctionTemplatesValidation.handleSubmit()
-  }
-
-  const getGridData = async () => {
+  const getGridData = () => {
     try {
-      var parameters = ``;
-  
-      const resSystemFunction = await getRequest({
+      const parameters = '';
+      
+      const resSystemFunctionPromise = getRequest({
         extension: SystemRepository.SystemFunction.qry,
         parameters: parameters
-      })
+      });
   
-      const resSmsFunctionTemplate = await getRequest({
+      const resSmsFunctionTemplatePromise = getRequest({
         extension: SystemRepository.SMSFunctionTemplate.qry,
         parameters: parameters
-      })
+      });
   
-      var finalList = [];
+       Promise.all([resSystemFunctionPromise, resSmsFunctionTemplatePromise])
+        .then(([resSystemFunction, resSmsFunctionTemplate]) => {
+          const finalList = resSystemFunction.list.map((x) => {
+            const n = {
+              functionId: parseInt(x.functionId),
+              templateId: null,
+              functionName: x.sfName,
+              templateName: null
+            };
   
-      resSystemFunction.list.forEach(x => {
-        var n = {
-          functionId: parseInt(x.functionId),
-          templateId: null,
-          functionName: x.sfName,
-          templateName: null
-        }
+            const matchingTemplate = resSmsFunctionTemplate.list.find(
+              (y) => n.functionId === y.functionId
+            );
   
-        resSmsFunctionTemplate.list.forEach(y => {
-          if (n.functionId == y.functionId) {
-            n.templateId = y.templateId
-            n.templateName = y.templateName
-          }
-        });
+            if (matchingTemplate) {
+              n.templateId = matchingTemplate.templateId;
+              n.templateName = matchingTemplate.templateName;
+            }
   
-        finalList.push(n)
-      })
+            return n;
+          });
+  
+          smsFunctionTemplatesValidation.setValues({
+            ...smsFunctionTemplatesValidation.values,
+            rows: finalList
+          });
 
-      // Casting finalList to the desired model
-      const castedList = finalList.map((item) => populateSmsFunctionTemplate(item))
-      console.log(castedList)
-      setGridData(castedList)
-    }   
-    catch (error) {
+        });
+
+    } catch (error) {
       setErrorMessage(error.res);
 
-      return [];
+      return Promise.reject(error); // You can choose to reject the promise if an error occurs
     }
   };
   
-  const postSmsFunctionTemplates = obj => {
-   /* const recordId = obj.recordId
-    postRequest({
-      extension: SystemRepository.SMSTemplate.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })*/
-  }
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.SmsTemplates, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData()
-        getLabels(ResourceIds.SmsTemplates, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+    const postSmsFunctionTemplates = obj => {
+      /* const recordId = obj.recordId
+       postRequest({
+         extension: SystemRepository.SMSTemplate.set,
+         record: JSON.stringify(obj)
+       })
+         .then(res => {
+           getGridData({})
+           setWindowOpen(false)
+           if (!recordId) toast.success('Record Added Successfully')
+           else toast.success('Record Edited Successfully')
+         })
+         .catch(error => {
+           setErrorMessage(error)
+         })*/
+     }
+  
+     useEffect(() => {
+      if (!access) getAccess(ResourceIds.SmsFunctionTemplates, setAccess)
+      else {
+        if (access.record.maxAccess > 0) {
+          getGridData()
+          getLabels(ResourceIds.SmsFunctionTemplates, setLabels)
+        } else {
+          setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
+        }
       }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [access])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [access])
 
   return (
     <>
@@ -161,14 +206,11 @@ const SmsFunctionTemplate = () => {
           height: '100%'
         }}
       >
-        <Table
+        <InlineEditGrid
+          gridValidation={smsFunctionTemplatesValidation}
           columns={columns}
-          gridData={gridData}
-          rowId={['functionId']}
-          api={getGridData}
-          isLoading={false}
-          maxAccess={access}
-          pagination={false}
+          allowDelete={false}
+          allowAddNewLine={false}
         />
       </Box>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
