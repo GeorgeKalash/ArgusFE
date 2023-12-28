@@ -23,7 +23,10 @@ const AgentBranchWindow = ({
   lookupCity,
   cityStore,
   setCityStore,
-  maxAccess
+  maxAccess,
+  lookupCityDistrict,
+  cityDistrictStore,
+  setCityDistrictStore,
 }) => {
   return (
     <Window
@@ -55,12 +58,14 @@ const AgentBranchWindow = ({
           labels={labels}
           lookupCity={lookupCity}
           fillStateStore={fillStateStore}
-cityStore={cityStore}
-setCityStore={setCityStore}
+          cityStore={cityStore}
+          setCityStore={setCityStore}
           fillCountryStore={fillCountryStore}
           addressValidation={agentBranchValidation}
           maxAccess={maxAccess}
-          agentStore={agentStore}
+          lookupCityDistrict={lookupCityDistrict}
+          cityDistrictStore={cityDistrictStore}
+          setCityDistrictStore={setCityDistrictStore}
         />
       </CustomTabPanel>
     </Window>

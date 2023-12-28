@@ -15,7 +15,9 @@ const GeneralTab = ({
   idCategoryStore,
   editMode,
   countryStore,
-  legalStatusStore
+  fillIdCategoryStore,
+  legalStatusStore,
+  defaultValue
 }) => {
   return (
     <>
@@ -35,6 +37,8 @@ const GeneralTab = ({
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation.setFieldValue('category', newValue?.key)
+                const selectedCategory = newValue?.key || ''
+                fillIdCategoryStore(selectedCategory) // Fetch and update state data based on the selected category
               }}
               error={bpMasterDataValidation.touched.category && Boolean(bpMasterDataValidation.errors.category)}
               helperText={bpMasterDataValidation.touched.category && bpMasterDataValidation.errors.category}
@@ -142,7 +146,8 @@ const GeneralTab = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+          {idCategoryStore && (  
+          <CustomComboBox
               name='defaultInc'
               label={labels.idCategory}
               valueField='recordId'
@@ -151,19 +156,19 @@ const GeneralTab = ({
               value={idCategoryStore.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
-                bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
+                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
               }}
               error={bpMasterDataValidation.touched.defaultInc && Boolean(bpMasterDataValidation.errors.defaultInc)}
               helperText={bpMasterDataValidation.touched.defaultInc && bpMasterDataValidation.errors.defaultInc}
             />
+            )}
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               label={labels.defaultId}
-              value={bpMasterDataValidation.values?.defaultId}
+              value={defaultValue}
               maxAccess={maxAccess}
               readOnly={!bpMasterDataValidation.values?.defaultInc}
-              onChange={bpMasterDataValidation.handleChange}
               onClear={() => bpMasterDataValidation.setFieldValue('defaultId', '')}
               error={bpMasterDataValidation.touched.defaultId && Boolean(bpMasterDataValidation.errors.defaultId)}
               helperText={bpMasterDataValidation.touched.defaultId && bpMasterDataValidation.errors.defaultId}
@@ -179,7 +184,7 @@ const GeneralTab = ({
               value={countryStore?.filter(item => item.recordId === bpMasterDataValidation.values.nationalityId)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
-                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
+                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('nationalityId', newValue?.recordId)
               }}
               error={
                 bpMasterDataValidation.touched.nationalityId && Boolean(bpMasterDataValidation.errors.nationalityId)
@@ -197,7 +202,7 @@ const GeneralTab = ({
               value={legalStatusStore?.filter(item => item.recordId === bpMasterDataValidation.values.legalStatusId)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
-                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
+                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('legalStatusId', newValue?.recordId)
               }}
               error={
                 bpMasterDataValidation.touched.legalStatusId && Boolean(bpMasterDataValidation.errors.legalStatusId)

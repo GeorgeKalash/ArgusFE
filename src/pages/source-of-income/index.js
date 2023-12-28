@@ -15,11 +15,13 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { CommonContext } from 'src/providers/CommonContext'
 import { getNewSourceOfIncome, populateSourceOfIncome } from 'src/Models/CurrencyTradingSettings/SourceOfIncome'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 // ** Windows
 import SourceOfIncomeWindow from './Windows/SourceOfIncomeWindow'
@@ -32,6 +34,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 const SourceOfIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //stores
   const [gridData, setGridData] = useState(null)
@@ -97,17 +100,10 @@ const SourceOfIncome = () => {
   }
 
   const fillIncomeStore = () => {
-    var parameters = '_database=3502' //add 'xml'.json and get _database values from there
-    getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: parameters
+    getAllKvsByDataset({
+      _dataset: DataSets.CT_INCOME_TYPE,
+      callback: setIncomeTypeStore
     })
-      .then(res => {
-        setIncomeTypeStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -115,7 +111,7 @@ const SourceOfIncome = () => {
     var parameters = defaultParams
 
     getRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.page,
+      extension: RemittanceSettingsRepository.SourceOfIncome.page,
       parameters: parameters
     })
       .then(res => {
@@ -129,7 +125,7 @@ const SourceOfIncome = () => {
   const postSourceOfIncome = obj => {
     const recordId = obj.recordId
     postRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.set,
+      extension: RemittanceSettingsRepository.SourceOfIncome.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -145,7 +141,7 @@ const SourceOfIncome = () => {
 
   const delSourceOfIncome = obj => {
     postRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.del,
+      extension: RemittanceSettingsRepository.SourceOfIncome.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -170,7 +166,7 @@ const SourceOfIncome = () => {
     const defaultParams = `_recordId=${_recordId}`
     var parameters = defaultParams
     getRequest({
-      extension: CurrencyTradingSettingsRepository.SourceOfIncome.get,
+      extension: RemittanceSettingsRepository.SourceOfIncome.get,
       parameters: parameters
     })
       .then(res => {
