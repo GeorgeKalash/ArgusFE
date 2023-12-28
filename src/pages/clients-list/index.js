@@ -15,6 +15,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import { formatDateToApi } from 'src/lib/date-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -57,7 +58,8 @@ const ClientsList = () => {
   const [genderStore, setGenderStore] = useState([]);
   const [stateAddressStore, setStateAddressStore] = useState([]);
   const [stateAddressWorkStore, setStateAddressWorkStore] = useState([]);
-
+const [cityDistrictAddressWorkStore , setCityDistrictAddressWorkStore] = useState([])
+const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
   const [educationStore, setEducationStore] = useState([]);
   const [idTypeStore, setIdTypeStore] = useState([]);
   const [titleStore, setTitleStore] = useState([]);
@@ -84,8 +86,6 @@ const ClientsList = () => {
         fillEducationStore();
         fillIdTypeStore()
         fillTitleStore()
-
-
 
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
@@ -189,7 +189,8 @@ const ClientsList = () => {
     fl_family: labels2 && labels2.find((item) => item.key === 65).value,
 
     state: labels2 && labels2.find((item) => item.key === 66).value,
-
+     confirmNb: labels2 && labels2.find((item) => item.key === 67).value,
+     confirmCell: labels2 && labels2.find((item) => item.key === 68).value,
 
 
   };
@@ -397,6 +398,7 @@ console.log(res)
 
   const postRtDefault = (obj) => {
     console.log("obj", obj);
+   const date = new Date()
 
     //CTCL
 
@@ -412,7 +414,7 @@ console.log(res)
       addressId: null,
       plantId: clientIndividualFormValidation.values.plantId,
       cellPhone: obj.cellPhone,
-      createdDate:  obj.expiryDate,
+      createdDate:  formatDateToApi(date.toISOString()),
       expiryDate: obj.expiryDate,
       otp: obj.otpVerified,
       plantName: obj.plantName,
@@ -581,11 +583,11 @@ console.log(res)
       subNo: null
     },
     validationSchema: yup.object({
-      // name:  yup.string().required('This field is required'),
-      // countryId:  yup.string().required('This field is required'),
-      // cityId:  yup.string().required('This field is required'),
-      // street1:  yup.string().required('This field is required'),
-      // phone: yup.string().required('This field is required')
+      name:  yup.string().required('This field is required'),
+      countryId:  yup.string().required('This field is required'),
+      cityId:  yup.string().required('This field is required'),
+      street1:  yup.string().required('This field is required'),
+      phone: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       console.log(values);
@@ -718,6 +720,40 @@ console.log(res)
       });
   };
 
+  const lookupCityDistrictAddress = searchQry => {
+    setCityDistrictAddressStore([])
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${clientIndividualFormValidation.values.cityId}`
+
+    getRequest({
+      extension: SystemRepository.CityDistrict.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res.list)
+        setCityDistrictAddressStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const lookupCityDistrictAddressWork = searchQry => {
+    setCityDistrictAddressWorkStore([])
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${WorkAddressValidation.values.cityId}`
+
+    getRequest({
+      extension: SystemRepository.CityDistrict.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res.list)
+        setCityDistrictAddressWorkStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   const lookupCityAddressWork = (searchQry) => {
     setCityAddressWorkStore([]);
     var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${WorkAddressValidation.values.countryId}&_stateId=${WorkAddressValidation.values.stateId || 0}`;
@@ -761,6 +797,7 @@ console.log(res)
         setErrorMessage(error);
       });
   };
+
 
   const fillSalaryRangeStore = () => {
     var parameters = `_filter=`;
@@ -883,7 +920,7 @@ onEdit={editClient}
        WorkAddressValidation={WorkAddressValidation}
        countryStore={countryStore}
        cityStore={cityStore}
-
+setCityStore={setCityStore}
        types={types}
   professionStore={professionStore}
   salaryRangeStore={salaryRangeStore}
@@ -901,8 +938,12 @@ onEdit={editClient}
   lookupCity={lookupCity}
   lookupCityAddress={lookupCityAddress}
   lookupCityAddressWork={lookupCityAddressWork}
+  lookupCityDistrictAddress={lookupCityDistrictAddress}
+  lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
   fillStateStoreAddress={fillStateStoreAddress}
   fillStateStoreAddressWork={fillStateStoreAddressWork}
+  cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
+  cityDistrictAddressStore={cityDistrictAddressStore}
   stateAddressWorkStore={stateAddressWorkStore}
   stateAddressStore={stateAddressStore}
   _labels ={_labels2}

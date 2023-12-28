@@ -19,6 +19,8 @@ const ClientTab = ({
   cityStore,
   setCityStore,
   cityAddressStore,
+  cityDistrictAddressWorkStore,
+  cityDistrictAddressStore,
   setCityAddressStore,
   cityAddressWorkStore,
   setCityAddressWorkStore,
@@ -26,6 +28,8 @@ const ClientTab = ({
   lookupCity,
   lookupCityAddress,
   lookupCityAddressWork,
+  lookupCityDistrictAddress,
+  lookupCityDistrictAddressWork,
   types,
   professionStore,
   salaryRangeStore,
@@ -221,7 +225,7 @@ return (
                 <Grid item xs={12}>
                   <CustomTextField
                     name="numberRepeat"
-                    label={_labels.number}
+                    label={_labels.confirmNb}
                     value={clientIndividualFormValidation.values?.numberRepeatEncrypt}
                     required
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptFirstFourDigitsRepeat(e)  }}
@@ -315,7 +319,7 @@ return (
                     }
                     required
                     onChange={(event, newValue) => {
-                      // setCityStore([])
+                      setCityStore([])
 
                       if(newValue){
 
@@ -327,7 +331,22 @@ return (
                       clientIndividualFormValidation.setFieldValue(
                         "country",
                         newValue?.name,
-                      );}else{
+
+                      );
+
+
+                      clientIndividualFormValidation.setFieldValue(
+                        "idCity",
+                        ''
+                      );
+                      clientIndividualFormValidation.setFieldValue(
+                        "city",
+                        ''
+                      );
+
+
+                    }else{
+
                         clientIndividualFormValidation.setFieldValue(
                           "idCountry",
                           ''
@@ -339,11 +358,11 @@ return (
 
                         clientIndividualFormValidation.setFieldValue(
                           "idCity",
-                          null
+                          ''
                         );
                         clientIndividualFormValidation.setFieldValue(
                           "city",
-                          null
+                          ''
                         );
 
 
@@ -415,7 +434,7 @@ return (
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
-               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore}  fillStateStore={fillStateStoreAddress}/>
+               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress}/>
                </FieldSet>
                 {/* <Grid item xs={12}>
                   <CustomTextField
@@ -803,7 +822,7 @@ return (
               <Grid item xs={6}>
                 <CustomTextField
                   name="cellPhoneRepeat"
-                  label={_labels.cellPhone}
+                  label={_labels.confirmCell}
                   value={clientIndividualFormValidation.values?.cellPhoneRepeat}
                   required
                   maxLength="15"
@@ -1382,7 +1401,7 @@ return (
 
                <Grid container sx={{marginTop: '20px'}}>
               <FieldSet title={_labels.workAddress}>
-              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork} stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork}/>
+              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore}/>
 
                </FieldSet>
                </Grid>
