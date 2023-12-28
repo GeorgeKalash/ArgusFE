@@ -71,7 +71,7 @@ const ProductMaster = () => {
   const [productCountriesGridData, setProductCountriesGridData] = useState([]) //for countries tab
   const [productCurrenciesGridData, setProductCurrenciesGridData] = useState([]) //for monetary tab
   const [productDispersalGridData, setProductDispersalGridData] = useState([]) //for product dispersal tab
-  const[type, setType] = useState(0)
+  const [type, setType] = useState(0)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)

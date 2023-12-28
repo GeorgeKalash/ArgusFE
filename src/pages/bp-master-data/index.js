@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button, FormControlLabel } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -29,10 +29,7 @@ import BPMasterDataWindow from './Windows/BPMasterDataWindow'
 import BPRelationWindow from './Windows/BPRelationWindow'
 
 // ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
 
 const BPMasterData = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
@@ -179,6 +176,7 @@ const BPMasterData = () => {
         obj.recordId = res.recordId
         fillIdNumberStore(obj)
         getRelationGridData(obj.recordId)
+        fillRelationComboStore()
         if (!recordId) {
           bpMasterDataValidation.setFieldValue('recordId', res.recordId)
           toast.success('Record Added Successfully')
@@ -273,7 +271,8 @@ const BPMasterData = () => {
     setIDCategoryStore([])
     const list = await filterIdCategory(categId)
     setIDCategoryStore(list)
-  }
+    }
+  
 
   const filterIdCategory = async categId => {
     try {
@@ -506,7 +505,6 @@ const BPMasterData = () => {
   }
 
   const postRelation = obj => {
-    console.log('enter')
     const recordId = obj.recordId
     const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
     obj.fromBPId=bpId

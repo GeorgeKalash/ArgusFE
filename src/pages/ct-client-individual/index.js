@@ -58,6 +58,7 @@ const Defaults = () => {
   const [educationStore, setEducationStore] = useState([]);
   const [idTypeStore, setIdTypeStore] = useState([]);
 
+  const [titleStore, setTitleStore] = useState([]);
 
   //stores
 
@@ -78,6 +79,7 @@ const Defaults = () => {
         fillCivilStatusStore();
         fillEducationStore();
         fillIdTypeStore()
+        fillTitleStore()
 
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" });
@@ -102,6 +104,10 @@ const Defaults = () => {
     last: labels && labels.find((item) => item.key === 12).value,
     middle: labels && labels.find((item) => item.key === 13).value,
     family: labels && labels.find((item) => item.key === 14).value,
+    fl_first: labels && labels.find((item) => item.key === 62).value,
+    fl_last: labels && labels.find((item) => item.key === 63).value,
+    fl_middle: labels && labels.find((item) => item.key === 64).value,
+    fl_family: labels && labels.find((item) => item.key === 65).value,
     nationality: labels && labels.find((item) => item.key === 15).value,
     profession: labels && labels.find((item) => item.key === 16).value,
     cellPhone: labels && labels.find((item) => item.key === 17).value,
@@ -150,7 +156,10 @@ const Defaults = () => {
   const clientIndividualFormValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true, // Trigger validation on change
-    validateOnBlur: true,     initialValues: {
+    validateOnBlur: true,
+
+
+     initialValues: {
       reference: null,
       isResident: false,
       number: null,
@@ -225,6 +234,7 @@ const Defaults = () => {
       subNo: null
 
     },
+
     validationSchema: yup.object({
       reference: yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
@@ -243,7 +253,8 @@ const Defaults = () => {
       cellPhone: yup.string().required("This field is required"),
       cellPhoneRepeat : yup.string().required('Repeat Password is required')
       .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-      status: yup.string().required("This field is required"),
+
+      // status: yup.string().required("This field is required"),
       salaryRangeId: yup.string().required("This field is required"),
       smsLanguage: yup.string().required("This field is required"),
       incomeSourceId: yup.string().required("This field is required"),
@@ -326,22 +337,30 @@ const Defaults = () => {
       status: obj.status,
       addressId: null,
       plantId: 3,
+      cellPhone: obj.cellPhone,
       createdDate:  obj.expiryDate,
       expiryDate: obj.expiryDate,
-
+      otp: obj.otpVerified,
+      plantName: obj.plantName,
+      nationalityName: obj.nationalityName,
+      status:1, //obj.statusName,
+      categoryName: obj.categoryName
 
     };
 
 
     //CCTD
     const obj2 = {
+      idNo : "1",
+
       // clientID: null,
       idCountryId: obj.countryId,
-      idCity: obj.cityId,
+      idtId: obj.idtId ,  //5
       idExpiryDate: obj.expiryDate,
       issusDate: obj.issusDate,
-      idNo : "1",
-      idtId: obj.idtId   //5
+      idCity: obj.cityId,
+      isDiplomatic: obj.isDiplomat,
+
     };
 
 
@@ -358,9 +377,8 @@ const Defaults = () => {
       fl_middleName: obj.fl_middleName,
       fl_familyName: obj.fl_familyName,
       birthDate: obj.birthDate,
-      professionId: obj.professionId,
-      cellPhone: obj.cellPhone,
       isResident: obj.isResident,
+
     };
 
 
@@ -370,7 +388,7 @@ const Defaults = () => {
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
       sponsorName: obj.sponsorName,
-      whatsappNo: obj.whatsappNo,
+      whatsAppNo: obj.whatsappNo,
       gender: obj.gender,
       title: obj.title,
       civilStatus: obj.civilStatus,
@@ -382,12 +400,17 @@ const Defaults = () => {
       OTPVerified: obj.OTPVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
-      status: obj.status,
-      isVerified: true,
-      reference: obj.reference,
+
+      // status: obj.status,
+
+      // isVerified: true,
+      // reference: obj.reference,
+      professionId:obj.professionId,
       idNo : "1",
       wip: 1,
-      releaseStatus: 1
+      releaseStatus: 1,
+      educationLevelName: obj.educationLevelName,
+      statusName: obj.statusName
 
       // date: obj.date,
     };
@@ -461,7 +484,7 @@ const Defaults = () => {
   const handleSubmit = () => {
     clientIndividualFormValidation.handleSubmit();
 
-    // WorkAddressValidation.handleSubmit();
+    WorkAddressValidation.handleSubmit();
 
   };
 
@@ -584,6 +607,13 @@ const Defaults = () => {
     getAllKvsByDataset({
       _dataset: DataSets.EDUCATION_LEVEL,
       callback: setEducationStore
+    })
+  };
+
+  const fillTitleStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.Title,
+      callback: setTitleStore
     })
   };
 
@@ -766,6 +796,7 @@ const Defaults = () => {
                     required
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptFirstFourDigits(e)  }}
                     onCopy={handleCopy}
+                    onPaste={handleCopy}
 
                     // maxLength="10"
                     onClear={() =>{
@@ -791,6 +822,8 @@ const Defaults = () => {
                     required
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptFirstFourDigitsRepeat(e)  }}
                     onBlur={clientIndividualFormValidation.handleBlur}
+                    onCopy={handleCopy}
+                    onPaste={handleCopy}
 
                     // maxLength="10"
                     onClear={() =>{
@@ -862,8 +895,13 @@ const Defaults = () => {
                     name="countryId"
                     label={_labels.country}
                     valueField="recordId"
-                    displayField="name"
-                    store={countryStore}
+                    displayField={['reference','name','flName']}
+                store={countryStore}
+                columnsInDropDown= {[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language Name' }
+                ]}
                     value={
                       countryStore.filter(
                         (item) =>
@@ -873,7 +911,11 @@ const Defaults = () => {
                     }
                     required
                     onChange={(event, newValue) => {
+                      setCityStore([])
+
                       if(newValue){
+
+
                       clientIndividualFormValidation.setFieldValue(
                         "countryId",
                         newValue?.recordId,
@@ -884,12 +926,22 @@ const Defaults = () => {
                       );}else{
                         clientIndividualFormValidation.setFieldValue(
                           "countryId",
-                          '',
+                          ''
                         );
                         clientIndividualFormValidation.setFieldValue(
                           "countryName",
-                          '',
+                          ''
                         );
+
+                        clientIndividualFormValidation.setFieldValue(
+                          "cityId",
+                          null
+                        );
+                        clientIndividualFormValidation.setFieldValue(
+                          "cityName",
+                          null
+                        );
+
 
                       }
                     }}
@@ -916,9 +968,15 @@ const Defaults = () => {
                     store={cityStore}
                     firstValue={clientIndividualFormValidation.values.cityName}
 
-                   secondDisplayField={false}
+                    // secondValue={clientIndividualFormValidation.values.cityName}
+
+                    secondDisplayField={false}
+
+                    //  secondDisplayField={false}
                     setStore={setCityStore}
                     onLookup={lookupCity}
+
+
                     onChange={(event, newValue) => {
                       if (newValue) {
                         clientIndividualFormValidation.setFieldValue(
@@ -1215,7 +1273,7 @@ const Defaults = () => {
                   name="oldReference"
                   label={_labels.oldReference}
                   value={clientIndividualFormValidation.values?.oldReference}
-                  required
+
                   onChange={clientIndividualFormValidation.handleChange}
                   maxLength="10"
                   onClear={() =>
@@ -1240,7 +1298,7 @@ const Defaults = () => {
                     name="whatsappNo"
                     label={_labels.whatsapp}
                     value={clientIndividualFormValidation.values?.whatsappNo}
-                    required
+
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
                     onClear={() =>
@@ -1264,39 +1322,39 @@ const Defaults = () => {
                   <CustomComboBox
                     name="title"
                     label={_labels.title}
-                    valueField="recordId"
-                    displayField="name"
-                    store={countryStore}
-                    value={clientIndividualFormValidation.values?.titleId}
+                    valueField="key"
+                    displayField="value"
+                    store={titleStore}
+                    value={clientIndividualFormValidation.values?.title}
                     onChange={(event, newValue) => {
 
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
-                        "civilStatus",
+                        "titleId",
                         newValue?.key,
                       );
                       clientIndividualFormValidation.setFieldValue(
-                        "civilStatusName",
+                        "titleId",
                         newValue?.value,
                       );
                       }else{
                         clientIndividualFormValidation.setFieldValue(
-                          "civilStatus",
+                          "titleId",
                           null,
                         );
                         clientIndividualFormValidation.setFieldValue(
-                          "civilStatusName",
+                          "title",
                           null,
                         );
                       }
                     }}
                     error={
-                      clientIndividualFormValidation.touched.titleId &&
-                      Boolean(clientIndividualFormValidation.errors.titleId)
+                      clientIndividualFormValidation.touched.title &&
+                      Boolean(clientIndividualFormValidation.errors.title )
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.titleId &&
-                      clientIndividualFormValidation.errors.titleId
+                      clientIndividualFormValidation.touched.title &&
+                      clientIndividualFormValidation.errors.title
                     }
                   />
                 </Grid>
@@ -1453,6 +1511,8 @@ const Defaults = () => {
                   required
                   onChange={clientIndividualFormValidation.handleChange}
                   maxLength="10"
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
                   onClear={() =>
                     clientIndividualFormValidation.setFieldValue(
                       "cellPhone",
@@ -1476,6 +1536,8 @@ const Defaults = () => {
                   value={clientIndividualFormValidation.values?.cellPhoneRepeat}
                   required
                   onChange={clientIndividualFormValidation.handleChange}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
                   onClear={() =>
                     clientIndividualFormValidation.setFieldValue(
                       "cellPhoneRepeat",
@@ -1518,7 +1580,29 @@ const Defaults = () => {
                     }
                   />
                 </Grid>
-
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name="middleName"
+                    label={_labels.middle}
+                    value={clientIndividualFormValidation.values?.middleName}
+                    onChange={clientIndividualFormValidation.handleChange}
+                    maxLength="10"
+                    onClear={() =>
+                      clientIndividualFormValidation.setFieldValue(
+                        "middleName",
+                        "",
+                      )
+                    }
+                    error={
+                      clientIndividualFormValidation.touched.middleName &&
+                      Boolean(clientIndividualFormValidation.errors.middleName)
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.middleName &&
+                      clientIndividualFormValidation.errors.middleName
+                    }
+                  />
+                </Grid>
                 <Grid item xs={3}>
                   <CustomTextField
                     name="lastName"
@@ -1543,29 +1627,7 @@ const Defaults = () => {
                     }
                   />
                 </Grid>
-                <Grid item xs={3}>
-                  <CustomTextField
-                    name="middleName"
-                    label={_labels.middle}
-                    value={clientIndividualFormValidation.values?.middleName}
-                    onChange={clientIndividualFormValidation.handleChange}
-                    maxLength="10"
-                    onClear={() =>
-                      clientIndividualFormValidation.setFieldValue(
-                        "middleName",
-                        "",
-                      )
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.middleName &&
-                      Boolean(clientIndividualFormValidation.errors.middleName)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.middleName &&
-                      clientIndividualFormValidation.errors.middleName
-                    }
-                  />
-                </Grid>
+
 
                 <Grid item xs={3}>
                   <CustomTextField
@@ -1591,36 +1653,41 @@ const Defaults = () => {
                   />
                 </Grid>
 
+
+
+
+
+
                 <Grid item xs={3}>
                   <CustomTextField
-                    name="fl_firstName"
-                    label={_labels.first}
-                    value={clientIndividualFormValidation.values?.fl_firstName}
+                    name="fl_familyName"
+                    label={_labels.fl_family}
+                    value={clientIndividualFormValidation.values?.fl_familyName}
                     onChange={clientIndividualFormValidation.handleChange}
-                    maxLength="10"
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
-                        "fl_firstName",
+                        "fl_familyName",
                         "",
                       )
                     }
                     error={
-                      clientIndividualFormValidation.touched.fl_firstName &&
+                      clientIndividualFormValidation.touched.fl_familyName &&
                       Boolean(
-                        clientIndividualFormValidation.errors.fl_firstName,
+                        clientIndividualFormValidation.errors.fl_familyName,
                       )
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.fl_firstName &&
-                      clientIndividualFormValidation.errors.fl_firstName
+                      clientIndividualFormValidation.touched.fl_familyName &&
+                      clientIndividualFormValidation.errors.fl_familyName
                     }
                   />
                 </Grid>
 
+
                 <Grid item xs={3}>
-                  <CustomTextField
+                <CustomTextField
                     name="fl_lastName"
-                    label={_labels.last}
+                    label={_labels.fl_last}
                     value={clientIndividualFormValidation.values?.fl_lastName}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
@@ -1643,12 +1710,12 @@ const Defaults = () => {
                 <Grid item xs={3}>
                   <CustomTextField
                     name="fl_middleName"
-                    label={_labels.middle}
+                    label={_labels.fl_middle}
                     value={clientIndividualFormValidation.values?.fl_middleName}
                     onChange={clientIndividualFormValidation.handleChange}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
-                        "fl_middleName",
+                        "fl_familyName",
                         "",
                       )
                     }
@@ -1664,28 +1731,28 @@ const Defaults = () => {
                     }
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomTextField
-                    name="fl_familyName"
-                    label={_labels.family}
-                    value={clientIndividualFormValidation.values?.fl_familyName}
+                    name="fl_firstName"
+                    label={_labels.fl_first}
+                    value={clientIndividualFormValidation.values?.fl_firstName}
                     onChange={clientIndividualFormValidation.handleChange}
+                    maxLength="10"
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
-                        "fl_familyName",
+                        "fl_firstName",
                         "",
                       )
                     }
                     error={
-                      clientIndividualFormValidation.touched.fl_familyName &&
+                      clientIndividualFormValidation.touched.fl_firstName &&
                       Boolean(
-                        clientIndividualFormValidation.errors.fl_familyName,
+                        clientIndividualFormValidation.errors.fl_firstName,
                       )
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.fl_familyName &&
-                      clientIndividualFormValidation.errors.fl_familyName
+                      clientIndividualFormValidation.touched.fl_firstName &&
+                      clientIndividualFormValidation.errors.fl_firstName
                     }
                   />
                 </Grid>
@@ -2002,7 +2069,7 @@ const Defaults = () => {
                   }
                 />
               </Grid> */}
-              <Grid item xs={12} sx={{marginTop: '15px'}}>
+              <Grid item xs={12} >
                 <CustomComboBox
                   name="professionId"
                   label={_labels.profession}

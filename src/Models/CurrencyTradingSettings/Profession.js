@@ -7,7 +7,8 @@ const getNewProfession = () => {
     reference: null,
     flName: null,
     monthlyIncome: null,
-    riskFactor: null
+    riskFactor: null,
+    diplomatStatus: null
   }
 }
 
@@ -18,9 +19,8 @@ const populateProfession = obj => {
     reference: obj.reference,
     flName: obj.flName,
     monthlyIncome: obj.monthlyIncome,
-    riskFactor: obj.riskFactor
-
-
+    riskFactor: obj.riskFactor,
+    diplomatStatus: obj.diplomatStatus
   }
 }
 
