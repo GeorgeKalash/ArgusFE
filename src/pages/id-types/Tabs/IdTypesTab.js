@@ -84,6 +84,7 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           required
           maxAccess={maxAccess}
           onChange={(event, newValue) => {
+            idTypesValidation && idTypesValidation.setFieldValue('type', newValue?.key);
             idTypesValidation && idTypesValidation.setFieldValue('clientFileExpiryType', newValue?.key)
           }}
           error={
@@ -97,7 +98,8 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           name='clientFileLifeTime'
           label={labels.clientFileLifeTime}
           value={idTypesValidation.values.clientFileLifeTime}
-          required
+          required={idTypesValidation.values.clientFileExpiryType === 1 ? true : false}
+          readOnly={idTypesValidation.values.clientFileExpiryType === 1 ? false : true}
           maxAccess={maxAccess}
           onChange={idTypesValidation.handleChange}
           onClear={() => idTypesValidation.setFieldValue('clientFileLifeTime', '')}
