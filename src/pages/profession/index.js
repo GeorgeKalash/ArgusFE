@@ -21,6 +21,9 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
+// ** Helpers
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+
 const Professions = () => {
 
 
@@ -38,6 +41,7 @@ const Professions = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Profession, setAccess)
@@ -139,16 +143,17 @@ const Professions = () => {
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + '&_dgId=0'
+    var parameters = defaultParams
 
     getRequest({
       extension: RemittanceSettingsRepository.Profession.page,
       parameters: parameters
     })
       .then(res => {
-        setGridData({ ...res, _startAt })
+        setGridData(res)
       })
       .catch(error => {
+        setErrorMessage(error)
       })
   }
 
@@ -160,8 +165,8 @@ const Professions = () => {
   }
 
   const ProfessionValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
+    enableReinitialize: true,
+    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
@@ -231,6 +236,7 @@ const Professions = () => {
           diplomatStore={diplomatStore}
         />
       )}
+       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
