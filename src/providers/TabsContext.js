@@ -10,9 +10,6 @@ import { IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 
-// ** Third Party Import
-import { useTranslation } from 'react-i18next'
-
 // ** Context
 import { MenuContext } from 'src/providers/MenuContext'
 
@@ -46,7 +43,6 @@ CustomTabPanel.propTypes = {
 const TabsProvider = ({ children, pageTitle }) => {
   // ** Hooks
   const router = useRouter()
-  const { t } = useTranslation('screens')
   const { menu, lastOpenedPage } = useContext(MenuContext)
 
   const getLabel = () => {
@@ -57,6 +53,8 @@ const TabsProvider = ({ children, pageTitle }) => {
 
   const findNode = (nodes, targetRouter) => {
     for (const node of nodes) {
+      // console.log({ nodePath: node.path })
+      // console.log({ targetRouter })
       if (node.children) {
         const result = findNode(node.children, targetRouter)
         if (result) {
@@ -77,7 +75,7 @@ const TabsProvider = ({ children, pageTitle }) => {
           {
             page: children,
             route: router.route,
-            label: pageTitle ? pageTitle : findNode(menu, router.route)
+            label: pageTitle ?? pageTitle
           }
         ]
 
@@ -128,6 +126,16 @@ const TabsProvider = ({ children, pageTitle }) => {
     }
   }, [children, router.route])
 
+  useEffect(() => {
+    if (!activeTabs[0].label) {
+      setActiveTabs(pre => {
+        const updatedTab = { ...activeTabs[0], label: findNode(menu, router.route) }
+
+        return [updatedTab]
+      })
+    }
+  }, [activeTabs])
+
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
@@ -139,7 +147,7 @@ const TabsProvider = ({ children, pageTitle }) => {
                   !activeTab.isDefault && (
                     <Tab
                       key={i}
-                      label={t(activeTab?.label?.replace(/-/g, ' '))}
+                      label={activeTab?.label}
                       onClick={() => router?.push(activeTab.route)}
                       icon={
                         <IconButton
