@@ -127,7 +127,7 @@ const TabsProvider = ({ children, pageTitle }) => {
   }, [children, router.route])
 
   useEffect(() => {
-    if (!activeTabs[0].label) {
+    if (activeTabs[0] && !activeTabs[0].label) {
       setActiveTabs(pre => {
         const updatedTab = { ...activeTabs[0], label: findNode(menu, router.route) }
 
