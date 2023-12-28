@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid, Box} from '@mui/material'
 
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
