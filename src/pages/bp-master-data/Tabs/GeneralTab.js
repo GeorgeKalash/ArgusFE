@@ -39,6 +39,7 @@ const GeneralTab = ({
                 bpMasterDataValidation.setFieldValue('category', newValue?.key)
                 const selectedCategory = newValue?.key || ''
                 fillIdCategoryStore(selectedCategory) // Fetch and update state data based on the selected category
+                
               }}
               error={bpMasterDataValidation.touched.category && Boolean(bpMasterDataValidation.errors.category)}
               helperText={bpMasterDataValidation.touched.category && bpMasterDataValidation.errors.category}
