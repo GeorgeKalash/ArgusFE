@@ -49,6 +49,7 @@ const Professions = () => {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 50 })
         getLabels(ResourceIds.Profession, setLabels)
+        fillDiplomatStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
