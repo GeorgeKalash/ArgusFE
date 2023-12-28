@@ -1,6 +1,7 @@
 const getNewPlant = () => {
   return {
     recordId: null,
+    addressId: null,
     reference: null,
     name: null,
     segmentRef: null,
@@ -12,11 +13,15 @@ const getNewPlant = () => {
     groupName: null,
     segmentName: null,
 
-    addName: null,
+    //not going to use them in post (only address Id)
+    //but i don't know how should i use them as being in "address" and maybe for display in edit mode
+
+    /*addName: null,
+    addRecordId
     countryId: null,
     stateId: null,
     cityId: null,
-    cityName: null,
+    city: null,
     street1: null,
     street2: null,
     email1: null,
@@ -27,16 +32,17 @@ const getNewPlant = () => {
     addressId: null,
     postalCode:null,
     cityDistrictId: null,
-    cityDistrictName:null,
+    cityDistrict:null,
     bldgNo: null,
     unitNo: null,
-    subNo: null
+    subNo: null*/
   }
 }
 
 const populatePlant = obj => {
   return {
     recordId: obj.recordId,
+    addressId: obj.addressId,
     reference: obj.reference,
     name: obj.name,
     segmentRef: obj.segmentRef,
@@ -48,11 +54,11 @@ const populatePlant = obj => {
     groupName: obj.groupName,
     segmentName: obj.segmentName,
 
-    addName: obj.name,
+    /*addName: obj.addName,
     countryId: obj.countryId,
     stateId: obj.stateId,
     cityId: obj.cityId,
-    cityName: obj.city,
+    city: obj.city,
     street1: obj.street1,
     street2: obj.street2,
     email1: obj.email1,
@@ -62,11 +68,11 @@ const populatePlant = obj => {
     phone3: obj.phone3,
     addressId: obj.addressId,
     postalCode:obj.postalCode,
-    cityDistrictId: obj.cityDistrictId,
-    cityDistrictName:obj.cityDistrict,
-    bldgNo: obj.bldgNo,
-    unitNo: obj.unitNo,
-    subNo: obj.subNo
+    cityDistrictId: obj.,
+    cityDistrict:null,
+    bldgNo: null,
+    unitNo: null,
+    subNo: null*/
   }
 }
 

@@ -19,6 +19,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewPlant, populatePlant } from 'src/Models/System/Plant'
+import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -49,7 +50,6 @@ const Plants = () => {
   const [cityStore, setCityStore] = useState([])
   const [cityDistrictStore, setCityDistrictStore] = useState([])
   const [stateStore, setStateStore] = useState([])
-  const [record, setRecord] = useState(null)
 
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
@@ -130,13 +130,14 @@ const Plants = () => {
       name: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log(values)
+      console.log('plantVal:' + values)
       postPlant(values)
     }
   })
 
   const handleSubmit = () => {
-    plantValidation.handleSubmit()
+    if (activeTab === 0) plantValidation.handleSubmit()   
+    else if (activeTab === 1) addressValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -156,6 +157,8 @@ const Plants = () => {
   }
 
   const postPlant = obj => {
+    console.log('firstTabBody')
+    console.log(obj)
     const recordId = obj.recordId
     postRequest({
       extension: SystemRepository.Plant.set,
@@ -164,11 +167,14 @@ const Plants = () => {
       .then(res => {
         getGridData({})
 
-        plantValidation.setFieldValue('recordId', res.recordId)
+        plantValidation.setFieldValue('recordId', res.recordId)   
 
         //setWindowOpen(false)
-        setRecord(res.recordId)
-        if (!recordId) toast.success('Record Added Successfully')
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+          addressValidation.setValues(getNewAddress) 
+          setEditMode(true)
+        }
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
@@ -192,28 +198,27 @@ const Plants = () => {
   }
 
   const addPlant = () => {
-    setRecord(0)
     setActiveTab(0)
-    plantValidation.setValues({})
     plantValidation.setValues(getNewPlant)
     fillCostCenterStore()
     fillPlantGroupStore()
     fillSegmentStore()
     setEditMode(false)
     setWindowOpen(true)
-
-    //CHECK WHEN TO EMPTY VALIDATION SECOND TAB
   }
 
   const editPlant = obj => {
+    console.log(obj)
     setActiveTab(0)
+
+    addressValidation.setValues(getNewAddress)
+    fillCountryStore()
+
     fillCostCenterStore()
     fillPlantGroupStore()
     fillSegmentStore()
 
     var parameters = `_filter=` + '&_recordId=' + obj.addressId
-    var object = obj
-    setRecord(0)
     if (obj.addressId) {
       getRequest({
         extension: SystemRepository.Address.get,
@@ -223,28 +228,11 @@ const Plants = () => {
           var result = res.record
           console.log(result)
 
-          object.addName = result.name
-          object.street1 = result.street1
-          object.street2 = result.street2
-          object.email1 = result.email1
-          object.email2 = result.email2
-          object.countryId = result.countryId
-          object.stateName = result.stateName
-          object.cityId = result.cityId
-          object.cityName = result.city
-          object.stateId = result.stateId
-          object.phone = result.phone
-          object.phone1 = result.phone1
-          object.phone2 = result.phone2
-          object.postalCode = result.postalCode
-          object.cityDistrictId = result.cityDistrictId
-          object.cityDistrictName = result.cityDistrict
-          object.bldgNo = result.bldgNo
-          object.unitNo = result.unitNo
-          object.subNo = result.subNo
-
-          fillStateStore(object.countryId)
-          getPlantById(object)
+          fillStateStore(result.countryId)
+          
+          addressValidation.setValues(populateAddress(result))
+          console.log('addressData')
+          getPlantById(obj)
 
         })
         .catch(error => {})
@@ -254,6 +242,8 @@ const Plants = () => {
   }
 
   const getPlantById = obj => {
+    console.log('recId')
+    console.log(obj.recordId)
     const _recordId = obj.recordId
     const defaultParams = `_recordId=${_recordId}`
     var parameters = defaultParams
@@ -276,13 +266,8 @@ const Plants = () => {
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
-        fillCostCenterStore()
-        fillPlantGroupStore()
-        fillSegmentStore()
         getLabels(ResourceIds.Plants, setLabels)
         getLabels(ResourceIds.Address, setAddressLabels)
-
-        //fillCountryStore() on edit
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -336,13 +321,13 @@ const Plants = () => {
 
   // ADDRESS TAB
 
-  const tabs = [{ label: _labels.plant }, { label: _labels.address }]
+  const tabs = [{ label: _labels.plant }, { label: _labels.address , disabled: !editMode }]
 
   const addressValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
+    enableReinitialize: true,
+    validateOnChange: true,
     validationSchema: yup.object({
-      addName: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required'),
       stateId: yup.string().required('This field is required'),
       street1: yup.string().required('This field is required'),
@@ -350,19 +335,16 @@ const Plants = () => {
       cityId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log(values)
+      console.log('addressVal:' + values)
       postAddress(values)
     }
   })
 
   const postAddress = obj => {
+    
     console.log(obj)
 
-    //const object = obj
-
-    //plantValidation.values.recordId
     // 2 options either same validation or get first tab again
-
     //obj.recordId = obj.addressId > 0 ? obj.addressId : obj.recordId
 
     postRequest({
@@ -370,34 +352,21 @@ const Plants = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        obj.addressId = res.addressId > 0 ? res.addressId : res.recordId
-        plantValidation.setFieldValue('addressId',  obj.addressId )
-        setRecord(0)
-        
-        //setWindowOpen(false)
-        //updatePlantAdd()
+        console.log(res.recordId)
+        obj.recordId = res.recordId
+        addressValidation.setFieldValue('recordId', obj.recordId)   
 
-       /* postRequest({
-          extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
-          record: JSON.stringify(object)
-        })
-          .then(res => {
-            getGridData({})
-            setWindowOpen(false)
-            setRecord(0)
-            if (!res.recordId) toast.success('Record Added Successfully')
-            else toast.success('Record Editted Successfully')
-          })
-          .catch(error => {
-            setErrorMessage(error)
-          }) */
+        //setWindowOpen(false)
+        updatePlantAddress(obj)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
- /* const updatePlantAdd = () => {
+  const updatePlantAddress = (obj) => {
+    console.log(plantValidation.values.recordId)
+    console.log(obj.recordId) //address
     const _recordId = plantValidation.values.recordId //always gives value?
     const defaultParams = `_recordId=${_recordId}`
     var parameters = defaultParams
@@ -406,14 +375,15 @@ const Plants = () => {
       parameters: parameters
     })
       .then(res => {
-        plantValidation.setValues(populatePlant(res.record))
-        setEditMode(true)
-        setWindowOpen(true)
+        //res.addressId = obj.recordId //address
+        plantValidation.setValues(populatePlant(res.record)) 
+        plantValidation.setFieldValue('addressId',  obj.recordId )
+        plantValidation.handleSubmit()
       })
       .catch(error => {
         setErrorMessage(error)
       })
-  }*/
+  }
 
   const fillCountryStore = () => {
     var parameters = `_filter=`
@@ -449,7 +419,13 @@ const Plants = () => {
 
   const lookupCity = searchQry => {
     setCityStore([])
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${agentBranchValidation.values.countryId}&_stateId=${agentBranchValidation.values.stateId}`
+    if (!addressValidation.values.countryId) 
+    {
+      console.log('false') 
+
+     return false
+    }
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${addressValidation.values.countryId}&_stateId=${addressValidation.values.stateId}`
     getRequest({
       extension: SystemRepository.City.snapshot,
       parameters: parameters
@@ -465,7 +441,7 @@ const Plants = () => {
 
   const lookupCityDistrict = searchQry => {
     setCityDistrictStore([])
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${agentBranchValidation.values.cityId}`
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${addressValidation.values.cityId}`
 
     getRequest({
       extension: SystemRepository.CityDistrict.snapshot,
@@ -519,7 +495,7 @@ const Plants = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          addressLabels={addressLabels}
+
           countryStore={countryStore}
           stateStore={stateStore}
           fillStateStore={fillStateStore}
