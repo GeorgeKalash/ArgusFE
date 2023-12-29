@@ -17,11 +17,15 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import { getNewUserInfo, populateUserInfo } from 'src/Models/System/UserInfo'
+import { getNewUserDocument, populateUserDocument } from 'src/Models/System/UserDocument'
 
 // ** Windows
 import UsersWindow from './Windows/UsersWindow'
@@ -45,7 +49,13 @@ const Users = () => {
   const [notificationGrpStore, setNotificationGrpStore] = useState([])
   const [employeeStore, setEmployeeStore] = useState([])
 
+  const [siteStore, setSiteStore] = useState([])
+  const [plantStore, setPlantStore] = useState([])
+  const [cashAccStore, setCashAccStore] = useState([])
+  const [salesPersonStore, setSalesPersonStore] = useState([])
+
   //states
+  const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -109,6 +119,8 @@ const Users = () => {
     }
   ]
 
+  const tabs = [{ label: _labels.users }, { label: _labels.defaults, disabled: !editMode }]
+
   const usersValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
@@ -126,9 +138,29 @@ const Users = () => {
       postUsers(values)
     }
   })
+  
+  const defaultsValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+    }),
+    initialValues: {
+      siteId: '',
+      plantId:'',
+      spId:'',
+      cashAccountId:''
+    },
+    onSubmit: values => {
+      console.log('values ',values)
+      postDefaults(values)
+    }
+  })
 
   const handleSubmit = () => {
-    usersValidation.handleSubmit()
+    if (activeTab === 0) usersValidation.handleSubmit()
+    else if (activeTab === 1 && ( defaultsValidation.values != undefined || defaultsValidation.values != null ))  {
+       defaultsValidation.handleSubmit()
+    }
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -155,6 +187,9 @@ const Users = () => {
     })
       .then(res => {
         getGridData({})
+        fillSiteStore()
+        fillPlantStore()
+        fillSalesPersonStore()
         setWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
@@ -181,6 +216,7 @@ const Users = () => {
 
   const addUsers = () => {
     usersValidation.setValues(getNewUserInfo())
+    setActiveTab(0)
     setEditMode(false)
     setWindowOpen(true)
     fillActiveStatusStore()
@@ -205,6 +241,11 @@ const Users = () => {
         fillUserTypeStore()
         fillLanguageStore()
         fillNotificationGrpStore()
+        fillSiteStore()
+        fillPlantStore()
+        fillSalesPersonStore()
+        getDefaultsById(obj)
+        setActiveTab(0)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -259,6 +300,139 @@ const Users = () => {
         setErrorMessage(error)
       })
   }
+
+  //Defaults Tab
+
+  const postDefaults = obj => {
+    const recordId = usersValidation.values.recordId
+    const fields = ["cashAccountId", "plantId", "siteId", "spId"]
+  
+    const postField = field => {
+      const request = {
+        key: field,
+        value: obj[field] !== null ? obj[field].toString() : null,
+        userId: recordId
+      }
+      postRequest({
+        extension: SystemRepository.UserDocument.set,
+        record: JSON.stringify(request)
+      })
+        .then(res => {
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
+    }
+    fields.forEach(postField)
+    getGridData({})
+    setWindowOpen(true)
+    if (!recordId) toast.success('Record Added Successfully')
+    else toast.success('Record Edited Successfully')
+  }
+
+  const getDefaultsById = obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_userId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.UserDocument.qry,
+      parameters: parameters
+    })
+      .then(res => {
+
+          const UserDocObject = {
+            plantId: null,
+            siteId: null,
+            cashAccountId: null,
+            spId: null,
+          }
+          
+
+           res.list.map((x) => {
+            switch (x.key) {
+                case "plantId":
+                  UserDocObject.plantId = x.value ? parseInt(x.value) : null
+                    break
+                case "siteId":
+                  UserDocObject.siteId = x.value ? parseInt(x.value) : null
+                    break
+                case "cashAccountId":
+                  UserDocObject.cashAccountId = x.value ? parseInt(x.value) : null
+                    break
+                case "spId":
+                  UserDocObject.spId = x.value ? parseInt(x.value) : null
+                    break
+                default:
+                    break
+            }
+        })
+
+        console.log('UserDocObject ',UserDocObject)
+       defaultsValidation.setValues(UserDocObject)
+
+       // defaultsValidation.setValues(populateUserDocument(UserDocObject))
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillSiteStore = () => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: InventoryRepository.Site.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setSiteStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
+  const fillPlantStore = () => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: SystemRepository.Plant.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setPlantStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
+  const fillSalesPersonStore = () => {
+    var parameters = `_filter=`
+    getRequest({
+      extension: SaleRepository.SalesPerson.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setSalesPersonStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
+  const lookupCashAcc = searchQry => {
+    var parameters = `_size=50&_startAt=0&_filter=${searchQry}&_type=0`
+    getRequest({
+      extension: CashBankRepository.CashAccount.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setdefaultsValidation(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Users, setAccess)
     else {
@@ -308,6 +482,9 @@ const Users = () => {
           labels={_labels}
           maxAccess={access}
           editMode={editMode}
+          tabs={tabs}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
 
           //Users
           usersValidation={usersValidation}
@@ -318,6 +495,15 @@ const Users = () => {
           employeeStore={employeeStore}
           setEmployeeStore={setEmployeeStore}
           lookupEmployee={lookupEmployee}
+
+          //Defaults
+          defaultsValidation={defaultsValidation}
+          siteStore={siteStore}
+          plantStore={plantStore}
+          salesPersonStore={salesPersonStore}
+          setCashAccStore={setCashAccStore}
+          cashAccStore={cashAccStore}
+          lookupCashAcc={lookupCashAcc}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
