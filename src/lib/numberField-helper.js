@@ -2,7 +2,7 @@ export function handleChangeNumber(
   inputValue,
   digitsBeforePoint,
   digitsAfterPoint,
-  setFormattedNumber,
+  validation,
   setPosition,
   param
 
@@ -14,7 +14,6 @@ export function handleChangeNumber(
 
   // Update field value
   validation.setFieldValue(param, formattedValue);
-  setFormattedNumber(formattedValue)
 
   const newCursorPosition =
    currentPosition +
