@@ -117,6 +117,11 @@ export const SystemRepository = {
   },
   SystemPlant:{
     get: service + 'getUD'
-  }
+  },
+  UserDocument: {
+    qry: service + 'qryUD',
+    get: service + 'getUD',
+    set: service + 'setUD'
+  },
 
 }

@@ -18,7 +18,7 @@ const ProductMasterTab = ({
   languageStore,
   maxAccess
 }) => {
-
+  
 return (
     <>
       <Grid container>
