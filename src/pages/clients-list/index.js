@@ -366,30 +366,30 @@ console.log(res)
     },
     validationSchema: yup.object({
       // reference: yup.string().required("This field is required"),
-      isResident: yup.string().required("This field is required"),
-      birthDate: yup.string().required("This field is required"),
-      idtId: yup.string().required("This field is required"),
-      number:  yup.string().required("This field is required"),
-      numberRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('number'), null], 'Number must match'),
-      expiryDate: yup.string().required("This field is required"),
-      countryId: yup.string().required("This field is required"),
-      cityId: yup.string().required("This field is required"),
-      idCountry: yup.string().required("This field is required"),
-      idCity: yup.string().required("This field is required"),
-      firstName: yup.string().required("This field is required"),
-      lastName: yup.string().required("This field is required"),
-      nationalityId: yup.string().required("This field is required"),
+      // isResident: yup.string().required("This field is required"),
+      // birthDate: yup.string().required("This field is required"),
+      // idtId: yup.string().required("This field is required"),
+      // number:  yup.string().required("This field is required"),
+      // numberRepeat : yup.string().required('Repeat Password is required')
+      // .oneOf([yup.ref('number'), null], 'Number must match'),
+      // expiryDate: yup.string().required("This field is required"),
+      // countryId: yup.string().required("This field is required"),
+      // cityId: yup.string().required("This field is required"),
+      // idCountry: yup.string().required("This field is required"),
+      // idCity: yup.string().required("This field is required"),
+      // firstName: yup.string().required("This field is required"),
+      // lastName: yup.string().required("This field is required"),
+      // nationalityId: yup.string().required("This field is required"),
 
-      // professionId: yup.string().required("This field is required"),
-      cellPhone: yup.string().required("This field is required"),
-      cellPhoneRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-      smsLanguage: yup.string().required("This field is required"),
-      incomeSourceId: yup.string().required("This field is required"),
-      gender: yup.string().required("This field is required"),
-      street1:  yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
+      // // professionId: yup.string().required("This field is required"),
+      // cellPhone: yup.string().required("This field is required"),
+      // cellPhoneRepeat : yup.string().required('Repeat Password is required')
+      // .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
+      // smsLanguage: yup.string().required("This field is required"),
+      // incomeSourceId: yup.string().required("This field is required"),
+      // gender: yup.string().required("This field is required"),
+      // street1:  yup.string().required('This field is required'),
+      // phone: yup.string().required('This field is required')
     }),
     onSubmit: (values) => {
       console.log("values" + values);

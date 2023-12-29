@@ -104,24 +104,24 @@ const populateIClients= obj => {
   return {
 
 
-      //clientID
+      //clientIDView
       reference: obj.clientMaster.reference,
 
-      clientId: obj.clientID.clientId,
-      expiryDate: obj.clientID.idExpiryDate  && formatDateFromApi(obj.clientID.idExpiryDate),
-      issusDate: obj.clientID.idIssusDate  && formatDateFromApi(obj.clientID.idIssusDate),
-      idCountry: obj.clientID.idCountryId,
-      idCity: obj.clientID.idCityId,
-      idNo: obj.clientID.idNo,
-      idNoRepeat: obj.clientID.idNo ,
-      idNoEncrypt: obj.clientID.idNo && encryptValue(obj.clientID.idNo) ,
-      idNoRepeatEncrypt: obj.clientID.idNo && encryptValue(obj.clientID.idNo) ,
+      clientId: obj.clientIDView.clientId,
+      expiryDate: obj.clientIDView.idExpiryDate  && formatDateFromApi(obj.clientIDView.idExpiryDate),
+      issusDate: obj.clientIDView.idIssusDate  && formatDateFromApi(obj.clientIDView.idIssusDate),
+      idCountry: obj.clientIDView.idCountryId,
+      idCity: obj.clientIDView.idCityId,
+      idNo: obj.clientIDView.idNo,
+      idNoRepeat: obj.clientIDView.idNo ,
+      idNoEncrypt: obj.clientIDView.idNo && encryptValue(obj.clientIDView.idNo) ,
+      idNoRepeatEncrypt: obj.clientIDView.idNo && encryptValue(obj.clientIDView.idNo) ,
 
-      idtId: obj.clientID.idtId,
-      isDiplomat: obj.clientID.isDiplomat,
+      idtId: obj.clientIDView.idtId,
+      isDiplomat: obj.clientIDView.isDiplomat,
 
-      country: obj.clientID.countryName,
-      city: obj.clientID.city,
+      // country: obj.clientIDView.countryName,
+      city: obj.clientIDView.idCityName,
 
       //address
       countryId: obj.addressView.countryId,

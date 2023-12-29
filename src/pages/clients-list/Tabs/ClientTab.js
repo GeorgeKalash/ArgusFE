@@ -408,7 +408,7 @@ return (
                     store={cityStore}
                     firstValue={clientIndividualFormValidation.values.city}
 
-                    // secondValue={clientIndividualFormValidation.values.cityName}
+                    // secondValue={clientIndividualFormValidation.values.city}
 
                     secondDisplayField={false}
 
@@ -1307,7 +1307,7 @@ return (
                 </Grid>
 
 
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                   <CustomTextField
                     name="salary"
                     label='salary'    //{_labels.whatsapp}
@@ -1329,7 +1329,7 @@ return (
                       clientIndividualFormValidation.errors.salary
                     }
                   />
-                </Grid>
+                </Grid> */}
 
                 <Grid item xs={12}>
                   <CustomTextField
