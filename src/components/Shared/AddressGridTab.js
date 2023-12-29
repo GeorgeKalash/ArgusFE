@@ -5,15 +5,16 @@ import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
-const AdressGridTab = ({
-  addressValidation,
-  getAddressValidation,
+const AddressGridTab = ({
+  addressGridData,
+  getAddressGridData,
   addAddress,
   delAddress,
   editAddress,
   maxAccess,
   labels
 }) => {
+
   const columns = [
     {
       field: 'name',
@@ -64,9 +65,9 @@ const AdressGridTab = ({
         <GridToolbar onAdd={addAddress} maxAccess={maxAccess} />
         <Table
           columns={columns}
-          gridData={addressValidation}
+          gridData={addressGridData}
           rowId={['recordId']}
-          api={getAddressValidation}
+          api={getAddressGridData}
           onEdit={editAddress}
           onDelete={delAddress}
           isLoading={false}
@@ -79,4 +80,4 @@ const AdressGridTab = ({
   )
 }
 
-export default AdressGridTab
+export default AddressGridTab

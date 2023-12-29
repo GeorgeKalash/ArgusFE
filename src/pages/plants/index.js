@@ -43,13 +43,13 @@ const Plants = () => {
   const [costCenterStore, setCostCenterStore] = useState([])
   const [plantGroupStore, setPlantGroupStore] = useState([])
   const [segmentStore, setSegmentStore] = useState([])
-
-  //states
-  const [activeTab, setActiveTab] = useState(0)
   const [countryStore, setCountryStore] = useState([])
   const [cityStore, setCityStore] = useState([])
   const [cityDistrictStore, setCityDistrictStore] = useState([])
   const [stateStore, setStateStore] = useState([])
+
+  //states
+  const [activeTab, setActiveTab] = useState(0)
 
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
@@ -65,7 +65,7 @@ const Plants = () => {
     segment: labels && labels.find(item => item.key === 7).value,
     plant: labels && labels.find(item => item.key === 8).value,
 
-    addName:
+    name:
       addressLabels && addressLabels.find(item => item.key === 1) && addressLabels.find(item => item.key === 1).value,
     street1:
       addressLabels && addressLabels.find(item => item.key === 2) && addressLabels.find(item => item.key === 2).value,
@@ -168,11 +168,9 @@ const Plants = () => {
         getGridData({})
 
         plantValidation.setFieldValue('recordId', res.recordId)   
-
-        //setWindowOpen(false)
-        if (!recordId) {
-          toast.success('Record Added Successfully')
+        if (!recordId) {         
           addressValidation.setValues(getNewAddress) 
+          toast.success('Record Added Successfully')
           setEditMode(true)
         }
         else toast.success('Record Edited Successfully')
@@ -200,6 +198,7 @@ const Plants = () => {
   const addPlant = () => {
     setActiveTab(0)
     plantValidation.setValues(getNewPlant)
+    addressValidation.setValues(getNewAddress)  // to solve a problem
     fillCostCenterStore()
     fillPlantGroupStore()
     fillSegmentStore()
@@ -218,7 +217,10 @@ const Plants = () => {
     fillPlantGroupStore()
     fillSegmentStore()
 
-    var parameters = `_filter=` + '&_recordId=' + obj.addressId
+    fillStateStore(obj.countryId)
+
+    // WITHOUT GETTING BOTH ADDRESS AND PLANT GET REQUEST, I AM FILLING ADDRESS FROM PLANTRECORD.ADDRESS
+    /*var parameters = `_filter=` + '&_recordId=' + obj.addressId //try to set address directlyyy
     if (obj.addressId) {
       getRequest({
         extension: SystemRepository.Address.get,
@@ -236,9 +238,10 @@ const Plants = () => {
 
         })
         .catch(error => {})
-    } else {
+    } else {*/
       getPlantById(obj)
-    }
+
+    //}
   }
 
   const getPlantById = obj => {
@@ -252,7 +255,11 @@ const Plants = () => {
       parameters: parameters
     })
       .then(res => {
+        console.log('plant')
+        console.log(res)
+        console.log(res.record)
         plantValidation.setValues(populatePlant(res.record))
+        res.record.address != null ? addressValidation.setValues(populateAddress(res.record.address)) : addressValidation.setValues(getNewAddress)
         setEditMode(true)
         setWindowOpen(true)
       })
@@ -340,12 +347,11 @@ const Plants = () => {
     }
   })
 
-  const postAddress = obj => {
+  const postAddress = obj => { //we can request again plant and save it or directly validation.handlesubmit
     
     console.log(obj)
 
-    // 2 options either same validation or get first tab again
-    //obj.recordId = obj.addressId > 0 ? obj.addressId : obj.recordId
+    // 2 options either same validation or get first tab again [2 ways]
 
     postRequest({
       extension: SystemRepository.Address.set,
@@ -357,17 +363,21 @@ const Plants = () => {
         addressValidation.setFieldValue('recordId', obj.recordId)   
 
         //setWindowOpen(false)
-        updatePlantAddress(obj)
+        //updatePlantAddress(obj)
+        //OR
+        
+        plantValidation.setFieldValue('addressId',  obj.recordId )
+        plantValidation.handleSubmit()
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const updatePlantAddress = (obj) => {
+  /*const updatePlantAddress = (obj) => { 
     console.log(plantValidation.values.recordId)
     console.log(obj.recordId) //address
-    const _recordId = plantValidation.values.recordId //always gives value?
+    const _recordId = plantValidation.values.recordId
     const defaultParams = `_recordId=${_recordId}`
     var parameters = defaultParams
     getRequest({
@@ -383,7 +393,7 @@ const Plants = () => {
       .catch(error => {
         setErrorMessage(error)
       })
-  }
+  }*/
 
   const fillCountryStore = () => {
     var parameters = `_filter=`

@@ -20,6 +20,7 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewBPMasterData, populateBPMasterData } from 'src/Models/BusinessPartner/BPMasterData'
 import { getNewRelation, populateRelation } from 'src/Models/BusinessPartner/Relation'
+import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
@@ -27,6 +28,7 @@ import { DataSets } from 'src/resources/DataSets'
 // ** Windows
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
 import BPRelationWindow from './Windows/BPRelationWindow'
+import AddressWindow from 'src/components/Shared/AddressWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -38,6 +40,7 @@ const BPMasterData = () => {
 
   //control
   const [labels, setLabels] = useState(null)
+  const [addressLabels, setAddressLabels] = useState(null)
   const [access, setAccess] = useState(null)
 
   //stores
@@ -50,6 +53,11 @@ const BPMasterData = () => {
   const [relationGridData, setRelationGridData] = useState([])
   const [relationStore, setRelationStore] = useState([])
   const [businessPartnerStore, setBusinessPartnerStore] = useState([])
+
+  const [addressGridData, setAddressGridData] = useState([]) //for address tab
+  const [cityStore, setCityStore] = useState([])
+  const [cityDistrictStore, setCityDistrictStore] = useState([])
+  const [stateStore, setStateStore] = useState([])
   
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -58,6 +66,9 @@ const BPMasterData = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [defaultValue, setdefaultValue] = useState(null)
   const [relationWindowOpen, setRelationWindowOpen] = useState(false)
+
+  const [addressWindowOpen, setAddressWindowOpen] = useState(false)
+  const [addressEditMode, setAddressEditMode] = useState(false)
 
   const _labels = {
     general: labels && labels.find(item => item.key === 1).value,
@@ -83,7 +94,45 @@ const BPMasterData = () => {
     relation: labels && labels.find(item => item.key === 21).value,
     businessPartner: labels && labels.find(item => item.key === 22).value,
     from: labels && labels.find(item => item.key === 23).value,
-    to: labels && labels.find(item => item.key === 24).value
+    to: labels && labels.find(item => item.key === 24).value,
+
+    name:
+      addressLabels && addressLabels.find(item => item.key === 1) && addressLabels.find(item => item.key === 1).value,
+    street1:
+      addressLabels && addressLabels.find(item => item.key === 2) && addressLabels.find(item => item.key === 2).value,
+    street2:
+      addressLabels && addressLabels.find(item => item.key === 3) && addressLabels.find(item => item.key === 3).value,
+    email:
+      addressLabels && addressLabels.find(item => item.key === 4) && addressLabels.find(item => item.key === 4).value,
+    email2:
+      addressLabels && addressLabels.find(item => item.key === 5) && addressLabels.find(item => item.key === 5).value,
+
+    country:
+      addressLabels && addressLabels.find(item => item.key === 6) && addressLabels.find(item => item.key === 6).value,
+    state:
+      addressLabels && addressLabels.find(item => item.key === 7) && addressLabels.find(item => item.key === 7).value,
+    city:
+      addressLabels && addressLabels.find(item => item.key === 8) && addressLabels.find(item => item.key === 8).value,
+
+    postalCode:
+      addressLabels && addressLabels.find(item => item.key === 9) && addressLabels.find(item => item.key === 9).value,
+    phone:
+      addressLabels && addressLabels.find(item => item.key === 10) && addressLabels.find(item => item.key === 10).value,
+    phone2:
+      addressLabels && addressLabels.find(item => item.key === 11) && addressLabels.find(item => item.key === 11).value,
+    phone3:
+      addressLabels && addressLabels.find(item => item.key === 12) && addressLabels.find(item => item.key === 12).value,
+    address:
+      addressLabels && addressLabels.find(item => item.key === 13) && addressLabels.find(item => item.key === 13).value,
+
+    cityDistrict:
+      addressLabels && addressLabels.find(item => item.key === 14) && addressLabels.find(item => item.key === 14).value,
+    bldgNo:
+      addressLabels && addressLabels.find(item => item.key === 15) && addressLabels.find(item => item.key === 15).value,
+    unitNo:
+      addressLabels && addressLabels.find(item => item.key === 16) && addressLabels.find(item => item.key === 16).value,
+    subNo:
+      addressLabels && addressLabels.find(item => item.key === 17) && addressLabels.find(item => item.key === 17).value
   }
 
   const columns = [
@@ -125,7 +174,8 @@ const BPMasterData = () => {
     }
   ]
 
-  const tabs = [{ label: _labels.general }, { label: _labels.idNumber, disabled: !editMode }, { label: _labels.relation, disabled: !editMode }]
+  const tabs = [{ label: _labels.general }, { label: _labels.idNumber, disabled: !editMode }, { label: _labels.relation, disabled: !editMode },
+    { label: _labels.address , disabled: !editMode }]
 
   const bpMasterDataValidation = useFormik({
     enableReinitialize: true,
@@ -145,6 +195,8 @@ const BPMasterData = () => {
     if (activeTab === 0) bpMasterDataValidation.handleSubmit()
     else if (activeTab === 1) idNumberValidation.handleSubmit()
     else if (activeTab === 2) relationGridData.handleSubmit()
+
+    //didn't mention address because it is not affected by submit button
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -214,6 +266,9 @@ const BPMasterData = () => {
     resetIdNumber()
     setRelationGridData([])
     setdefaultValue(null)
+
+    //address
+    setAddressGridData([]) //state store will be filled upon country selection
   }
 
   const editBPMasterData = obj => {
@@ -240,6 +295,9 @@ const BPMasterData = () => {
         setEditMode(true)
         setWindowOpen(true)
         setActiveTab(0)
+
+        //address
+        getAddressGridData(obj.recordId)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -306,7 +364,7 @@ const BPMasterData = () => {
     }
   }
 
-  const fillCountryStore = () => {
+  const fillCountryStore = () => { //used for 2 tabs
     var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Country.qry,
@@ -599,6 +657,7 @@ const BPMasterData = () => {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 50 })
         getLabels(ResourceIds.BPMasterData, setLabels)
+        getLabels(ResourceIds.Address, setAddressLabels)
         fillGroupStore()
         fillCategoryStore()
         fillCountryStore()
@@ -609,6 +668,210 @@ const BPMasterData = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
+
+  
+  // Address Tab
+
+  const addressValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      name: yup.string().required('This field is required'),
+      countryId: yup.string().required('This field is required'),
+      stateId: yup.string().required('This field is required'),
+      street1: yup.string().required('This field is required'),
+      phone: yup.string().required('This field is required'),
+      cityId: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+      console.log('addressVal:')
+      console.log(values)
+      postAddress(values)
+    }
+  })
+
+  const postAddress = obj => {   
+    console.log(obj)
+    const bpId = bpMasterDataValidation.values.recordId
+    postRequest({
+      extension: SystemRepository.Address.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        console.log(res.recordId)
+        obj.recordId = res.recordId
+        addressValidation.setFieldValue('recordId', obj.recordId)   
+        setAddressWindowOpen(false)
+       
+        //post BPAddress
+        const object = obj //we add bill to and ship to to validation
+        object.addressId = addressValidation.values.recordId
+        object.bpId = bpId
+        console.log('object')
+        console.log(object)
+        postRequest({
+          extension: BusinessPartnerRepository.BPAddress.set,
+          record: JSON.stringify(object)
+        })
+        .then(bpResponse => {
+          getAddressGridData(bpId)
+         })
+        .catch(error => {
+          setErrorMessage(error)
+        })
+
+        //bill to and ship to are with formik (hidden or not from security grps)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const getAddressGridData = bpId => { 
+    setAddressGridData([])
+    const defaultParams = `_bpId=${bpId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: BusinessPartnerRepository.BPAddress.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log('grid')
+        console.log(res) //address is complex object so data are not appearing in grid setAddressGridData(res).. should find solution
+        res.list = res.list.map((row) => row = row.address) //sol
+        console.log(res)
+        setAddressGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const delAddress = obj => { //talk about problem of getting only address body: create empty object or keep this full body??
+    console.log(obj)
+    const bpId = bpMasterDataValidation.values.recordId
+    obj.bpId =  bpId
+    obj.addressId = obj.recordId
+    console.log(obj)
+    postRequest({
+      extension: BusinessPartnerRepository.BPAddress.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        toast.success('Record Deleted Successfully')
+        getAddressGridData(bpId)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const addAddress = () => {
+    addressValidation.setValues(getNewAddress) //bpId is then added to object on save.. 
+    setAddressWindowOpen(true)
+  }
+
+  const editAddress = obj => {
+    console.log(obj)
+    getAddressById(obj)
+  }
+
+   const getAddressById = obj => {
+    const _bpId = bpMasterDataValidation.values.recordId
+
+    const defaultParams = `_recordId=${obj.recordId}`//addressId the object i am getting was the bpAddress
+    // after modifying list it is normal address so i send obj.recordId
+    const bpAddressDefaultParams =  `_addressId=${obj.recordId}&_bpId=${_bpId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: SystemRepository.Address.get,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res.record)
+        addressValidation.setValues(populateAddress(res.record))
+        setAddressEditMode(true)
+        setAddressWindowOpen(true)
+
+        getRequest({
+          extension: BusinessPartnerRepository.BPAddress.get,
+          parameters: bpAddressDefaultParams
+        })
+          .then(res => {
+            console.log(res.record)
+            
+            //addressValidation.setValues(populateAddress(res.record)) put in address validation shipto and billto
+            //buttons
+          })
+          .catch(error => {
+            setErrorMessage(error)
+          })
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  } 
+
+  const handleAddressSubmit = () => {
+    addressValidation.handleSubmit()
+  }
+  
+
+  const fillStateStore = countryId => {
+    setStateStore([])
+    var parameters = `_countryId=${countryId}`
+    if (countryId) {
+      getRequest({
+        extension: SystemRepository.State.qry,
+        parameters: parameters
+      })
+        .then(res => {
+          setStateStore(res.list)
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
+    }
+  }
+
+  const lookupCity = searchQry => {
+    setCityStore([])
+    if (!addressValidation.values.countryId) 
+    {
+      console.log('false') 
+
+     return false
+    }
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${addressValidation.values.countryId}&_stateId=${addressValidation.values.stateId}`
+    getRequest({
+      extension: SystemRepository.City.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res.list)
+        setCityStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const lookupCityDistrict = searchQry => {
+    setCityDistrictStore([])
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${addressValidation.values.cityId}`
+
+    getRequest({
+      extension: SystemRepository.CityDistrict.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res.list)
+        setCityDistrictStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   return (
     <>
@@ -660,6 +923,13 @@ const BPMasterData = () => {
           delRelation={delRelation}
           addRelation={addRelation}
           popupRelation={popupRelation}
+
+          //Address tab (grid)
+          addressGridData={addressGridData}
+          getAddressGridData={getAddressGridData}
+          addAddress={addAddress}
+          delAddress={delAddress}
+          editAddress={editAddress}
         />
       )}
 
@@ -674,6 +944,28 @@ const BPMasterData = () => {
           lookupBusinessPartner={lookupBusinessPartner}
           labels={_labels}
           maxAccess={access}
+        />
+      )}
+      {addressWindowOpen && (
+        <AddressWindow
+          onClose={() => setAddressWindowOpen(false)}
+          onSave={handleAddressSubmit}
+          addressValidation={addressValidation}
+          countryStore={countryStore}
+          stateStore={stateStore}
+          fillStateStore={fillStateStore}
+          cityStore={cityStore}
+          setCityStore={setCityStore}
+          lookupCity={lookupCity}
+          cityDistrictStore={cityDistrictStore}
+          setCityDistrictStore={setCityDistrictStore}
+          lookupCityDistrict={lookupCityDistrict}
+
+          //approverComboStore={approverComboStore.list} why list?
+          maxAccess={access}
+          labels={_labels}
+          width ={600}
+          height={400}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

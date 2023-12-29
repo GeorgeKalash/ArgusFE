@@ -30,7 +30,7 @@ const AddressTab = ({
           <Grid item xs={12}>
             <CustomTextField
               name='name'
-              label={labels.addName}
+              label={labels.name}
               value={addressValidation.values.name}
               required
               maxLength='20'

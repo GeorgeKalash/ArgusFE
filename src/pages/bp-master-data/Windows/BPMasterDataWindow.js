@@ -4,6 +4,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GeneralTab from 'src/pages/bp-master-data/Tabs/GeneralTab'
 import IDNumberTab from 'src/pages/bp-master-data/Tabs/IDNumberTab'
 import RelationTab from 'src/pages/bp-master-data/Tabs/RelationTab'
+import AddressGridTab from 'src/components/Shared/AddressGridTab'
 
 const BPMasterDataWindow = ({
   onClose,
@@ -30,7 +31,14 @@ const BPMasterDataWindow = ({
   addRelation,
   delRelation,
   defaultValue,
-  popupRelation
+  popupRelation,
+
+  //Address tab (grid)
+  addressGridData,
+  getAddressGridData,
+  addAddress,
+  delAddress,
+  editAddress,
 }) => {
   return (
     <Window
@@ -74,6 +82,17 @@ const BPMasterDataWindow = ({
           addRelation={addRelation}
           delRelation={delRelation}
           popupRelation={popupRelation}
+          labels={labels}
+          maxAccess={maxAccess}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel index={3} value={activeTab}>
+        <AddressGridTab
+          addressGridData={addressGridData}
+          getAddressGridData={getAddressGridData}
+          addAddress={addAddress}
+          delAddress={delAddress}
+          editAddress={editAddress}
           labels={labels}
           maxAccess={maxAccess}
         />

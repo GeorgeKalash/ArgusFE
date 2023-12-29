@@ -98,7 +98,7 @@ const Agent = () => {
     swiftCode: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
     title: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value,
 
-    addName:
+    name:
       addressLabels && addressLabels.find(item => item.key === 1) && addressLabels.find(item => item.key === 1).value,
     street1:
       addressLabels && addressLabels.find(item => item.key === 2) && addressLabels.find(item => item.key === 2).value,
