@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -16,6 +16,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { CommonContext } from 'src/providers/CommonContext'
@@ -52,9 +53,8 @@ const Users = () => {
   //control
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
-  
-  
-//Users Tab
+
+  //Users Tab
   const _labels = {
     users: labels && labels.find(item => item.key === 1).value,
     username: labels && labels.find(item => item.key === 2).value,
@@ -73,12 +73,12 @@ const Users = () => {
     defaults: labels && labels.find(item => item.key === 15).value,
     password: labels && labels.find(item => item.key === 16).value,
     name: labels && labels.find(item => item.key === 17).value,
-    confirmPassword: labels && labels.find(item => item.key === 18).value,
+    confirmPassword: labels && labels.find(item => item.key === 18).value
   }
 
   const columns = [
     {
-      field: 'name',
+      field: 'fullName',
       headerName: _labels.name,
       flex: 1
     },
@@ -98,7 +98,7 @@ const Users = () => {
       flex: 1
     },
     {
-      field: 'language',
+      field: 'languageName',
       headerName: _labels.language,
       flex: 1
     },
@@ -113,18 +113,17 @@ const Users = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name:  yup.string().required('This field is required'),
-      username:  yup.string().required('This field is required'),
-      email:  yup.string().required('This field is required'),
-      activeStatus:  yup.string().required('This field is required'),
-      userType:  yup.string().required('This field is required'),
-      language:  yup.string().required('This field is required'),
-      password:  yup.string().required('This field is required'),
-      confirmPassword:  yup.string().required('This field is required'),
-
+      fullName: yup.string().required('This field is required'),
+      username: yup.string().required('This field is required'),
+      email: yup.string().required('This field is required'),
+      activeStatus: yup.string().required('This field is required'),
+      userType: yup.string().required('This field is required'),
+      languageId: yup.string().required('This field is required'),
+      password: yup.string().required('This field is required'),
+      confirmPassword: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-        postUsers(values)
+      postUsers(values)
     }
   })
 
@@ -133,11 +132,11 @@ const Users = () => {
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_sortBy=fullName`
+    const defaultParams = `_startAt=${_startAt}&_size=${_pageSize}&_filter=&_sortBy=fullName`
     var parameters = defaultParams
 
     getRequest({
-      extension: SystemRepository.Users.page,
+      extension: SystemRepository.Users.qry,
       parameters: parameters
     })
       .then(res => {
@@ -165,7 +164,7 @@ const Users = () => {
       })
   }
 
-  const delUsers= obj => {
+  const delUsers = obj => {
     postRequest({
       extension: SystemRepository.Users.del,
       record: JSON.stringify(obj)
@@ -221,16 +220,16 @@ const Users = () => {
 
   const fillUserTypeStore = () => {
     getAllKvsByDataset({
-        _dataset: DataSets.USER_TYPE,
-        callback: setUserTypeStore
-      })
+      _dataset: DataSets.USER_TYPE,
+      callback: setUserTypeStore
+    })
   }
 
   const fillLanguageStore = () => {
     getAllKvsByDataset({
-        _dataset: DataSets.LANGUAGE,
-        callback: setLanguageStore
-      })
+      _dataset: DataSets.LANGUAGE,
+      callback: setLanguageStore
+    })
   }
 
   const fillNotificationGrpStore = () => {
@@ -247,7 +246,19 @@ const Users = () => {
       })
   }
 
-
+  const lookupEmployee = searchQry => {
+    var parameters = `_size=50&_startAt=0&_filter=${searchQry}&_branchId=0`
+    getRequest({
+      extension: EmployeeRepository.Employee.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setEmployeeStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Users, setAccess)
     else {
@@ -262,7 +273,7 @@ const Users = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
   return (
@@ -296,6 +307,7 @@ const Users = () => {
           onSave={handleSubmit}
           labels={_labels}
           maxAccess={access}
+          editMode={editMode}
 
           //Users
           usersValidation={usersValidation}
@@ -303,7 +315,9 @@ const Users = () => {
           languageStore={languageStore}
           userTypeStore={userTypeStore}
           activeStatusStore={activeStatusStore}
-
+          employeeStore={employeeStore}
+          setEmployeeStore={setEmployeeStore}
+          lookupEmployee={lookupEmployee}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

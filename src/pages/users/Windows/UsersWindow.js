@@ -8,6 +8,7 @@ const UsersWindow = ({
   width,
   height,
   onSave,
+  editMode,
   usersValidation,
   labels,
   maxAccess,
@@ -15,6 +16,9 @@ const UsersWindow = ({
   languageStore,
   userTypeStore,
   activeStatusStore,
+  employeeStore,
+  setEmployeeStore,
+  lookupEmployee
 }) => {
   return (
     <Window
@@ -35,6 +39,10 @@ const UsersWindow = ({
           languageStore={languageStore}
           userTypeStore={userTypeStore}
           activeStatusStore={activeStatusStore}
+          editMode={editMode}
+          employeeStore={employeeStore}
+          setEmployeeStore={setEmployeeStore}
+          lookupEmployee={lookupEmployee}
         />
       </CustomTabPanel>
     </Window>
