@@ -63,7 +63,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
   const [educationStore, setEducationStore] = useState([]);
   const [idTypeStore, setIdTypeStore] = useState([]);
   const [titleStore, setTitleStore] = useState([]);
-
+const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
   const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
@@ -86,7 +86,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
         fillEducationStore();
         fillIdTypeStore()
         fillTitleStore()
-
+        fillMobileVerifiedStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -150,7 +150,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
     isResident: labels2 && labels2.find((item) => item.key === 34).value,
     mobileVerified: labels2 && labels2.find((item) => item.key === 35).value,
 
-    otpVerified: labels2 && labels2.find((item) => item.key === 36).value,
+    OTPVerified: labels2 && labels2.find((item) => item.key === 36).value,
     coveredFace: labels2 && labels2.find((item) => item.key === 37).value,
     isEmployed: labels2 && labels2.find((item) => item.key === 38).value,
 
@@ -191,6 +191,8 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
     state: labels2 && labels2.find((item) => item.key === 66).value,
      confirmNb: labels2 && labels2.find((item) => item.key === 67).value,
      confirmCell: labels2 && labels2.find((item) => item.key === 68).value,
+     issusCountry: labels2 && labels2.find((item) => item.key === 69).value,
+     issusPlace: labels2 && labels2.find((item) => item.key === 70).value,
 
 
   };
@@ -350,6 +352,18 @@ console.log(res)
     enableReinitialize: false,
     validateOnChange: true, // Trigger validation on change
     validateOnBlur: true,
+    validate : (values) => {
+      const errors = {};
+
+      // Example validation for a 'name' field
+      if (values.isRelativeDiplomate  && !values.relativeDiplomateInfo ) {
+        errors.relativeDiplomateInfo = 'Relative Diplomat Info is required';
+      }
+
+      // Add more validation rules for other fields as needed
+
+      return errors;
+    },
     validationSchema: yup.object({
       // reference: yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
@@ -366,27 +380,14 @@ console.log(res)
       firstName: yup.string().required("This field is required"),
       lastName: yup.string().required("This field is required"),
       nationalityId: yup.string().required("This field is required"),
-      professionId: yup.string().required("This field is required"),
+
+      // professionId: yup.string().required("This field is required"),
       cellPhone: yup.string().required("This field is required"),
       cellPhoneRepeat : yup.string().required('Repeat Password is required')
       .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-
-      // status: yup.string().required("This field is required"),
-      salaryRangeId: yup.string().required("This field is required"),
       smsLanguage: yup.string().required("This field is required"),
       incomeSourceId: yup.string().required("This field is required"),
-
       gender: yup.string().required("This field is required"),
-
-      // otpVerified: yup.string().required("This field is required"),
-      // coveredFace: yup.string().required("This field is required"),
-      // isEmployee: yup.string().required("This field is required"),
-      isDiplomat: yup.string().required("This field is required"),
-      isRelativeDiplomate: yup.string().required("This field is required"),
-      relativeDiplomateInfo: yup.string().required("This field is required"),
-
-      // name:  yup.string().required('This field is required'),
-
       street1:  yup.string().required('This field is required'),
       phone: yup.string().required('This field is required')
     }),
@@ -416,7 +417,7 @@ console.log(res)
       cellPhone: obj.cellPhone,
       createdDate:  formatDateToApi(date.toISOString()),
       expiryDate: obj.expiryDate,
-      otp: obj.otpVerified,
+      OTPVerified: obj.OTPVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
       status:1, //obj.statusName,
@@ -427,7 +428,7 @@ console.log(res)
 
     //CCTD
     const obj2 = {
-      idNo : "1",
+      idNo : obj.idNo,
 
       // clientID: null,
       idCountryId: obj.idCountry,
@@ -464,7 +465,7 @@ console.log(res)
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
       sponsorName: obj.sponsorName,
-      whatsAppNo: obj.whatsappNo,
+      whatsAppNo: obj.whatsAppNo,
       gender: obj.gender,
       title: obj.title,
       civilStatus: obj.civilStatus,
@@ -473,7 +474,7 @@ console.log(res)
       isDiplomat: obj.isDiplomat,
       isRelativeDiplomat: obj.isRelativeDiplomate,
       relativeDiplomatInfo: obj.relativeDiplomateInfo,
-      OTPVerified: obj.OTPVerified,
+      OTPVerified: obj.otp,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
 
@@ -482,7 +483,7 @@ console.log(res)
       // isVerified: true,
       // reference: obj.reference,
       professionId:obj.professionId,
-      idNo : "1",
+      idNo : obj.idNo,
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
@@ -567,7 +568,7 @@ console.log(res)
       countryId: null,
       stateId: null,
       cityId: null,
-      cityName: null,
+      city: null,
       street1: null,
       street2: null,
       email1: null,
@@ -616,6 +617,7 @@ console.log(res)
     })
       .then(res => {
         clientIndividualFormValidation.setValues(populateIClients(res.record))
+        WorkAddressValidation.setValues(res.record.workAddressView)
         getPlantId()
         setWindowOpen(true)
       })
@@ -836,7 +838,7 @@ console.log(res)
 
   const fillTitleStore = () => {
     getAllKvsByDataset({
-      _dataset: DataSets.Title,
+      _dataset: DataSets.TITLE,
       callback: setTitleStore
     })
   };
@@ -863,6 +865,12 @@ console.log(res)
     })
   };
 
+  const fillMobileVerifiedStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.MOBILE_VERIFIED,
+      callback: setMobileVerifiedStore
+    })
+  };
 
 
 
@@ -882,11 +890,13 @@ console.log(res)
             <CustomTextField
               name='search'
 
-              // label={labels.reference}
+              label={_labels.search}
+
               // value={ProfessionValidation.values.reference}
               required
+              onKeyDown={(e) => e.key === 'Enter' && search(e)}
 
-              onChange={search}
+              // onChange={search}
 
               // maxLength = '10'
 
@@ -913,7 +923,7 @@ onEdit={editClient}
  {windowOpen && (
        <ClientWindow
        onClose={() => setWindowOpen(false)}
-       width={1000}
+       width={1100}
        height={600}
        onSave={handleSubmit}
        clientIndividualFormValidation={clientIndividualFormValidation}
@@ -928,6 +938,7 @@ setCityStore={setCityStore}
   smsLanguageStore={smsLanguageStore}
   civilStatusStore={civilStatusStore}
   genderStore={genderStore}
+  mobileVerifiedStore={mobileVerifiedStore}
   educationStore={educationStore}
   idTypeStore={idTypeStore}
   titleStore={titleStore}

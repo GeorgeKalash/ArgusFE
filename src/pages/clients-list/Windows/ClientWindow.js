@@ -23,6 +23,7 @@ const ClientWindow = ({
     incomeOfSourceStore,
     smsLanguageStore,
     civilStatusStore,
+    mobileVerifiedStore,
     genderStore,
     fillStateStoreAddress,
     fillStateStoreAddressWork,
@@ -71,6 +72,7 @@ return (
                     smsLanguageStore={smsLanguageStore}
                     civilStatusStore={civilStatusStore}
                     genderStore={genderStore}
+                    mobileVerifiedStore={mobileVerifiedStore}
                     fillStateStoreAddress={fillStateStoreAddress}
                     fillStateStoreAddressWork={fillStateStoreAddressWork}
                     stateAddressWorkStore={stateAddressWorkStore}
