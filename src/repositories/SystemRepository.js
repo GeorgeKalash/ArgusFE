@@ -109,8 +109,19 @@ export const SystemRepository = {
   SMSFunctionTemplate:{
     qry: service + 'qrySFT'
   },
+  Users: {
+    qry: service + 'qryUS',
+    get: service + 'getUS',
+    set: service + 'setUS',
+    del: service + 'delUS'
+  },
   SystemPlant:{
     get: service + 'getUD'
-  }
+  },
+  UserDocument: {
+    qry: service + 'qryUD',
+    get: service + 'getUD',
+    set: service + 'setUD'
+  },
 
 }

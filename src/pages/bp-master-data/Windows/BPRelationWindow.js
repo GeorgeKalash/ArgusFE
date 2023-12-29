@@ -70,6 +70,10 @@ const BPRelationWindow = ({
             <CustomComboBox
               name='relationId'
               label={labels.relation}
+              columnsInDropDown= {[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               valueField='recordId'
               displayField='name'
               store={relationStore}

@@ -145,7 +145,6 @@ const DRGroups = () => {
 
   const addDRGroup = () => {
     drGroupValidation.setValues(getNewDRGroup)
-    resetApprover()
     setApproverGridData([])
     fillApproverComboStore({ _startAt: 0, _pageSize: 1000 })
     setEditMode(false)
@@ -157,7 +156,6 @@ const DRGroups = () => {
     setActiveTab(0)
     console.log(obj)
     fillApproverComboStore({ _startAt: 0, _pageSize: 1000 })
-    resetApprover()
     getApproverGridData(obj.recordId)
     getDRGroupById(obj)
   }
@@ -225,7 +223,6 @@ const DRGroups = () => {
       })
   }
 
-  const resetApprover = () => {}
 
   const getApproverGridData = groupId => {
     setApproverGridData([])

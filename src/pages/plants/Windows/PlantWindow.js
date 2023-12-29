@@ -22,7 +22,6 @@ const PlantWindow = ({
   tabs,
   activeTab,
   setActiveTab,
-  addressLabels,
   countryStore,
   stateStore,
   fillStateStore,

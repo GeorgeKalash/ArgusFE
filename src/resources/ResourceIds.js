@@ -42,7 +42,8 @@ export const ResourceIds = {
   Strategies : 10106,
   Classes : 10101,
   SmsTemplates : 20130,
-  SmsFunctionTemplates : 20131
+  SmsFunctionTemplates : 20131,
+  Users : 23101
 
 
 }
