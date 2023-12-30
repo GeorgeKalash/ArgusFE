@@ -1,705 +1,48 @@
-// ** React Imports
-import { useEffect, useState, useContext } from "react";
-
 // ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from "@mui/material";
-import { Paper, Typography } from "@mui/material";
-
-// ** Third Party Imports
-import { useFormik } from "formik";
-import * as yup from "yup";
-import toast from "react-hot-toast";
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
 // ** Custom Imports
-import CustomComboBox from "src/components/Inputs/CustomComboBox";
-import ErrorWindow from "src/components/Shared/ErrorWindow";
-import WindowToolbar from "src/components/Shared/WindowToolbar";
-import CustomTextField from "src/components/Inputs/CustomTextField";
-import CustomDatePicker from "src/components/Inputs/CustomDatePicker";
-
-// ** API
-import { RequestsContext } from "src/providers/RequestsContext";
-import { ControlContext } from "src/providers/ControlContext";
-import { CommonContext } from "src/providers/CommonContext";
-import { SystemRepository } from "src/repositories/SystemRepository";
-import CustomLookup from "src/components/Inputs/CustomLookup";
-
-// ** Resources
-import { ResourceIds } from "src/resources/ResourceIds";
-import { DataSets } from 'src/resources/DataSets'
-import { CurrencyTradingSettingsRepository } from "src/repositories/CurrencyTradingSettingsRepository";
-import { position } from "stylis";
-import FieldSet from "src/components/Shared/FieldSet";
-import { KVSRepository } from "src/repositories/KVSRepository";
-import { RTCLRepository } from "src/repositories/RTCLRepository";
-import AddressTab from "src/components/Shared/AddressTab";
-import { CTIDRepository } from "src/repositories/CTIDRepository";
-import { RemittanceSettingsRepository } from "src/repositories/RemittanceRepository";
-import { CurrencyTradingClientRepository } from "src/repositories/CurrencyTradingClientRepository";
-
-const Defaults = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext);
-  const { getLabels, getAccess } = useContext(ControlContext);
-  const { getAllKvsByDataset } = useContext(CommonContext)
-
-  //control
-  const [labels, setLabels] = useState(null);
-  const [access, setAccess] = useState(null);
-  const [types, setTypes] = useState([]);
-  const [countryStore, setCountryStore] = useState([]);
-  const [cityStore, setCityStore] = useState([]);
-  const [cityAddressStore, setCityAddressStore] = useState([]);
-  const [cityAddressWorkStore, setCityAddressWorkStore] = useState([]);
-
-  const [professionStore, setProfessionStore] = useState([]);
-  const [salaryRangeStore, setSalaryRangeStore] = useState([]);
-  const [incomeOfSourceStore, setIncomeOfSourceStore] = useState([]);
-  const [smsLanguageStore, setSMSLanguageStore] = useState([]);
-  const [civilStatusStore, setCivilStatusStore] = useState([]);
-  const [genderStore, setGenderStore] = useState([]);
-  const [stateStore, setStateStore] = useState([]);
-  const [educationStore, setEducationStore] = useState([]);
-  const [idTypeStore, setIdTypeStore] = useState([]);
-
-  const [titleStore, setTitleStore] = useState([]);
-
-  //stores
-
-  const [errorMessage, setErrorMessage] = useState(null);
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.ClientMaster, setAccess);
-    else {
-      if (access.record.maxAccess > 0) {
-        getLabels(ResourceIds.ClientMaster, setLabels);
-        fillType();
-        fillCountryStore();
-        fillProfessionStore();
-        fillSalaryRangeStore();
-        fillIncomeOfSourceStore();
-        fillSMSLanguageStore();
-        fillGenderStore();
-        fillCivilStatusStore();
-        fillEducationStore();
-        fillIdTypeStore()
-        fillTitleStore()
-
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" });
-      }
-    }
-
-    // getDataResult()
-  }, [access]);
-
-  const _labels = {
-    reference: labels && labels.find((item) => item.key === 1).value,
-    birthDate: labels && labels.find((item) => item.key === 2).value,
-    isResident: labels && labels.find((item) => item.key === 3).value,
-
-    // number: labels && labels.find((item) => item.key === 4).value,
-    number: labels && labels.find((item) => item.key === 5).value,
-    type: labels && labels.find((item) => item.key === 6).value,
-    expiryDate: labels && labels.find((item) => item.key === 7).value,
-    issusDate: labels && labels.find((item) => item.key === 8).value,
-    country: labels && labels.find((item) => item.key === 9).value,
-    city: labels && labels.find((item) => item.key === 10).value,
-    first: labels && labels.find((item) => item.key === 11).value,
-    last: labels && labels.find((item) => item.key === 12).value,
-    middle: labels && labels.find((item) => item.key === 13).value,
-    family: labels && labels.find((item) => item.key === 14).value,
-
-    nationality: labels && labels.find((item) => item.key === 15).value,
-    profession: labels && labels.find((item) => item.key === 16).value,
-    cellPhone: labels && labels.find((item) => item.key === 17).value,
-    status: labels && labels.find((item) => item.key === 18).value,
-    oldReference: labels && labels.find((item) => item.key === 19).value,
-    whatsapp: labels && labels.find((item) => item.key === 20).value,
-    sponsor: labels && labels.find((item) => item.key === 21).value,
-    salaryRange: labels && labels.find((item) => item.key === 22).value,
-    riskLevel: labels && labels.find((item) => item.key === 23).value,
-    smsLanguage: labels && labels.find((item) => item.key === 24).value,
-    incomeSource: labels && labels.find((item) => item.key === 25).value,
-    civilStatus: labels && labels.find((item) => item.key === 26).value,
-    educationLevel: labels && labels.find((item) => item.key === 27).value,
-    gender: labels && labels.find((item) => item.key === 28).value,
-    title: labels && labels.find((item) => item.key === 29).value,
-    id: labels && labels.find((item) => item.key === 30).value,
-    name: labels && labels.find((item) => item.key === 31).value,
-    main: labels && labels.find((item) => item.key === 32).value,
-
-    bankAccounts: labels && labels.find((item) => item.key === 33).value,
-    isResident: labels && labels.find((item) => item.key === 34).value,
-    mobileVerified: labels && labels.find((item) => item.key === 35).value,
-
-    otpVerified: labels && labels.find((item) => item.key === 36).value,
-    coveredFace: labels && labels.find((item) => item.key === 37).value,
-    isEmployed: labels && labels.find((item) => item.key === 38).value,
-
-    diplomat: labels && labels.find((item) => item.key === 39).value,
-
-    isDiplomat: labels && labels.find((item) => item.key === 40).value,
-    isDiplomatRelative:
-      labels && labels.find((item) => item.key === 41).value,
-
-    relativeDiplomateInfo: labels && labels.find((item) => item.key === 42).value,
-    address: labels && labels.find((item) => item.key === 43).value, // nationalityAddress
-    customerInformation: labels && labels.find((item) => item.key === 44).value,
-    workAddress: labels && labels.find((item) => item.key === 45).value,
-    phone: labels && labels.find((item) => item.key === 46).value,
-    phone2: labels && labels.find((item) => item.key === 47).value,
-    email: labels&& labels.find((item) => item.key === 48).value,
-    email2: labels&& labels.find((item) => item.key === 49).value,
-     phone3: labels && labels.find((item) => item.key === 50).value,
-
-    phone3: labels && labels.find((item) => item.key === 50).value,
-    bldgNo: labels && labels.find((item) => item.key === 51).value,
-    unitNo :  labels && labels.find((item) => item.key === 52).value,
-    subNo:  labels && labels.find((item) => item.key === 53).value,
-    postalCode :  labels && labels.find((item) => item.key === 54).value,
-    cityDistrict :  labels && labels.find((item) => item.key === 55).value,
-
-    street1 :  labels && labels.find((item) => item.key === 56).value,
-    street2 :  labels && labels.find((item) => item.key === 57).value,
-    category :  labels && labels.find((item) => item.key === 58).value,
-    foreignName :  labels && labels.find((item) => item.key === 59).value,
-    keyword :  labels && labels.find((item) => item.key === 60).value,
-
-    // createdDate :  labels && labels.find((item) => item.key === 61).value,
-
-    fl_first: labels && labels.find((item) => item.key === 62).value,
-    fl_last: labels && labels.find((item) => item.key === 63).value,
-    fl_middle: labels && labels.find((item) => item.key === 64).value,
-    fl_family: labels && labels.find((item) => item.key === 65).value,
-
-    state: labels && labels.find((item) => item.key === 66).value,
-
-
-
-  };
-
-
-
-  const clientIndividualFormValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true, // Trigger validation on change
-    validateOnBlur: true,
-
-
-     initialValues: {
-      reference: null,
-      isResident: false,
-      number: null,
-      numberEncrypt: null,
-      numberVerified: null,
-      numberVerifiedEncrypt: null,
-      type: null,
-      expiryDate: null,
-      issusDate: null,
-      countryId: null,
-      cityId: null,
-      idCountry: null,
-      idCity: null,
-      country: null,
-      city: null,
-      whatsappNo: null,
-      sponsorName: null,
-      firstName: null,
-      lastName: null,
-      middleName: null,
-      familyName: null,
-      fl_firstName: null,
-      fl_lastName: null,
-      fl_middleName: null,
-      fl_familyName: null,
-      birthDate: null,
-      nationalityId: null,
-      nationality: null,
-      profession: null,
-      professionId: null,
-      cellPhone: null,
-      cellPhoneRepeat: null,
-
-      status: null,
-      idtId: null,
-      oldReference: null,
-      salaryRange: null,
-      salaryRangeId: null,
-      riskLevel: null,
-      smsLanguage: null,
-      smsLanguageId: null,
-      incomeSourceId: null,
-      incomeSource: null,
-      civilStatus: null,
-      civilStatusId: null,
-      educationLevel: null,
-      educationLevelName: null,
-      gender: null,
-      genderId: null,
-      title: null,
-      titleId: null,
-      mobileVerified: false,
-      otpVerified: false,
-      coveredFace: false,
-      isEmployee: false,
-      isDiplomat: false,
-      isRelativeDiplomate: false,
-      relativeDiplomateInfo: null,
-      name: null,
-      countryId: null,
-      stateId: null,
-      cityId: null,
-      cityName: null,
-      street1: null,
-      street2: null,
-      email1: null,
-      email2: null,
-      phone: null,
-      phone2: null,
-      phone3: null,
-      addressId: null,
-      postalCode:null,
-      cityDistrictId: null,
-      bldgNo: null,
-      unitNo: null,
-      subNo: null
-
-    },
-
-    validationSchema: yup.object({
-      reference: yup.string().required("This field is required"),
-      isResident: yup.string().required("This field is required"),
-      birthDate: yup.string().required("This field is required"),
-      idtId: yup.string().required("This field is required"),
-      number:  yup.string().required("This field is required"),
-      numberRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('number'), null], 'Number must match'),
-      expiryDate: yup.string().required("This field is required"),
-      countryId: yup.string().required("This field is required"),
-      cityId: yup.string().required("This field is required"),
-      firstName: yup.string().required("This field is required"),
-      lastName: yup.string().required("This field is required"),
-      nationalityId: yup.string().required("This field is required"),
-      professionId: yup.string().required("This field is required"),
-      cellPhone: yup.string().required("This field is required"),
-      cellPhoneRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-
-      // status: yup.string().required("This field is required"),
-      salaryRangeId: yup.string().required("This field is required"),
-      smsLanguage: yup.string().required("This field is required"),
-      incomeSourceId: yup.string().required("This field is required"),
-
-      // mobileVerified: yup.string().required("This field is required"),
-      // otpVerified: yup.string().required("This field is required"),
-      // coveredFace: yup.string().required("This field is required"),
-      gender: yup.string().required("This field is required"),
-      isDiplomat: yup.string().required("This field is required"),
-      isRelativeDiplomate: yup.string().required("This field is required"),
-      relativeDiplomateInfo: yup.string().required("This field is required"),
-
-      // name:  yup.string().required('This field is required'),
-      countryId:  yup.string().required('This field is required'),
-      cityId:  yup.string().required('This field is required'),
-      street1:  yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
-    }),
-    onSubmit: (values) => {
-      console.log("values" + values);
-      postRtDefault(values);
-    },
-  });
-
-  const WorkAddressValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    initialValues: {
-      name: null,
-      countryId: null,
-      stateId: null,
-      cityId: null,
-      cityName: null,
-      street1: null,
-      street2: null,
-      email1: null,
-      email2: null,
-      phone: null,
-      phone2: null,
-      phone3: null,
-      addressId: null,
-      postalCode:null,
-      cityDistrictId: null,
-      bldgNo: null,
-      unitNo: null,
-      subNo: null
-    },
-    validationSchema: yup.object({
-      // name:  yup.string().required('This field is required'),
-      // countryId:  yup.string().required('This field is required'),
-      // cityId:  yup.string().required('This field is required'),
-      // street1:  yup.string().required('This field is required'),
-      // phone: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log(values);
-
-      // clientIndividualFormValidation.handleSubmit();
-
-        // postAgentBranch(values)
-
-    }
-  })
-
-  console.log(clientIndividualFormValidation);
-
-  const postRtDefault = (obj) => {
-    console.log("obj", obj);
-
-    //CTCL
-
-
-
-    const obj1 = {
-      category: 1,
-      reference: obj.reference,
-      name: obj.firstName,
-      flName: obj.fl_firstName,
-      nationalityId: obj.nationalityId,
-      status: obj.status,
-      addressId: null,
-      plantId: 3,
-      cellPhone: obj.cellPhone,
-      createdDate:  obj.expiryDate,
-      expiryDate: obj.expiryDate,
-      otp: obj.otpVerified,
-      plantName: obj.plantName,
-      nationalityName: obj.nationalityName,
-      status:1, //obj.statusName,
-      categoryName: obj.categoryName
-
-    };
-
-
-    //CCTD
-    const obj2 = {
-      idNo : "1",
-
-      // clientID: null,
-      idCountryId: obj.idCountry,
-      idtId: obj.idtId ,  //5
-      idExpiryDate: obj.expiryDate,
-      issusDate: obj.issusDate,
-      idCity: obj.idCity,
-      isDiplomatic: obj.isDiplomat,
-
-    };
-
-
-
-    //CTCLI
-    const obj3 = {
-      // clientID: null,
-      firstName: obj.firstName,
-      lastName: obj.lastName,
-      middleName: obj.middleName,
-      familyName: obj.familyName,
-      fl_firstName: obj.fl_firstName,
-      fl_lastName: obj.fl_lastName,
-      fl_middleName: obj.fl_middleName,
-      fl_familyName: obj.fl_familyName,
-      birthDate: obj.birthDate,
-      isResident: obj.isResident,
-
-    };
-
-
-    const obj4 = {
-      incomeSourceId: obj.incomeSourceId,
-      salaryRangeId: obj.salaryRangeId,
-      riskLevel: obj.riskLevel,
-      smsLanguage: obj.smsLanguage,
-      sponsorName: obj.sponsorName,
-      whatsAppNo: obj.whatsappNo,
-      gender: obj.gender,
-      title: obj.title,
-      civilStatus: obj.civilStatus,
-      mobileVerificationStatus: 1, //obj.mobileVerified,
-      educationLevel: obj.educationLevel,
-      isDiplomatic: obj.isDiplomat,
-      isRelativeDiplomate: obj.isRelativeDiplomate,
-      relativeDiplomateInfo: obj.relativeDiplomateInfo,
-      OTPVerified: obj.OTPVerified,
-      coveredFace: obj.coveredFace,
-      isEmployee: obj.isEmployee,
-
-      // status: obj.status,
-
-      // isVerified: true,
-      // reference: obj.reference,
-      professionId:obj.professionId,
-      idNo : "1",
-      wip: 1,
-      releaseStatus: 1,
-      educationLevelName: obj.educationLevelName,
-      statusName: obj.statusName
-
-      // date: obj.date,
-    };
-
-
-     const obj5 = {
-      name: obj.name,
-      countryId: obj.countryId,
-      stateId: obj.stateId,
-      cityId: obj.cityId,
-      cityName: obj.cityName,
-      street1: obj.street1,
-      street2: obj.street2,
-      email1: obj.email1,
-      email2: obj.email2,
-      phone: obj.phone,
-      phone2: obj.phone2,
-      phone3: obj.phone3,
-      addressId: obj.addressId,
-      postalCode:obj.postalCode,
-      cityDistrictId: obj.cityDistrictId,
-      bldgNo: obj.bldgNo,
-      unitNo: obj.unitNo,
-      subNo: obj.subNo
-     }
-
-     const obj6 = {
-      name: WorkAddressValidation.values.name,
-      countryId: WorkAddressValidation.values.countryId,
-      stateId: WorkAddressValidation.values.stateId,
-      cityId: WorkAddressValidation.values.cityId,
-      cityName: WorkAddressValidation.values.cityName,
-      street1: WorkAddressValidation.values.street1,
-      street2: WorkAddressValidation.values.street2,
-      email1: WorkAddressValidation.values.email1,
-      email2: WorkAddressValidation.values.email2,
-      phone: WorkAddressValidation.values.phone,
-      phone2: WorkAddressValidation.values.phone2,
-      phone3: WorkAddressValidation.values.phone3,
-      addressId: WorkAddressValidation.values.addressId,
-      postalCode:WorkAddressValidation.values.postalCode,
-      cityDistrictId: WorkAddressValidation.values.cityDistrictId,
-      bldgNo: WorkAddressValidation.values.bldgNo,
-      unitNo: WorkAddressValidation.values.unitNo,
-      subNo: WorkAddressValidation.values.subNo
-     }
-
-    const data = {
-      clientMaster: obj1, //CTCL
-      clientID: obj2, //CTID
-      ClientIndividual: obj3, //CTCLI
-      clientRemittance: obj4,
-      address: obj5,
-      workAddress: obj6
-
-    };
-
-    postRequest({
-      extension: RTCLRepository.CtClientIndividual.set2,
-      record: JSON.stringify(data), // JSON.stringify({  sysDefaults  : data })
-    })
-      .then((res) => {
-        if (res) toast.success("Record Successfully");
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const handleSubmit = () => {
-    clientIndividualFormValidation.handleSubmit();
-
-    WorkAddressValidation.handleSubmit();
-
-  };
-
-  const fillType = () => {
-    var parameters = `_filter=`;
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.IdTypes.qry,
-      parameters: parameters,
-    })
-      .then((res) => {
-        setTypes(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const fillStateStore = countryId => {
-    var parameters = `_countryId=${countryId}`
-    getRequest({
-      extension: SystemRepository.State.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setStateStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillCountryStore = () => {
-    var parameters = `_filter=`;
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters,
-    })
-      .then((res) => {
-        setCountryStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const lookupCity = (searchQry) => {
-    setCityStore([]);
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${clientIndividualFormValidation.values.idCountry}&_stateId=0`;
-    getRequest({
-      extension: SystemRepository.City.snapshot,
-      parameters: parameters,
-    })
-      .then((res) => {
-        console.log(res.list);
-        setCityStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const lookupCityAddress = (searchQry) => {
-    setCityStore([]);
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${clientIndividualFormValidation.values.countryId}&_stateId=0`;
-    getRequest({
-      extension: SystemRepository.City.snapshot,
-      parameters: parameters,
-    })
-      .then((res) => {
-        console.log(res.list);
-        setCityAddressStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const lookupCityAddressWork = (searchQry) => {
-    setCityStore([]);
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${clientIndividualFormValidation.values.idCountry}&_stateId=0`;
-    getRequest({
-      extension: SystemRepository.City.snapshot,
-      parameters: parameters,
-    })
-      .then((res) => {
-        console.log(res.list);
-        setCityAddressWorkStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const fillIdTypeStore = () => {
-    var parameters = ``;
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.IdTypes.qry,
-      parameters: parameters,
-    })
-      .then((res) => {
-        setIdTypeStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const fillProfessionStore = (cId) => {
-    var parameters = `_filter=_&profession=36116`;
-    getRequest({
-      extension: RemittanceSettingsRepository.Profession.qry,
-      parameters: parameters,
-    })
-      .then((res) => {
-        setProfessionStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const fillSalaryRangeStore = () => {
-    var parameters = `_filter=_&salaryRange=36118`;
-    getRequest({
-      extension: RemittanceSettingsRepository.SalaryRange.qry,
-      parameters: parameters,
-    })
-      .then((res) => {
-        setSalaryRangeStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const fillIncomeOfSourceStore = () => {
-    var parameters = `_filter=_&sourceOfIncome=36117`;
-    getRequest({
-      extension: RemittanceSettingsRepository.SourceOfIncome.qry,
-      parameters: parameters,
-    })
-      .then((res) => {
-        setIncomeOfSourceStore(res.list);
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
-
-  const fillEducationStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.EDUCATION_LEVEL,
-      callback: setEducationStore
-    })
-  };
-
-  const fillTitleStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.Title,
-      callback: setTitleStore
-    })
-  };
-
-  const fillSMSLanguageStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.LANGUAGE,
-      callback: setSMSLanguageStore
-    })
-  };
-
-  const fillGenderStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.GENDER,
-      callback: setGenderStore
-    })
-  };
-
-
-  const fillCivilStatusStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.CIVIL_STATUS,
-      callback: setCivilStatusStore
-    })
-  };
-
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+
+// ** Helpers
+
+import AddressTab from 'src/components/Shared/AddressTab'
+import FieldSet from 'src/components/Shared/FieldSet'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomLookup from 'src/components/Inputs/CustomLookup'
+
+const ClientTab = ({
+  clientIndividualFormValidation,
+  WorkAddressValidation,
+  countryStore,
+  cityStore,
+  setCityStore,
+  cityAddressStore,
+  setCityAddressStore,
+  cityAddressWorkStore,
+  setCityAddressWorkStore,
+
+  lookupCity,
+  lookupCityAddress,
+  lookupCityAddressWork,
+  types,
+  professionStore,
+  salaryRangeStore,
+  incomeOfSourceStore,
+  smsLanguageStore,
+  civilStatusStore,
+  genderStore,
+  fillStateStoreAddress,
+  fillStateStoreAddressWork,
+  stateAddressWorkStore,
+  stateAddressStore,
+  educationStore,
+  idTypeStore,
+  titleStore,
+   _labels, maxAccess, editMode
+ }) => {
+  console.log(cityAddressStore)
 
   const encryptFirstFourDigits = (e) => {
     const input = e.target.value
@@ -716,13 +59,6 @@ const Defaults = () => {
 
   };
 
-  const handleCopy = (event) => {
-    event.preventDefault();
-  };
-
-
-
-
   const encryptFirstFourDigitsRepeat = (e) => {
     const input = e.target.value
     const showLength = Math.max(0, input.length - 4);
@@ -738,10 +74,14 @@ const Defaults = () => {
 
   };
 
+  const handleCopy = (event) => {
+    event.preventDefault();
+  };
 
-  return (
-    <>
-      <Grid container xs={12} spacing={2} sx={{ padding: "40px" }}>
+return (
+        <>
+            <Grid container spacing={4}>
+            <Grid container xs={12} spacing={2} sx={{ padding: "40px" }}>
         <Grid item xs={6} sx={{ padding: "40px" }}>
           <Grid container spacing={2}>
             <Grid item xs={6}>
@@ -749,7 +89,9 @@ const Defaults = () => {
                 name="reference"
                 label={_labels.reference}
                 value={clientIndividualFormValidation.values?.reference}
-                required
+
+                // required
+                disabled={true}
                 onChange={clientIndividualFormValidation.handleChange}
                 maxLength="10"
                 onClear={() =>
@@ -808,6 +150,7 @@ const Defaults = () => {
                     label={_labels.type}
                     valueField="recordId"
                     displayField="name"
+
                     store={idTypeStore}
                     value={
                       idTypeStore.filter(
@@ -972,7 +315,7 @@ const Defaults = () => {
                     }
                     required
                     onChange={(event, newValue) => {
-                      setCityStore([])
+                      // setCityStore([])
 
                       if(newValue){
 
@@ -1072,7 +415,7 @@ const Defaults = () => {
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
-               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} lookupCity={lookupCityAddress} stateStore={stateStore}  fillStateStore={fillStateStore}/>
+               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore}  fillStateStore={fillStateStoreAddress}/>
                </FieldSet>
                 {/* <Grid item xs={12}>
                   <CustomTextField
@@ -1360,7 +703,7 @@ const Defaults = () => {
                     value={clientIndividualFormValidation.values?.whatsappNo}
 
                     onChange={clientIndividualFormValidation.handleChange}
-                    maxLength="10"
+                    maxLength="15"
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "whatsappNo",
@@ -1419,139 +762,7 @@ const Defaults = () => {
                   />
                 </Grid>
               </Grid>
-              <Grid container xs={6} spacing={2} sx={{ padding: "5px" }}>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="mobileVerified"
-                        disabled={true}
 
-                        // checked={clientIndividualFormValidation.values?.isInactive}
-                        onChange={clientIndividualFormValidation.handleChange}
-                      />
-                    }
-                    label={_labels?.mobileVerified}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="OTPVerified"
-                        disabled={true}
-                        checked={
-                          clientIndividualFormValidation.values?.OTPVerified
-                        }
-                        onChange={clientIndividualFormValidation.handleChange}
-                      />
-                    }
-                    label={_labels?.otpVerified}
-                  />
-                </Grid>{}
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        disabled={clientIndividualFormValidation.values.genderId ===2 ? false : true}
-
-                        name="coveredFace"
-                        checked={
-                          clientIndividualFormValidation.values?.coveredFace
-                        }
-                        onChange={clientIndividualFormValidation.handleChange}
-                      />
-                    }
-                    label={_labels?.coveredFace}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isEmployee"
-                        checked={
-                          clientIndividualFormValidation.values?.isEmployee
-                        }
-                        onChange={clientIndividualFormValidation.handleChange}
-                      />
-                    }
-                    label={_labels?.isEmployed}
-                  />
-                </Grid>
-              </Grid>
-
-              <Grid container xs={6} spacing={2} sx={{ paddingTop: "15px" }}>
-                <Grid container xs={12}>
-                  <FieldSet title={_labels.diplomat}>
-                    <Grid item xs={12}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name="isDiplomatic"
-                            checked={
-                              clientIndividualFormValidation.values?.isInactive
-                            }
-                            onChange={
-                              clientIndividualFormValidation.handleChange
-                            }
-                          />
-                        }
-                        label={_labels?.isDiplomat}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name="isRelativeDiplomate"
-                            checked={
-                              clientIndividualFormValidation.values?.isInactive
-                            }
-                            onChange={
-                              clientIndividualFormValidation.handleChange
-                            }
-                          />
-                        }
-                        label={_labels?.isDiplomatRelative}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <CustomTextField
-                        name="relativeDiplomateInfo"
-                        label={_labels.relativeDiplomateInfo}
-                        value={
-                          clientIndividualFormValidation.values
-                            ?.relativeDiplomateInfo
-                        }
-                        onChange={clientIndividualFormValidation.handleChange}
-                        maxLength="10"
-                        onClear={() =>
-                          clientIndividualFormValidation.setFieldValue(
-                            "relativeDiplomateInfo",
-                            "",
-                          )
-                        }
-                        error={
-                          clientIndividualFormValidation.touched
-                            .relativeDiplomateInfo &&
-                          Boolean(
-                            clientIndividualFormValidation.errors
-                              .relativeDiplomateInfo,
-                          )
-                        }
-                        helperText={
-                          clientIndividualFormValidation.touched
-                            .relativeDiplomateInfo &&
-                          clientIndividualFormValidation.errors
-                            .relativeDiplomateInfo
-                        }
-                      />
-                    </Grid>
-                  </FieldSet>
-                </Grid>
-              </Grid>
             </Grid>
               </Grid>
             </Grid>
@@ -1561,7 +772,7 @@ const Defaults = () => {
         <Grid item xs={6}>
           <Grid container xs={12} spacing={2}>
 
-            <Grid item xs={12} >
+            <Grid container xs={12} >
               <FieldSet title={_labels.customerInformation}>
               <Grid item xs={6}>
                 <CustomTextField
@@ -1570,7 +781,7 @@ const Defaults = () => {
                   value={clientIndividualFormValidation.values?.cellPhone}
                   required
                   onChange={clientIndividualFormValidation.handleChange}
-                  maxLength="10"
+                  maxLength="15"
                   onCopy={handleCopy}
                   onPaste={handleCopy}
                   onClear={() =>
@@ -1595,6 +806,7 @@ const Defaults = () => {
                   label={_labels.cellPhone}
                   value={clientIndividualFormValidation.values?.cellPhoneRepeat}
                   required
+                  maxLength="15"
                   onChange={clientIndividualFormValidation.handleChange}
                   onCopy={handleCopy}
                   onPaste={handleCopy}
@@ -1893,6 +1105,7 @@ const Defaults = () => {
                     valueField="key"
                     displayField="value"
                     store={genderStore}
+                    required
                     value={
                       genderStore.filter(
                         (item) =>
@@ -1903,11 +1116,11 @@ const Defaults = () => {
 
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
-                        "genderId",
+                        "gender",
                         newValue?.key,
                       );
                       clientIndividualFormValidation.setFieldValue(
-                        "gender",
+                        "genderName",
                         newValue?.value,
                       );
                     }else{
@@ -1922,14 +1135,13 @@ const Defaults = () => {
                       );
                     }
                     }}
-                    required
                     error={
-                      clientIndividualFormValidation.touched.genderId &&
-                      Boolean(clientIndividualFormValidation.errors.genderId)
+                      clientIndividualFormValidation.touched.gender &&
+                      Boolean(clientIndividualFormValidation.errors.gender)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.genderId &&
-                      clientIndividualFormValidation.errors.genderId
+                      clientIndividualFormValidation.touched.gender &&
+                      clientIndividualFormValidation.errors.gender
                     }
                   />
                 </Grid>
@@ -2089,7 +1301,7 @@ const Defaults = () => {
                     label={_labels.sponsor}
                     value={clientIndividualFormValidation.values?.sponsorName}
                     onChange={clientIndividualFormValidation.handleChange}
-                    maxLength="10"
+                    maxLength="15"
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "sponsorName",
@@ -2168,12 +1380,147 @@ const Defaults = () => {
               </FieldSet>
 
 
-     <Grid sx={{marginTop: '20px'}}>
+               <Grid container sx={{marginTop: '20px'}}>
               <FieldSet title={_labels.workAddress}>
-              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} lookupCity={lookupCityAddressWork} stateStore={stateStore}  fillStateStore={fillStateStore}/>
+              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork} stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork}/>
 
                </FieldSet>
                </Grid>
+
+               <Grid container xs={6} spacing={2} sx={{ padding: "5px" }}>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="mobileVerified"
+                        disabled={true}
+
+                        // checked={clientIndividualFormValidation.values?.isInactive}
+                        onChange={clientIndividualFormValidation.handleChange}
+                      />
+                    }
+                    label={_labels?.mobileVerified}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="OTPVerified"
+                        disabled={true}
+                        checked={
+                          clientIndividualFormValidation.values?.OTPVerified
+                        }
+                        onChange={clientIndividualFormValidation.handleChange}
+                      />
+                    }
+                    label={_labels?.otpVerified}
+                  />
+                </Grid>{}
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        disabled={clientIndividualFormValidation.values.genderId ===2 ? false : true}
+
+                        name="coveredFace"
+                        checked={
+                          clientIndividualFormValidation.values?.coveredFace
+                        }
+                        onChange={clientIndividualFormValidation.handleChange}
+                      />
+                    }
+                    label={_labels?.coveredFace}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isEmployee"
+                        checked={
+                          clientIndividualFormValidation.values?.isEmployee
+                        }
+                        onChange={clientIndividualFormValidation.handleChange}
+                      />
+                    }
+                    label={_labels?.isEmployed}
+                  />
+                </Grid>
+              </Grid>
+
+              <Grid container xs={6} spacing={2} sx={{ paddingTop: "15px" }}>
+                <Grid container xs={12}>
+                  <FieldSet title={_labels.diplomat}>
+                    <Grid item xs={12}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="isDiplomatic"
+                            checked={
+                              clientIndividualFormValidation.values?.isInactive
+                            }
+                            onChange={
+                              clientIndividualFormValidation.handleChange
+                            }
+                          />
+                        }
+                        label={_labels?.isDiplomat}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="isRelativeDiplomate"
+                            checked={
+                              clientIndividualFormValidation.values?.isInactive
+                            }
+                            onChange={
+                              clientIndividualFormValidation.handleChange
+                            }
+                          />
+                        }
+                        label={_labels?.isDiplomatRelative}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomTextField
+                        name="relativeDiplomateInfo"
+                        label={_labels.relativeDiplomateInfo}
+                        value={
+                          clientIndividualFormValidation.values
+                            ?.relativeDiplomateInfo
+                        }
+                        onChange={clientIndividualFormValidation.handleChange}
+                        maxLength="10"
+                        onClear={() =>
+                          clientIndividualFormValidation.setFieldValue(
+                            "relativeDiplomateInfo",
+                            "",
+                          )
+                        }
+                        error={
+                          clientIndividualFormValidation.touched
+                            .relativeDiplomateInfo &&
+                          Boolean(
+                            clientIndividualFormValidation.errors
+                              .relativeDiplomateInfo,
+                          )
+                        }
+                        helperText={
+                          clientIndividualFormValidation.touched
+                            .relativeDiplomateInfo &&
+                          clientIndividualFormValidation.errors
+                            .relativeDiplomateInfo
+                        }
+                      />
+                    </Grid>
+                  </FieldSet>
+                </Grid>
+              </Grid>
+
             </Grid>
 
 
@@ -2192,17 +1539,11 @@ const Defaults = () => {
             textAlign: "center",
           }}
         >
-          <WindowToolbar onSave={handleSubmit} />
         </Grid>
       </Grid>
+            </Grid>
+        </>
+    )
+}
 
-      <ErrorWindow
-        open={errorMessage}
-        onClose={() => setErrorMessage(null)}
-        message={errorMessage}
-      />
-    </>
-  );
-};
-
-export default Defaults;
+export default ClientTab

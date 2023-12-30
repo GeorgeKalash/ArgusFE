@@ -1,33 +1,66 @@
+
 import React, { useContext, useEffect } from 'react'
 import { Box, Grid } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
+import { useFormik } from 'formik'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { CommonContext } from 'src/providers/CommonContext'
+import { DataSets } from 'src/resources/DataSets'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { formatDateFromApi } from 'src/lib/date-helper'
-
+import ClientWindow from './Windows/ClientWindow'
+import { RTCLRepository } from 'src/repositories/RTCLRepository'
+import { getNewClients, populateIClients } from 'src/Models/RemittanceSettings/clients'
 
 const ClientsList = () => {
 
 
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //control
   const [labels, setLabels] = useState(null)
+  const [labels2, setLabels2] = useState(null)
+
   const [access, setAccess] = useState(null)
+  const [windowOpen, setWindowOpen] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
 
   //states
+
+  const [types, setTypes] = useState([]);
+  const [countryStore, setCountryStore] = useState([]);
+  const [cityStore, setCityStore] = useState([]);
+  const [cityAddressStore, setCityAddressStore] = useState([]);
+  const [cityAddressWorkStore, setCityAddressWorkStore] = useState([]);
+  const [professionStore, setProfessionStore] = useState([]);
+  const [salaryRangeStore, setSalaryRangeStore] = useState([]);
+  const [incomeOfSourceStore, setIncomeOfSourceStore] = useState([]);
+  const [smsLanguageStore, setSMSLanguageStore] = useState([]);
+  const [civilStatusStore, setCivilStatusStore] = useState([]);
+  const [genderStore, setGenderStore] = useState([]);
+  const [stateAddressStore, setStateAddressStore] = useState([]);
+  const [stateAddressWorkStore, setStateAddressWorkStore] = useState([]);
+
+  const [educationStore, setEducationStore] = useState([]);
+  const [idTypeStore, setIdTypeStore] = useState([]);
+  const [titleStore, setTitleStore] = useState([]);
 
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -38,6 +71,22 @@ const ClientsList = () => {
         // getGridData({ _startAt: 0, _pageSize: 30 })
 
         getLabels(ResourceIds.ClientList, setLabels)
+        getLabels(ResourceIds.ClientMaster, setLabels2)
+
+        fillType();
+        fillCountryStore();
+        fillProfessionStore();
+        fillSalaryRangeStore();
+        fillIncomeOfSourceStore();
+        fillSMSLanguageStore();
+        fillGenderStore();
+        fillCivilStatusStore();
+        fillEducationStore();
+        fillIdTypeStore()
+        fillTitleStore()
+
+
+
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -60,6 +109,90 @@ const ClientsList = () => {
 
   }
 
+
+  const _labels2 = {
+    reference: labels2 && labels2.find((item) => item.key === 1).value,
+    birthDate: labels2 && labels2.find((item) => item.key === 2).value,
+    isResident: labels2 && labels2.find((item) => item.key === 3).value,
+
+    // number: labels2 && labels2.find((item) => item.key === 4).value,
+    number: labels2 && labels2.find((item) => item.key === 5).value,
+    type: labels2 && labels2.find((item) => item.key === 6).value,
+    expiryDate: labels2 && labels2.find((item) => item.key === 7).value,
+    issusDate: labels2 && labels2.find((item) => item.key === 8).value,
+    country: labels2 && labels2.find((item) => item.key === 9).value,
+    city: labels2 && labels2.find((item) => item.key === 10).value,
+    first: labels2 && labels2.find((item) => item.key === 11).value,
+    last: labels2 && labels2.find((item) => item.key === 12).value,
+    middle: labels2 && labels2.find((item) => item.key === 13).value,
+    family: labels2 && labels2.find((item) => item.key === 14).value,
+
+    nationality: labels2 && labels2.find((item) => item.key === 15).value,
+    profession: labels2 && labels2.find((item) => item.key === 16).value,
+    cellPhone: labels2 && labels2.find((item) => item.key === 17).value,
+    status: labels2 && labels2.find((item) => item.key === 18).value,
+    oldReference: labels2 && labels2.find((item) => item.key === 19).value,
+    whatsapp: labels2 && labels2.find((item) => item.key === 20).value,
+    sponsor: labels2 && labels2.find((item) => item.key === 21).value,
+    salaryRange: labels2 && labels2.find((item) => item.key === 22).value,
+    riskLevel: labels2 && labels2.find((item) => item.key === 23).value,
+    smsLanguage: labels2 && labels2.find((item) => item.key === 24).value,
+    incomeSource: labels2 && labels2.find((item) => item.key === 25).value,
+    civilStatus: labels2 && labels2.find((item) => item.key === 26).value,
+    educationLevel: labels2 && labels2.find((item) => item.key === 27).value,
+    gender: labels2 && labels2.find((item) => item.key === 28).value,
+    title: labels2 && labels2.find((item) => item.key === 29).value,
+    id: labels2 && labels2.find((item) => item.key === 30).value,
+    name: labels2 && labels2.find((item) => item.key === 31).value,
+    main: labels2 && labels2.find((item) => item.key === 32).value,
+
+    bankAccounts: labels2 && labels2.find((item) => item.key === 33).value,
+    isResident: labels2 && labels2.find((item) => item.key === 34).value,
+    mobileVerified: labels2 && labels2.find((item) => item.key === 35).value,
+
+    otpVerified: labels2 && labels2.find((item) => item.key === 36).value,
+    coveredFace: labels2 && labels2.find((item) => item.key === 37).value,
+    isEmployed: labels2 && labels2.find((item) => item.key === 38).value,
+
+    diplomat: labels2 && labels2.find((item) => item.key === 39).value,
+
+    isDiplomat: labels2 && labels2.find((item) => item.key === 40).value,
+    isDiplomatRelative:
+      labels2 && labels2.find((item) => item.key === 41).value,
+
+    relativeDiplomateInfo: labels2 && labels2.find((item) => item.key === 42).value,
+    address: labels2 && labels2.find((item) => item.key === 43).value, // nationalityAddress
+    customerInformation: labels2 && labels2.find((item) => item.key === 44).value,
+    workAddress: labels2 && labels2.find((item) => item.key === 45).value,
+    phone: labels2 && labels2.find((item) => item.key === 46).value,
+    phone2: labels2 && labels2.find((item) => item.key === 47).value,
+    email: labels2 && labels2.find((item) => item.key === 48).value,
+    email2: labels2 && labels2.find((item) => item.key === 49).value,
+     phone3: labels2 && labels2.find((item) => item.key === 50).value,
+    bldgNo: labels2 && labels2.find((item) => item.key === 51).value,
+    unitNo :  labels2 && labels2.find((item) => item.key === 52).value,
+    subNo:  labels2 && labels2.find((item) => item.key === 53).value,
+    postalCode :  labels2 && labels2.find((item) => item.key === 54).value,
+    cityDistrict :  labels2 && labels2.find((item) => item.key === 55).value,
+
+    street1 :  labels2 && labels2.find((item) => item.key === 56).value,
+    street2 :  labels2 && labels2.find((item) => item.key === 57).value,
+    category :  labels2 && labels2.find((item) => item.key === 58).value,
+    foreignName :  labels2 && labels2.find((item) => item.key === 59).value,
+    keyword :  labels2 && labels2.find((item) => item.key === 60).value,
+
+    // createdDate :  labels2 && labels2.find((item) => item.key === 61).value,
+
+    fl_first: labels2 && labels2.find((item) => item.key === 62).value,
+    fl_last: labels2 && labels2.find((item) => item.key === 63).value,
+    fl_middle: labels2 && labels2.find((item) => item.key === 64).value,
+    fl_family: labels2 && labels2.find((item) => item.key === 65).value,
+
+    state: labels2 && labels2.find((item) => item.key === 66).value,
+
+
+
+  };
 
 
   const columns = [
@@ -157,13 +290,41 @@ const ClientsList = () => {
     }
   ]
 
+const getPlantId = obj=>{
+
+  const userData = window.sessionStorage.getItem('userData') ?JSON.parse( window.sessionStorage.getItem('userData')) : null
+  console.log(userData)
+  var parameters = `_userId=${userData && userData.userId}&_key=plantId`
+  getRequest({
+    extension: SystemRepository.SystemPlant.get,
+    parameters: parameters
+  })
+    .then(res => {
+console.log(res)
+
+      clientIndividualFormValidation.setFieldValue('plantId', res.record.value)
+
+//
+      // console.log(clientIndividualFormValidation)
+
+      // console.log(clientIndividualFormValidation)
+
+
+    })
+    .catch(error => {
+      setErrorMessage(error)
+    })
+
+}
+
+
   const search = e => {
     setGridData({count : 0, list: [] , message :"",  statusId:1})
      const input = e.target.value
      console.log({list: []})
 
   console.log(gridData)
-     if(input.length > 6){
+     if(input.length > 1){
     var parameters = `_size=30&_startAt=0&_filter=${input}`
     getRequest({
       extension: CTCLRepository.CtClientIndividual.snapshot,
@@ -184,7 +345,486 @@ const ClientsList = () => {
   }
 
 
+  const clientIndividualFormValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true, // Trigger validation on change
+    validateOnBlur: true,
+    validationSchema: yup.object({
+      // reference: yup.string().required("This field is required"),
+      isResident: yup.string().required("This field is required"),
+      birthDate: yup.string().required("This field is required"),
+      idtId: yup.string().required("This field is required"),
+      number:  yup.string().required("This field is required"),
+      numberRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('number'), null], 'Number must match'),
+      expiryDate: yup.string().required("This field is required"),
+      countryId: yup.string().required("This field is required"),
+      cityId: yup.string().required("This field is required"),
+      idCountry: yup.string().required("This field is required"),
+      idCity: yup.string().required("This field is required"),
+      firstName: yup.string().required("This field is required"),
+      lastName: yup.string().required("This field is required"),
+      nationalityId: yup.string().required("This field is required"),
+      professionId: yup.string().required("This field is required"),
+      cellPhone: yup.string().required("This field is required"),
+      cellPhoneRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
 
+      // status: yup.string().required("This field is required"),
+      salaryRangeId: yup.string().required("This field is required"),
+      smsLanguage: yup.string().required("This field is required"),
+      incomeSourceId: yup.string().required("This field is required"),
+
+      gender: yup.string().required("This field is required"),
+
+      // otpVerified: yup.string().required("This field is required"),
+      // coveredFace: yup.string().required("This field is required"),
+      // isEmployee: yup.string().required("This field is required"),
+      isDiplomat: yup.string().required("This field is required"),
+      isRelativeDiplomate: yup.string().required("This field is required"),
+      relativeDiplomateInfo: yup.string().required("This field is required"),
+
+      // name:  yup.string().required('This field is required'),
+
+      street1:  yup.string().required('This field is required'),
+      phone: yup.string().required('This field is required')
+    }),
+    onSubmit: (values) => {
+      console.log("values" + values);
+      postRtDefault(values);
+    },
+  });
+
+  const postRtDefault = (obj) => {
+    console.log("obj", obj);
+
+    //CTCL
+
+
+    const obj1 = {
+      category: 1,
+      reference: obj.reference,
+      name: obj.firstName,
+      flName: obj.fl_firstName,
+      nationalityId: obj.nationalityId,
+
+      // status: obj.status,
+      addressId: null,
+      plantId: clientIndividualFormValidation.values.plantId,
+      cellPhone: obj.cellPhone,
+      createdDate:  obj.expiryDate,
+      expiryDate: obj.expiryDate,
+      otp: obj.otpVerified,
+      plantName: obj.plantName,
+      nationalityName: obj.nationalityName,
+      status:1, //obj.statusName,
+      categoryName: obj.categoryName
+
+    };
+
+
+    //CCTD
+    const obj2 = {
+      idNo : "1",
+
+      // clientID: null,
+      idCountryId: obj.idCountry,
+      idtId: obj.idtId ,  //5
+      idExpiryDate: obj.expiryDate,
+      issusDate: obj.issusDate,
+      idCity: obj.idCity,
+      isDiplomatic: obj.isDiplomat,
+
+    };
+
+
+
+    //CTCLI
+    const obj3 = {
+      // clientID: null,
+      firstName: obj.firstName,
+      lastName: obj.lastName,
+      middleName: obj.middleName,
+      familyName: obj.familyName,
+      fl_firstName: obj.fl_firstName,
+      fl_lastName: obj.fl_lastName,
+      fl_middleName: obj.fl_middleName,
+      fl_familyName: obj.fl_familyName,
+      birthDate: obj.birthDate,
+      isResident: obj.isResident,
+
+    };
+
+
+    const obj4 = {
+      incomeSourceId: obj.incomeSourceId,
+      salaryRangeId: obj.salaryRangeId,
+      riskLevel: obj.riskLevel,
+      smsLanguage: obj.smsLanguage,
+      sponsorName: obj.sponsorName,
+      whatsAppNo: obj.whatsappNo,
+      gender: obj.gender,
+      title: obj.title,
+      civilStatus: obj.civilStatus,
+      mobileVerificationStatus: 1, //obj.mobileVerified,
+      educationLevel: obj.educationLevel,
+      isDiplomat: obj.isDiplomat,
+      isRelativeDiplomat: obj.isRelativeDiplomate,
+      relativeDiplomatInfo: obj.relativeDiplomateInfo,
+      OTPVerified: obj.OTPVerified,
+      coveredFace: obj.coveredFace,
+      isEmployee: obj.isEmployee,
+
+      // status: obj.status,
+
+      // isVerified: true,
+      // reference: obj.reference,
+      professionId:obj.professionId,
+      idNo : "1",
+      wip: 1,
+      releaseStatus: 1,
+      educationLevelName: obj.educationLevelName,
+      statusName: obj.statusName
+
+      // date: obj.date,
+    };
+
+
+     const obj5 = {
+      name: obj.name,
+      countryId: obj.countryId,
+      stateId: obj.stateId,
+      cityId: obj.cityId,
+      cityName: obj.cityName,
+      street1: obj.street1,
+      street2: obj.street2,
+      email1: obj.email1,
+      email2: obj.email2,
+      phone: obj.phone,
+      phone2: obj.phone2,
+      phone3: obj.phone3,
+      addressId: obj.addressId,
+      postalCode:obj.postalCode,
+      cityDistrictId: obj.cityDistrictId,
+      bldgNo: obj.bldgNo,
+      unitNo: obj.unitNo,
+      subNo: obj.subNo
+     }
+
+     const obj6 = {
+      name: WorkAddressValidation.values.name,
+      countryId: WorkAddressValidation.values.countryId,
+      stateId: WorkAddressValidation.values.stateId,
+      cityId: WorkAddressValidation.values.cityId,
+      cityName: WorkAddressValidation.values.cityName,
+      street1: WorkAddressValidation.values.street1,
+      street2: WorkAddressValidation.values.street2,
+      email1: WorkAddressValidation.values.email1,
+      email2: WorkAddressValidation.values.email2,
+      phone: WorkAddressValidation.values.phone,
+      phone2: WorkAddressValidation.values.phone2,
+      phone3: WorkAddressValidation.values.phone3,
+      addressId: WorkAddressValidation.values.addressId,
+      postalCode:WorkAddressValidation.values.postalCode,
+      cityDistrictId: WorkAddressValidation.values.cityDistrictId,
+      bldgNo: WorkAddressValidation.values.bldgNo,
+      unitNo: WorkAddressValidation.values.unitNo,
+      subNo: WorkAddressValidation.values.subNo
+     }
+
+    const data = {
+      plantId: clientIndividualFormValidation.values.plantId,
+      clientMaster: obj1, //CTCL
+      clientID: obj2, //CTID
+      ClientIndividual: obj3, //CTCLI
+      clientRemittance: obj4,
+      address: obj5,
+      workAddress: obj6
+
+    };
+
+    console.log(data)
+    postRequest({
+      extension: RTCLRepository.CtClientIndividual.set2,
+      record: JSON.stringify(data), // JSON.stringify({  sysDefaults  : data })
+    })
+      .then((res) => {
+        if (res) toast.success("Record Successfully");
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+
+  const WorkAddressValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    initialValues: {
+      name: null,
+      countryId: null,
+      stateId: null,
+      cityId: null,
+      cityName: null,
+      street1: null,
+      street2: null,
+      email1: null,
+      email2: null,
+      phone: null,
+      phone2: null,
+      phone3: null,
+      addressId: null,
+      postalCode:null,
+      cityDistrictId: null,
+      bldgNo: null,
+      unitNo: null,
+      subNo: null
+    },
+    validationSchema: yup.object({
+      // name:  yup.string().required('This field is required'),
+      // countryId:  yup.string().required('This field is required'),
+      // cityId:  yup.string().required('This field is required'),
+      // street1:  yup.string().required('This field is required'),
+      // phone: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+      console.log(values);
+
+    }
+  })
+
+
+
+  const addClient= obj => {
+
+    clientIndividualFormValidation.setValues(getNewClients())
+    getPlantId()
+    console.log(clientIndividualFormValidation)
+    setWindowOpen(true)
+  }
+
+  const editClient= obj => {
+
+    const _recordId = obj.recordId
+    const defaultParams = `_clientId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RTCLRepository.CtClientIndividual.get,
+      parameters: parameters
+    })
+      .then(res => {
+        clientIndividualFormValidation.setValues(populateIClients(res.record))
+        getPlantId()
+        setWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const handleSubmit = () => {
+    clientIndividualFormValidation.handleSubmit();
+
+    WorkAddressValidation.handleSubmit();
+
+  };
+
+
+  const fillType = () => {
+    var parameters = `_filter=`;
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.IdTypes.qry,
+      parameters: parameters,
+    })
+      .then((res) => {
+        setTypes(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const fillStateStoreAddress = countryId => {
+    var parameters = `_countryId=${countryId}`
+    getRequest({
+      extension: SystemRepository.State.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setStateAddressStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillStateStoreAddressWork = countryId => {
+    var parameters = `_countryId=${countryId}`
+    getRequest({
+      extension: SystemRepository.State.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setStateAddressWorkStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillCountryStore = () => {
+    var parameters = `_filter=`;
+    getRequest({
+      extension: SystemRepository.Country.qry,
+      parameters: parameters,
+    })
+      .then((res) => {
+        setCountryStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const lookupCity = (searchQry) => {
+    setCityStore([]);
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${clientIndividualFormValidation.values.idCountry}&_stateId=0`;
+    getRequest({
+      extension: SystemRepository.City.snapshot,
+      parameters: parameters,
+    })
+      .then((res) => {
+        console.log(res.list);
+        setCityStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const lookupCityAddress = (searchQry) => {
+    setCityAddressStore([]);
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${clientIndividualFormValidation.values.countryId}&_stateId=${clientIndividualFormValidation.values.stateId || 0}`;
+    getRequest({
+      extension: SystemRepository.City.snapshot,
+      parameters: parameters,
+    })
+      .then((res) => {
+        console.log(res.list);
+        setCityAddressStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const lookupCityAddressWork = (searchQry) => {
+    setCityAddressWorkStore([]);
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${WorkAddressValidation.values.countryId}&_stateId=${WorkAddressValidation.values.stateId || 0}`;
+    getRequest({
+      extension: SystemRepository.City.snapshot,
+      parameters: parameters,
+    })
+      .then((res) => {
+        console.log(res.list);
+        setCityAddressWorkStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const fillIdTypeStore = () => {
+    var parameters = ``;
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.IdTypes.qry,
+      parameters: parameters,
+    })
+      .then((res) => {
+        setIdTypeStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const fillProfessionStore = (cId) => {
+    var parameters = `_filter=`;
+    getRequest({
+      extension: RemittanceSettingsRepository.Profession.qry,
+      parameters: parameters,
+    })
+      .then((res) => {
+        setProfessionStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const fillSalaryRangeStore = () => {
+    var parameters = `_filter=`;
+    getRequest({
+      extension: RemittanceSettingsRepository.SalaryRange.qry,
+      parameters: parameters,
+    })
+      .then((res) => {
+        setSalaryRangeStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const fillIncomeOfSourceStore = () => {
+    var parameters = `_filter=`;
+    getRequest({
+      extension: RemittanceSettingsRepository.SourceOfIncome.qry,
+      parameters: parameters,
+    })
+      .then((res) => {
+        setIncomeOfSourceStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const fillEducationStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.EDUCATION_LEVEL,
+      callback: setEducationStore
+    })
+  };
+
+  const fillTitleStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.Title,
+      callback: setTitleStore
+    })
+  };
+
+  const fillSMSLanguageStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.LANGUAGE,
+      callback: setSMSLanguageStore
+    })
+  };
+
+  const fillGenderStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.GENDER,
+      callback: setGenderStore
+    })
+  };
+
+
+  const fillCivilStatusStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.CIVIL_STATUS,
+      callback: setCivilStatusStore
+    })
+  };
 
 
 
@@ -222,6 +862,8 @@ const ClientsList = () => {
           </Grid>
 </Grid>
 
+<GridToolbar onAdd={addClient} maxAccess={access} />
+
 {gridData &&
         <Table
           columns={columns}
@@ -229,9 +871,45 @@ const ClientsList = () => {
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}
-
+onEdit={editClient}
         />}
+ {windowOpen && (
+       <ClientWindow
+       onClose={() => setWindowOpen(false)}
+       width={1000}
+       height={600}
+       onSave={handleSubmit}
+       clientIndividualFormValidation={clientIndividualFormValidation}
+       WorkAddressValidation={WorkAddressValidation}
+       countryStore={countryStore}
+       cityStore={cityStore}
 
+       types={types}
+  professionStore={professionStore}
+  salaryRangeStore={salaryRangeStore}
+  incomeOfSourceStore={incomeOfSourceStore}
+  smsLanguageStore={smsLanguageStore}
+  civilStatusStore={civilStatusStore}
+  genderStore={genderStore}
+  educationStore={educationStore}
+  idTypeStore={idTypeStore}
+  titleStore={titleStore}
+  cityAddressStore={cityAddressStore}
+  cityAddressWorkStore={cityAddressWorkStore}
+  setCityAddressWorkStore={setCityAddressWorkStore}
+  setCityAddressStore={setCityAddressStore}
+  lookupCity={lookupCity}
+  lookupCityAddress={lookupCityAddress}
+  lookupCityAddressWork={lookupCityAddressWork}
+  fillStateStoreAddress={fillStateStoreAddress}
+  fillStateStoreAddressWork={fillStateStoreAddressWork}
+  stateAddressWorkStore={stateAddressWorkStore}
+  stateAddressStore={stateAddressStore}
+  _labels ={_labels2}
+  maxAccess={access}
+
+       />
+       )}
 
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
 
