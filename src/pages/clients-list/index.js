@@ -25,6 +25,7 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import ClientWindow from './Windows/ClientWindow'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { getNewClients, populateIClients } from 'src/Models/RemittanceSettings/clients'
+import TransactionLog from 'src/components/Shared/TransactionLog'
 
 const ClientsList = () => {
 
@@ -39,6 +40,7 @@ const ClientsList = () => {
 
   const [access, setAccess] = useState(null)
   const [windowOpen, setWindowOpen] = useState(null)
+  const [windowInfo, setWindowInfo] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -74,7 +76,7 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
 
         getLabels(ResourceIds.ClientList, setLabels)
         getLabels(ResourceIds.ClientMaster, setLabels2)
-
+        fillMobileVerifiedStore()
         fillType();
         fillCountryStore();
         fillProfessionStore();
@@ -307,11 +309,6 @@ console.log(res)
 
       clientIndividualFormValidation.setFieldValue('plantId', res.record.value)
 
-//
-      // console.log(clientIndividualFormValidation)
-
-      // console.log(clientIndividualFormValidation)
-
 
     })
     .catch(error => {
@@ -367,29 +364,30 @@ console.log(res)
     validationSchema: yup.object({
       // reference: yup.string().required("This field is required"),
       // isResident: yup.string().required("This field is required"),
-      // birthDate: yup.string().required("This field is required"),
-      // idtId: yup.string().required("This field is required"),
-      // number:  yup.string().required("This field is required"),
-      // numberRepeat : yup.string().required('Repeat Password is required')
-      // .oneOf([yup.ref('number'), null], 'Number must match'),
-      // expiryDate: yup.string().required("This field is required"),
-      // countryId: yup.string().required("This field is required"),
-      // cityId: yup.string().required("This field is required"),
-      // idCountry: yup.string().required("This field is required"),
-      // idCity: yup.string().required("This field is required"),
-      // firstName: yup.string().required("This field is required"),
-      // lastName: yup.string().required("This field is required"),
-      // nationalityId: yup.string().required("This field is required"),
+      birthDate: yup.string().required("This field is required"),
+      idtId: yup.string().required("This field is required"),
+      idNo:  yup.string().required("This field is required"),
+      idNoRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('idNo'), null], 'Number must match'),
 
-      // // professionId: yup.string().required("This field is required"),
-      // cellPhone: yup.string().required("This field is required"),
-      // cellPhoneRepeat : yup.string().required('Repeat Password is required')
-      // .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-      // smsLanguage: yup.string().required("This field is required"),
-      // incomeSourceId: yup.string().required("This field is required"),
-      // gender: yup.string().required("This field is required"),
-      // street1:  yup.string().required('This field is required'),
-      // phone: yup.string().required('This field is required')
+      expiryDate: yup.string().required("This field is required"),
+      countryId: yup.string().required("This field is required"),
+      cityId: yup.string().required("This field is required"),
+      idCountry: yup.string().required("This field is required"),
+      idCity: yup.string().required("This field is required"),
+      firstName: yup.string().required("This field is required"),
+      lastName: yup.string().required("This field is required"),
+      nationalityId: yup.string().required("This field is required"),
+      professionId: yup.string().required("This field is required"),
+
+      cellPhone: yup.string().required("This field is required"),
+      cellPhoneRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
+      smsLanguage: yup.string().required("This field is required"),
+      incomeSourceId: yup.string().required("This field is required"),
+      gender: yup.string().required("This field is required"),
+      street1:  yup.string().required('This field is required'),
+      phone: yup.string().required('This field is required')
     }),
     onSubmit: (values) => {
       console.log("values" + values);
@@ -421,7 +419,9 @@ console.log(res)
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
       status:1, //obj.statusName,
-      categoryName: obj.categoryName
+      categoryName: obj.categoryName,
+      oldReference:obj.oldReference
+
 
     };
 
@@ -435,7 +435,7 @@ console.log(res)
       idtId: obj.idtId ,  //5
       idExpiryDate: obj.expiryDate,
       issusDate: obj.issusDate,
-      idCity: obj.idCity,
+      idCityId: obj.idCity,
       isDiplomatic: obj.isDiplomat,
 
     };
@@ -474,14 +474,10 @@ console.log(res)
       isDiplomat: obj.isDiplomat,
       isRelativeDiplomat: obj.isRelativeDiplomate,
       relativeDiplomatInfo: obj.relativeDiplomateInfo,
-      OTPVerified: obj.otp,
+      OTPVerified: obj.OTPVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
 
-      // status: obj.status,
-
-      // isVerified: true,
-      // reference: obj.reference,
       professionId:obj.professionId,
       idNo : obj.idNo,
       wip: 1,
@@ -926,11 +922,14 @@ onEdit={editClient}
        width={1100}
        height={600}
        onSave={handleSubmit}
+       onInfo={()=>{setWindowInfo(true)}}
+       onInfoClose={()=>{setWindowInfo(false)}}
+
        clientIndividualFormValidation={clientIndividualFormValidation}
        WorkAddressValidation={WorkAddressValidation}
        countryStore={countryStore}
        cityStore={cityStore}
-setCityStore={setCityStore}
+       setCityStore={setCityStore}
        types={types}
   professionStore={professionStore}
   salaryRangeStore={salaryRangeStore}
@@ -960,8 +959,12 @@ setCityStore={setCityStore}
   _labels ={_labels2}
   maxAccess={access}
 
+
        />
        )}
+
+       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
+/>}
 
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
 

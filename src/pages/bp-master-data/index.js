@@ -12,6 +12,7 @@ import toast from 'react-hot-toast'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import TransactionLog from 'src/components/Shared/TransactionLog'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -58,13 +59,15 @@ const BPMasterData = () => {
   const [cityStore, setCityStore] = useState([])
   const [cityDistrictStore, setCityDistrictStore] = useState([])
   const [stateStore, setStateStore] = useState([])
-  
+
   //states
   const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [defaultValue, setdefaultValue] = useState(null)
+  const [windowInfo, setWindowInfo] = useState(null)
+
   const [relationWindowOpen, setRelationWindowOpen] = useState(false)
 
   const [addressWindowOpen, setAddressWindowOpen] = useState(false)
@@ -330,7 +333,7 @@ const BPMasterData = () => {
     const list = await filterIdCategory(categId)
     setIDCategoryStore(list)
     }
-  
+
 
   const filterIdCategory = async categId => {
     try {
@@ -669,7 +672,7 @@ const BPMasterData = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
-  
+
   // Address Tab
 
   const addressValidation = useFormik({
@@ -690,7 +693,7 @@ const BPMasterData = () => {
     }
   })
 
-  const postAddress = obj => {   
+  const postAddress = obj => {
     console.log(obj)
     const bpId = bpMasterDataValidation.values.recordId
     postRequest({
@@ -700,9 +703,9 @@ const BPMasterData = () => {
       .then(res => {
         console.log(res.recordId)
         obj.recordId = res.recordId
-        addressValidation.setFieldValue('recordId', obj.recordId)   
+        addressValidation.setFieldValue('recordId', obj.recordId)
         setAddressWindowOpen(false)
-       
+
         //post BPAddress
         const object = obj //we add bill to and ship to to validation
         object.addressId = addressValidation.values.recordId
@@ -727,7 +730,7 @@ const BPMasterData = () => {
       })
   }
 
-  const getAddressGridData = bpId => { 
+  const getAddressGridData = bpId => {
     setAddressGridData([])
     const defaultParams = `_bpId=${bpId}`
     var parameters = defaultParams
@@ -767,7 +770,7 @@ const BPMasterData = () => {
   }
 
   const addAddress = () => {
-    addressValidation.setValues(getNewAddress) //bpId is then added to object on save.. 
+    addressValidation.setValues(getNewAddress) //bpId is then added to object on save..
     setAddressWindowOpen(true)
   }
 
@@ -799,7 +802,7 @@ const BPMasterData = () => {
         })
           .then(res => {
             console.log(res.record)
-            
+
             //addressValidation.setValues(populateAddress(res.record)) put in address validation shipto and billto
             //buttons
           })
@@ -810,12 +813,12 @@ const BPMasterData = () => {
       .catch(error => {
         setErrorMessage(error)
       })
-  } 
+  }
 
   const handleAddressSubmit = () => {
     addressValidation.handleSubmit()
   }
-  
+
 
   const fillStateStore = countryId => {
     setStateStore([])
@@ -836,9 +839,9 @@ const BPMasterData = () => {
 
   const lookupCity = searchQry => {
     setCityStore([])
-    if (!addressValidation.values.countryId) 
+    if (!addressValidation.values.countryId)
     {
-      console.log('false') 
+      console.log('false')
 
      return false
     }
@@ -897,6 +900,8 @@ const BPMasterData = () => {
           height={400}
           tabs={tabs}
           onSave={handleSubmit}
+          onInfo={()=>{setWindowInfo(true)}}
+          onInfoClose={()=>{setWindowInfo(false)}}
           editMode={editMode}
           labels={_labels}
           maxAccess={access}
@@ -968,6 +973,8 @@ const BPMasterData = () => {
           height={400}
         />
       )}
+             {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.BPMasterData}  onInfoClose={() => setWindowInfo(false)} recordId={bpMasterDataValidation.values.recordId}/>}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

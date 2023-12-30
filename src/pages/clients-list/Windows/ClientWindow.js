@@ -43,6 +43,8 @@ const ClientWindow = ({
     height,
     _labels,
     editMode,
+    onInfo,
+    onInfoClose,
     maxAccess
 }) => {
 
@@ -52,7 +54,7 @@ const ClientWindow = ({
 
 return (
         <Window id='CountryWindow' Title={_labels.country} onClose={onClose} width={width} height={height}
-         onSave={onSave}>
+         onSave={onSave} onInfo={onInfo} onInfoClose={onInfoClose}>
             <CustomTabPanel>
                 <ClientTab
                     clientIndividualFormValidation={clientIndividualFormValidation}

@@ -17,6 +17,7 @@ export const ResourceIds = {
   CorrespondentAgents: 36102,
   CorrespondentAgentBranch: 36107,
   CityDistrict: 20206,
+  TransactionLog:20100,
   Address: 20102,
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
@@ -43,7 +44,8 @@ export const ResourceIds = {
   Classes : 10101,
   SmsTemplates : 20130,
   SmsFunctionTemplates : 20131,
-  Users : 23101
+  Users : 23101,
+
 
 
 }

@@ -123,5 +123,9 @@ export const SystemRepository = {
     get: service + 'getUD',
     set: service + 'setUD'
   },
+  TransactionLog: {
+    qry: service + 'qryTL',
+    get: service + 'getTL',
+  },
 
 }

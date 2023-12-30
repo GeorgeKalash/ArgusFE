@@ -32,6 +32,8 @@ const BPMasterDataWindow = ({
   delRelation,
   defaultValue,
   popupRelation,
+onInfo,
+onInfoClose,
 
   //Address tab (grid)
   addressGridData,
@@ -50,6 +52,8 @@ const BPMasterDataWindow = ({
       width={width}
       height={height}
       onSave={onSave}
+      onInfo={onInfo}
+      onInfoClose={onInfoClose}
       setActiveTab={setActiveTab}
     >
       <CustomTabPanel index={0} value={activeTab}>

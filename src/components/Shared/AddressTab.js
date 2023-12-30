@@ -70,15 +70,15 @@ const AddressTab = ({
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='email'
+              name='email1'
               label={labels.email}
-              value={addressValidation.values.email}
+              value={addressValidation.values.email1}
               type='email'
               placeholder='johndoe@email.com'
               onChange={addressValidation.handleChange}
-              onClear={() => addressValidation.setFieldValue('email', '')}
-              error={addressValidation.touched.email && Boolean(addressValidation.errors.email)}
-              helperText={addressValidation.touched.email && addressValidation.errors.email}
+              onClear={() => addressValidation.setFieldValue('email1', '')}
+              error={addressValidation.touched.email1 && Boolean(addressValidation.errors.email1)}
+              helperText={addressValidation.touched.email1 && addressValidation.errors.email1}
               maxAccess={maxAccess}
             />
           </Grid>

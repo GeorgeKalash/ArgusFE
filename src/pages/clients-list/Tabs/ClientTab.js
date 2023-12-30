@@ -357,7 +357,7 @@ return (
                         ''
                       );
                       clientIndividualFormValidation.setFieldValue(
-                        "city",
+                        "cityName",
                         ''
                       );
 
@@ -378,7 +378,7 @@ return (
                           ''
                         );
                         clientIndividualFormValidation.setFieldValue(
-                          "city",
+                          "cityName",
                           ''
                         );
 
@@ -396,58 +396,55 @@ return (
                   />
                 </Grid>
 
+
                 <Grid item xs={12}>
+            <CustomLookup
+              name='idCity'
+              label={_labels.issusPlace}
+              required
+              valueField='name'
+              displayField='name'
+              store={cityStore}
+              setStore={setCityStore}
+              onLookup={lookupCity}
+              firstValue={clientIndividualFormValidation.values.cityName}
+              secondDisplayField={false}
+
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  clientIndividualFormValidation.setFieldValue(
+                    "idCity",
+                    newValue?.recordId,
+                  );
+                  clientIndividualFormValidation.setFieldValue(
+                    "cityName",
+                    newValue?.name,
+                  );
+                } else {
+                  clientIndividualFormValidation.setFieldValue(
+                    "idCity",
+                    null,
+                  );
+                  clientIndividualFormValidation.setFieldValue(
+                    "cityName",
+                    null,
+                  );
+                }
+              }}
+              error={
+                clientIndividualFormValidation.touched.idCity &&
+                Boolean(clientIndividualFormValidation.errors.idCity)
+              }
+              helperText={
+                clientIndividualFormValidation.touched.idCity &&
+                clientIndividualFormValidation.errors.idCity
+              }
+              maxAccess={maxAccess}
+            />
+          </Grid>
 
 
-                  <CustomLookup
-                    name="idCity"
-                    label={_labels.issusPlace}
-                    value={clientIndividualFormValidation.values.idCity}
-                    required
-                    valueField="name"
-                    store={cityStore}
-                    firstValue={clientIndividualFormValidation.values.city}
 
-                    // secondValue={clientIndividualFormValidation.values.city}
-
-                    secondDisplayField={false}
-
-                    //  secondDisplayField={false}
-                    setStore={setCityStore}
-                    onLookup={lookupCity}
-
-
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        clientIndividualFormValidation.setFieldValue(
-                          "idCity",
-                          newValue?.recordId,
-                        );
-                        clientIndividualFormValidation.setFieldValue(
-                          "city",
-                          newValue?.name,
-                        );
-                      } else {
-                        clientIndividualFormValidation.setFieldValue(
-                          "idCity",
-                          null,
-                        );
-                        clientIndividualFormValidation.setFieldValue(
-                          "city",
-                          null,
-                        );
-                      }
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.idCity &&
-                      Boolean(clientIndividualFormValidation.errors.idCity)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.idCity &&
-                      clientIndividualFormValidation.errors.idCity
-                    }
-                  />
-                </Grid>
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
@@ -538,7 +535,8 @@ return (
                   <CustomComboBox
                     name="riskLevel"
                     label={_labels.riskLevel}
-                    readOnly //disabled
+
+                    // readOnly //disabled
                     valueField="recordId"
                     displayField="name"
                     store={countryStore}
@@ -546,7 +544,7 @@ return (
                       countryStore.filter(
                         (item) =>
                           item.recordId ===
-                          clientIndividualFormValidation.values.riskLevelId,
+                          clientIndividualFormValidation.values.riskLevel,
                       )[0]
                     }
                     required
@@ -554,13 +552,10 @@ return (
 
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
-                        "riskLevelId",
+                        "riskLevel",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "riskLevel",
-                        newValue?.name,
-                      );}else{
+                     }else{
 
                         clientIndividualFormValidation.setFieldValue(
                           "riskLevelId",
@@ -644,7 +639,14 @@ return (
                     valueField="key"
                     displayField="value"
                     store={civilStatusStore}
-                    value={clientIndividualFormValidation.values?.civilStatusName}
+                    value={
+                      civilStatusStore.filter(
+                        (item) =>
+                          item.key ===
+                          clientIndividualFormValidation.values.civilStatus,
+                      )[0]
+                    }
+
                     onChange={(event, newValue) => {
 
                       if(newValue){
@@ -763,27 +765,27 @@ return (
                     valueField="key"
                     displayField="value"
                     store={titleStore}
-                    value={clientIndividualFormValidation.values?.title}
-                    onChange={(event, newValue) => {
+                    value={
+                      titleStore.filter(
+                        (item) =>
+                          item.key ===
+                          clientIndividualFormValidation.values.title,
+                      )[0]
+                    }
+                      onChange={(event, newValue) => {
 
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
-                        "titleId",
+                        "title",
                         newValue?.key,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "titleId",
-                        newValue?.value,
-                      );
+
                       }else{
-                        clientIndividualFormValidation.setFieldValue(
-                          "titleId",
-                          null,
-                        );
                         clientIndividualFormValidation.setFieldValue(
                           "title",
                           null,
                         );
+
                       }
                     }}
                     error={
@@ -1445,9 +1447,9 @@ return (
                     label={_labels.mobileVerified}
                     valueField="key"
                     displayField="value"
-                    store={mobileVerifiedStore}
+                    store={mobileVerifiedStore && mobileVerifiedStore}
                     value={
-                      mobileVerifiedStore.filter(
+                      mobileVerifiedStore &&    mobileVerifiedStore.filter(
                         (item) =>
                           item.key ===
                           clientIndividualFormValidation.values.mobileVerified,

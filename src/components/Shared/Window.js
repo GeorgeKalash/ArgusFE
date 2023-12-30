@@ -28,6 +28,7 @@ const Window = ({
   Title,
   onSave,
   onClear,
+  onInfo,
   editMode = false,
   ...props
 }) => {
@@ -120,7 +121,7 @@ const Window = ({
             <DialogContent sx={{ height: expanded ? `calc(100vh - 48px - 180px)` : height, p: 0 }}>
               {children}
             </DialogContent>
-            {windowToolbarVisible && <WindowToolbar onSave={onSave} onClear={onClear} />}
+            {windowToolbarVisible && <WindowToolbar onSave={onSave} onClear={onClear} onInfo={onInfo} />}
           </Paper>
         </Box>
       </Draggable>
