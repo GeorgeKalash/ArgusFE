@@ -4,6 +4,11 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import AddressTab from 'src/components/Shared/AddressTab'
 
 const AddressWindow = ({
+  onClose,
+  onSave,
+  width,
+  height,
+
   labels,
   addressValidation,
   maxAccess,
@@ -22,9 +27,9 @@ const AddressWindow = ({
     <Window
       id='AddressWindow'
       Title={labels.address}
-      onClose={onClose}
-      width={width}
-      height={height}
+      onClose={onClose}    
+      width={width} //check
+      height={height} //check
       onSave={onSave}
       addressValidation={addressValidation}
       countryStore={countryStore}
@@ -41,11 +46,10 @@ const AddressWindow = ({
           fillStateStore={fillStateStore}
           cityStore={cityStore}
           setCityStore={setCityStore}
-          fillCountryStore={fillCountryStore}
           lookupCityDistrict={lookupCityDistrict}
           cityDistrictStore={cityDistrictStore}
           setCityDistrictStore={setCityDistrictStore}
-          addressValidation={agentBranchValidation}
+          addressValidation={addressValidation}
           maxAccess={maxAccess}
           editMode={editMode}
         />

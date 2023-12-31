@@ -23,6 +23,7 @@ const ClientWindow = ({
     incomeOfSourceStore,
     smsLanguageStore,
     civilStatusStore,
+    mobileVerifiedStore,
     genderStore,
     fillStateStoreAddress,
     fillStateStoreAddressWork,
@@ -31,7 +32,10 @@ const ClientWindow = ({
     educationStore,
     idTypeStore,
     titleStore,
-
+    lookupCityDistrictAddress,
+    lookupCityDistrictAddressWork,
+    cityDistrictAddressWorkStore,
+    cityDistrictAddressStore,
      lookupCity,
     lookupCityAddress,
     lookupCityAddressWork,
@@ -39,6 +43,8 @@ const ClientWindow = ({
     height,
     _labels,
     editMode,
+    onInfo,
+    onInfoClose,
     maxAccess
 }) => {
 
@@ -48,7 +54,7 @@ const ClientWindow = ({
 
 return (
         <Window id='CountryWindow' Title={_labels.country} onClose={onClose} width={width} height={height}
-         onSave={onSave}>
+         onSave={onSave} onInfo={onInfo} onInfoClose={onInfoClose}>
             <CustomTabPanel>
                 <ClientTab
                     clientIndividualFormValidation={clientIndividualFormValidation}
@@ -60,13 +66,15 @@ return (
                     setCityStore={setCityStore}
                     cityAddressStore={cityAddressStore}
                     cityAddressWorkStore={cityAddressWorkStore}
-
+                    lookupCityDistrictAddress={lookupCityDistrictAddress}
+                    lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
                     professionStore={professionStore}
                     salaryRangeStore={salaryRangeStore}
                     incomeOfSourceStore={incomeOfSourceStore}
                     smsLanguageStore={smsLanguageStore}
                     civilStatusStore={civilStatusStore}
                     genderStore={genderStore}
+                    mobileVerifiedStore={mobileVerifiedStore}
                     fillStateStoreAddress={fillStateStoreAddress}
                     fillStateStoreAddressWork={fillStateStoreAddressWork}
                     stateAddressWorkStore={stateAddressWorkStore}
@@ -80,7 +88,8 @@ return (
                     lookupCity={lookupCity}
                     lookupCityAddress={lookupCityAddress}
                     lookupCityAddressWork={lookupCityAddressWork}
-
+                    cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
+                    cityDistrictAddressStore={cityDistrictAddressStore}
                     _labels={_labels}
                     maxAccess={maxAccess}
                     editMode={editMode}

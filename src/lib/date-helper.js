@@ -2,7 +2,6 @@
 import dayjs from 'dayjs'
 
 const formatDateFromApi = (date) => {
-  console.log(date)
     const timestamp = parseInt(date.match(/\d+/)[0], 10);
 
     return dayjs(timestamp)

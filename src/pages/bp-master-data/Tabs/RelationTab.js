@@ -8,7 +8,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const RelationTab = ({ relationGridData, getRelationGridData, addRelation, delRelation, popupRelation, labels, maxAccess }) => {
 
-
   const columns = [
     {
       field: 'relationName',

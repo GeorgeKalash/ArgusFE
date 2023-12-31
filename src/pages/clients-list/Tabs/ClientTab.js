@@ -17,8 +17,11 @@ const ClientTab = ({
   WorkAddressValidation,
   countryStore,
   cityStore,
+
   setCityStore,
   cityAddressStore,
+  cityDistrictAddressWorkStore,
+  cityDistrictAddressStore,
   setCityAddressStore,
   cityAddressWorkStore,
   setCityAddressWorkStore,
@@ -26,6 +29,8 @@ const ClientTab = ({
   lookupCity,
   lookupCityAddress,
   lookupCityAddressWork,
+  lookupCityDistrictAddress,
+  lookupCityDistrictAddressWork,
   types,
   professionStore,
   salaryRangeStore,
@@ -33,6 +38,7 @@ const ClientTab = ({
   smsLanguageStore,
   civilStatusStore,
   genderStore,
+  mobileVerifiedStore,
   fillStateStoreAddress,
   fillStateStoreAddressWork,
   stateAddressWorkStore,
@@ -42,7 +48,6 @@ const ClientTab = ({
   titleStore,
    _labels, maxAccess, editMode
  }) => {
-  console.log(cityAddressStore)
 
   const encryptFirstFourDigits = (e) => {
     const input = e.target.value
@@ -59,8 +64,8 @@ const ClientTab = ({
 
   };
 
-  const encryptFirstFourDigitsRepeat = (e) => {
-    const input = e.target.value
+  const encryptValue = (value) => {
+    const input = value
     const showLength = Math.max(0, input.length - 4);
 
     // Check if input has at least four digits
@@ -74,13 +79,28 @@ const ClientTab = ({
 
   };
 
+  const encryptDigits = (e, type) => {
+    const input = e.target.value
+    const showLength = Math.max(0, input.length - 4);
+
+    // Check if input has at least four digits
+
+  const maskedValue =
+    '*'.repeat(showLength) + input.substring(showLength);
+     clientIndividualFormValidation.setFieldValue(type, maskedValue)
+
+    //  clientIndividualFormValidation.setFieldValue("numberRepeat", input)
+
+
+  };
+
   const handleCopy = (event) => {
     event.preventDefault();
   };
 
 return (
         <>
-            <Grid container spacing={4}>
+            <Grid container spacing={2}>
             <Grid container xs={12} spacing={2} sx={{ padding: "40px" }}>
         <Grid item xs={6} sx={{ padding: "40px" }}>
           <Grid container spacing={2}>
@@ -194,54 +214,54 @@ return (
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name="number"
-                    label={_labels.number}
-                    value={clientIndividualFormValidation.values?.numberEncrypt}
+                    name="idNo"
+                    label={_labels.idNo}
+                    value={clientIndividualFormValidation.values?.idNoEncrypt}
                     required
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptFirstFourDigits(e)  }}
+                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e, "idNoEncrypt")  }}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
 
                     // maxLength="10"
                     onClear={() =>{
-                      clientIndividualFormValidation.setFieldValue("number", "")
-                      clientIndividualFormValidation.setFieldValue("numberEncrypt", "")}
+                      clientIndividualFormValidation.setFieldValue("idNo", "")
+                      clientIndividualFormValidation.setFieldValue("idNoEncrypt", "")}
 
                     }
                     error={
-                      clientIndividualFormValidation.touched.number &&
-                      Boolean(clientIndividualFormValidation.errors.number)
+                      clientIndividualFormValidation.touched.idNo &&
+                      Boolean(clientIndividualFormValidation.errors.idNo)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.number &&
-                      clientIndividualFormValidation.errors.number
+                      clientIndividualFormValidation.touched.idNo &&
+                      clientIndividualFormValidation.errors.idNo
                     }
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name="numberRepeat"
-                    label={_labels.number}
-                    value={clientIndividualFormValidation.values?.numberRepeatEncrypt}
+                    name="idNoRepeat"
+                    label={_labels.confirmNb}
+                    value={clientIndividualFormValidation.values?.idNoRepeatEncrypt}
                     required
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptFirstFourDigitsRepeat(e)  }}
+                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e , 'idNoRepeatEncrypt')  }}
                     onBlur={clientIndividualFormValidation.handleBlur}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
 
                     // maxLength="10"
                     onClear={() =>{
-                      clientIndividualFormValidation.setFieldValue("numberRepeat", "")
-                      clientIndividualFormValidation.setFieldValue("numberRepeatEncrypt", "")}
+                      clientIndividualFormValidation.setFieldValue("idNoRepeat", "")
+                      clientIndividualFormValidation.setFieldValue("idNoRepeat", "")}
 
                     }
                     error={
-                      clientIndividualFormValidation.touched.numberRepeat &&
-                      Boolean(clientIndividualFormValidation.errors.numberRepeat)
+                      clientIndividualFormValidation.touched.idNoRepeat &&
+                      Boolean(clientIndividualFormValidation.errors.idNoRepeat)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.numberRepeat &&
-                      clientIndividualFormValidation.errors.numberRepeat
+                      clientIndividualFormValidation.touched.idNoRepeat &&
+                      clientIndividualFormValidation.errors.idNoRepeat
                     }
                   />
                 </Grid>
@@ -258,6 +278,7 @@ return (
                         "",
                       )
                     }
+                    disabledDate={true}
                     error={
                       clientIndividualFormValidation.touched.expiryDate &&
                       Boolean(clientIndividualFormValidation.errors.expiryDate)
@@ -297,7 +318,7 @@ return (
                 <Grid item xs={12}>
                   <CustomComboBox
                     name="idCountry"
-                    label={_labels.country}
+                    label={_labels.issusCountry}
                     valueField="recordId"
                     displayField={['reference','name','flName']}
                 store={countryStore}
@@ -315,7 +336,7 @@ return (
                     }
                     required
                     onChange={(event, newValue) => {
-                      // setCityStore([])
+                      setCityStore([])
 
                       if(newValue){
 
@@ -327,7 +348,22 @@ return (
                       clientIndividualFormValidation.setFieldValue(
                         "country",
                         newValue?.name,
-                      );}else{
+
+                      );
+
+
+                      clientIndividualFormValidation.setFieldValue(
+                        "idCity",
+                        ''
+                      );
+                      clientIndividualFormValidation.setFieldValue(
+                        "cityName",
+                        ''
+                      );
+
+
+                    }else{
+
                         clientIndividualFormValidation.setFieldValue(
                           "idCountry",
                           ''
@@ -339,11 +375,11 @@ return (
 
                         clientIndividualFormValidation.setFieldValue(
                           "idCity",
-                          null
+                          ''
                         );
                         clientIndividualFormValidation.setFieldValue(
-                          "city",
-                          null
+                          "cityName",
+                          ''
                         );
 
 
@@ -360,84 +396,81 @@ return (
                   />
                 </Grid>
 
+
                 <Grid item xs={12}>
+            <CustomLookup
+              name='idCity'
+              label={_labels.issusPlace}
+              required
+              valueField='name'
+              displayField='name'
+              store={cityStore}
+              setStore={setCityStore}
+              onLookup={lookupCity}
+              firstValue={clientIndividualFormValidation.values.cityName}
+              secondDisplayField={false}
+
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  clientIndividualFormValidation.setFieldValue(
+                    "idCity",
+                    newValue?.recordId,
+                  );
+                  clientIndividualFormValidation.setFieldValue(
+                    "cityName",
+                    newValue?.name,
+                  );
+                } else {
+                  clientIndividualFormValidation.setFieldValue(
+                    "idCity",
+                    null,
+                  );
+                  clientIndividualFormValidation.setFieldValue(
+                    "cityName",
+                    null,
+                  );
+                }
+              }}
+              error={
+                clientIndividualFormValidation.touched.idCity &&
+                Boolean(clientIndividualFormValidation.errors.idCity)
+              }
+              helperText={
+                clientIndividualFormValidation.touched.idCity &&
+                clientIndividualFormValidation.errors.idCity
+              }
+              maxAccess={maxAccess}
+            />
+          </Grid>
 
 
-                  <CustomLookup
-                    name="idCity"
-                    label={_labels.city}
-                    value={clientIndividualFormValidation.values.idCity}
-                    required
-                    valueField="name"
-                    store={cityStore}
-                    firstValue={clientIndividualFormValidation.values.city}
 
-                    // secondValue={clientIndividualFormValidation.values.cityName}
-
-                    secondDisplayField={false}
-
-                    //  secondDisplayField={false}
-                    setStore={setCityStore}
-                    onLookup={lookupCity}
-
-
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        clientIndividualFormValidation.setFieldValue(
-                          "idCity",
-                          newValue?.recordId,
-                        );
-                        clientIndividualFormValidation.setFieldValue(
-                          "city",
-                          newValue?.name,
-                        );
-                      } else {
-                        clientIndividualFormValidation.setFieldValue(
-                          "idCity",
-                          null,
-                        );
-                        clientIndividualFormValidation.setFieldValue(
-                          "city",
-                          null,
-                        );
-                      }
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.idCity &&
-                      Boolean(clientIndividualFormValidation.errors.idCity)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.idCity &&
-                      clientIndividualFormValidation.errors.idCity
-                    }
-                  />
-                </Grid>
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
-               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore}  fillStateStore={fillStateStoreAddress}/>
+               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress}/>
                </FieldSet>
                 {/* <Grid item xs={12}>
                   <CustomTextField
-                    name="whatsappNo"
+                    name="whatsAppNo"
                     label={_labels.whatsapp}
-                    value={clientIndividualFormValidation.values?.whatsappNo}
+                    value={clientIndividualFormValidation.values?.whatsAppNo}
                     required
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
-                        "whatsappNo",
+                        "whatsAppNo",
                         "",
                       )
                     }
                     error={
-                      clientIndividualFormValidation.touched.whatsappNo &&
-                      Boolean(clientIndividualFormValidation.errors.whatsappNo)
+                      clientIndividualFormValidation.touched.whatsAppNo &&
+                      Boolean(clientIndividualFormValidation.errors.whatsAppNo)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.whatsappNo &&
-                      clientIndividualFormValidation.errors.whatsappNo
+                      clientIndividualFormValidation.touched.whatsAppNo &&
+                      clientIndividualFormValidation.errors.whatsAppNo
                     }
                   />
                 </Grid> */}
@@ -462,7 +495,6 @@ return (
                           clientIndividualFormValidation.values.salaryRangeId,
                       )[0]
                     }
-                    required
                     onChange={(event, newValue) => {
 
                       if(newValue){
@@ -503,7 +535,8 @@ return (
                   <CustomComboBox
                     name="riskLevel"
                     label={_labels.riskLevel}
-                    readOnly //disabled
+
+                    // readOnly //disabled
                     valueField="recordId"
                     displayField="name"
                     store={countryStore}
@@ -511,7 +544,7 @@ return (
                       countryStore.filter(
                         (item) =>
                           item.recordId ===
-                          clientIndividualFormValidation.values.riskLevelId,
+                          clientIndividualFormValidation.values.riskLevel,
                       )[0]
                     }
                     required
@@ -519,13 +552,10 @@ return (
 
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
-                        "riskLevelId",
+                        "riskLevel",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "riskLevel",
-                        newValue?.name,
-                      );}else{
+                     }else{
 
                         clientIndividualFormValidation.setFieldValue(
                           "riskLevelId",
@@ -609,7 +639,14 @@ return (
                     valueField="key"
                     displayField="value"
                     store={civilStatusStore}
-                    value={clientIndividualFormValidation.values?.civilStatusName}
+                    value={
+                      civilStatusStore.filter(
+                        (item) =>
+                          item.key ===
+                          clientIndividualFormValidation.values.civilStatus,
+                      )[0]
+                    }
+
                     onChange={(event, newValue) => {
 
                       if(newValue){
@@ -698,25 +735,25 @@ return (
 
                 <Grid item xs={12}>
                   <CustomTextField
-                    name="whatsappNo"
+                    name="whatsAppNo"
                     label={_labels.whatsapp}
-                    value={clientIndividualFormValidation.values?.whatsappNo}
+                    value={clientIndividualFormValidation.values?.whatsAppNo}
 
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="15"
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
-                        "whatsappNo",
+                        "whatsAppNo",
                         "",
                       )
                     }
                     error={
-                      clientIndividualFormValidation.touched.whatsappNo &&
-                      Boolean(clientIndividualFormValidation.errors.whatsappNo)
+                      clientIndividualFormValidation.touched.whatsAppNo &&
+                      Boolean(clientIndividualFormValidation.errors.whatsAppNo)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.whatsappNo &&
-                      clientIndividualFormValidation.errors.whatsappNo
+                      clientIndividualFormValidation.touched.whatsAppNo &&
+                      clientIndividualFormValidation.errors.whatsAppNo
                     }
                   />
                 </Grid>
@@ -728,27 +765,27 @@ return (
                     valueField="key"
                     displayField="value"
                     store={titleStore}
-                    value={clientIndividualFormValidation.values?.title}
-                    onChange={(event, newValue) => {
+                    value={
+                      titleStore.filter(
+                        (item) =>
+                          item.key ===
+                          clientIndividualFormValidation.values.title,
+                      )[0]
+                    }
+                      onChange={(event, newValue) => {
 
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
-                        "titleId",
+                        "title",
                         newValue?.key,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "titleId",
-                        newValue?.value,
-                      );
+
                       }else{
-                        clientIndividualFormValidation.setFieldValue(
-                          "titleId",
-                          null,
-                        );
                         clientIndividualFormValidation.setFieldValue(
                           "title",
                           null,
                         );
+
                       }
                     }}
                     error={
@@ -778,9 +815,9 @@ return (
                 <CustomTextField
                   name="cellPhone"
                   label={_labels.cellPhone}
-                  value={clientIndividualFormValidation.values?.cellPhone}
+                  value={clientIndividualFormValidation.values?.cellPhoneEncrypt}
                   required
-                  onChange={clientIndividualFormValidation.handleChange}
+                  onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e, 'cellPhoneEncrypt')  }}
                   maxLength="15"
                   onCopy={handleCopy}
                   onPaste={handleCopy}
@@ -803,11 +840,11 @@ return (
               <Grid item xs={6}>
                 <CustomTextField
                   name="cellPhoneRepeat"
-                  label={_labels.cellPhone}
-                  value={clientIndividualFormValidation.values?.cellPhoneRepeat}
+                  label={_labels.confirmCell}
+                  value={clientIndividualFormValidation.values?.cellPhoneRepeatEncrypt}
                   required
                   maxLength="15"
-                  onChange={clientIndividualFormValidation.handleChange}
+                  onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e, 'cellPhoneRepeatEncrypt')  }}
                   onCopy={handleCopy}
                   onPaste={handleCopy}
                   onClear={() =>
@@ -1088,6 +1125,8 @@ return (
                 onClear={() =>
                   clientIndividualFormValidation.setFieldValue("birthDate", "")
                 }
+                disabledDate={true}
+
                 error={
                   clientIndividualFormValidation.touched.birthDate &&
                   Boolean(clientIndividualFormValidation.errors.birthDate)
@@ -1270,30 +1309,29 @@ return (
                 </Grid>
 
 
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                   <CustomTextField
                     name="salary"
                     label='salary'    //{_labels.whatsapp}
-                    value={clientIndividualFormValidation.values?.whatsappNo}
-                    required
+                    value={clientIndividualFormValidation.values?.salary}
+
                     onChange={clientIndividualFormValidation.handleChange}
-                    maxLength="10"
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
-                        "whatsappNo",
+                        "salary",
                         "",
                       )
                     }
                     error={
-                      clientIndividualFormValidation.touched.whatsappNo &&
-                      Boolean(clientIndividualFormValidation.errors.whatsappNo)
+                      clientIndividualFormValidation.touched.salary &&
+                      Boolean(clientIndividualFormValidation.errors.salary)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.whatsappNo &&
-                      clientIndividualFormValidation.errors.whatsappNo
+                      clientIndividualFormValidation.touched.salary &&
+                      clientIndividualFormValidation.errors.salary
                     }
                   />
-                </Grid>
+                </Grid> */}
 
                 <Grid item xs={12}>
                   <CustomTextField
@@ -1382,7 +1420,7 @@ return (
 
                <Grid container sx={{marginTop: '20px'}}>
               <FieldSet title={_labels.workAddress}>
-              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork} stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork}/>
+              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore}/>
 
                </FieldSet>
                </Grid>
@@ -1392,32 +1430,54 @@ return (
                   <FormControlLabel
                     control={
                       <Checkbox
-                        name="mobileVerified"
+                        name="OTPVerified"
                         disabled={true}
 
                         // checked={clientIndividualFormValidation.values?.isInactive}
                         onChange={clientIndividualFormValidation.handleChange}
                       />
                     }
-                    label={_labels?.mobileVerified}
+                    label={_labels?.OTPVerified}
                   />
                 </Grid>
 
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="OTPVerified"
-                        disabled={true}
-                        checked={
-                          clientIndividualFormValidation.values?.OTPVerified
-                        }
-                        onChange={clientIndividualFormValidation.handleChange}
-                      />
+                  <CustomComboBox
+                    name="mobileVerified"
+                    label={_labels.mobileVerified}
+                    valueField="key"
+                    displayField="value"
+                    store={mobileVerifiedStore && mobileVerifiedStore}
+                    value={
+                      mobileVerifiedStore &&    mobileVerifiedStore.filter(
+                        (item) =>
+                          item.key ===
+                          clientIndividualFormValidation.values.mobileVerified,
+                      )[0]
                     }
-                    label={_labels?.otpVerified}
+                    readOnly
+                    onChange={(event, newValue) => {
+                      clientIndividualFormValidation.setFieldValue(
+                        "mobileVerified",
+                        newValue?.recordId,
+                      );
+                      clientIndividualFormValidation.setFieldValue(
+                        "mobileVerifiedName",
+                        newValue?.name,
+                      );
+                    }}
+                    error={
+                      clientIndividualFormValidation.touched.mobileVerified &&
+                      Boolean(
+                        clientIndividualFormValidation.errors.mobileVerified,
+                      )
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.mobileVerified &&
+                      clientIndividualFormValidation.errors.mobileVerified
+                    }
                   />
-                </Grid>{}
+                </Grid>
                 <Grid item xs={12}>
                   <FormControlLabel
                     control={
@@ -1473,9 +1533,9 @@ return (
                       <FormControlLabel
                         control={
                           <Checkbox
-                            name="isRelativeDiplomate"
+                            name="isRelativeDiplomat"
                             checked={
-                              clientIndividualFormValidation.values?.isInactive
+                              clientIndividualFormValidation.values?.isRelativeDiplomat
                             }
                             onChange={
                               clientIndividualFormValidation.handleChange
@@ -1495,6 +1555,7 @@ return (
                         }
                         onChange={clientIndividualFormValidation.handleChange}
                         maxLength="10"
+                        required={clientIndividualFormValidation.values.isRelativeDiplomate ? true : false}
                         onClear={() =>
                           clientIndividualFormValidation.setFieldValue(
                             "relativeDiplomateInfo",
