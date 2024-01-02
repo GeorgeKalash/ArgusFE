@@ -41,6 +41,8 @@ const ClientsList = () => {
   const [access, setAccess] = useState(null)
   const [windowOpen, setWindowOpen] = useState(null)
   const [windowInfo, setWindowInfo] = useState(null)
+  const [editMode, setEditMode] = useState(null)
+
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -53,6 +55,8 @@ const ClientsList = () => {
   const [cityAddressStore, setCityAddressStore] = useState([]);
   const [cityAddressWorkStore, setCityAddressWorkStore] = useState([]);
   const [professionStore, setProfessionStore] = useState([]);
+  const [professionFilterStore, setProfessionFilterStore] = useState([]);
+
   const [salaryRangeStore, setSalaryRangeStore] = useState([]);
   const [incomeOfSourceStore, setIncomeOfSourceStore] = useState([]);
   const [smsLanguageStore, setSMSLanguageStore] = useState([]);
@@ -117,8 +121,9 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
     birthDate: labels2 && labels2.find((item) => item.key === 2).value,
     isResident: labels2 && labels2.find((item) => item.key === 3).value,
 
-    // number: labels2 && labels2.find((item) => item.key === 4).value,
     number: labels2 && labels2.find((item) => item.key === 5).value,
+
+    // number: labels2 && labels2.find((item) => item.key === 5).value,
     type: labels2 && labels2.find((item) => item.key === 6).value,
     expiryDate: labels2 && labels2.find((item) => item.key === 7).value,
     issusDate: labels2 && labels2.find((item) => item.key === 8).value,
@@ -345,6 +350,8 @@ console.log(res)
   }
 
 
+
+
   const clientIndividualFormValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true, // Trigger validation on change
@@ -352,14 +359,18 @@ console.log(res)
     validate : (values) => {
       const errors = {};
 
+      console.log(values.isRelativeDiplomat , values.relativeDiplomateInfo )
+
       // Example validation for a 'name' field
-      if (values.isRelativeDiplomate  && !values.relativeDiplomateInfo ) {
-        errors.relativeDiplomateInfo = 'Relative Diplomat Info is required';
+      if (values.isRelativeDiplomat  && !values.relativeDiplomatInfo ) {
+        errors.relativeDiplomatInfo = 'Relative Diplomat Info is required';
       }
 
       // Add more validation rules for other fields as needed
+console.log(errors)
 
-      return errors;
+return errors;
+
     },
     validationSchema: yup.object({
       // reference: yup.string().required("This field is required"),
@@ -374,7 +385,8 @@ console.log(res)
       countryId: yup.string().required("This field is required"),
       cityId: yup.string().required("This field is required"),
       idCountry: yup.string().required("This field is required"),
-      idCity: yup.string().required("This field is required"),
+
+      // idCity: yup.string().required("This field is required"),
       firstName: yup.string().required("This field is required"),
       lastName: yup.string().required("This field is required"),
       nationalityId: yup.string().required("This field is required"),
@@ -436,7 +448,7 @@ console.log(res)
       idExpiryDate: obj.expiryDate,
       issusDate: obj.issusDate,
       idCityId: obj.idCity,
-      isDiplomatic: obj.isDiplomat,
+      isDiplomat: obj.isDiplomat,
 
     };
 
@@ -472,8 +484,8 @@ console.log(res)
       mobileVerificationStatus: 1, //obj.mobileVerified,
       educationLevel: obj.educationLevel,
       isDiplomat: obj.isDiplomat,
-      isRelativeDiplomat: obj.isRelativeDiplomate,
-      relativeDiplomatInfo: obj.relativeDiplomateInfo,
+      isRelativeDiplomat: obj.isRelativeDiplomat,
+      relativeDiplomatInfo: obj.relativeDiplomatInfo,
       OTPVerified: obj.OTPVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
@@ -595,7 +607,7 @@ console.log(res)
 
 
   const addClient= obj => {
-
+setEditMode(false)
     clientIndividualFormValidation.setValues(getNewClients())
     getPlantId()
     console.log(clientIndividualFormValidation)
@@ -603,7 +615,7 @@ console.log(res)
   }
 
   const editClient= obj => {
-
+    setEditMode(true)
     const _recordId = obj.recordId
     const defaultParams = `_clientId=${_recordId}`
     var parameters = defaultParams
@@ -614,6 +626,7 @@ console.log(res)
       .then(res => {
         clientIndividualFormValidation.setValues(populateIClients(res.record))
         WorkAddressValidation.setValues(res.record.workAddressView)
+
         getPlantId()
         setWindowOpen(true)
       })
@@ -783,7 +796,7 @@ console.log(res)
   };
 
   const fillProfessionStore = (cId) => {
-    var parameters = `_filter=`;
+    var parameters = `_filter=&_isDiplomat=`+cId;
     getRequest({
       extension: RemittanceSettingsRepository.Profession.qry,
       parameters: parameters,
@@ -870,6 +883,24 @@ console.log(res)
 
 
 
+  const fillFilterProfession=(value)=>{
+    console.log(value)
+    if(value){
+      const filteredList =  professionStore.filter(item => item.diplomatStatus === 2);
+      clientIndividualFormValidation.setFieldValue('isDiplomat',true )
+      clientIndividualFormValidation.setFieldValue('isDiplomatReadOnly',true )
+
+      setProfessionFilterStore(filteredList)
+    }else{
+      const filteredList =  professionStore;
+      clientIndividualFormValidation.setFieldValue('isDiplomat',false )
+      clientIndividualFormValidation.setFieldValue('isDiplomatReadOnly',false )
+
+      setProfessionFilterStore(filteredList)
+      }
+
+  }
+
 
   return (
     <>
@@ -924,14 +955,13 @@ onEdit={editClient}
        onSave={handleSubmit}
        onInfo={()=>{setWindowInfo(true)}}
        onInfoClose={()=>{setWindowInfo(false)}}
-
        clientIndividualFormValidation={clientIndividualFormValidation}
        WorkAddressValidation={WorkAddressValidation}
        countryStore={countryStore}
        cityStore={cityStore}
        setCityStore={setCityStore}
        types={types}
-  professionStore={professionStore}
+  professionFilterStore={professionFilterStore}
   salaryRangeStore={salaryRangeStore}
   incomeOfSourceStore={incomeOfSourceStore}
   smsLanguageStore={smsLanguageStore}
@@ -955,18 +985,20 @@ onEdit={editClient}
   cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
   cityDistrictAddressStore={cityDistrictAddressStore}
   stateAddressWorkStore={stateAddressWorkStore}
+  fillFilterProfession={fillFilterProfession}
   stateAddressStore={stateAddressStore}
   _labels ={_labels2}
   maxAccess={access}
+  editMode={editMode}
 
 
        />
        )}
 
-       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
+       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  readOnly={true} onInfoClose={() => setWindowInfo(false)}
 />}
 
-<ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+<ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
 
       </Box>
 

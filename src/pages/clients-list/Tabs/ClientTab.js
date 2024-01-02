@@ -1,6 +1,8 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
+import { useEffect } from 'react'
+
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
@@ -32,7 +34,9 @@ const ClientTab = ({
   lookupCityDistrictAddress,
   lookupCityDistrictAddressWork,
   types,
-  professionStore,
+  professionFilterStore,
+  fillFilterProfession,
+
   salaryRangeStore,
   incomeOfSourceStore,
   smsLanguageStore,
@@ -49,35 +53,7 @@ const ClientTab = ({
    _labels, maxAccess, editMode
  }) => {
 
-  const encryptFirstFourDigits = (e) => {
-    const input = e.target.value
-    const showLength = Math.max(0, input.length - 4);
 
-    // Check if input has at least four digits
-
-  const maskedValue =
-    '*'.repeat(showLength) + input.substring(showLength);
-     clientIndividualFormValidation.setFieldValue("numberEncrypt", maskedValue)
-
-    //  clientIndividualFormValidation.setFieldValue("numberEncrypt", input)
-
-
-  };
-
-  const encryptValue = (value) => {
-    const input = value
-    const showLength = Math.max(0, input.length - 4);
-
-    // Check if input has at least four digits
-
-  const maskedValue =
-    '*'.repeat(showLength) + input.substring(showLength);
-     clientIndividualFormValidation.setFieldValue("numberRepeatEncrypt", maskedValue)
-
-    //  clientIndividualFormValidation.setFieldValue("numberRepeat", input)
-
-
-  };
 
   const encryptDigits = (e, type) => {
     const input = e.target.value
@@ -93,6 +69,7 @@ const ClientTab = ({
 
 
   };
+
 
   const handleCopy = (event) => {
     event.preventDefault();
@@ -111,7 +88,7 @@ return (
                 value={clientIndividualFormValidation.values?.reference}
 
                 // required
-                disabled={true}
+                readOnly={true}
                 onChange={clientIndividualFormValidation.handleChange}
                 maxLength="10"
                 onClear={() =>
@@ -134,6 +111,7 @@ return (
                     name="isResident"
                     checked={clientIndividualFormValidation.values?.isResident}
                     onChange={clientIndividualFormValidation.handleChange}
+                    readOnly={editMode && true}
                   />
                 }
                 label={_labels.isResident}
@@ -170,7 +148,7 @@ return (
                     label={_labels.type}
                     valueField="recordId"
                     displayField="name"
-
+                    readOnly={editMode && true}
                     store={idTypeStore}
                     value={
                       idTypeStore.filter(
@@ -181,7 +159,15 @@ return (
                     }
                     required
                     onChange={(event, newValue) => {
+
+
+                        fillFilterProfession(newValue.isDiplomat)
+
+
+
+
                       if(newValue){
+
                       clientIndividualFormValidation.setFieldValue(
                         "idtId",
                         newValue?.recordId,
@@ -215,12 +201,13 @@ return (
                 <Grid item xs={12}>
                   <CustomTextField
                     name="idNo"
-                    label={_labels.idNo}
+                    label={_labels.number}
                     value={clientIndividualFormValidation.values?.idNoEncrypt}
                     required
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e, "idNoEncrypt")  }}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
+                    readOnly={editMode && true}
 
                     // maxLength="10"
                     onClear={() =>{
@@ -248,6 +235,7 @@ return (
                     onBlur={clientIndividualFormValidation.handleBlur}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
+                    readOnly={editMode && true}
 
                     // maxLength="10"
                     onClear={() =>{
@@ -270,6 +258,7 @@ return (
                     name="expiryDate"
                     label={_labels.expiryDate}
                     value={clientIndividualFormValidation.values?.expiryDate}
+                    readOnly={editMode && true}
                     required={true}
                     onChange={clientIndividualFormValidation.setFieldValue}
                     onClear={() =>
@@ -278,7 +267,7 @@ return (
                         "",
                       )
                     }
-                    disabledDate={true}
+                    disabledDate={'<'}
                     error={
                       clientIndividualFormValidation.touched.expiryDate &&
                       Boolean(clientIndividualFormValidation.errors.expiryDate)
@@ -295,6 +284,7 @@ return (
                     name="issusDate"
                     label={_labels.issusDate}
                     value={clientIndividualFormValidation.values?.issusDate}
+                    readOnly={editMode && true}
 
                     // required={true}
                     onChange={clientIndividualFormValidation.handleChange}
@@ -321,6 +311,7 @@ return (
                     label={_labels.issusCountry}
                     valueField="recordId"
                     displayField={['reference','name','flName']}
+                    readOnly={editMode && true}
                 store={countryStore}
                 columnsInDropDown= {[
                   { key: 'reference', value: 'Reference' },
@@ -401,7 +392,7 @@ return (
             <CustomLookup
               name='idCity'
               label={_labels.issusPlace}
-              required
+
               valueField='name'
               displayField='name'
               store={cityStore}
@@ -409,7 +400,7 @@ return (
               onLookup={lookupCity}
               firstValue={clientIndividualFormValidation.values.cityName}
               secondDisplayField={false}
-
+              readOnly={editMode && true}
               onChange={(event, newValue) => {
                 if (newValue) {
                   clientIndividualFormValidation.setFieldValue(
@@ -448,7 +439,7 @@ return (
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
-               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress}/>
+               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress} editModeReadOnly={true}/>
                </FieldSet>
                 {/* <Grid item xs={12}>
                   <CustomTextField
@@ -487,6 +478,7 @@ return (
                       { key: "min", value: "min" },
                       { key: "max", value: "max" },
                     ]}
+                    readOnly={editMode && true}
                     store={salaryRangeStore}
                     value={
                       salaryRangeStore.filter(
@@ -535,6 +527,7 @@ return (
                   <CustomComboBox
                     name="riskLevel"
                     label={_labels.riskLevel}
+                    readOnly={editMode && true}
 
                     // readOnly //disabled
                     valueField="recordId"
@@ -593,6 +586,7 @@ return (
                       )[0]
                     }
                     required
+                    readOnly={editMode && true}
                     onChange={(event, newValue) => {
 
                       if(newValue){
@@ -646,7 +640,7 @@ return (
                           clientIndividualFormValidation.values.civilStatus,
                       )[0]
                     }
-
+                    readOnly={editMode && true}
                     onChange={(event, newValue) => {
 
                       if(newValue){
@@ -713,7 +707,7 @@ return (
                   name="oldReference"
                   label={_labels.oldReference}
                   value={clientIndividualFormValidation.values?.oldReference}
-
+                  readOnly={editMode && true}
                   onChange={clientIndividualFormValidation.handleChange}
                   maxLength="10"
                   onClear={() =>
@@ -738,7 +732,7 @@ return (
                     name="whatsAppNo"
                     label={_labels.whatsapp}
                     value={clientIndividualFormValidation.values?.whatsAppNo}
-
+                    readOnly={editMode && true}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="15"
                     onClear={() =>
@@ -765,6 +759,7 @@ return (
                     valueField="key"
                     displayField="value"
                     store={titleStore}
+                    readOnly={editMode && true}
                     value={
                       titleStore.filter(
                         (item) =>
@@ -816,6 +811,7 @@ return (
                   name="cellPhone"
                   label={_labels.cellPhone}
                   value={clientIndividualFormValidation.values?.cellPhoneEncrypt}
+                  readOnly={editMode && true}
                   required
                   onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e, 'cellPhoneEncrypt')  }}
                   maxLength="15"
@@ -843,6 +839,7 @@ return (
                   label={_labels.confirmCell}
                   value={clientIndividualFormValidation.values?.cellPhoneRepeatEncrypt}
                   required
+                  readOnly={editMode && true}
                   maxLength="15"
                   onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e, 'cellPhoneRepeatEncrypt')  }}
                   onCopy={handleCopy}
@@ -873,6 +870,7 @@ return (
                     required
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "firstName",
@@ -896,6 +894,7 @@ return (
                     value={clientIndividualFormValidation.values?.middleName}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "middleName",
@@ -920,6 +919,7 @@ return (
                     required
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "lastName",
@@ -945,6 +945,7 @@ return (
                     value={clientIndividualFormValidation.values?.familyName}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "familyName",
@@ -973,6 +974,7 @@ return (
                     label={_labels.fl_family}
                     value={clientIndividualFormValidation.values?.fl_familyName}
                     onChange={clientIndividualFormValidation.handleChange}
+                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "fl_familyName",
@@ -1000,6 +1002,7 @@ return (
                     value={clientIndividualFormValidation.values?.fl_lastName}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "fl_lastName",
@@ -1022,6 +1025,7 @@ return (
                     label={_labels.fl_middle}
                     value={clientIndividualFormValidation.values?.fl_middleName}
                     onChange={clientIndividualFormValidation.handleChange}
+                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "fl_familyName",
@@ -1047,6 +1051,7 @@ return (
                     value={clientIndividualFormValidation.values?.fl_firstName}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "fl_firstName",
@@ -1072,6 +1077,7 @@ return (
                   valueField="recordId"
                   displayField="name"
                   store={countryStore}
+                  readOnly={editMode && true}
                   value={
                     countryStore.filter(
                       (item) =>
@@ -1125,7 +1131,8 @@ return (
                 onClear={() =>
                   clientIndividualFormValidation.setFieldValue("birthDate", "")
                 }
-                disabledDate={true}
+                disabledDate={'>='}
+                readOnly={editMode && true}
 
                 error={
                   clientIndividualFormValidation.touched.birthDate &&
@@ -1145,6 +1152,7 @@ return (
                     displayField="value"
                     store={genderStore}
                     required
+                    readOnly={editMode && true}
                     value={
                       genderStore.filter(
                         (item) =>
@@ -1191,6 +1199,7 @@ return (
                     valueField="key"
                     displayField="value"
                     store={educationStore}
+                    readOnly={editMode && true}
 
                     // value={
                     //   clientIndividualFormValidation.values?.educationLevel
@@ -1275,6 +1284,7 @@ return (
                     name="incomeSourceId"
                     label={_labels.incomeSource}
                     valueField="recordId"
+                    readOnly={editMode && true}
                     displayField="name"
                     store={incomeOfSourceStore}
                     value={
@@ -1338,6 +1348,7 @@ return (
                     name="sponsorName"
                     label={_labels.sponsor}
                     value={clientIndividualFormValidation.values?.sponsorName}
+                    readOnly={editMode && true}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="15"
                     onClear={() =>
@@ -1386,9 +1397,10 @@ return (
                   label={_labels.profession}
                   valueField="recordId"
                   displayField="name"
-                  store={professionStore}
+                  store={professionFilterStore}
+                  readOnly={editMode && true}
                   value={
-                    professionStore.filter(
+                    professionFilterStore.filter(
                       (item) =>
                         item.recordId ===
                         clientIndividualFormValidation.values.professionId,
@@ -1404,6 +1416,8 @@ return (
                       "professionName",
                       newValue?.name,
                     );
+
+
                   }}
                   error={
                     clientIndividualFormValidation.touched.professionId &&
@@ -1432,6 +1446,7 @@ return (
                       <Checkbox
                         name="OTPVerified"
                         disabled={true}
+                        readOnly={editMode && true}
 
                         // checked={clientIndividualFormValidation.values?.isInactive}
                         onChange={clientIndividualFormValidation.handleChange}
@@ -1483,7 +1498,7 @@ return (
                     control={
                       <Checkbox
                         disabled={clientIndividualFormValidation.values.genderId ===2 ? false : true}
-
+                        readOnly={editMode && true}
                         name="coveredFace"
                         checked={
                           clientIndividualFormValidation.values?.coveredFace
@@ -1499,6 +1514,7 @@ return (
                     control={
                       <Checkbox
                         name="isEmployee"
+                        readOnly={editMode && true}
                         checked={
                           clientIndividualFormValidation.values?.isEmployee
                         }
@@ -1516,11 +1532,14 @@ return (
                     <Grid item xs={12}>
                       <FormControlLabel
                         control={
+
                           <Checkbox
-                            name="isDiplomatic"
+                            name="isDiplomat"
                             checked={
-                              clientIndividualFormValidation.values?.isInactive
+                              clientIndividualFormValidation.values?.isDiplomat
                             }
+
+                            disabled={(clientIndividualFormValidation.values?.isDiplomatReadOnly || editMode) && true}
                             onChange={
                               clientIndividualFormValidation.handleChange
                             }
@@ -1547,34 +1566,33 @@ return (
                     </Grid>
                     <Grid item xs={12}>
                       <CustomTextField
-                        name="relativeDiplomateInfo"
-                        label={_labels.relativeDiplomateInfo}
+                        name="relativeDiplomatInfo"
+                        label={_labels.relativeDiplomatInfo}
                         value={
-                          clientIndividualFormValidation.values
-                            ?.relativeDiplomateInfo
+                          clientIndividualFormValidation.values?.relativeDiplomatInfo
                         }
                         onChange={clientIndividualFormValidation.handleChange}
                         maxLength="10"
-                        required={clientIndividualFormValidation.values.isRelativeDiplomate ? true : false}
+                        required={clientIndividualFormValidation.values.isRelativeDiplomat ? true : false}
                         onClear={() =>
                           clientIndividualFormValidation.setFieldValue(
-                            "relativeDiplomateInfo",
+                            "relativeDiplomatInfo",
                             "",
                           )
                         }
                         error={
                           clientIndividualFormValidation.touched
-                            .relativeDiplomateInfo &&
+                            .relativeDiplomatInfo &&
                           Boolean(
                             clientIndividualFormValidation.errors
-                              .relativeDiplomateInfo,
+                              .relativeDiplomatInfo,
                           )
                         }
                         helperText={
                           clientIndividualFormValidation.touched
-                            .relativeDiplomateInfo &&
+                            .relativeDiplomatInfo &&
                           clientIndividualFormValidation.errors
-                            .relativeDiplomateInfo
+                            .relativeDiplomatInfo
                         }
                       />
                     </Grid>

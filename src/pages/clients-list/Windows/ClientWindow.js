@@ -18,7 +18,7 @@ const ClientWindow = ({
     setCityAddressStore,
     cityAddressWorkStore,
     setCityAddressWorkStore,
-    professionStore,
+    professionFilterStore,
     salaryRangeStore,
     incomeOfSourceStore,
     smsLanguageStore,
@@ -39,12 +39,14 @@ const ClientWindow = ({
      lookupCity,
     lookupCityAddress,
     lookupCityAddressWork,
+    fillFilterProfession,
     width,
     height,
     _labels,
     editMode,
     onInfo,
     onInfoClose,
+
     maxAccess
 }) => {
 
@@ -68,7 +70,9 @@ return (
                     cityAddressWorkStore={cityAddressWorkStore}
                     lookupCityDistrictAddress={lookupCityDistrictAddress}
                     lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
-                    professionStore={professionStore}
+                    professionFilterStore={professionFilterStore}
+                    fillFilterProfession={fillFilterProfession}
+
                     salaryRangeStore={salaryRangeStore}
                     incomeOfSourceStore={incomeOfSourceStore}
                     smsLanguageStore={smsLanguageStore}

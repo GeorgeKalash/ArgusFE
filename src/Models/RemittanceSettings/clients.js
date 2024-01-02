@@ -32,7 +32,8 @@ const getNewClients= () => {
  idNoRepeatEncrypt: null,
 
  idtId:null,
- isDiplomat:null,
+
+//  isDiplomatic:false,
 
  // country: obj.clientIDView.countryName,
  cityName: null,
@@ -87,6 +88,7 @@ const getNewClients= () => {
  cellPhoneRepeatEncrypt : null,
  cellPhoneRepeat:null,
  createdDate  :null,
+ isDiplomatReadOnly: false,
 
  // expiryDate  :obj.clientMaster.expiryDate,
  flName  :null,
@@ -113,7 +115,7 @@ const getNewClients= () => {
  gender: null,
  idNo: null,
  incomeSourceId: null,
- isDiplomat: null,
+ isDiplomat: false,
  isEmployee:null,
  relativeDiplomatInfo: null,
  releaseStatus: null,
@@ -128,7 +130,7 @@ const getNewClients= () => {
  workAddressId: null,
  title: null,
  mobileVerified: null,
- isRelativeDiplomat: null,
+ isRelativeDiplomat: false,
   }
 }
 
@@ -231,7 +233,8 @@ const populateIClients= obj => {
       gender: obj.clientRemittance.gender,
       idNo: obj.clientRemittance.idNo,
       incomeSourceId: obj.clientRemittance.incomeSourceId,
-      isDiplomat: obj.clientRemittance.isDiplomat,
+
+      // isDiplomat: obj.clientRemittance.isDiplomat,
       isEmployee: obj.clientRemittance.isEmployee,
       relativeDiplomatInfo: obj.clientRemittance.relativeDiplomatInfo,
       releaseStatus: obj.clientRemittance.releaseStatus,
@@ -260,7 +263,7 @@ const populateIClients= obj => {
 
 
       // isEmployee: obj.isEmployee,
-      // isDiplomat: obj.isDiplomat,
+      // isDiplomatic: obj.isDiplomatic,
       // isRelativeDiplomate: obj.isRelativeDiplomate,
 
 

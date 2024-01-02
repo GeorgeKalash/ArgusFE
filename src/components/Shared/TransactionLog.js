@@ -173,10 +173,12 @@ const columns = [
 
                       />
         </Grid>
-          <Grid container xs={6} spacing={4} sx={{paddingLeft:'25px'}} >
-          <Grid item xs={6}>{_labels.recordId}</Grid> <Grid item xs={6}>{recordId}</Grid>
-          <Grid xs={6}>{_labels.resourceId}</Grid> <Grid  xs={6}>{resourceId}</Grid>
+        <Grid container xs={6} spacing={4} sx={{paddingLeft:'40px'}} >
+
+          <Grid item xs={4}>{_labels.recordId}</Grid> <Grid item xs={6}>{recordId}</Grid>
+          <Grid  item xs={4}>{_labels.resourceId}</Grid> <Grid  tem xs={6}>{resourceId}</Grid>
           </Grid>
+
     </Grid>
 
 
