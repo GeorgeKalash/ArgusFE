@@ -122,7 +122,7 @@ const Users = () => {
   const tabs = [{ label: _labels.users }, { label: _labels.defaults, disabled: !editMode }]
 
   const usersValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       fullName: yup.string().required('This field is required'),
@@ -138,28 +138,29 @@ const Users = () => {
       postUsers(values)
     }
   })
-  
+
   const defaultsValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({
-    }),
+    validationSchema: yup.object({}),
     initialValues: {
       siteId: '',
-      plantId:'',
-      spId:'',
-      cashAccountId:''
+      plantId: '',
+      spId: '',
+      cashAccountId: '',
+      cashAccountRef: '',
+      cashAccountName: ''
     },
     onSubmit: values => {
-      console.log('values ',values)
+      console.log('values ', values)
       postDefaults(values)
     }
   })
 
   const handleSubmit = () => {
     if (activeTab === 0) usersValidation.handleSubmit()
-    else if (activeTab === 1 && ( defaultsValidation.values != undefined || defaultsValidation.values != null ))  {
-       defaultsValidation.handleSubmit()
+    else if (activeTab === 1 && (defaultsValidation.values != undefined || defaultsValidation.values != null)) {
+      defaultsValidation.handleSubmit()
     }
   }
 
@@ -305,8 +306,8 @@ const Users = () => {
 
   const postDefaults = obj => {
     const recordId = usersValidation.values.recordId
-    const fields = ["cashAccountId", "plantId", "siteId", "spId"]
-  
+    const fields = ['cashAccountId', 'plantId', 'siteId', 'spId']
+
     const postField = field => {
       const request = {
         key: field,
@@ -317,8 +318,7 @@ const Users = () => {
         extension: SystemRepository.UserDocument.set,
         record: JSON.stringify(request)
       })
-        .then(res => {
-        })
+        .then(res => {})
         .catch(error => {
           setErrorMessage(error)
         })
@@ -330,53 +330,73 @@ const Users = () => {
     else toast.success('Record Edited Successfully')
   }
 
-  const getDefaultsById = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_userId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.UserDocument.qry,
-      parameters: parameters
-    })
-      .then(res => {
-
-          const UserDocObject = {
-            plantId: null,
-            siteId: null,
-            cashAccountId: null,
-            spId: null,
+  const getDefaultsById = async (obj) => {
+    try {
+      const _recordId = obj.recordId;
+      const defaultParams = `_userId=${_recordId}`;
+      const parameters = defaultParams;
+  
+      const res = await getRequest({
+        extension: SystemRepository.UserDocument.qry,
+        parameters: parameters,
+      });
+  
+      const UserDocObject = {
+        plantId: null,
+        siteId: null,
+        cashAccountId: null,
+        cashAccountRef: null,
+        cashAccountName: null,
+        spId: null,
+      };
+  
+      await Promise.all(
+        res.list.map(async (x) => {
+          switch (x.key) {
+            case 'plantId':
+              UserDocObject.plantId = x.value ? parseInt(x.value) : null;
+              break;
+            case 'siteId':
+              UserDocObject.siteId = x.value ? parseInt(x.value) : null;
+              break;
+            case 'cashAccountId':
+              UserDocObject.cashAccountId = x.value ? parseInt(x.value) : null;
+              await getACC(UserDocObject.cashAccountId, UserDocObject);
+              break;
+            case 'spId':
+              UserDocObject.spId = x.value ? parseInt(x.value) : null;
+              break;
+            default:
+              break;
           }
-          
-
-           res.list.map((x) => {
-            switch (x.key) {
-                case "plantId":
-                  UserDocObject.plantId = x.value ? parseInt(x.value) : null
-                    break
-                case "siteId":
-                  UserDocObject.siteId = x.value ? parseInt(x.value) : null
-                    break
-                case "cashAccountId":
-                  UserDocObject.cashAccountId = x.value ? parseInt(x.value) : null
-                    break
-                case "spId":
-                  UserDocObject.spId = x.value ? parseInt(x.value) : null
-                    break
-                default:
-                    break
-            }
         })
-
-        console.log('UserDocObject ',UserDocObject)
-       defaultsValidation.setValues(UserDocObject)
-
-       // defaultsValidation.setValues(populateUserDocument(UserDocObject))
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
+      );
+  
+      await defaultsValidation.setValues(UserDocObject);
+      console.log('dvdvdv ',defaultsValidation.values)
+    } catch (error) {
+      setErrorMessage(error);
+    }
+  };
+  
+  const getACC = async (cashAccId, UserDocObject) => {
+    try {
+      const defaultParams = `_recordId=${cashAccId}`;
+      const parameters = defaultParams;
+  
+      const res = await getRequest({
+        extension: CashBankRepository.CashAccount.get,
+        parameters: parameters,
+      });
+      UserDocObject.cashAccountRef = res.record.accountNo;
+      UserDocObject.cashAccountName = res.record.name;
+  
+      return UserDocObject;
+    } catch (error) {
+      setErrorMessage(error);
+    }
+  };
+  
   const fillSiteStore = () => {
     var parameters = `_filter=`
     getRequest({
@@ -426,7 +446,7 @@ const Users = () => {
       parameters: parameters
     })
       .then(res => {
-        setdefaultsValidation(res.list)
+        setCashAccStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
