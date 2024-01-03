@@ -266,7 +266,7 @@ const InlineEditGrid = ({
             getOptionLabel={option => {
               if (typeof option === 'object') return option[column.displayField]
               else {
-                const selectedOption = column.store.find(item => {
+                const selectedOption = column.store?.find(item => {
                   return item[column.valueField] === option
                 })
                 if (selectedOption) return selectedOption[column?.displayField]

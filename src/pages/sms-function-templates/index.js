@@ -56,7 +56,7 @@ const SmsFunctionTemplate = () => {
       parameters: parameters
     })
       .then(res => {
-        setTemplateStore(res.list)
+        setTemplateStore(res)
       })
       .catch(error => {
          setErrorMessage(error)
@@ -65,37 +65,51 @@ const SmsFunctionTemplate = () => {
     
   const columns = [
     {
-        field: 'textfield',
-        header: _labels.functionId,
-        name: 'functionId',
-        mandatory: true,
-        readOnly: true,
-        width: 150, 
+      field: 'textfield',
+      header: _labels.functionId,
+      name: 'functionId',
+      mandatory: true,
+      readOnly: true,
+      width: 150, 
     },
     {
-        field: 'textfield',
-        header: _labels.name,
-        name: 'functionName',
-        mandatory: true,
-        readOnly: true,
-        width: 200, 
+      field: 'textfield',
+      header: _labels.name,
+      name: 'functionName',
+      mandatory: true,
+      readOnly: true,
+      width: 300, 
     },
     {
-      field: 'templateName',
+      field: 'lookup',
       header: _labels.templateName,
       nameId: 'templateId',
       name: 'templateName',
-      customComponent: CustomLookup,
-      onLookup: { lookupTemplate },
-      setStore: templateStore,
+      mandatory: false,
+      store: templateStore?.list,
       valueField: 'templateId',
       displayField: 'templateName',
-      columnsInDropDown: [{ key: 'templateId', value: 'templateName' }],
-      width: 250,
-      readOnly:false,
-      disabled:false,
-
+      fieldsToUpdate: [{ from: 'name', to: 'templateName' }],
+      columnsInDropDown: [
+        { key: 'templateName', value: 'templateName' }
+      ]
     },
+
+    // {
+    //   field: 'lookup',
+    //   header: _labels.templateName,
+    //   nameId: 'templateId',
+    //   name: 'templateName',
+    //   onLookup: lookupTemplate,
+    //   setStore: templateStore.list,
+    //   valueField: 'templateId',
+    //   displayField: 'templateName',
+    //   columnsInDropDown: [{ key: 'templateId', value: 'templateName' }],
+    //   width: 250,
+    //   readOnly:false,
+    //   disabled:false,
+
+    // },
 ];
 
   const smsFunctionTemplatesValidation = useFormik({
