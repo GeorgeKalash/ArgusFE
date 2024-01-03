@@ -638,6 +638,8 @@ setEditMode(false)
   const handleSubmit = () => {
     clientIndividualFormValidation.handleSubmit();
 
+    // console.log(clientIndividualFormValidation.values.idNo)
+
     WorkAddressValidation.handleSubmit();
 
   };
@@ -730,6 +732,8 @@ setEditMode(false)
         setErrorMessage(error);
       });
   };
+
+// console.log(clientIndividualFormValidation.values.idNo)
 
   const lookupCityDistrictAddress = searchQry => {
     setCityDistrictAddressStore([])
@@ -995,7 +999,7 @@ onEdit={editClient}
        />
        )}
 
-       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  readOnly={true} onInfoClose={() => setWindowInfo(false)}
+       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
 />}
 
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
