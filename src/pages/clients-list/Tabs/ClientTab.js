@@ -53,7 +53,7 @@ const ClientTab = ({
    _labels, maxAccess, editMode
  }) => {
 
-
+// console.log(clientIndividualFormValidation)
 
   const encryptDigits = (v) => {
     const input = v
@@ -70,17 +70,14 @@ if(input?.length > 1){
     // Check if input has at least four digits
 
     const maskedValue =
-    '* '.repeat(showLength) + input?.substring(showLength);
+    '*'.repeat(showLength) + input?.substring(showLength);
 
 
      return maskedValue;
     }else{
 
-      return '';
+      return ;
     }
-
-    //  clientIndividualFormValidation.setFieldValue("numberRepeat", input)
-
 
   };
 
@@ -218,7 +215,8 @@ return (
                   <CustomTextField
                     name="idNo"
                     label={_labels.number}
-                    type="password"
+
+                    // type="password"
                     value={clientIndividualFormValidation.values?.idNo }
                     required
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
@@ -248,18 +246,15 @@ return (
                           <Grid
                            sx={{
                               position: 'absolute',
-                              top: '30%',
-
-                              // marginRight:'25px',
-                              //  left: '0', /* Adjust the right offset as needed */
-                              // transform: 'translateY(-50%)',
-                              marginLeft:' 10px',
+                              top: '35%',
+                              letterSpacing: "3px",
+                              marginLeft:'10px',
                               padding: '0px',
                               backgroundColor: '#fff',
                               pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
                               fontFamily: 'Arial'
                           }}
-                          >{encryptDigits(clientIndividualFormValidation.values.idNo)}</Grid>
+                          >{encryptDigits(clientIndividualFormValidation.values?.idNo)}</Grid>
 
                 </Grid>
                 <Grid item xs={12}
@@ -267,7 +262,7 @@ return (
                   <CustomTextField
                     name="idNoRepeat"
                     label={_labels.confirmNb}
-                    value={clientIndividualFormValidation.values?.idNoRepeatEncrypt}
+                    value={clientIndividualFormValidation.values?.idNoRepeat}
                     required
 
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
@@ -295,17 +290,19 @@ return (
                      sx={{
                               position: 'absolute',
                               top: '25%',
-                              marginRight:'25px',
+                              marginRight: '25px',
+                              letterSpacing: "3px",
                                left: '0', /* Adjust the right offset as needed */
                               // transform: 'translateY(-50%)',
-                              marginLeft:clientIndividualFormValidation.values.idNoRepeat?.length  > 11? '25px'  :  '20px',
-                              padding: '0px',
+                              marginLeft: `${ clientIndividualFormValidation.values?.idNoRepeat?.length > 12? 22.5 : 20 }px`,
+                              padding: '2px',
                               backgroundColor: '#fff',
                               pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
                               fontFamily: 'Arial'
+
                           }}
                           >
-                            {encryptDigits(clientIndividualFormValidation.values.idNoRepeat)}</Grid>
+                            {encryptDigits(clientIndividualFormValidation.values?.idNoRepeat)}</Grid>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
@@ -493,7 +490,7 @@ return (
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
-               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress} readOnly={true} />
+               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress} readOnly={editMode && true} />
                </FieldSet>
                 {/* <Grid item xs={12}>
                   <CustomTextField
@@ -865,10 +862,10 @@ return (
                 <CustomTextField
                   name="cellPhone"
                   label={_labels.cellPhone}
-                  value={clientIndividualFormValidation.values?.cellPhoneEncrypt}
+                  value={clientIndividualFormValidation.values?.cellPhone}
                   readOnly={editMode && true}
                   required
-                  onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e, 'cellPhoneEncrypt')  }}
+                  onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
                   maxLength="15"
                   onCopy={handleCopy}
                   onPaste={handleCopy}
@@ -888,26 +885,27 @@ return (
                   }
                 />
                  <Grid
-                           sx={{
-                              position: 'absolute',
-                              top: clientIndividualFormValidation.touched.cellPhone ? '20px' : '18px',
-                              marginLeft: '15px',
-                              padding: '0px',
-                              backgroundColor: '#fff',
-                              pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
-                              // fontFamily: 'Arial'
-                          }}
-                          >{encryptDigits(clientIndividualFormValidation.values.cellPhone)}</Grid>
+                          sx={{
+                            position: 'absolute',
+                            top: '25%',
+                            letterSpacing: "3px",
+                            marginLeft:'15px',
+                            padding: '0px',
+                            backgroundColor: '#fff',
+                            pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
+                            fontFamily: 'Arial'
+                        }}
+                          >{encryptDigits(clientIndividualFormValidation.values?.cellPhone)}</Grid>
               </Grid>
               <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
                   name="cellPhoneRepeat"
                   label={_labels.confirmCell}
-                  value={clientIndividualFormValidation.values?.cellPhoneRepeatEncrypt}
+                  value={clientIndividualFormValidation.values?.cellPhoneRepeat}
                   required
                   readOnly={editMode && true}
                   maxLength="15"
-                  onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) , encryptDigits(e, 'cellPhoneRepeatEncrypt')  }}
+                  onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
                   onCopy={handleCopy}
                   onPaste={handleCopy}
                   onClear={() =>
@@ -928,15 +926,16 @@ return (
                   }
                 />
                  <Grid
-                           sx={{
-                              position: 'absolute',
-                              top: clientIndividualFormValidation.touched.cellPhone ? '20px' : '18px',
-                              marginLeft:' 15px',
-                              padding: '0px',
-                              backgroundColor: '#fff',
-                              pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
-                              fontFamily: 'Arial'
-                          }}
+                         sx={{
+                          position: 'absolute',
+                          top: '25%',
+                          letterSpacing: "3px",
+                          marginLeft:'15px',
+                          padding: '0px',
+                          backgroundColor: '#fff',
+                          pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
+                          fontFamily: 'Arial'
+                      }}
                           >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid>
               </Grid>
                 <Grid item xs={3}>
@@ -1511,7 +1510,7 @@ return (
 
                <Grid container sx={{marginTop: '20px'}}>
               <FieldSet title={_labels.workAddress}>
-              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} readOnly={true} />
+              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} readOnly={editMode && true} />
 
                </FieldSet>
                </Grid>
@@ -1524,8 +1523,7 @@ return (
                         name="OTPVerified"
                         disabled={true}
                         readOnly={editMode && true}
-
-                        // checked={clientIndividualFormValidation.values?.isInactive}
+                        checked={clientIndividualFormValidation.values?.OTPVerified}
                         onChange={clientIndividualFormValidation.handleChange}
                       />
                     }

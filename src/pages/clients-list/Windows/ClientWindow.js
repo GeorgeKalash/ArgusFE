@@ -55,7 +55,7 @@ const ClientWindow = ({
 
 
 return (
-        <Window id='CountryWindow' Title={_labels.country} onClose={onClose} width={width} height={height}
+        <Window id='CountryWindow' Title={_labels.pageTitle} onClose={onClose} width={width} height={height}
          onSave={onSave} onInfo={onInfo} onInfoClose={onInfoClose}>
             <CustomTabPanel>
                 <ClientTab

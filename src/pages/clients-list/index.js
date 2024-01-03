@@ -26,6 +26,7 @@ import ClientWindow from './Windows/ClientWindow'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { getNewClients, populateIClients } from 'src/Models/RemittanceSettings/clients'
 import TransactionLog from 'src/components/Shared/TransactionLog'
+import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 
 const ClientsList = () => {
 
@@ -71,7 +72,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
   const [titleStore, setTitleStore] = useState([]);
 const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
   const [errorMessage, setErrorMessage] = useState(null)
-
+ const [showOtpVerification , setShowOtpVerification] = useState(false)
   useEffect(() => {
     if (!access) getAccess(ResourceIds.ClientList, setAccess)
     else {
@@ -200,6 +201,7 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
      confirmCell: labels2 && labels2.find((item) => item.key === 68).value,
      issusCountry: labels2 && labels2.find((item) => item.key === 69).value,
      issusPlace: labels2 && labels2.find((item) => item.key === 70).value,
+     pageTitle: labels2 && labels2.find((item) => item.key === 71).value,
 
 
   };
@@ -300,17 +302,17 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
     }
   ]
 
-const getPlantId = obj=>{
+const getPlantId = ()=>{
 
-  const userData = window.sessionStorage.getItem('userData') ?JSON.parse( window.sessionStorage.getItem('userData')) : null
-  console.log(userData)
+  const userData = window.sessionStorage.getItem('userData') ? JSON.parse( window.sessionStorage.getItem('userData')) : null
+console.log(userData)
   var parameters = `_userId=${userData && userData.userId}&_key=plantId`
   getRequest({
     extension: SystemRepository.SystemPlant.get,
     parameters: parameters
   })
     .then(res => {
-console.log(res)
+
 
       clientIndividualFormValidation.setFieldValue('plantId', res.record.value)
 
@@ -328,7 +330,6 @@ console.log(res)
      const input = e.target.value
      console.log({list: []})
 
-  console.log(gridData)
      if(input.length > 1){
     var parameters = `_size=30&_startAt=0&_filter=${input}`
     getRequest({
@@ -386,7 +387,7 @@ return errors;
       cityId: yup.string().required("This field is required"),
       idCountry: yup.string().required("This field is required"),
 
-      // idCity: yup.string().required("This field is required"),
+       name: yup.string().required("This field is required"),
       firstName: yup.string().required("This field is required"),
       lastName: yup.string().required("This field is required"),
       nationalityId: yup.string().required("This field is required"),
@@ -403,9 +404,12 @@ return errors;
     }),
     onSubmit: (values) => {
       console.log("values" + values);
+    console.log(WorkAddressValidation)
       postRtDefault(values);
     },
   });
+
+      // console.log("values" + values);
 
   const postRtDefault = (obj) => {
     console.log("obj", obj);
@@ -423,11 +427,11 @@ return errors;
 
       // status: obj.status,
       addressId: null,
-      plantId: clientIndividualFormValidation.values.plantId,
+      plantId: clientIndividualFormValidation.values.plantId || 3,
       cellPhone: obj.cellPhone,
       createdDate:  formatDateToApi(date.toISOString()),
       expiryDate: obj.expiryDate,
-      OTPVerified: obj.OTPVerified,
+      OTPVerified:  obj.OTPVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
       status:1, //obj.statusName,
@@ -442,7 +446,7 @@ return errors;
     const obj2 = {
       idNo : obj.idNo,
 
-      // clientID: null,
+      // clientID: obj.clientID,
       idCountryId: obj.idCountry,
       idtId: obj.idtId ,  //5
       idExpiryDate: obj.expiryDate,
@@ -456,7 +460,7 @@ return errors;
 
     //CTCLI
     const obj3 = {
-      // clientID: null,
+      // clientID: obj.clientID,
       firstName: obj.firstName,
       lastName: obj.lastName,
       middleName: obj.middleName,
@@ -544,7 +548,7 @@ return errors;
      }
 
     const data = {
-      plantId: clientIndividualFormValidation.values.plantId,
+      plantId: clientIndividualFormValidation.values.plantId || 3,
       clientMaster: obj1, //CTCL
       clientID: obj2, //CTID
       ClientIndividual: obj3, //CTCLI
@@ -554,13 +558,16 @@ return errors;
 
     };
 
-    console.log(data)
     postRequest({
       extension: RTCLRepository.CtClientIndividual.set2,
-      record: JSON.stringify(data), // JSON.stringify({  sysDefaults  : data })
+      record: JSON.stringify(data),
     })
       .then((res) => {
-        if (res) toast.success("Record Successfully");
+        if (res){
+         toast.success("Record Successfully");
+         clientIndividualFormValidation.setFieldValue('clientId' , res.recordId)
+        setShowOtpVerification(true)
+        }
       })
       .catch((error) => {
         setErrorMessage(error);
@@ -599,7 +606,7 @@ return errors;
       phone: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log(values);
+      // console.log(values);
 
     }
   })
@@ -607,10 +614,9 @@ return errors;
 
 
   const addClient= obj => {
-setEditMode(false)
+     setEditMode(false)
     clientIndividualFormValidation.setValues(getNewClients())
     getPlantId()
-    console.log(clientIndividualFormValidation)
     setWindowOpen(true)
   }
 
@@ -636,10 +642,9 @@ setEditMode(false)
   }
 
   const handleSubmit = () => {
+    // setShowOtpVerification(true)
+
     clientIndividualFormValidation.handleSubmit();
-
-    // console.log(clientIndividualFormValidation.values.idNo)
-
     WorkAddressValidation.handleSubmit();
 
   };
@@ -709,7 +714,7 @@ setEditMode(false)
       parameters: parameters,
     })
       .then((res) => {
-        console.log(res.list);
+        // console.log(res.list);
         setCityStore(res.list);
       })
       .catch((error) => {
@@ -725,7 +730,7 @@ setEditMode(false)
       parameters: parameters,
     })
       .then((res) => {
-        console.log(res.list);
+        // console.log(res.list);
         setCityAddressStore(res.list);
       })
       .catch((error) => {
@@ -733,7 +738,7 @@ setEditMode(false)
       });
   };
 
-// console.log(clientIndividualFormValidation.values.idNo)
+
 
   const lookupCityDistrictAddress = searchQry => {
     setCityDistrictAddressStore([])
@@ -744,7 +749,7 @@ setEditMode(false)
       parameters: parameters
     })
       .then(res => {
-        console.log(res.list)
+
         setCityDistrictAddressStore(res.list)
       })
       .catch(error => {
@@ -761,7 +766,7 @@ setEditMode(false)
       parameters: parameters
     })
       .then(res => {
-        console.log(res.list)
+
         setCityDistrictAddressWorkStore(res.list)
       })
       .catch(error => {
@@ -777,7 +782,7 @@ setEditMode(false)
       parameters: parameters,
     })
       .then((res) => {
-        console.log(res.list);
+
         setCityAddressWorkStore(res.list);
       })
       .catch((error) => {
@@ -888,7 +893,7 @@ setEditMode(false)
 
 
   const fillFilterProfession=(value)=>{
-    console.log(value)
+
     if(value){
       const filteredList =  professionStore.filter(item => item.diplomatStatus === 2);
       clientIndividualFormValidation.setFieldValue('isDiplomat',true )
@@ -998,7 +1003,7 @@ onEdit={editClient}
 
        />
        )}
-
+       {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={3600}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode} />}
        {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
 />}
 

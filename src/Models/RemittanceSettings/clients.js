@@ -72,7 +72,7 @@ const getNewClients= () => {
  fl_lastName: null,
  fl_middleName: null,
  fl_familyName: null,
- isResident: null,
+ isResident: false,
 
  // end clientIndividual
 
@@ -103,12 +103,12 @@ const getNewClients= () => {
 
  //clientRemittance
 
- OTPVerified: null,
+ OTPVerified: false,
  addressId: null,
  batchId: null,
  civilStatus: null,
  clientId: null,
- coveredFace: null,
+ coveredFace: false,
  date: null,
  dtId: null,
  educationLevel:null,
@@ -116,7 +116,7 @@ const getNewClients= () => {
  idNo: null,
  incomeSourceId: null,
  isDiplomat: false,
- isEmployee:null,
+ isEmployee:false,
  relativeDiplomatInfo: null,
  releaseStatus: null,
  riskLevel: null,
@@ -131,6 +131,7 @@ const getNewClients= () => {
  title: null,
  mobileVerified: null,
  isRelativeDiplomat: false,
+ professionId:null,
   }
 }
 
@@ -179,6 +180,7 @@ const populateIClients= obj => {
 
       whatsappNo: obj.whatsappNo,
       sponsorName: obj.sponsorName,
+
 
 
       //clientIndividual
