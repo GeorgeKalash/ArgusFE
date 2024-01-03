@@ -16,7 +16,9 @@ const DefaultsTab = ({
   cashAccStore,
   lookupCashAcc
 }) => {
-    
+    console.log('defaultsValidation  ',   defaultsValidation.values    )
+    console.log('salesStore ',salesPersonStore)
+
   return (
     <Grid container spacing={4}>
         <Grid item xs={12}>
@@ -62,17 +64,17 @@ const DefaultsTab = ({
         <Grid item xs={12}>
         <CustomLookup
           name='cashAccountId'
-          value={defaultsValidation.values.cashAccountId}
+          value={defaultsValidation.values?.cashAccountId}
           label={labels.cashAcc}
           valueField='accountNo'
           displayField='name'
           store={cashAccStore}
           setStore={setCashAccStore}
-          firstValue={defaultsValidation.values.cashAccountRef}
-          secondValue={defaultsValidation.values.cashAccountName}
+          firstValue={defaultsValidation.values?.cashAccountRef}
+          secondValue={defaultsValidation.values?.cashAccountName}
           onLookup={lookupCashAcc}
           onChange={(event, newValue) => {
-                if ( newValue.recordId) {
+                if ( newValue) {
                   defaultsValidation.setFieldValue('cashAccountId', newValue?.recordId)
                   defaultsValidation.setFieldValue('cashAccountRef', newValue?.accountNo)
                   defaultsValidation.setFieldValue('cashAccountName', newValue?.name)
@@ -95,7 +97,7 @@ const DefaultsTab = ({
             valueField='recordId'
             displayField='name'
             columnsInDropDown= {[
-              { key: 'reference', value: 'Reference' },
+              { key: 'spRef', value: 'Reference' },
               { key: 'name', value: 'Name' }
             ]}
             store={salesPersonStore}

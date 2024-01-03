@@ -4,6 +4,7 @@ import { Box } from '@mui/material'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const IDNumberTab = ({ bpMasterDataValidation, idNumberValidation, idNumberGridColumn, maxAccess }) => {
+
   return (
     <>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>

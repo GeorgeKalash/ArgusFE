@@ -19,6 +19,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { AccountRepository } from 'src/repositories/AccountRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -37,7 +38,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const Users = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest , getIdentityRequest} = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -59,6 +60,8 @@ const Users = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [emailPresent, setEmailPresent] = useState(false)
+  const [passwordState, setPasswordState] = useState(false)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -121,8 +124,9 @@ const Users = () => {
 
   const tabs = [{ label: _labels.users }, { label: _labels.defaults, disabled: !editMode }]
 
+
   const usersValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       fullName: yup.string().required('This field is required'),
@@ -131,35 +135,45 @@ const Users = () => {
       activeStatus: yup.string().required('This field is required'),
       userType: yup.string().required('This field is required'),
       languageId: yup.string().required('This field is required'),
-      password: yup.string().required('This field is required'),
-      confirmPassword: yup.string().required('This field is required')
+      
+      //if passwordState is false, then the password and confirmPassword fields are added to the schema using object spreading.
+      // else an empty object is added, ensuring those fields are not included in the schema.
+      //spread syntax (...)
+      ...(passwordState
+        ? {}
+        : {
+            password: yup.string().required('This field is required'),
+            confirmPassword: yup.string().required('This field is required'),
+          }),
     }),
     onSubmit: values => {
       postUsers(values)
-    }
+    },
   })
-  
+
+
   const defaultsValidation = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({
-    }),
+    validationSchema: yup.object({}),
     initialValues: {
       siteId: '',
-      plantId:'',
-      spId:'',
-      cashAccountId:''
+      plantId: '',
+      spId: '',
+      cashAccountId: '',
+      cashAccountRef: '',
+      cashAccountName: ''
     },
     onSubmit: values => {
-      console.log('values ',values)
+      console.log('values ', values)
       postDefaults(values)
     }
   })
 
   const handleSubmit = () => {
     if (activeTab === 0) usersValidation.handleSubmit()
-    else if (activeTab === 1 && ( defaultsValidation.values != undefined || defaultsValidation.values != null ))  {
-       defaultsValidation.handleSubmit()
+    else if (activeTab === 1 && (defaultsValidation.values != undefined || defaultsValidation.values != null)) {
+      defaultsValidation.handleSubmit()
     }
   }
 
@@ -223,6 +237,7 @@ const Users = () => {
     fillUserTypeStore()
     fillLanguageStore()
     fillNotificationGrpStore()
+    setPasswordState(false)
   }
 
   const editUsers = obj => {
@@ -244,6 +259,7 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
+        setPasswordState(true)
         getDefaultsById(obj)
         setActiveTab(0)
       })
@@ -300,13 +316,41 @@ const Users = () => {
         setErrorMessage(error)
       })
   }
+  
+  const checkFieldDirect = email =>{
+    const defaultParams = `_email=${email}`
+    var parameters = defaultParams
+    getIdentityRequest({
+      extension: AccountRepository.UserIdentity.check,
+      parameters: parameters
+    })
+      .then(res => {
+        setEmailPresent(false)
+        setPasswordState(false)
+        usersValidation.validateForm()
+      })
+      .catch(error => {
+        setErrorMessage(error)
+        if(error.response.status == 300){
+          setEmailPresent(true)
+          setPasswordState(true)
+          usersValidation.validateForm()
+        }
+        else{
+          setEmailPresent(false)
+          setPasswordState(false)
+          usersValidation.validateForm()
+        }
+
+      })
+  }
 
   //Defaults Tab
 
   const postDefaults = obj => {
     const recordId = usersValidation.values.recordId
-    const fields = ["cashAccountId", "plantId", "siteId", "spId"]
-  
+    const fields = ['cashAccountId', 'plantId', 'siteId', 'spId']
+
     const postField = field => {
       const request = {
         key: field,
@@ -317,8 +361,7 @@ const Users = () => {
         extension: SystemRepository.UserDocument.set,
         record: JSON.stringify(request)
       })
-        .then(res => {
-        })
+        .then(res => {})
         .catch(error => {
           setErrorMessage(error)
         })
@@ -330,53 +373,75 @@ const Users = () => {
     else toast.success('Record Edited Successfully')
   }
 
-  const getDefaultsById = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_userId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.UserDocument.qry,
-      parameters: parameters
-    })
-      .then(res => {
-
-          const UserDocObject = {
-            plantId: null,
-            siteId: null,
-            cashAccountId: null,
-            spId: null,
+  const getDefaultsById = async (obj) => {
+    try {
+      const _recordId = obj.recordId;
+      const defaultParams = `_userId=${_recordId}`;
+      const parameters = defaultParams;
+  
+      const res = await getRequest({
+        extension: SystemRepository.UserDocument.qry,
+        parameters: parameters,
+      });
+  
+      const UserDocObject = {
+        plantId: null,
+        siteId: null,
+        cashAccountId: null,
+        cashAccountRef: null,
+        cashAccountName: null,
+        spId: null,
+      };
+  
+      await Promise.all(
+        res.list.map(async (x) => {
+          switch (x.key) {
+            case 'plantId':
+              UserDocObject.plantId = x.value ? parseInt(x.value) : null;
+              break;
+            case 'siteId':
+              UserDocObject.siteId = x.value ? parseInt(x.value) : null;
+              break;
+            case 'cashAccountId':
+              UserDocObject.cashAccountId = x.value ? parseInt(x.value) : null;
+              await getACC(UserDocObject.cashAccountId, UserDocObject);
+              break;
+            case 'spId':
+              UserDocObject.spId = x.value ? parseInt(x.value) : null;
+              break;
+            default:
+              break;
           }
-          
-
-           res.list.map((x) => {
-            switch (x.key) {
-                case "plantId":
-                  UserDocObject.plantId = x.value ? parseInt(x.value) : null
-                    break
-                case "siteId":
-                  UserDocObject.siteId = x.value ? parseInt(x.value) : null
-                    break
-                case "cashAccountId":
-                  UserDocObject.cashAccountId = x.value ? parseInt(x.value) : null
-                    break
-                case "spId":
-                  UserDocObject.spId = x.value ? parseInt(x.value) : null
-                    break
-                default:
-                    break
-            }
         })
+      );
+  
+      await defaultsValidation.setValues(UserDocObject);
+      console.log('dvdvdv ',defaultsValidation.values)
+    } catch (error) {
+      setErrorMessage(error);
+    }
+  };
 
-        console.log('UserDocObject ',UserDocObject)
-       defaultsValidation.setValues(UserDocObject)
-
-       // defaultsValidation.setValues(populateUserDocument(UserDocObject))
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const getACC = async (cashAccId, UserDocObject) => {
+    if (cashAccId != null){
+    try {
+      const defaultParams = `_recordId=${cashAccId}`;
+      const parameters = defaultParams;
+  
+      const res = await getRequest({
+        extension: CashBankRepository.CashAccount.get,
+        parameters: parameters,
+      });
+      UserDocObject.cashAccountRef = res.record.accountNo;
+      UserDocObject.cashAccountName = res.record.name;
+  
+      return UserDocObject;
+    } catch (error) {
+      setErrorMessage(error);
+    }
   }
-
+  };
+  
   const fillSiteStore = () => {
     var parameters = `_filter=`
     getRequest({
@@ -426,7 +491,7 @@ const Users = () => {
       parameters: parameters
     })
       .then(res => {
-        setdefaultsValidation(res.list)
+        setCashAccStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -495,6 +560,10 @@ const Users = () => {
           employeeStore={employeeStore}
           setEmployeeStore={setEmployeeStore}
           lookupEmployee={lookupEmployee}
+          checkFieldDirect={checkFieldDirect}
+          emailPresent={emailPresent}
+          passwordState={passwordState}
+          setPasswordState={setPasswordState}
 
           //Defaults
           defaultsValidation={defaultsValidation}
