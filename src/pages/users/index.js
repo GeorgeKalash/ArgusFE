@@ -26,10 +26,11 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import { getNewUserInfo, populateUserInfo } from 'src/Models/System/UserInfo'
-import { getNewUserDocument, populateUserDocument } from 'src/Models/System/UserDocument'
+import { getNewSecurityGroup, populateSecurityGroup } from 'src/Models/AccessControl/SecurityGroup'
 
 // ** Windows
 import UsersWindow from './Windows/UsersWindow'
+import SecurityGrpWindow from './Windows/SecurityGrpWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -38,7 +39,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const Users = () => {
-  const { getRequest, postRequest , getIdentityRequest} = useContext(RequestsContext)
+  const { getRequest, postRequest, getIdentityRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -54,6 +55,7 @@ const Users = () => {
   const [plantStore, setPlantStore] = useState([])
   const [cashAccStore, setCashAccStore] = useState([])
   const [salesPersonStore, setSalesPersonStore] = useState([])
+  const [securityGrpGridData, setSecurityGrpGridData] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -62,6 +64,7 @@ const Users = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [emailPresent, setEmailPresent] = useState(false)
   const [passwordState, setPasswordState] = useState(false)
+  const [securityGrpWindowOpen, setSecurityGrpWindowOpen] = useState(false)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -86,7 +89,11 @@ const Users = () => {
     defaults: labels && labels.find(item => item.key === 15).value,
     password: labels && labels.find(item => item.key === 16).value,
     name: labels && labels.find(item => item.key === 17).value,
-    confirmPassword: labels && labels.find(item => item.key === 18).value
+    confirmPassword: labels && labels.find(item => item.key === 18).value,
+    securityGrp: labels && labels.find(item => item.key === 19).value,
+    all: labels && labels.find(item => item.key === 20).value,
+    selected: labels && labels.find(item => item.key === 21).value,
+    group: labels && labels.find(item => item.key === 22).value
   }
 
   const columns = [
@@ -122,8 +129,7 @@ const Users = () => {
     }
   ]
 
-  const tabs = [{ label: _labels.users }, { label: _labels.defaults, disabled: !editMode }]
-
+  const tabs = [{ label: _labels.users }, { label: _labels.defaults, disabled: !editMode }, { label: _labels.securityGrp, disabled: !editMode }]
 
   const usersValidation = useFormik({
     enableReinitialize: false,
@@ -135,7 +141,7 @@ const Users = () => {
       activeStatus: yup.string().required('This field is required'),
       userType: yup.string().required('This field is required'),
       languageId: yup.string().required('This field is required'),
-      
+
       //if passwordState is false, then the password and confirmPassword fields are added to the schema using object spreading.
       // else an empty object is added, ensuring those fields are not included in the schema.
       //spread syntax (...)
@@ -143,14 +149,13 @@ const Users = () => {
         ? {}
         : {
             password: yup.string().required('This field is required'),
-            confirmPassword: yup.string().required('This field is required'),
-          }),
+            confirmPassword: yup.string().required('This field is required')
+          })
     }),
     onSubmit: values => {
       postUsers(values)
-    },
+    }
   })
-
 
   const defaultsValidation = useFormik({
     enableReinitialize: false,
@@ -175,6 +180,7 @@ const Users = () => {
     else if (activeTab === 1 && (defaultsValidation.values != undefined || defaultsValidation.values != null)) {
       defaultsValidation.handleSubmit()
     }
+    else if (activeTab === 2) securityGrpValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -238,6 +244,7 @@ const Users = () => {
     fillLanguageStore()
     fillNotificationGrpStore()
     setPasswordState(false)
+    setSecurityGrpGridData([])
   }
 
   const editUsers = obj => {
@@ -316,8 +323,8 @@ const Users = () => {
         setErrorMessage(error)
       })
   }
-  
-  const checkFieldDirect = email =>{
+
+  const checkFieldDirect = email => {
     const defaultParams = `_email=${email}`
     var parameters = defaultParams
     getIdentityRequest({
@@ -331,17 +338,15 @@ const Users = () => {
       })
       .catch(error => {
         setErrorMessage(error)
-        if(error.response.status == 300){
+        if (error.response.status == 300) {
           setEmailPresent(true)
           setPasswordState(true)
           usersValidation.validateForm()
-        }
-        else{
+        } else {
           setEmailPresent(false)
           setPasswordState(false)
           usersValidation.validateForm()
         }
-
       })
   }
 
@@ -373,75 +378,75 @@ const Users = () => {
     else toast.success('Record Edited Successfully')
   }
 
-  const getDefaultsById = async (obj) => {
+  const getDefaultsById = async obj => {
     try {
-      const _recordId = obj.recordId;
-      const defaultParams = `_userId=${_recordId}`;
-      const parameters = defaultParams;
-  
+      const _recordId = obj.recordId
+      const defaultParams = `_userId=${_recordId}`
+      const parameters = defaultParams
+
       const res = await getRequest({
         extension: SystemRepository.UserDocument.qry,
-        parameters: parameters,
-      });
-  
+        parameters: parameters
+      })
+
       const UserDocObject = {
         plantId: null,
         siteId: null,
         cashAccountId: null,
         cashAccountRef: null,
         cashAccountName: null,
-        spId: null,
-      };
-  
+        spId: null
+      }
+
       await Promise.all(
-        res.list.map(async (x) => {
+        res.list.map(async x => {
           switch (x.key) {
             case 'plantId':
-              UserDocObject.plantId = x.value ? parseInt(x.value) : null;
-              break;
+              UserDocObject.plantId = x.value ? parseInt(x.value) : null
+              break
             case 'siteId':
-              UserDocObject.siteId = x.value ? parseInt(x.value) : null;
-              break;
+              UserDocObject.siteId = x.value ? parseInt(x.value) : null
+              break
             case 'cashAccountId':
-              UserDocObject.cashAccountId = x.value ? parseInt(x.value) : null;
-              await getACC(UserDocObject.cashAccountId, UserDocObject);
-              break;
+              UserDocObject.cashAccountId = x.value ? parseInt(x.value) : null
+              await getACC(UserDocObject.cashAccountId, UserDocObject)
+              break
             case 'spId':
-              UserDocObject.spId = x.value ? parseInt(x.value) : null;
-              break;
+              UserDocObject.spId = x.value ? parseInt(x.value) : null
+              break
             default:
-              break;
+              break
           }
         })
-      );
-  
-      await defaultsValidation.setValues(UserDocObject);
-      console.log('dvdvdv ',defaultsValidation.values)
-    } catch (error) {
-      setErrorMessage(error);
-    }
-  };
+      )
 
-  const getACC = async (cashAccId, UserDocObject) => {
-    if (cashAccId != null){
-    try {
-      const defaultParams = `_recordId=${cashAccId}`;
-      const parameters = defaultParams;
-  
-      const res = await getRequest({
-        extension: CashBankRepository.CashAccount.get,
-        parameters: parameters,
-      });
-      UserDocObject.cashAccountRef = res.record.accountNo;
-      UserDocObject.cashAccountName = res.record.name;
-  
-      return UserDocObject;
+      await defaultsValidation.setValues(UserDocObject)
+      console.log('dvdvdv ', defaultsValidation.values)
     } catch (error) {
-      setErrorMessage(error);
+      setErrorMessage(error)
     }
   }
-  };
-  
+
+  const getACC = async (cashAccId, UserDocObject) => {
+    if (cashAccId != null) {
+      try {
+        const defaultParams = `_recordId=${cashAccId}`
+        const parameters = defaultParams
+
+        const res = await getRequest({
+          extension: CashBankRepository.CashAccount.get,
+          parameters: parameters
+        })
+        UserDocObject.cashAccountRef = res.record.accountNo
+        UserDocObject.cashAccountName = res.record.name
+
+        return UserDocObject
+      } catch (error) {
+        setErrorMessage(error)
+      }
+    }
+  }
+
   const fillSiteStore = () => {
     var parameters = `_filter=`
     getRequest({
@@ -496,6 +501,99 @@ const Users = () => {
       .catch(error => {
         setErrorMessage(error)
       })
+  }
+
+  //Security Grp Tab
+  const securityGrpValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+    }),
+    onSubmit: values => {
+      postSecurityGrp(values)
+    }
+  })
+
+  const getSecurityGrpGridData = userId => {
+    setSecurityGrpGridData([])
+
+    /*const defaultParams = `_bpId=${bpId}`
+    var parameters = defaultParams
+
+    getRequest({
+      extension: BusinessPartnerRepository.Relation.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setRelationGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })*/
+  }
+
+  const addSecurityGrp = () => {
+   // securityGrpValidation.setValues(getNewSecurityGrp(userValidation.values.recordId))
+   setSecurityGrpWindowOpen(true)
+  }
+
+  const postSecurityGrp = obj => {
+    /*const recordId = obj.recordId
+    const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
+    obj.fromBPId=bpId
+    postRequest({
+      extension: BusinessPartnerRepository.Relation.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+        }
+        else toast.success('Record Editted Successfully')
+
+        setRelationWindowOpen(false)
+        getRelationGridData(bpId)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })*/
+  }
+
+  const popupSecurityGrp = obj => {
+    /*const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: BusinessPartnerRepository.Relation.get,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log('get '+JSON.stringify())
+        relationValidation.setValues(populateRelation(res.record))
+        setRelationWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })*/
+  }
+  
+  const handleSecurityGrpSubmit = () => {
+    securityGrpValidation.handleSubmit()
+  }
+
+  const delSecurityGrp = obj => {
+    /*const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
+    postRequest({
+      extension: BusinessPartnerRepository.Relation.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        toast.success('Record Deleted Successfully')
+        getRelationGridData(bpId)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })*/
   }
 
   useEffect(() => {
@@ -573,6 +671,22 @@ const Users = () => {
           setCashAccStore={setCashAccStore}
           cashAccStore={cashAccStore}
           lookupCashAcc={lookupCashAcc}
+
+          //Security Grp
+           securityGrpGridData={securityGrpGridData}
+           getSecurityGrpGridData={getSecurityGrpGridData}
+           delSecurityGrp={delSecurityGrp}
+           addSecurityGrp={addSecurityGrp}
+           popupSecurityGrp={popupSecurityGrp}
+        />
+      )}
+       {securityGrpWindowOpen && (
+        <SecurityGrpWindow
+          onClose={() => setSecurityGrpWindowOpen(false)}
+          onSave={handleSecurityGrpSubmit}
+          securityGrpValidation={securityGrpValidation}
+          labels={_labels}
+          maxAccess={access}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

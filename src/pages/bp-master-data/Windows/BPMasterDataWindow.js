@@ -32,8 +32,8 @@ const BPMasterDataWindow = ({
   delRelation,
   defaultValue,
   popupRelation,
-onInfo,
-onInfoClose,
+  onInfo,
+  onInfoClose,
 
   //Address tab (grid)
   addressGridData,

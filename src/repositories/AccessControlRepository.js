@@ -13,4 +13,10 @@ export const AccessControlRepository = {
         set: service + 'setNOT',
         del: service + 'delNOT'
       },
+   SecurityGroup:{
+        qry: service + 'qryGUS',
+        set: service + 'setGUS',
+        set2: service + 'set2GUS',
+        del: service + 'delGUS'
+   }
 }
