@@ -6,6 +6,9 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
+// ** React Imports
+import { useState } from 'react'
+
 const UsersTab = ({
   labels,
   usersValidation,
@@ -17,8 +20,13 @@ const UsersTab = ({
   employeeStore,
   setEmployeeStore,
   lookupEmployee,
-  editMode
+  editMode,
+  checkFieldDirect,
+  emailPresent,
+  passwordState,
+  setPasswordState
 }) => {
+
   return (
     <Grid container>
       {/* First Column */}
@@ -46,10 +54,25 @@ const UsersTab = ({
             maxAccess={maxAccess}
             minLength='6'
             maxLength='30'
-            onChange={usersValidation.handleChange}
+            readOnly={editMode}
             onClear={() => usersValidation.setFieldValue('username', '')}
             error={usersValidation.touched.username && Boolean(usersValidation.errors.username)}
             helperText={usersValidation.touched.username && usersValidation.errors.username}
+
+            //Manually checking the entered value against the regular expression & enforcing the validation logic
+            onChange={(e) => {
+              const inputValue = e.target.value;
+              if (/^[a-zA-Z0-9_.-@]*$/.test(inputValue)) {
+                usersValidation.handleChange(e);
+              }
+            }}
+
+            // The onBlur event is triggered when the user leaves the input field, either by clicking outside of it or using the tab key.
+            onBlur={(e) => {
+              if (!editMode && e.target.value != '' ){
+              checkFieldDirect(e.target.value)
+              setPasswordState(emailPresent)}
+            }}
           />
         </Grid>
         <Grid item xs={12}>
@@ -58,7 +81,9 @@ const UsersTab = ({
             label={labels.email}
             value={usersValidation.values.email}
             type='email'
+            required
             placeholder='johndoe@email.com'
+            readOnly={editMode}
             onChange={usersValidation.handleChange}
             onClear={() => usersValidation.setFieldValue('email', '')}
             error={usersValidation.touched.email && Boolean(usersValidation.errors.email)}
@@ -184,6 +209,7 @@ const UsersTab = ({
             value={usersValidation.values.password}
             required
             hidden={editMode}
+            readOnly={passwordState}
             maxAccess={maxAccess}
             onChange={usersValidation.handleChange}
             onClear={() => usersValidation.setFieldValue('password', '')}
@@ -198,6 +224,7 @@ const UsersTab = ({
             value={usersValidation.values.confirmPassword}
             required
             hidden={editMode}
+            readOnly={passwordState}
             maxAccess={maxAccess}
             onChange={usersValidation.handleChange}
             onClear={() => usersValidation.setFieldValue('confirmPassword', '')}

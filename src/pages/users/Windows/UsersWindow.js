@@ -29,7 +29,11 @@ const UsersWindow = ({
   salesPersonStore,
   setCashAccStore,
   cashAccStore,
-  lookupCashAcc
+  lookupCashAcc,
+  checkFieldDirect,
+  emailPresent,
+  passwordState,
+  setPasswordState
 }) => {
   return (
     <Window
@@ -57,6 +61,10 @@ const UsersWindow = ({
           employeeStore={employeeStore}
           setEmployeeStore={setEmployeeStore}
           lookupEmployee={lookupEmployee}
+          checkFieldDirect={checkFieldDirect}
+          emailPresent={emailPresent}
+          passwordState={passwordState}
+          setPasswordState={setPasswordState}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>

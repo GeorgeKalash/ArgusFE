@@ -17,6 +17,7 @@ const DefaultsTab = ({
   lookupCashAcc
 }) => {
     console.log('defaultsValidation  ',   defaultsValidation.values    )
+    console.log('salesStore ',salesPersonStore)
 
   return (
     <Grid container spacing={4}>
@@ -96,7 +97,7 @@ const DefaultsTab = ({
             valueField='recordId'
             displayField='name'
             columnsInDropDown= {[
-              { key: 'reference', value: 'Reference' },
+              { key: 'spRef', value: 'Reference' },
               { key: 'name', value: 'Name' }
             ]}
             store={salesPersonStore}

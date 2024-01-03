@@ -19,6 +19,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { AccountRepository } from 'src/repositories/AccountRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -37,7 +38,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const Users = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest , getIdentityRequest} = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -59,6 +60,8 @@ const Users = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [emailPresent, setEmailPresent] = useState(false)
+  const [passwordState, setPasswordState] = useState(false)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -121,6 +124,7 @@ const Users = () => {
 
   const tabs = [{ label: _labels.users }, { label: _labels.defaults, disabled: !editMode }]
 
+
   const usersValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
@@ -131,13 +135,22 @@ const Users = () => {
       activeStatus: yup.string().required('This field is required'),
       userType: yup.string().required('This field is required'),
       languageId: yup.string().required('This field is required'),
-      password: yup.string().required('This field is required'),
-      confirmPassword: yup.string().required('This field is required')
+      
+      //if passwordState is false, then the password and confirmPassword fields are added to the schema using object spreading.
+      // else an empty object is added, ensuring those fields are not included in the schema.
+      //spread syntax (...)
+      ...(passwordState
+        ? {}
+        : {
+            password: yup.string().required('This field is required'),
+            confirmPassword: yup.string().required('This field is required'),
+          }),
     }),
     onSubmit: values => {
       postUsers(values)
-    }
+    },
   })
+
 
   const defaultsValidation = useFormik({
     enableReinitialize: false,
@@ -224,6 +237,7 @@ const Users = () => {
     fillUserTypeStore()
     fillLanguageStore()
     fillNotificationGrpStore()
+    setPasswordState(false)
   }
 
   const editUsers = obj => {
@@ -245,6 +259,7 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
+        setPasswordState(true)
         getDefaultsById(obj)
         setActiveTab(0)
       })
@@ -299,6 +314,34 @@ const Users = () => {
       })
       .catch(error => {
         setErrorMessage(error)
+      })
+  }
+  
+  const checkFieldDirect = email =>{
+    const defaultParams = `_email=${email}`
+    var parameters = defaultParams
+    getIdentityRequest({
+      extension: AccountRepository.UserIdentity.check,
+      parameters: parameters
+    })
+      .then(res => {
+        setEmailPresent(false)
+        setPasswordState(false)
+        usersValidation.validateForm()
+      })
+      .catch(error => {
+        setErrorMessage(error)
+        if(error.response.status == 300){
+          setEmailPresent(true)
+          setPasswordState(true)
+          usersValidation.validateForm()
+        }
+        else{
+          setEmailPresent(false)
+          setPasswordState(false)
+          usersValidation.validateForm()
+        }
+
       })
   }
 
@@ -378,8 +421,9 @@ const Users = () => {
       setErrorMessage(error);
     }
   };
-  
+
   const getACC = async (cashAccId, UserDocObject) => {
+    if (cashAccId != null){
     try {
       const defaultParams = `_recordId=${cashAccId}`;
       const parameters = defaultParams;
@@ -395,6 +439,7 @@ const Users = () => {
     } catch (error) {
       setErrorMessage(error);
     }
+  }
   };
   
   const fillSiteStore = () => {
@@ -515,6 +560,10 @@ const Users = () => {
           employeeStore={employeeStore}
           setEmployeeStore={setEmployeeStore}
           lookupEmployee={lookupEmployee}
+          checkFieldDirect={checkFieldDirect}
+          emailPresent={emailPresent}
+          passwordState={passwordState}
+          setPasswordState={setPasswordState}
 
           //Defaults
           defaultsValidation={defaultsValidation}
