@@ -32,7 +32,8 @@ const getNewClients= () => {
  idNoRepeatEncrypt: null,
 
  idtId:null,
- isDiplomat:null,
+
+//  isDiplomatic:false,
 
  // country: obj.clientIDView.countryName,
  cityName: null,
@@ -71,7 +72,7 @@ const getNewClients= () => {
  fl_lastName: null,
  fl_middleName: null,
  fl_familyName: null,
- isResident: null,
+ isResident: false,
 
  // end clientIndividual
 
@@ -87,6 +88,7 @@ const getNewClients= () => {
  cellPhoneRepeatEncrypt : null,
  cellPhoneRepeat:null,
  createdDate  :null,
+ isDiplomatReadOnly: false,
 
  // expiryDate  :obj.clientMaster.expiryDate,
  flName  :null,
@@ -101,20 +103,20 @@ const getNewClients= () => {
 
  //clientRemittance
 
- OTPVerified: null,
+ OTPVerified: false,
  addressId: null,
  batchId: null,
  civilStatus: null,
  clientId: null,
- coveredFace: null,
+ coveredFace: false,
  date: null,
  dtId: null,
  educationLevel:null,
  gender: null,
  idNo: null,
  incomeSourceId: null,
- isDiplomat: null,
- isEmployee:null,
+ isDiplomat: false,
+ isEmployee:false,
  relativeDiplomatInfo: null,
  releaseStatus: null,
  riskLevel: null,
@@ -128,7 +130,8 @@ const getNewClients= () => {
  workAddressId: null,
  title: null,
  mobileVerified: null,
- isRelativeDiplomat: null,
+ isRelativeDiplomat: false,
+ professionId:null,
   }
 }
 
@@ -177,6 +180,7 @@ const populateIClients= obj => {
 
       whatsappNo: obj.whatsappNo,
       sponsorName: obj.sponsorName,
+
 
 
       //clientIndividual
@@ -231,7 +235,8 @@ const populateIClients= obj => {
       gender: obj.clientRemittance.gender,
       idNo: obj.clientRemittance.idNo,
       incomeSourceId: obj.clientRemittance.incomeSourceId,
-      isDiplomat: obj.clientRemittance.isDiplomat,
+
+      // isDiplomat: obj.clientRemittance.isDiplomat,
       isEmployee: obj.clientRemittance.isEmployee,
       relativeDiplomatInfo: obj.clientRemittance.relativeDiplomatInfo,
       releaseStatus: obj.clientRemittance.releaseStatus,
@@ -260,7 +265,7 @@ const populateIClients= obj => {
 
 
       // isEmployee: obj.isEmployee,
-      // isDiplomat: obj.isDiplomat,
+      // isDiplomatic: obj.isDiplomatic,
       // isRelativeDiplomate: obj.isRelativeDiplomate,
 
 
