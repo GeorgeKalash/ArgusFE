@@ -10,9 +10,6 @@ import { IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 
-// ** Third Party Import
-import { useTranslation } from 'react-i18next'
-
 // ** Context
 import { MenuContext } from 'src/providers/MenuContext'
 
@@ -43,10 +40,9 @@ CustomTabPanel.propTypes = {
   value: PropTypes.number.isRequired
 }
 
-const TabsProvider = ({ children, pageTitle }) => {
+const TabsProvider = ({ children }) => {
   // ** Hooks
   const router = useRouter()
-  const { t } = useTranslation('screens')
   const { menu, lastOpenedPage } = useContext(MenuContext)
 
   const getLabel = () => {
@@ -70,19 +66,9 @@ const TabsProvider = ({ children, pageTitle }) => {
     return null
   }
 
-  var initialActiveTab =
-    router.route === '/default'
-      ? []
-      : [
-          {
-            page: children,
-            route: router.route,
-            label: pageTitle ? pageTitle : findNode(menu, router.route)
-          }
-        ]
-
   // ** States
-  const [activeTabs, setActiveTabs] = useState(initialActiveTab)
+  const [activeTabs, setActiveTabs] = useState([])
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [value, setValue] = useState(0)
 
   const handleChange = (event, newValue) => {
@@ -112,21 +98,38 @@ const TabsProvider = ({ children, pageTitle }) => {
   }
 
   useEffect(() => {
-    if (router.route != '/default') {
-      const isTabOpen = activeTabs.some(activeTab => activeTab.page === children || activeTab.route === router.route)
+    if (initialLoadDone && router.asPath != '/default') {
+      const isTabOpen = activeTabs.some(activeTab => activeTab.page === children || activeTab.route === router.asPath)
       if (isTabOpen) return
       else {
         const newValueState = activeTabs.length
         setActiveTabs(prevState => {
           return [
             ...prevState,
-            { page: children, route: router.route, label: lastOpenedPage ? lastOpenedPage.name : getLabel() }
+            {
+              page: children,
+              route: router.asPath,
+              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
+            }
           ]
         })
         setValue(newValueState)
       }
     }
-  }, [children, router.route])
+  }, [children, router.asPath])
+
+  useEffect(() => {
+    if (!activeTabs[0] && router.route != '/default' && router.asPath && menu.length > 0) {
+      setActiveTabs([
+        {
+          page: children,
+          route: router.asPath,
+          label: findNode(menu, router.asPath.replace(/\/$/, ''))
+        }
+      ])
+      setInitialLoadDone(true)
+    }
+  }, [activeTabs, router, menu])
 
   return (
     <>
@@ -139,7 +142,7 @@ const TabsProvider = ({ children, pageTitle }) => {
                   !activeTab.isDefault && (
                     <Tab
                       key={i}
-                      label={t(activeTab?.label?.replace(/-/g, ' '))}
+                      label={activeTab?.label}
                       onClick={() => router?.push(activeTab.route)}
                       icon={
                         <IconButton

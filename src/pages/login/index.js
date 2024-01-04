@@ -1,3 +1,5 @@
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+
 // ** React Imports
 import { useState } from 'react'
 
@@ -61,12 +63,12 @@ const LoginPage = () => {
   const validation = useFormik({
     enableReinitialize: true,
     initialValues: {
-      email: '',
+      username: '',
       password: '',
       rememberMe: false
     },
     validationSchema: yup.object({
-      email: yup.string().email().required(),
+      username: yup.string().required(),
       password: yup.string().min(5, 'Must be at least 6 characters').required(),
       rememberMe: yup.boolean()
     }),
@@ -102,19 +104,20 @@ const LoginPage = () => {
           <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
             <Grid container spacing={5}>
               <Grid item xs={12}>
-                <TextField
-                  name='email'
+                <CustomTextField
+                  name='username'
                   size='small'
                   fullWidth
-                  label='Email'
-                  value={validation.values.email}
+                  label='Username'
+                  value={validation.values.username}
+                  type='text'
                   onChange={validation.handleChange}
-                  error={validation.touched.email && validation.errors.email}
-                  helperText={validation.touched.email && validation.errors.email}
+                  error={validation.touched.username && Boolean(validation.errors.username)}
+                  helperText={validation.touched.username && validation.errors.username}
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <CustomTextField
                   name='password'
                   size='small'
                   fullWidth
