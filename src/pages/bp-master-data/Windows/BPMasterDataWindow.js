@@ -42,6 +42,7 @@ const BPMasterDataWindow = ({
   delAddress,
   editAddress,
 }) => {
+
   return (
     <Window
       id='BPMasterDataWindow'
