@@ -15,6 +15,7 @@ const SecurityGrpTab = ({ securityGrpGridData, getSecurityGrpGridData, addSecuri
       flex: 1
     }
   ]
+  console.log('ressss ',securityGrpGridData)
 
   return (
     <>

@@ -18,5 +18,8 @@ export const AccessControlRepository = {
         set: service + 'setGUS',
         set2: service + 'set2GUS',
         del: service + 'delGUS'
-   }
+   },
+   Group:{
+    qry: service + 'qryGRP',
+}
 }

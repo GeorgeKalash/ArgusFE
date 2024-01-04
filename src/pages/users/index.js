@@ -56,6 +56,8 @@ const Users = () => {
   const [cashAccStore, setCashAccStore] = useState([])
   const [salesPersonStore, setSalesPersonStore] = useState([])
   const [securityGrpGridData, setSecurityGrpGridData] = useState([])
+  const [securityGrpALLData, setSecurityGrpALLData] = useState([])
+  const [securityGrpSelectedData, setSecurityGrpSelectedData] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -210,6 +212,7 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
+        getSecurityGrpGridData(obj.recordId)
         setWindowOpen(false)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
@@ -266,6 +269,7 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
+        getSecurityGrpGridData(obj.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
         setActiveTab(0)
@@ -516,26 +520,82 @@ const Users = () => {
 
   const getSecurityGrpGridData = userId => {
     setSecurityGrpGridData([])
-
-    /*const defaultParams = `_bpId=${bpId}`
+    const defaultParams = `_userId=${userId}&_filter=&_sgId=0`
     var parameters = defaultParams
 
     getRequest({
-      extension: BusinessPartnerRepository.Relation.qry,
+      extension: AccessControlRepository.SecurityGroup.qry,
       parameters: parameters
     })
       .then(res => {
-        setRelationGridData(res)
+        setSecurityGrpGridData(res)
       })
       .catch(error => {
         setErrorMessage(error)
-      })*/
+      })
   }
 
   const addSecurityGrp = () => {
-   // securityGrpValidation.setValues(getNewSecurityGrp(userValidation.values.recordId))
-   setSecurityGrpWindowOpen(true)
-  }
+    try{
+    setSecurityGrpALLData([])
+    setSecurityGrpSelectedData([])
+
+   const userId = usersValidation.values.recordId
+   const defaultParams = `_filter=&_size=100&_startAt=0&_userId=${userId}&_pageSize=50&_sgId=0`
+    var parameters = defaultParams
+
+    const GrpRequest = getRequest({
+      extension: AccessControlRepository.Group.qry,
+      parameters: parameters
+    })
+
+    const GUSRequest = getRequest({
+      extension: AccessControlRepository.SecurityGroup.qry,
+      parameters: parameters
+    })
+
+    Promise.all([GrpRequest, GUSRequest])
+    .then(([resGRPFunction, resGUSTemplate]) => {
+        const allList = resGRPFunction.list.map((x) => {
+          const n = {
+            sgId: x.recordId,
+            sgName: x.name,
+            userId: userId,
+          }
+
+          return n;
+        })
+
+      const selectedList = resGUSTemplate.list.map((x) => {
+        const n2 = {
+          sgId: x.sgId,
+          sgName: x.sgName,
+          userId: userId,
+        }
+
+        return n2;
+      })
+      setSecurityGrpSelectedData(selectedList)
+
+        // Remove items from allList that have the same sgId and userId as items in selectedList
+    const filteredAllList = allList.filter((item) => {
+      return !selectedList.some(
+        (selectedItem) =>
+          selectedItem.sgId === item.sgId && selectedItem.userId === item.userId
+      );
+    });
+    setSecurityGrpALLData(filteredAllList)
+
+    })
+      setSecurityGrpWindowOpen(true)
+      console.log('finallll ', setSecurityGrpALLData, ' ', setSecurityGrpSelectedData)
+    } catch (error) {
+      setErrorMessage(error.res);
+
+      return Promise.reject(error); // You can choose to reject the promise if an error occurs
+    }
+  };
+  
 
   const postSecurityGrp = obj => {
     /*const recordId = obj.recordId
@@ -559,41 +619,25 @@ const Users = () => {
       })*/
   }
 
-  const popupSecurityGrp = obj => {
-    /*const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: BusinessPartnerRepository.Relation.get,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log('get '+JSON.stringify())
-        relationValidation.setValues(populateRelation(res.record))
-        setRelationWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })*/
-  }
   
   const handleSecurityGrpSubmit = () => {
     securityGrpValidation.handleSubmit()
   }
 
-  const delSecurityGrp = obj => {
-    /*const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
+  const delSecurityGrp = (obj) => {
+    const userId = usersValidation.values.recordId
+
     postRequest({
-      extension: BusinessPartnerRepository.Relation.del,
+      extension: AccessControlRepository.SecurityGroup.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
         toast.success('Record Deleted Successfully')
-        getRelationGridData(bpId)
+        getSecurityGrpGridData(userId)
       })
       .catch(error => {
         setErrorMessage(error)
-      })*/
+      })
   }
 
   useEffect(() => {
@@ -677,14 +721,15 @@ const Users = () => {
            getSecurityGrpGridData={getSecurityGrpGridData}
            delSecurityGrp={delSecurityGrp}
            addSecurityGrp={addSecurityGrp}
-           popupSecurityGrp={popupSecurityGrp}
         />
       )}
        {securityGrpWindowOpen && (
         <SecurityGrpWindow
+
           onClose={() => setSecurityGrpWindowOpen(false)}
           onSave={handleSecurityGrpSubmit}
-          securityGrpValidation={securityGrpValidation}
+          securityGrpALLData={securityGrpALLData}
+          securityGrpSelectedData={securityGrpSelectedData}
           labels={_labels}
           maxAccess={access}
         />
