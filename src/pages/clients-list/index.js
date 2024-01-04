@@ -169,7 +169,7 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
     isDiplomatRelative:
       labels2 && labels2.find((item) => item.key === 41).value,
 
-    relativeDiplomateInfo: labels2 && labels2.find((item) => item.key === 42).value,
+    relativeDiplomatInfo: labels2 && labels2.find((item) => item.key === 42).value,
     address: labels2 && labels2.find((item) => item.key === 43).value, // nationalityAddress
     customerInformation: labels2 && labels2.find((item) => item.key === 44).value,
     workAddress: labels2 && labels2.find((item) => item.key === 45).value,

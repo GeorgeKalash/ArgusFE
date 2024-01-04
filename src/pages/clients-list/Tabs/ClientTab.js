@@ -490,7 +490,7 @@ return (
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
-               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress} readOnly={!editMode && true} />
+               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress} readOnly={editMode && true} />
                </FieldSet>
                 {/* <Grid item xs={12}>
                   <CustomTextField
@@ -1510,7 +1510,7 @@ return (
 
                <Grid container sx={{marginTop: '20px'}}>
               <FieldSet title={_labels.workAddress}>
-              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} readOnly={!editMode && true} />
+              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} readOnly={editMode && true} />
 
                </FieldSet>
                </Grid>
