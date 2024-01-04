@@ -1151,8 +1151,16 @@ return (
                   name="nationalityId"
                   label={_labels.nationality}
                   valueField="recordId"
-                  displayField="name"
+
+                  // displayField="name"
                   store={countryStore}
+                   displayField={['reference','name','flName']}
+
+                  columnsInDropDown= {[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
+                  ]}
                   readOnly={editMode && true}
                   value={
                     countryStore.filter(
@@ -1361,7 +1369,13 @@ return (
                     label={_labels.incomeSource}
                     valueField="recordId"
                     readOnly={editMode && true}
-                    displayField="name"
+                    displayField={['reference','name','flName']}
+
+                    columnsInDropDown= {[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'flName', value: 'Foreign Language Name' }
+                    ]}
                     store={incomeOfSourceStore}
                     value={
                       incomeOfSourceStore.filter(
@@ -1472,7 +1486,13 @@ return (
                   name="professionId"
                   label={_labels.profession}
                   valueField="recordId"
-                  displayField="name"
+                  displayField={['reference','name','flName']}
+
+                  columnsInDropDown= {[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
+                  ]}
                   store={professionFilterStore}
                   readOnly={editMode && true}
                   value={

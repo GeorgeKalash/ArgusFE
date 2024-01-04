@@ -109,12 +109,19 @@ const  showInfo = (obj) =>{
 
 }
 
+const formatDate = (dateString) => {
+  const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+
+return new Date(dateString).toLocaleString('en-GB', options);
+};
+
+
 const columns = [
   {
     field: 'eventDt',
     headerName: _labels.eventDate,
     flex: 1,
-    valueGetter: ({ row }) => formatDateFromApi(row?.eventDt)
+    valueGetter: ({ row }) => formatDate(formatDateFromApi(row?.eventDt))
 
   },
   {
@@ -190,6 +197,7 @@ const columns = [
           isLoading={false}
           maxAccess={access}
           onEdit={showInfo}
+          pagination={false}
         />
 
 
