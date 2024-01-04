@@ -21,16 +21,16 @@ const CustomTextField = ({
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const _readOnly = editMode ? (editMode && maxAccess < 3) : readOnly
+  const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
-  const inputRef = useRef(null);
+  const inputRef = useRef(null)
 
   useEffect(() => {
-     // Save the cursor position before the value changes
+    // Save the cursor position before the value changes
     if (typeof inputRef.current.selectionStart !== undefined && position) {
-      inputRef.current.setSelectionRange(position, position);
+      inputRef.current.setSelectionRange(position, position)
     }
-  }, [position]);
+  }, [position])
 
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
