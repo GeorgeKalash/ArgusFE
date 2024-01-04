@@ -28,7 +28,7 @@ const VerticalNavItems = props => {
   let theme = createTheme(themeOptions(settings, 'light'))
 
   const closeDialog = () => {
-    setOpenFolders([])
+    // setOpenFolders([])
     setSelectedNode(false)
   }
 
@@ -57,7 +57,7 @@ const VerticalNavItems = props => {
       : null
 
     return (
-      <div key={node.id} style={{ paddingTop: isRoot && 10 }}>
+      <div key={node.id} style={{ paddingTop: isRoot && 10 , marginRight: '8px'}}>
         <div
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
           onClick={() => {
@@ -70,11 +70,18 @@ const VerticalNavItems = props => {
           }}
         >
           <div
-            style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }}
+            style={{ display: 'flex', alignItems: 'center', overflowX: navCollapsed && !navHover ? '':'hidden'}}
             onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
           >
             {imgName ? (
-              <div className='icon'>
+              <div
+              style={{
+                display: 'flex',
+                alignItems: navCollapsed && !navHover ? 'center !important' : 'left',
+                justifyContent: navCollapsed && !navHover ? 'center' : 'left',
+                paddingLeft:'8px',
+              }}
+              >
                 <Image
                   src={imgName} // Assuming the images are in the public/icons folder
                   alt={node.title}
@@ -85,8 +92,11 @@ const VerticalNavItems = props => {
             ):<div style={{ width: '30px', height: '22px' }}>
               {/* placeHolder */}
               </div>}
-            {!navCollapsed || (navCollapsed && navHover) ? (
               <>
+              <div style={{
+                margin:'2px 0px 0px 5px',
+                display:navCollapsed && !navHover ? 'none':'flex',
+                }}>
                 <div className='text'>
                   {' '}
                   {/* Added a container div for text */}
@@ -101,13 +111,16 @@ const VerticalNavItems = props => {
                     )}
                   </div>
                 )}
+                </div>
               </>
-            ) : (
-              <></>
-            )}
           </div>
         </div>
-        {isOpen && isFolder && <div className='children'>{node.children.map(child => renderNode(child))}</div>}
+        {isOpen && isFolder && 
+        <div className='children'
+          style={{ paddingLeft: navCollapsed && !navHover ? '0px' : '12px',}}
+        >
+          {node.children.map(child => renderNode(child))}
+        </div>}
       </div>
     )
   }
@@ -115,7 +128,7 @@ const VerticalNavItems = props => {
   return (
     <>
     <ThemeProvider theme={theme}>
-      <div className='sidebar' style={{ paddingRight: navCollapsed && '8px' }}>
+      <div className='sidebar' style={{ paddingRight: navCollapsed && !navHover ? '8px' : '' }}>
         {verticalNavItems.map(node => renderNode(node))}
       </div>
       {selectedNode && (
