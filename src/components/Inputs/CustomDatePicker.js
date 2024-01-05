@@ -73,7 +73,7 @@ const CustomDatePicker = ({
         disabled={disabled}
         readOnly={_readOnly}
         clearable //bug from mui not working for now
-        // shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
+        shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
 
         slotProps={{
           // replacing clearable behaviour
