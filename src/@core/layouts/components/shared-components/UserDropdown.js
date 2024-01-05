@@ -100,19 +100,19 @@ const UserDropdown = props => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
               <Typography sx={{ color: '#383838', fontWeight: 600, pr: 4 }}>{auth?.user?.username}</Typography>
-              <Typography variant='body2' sx={{ color: '#383838', fontSize: '0.8rem' }}>
+              {/* <Typography variant='body2' sx={{ color: '#383838', fontSize: '0.8rem' }}>
                 {auth?.user?.role}
-              </Typography>
+              </Typography> */}
             </Box>
           </Box>
         </Box>
-        <Divider sx={{ backgroundColor: '#383838', mt: '0 !important' }} />
+        {/* <Divider sx={{ backgroundColor: '#383838', mt: '0 !important' }} />
         <MenuItem sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/account-settings/account')}>
           <Box sx={{ display: 'flex', alignItems: 'center', my: 2, pl: 4, color: '#383838' }}>
             <Icon icon='mdi:cog-outline' />
             <Typography sx={{ color: '#383838', pl: 2 }}>Settings</Typography>
           </Box>
-        </MenuItem>
+        </MenuItem> */}
         <Divider sx={{ backgroundColor: '#383838' }} />
         <MenuItem onClick={handleLogout} sx={{ py: 2, '& svg': { mr: 2, fontSize: '1.375rem', color: '#383838' } }}>
           <Icon icon='mdi:logout-variant' />

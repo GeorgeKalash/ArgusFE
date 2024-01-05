@@ -1,37 +1,17 @@
-// ** MUI Imports
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
-    Button,
-} from '@mui/material'
+
+import ConfirmationDialog from '../ConfirmationDialog';
 
 const DeleteDialog = (props) => {
 
     return (
-        <Dialog
-            open={props.open[0] ? props.open[0] : false}
-            onClose={props.onClose}
-            fullWidth={true}
-            maxWidth="xs"
-        >
-            <DialogTitle>Confirmation</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    Are you sure you want to delete the selected record ?
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => props.onConfirm(props.open[1])} color="primary">
-                    OK
-                </Button>
-                <Button onClick={props.onClose} color="primary">
-                    Cancel
-                </Button>
-            </DialogActions>
-        </Dialog>
+        <ConfirmationDialog
+        openCondition={props.open[0] ? props.open[0] : false}
+        closeCondition={props.onClose}
+        DialogText={"Are you sure you want to delete the selected record?"}
+        okButtonAction={() => props.onConfirm(props.open[1])}
+        cancelButtonAction={props.onClose}
+      />
+        
     );
 }
 
