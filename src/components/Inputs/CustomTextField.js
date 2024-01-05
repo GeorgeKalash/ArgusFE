@@ -26,35 +26,12 @@ const CustomTextField = ({
 
   const inputRef = useRef(null)
 
-  // Add state for autofill detection
-  const [isAutofilled, setIsAutofilled] = useState(false)
-
-  // Implemented makeAnimationStartHandler function for reusability
-  const handleAnimationStart = e => {
-    const autofilled = !!e.target?.matches('*:-webkit-autofill')
-    if (e.animationName === 'mui-auto-fill' || e.animationName === 'mui-auto-fill-cancel') {
-      setIsAutofilled(autofilled)
-    }
-  }
-
   useEffect(() => {
     // Save the cursor position before the value changes
     if (typeof inputRef.current.selectionStart !== undefined && position) {
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
-
-  const handleInput = (e) => {
-    const inputValue = e.target.value;
-    if (type=== 'number' && props && e.target.value && inputValue.length > maxLength) {
-      // Truncate the input value if it exceeds the maxLength
-      const truncatedValue = inputValue.slice(0, maxLength);
-      e.target.value = truncatedValue;
-
-      // You can also choose to update the state or trigger a callback here
-      props?.onChange(e);
-    }
-  };
 
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
@@ -70,21 +47,16 @@ const CustomTextField = ({
           readOnly: _readOnly,
           maxLength: maxLength,
           dir: dir, // Set direction to right-to-left
-
           inputMode: 'numeric',
           pattern: numberField && '[0-9]*', // Allow only numeric input
           style: {
             textAlign: numberField && 'right'
-          },
-          onAnimationStart: handleAnimationStart
+          }
         }}
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
-        InputLabelProps={{
-          shrink: isAutofilled || value // Shrink if autofilled or if value is present
-        }}
         onInput={handleInput}
-
+        
         InputProps={{
           endAdornment: !readOnly &&
             value && ( // Only show the clear icon if readOnly is false
