@@ -1,5 +1,6 @@
 // ** React Imports
 import { useContext, useState } from 'react'
+import { ThemeProvider } from '@mui/material/styles'
 
 // ** Next Imports
 import { useRouter } from 'next/router'
@@ -12,18 +13,22 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 // ** Context
 import { MenuContext } from 'src/providers/MenuContext'
+import { createTheme } from '@mui/system'
+import themeOptions from 'src/@core/theme/ThemeOptions'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
 const VerticalNavItems = props => {
   const router = useRouter()
   const { handleBookmark, setLastOpenedPage } = useContext(MenuContext)
 
   // ** Props
-  const { verticalNavItems, openFolders, setOpenFolders, navHover, navCollapsed } = props
+  const { verticalNavItems, settings, openFolders, setOpenFolders, navHover, navCollapsed } = props
 
   const [selectedNode, setSelectedNode] = useState(false)
+  let theme = createTheme(themeOptions(settings, 'light'))
 
   const closeDialog = () => {
-    setOpenFolders([])
+    // setOpenFolders([])
     setSelectedNode(false)
   }
 
@@ -52,7 +57,7 @@ const VerticalNavItems = props => {
       : null
 
     return (
-      <div key={node.id} style={{ paddingTop: isRoot && 10 }}>
+      <div key={node.id} style={{ paddingTop: isRoot && 10 , marginRight: '8px'}}>
         <div
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
           onClick={() => {
@@ -65,11 +70,18 @@ const VerticalNavItems = props => {
           }}
         >
           <div
-            style={{ display: 'flex', alignItems: 'center', overflowX: 'hidden' }}
+            style={{ display: 'flex', alignItems: 'center', overflowX: navCollapsed && !navHover ? '':'hidden'}}
             onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
           >
-            {imgName && (
-              <div className='icon'>
+            {imgName ? (
+              <div
+              style={{
+                display: 'flex',
+                alignItems: navCollapsed && !navHover ? 'center !important' : 'left',
+                justifyContent: navCollapsed && !navHover ? 'center' : 'left',
+                paddingLeft:'8px',
+              }}
+              >
                 <Image
                   src={imgName} // Assuming the images are in the public/icons folder
                   alt={node.title}
@@ -77,9 +89,14 @@ const VerticalNavItems = props => {
                   height={22} // Set the height as needed
                 />
               </div>
-            )}
-            {!navCollapsed || (navCollapsed && navHover) ? (
+            ):<div style={{ width: '30px', height: '22px' }}>
+              {/* placeHolder */}
+              </div>}
               <>
+              <div style={{
+                margin:'2px 0px 0px 5px',
+                display:navCollapsed && !navHover ? 'none':'flex',
+                }}>
                 <div className='text'>
                   {' '}
                   {/* Added a container div for text */}
@@ -94,43 +111,40 @@ const VerticalNavItems = props => {
                     )}
                   </div>
                 )}
+                </div>
               </>
-            ) : (
-              <></>
-            )}
           </div>
         </div>
-        {isOpen && isFolder && <div className='children'>{node.children.map(child => renderNode(child))}</div>}
+        {isOpen && isFolder && 
+        <div className='children'
+          style={{ paddingLeft: navCollapsed && !navHover ? '0px' : '12px',}}
+        >
+          {node.children.map(child => renderNode(child))}
+        </div>}
       </div>
     )
   }
 
   return (
     <>
-      <div className='sidebar' style={{ paddingRight: navCollapsed && '8px' }}>
+    <ThemeProvider theme={theme}>
+      <div className='sidebar' style={{ paddingRight: navCollapsed && !navHover ? '8px' : '' }}>
         {verticalNavItems.map(node => renderNode(node))}
       </div>
       {selectedNode && (
-        <Dialog
-          open={selectedNode ? true : false}
-          onClose={() => setSelectedNode(false)}
-          fullWidth={true}
-          maxWidth='xs'
-        >
-          <DialogTitle>Confirmation</DialogTitle>
-          <DialogContent>
-            <DialogContentText>{selectedNode[1] ? 'Remove from favorites ?' : 'Add to favorites ?'}</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => handleBookmark(selectedNode[0], selectedNode[1], closeDialog)} color='primary'>
-              OK
-            </Button>
-            <Button onClick={() => setSelectedNode(false)} color='primary'>
-              Cancel
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <ConfirmationDialog
+          openCondition={selectedNode ? true : false}
+          closeCondition={() => setSelectedNode(false)}
+          DialogText={
+            selectedNode[1] ? 'Remove from favorites ?' : 'Add to favorites ?'
+          }
+          okButtonAction={() =>
+            handleBookmark(selectedNode[0], selectedNode[1], closeDialog)
+          }
+          cancelButtonAction={() => setSelectedNode(false)}
+        />
       )}
+      </ThemeProvider>
     </>
   )
 

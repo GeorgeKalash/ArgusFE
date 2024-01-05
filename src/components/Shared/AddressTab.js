@@ -78,6 +78,8 @@ const AddressTab = ({
               label={labels.email}
               value={addressValidation.values.email1}
               type='email'
+              onBlur={addressValidation.handleBlur}
+
               readOnly={readOnly}
               placeholder='johndoe@email.com'
               onChange={addressValidation.handleChange}
@@ -94,6 +96,8 @@ const AddressTab = ({
               readOnly={readOnly}
               placeholder='johndoe@email.com'
               label={labels.email2}
+              onBlur={addressValidation.handleBlur}
+
               value={addressValidation.values.email2}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('email2', '')}

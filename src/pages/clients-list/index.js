@@ -16,6 +16,7 @@ import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { formatDateToApi } from 'src/lib/date-helper'
+import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -168,7 +169,7 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
     isDiplomatRelative:
       labels2 && labels2.find((item) => item.key === 41).value,
 
-    relativeDiplomateInfo: labels2 && labels2.find((item) => item.key === 42).value,
+    relativeDiplomatInfo: labels2 && labels2.find((item) => item.key === 42).value,
     address: labels2 && labels2.find((item) => item.key === 43).value, // nationalityAddress
     customerInformation: labels2 && labels2.find((item) => item.key === 44).value,
     workAddress: labels2 && labels2.find((item) => item.key === 45).value,
@@ -355,22 +356,25 @@ console.log(userData)
 
   const clientIndividualFormValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: true, // Trigger validation on change
+    validateOnChange: false,
     validateOnBlur: true,
     validate : (values) => {
       const errors = {};
 
-      console.log(values.isRelativeDiplomat , values.relativeDiplomateInfo )
-
-      // Example validation for a 'name' field
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (values.isRelativeDiplomat  && !values.relativeDiplomatInfo ) {
         errors.relativeDiplomatInfo = 'Relative Diplomat Info is required';
       }
 
-      // Add more validation rules for other fields as needed
-console.log(errors)
+      if (values.email1  && !emailRegex.test(values.email1) ) {
+        errors.email1 = 'Invalid email format';
+      }
 
-return errors;
+      if (values.email2 && !emailRegex.test(values.email2) ) {
+        errors.email2 = 'Invalid email format';
+      }
+
+      return errors;
 
     },
     validationSchema: yup.object({
@@ -404,8 +408,8 @@ return errors;
     }),
     onSubmit: (values) => {
       console.log("values" + values);
-    console.log(WorkAddressValidation)
-      postRtDefault(values);
+       console.log(WorkAddressValidation)
+       Object.keys(WorkAddressValidation.errors).length < 1 && postRtDefault(values);
     },
   });
 
@@ -577,7 +581,24 @@ return errors;
 
   const WorkAddressValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: true,
+    validateOnChange: false,
+    validate : (values) => {
+      const errors = {};
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+      if (values.email1  && !emailRegex.test(values.email1) ) {
+        errors.email1 = 'Invalid email format';
+      }
+
+      if (values.email2 && !emailRegex.test(values.email2) ) {
+        errors.email2 = 'Invalid email format';
+      }
+
+      return errors;
+
+    },
     initialValues: {
       name: null,
       countryId: null,
@@ -616,6 +637,7 @@ return errors;
   const addClient= obj => {
      setEditMode(false)
     clientIndividualFormValidation.setValues(getNewClients())
+    WorkAddressValidation.setValues(getNewAddress())
     getPlantId()
     setWindowOpen(true)
   }
