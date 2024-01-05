@@ -60,7 +60,7 @@ const VerticalNavItems = props => {
       <div key={node.id} style={{ paddingTop: isRoot && 10,}}>
         <div
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
-          style={{display: !isFolder && navCollapsed && !navHover ? 'none' : 'flex', height:'40px',}}
+          style={{display: !isFolder && navCollapsed && !navHover ? 'none' : 'flex', height:'35px',}}
           onClick={() => {
             if (node.children) {
               toggleFolder(node.id)
