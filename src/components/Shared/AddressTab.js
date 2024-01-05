@@ -20,6 +20,7 @@ const AddressTab = ({
   cityDistrictStore,
   setCityDistrictStore,
   readOnly= false,
+  requiredOptional=false,
   editMode // not used since all fields are editable in edit mode
 }) => {
 
@@ -33,7 +34,7 @@ const AddressTab = ({
               name='name'
               label={labels.name}
               value={addressValidation.values.name}
-              required
+              required={requiredOptional ? false : true}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
@@ -48,7 +49,8 @@ const AddressTab = ({
               name='street1'
               label={labels.street1}
               value={addressValidation.values.street1}
-              required
+              required={requiredOptional ? false : true}
+
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
@@ -156,15 +158,16 @@ const AddressTab = ({
               name='countryId'
               label={labels.country}
               valueField='countryId'
-              required
-              readOnly={readOnly}
-              displayField={['reference','name']}
-              store={countryStore}
-              columnsInDropDown= {[
-                { key: 'reference', value: 'Ref' },
-                { key: 'name', value: 'Name' },
+              required={requiredOptional ? false : true}
 
-                // { key: 'flName', value: 'Foreign Language Name' }
+              readOnly={readOnly}
+              store={countryStore}
+              displayField={['reference','name','flName']}
+
+              columnsInDropDown= {[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' },
+                { key: 'flName', value: 'Foreign Language Name' }
               ]}
               value={countryStore.filter(item => item.recordId === addressValidation.values.countryId)[0]}
               onChange={(event, newValue) => {
@@ -212,7 +215,8 @@ const AddressTab = ({
             <CustomLookup
               name='city'
               label={labels.city}
-              required
+              required={requiredOptional ? false : true}
+              readOnly={readOnly}
               valueField='name'
               displayField='name'
               store={cityStore}
@@ -285,7 +289,9 @@ const AddressTab = ({
               value={addressValidation.values.phone}
               readOnly={readOnly}
               maxLength='20'
-              required
+              type="number"
+              required={requiredOptional ? false : true}
+
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
@@ -297,6 +303,7 @@ const AddressTab = ({
           <Grid item xs={12}>
             <CustomTextField
               name='phone2'
+              type="number"
               label={labels.phone2}
               value={addressValidation.values.phone2}
               maxLength='20'
@@ -313,6 +320,8 @@ const AddressTab = ({
             <CustomTextField
               name='phone3'
               label={labels.phone3}
+              type="number"
+
               value={addressValidation.values.phone3}
               maxLength='20'
               readOnly={readOnly}

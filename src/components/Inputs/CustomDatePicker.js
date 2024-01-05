@@ -35,16 +35,23 @@ const CustomDatePicker = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
+  console.log(value +'value')
+
 
    // Function to check if a date should be disabled
-    const shouldDisableDate = (date) => {
+    const shouldDisableDate = (dates) => {
+      console.log('dates' + dates )
+      const date = new Date(dates);
+      console.log(date )
+
     const today = new Date();
-    today.setDate(today.getDate() - 1);
+    today.setDate(today.getDate());
+    date.setDate(date.getDate());
   if(disabledDate === '>=' ){
-    return date.toISOString()   >= today.toISOString()  ;
+    return date   >= today  ;
   }
   if(disabledDate === '<' ){
-    return date.toISOString()   < today.toISOString()  ; // Disable today and future dates
+    return date   < today  ; // Disable today and future dates
   }
 
   };
@@ -59,6 +66,7 @@ const CustomDatePicker = ({
         fullWidth={fullWidth}
         autoFocus={autoFocus}
         format={dateFormat}
+
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}

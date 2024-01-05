@@ -17,6 +17,7 @@ const CustomTextField = ({
   editMode = false,
   maxLength = '',
   position,
+  dir='ltr',
   hidden = false,
   ...props
 }) => {
@@ -43,6 +44,18 @@ const CustomTextField = ({
     }
   }, [position])
 
+  const handleInput = (e) => {
+    const inputValue = e.target.value;
+    if (type=== 'number' && props && e.target.value && inputValue.length > maxLength) {
+      // Truncate the input value if it exceeds the maxLength
+      const truncatedValue = inputValue.slice(0, maxLength);
+      e.target.value = truncatedValue;
+
+      // You can also choose to update the state or trigger a callback here
+      props?.onChange(e);
+    }
+  };
+
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
       <TextField
@@ -56,6 +69,8 @@ const CustomTextField = ({
         inputProps={{
           readOnly: _readOnly,
           maxLength: maxLength,
+          dir: dir, // Set direction to right-to-left
+
           inputMode: 'numeric',
           pattern: numberField && '[0-9]*', // Allow only numeric input
           style: {
@@ -68,6 +83,8 @@ const CustomTextField = ({
         InputLabelProps={{
           shrink: isAutofilled || value // Shrink if autofilled or if value is present
         }}
+        onInput={handleInput}
+
         InputProps={{
           endAdornment: !readOnly &&
             value && ( // Only show the clear icon if readOnly is false
