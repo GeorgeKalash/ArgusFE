@@ -33,29 +33,32 @@ code[class*='language-'] {
 .node {
   width: '100%';
   padding-top: 8px;
-  padding-bottom: 2px;
+  padding-bottom: 8px;
   cursor: pointer;
   white-space: nowrap;
+  position: relative;
 }
 
 .folder {
   font-size: 14px;
   width: '100%';
   display: flex;
-  /* margin-right: 8px; */
   align-items: center;
   justify-content: space-between;
   background-color: 'red';
   padding-bottom: 8px;
 }
 
+.css-1kwaz16-MuiList-root {
+  padding-right: 12px !important;
+}
+
 .node.folder {
   background-color: #231f20;
-  /* padding-left: 8px; */
   border-radius: 4px;
 }
 
-.node.folder .children {
+.node.folder.children {
   background-color: #231f20;
   border-radius: 0;
 }
@@ -67,12 +70,10 @@ code[class*='language-'] {
 
 .file {
   font-size: 14px;
-  /* padding-left: 12px; */
 }
 
 .children {
   background-color: #231f20;
-  /* padding-left: 12px; */
 }
 
 .node.folder.open .file:last-child {
@@ -86,14 +87,14 @@ code[class*='language-'] {
 
 .arrow {
   position: absolute;
-  right: 12px;
-  margin-right: 10px;
+  right: 8px;
+  bottom: 2px;
 }
 
 .node .text {
   display: flex;
   align-items: center;
-  padding-bottom: 4px;
+  line-height:0 !important;
 }
 
 /***** phone verification *****/
