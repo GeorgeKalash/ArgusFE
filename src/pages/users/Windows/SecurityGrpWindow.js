@@ -11,47 +11,46 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 
-const SecurityGrpWindow = ({ onClose, onSave, securityGrpALLData, securityGrpSelectedData,  labels, maxAccess }) => {
+const SecurityGrpWindow = ({ onClose, onSave, securityGrpALLData, securityGrpSelectedData,  labels, handleSecurityGrpDataChange }) => {
   const [selected, setSelected] = useState([])
   const [allItems, setAllItems] = useState([]);
   const [newSelected, setNewSelected] = useState([])
   const [newAll, setNewAll] = useState([])
 
   useEffect(() => {
-    // Loop through setSecurityGrpALLData and assign each object to allItems
+    console.log('useEffect fires')
+
+    // Loop through securityGrpALLData and assign each object to allItems
     if (Array.isArray(securityGrpALLData)) {
-    const updatedAllItems = securityGrpALLData.map((item) => {
-      return {
+      const updatedAllItems = securityGrpALLData.map((item) => ({
         sgId: item.sgId,
         sgName: item.sgName,
         userId: item.userId
-      }
-    })
-    setAllItems(updatedAllItems)}
+      }));
+      setAllItems(updatedAllItems);
+    }
 
-    if(Array.isArray(securityGrpSelectedData)){
-    const updatedSelectedItems = securityGrpSelectedData.map((item) => {
-        return {
-          sgId: item.sgId,
-          sgName: item.sgName,
-          userId: item.userId
-        }
-      })
+    if (Array.isArray(securityGrpSelectedData)) {
+      const updatedSelectedItems = securityGrpSelectedData.map((item) => ({
+        sgId: item.sgId,
+        sgName: item.sgName,
+        userId: item.userId
+      }));
 
-    // Update the allItems state with the new array
-    setSelected(updatedSelectedItems)}
-  }, [securityGrpALLData, securityGrpSelectedData])
+      // Update the selected state with the new array
+      setSelected(updatedSelectedItems);
+    }
+    
+    //handleSecurityGrpDataChange(allItems,selected);
+    
+  }, [securityGrpALLData, securityGrpSelectedData]);
 
   const handleToggle = value => () => {
     if (selected.includes(value)) {
-      // Remove the item from the allItems list
-      //  setSelected((prevSelected) => prevSelected.filter((item) => item !== value));
 
       //add the item to newAllList
       setNewAll(prevSelected => [...prevSelected, value])
     } else {
-      // Remove the item from the allItems list
-      // setAllItems((prevItems) => prevItems.filter((item) => item !== value));
 
       //add the item to newSelectedList
       setNewSelected(prevSelected => [...prevSelected, value])

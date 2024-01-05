@@ -134,7 +134,7 @@ const Users = () => {
   const tabs = [{ label: _labels.users }, { label: _labels.defaults, disabled: !editMode }, { label: _labels.securityGrp, disabled: !editMode }]
 
   const usersValidation = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       fullName: yup.string().required('This field is required'),
@@ -143,7 +143,7 @@ const Users = () => {
       activeStatus: yup.string().required('This field is required'),
       userType: yup.string().required('This field is required'),
       languageId: yup.string().required('This field is required'),
-
+      
       //if passwordState is false, then the password and confirmPassword fields are added to the schema using object spreading.
       // else an empty object is added, ensuring those fields are not included in the schema.
       //spread syntax (...)
@@ -155,7 +155,9 @@ const Users = () => {
           })
     }),
     onSubmit: values => {
-      postUsers(values)
+      console.log('valuesss ',values)
+
+      //postUsers(values)
     }
   })
 
@@ -174,6 +176,20 @@ const Users = () => {
     onSubmit: values => {
       console.log('values ', values)
       postDefaults(values)
+    }
+  })
+
+  const securityGrpValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({}),
+    initialValues: {
+      sgId: '',
+      sgName: '',
+      userId: '',
+    },
+    onSubmit: values => {
+      postSecurityGrp()
     }
   })
 
@@ -507,16 +523,11 @@ const Users = () => {
       })
   }
 
-  //Security Grp Tab
-  const securityGrpValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-    }),
-    onSubmit: values => {
-      postSecurityGrp(values)
-    }
-  })
+  //Security Grp Tab 
+  const handleSecurityGrpSubmit = () => {
+    if (securityGrpValidation) {
+    securityGrpValidation.handleSubmit()}
+  }
 
   const getSecurityGrpGridData = userId => {
     setSecurityGrpGridData([])
@@ -596,32 +607,37 @@ const Users = () => {
     }
   };
   
-
-  const postSecurityGrp = obj => {
-    /*const recordId = obj.recordId
-    const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
-    obj.fromBPId=bpId
-    postRequest({
-      extension: BusinessPartnerRepository.Relation.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-        }
-        else toast.success('Record Editted Successfully')
-
-        setRelationWindowOpen(false)
-        getRelationGridData(bpId)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })*/
+  const handleSecurityGrpDataChange = (allData,selectedData) => {
+    // Update the state in the parent component when the child component data changes
+    setSecurityGrpALLData(allData)
+    setSecurityGrpSelectedData(selectedData);
   }
 
+  const postSecurityGrp = () => {
+    const userId = usersValidation.values.recordId
+
+    const data = {
+        sgId: 0,
+        userId: userId,
+        groups: securityGrpSelectedData
+      }
   
-  const handleSecurityGrpSubmit = () => {
-    securityGrpValidation.handleSubmit()
+      postRequest({
+        extension: AccessControlRepository.SecurityGroup.set2,
+        record: JSON.stringify(data)
+      })
+        .then(res => {
+          setSecurityGrpWindowOpen(false)
+          getSecurityGrpGridData(userId)
+          if (!res.recordId) {
+            toast.success('Record Added Successfully')
+          } else {
+            toast.success('Record Edited Successfully')
+          }
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
   }
 
   const delSecurityGrp = (obj) => {
@@ -730,6 +746,7 @@ const Users = () => {
           onSave={handleSecurityGrpSubmit}
           securityGrpALLData={securityGrpALLData}
           securityGrpSelectedData={securityGrpSelectedData}
+          handleSecurityGrpDataChange={handleSecurityGrpDataChange}
           labels={_labels}
           maxAccess={access}
         />

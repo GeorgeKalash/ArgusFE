@@ -237,6 +237,7 @@ const UsersTab = ({
             control={
               <Checkbox
                 name='umcpnl'
+                maxAccess={maxAccess}
                 checked={usersValidation.values?.umcpnl}
                 onChange={usersValidation.handleChange}
               />
