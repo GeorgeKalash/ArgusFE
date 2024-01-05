@@ -60,7 +60,7 @@ const VerticalNavItems = props => {
       <div key={node.id} style={{ paddingTop: isRoot && 10,}}>
         <div
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
-          style={{display: !isFolder && navCollapsed && !navHover ? 'none' : 'flex',}}
+          style={{display: !isFolder && navCollapsed && !navHover ? 'none' : 'flex', height:'33px',}}
           onClick={() => {
             if (node.children) {
               toggleFolder(node.id)
@@ -80,17 +80,17 @@ const VerticalNavItems = props => {
                 display: 'flex',
                 alignItems: navCollapsed && !navHover ? 'center !important' : 'left',
                 justifyContent: navCollapsed && !navHover ? 'center' : 'left',
-                paddingLeft:'8px',
+                paddingLeft:'7px',
               }}
               >
                 <Image
                   src={imgName} // Assuming the images are in the public/icons folder
                   alt={node.title}
-                  width={22} // Set the width as needed
-                  height={22} // Set the height as needed
+                  width={18} // Set the width as needed
+                  height={18} // Set the height as needed
                 />
               </div>
-            ):<div style={{ width: '30px', height: '22px' }}>
+            ):<div style={{ width: '26px', height: '18px' }}>
               {/* placeHolder */}
               </div>}
               <>

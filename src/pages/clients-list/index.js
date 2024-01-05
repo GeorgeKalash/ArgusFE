@@ -981,8 +981,8 @@ onEdit={editClient}
  {windowOpen && (
        <ClientWindow
        onClose={() => setWindowOpen(false)}
-       width={1100}
-       height={600}
+       width={'90%'}
+       height={'70vh'}
        onSave={handleSubmit}
        onInfo={()=>{setWindowInfo(true)}}
        onInfoClose={()=>{setWindowInfo(false)}}

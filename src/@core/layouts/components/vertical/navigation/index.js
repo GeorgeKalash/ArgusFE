@@ -210,13 +210,14 @@ const Navigation = props => {
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 4 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', pl: navCollapsed && !navHover ? 3:4 , pr: 4,}}>
           <TextField
             label="Search"
             variant="outlined"
             fullWidth
             margin="normal"
             size="small"
+            // sx={{ height: '20px' }} 
             onChange={handleSearch}
             autoComplete='off'
             InputLabelProps={{
@@ -232,7 +233,7 @@ const Navigation = props => {
                 fieldset: {
                   borderColor: 'transparent !important', },},
               endAdornment: <SearchIcon 
-              sx={{ border: '0px' }}  />,
+              sx={{ border: '0px' , height:'18px'}}  />,
             }}
           />
           <TextField sx={{display:'none'}}/>

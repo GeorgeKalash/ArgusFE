@@ -40,7 +40,7 @@ code[class*='language-'] {
 }
 
 .folder {
-  font-size: 14px;
+  font-size: 12px;
   width: '100%';
   display: flex;
   align-items: center;
@@ -50,7 +50,7 @@ code[class*='language-'] {
 }
 
 .css-1kwaz16-MuiList-root {
-  padding-right: 12px !important;
+  padding-right: 10px !important;
 }
 
 .node.folder {
@@ -69,7 +69,7 @@ code[class*='language-'] {
 }
 
 .file {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .children {
