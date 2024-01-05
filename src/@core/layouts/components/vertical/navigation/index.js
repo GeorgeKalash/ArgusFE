@@ -112,7 +112,7 @@ const Navigation = props => {
   // ** filterMenu
   const handleSearch = (e) => {
     const term = e.target.value;
-
+    
     if (term === '') {
       setFilteredMenu(menu)
       setOpenFolders([])
@@ -210,22 +210,33 @@ const Navigation = props => {
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        {!navCollapsed &&
-          <Box sx={{ display: 'flex', alignItems: 'center', px: 4 }}>
-            <TextField
-              label="Search"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              size="small"
-              onChange={handleSearch}
-              autoComplete='off'
-              InputProps={{
-                endAdornment: <SearchIcon />,
-              }}
-            />
-          </Box>
-        }
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 4 }}>
+          <TextField
+            label="Search"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            size="small"
+            onChange={handleSearch}
+            autoComplete='off'
+            InputLabelProps={{
+              sx: { color: 'rgba(231, 227, 252, 0.87) !important',backgroundColor:'#383838',padding:'0px 3px !important',
+              display:  navCollapsed && !navHover ? 'none':'flex',},
+            }}
+            InputProps={{
+              sx: { 
+                display: 'flex',
+                alignItems: navCollapsed && !navHover ? 'center !important' : 'left',
+                justifyContent: navCollapsed && !navHover ? 'center !important' : 'left',
+                border: '1px solid rgba(231, 227, 252, 0.87)',
+                fieldset: {
+                  borderColor: 'transparent !important', },},
+              endAdornment: <SearchIcon 
+              sx={{ border: '0px' }}  />,
+            }}
+          />
+          <TextField sx={{display:'none'}}/>
+        </Box>
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
           {/* @ts-ignore */}
           <ScrollWrapper
@@ -253,7 +264,7 @@ const Navigation = props => {
                   transition: 'padding .25s ease',
                   '& > :first-child': { mt: '0' },
 
-                  pr: !navCollapsed || (navCollapsed && navHover) ? '10px' : 1.25
+                  // pr: !navCollapsed || (navCollapsed && navHover) ? '10px' : 1.25
 
                 }}
               >

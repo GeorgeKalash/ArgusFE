@@ -19,6 +19,7 @@ const AddressTab = ({
   lookupCityDistrict,
   cityDistrictStore,
   setCityDistrictStore,
+  readOnly= false,
   editMode // not used since all fields are editable in edit mode
 }) => {
 
@@ -33,6 +34,7 @@ const AddressTab = ({
               label={labels.name}
               value={addressValidation.values.name}
               required
+              readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('name', '')}
@@ -47,6 +49,7 @@ const AddressTab = ({
               label={labels.street1}
               value={addressValidation.values.street1}
               required
+              readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street1', '')}
@@ -61,6 +64,7 @@ const AddressTab = ({
               label={labels.street2}
               value={addressValidation.values.street2}
               maxLength='20'
+              readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street2', '')}
               error={addressValidation.touched.street2 && Boolean(addressValidation.errors.street2)}
@@ -74,6 +78,9 @@ const AddressTab = ({
               label={labels.email}
               value={addressValidation.values.email1}
               type='email'
+              onBlur={addressValidation.handleBlur}
+
+              readOnly={readOnly}
               placeholder='johndoe@email.com'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('email1', '')}
@@ -86,8 +93,11 @@ const AddressTab = ({
             <CustomTextField
               name='email2'
               type='email'
+              readOnly={readOnly}
               placeholder='johndoe@email.com'
               label={labels.email2}
+              onBlur={addressValidation.handleBlur}
+
               value={addressValidation.values.email2}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('email2', '')}
@@ -102,6 +112,7 @@ const AddressTab = ({
               label={labels.bldgNo}
               value={addressValidation.values.bldgNo}
               maxLength='10'
+              readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('bldgNo', '')}
               error={addressValidation.touched.bldgNo && Boolean(addressValidation.errors.bldgNo)}
@@ -115,6 +126,7 @@ const AddressTab = ({
               label={labels.unitNo}
               value={addressValidation.values.unitNo}
               maxLength='10'
+              readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('unitNo', '')}
               error={addressValidation.touched.unitNo && Boolean(addressValidation.errors.unitNo)}
@@ -128,6 +140,7 @@ const AddressTab = ({
               label={labels.subNo}
               value={addressValidation.values.subNo}
               maxLength='10'
+              readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('subNo', '')}
               error={addressValidation.touched.subNo && Boolean(addressValidation.errors.subNo)}
@@ -144,6 +157,7 @@ const AddressTab = ({
               label={labels.country}
               valueField='countryId'
               required
+              readOnly={readOnly}
               displayField={['reference','name']}
               store={countryStore}
               columnsInDropDown= {[
@@ -178,6 +192,7 @@ const AddressTab = ({
                 valueField='stateId'
                 displayField='name'
                 store={stateStore}
+                readOnly={readOnly}
                 value={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
                 onChange={(event, newValue) => {
                   addressValidation.setFieldValue('stateId', newValue?.recordId)
@@ -228,6 +243,7 @@ const AddressTab = ({
               label={labels.cityDistrict}
               valueField='name'
               displayField='name'
+              readOnly={readOnly}
               store={cityDistrictStore}
               setStore={setCityDistrictStore}
               onLookup={lookupCityDistrict}
@@ -252,6 +268,7 @@ const AddressTab = ({
             <CustomTextField
               name='postalCode'
               label={labels.postalCode}
+              readOnly={readOnly}
               value={addressValidation.values.postalCode}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('postalCode', '')}
@@ -266,6 +283,7 @@ const AddressTab = ({
               name='phone'
               label={labels.phone}
               value={addressValidation.values.phone}
+              readOnly={readOnly}
               maxLength='20'
               required
               onChange={addressValidation.handleChange}
@@ -282,6 +300,7 @@ const AddressTab = ({
               label={labels.phone2}
               value={addressValidation.values.phone2}
               maxLength='20'
+              readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone2', '')}
               error={addressValidation.touched.phone2 && Boolean(addressValidation.errors.phone2)}
@@ -296,6 +315,7 @@ const AddressTab = ({
               label={labels.phone3}
               value={addressValidation.values.phone3}
               maxLength='20'
+              readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone3', '')}
               error={addressValidation.touched.phone3 && Boolean(addressValidation.errors.phone3)}

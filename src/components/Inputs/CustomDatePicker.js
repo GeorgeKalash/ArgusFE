@@ -23,7 +23,7 @@ const CustomDatePicker = ({
   required = false,
   autoFocus = false,
   disabled = false,
-  disabledDate = false,
+  disabledDate = null,
   readOnly = false,
   editMode = false,
   ...props
@@ -40,8 +40,13 @@ const CustomDatePicker = ({
     const shouldDisableDate = (date) => {
     const today = new Date();
     today.setDate(today.getDate() - 1);
+  if(disabledDate === '>=' ){
+    return date.toISOString()   >= today.toISOString()  ;
+  }
+  if(disabledDate === '<' ){
+    return date.toISOString()   < today.toISOString()  ; // Disable today and future dates
+  }
 
-    return date.toISOString()   >= today.toISOString()  ; // Disable today and future dates
   };
 
   return (

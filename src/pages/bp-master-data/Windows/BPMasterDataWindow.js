@@ -42,6 +42,7 @@ onInfoClose,
   delAddress,
   editAddress,
 }) => {
+
   return (
     <Window
       id='BPMasterDataWindow'
