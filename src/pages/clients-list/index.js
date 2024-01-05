@@ -15,7 +15,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateToApi } from 'src/lib/date-helper'
+import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 
 // ** Resources
@@ -44,6 +44,7 @@ const ClientsList = () => {
   const [windowOpen, setWindowOpen] = useState(null)
   const [windowInfo, setWindowInfo] = useState(null)
   const [editMode, setEditMode] = useState(null)
+const requiredOptional = true
 
 
   //stores
@@ -353,7 +354,6 @@ console.log(userData)
 
 
 
-
   const clientIndividualFormValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
@@ -379,7 +379,7 @@ console.log(userData)
     },
     validationSchema: yup.object({
       // reference: yup.string().required("This field is required"),
-      // isResident: yup.string().required("This field is required"),
+      isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
       idNo:  yup.string().required("This field is required"),
@@ -416,11 +416,10 @@ console.log(userData)
       // console.log("values" + values);
 
   const postRtDefault = (obj) => {
-    console.log("obj", obj);
-   const date = new Date()
+
+     const date = new Date()
 
     //CTCL
-
 
     const obj1 = {
       category: 1,
@@ -433,8 +432,10 @@ console.log(userData)
       addressId: null,
       plantId: clientIndividualFormValidation.values.plantId || 3,
       cellPhone: obj.cellPhone,
+
       createdDate:  formatDateToApi(date.toISOString()),
-      expiryDate: obj.expiryDate,
+
+      expiryDate: formatDateToApiFunction(obj.expiryDate),
       OTPVerified:  obj.OTPVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
@@ -453,8 +454,8 @@ console.log(userData)
       // clientID: obj.clientID,
       idCountryId: obj.idCountry,
       idtId: obj.idtId ,  //5
-      idExpiryDate: obj.expiryDate,
-      issusDate: obj.issusDate,
+      idExpiryDate: formatDateToApiFunction(obj.expiryDate),
+      issusDate: formatDateToApiFunction(obj.issusDate),
       idCityId: obj.idCity,
       isDiplomat: obj.isDiplomat,
 
@@ -473,7 +474,8 @@ console.log(userData)
       fl_lastName: obj.fl_lastName,
       fl_middleName: obj.fl_middleName,
       fl_familyName: obj.fl_familyName,
-      birthDate: obj.birthDate,
+
+      birthDate:  formatDateToApiFunction(obj.birthDate),
       isResident: obj.isResident,
 
     };
@@ -558,7 +560,7 @@ console.log(userData)
       ClientIndividual: obj3, //CTCLI
       clientRemittance: obj4,
       address: obj5,
-      workAddress: obj6
+      workAddress: (obj6.name && obj6.countryId && obj6.city && obj6.phone && obj6.street1 ) ? obj6 : null
 
     };
 
@@ -571,6 +573,7 @@ console.log(userData)
          toast.success("Record Successfully");
          clientIndividualFormValidation.setFieldValue('clientId' , res.recordId)
         setShowOtpVerification(true)
+        setEditMode(true)
         }
       })
       .catch((error) => {
@@ -619,7 +622,8 @@ console.log(userData)
       unitNo: null,
       subNo: null
     },
-    validationSchema: yup.object({
+
+    validationSchema: !requiredOptional && yup.object({
       name:  yup.string().required('This field is required'),
       countryId:  yup.string().required('This field is required'),
       cityId:  yup.string().required('This field is required'),
@@ -653,7 +657,8 @@ console.log(userData)
     })
       .then(res => {
         clientIndividualFormValidation.setValues(populateIClients(res.record))
-        WorkAddressValidation.setValues(res.record.workAddressView)
+        res.record.workAddressView &&  WorkAddressValidation.setValues(populateAddress(res.record.workAddressView))
+
 
         getPlantId()
         setWindowOpen(true)
@@ -834,6 +839,7 @@ console.log(userData)
     })
       .then((res) => {
         setProfessionStore(res.list);
+        setProfessionFilterStore(res.list)
       })
       .catch((error) => {
         setErrorMessage(error);
@@ -920,7 +926,6 @@ console.log(userData)
       const filteredList =  professionStore.filter(item => item.diplomatStatus === 2);
       clientIndividualFormValidation.setFieldValue('isDiplomat',true )
       clientIndividualFormValidation.setFieldValue('isDiplomatReadOnly',true )
-
       setProfessionFilterStore(filteredList)
     }else{
       const filteredList =  professionStore;
@@ -992,6 +997,7 @@ onEdit={editClient}
        cityStore={cityStore}
        setCityStore={setCityStore}
        types={types}
+       requiredOptional={requiredOptional}
   professionFilterStore={professionFilterStore}
   salaryRangeStore={salaryRangeStore}
   incomeOfSourceStore={incomeOfSourceStore}
@@ -1025,7 +1031,7 @@ onEdit={editClient}
 
        />
        )}
-       {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={3600}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode} />}
+       {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={3600}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
        {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
 />}
 

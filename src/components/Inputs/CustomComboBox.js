@@ -67,7 +67,14 @@ const CustomComboBox = ({
 
                 if(typeof displayField =='object'){
                   displayField.forEach((header) => {
-                    text += `${option[header]} `;
+                    console.log(header)
+                    if(option[header]){
+                      text += `${option[header]} `;
+                    }else{
+                      text += `${header} `;
+
+                    }
+
                   });
 
                     return text
