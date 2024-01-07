@@ -298,7 +298,9 @@ const InlineEditGrid = ({
               }
             }}
             PaperComponent={props =>
-              column.columnsInDropDown && column.columnsInDropDown.length > 0 && CustomPaper(props, widthDropDown)
+              column.columnsInDropDown &&
+              column.columnsInDropDown.length > 0 &&
+              CustomPaper(props, column.widthDropDown)
             }
             renderOption={(props, option) => {
               if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
