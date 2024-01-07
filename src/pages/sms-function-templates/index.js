@@ -89,8 +89,8 @@ const SmsFunctionTemplate = () => {
       store: templateStore,
       valueField: 'templateId',
       displayField: 'templateName',
-      fieldsToUpdate: [{ from: 'name', to: 'templateName' }],
-      columnsInDropDown: [{ key: 'templateName', value: 'templateName' }],
+      fieldsToUpdate: [{ from: 'recordId', to: 'templateId' }, { from: 'name', to: 'templateName' }],
+      columnsInDropDown: [{ key: 'name', value: 'name' }],
       onLookup: lookupTemplate
     }
 
