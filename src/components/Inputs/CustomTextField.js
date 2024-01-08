@@ -33,6 +33,18 @@ const CustomTextField = ({
     }
   }, [position])
 
+  const handleInput = (e) => {
+    const inputValue = e.target.value;
+    if (type=== 'number' && props && e.target.value && inputValue.length > maxLength) {
+      // Truncate the input value if it exceeds the maxLength
+      const truncatedValue = inputValue.slice(0, maxLength);
+      e.target.value = truncatedValue;
+
+      // You can also choose to update the state or trigger a callback here
+      props?.onChange(e);
+    }
+  };
+  
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
       <TextField
