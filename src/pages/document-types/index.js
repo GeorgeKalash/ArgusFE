@@ -60,13 +60,13 @@ const DocumentTypes = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    sysFunction: labels && labels.find(item => item.key === 3).value,
-    intLogic: labels && labels.find(item => item.key === 4).value,
-    status: labels && labels.find(item => item.key === 5).value,
-    nuRange: labels && labels.find(item => item.key === 6).value,
-    documentType: labels && labels.find(item => item.key === 7).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    sysFunction: labels && labels.find(item => item.key === "3").value,
+    intLogic: labels && labels.find(item => item.key === "4").value,
+    status: labels && labels.find(item => item.key === "5").value,
+    nuRange: labels && labels.find(item => item.key === "6").value,
+    documentType: labels && labels.find(item => item.key === "7").value
   }
 
   const columns = [

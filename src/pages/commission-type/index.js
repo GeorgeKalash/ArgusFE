@@ -48,10 +48,10 @@ const CommissionType = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    type: labels && labels.find(item => item.key === 3).value,
-    comissiontype: labels && labels.find(item => item.key === 4).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    type: labels && labels.find(item => item.key === "3").value,
+    comissiontype: labels && labels.find(item => item.key === "4").value
   }
 
   const columns = [

@@ -61,18 +61,18 @@ const Characteristics = () => {
   const [valueEditMode, setValueEditMode] = useState(false)
 
   const _labels = {
-    name: labels && labels.find(item => item.key === 1).value,
-    dataType: labels && labels.find(item => item.key === 2).value,
-    property: labels && labels.find(item => item.key === 3).value,
-    isRange: labels && labels.find(item => item.key === 4).value,
-    isMultiple: labels && labels.find(item => item.key === 5).value,
-    allowNeg: labels && labels.find(item => item.key === 6).value,
-    caseSensitive: labels && labels.find(item => item.key === 7).value,
-    currency: labels && labels.find(item => item.key === 8).value,
-    textSize: labels && labels.find(item => item.key === 9).value,
-    validFrom: labels && labels.find(item => item.key === 10).value,
-    characteristic: labels && labels.find(item => item.key === 11).value,
-    value: labels && labels.find(item => item.key === 12).value
+    name: labels && labels.find(item => item.key === "1").value,
+    dataType: labels && labels.find(item => item.key === "2").value,
+    property: labels && labels.find(item => item.key === "3").value,
+    isRange: labels && labels.find(item => item.key === "4").value,
+    isMultiple: labels && labels.find(item => item.key === "5").value,
+    allowNeg: labels && labels.find(item => item.key === "6").value,
+    caseSensitive: labels && labels.find(item => item.key === "7").value,
+    currency: labels && labels.find(item => item.key === "8").value,
+    textSize: labels && labels.find(item => item.key === "9").value,
+    validFrom: labels && labels.find(item => item.key === "10").value,
+    characteristic: labels && labels.find(item => item.key === "11").value,
+    value: labels && labels.find(item => item.key === "12").value
   }
 
   const columns = [

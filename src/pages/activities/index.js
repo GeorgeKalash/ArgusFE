@@ -51,11 +51,11 @@ const Activities = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    flName: labels && labels.find(item => item.key === 3).value,
-    industryId: labels && labels.find(item => item.key === 4).value,
-    activity: labels && labels.find(item => item.key === 5).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    flName: labels && labels.find(item => item.key === "3").value,
+    industryId: labels && labels.find(item => item.key === "4").value,
+    activity: labels && labels.find(item => item.key === "5").value
   }
 
   const columns = [
