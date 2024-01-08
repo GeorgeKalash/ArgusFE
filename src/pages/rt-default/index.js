@@ -63,7 +63,7 @@ const DocumentTypeMaps = () => {
   }, [access])
 
   const _labels = {
-    nuRange:  labels && labels.find(item => item.key === 1).value,
+    nuRange:  labels && labels.find(item => item.key === "1").value,
 
   }
 

@@ -61,8 +61,8 @@ const Defaults = () => {
   }, [access])
 
   const _labels = {
-    nri: labels && labels.find(item => item.key === 1).value,
-    nrc: labels && labels.find(item => item.key ===2).value
+    nri: labels && labels.find(item => item.key === "1").value,
+    nrc: labels && labels.find(item => item.key ==="2").value
 
   }
 

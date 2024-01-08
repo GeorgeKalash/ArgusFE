@@ -50,12 +50,12 @@ const IdCategories = () => {
   }, [access])
 
   const _labels = {
-    name: labels && labels.find(item => item.key === 1).value,
-    org: labels && labels.find(item => item.key === 2).value,
-    person: labels && labels.find(item => item.key === 3).value,
-    group: labels && labels.find(item => item.key === 4).value,
-    unique: labels && labels.find(item => item.key === 5).value,
-    title: labels && labels.find(item => item.key === 6).value
+    name: labels && labels.find(item => item.key === "1").value,
+    org: labels && labels.find(item => item.key === "2").value,
+    person: labels && labels.find(item => item.key === "3").value,
+    group: labels && labels.find(item => item.key === "4").value,
+    unique: labels && labels.find(item => item.key === "5").value,
+    title: labels && labels.find(item => item.key === "6").value
 
   }
 
