@@ -74,28 +74,28 @@ const Users = () => {
 
   //Users Tab
   const _labels = {
-    users: labels && labels.find(item => item.key === 1).value,
-    username: labels && labels.find(item => item.key === 2).value,
-    email: labels && labels.find(item => item.key === 3).value,
-    cellPhone: labels && labels.find(item => item.key === 4).value,
-    activeStatus: labels && labels.find(item => item.key === 5).value,
-    userType: labels && labels.find(item => item.key === 6).value,
-    language: labels && labels.find(item => item.key === 7).value,
-    notificationGrp: labels && labels.find(item => item.key === 8).value,
-    employee: labels && labels.find(item => item.key === 9).value,
-    umcpnl: labels && labels.find(item => item.key === 10).value,
-    site: labels && labels.find(item => item.key === 11).value,
-    plant: labels && labels.find(item => item.key === 12).value,
-    cashAcc: labels && labels.find(item => item.key === 13).value,
-    salesPerson: labels && labels.find(item => item.key === 14).value,
-    defaults: labels && labels.find(item => item.key === 15).value,
-    password: labels && labels.find(item => item.key === 16).value,
-    name: labels && labels.find(item => item.key === 17).value,
-    confirmPassword: labels && labels.find(item => item.key === 18).value,
-    securityGrp: labels && labels.find(item => item.key === 19).value,
-    all: labels && labels.find(item => item.key === 20).value,
-    selected: labels && labels.find(item => item.key === 21).value,
-    group: labels && labels.find(item => item.key === 22).value
+    users: labels && labels.find(item => item.key === '1').value,
+    username: labels && labels.find(item => item.key === '2').value,
+    email: labels && labels.find(item => item.key === '3').value,
+    cellPhone: labels && labels.find(item => item.key === '4').value,
+    activeStatus: labels && labels.find(item => item.key === '5').value,
+    userType: labels && labels.find(item => item.key === '6').value,
+    language: labels && labels.find(item => item.key === '7').value,
+    notificationGrp: labels && labels.find(item => item.key === '8').value,
+    employee: labels && labels.find(item => item.key === '9').value,
+    umcpnl: labels && labels.find(item => item.key === '10').value,
+    site: labels && labels.find(item => item.key === '11').value,
+    plant: labels && labels.find(item => item.key === '12').value,
+    cashAcc: labels && labels.find(item => item.key === '13').value,
+    salesPerson: labels && labels.find(item => item.key === '14').value,
+    defaults: labels && labels.find(item => item.key === '15').value,
+    password: labels && labels.find(item => item.key === '16').value,
+    name: labels && labels.find(item => item.key === '17').value,
+    confirmPassword: labels && labels.find(item => item.key === '18').value,
+    securityGrp: labels && labels.find(item => item.key === '19').value,
+    all: labels && labels.find(item => item.key === '20').value,
+    selected: labels && labels.find(item => item.key === '21').value,
+    group: labels && labels.find(item => item.key === '22').value
   }
 
   const columns = [
@@ -131,7 +131,11 @@ const Users = () => {
     }
   ]
 
-  const tabs = [{ label: _labels.users }, { label: _labels.defaults, disabled: !editMode }, { label: _labels.securityGrp, disabled: !editMode }]
+  const tabs = [
+    { label: _labels.users },
+    { label: _labels.defaults, disabled: !editMode },
+    { label: _labels.securityGrp, disabled: !editMode }
+  ]
 
   const usersValidation = useFormik({
     enableReinitialize: true,
@@ -143,7 +147,7 @@ const Users = () => {
       activeStatus: yup.string().required('This field is required'),
       userType: yup.string().required('This field is required'),
       languageId: yup.string().required('This field is required'),
-      
+
       //if passwordState is false, then the password and confirmPassword fields are added to the schema using object spreading.
       // else an empty object is added, ensuring those fields are not included in the schema.
       //spread syntax (...)
@@ -155,7 +159,7 @@ const Users = () => {
           })
     }),
     onSubmit: values => {
-      console.log('valuesss ',values)
+      console.log('valuesss ', values)
 
       //postUsers(values)
     }
@@ -186,7 +190,7 @@ const Users = () => {
     initialValues: {
       sgId: '',
       sgName: '',
-      userId: '',
+      userId: ''
     },
     onSubmit: values => {
       postSecurityGrp()
@@ -197,8 +201,7 @@ const Users = () => {
     if (activeTab === 0) usersValidation.handleSubmit()
     else if (activeTab === 1 && (defaultsValidation.values != undefined || defaultsValidation.values != null)) {
       defaultsValidation.handleSubmit()
-    }
-    else if (activeTab === 2) securityGrpValidation.handleSubmit()
+    } else if (activeTab === 2) securityGrpValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -523,10 +526,11 @@ const Users = () => {
       })
   }
 
-  //Security Grp Tab 
+  //Security Grp Tab
   const handleSecurityGrpSubmit = () => {
     if (securityGrpValidation) {
-    securityGrpValidation.handleSubmit()}
+      securityGrpValidation.handleSubmit()
+    }
   }
 
   const getSecurityGrpGridData = userId => {
@@ -547,100 +551,100 @@ const Users = () => {
   }
 
   const addSecurityGrp = () => {
-    try{
-    setSecurityGrpALLData([])
-    setSecurityGrpSelectedData([])
+    try {
+      setSecurityGrpALLData([])
+      setSecurityGrpSelectedData([])
 
-   const userId = usersValidation.values.recordId
-   const defaultParams = `_filter=&_size=100&_startAt=0&_userId=${userId}&_pageSize=50&_sgId=0`
-    var parameters = defaultParams
+      const userId = usersValidation.values.recordId
+      const defaultParams = `_filter=&_size=100&_startAt=0&_userId=${userId}&_pageSize=50&_sgId=0`
+      var parameters = defaultParams
 
-    const GrpRequest = getRequest({
-      extension: AccessControlRepository.Group.qry,
-      parameters: parameters
-    })
+      const GrpRequest = getRequest({
+        extension: AccessControlRepository.Group.qry,
+        parameters: parameters
+      })
 
-    const GUSRequest = getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
-      parameters: parameters
-    })
+      const GUSRequest = getRequest({
+        extension: AccessControlRepository.SecurityGroup.qry,
+        parameters: parameters
+      })
 
-    Promise.all([GrpRequest, GUSRequest])
-    .then(([resGRPFunction, resGUSTemplate]) => {
-        const allList = resGRPFunction.list.map((x) => {
+      Promise.all([GrpRequest, GUSRequest]).then(([resGRPFunction, resGUSTemplate]) => {
+        const allList = resGRPFunction.list.map(x => {
           const n = {
             sgId: x.recordId,
             sgName: x.name,
-            userId: userId,
+            userId: userId
           }
 
-          return n;
+          return n
         })
 
-      const selectedList = resGUSTemplate.list.map((x) => {
-        const n2 = {
-          sgId: x.sgId,
-          sgName: x.sgName,
-          userId: userId,
-        }
+        const selectedList = resGUSTemplate.list.map(x => {
+          const n2 = {
+            sgId: x.sgId,
+            sgName: x.sgName,
+            userId: userId
+          }
 
-        return n2;
-      })
-      setSecurityGrpSelectedData(selectedList)
+          return n2
+        })
+        setSecurityGrpSelectedData(selectedList)
 
         // Remove items from allList that have the same sgId and userId as items in selectedList
-    const filteredAllList = allList.filter((item) => {
-      return !selectedList.some(
-        (selectedItem) =>
-          selectedItem.sgId === item.sgId && selectedItem.userId === item.userId
-      );
-    });
-    setSecurityGrpALLData(filteredAllList)
-
-    })
+        const filteredAllList = allList.filter(item => {
+          return !selectedList.some(
+            selectedItem => selectedItem.sgId === item.sgId && selectedItem.userId === item.userId
+          )
+        })
+        setSecurityGrpALLData(filteredAllList)
+      })
       setSecurityGrpWindowOpen(true)
       console.log('finallll ', setSecurityGrpALLData, ' ', setSecurityGrpSelectedData)
     } catch (error) {
-      setErrorMessage(error.res);
+      setErrorMessage(error.res)
 
-      return Promise.reject(error); // You can choose to reject the promise if an error occurs
+      return Promise.reject(error) // You can choose to reject the promise if an error occurs
     }
-  };
-  
-  const handleSecurityGrpDataChange = (allData,selectedData) => {
+  }
+
+  const handleSecurityGrpDataChange = (allData, selectedData) => {
+    console.log('allmain ', allData)
+    console.log('selectedmain ', selectedData)
+
     // Update the state in the parent component when the child component data changes
     setSecurityGrpALLData(allData)
-    setSecurityGrpSelectedData(selectedData);
+    setSecurityGrpSelectedData(selectedData)
   }
 
   const postSecurityGrp = () => {
     const userId = usersValidation.values.recordId
 
     const data = {
-        sgId: 0,
-        userId: userId,
-        groups: securityGrpSelectedData
-      }
-  
-      postRequest({
-        extension: AccessControlRepository.SecurityGroup.set2,
-        record: JSON.stringify(data)
+      sgId: 0,
+      userId: userId,
+      groups: securityGrpSelectedData
+    }
+
+    postRequest({
+      extension: AccessControlRepository.SecurityGroup.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        setSecurityGrpWindowOpen(false)
+        getSecurityGrpGridData(userId)
+        if (!res.recordId) {
+          toast.success('Record Added Successfully')
+        } else {
+          toast.success('Record Edited Successfully')
+        }
       })
-        .then(res => {
-          setSecurityGrpWindowOpen(false)
-          getSecurityGrpGridData(userId)
-          if (!res.recordId) {
-            toast.success('Record Added Successfully')
-          } else {
-            toast.success('Record Edited Successfully')
-          }
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
-  const delSecurityGrp = (obj) => {
+  const delSecurityGrp = obj => {
     const userId = usersValidation.values.recordId
 
     postRequest({
@@ -731,17 +735,16 @@ const Users = () => {
           setCashAccStore={setCashAccStore}
           cashAccStore={cashAccStore}
           lookupCashAcc={lookupCashAcc}
-
+          
           //Security Grp
-           securityGrpGridData={securityGrpGridData}
-           getSecurityGrpGridData={getSecurityGrpGridData}
-           delSecurityGrp={delSecurityGrp}
-           addSecurityGrp={addSecurityGrp}
+          securityGrpGridData={securityGrpGridData}
+          getSecurityGrpGridData={getSecurityGrpGridData}
+          delSecurityGrp={delSecurityGrp}
+          addSecurityGrp={addSecurityGrp}
         />
       )}
-       {securityGrpWindowOpen && (
+      {securityGrpWindowOpen && (
         <SecurityGrpWindow
-
           onClose={() => setSecurityGrpWindowOpen(false)}
           onSave={handleSecurityGrpSubmit}
           securityGrpALLData={securityGrpALLData}
