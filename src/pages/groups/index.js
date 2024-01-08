@@ -54,14 +54,14 @@ const Groups = () => {
   }, [access])
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    nuRange: labels && labels.find(item => item.key === 3).value,
-    title: labels && labels.find(item => item.key === 4).value,
-    accountGroup: labels && labels.find(item => item.key === 5).value,
-    typeName: labels && labels.find(item => item.key === 6).value,
-    sameNumber: labels && labels.find(item => item.key === 7).value,
-    title2: labels && labels.find(item => item.key === 8).value,
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    nuRange: labels && labels.find(item => item.key === "3").value,
+    title: labels && labels.find(item => item.key === "4").value,
+    accountGroup: labels && labels.find(item => item.key === "5").value,
+    typeName: labels && labels.find(item => item.key === "6").value,
+    sameNumber: labels && labels.find(item => item.key === "7").value,
+    title2: labels && labels.find(item => item.key === "8").value,
   }
 
   const columns = [

@@ -48,13 +48,13 @@ const TransactionLog = (props) =>{
 console.log(access)
 
   const _labels = {
-    trxType: labels && labels.find(item => item.key === 1).value,
-    recordId: labels && labels.find(item => item.key === 2).value,
-    resourceId: labels && labels.find(item => item.key === 3).value,
-    eventDate: labels && labels.find(item => item.key === 4).value,
-    username: labels && labels.find(item => item.key === 5).value,
-    trxName: labels && labels.find(item => item.key === 6).value,
-    title: labels && labels.find(item => item.key === 7).value,
+    trxType: labels && labels.find(item => item.key === "1").value,
+    recordId: labels && labels.find(item => item.key === "2").value,
+    resourceId: labels && labels.find(item => item.key === "3").value,
+    eventDate: labels && labels.find(item => item.key === "4").value,
+    username: labels && labels.find(item => item.key === "5").value,
+    trxName: labels && labels.find(item => item.key === "6").value,
+    title: labels && labels.find(item => item.key === "7").value,
 
 
   }

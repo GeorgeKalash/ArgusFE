@@ -41,9 +41,9 @@ const SmsFunctionTemplate = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    functionId: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    templateName: labels && labels.find(item => item.key === 3).value
+    functionId: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    templateName: labels && labels.find(item => item.key === "3").value
   }
 
   const lookupTemplate = searchQry => {

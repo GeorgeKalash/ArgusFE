@@ -51,11 +51,11 @@ const GroupLegalDocument = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    group: labels && labels.find(item => item.key === 1).value,
-    categoryId: labels && labels.find(item => item.key === 2).value,
-    required: labels && labels.find(item => item.key === 3).value,
-    mandatory: labels && labels.find(item => item.key === 4).value,
-    groupLegalDocument: labels && labels.find(item => item.key === 5).value
+    group: labels && labels.find(item => item.key === "1").value,
+    categoryId: labels && labels.find(item => item.key === "2").value,
+    required: labels && labels.find(item => item.key === "3").value,
+    mandatory: labels && labels.find(item => item.key === "4").value,
+    groupLegalDocument: labels && labels.find(item => item.key === "5").value
   }
 
   const columns = [
