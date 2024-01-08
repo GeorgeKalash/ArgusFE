@@ -56,7 +56,7 @@ const CustomTextField = ({
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
         onInput={handleInput}
-        
+
         InputProps={{
           endAdornment: !readOnly &&
             value && ( // Only show the clear icon if readOnly is false
