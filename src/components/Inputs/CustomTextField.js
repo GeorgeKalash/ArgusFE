@@ -19,6 +19,7 @@ const CustomTextField = ({
   position,
   dir='ltr',
   hidden = false,
+  phone = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -33,6 +34,7 @@ const CustomTextField = ({
     }
   }, [position])
 
+
   const handleInput = (e) => {
     const inputValue = e.target.value;
     if (type=== 'number' && props && e.target.value && inputValue.length > maxLength) {
@@ -44,14 +46,16 @@ const CustomTextField = ({
       props?.onChange(e);
     }
   };
-  
+
+
+
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
       <TextField
         inputRef={inputRef}
         type={type}
         variant={variant}
-        value={value}
+        value={phone ? value?.replace(/\D/g, '') : value}
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
@@ -62,7 +66,9 @@ const CustomTextField = ({
           inputMode: 'numeric',
           pattern: numberField && '[0-9]*', // Allow only numeric input
           style: {
-            textAlign: numberField && 'right'
+            textAlign: numberField && 'right',
+            '-moz-appearance': 'textfield', // Firefox
+
           }
         }}
         autoComplete={autoComplete}

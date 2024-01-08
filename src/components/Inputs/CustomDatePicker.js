@@ -53,6 +53,9 @@ const CustomDatePicker = ({
   if(disabledDate === '<' ){
     return date   < today  ; // Disable today and future dates
   }
+  if(disabledDate === '>' ){
+    return date   > today  ; // Disable today and future dates
+  }
 
   };
 
