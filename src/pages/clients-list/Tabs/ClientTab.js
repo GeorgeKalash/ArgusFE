@@ -249,7 +249,7 @@ return (
                           <Grid
                            sx={{
                               position: 'absolute',
-                              top: '35%',
+                              top:  '15px',
                               letterSpacing: "3px",
                               marginLeft:'10px',
                               padding: '0px',
@@ -292,7 +292,8 @@ return (
                   <Grid
                      sx={{
                               position: 'absolute',
-                              top: '25%',
+                              top:  '15px',
+
                               marginRight: '25px',
                               letterSpacing: "3px",
                                left: '0', /* Adjust the right offset as needed */
@@ -890,7 +891,8 @@ return (
                  <Grid
                           sx={{
                             position: 'absolute',
-                            top: '25%',
+                            top:  '15px',
+
                             letterSpacing: "3px",
                             marginLeft:'15px',
                             padding: '0px',
@@ -931,7 +933,7 @@ return (
                  <Grid
                          sx={{
                           position: 'absolute',
-                          top: '25%',
+                          top:  '15px',
                           letterSpacing: "3px",
                           marginLeft:'15px',
                           padding: '0px',
@@ -941,6 +943,7 @@ return (
                       }}
                           >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid>
               </Grid>
+              <Grid container  spacing={2} sx={{paddingTop: '20px'}} >
                 <Grid item xs={3}>
                   <CustomTextField
                     name="firstName"
@@ -1015,8 +1018,6 @@ return (
                     }
                   />
                 </Grid>
-
-
                 <Grid item xs={3}>
                   <CustomTextField
                     name="familyName"
@@ -1042,11 +1043,11 @@ return (
                   />
                 </Grid>
 
+                </Grid>
 
 
 
-
-
+  <Grid container  spacing={2} sx={{ flexDirection: 'row-reverse' , paddingTop:'5px'}} >
                 <Grid item xs={3}>
                   <CustomTextField
                     name="fl_familyName"
@@ -1156,6 +1157,7 @@ return (
                       clientIndividualFormValidation.errors.fl_firstName
                     }
                   />
+                </Grid>
                 </Grid>
                 <Grid item xs={12}>
                 <CustomComboBox
