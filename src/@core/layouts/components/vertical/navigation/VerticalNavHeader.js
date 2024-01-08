@@ -85,7 +85,7 @@ const VerticalNavHeader = props => {
                 !navCollapsed || (navCollapsed && navHover) ? '/images/logos/ArgusLogo.png' : '/images/logos/ArgusA.png'
               }
               alt='Argus'
-              style={{ maxHeight: '30px' }}
+              style={{ maxHeight: '20px' }}
             />
             {/* <svg
             width={30}
@@ -158,7 +158,7 @@ const VerticalNavHeader = props => {
           disableRipple
           disableFocusRipple
           onClick={toggleNavVisibility}
-          sx={{ p: 0, backgroundColor: 'transparent !important' }}
+          sx={{ p: 0, backgroundColor: 'transparent !important', height:'5px !important' }}
         >
           <Icon icon='mdi:close' fontSize={20} />
         </IconButton>
@@ -172,7 +172,7 @@ const VerticalNavHeader = props => {
             color: 'text.primary',
             backgroundColor: 'transparent !important',
             '& svg': {
-              fontSize: '1.25rem',
+              fontSize: '1.15rem',
               ...menuCollapsedStyles,
               transition: 'opacity .25s ease-in-out'
             }

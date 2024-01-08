@@ -96,10 +96,10 @@ const UserDropdown = props => {
         anchorOrigin={{ vertical: 'bottom', horizontal: direction === 'ltr' ? 'right' : 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: direction === 'ltr' ? 'right' : 'left' }}
       >
-        <Box sx={{ pt: 2, pb: 3, px: 2 }}>
+        <Box sx={{ pt: 1, pb: 2, px: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ color: '#383838', fontWeight: 600, pr: 4 }}>{auth?.user?.username}</Typography>
+              <Typography sx={{ color: '#383838', fontWeight: 600, pr: 4, fontSize:12,  }}>{auth?.user?.username}</Typography>
               {/* <Typography variant='body2' sx={{ color: '#383838', fontSize: '0.8rem' }}>
                 {auth?.user?.role}
               </Typography> */}
@@ -114,9 +114,9 @@ const UserDropdown = props => {
           </Box>
         </MenuItem> */}
         <Divider sx={{ backgroundColor: '#383838' }} />
-        <MenuItem onClick={handleLogout} sx={{ py: 2, '& svg': { mr: 2, fontSize: '1.375rem', color: '#383838' } }}>
+        <MenuItem onClick={handleLogout} sx={{ py: 1 , '& svg': { mr: 1, fontSize: '1.175rem', color: '#383838' } }}>
           <Icon icon='mdi:logout-variant' />
-          <Typography sx={{ color: '#383838', pl: 1 }}>Logout</Typography>
+          <Typography sx={{ color: '#383838', pl: 0 , fontSize:12}}>Logout</Typography>
         </MenuItem>
       </Menu>
     </Fragment>
