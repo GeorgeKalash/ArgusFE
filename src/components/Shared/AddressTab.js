@@ -153,7 +153,7 @@ const AddressTab = ({
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={3} xs={6} sx={{ px: 2 }}>
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <CustomComboBox
               name='countryId'
               label={labels.country}
@@ -162,18 +162,27 @@ const AddressTab = ({
 
               readOnly={readOnly}
               store={countryStore}
-              displayField={['reference','name','flName']}
-
+              displayField={['reference','name']}
+              displayFieldWidth={2}
               columnsInDropDown= {[
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' },
                 { key: 'flName', value: 'Foreign Language Name' }
               ]}
-              value={countryStore.filter(item => item.recordId === addressValidation.values.countryId)[0]}
+              value={countryStore.filter(item => item.recordId === 1)[0]}
               onChange={(event, newValue) => {
-                addressValidation.setFieldValue('countryId', newValue?.recordId)
+                if(newValue){
                 const selectedCountryId = newValue?.recordId || ''
                 fillStateStore(selectedCountryId)
+                addressValidation.setFieldValue('countryId', newValue?.recordId)
+
+
+                }else{
+                  addressValidation.setFieldValue('countryId', '')
+
+
+                }
+
                 addressValidation.setFieldValue('stateId', null)
                 addressValidation.setFieldValue('cityId', null)
                 addressValidation.setFieldValue('cityDistrictId', null)
@@ -184,7 +193,75 @@ const AddressTab = ({
               helperText={addressValidation.touched.countryId && addressValidation.errors.countryId}
               maxAccess={maxAccess}
             />
-          </Grid>
+          </Grid> */}
+              <Grid item xs={12}>
+                  <CustomComboBox
+                    name="countryId"
+                    label={labels.country}
+                    valueField="recordId"
+                    displayField={['reference','name']}
+                    readOnly={readOnly}
+                    store={countryStore}
+                    displayFieldWidth={2}
+
+                columnsInDropDown= {[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language Name' }
+                ]}
+                    value={
+                      countryStore.filter(
+                        (item) =>
+                          item.recordId ===
+                          addressValidation.values.countryId,
+                      )[0]
+                    }
+                    required
+                    onChange={(event, newValue) => {
+                      setCityStore([])
+
+                      if(newValue){
+
+
+                      addressValidation.setFieldValue(
+                        "countryId",
+                        newValue?.recordId,
+                      );
+
+
+                      fillStateStore(newValue?.recordId)
+
+
+
+                    }else{
+
+                        addressValidation.setFieldValue(
+                          "countryId",
+                          ''
+                        );
+
+                        fillStateStore(0)
+
+
+                      }
+
+                      addressValidation.setFieldValue('stateId', null)
+                      addressValidation.setFieldValue('cityId', null)
+                      addressValidation.setFieldValue('city', null)
+                      addressValidation.setFieldValue('cityDistrictId', null)
+                      addressValidation.setFieldValue('cityDistrict', null)
+                    }}
+                    error={
+                      addressValidation.touched.countryId &&
+                      Boolean(addressValidation.errors.countryId)
+                    }
+                    helperText={
+                      addressValidation.touched.countryId &&
+                      addressValidation.errors.countryId
+                    }
+                  />
+                </Grid>
+
           <Grid item xs={12}>
             {
 
@@ -288,8 +365,9 @@ const AddressTab = ({
               label={labels.phone}
               value={addressValidation.values.phone}
               readOnly={readOnly}
-              maxLength='20'
-              type="number"
+              maxLength='15'
+              type="text"
+              phone={true}
               required={requiredOptional ? false : true}
 
               onChange={addressValidation.handleChange}
@@ -303,10 +381,11 @@ const AddressTab = ({
           <Grid item xs={12}>
             <CustomTextField
               name='phone2'
-              type="number"
+
               label={labels.phone2}
               value={addressValidation.values.phone2}
-              maxLength='20'
+              maxLength='15'
+              phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone2', '')}
@@ -320,10 +399,9 @@ const AddressTab = ({
             <CustomTextField
               name='phone3'
               label={labels.phone3}
-              type="number"
-
+              phone={true}
               value={addressValidation.values.phone3}
-              maxLength='20'
+              maxLength='15'
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone3', '')}

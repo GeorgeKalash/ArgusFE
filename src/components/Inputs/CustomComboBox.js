@@ -5,6 +5,7 @@ import {
 } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import {Box} from '@mui/material'
+import Paper from '@mui/material/Paper';
 
 const CustomComboBox = ({
     type = 'text', //any valid HTML5 input type
@@ -25,6 +26,7 @@ const CustomComboBox = ({
     autoFocus = false,
     disabled = false,
     readOnly = false,
+    displayFieldWidth = 1,
     sx,
     columnsInDropDown,
     editMode = false,
@@ -51,6 +53,10 @@ const CustomComboBox = ({
             value={value}
             size={size}
             options={store}
+            PaperComponent={({ children }) => (
+
+    <Paper style={{ width: `${displayFieldWidth*100}%` }}>{children}</Paper>
+            )}
 
             // getOptionLabel={option => {
             //     if (typeof option === 'object')
@@ -190,7 +196,7 @@ return search.trim(); // Trim to remove extra spaces
             renderOption={(props, option) => {
               if (columnsInDropDown && columnsInDropDown.length > 0){
                 return (
-                  <Box>
+                  <Box  >
                     {props.id.endsWith('-0') && (
                       <li className={props.className}>
                         {columnsInDropDown.map((header, i) => {
@@ -215,7 +221,7 @@ return search.trim(); // Trim to remove extra spaces
                 )}else{
                 return( <Box>
 
-                  <li {...props}>
+                  <li {...props}  >
                     {/* <Box sx={{ flex: 1 }}>{option[valueField]}</Box> */}
                     <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
                   </li>
