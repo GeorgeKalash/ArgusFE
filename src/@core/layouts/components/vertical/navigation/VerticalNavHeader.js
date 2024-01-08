@@ -64,7 +64,7 @@ const VerticalNavHeader = props => {
       if (userNavMenuBranding) {
         return 0
       } else {
-        return (collapsedNavWidth - navigationBorderWidth - 30) / 8
+        return (collapsedNavWidth - navigationBorderWidth - 25) / 8
       }
     } else {
       return 6

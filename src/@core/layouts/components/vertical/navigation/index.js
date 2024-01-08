@@ -221,8 +221,12 @@ const Navigation = props => {
             onChange={handleSearch}
             autoComplete='off'
             InputLabelProps={{
-              sx: { color: 'rgba(231, 227, 252, 0.87) !important',backgroundColor:'#383838',padding:'0px 3px !important',
-              display:  navCollapsed && !navHover ? 'none':'flex',},
+              sx: 
+              { color: 'rgba(231, 227, 252, 0.87) !important',
+                backgroundColor:'#383838',
+                padding:'0px 3px !important',
+                display:  navCollapsed && !navHover ? 'none':'flex',
+              },
             }}
             InputProps={{
               sx: { 
@@ -231,9 +235,11 @@ const Navigation = props => {
                 justifyContent: navCollapsed && !navHover ? 'center !important' : 'left',
                 border: '1px solid rgba(231, 227, 252, 0.87)',
                 fieldset: {
-                  borderColor: 'transparent !important', },},
+                  borderColor: 'transparent !important', 
+                },
+              },
               endAdornment: <SearchIcon 
-              sx={{ border: '0px' , height:'18px'}}  />,
+                sx={{ border: '0px' , height:'18px'}}  />,
             }}
           />
           <TextField sx={{display:'none'}}/>

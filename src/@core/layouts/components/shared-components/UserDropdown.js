@@ -86,7 +86,7 @@ const UserDropdown = props => {
           horizontal: 'right'
         }}
       >
-        <Icon icon='mdi:account-circle-outline' />
+        <Icon icon='mdi:account-circle-outline' fontSize={20} />
       </Badge>
       <Menu
         anchorEl={anchorEl}
