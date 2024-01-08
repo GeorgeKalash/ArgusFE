@@ -8,14 +8,15 @@ import  styles from  '../../../styles/phoneVerification.module.css';
 import { CTCLRepository } from 'src/repositories/CTCLRepository';
 
 
-const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtpVerification, setEditMode}) => {
+const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtpVerification, setEditMode, setErrorMessage}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
 
   const [otp, setOtp] = useState(['', '', '', '', '','']);
   const [timer, setTimer] = useState(60);
   const [error, setError] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+
+  // const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     let interval;
@@ -45,7 +46,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
     })
       .then(res => {
 
-
+        setError(res.error)
 
       })
       .catch(error => {
@@ -64,17 +65,33 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
     })
       .then(res => {
 
-        formValidation.setFieldValue('OTPVerified', true )
+        // console.log(res)
+
+        // if (res.status === 303) {
+
+        //   // Follow the redirection with a new GET request
+        //  alert(res.error)
+        // } else {
+        //   formValidation.setFieldValue('OTPVerified', true )
+        // }
+
+        // formValidation.setFieldValue('OTPVerified', true )
+
+        // setError(res.error)
 
 
       })
       .catch(error => {
+
         setErrorMessage(error)
+
       })
       formValidation.setFieldValue('OTPVerified', true )
-      setShowOtpVerification(false)
+
+      // setShowOtpVerification(false)
       console.log(formValidation)
-      setEditMode(true)
+
+      // setEditMode(true)
 
   }
 

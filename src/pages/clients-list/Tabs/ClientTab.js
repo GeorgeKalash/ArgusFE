@@ -19,7 +19,7 @@ const ClientTab = ({
   WorkAddressValidation,
   countryStore,
   cityStore,
-
+  requiredOptional,
   setCityStore,
   cityAddressStore,
   cityDistrictAddressWorkStore,
@@ -53,7 +53,7 @@ const ClientTab = ({
    _labels, maxAccess, editMode
  }) => {
 
-// console.log(clientIndividualFormValidation)
+console.log(clientIndividualFormValidation)
 
   const encryptDigits = (v) => {
     const input = v
@@ -172,9 +172,12 @@ return (
                     required
                     onChange={(event, newValue) => {
 
-
+                        if(newValue){
                         fillFilterProfession(newValue.isDiplomat)
+                        }else{
+                          fillFilterProfession('')
 
+                        }
 
 
 
@@ -452,6 +455,7 @@ return (
               firstValue={clientIndividualFormValidation.values.cityName}
               secondDisplayField={false}
               readOnly={editMode && true}
+              maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 if (newValue) {
                   clientIndividualFormValidation.setFieldValue(
@@ -481,7 +485,6 @@ return (
                 clientIndividualFormValidation.touched.idCity &&
                 clientIndividualFormValidation.errors.idCity
               }
-              maxAccess={maxAccess}
             />
           </Grid>
 
@@ -524,7 +527,7 @@ return (
                     name="salaryRangeId"
                     label={_labels.salaryRange}
                     valueField="recordId"
-                    displayField={["min", "max"]}
+                    displayField={["min", "->",  "max"]}
                     columnsInDropDown={[
                       { key: "min", value: "min" },
                       { key: "max", value: "max" },
@@ -1051,6 +1054,8 @@ return (
                     value={clientIndividualFormValidation.values?.fl_familyName}
                     onChange={clientIndividualFormValidation.handleChange}
                     readOnly={editMode && true}
+                    dir='rtl'// Set direction to right-to-left
+
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "fl_familyName",
@@ -1078,6 +1083,8 @@ return (
                     value={clientIndividualFormValidation.values?.fl_lastName}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    dir='rtl'// Set direction to right-to-left
+
                     readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
@@ -1102,6 +1109,8 @@ return (
                     value={clientIndividualFormValidation.values?.fl_middleName}
                     onChange={clientIndividualFormValidation.handleChange}
                     readOnly={editMode && true}
+                    dir='rtl'// Set direction to right-to-left
+
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "fl_familyName",
@@ -1128,6 +1137,8 @@ return (
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
                     readOnly={editMode && true}
+                    dir='rtl'// Set direction to right-to-left
+
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
                         "fl_firstName",
@@ -1530,7 +1541,7 @@ return (
 
                <Grid container sx={{marginTop: '20px'}}>
               <FieldSet title={_labels.workAddress}>
-              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} readOnly={editMode && true} />
+              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} requiredOptional={requiredOptional} readOnly={editMode && true} />
 
                </FieldSet>
                </Grid>
@@ -1653,8 +1664,8 @@ return (
                             }
                             disabled={editMode && true}
 
-                            onChange={
-                              clientIndividualFormValidation.handleChange
+                            onChange={(e)=>{
+                              clientIndividualFormValidation.handleChange(e), clientIndividualFormValidation.setFieldValue('relativeDiplomatInfo', '') }
                             }
                           />
                         }
@@ -1665,10 +1676,11 @@ return (
                       <CustomTextField
                         name="relativeDiplomatInfo"
                         label={_labels.relativeDiplomatInfo}
+                        onBlur={clientIndividualFormValidation.handleBlur}
                         value={
                           clientIndividualFormValidation.values?.relativeDiplomatInfo
                         }
-                        readOnly={editMode && true}
+                        readOnly={editMode || !clientIndividualFormValidation.values?.isRelativeDiplomat  && true}
 
                         onChange={clientIndividualFormValidation.handleChange}
                         maxLength="10"

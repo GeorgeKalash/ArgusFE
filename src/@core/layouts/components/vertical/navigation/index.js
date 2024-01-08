@@ -193,10 +193,10 @@ const Navigation = props => {
     setFilteredMenu(props.verticalNavItems)
   }, [props.verticalNavItems])
 
-  useEffect(() => {
-    if (navCollapsed)
-      setOpenFolders([])
-  }, [navCollapsed])
+  // useEffect(() => {
+  //   if (navCollapsed)
+  //     setOpenFolders([])
+  // }, [navCollapsed])
 
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 

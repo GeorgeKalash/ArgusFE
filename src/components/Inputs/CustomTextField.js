@@ -17,6 +17,7 @@ const CustomTextField = ({
   editMode = false,
   maxLength = '',
   position,
+  dir='ltr',
   hidden = false,
   ...props
 }) => {
@@ -24,17 +25,6 @@ const CustomTextField = ({
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
   const inputRef = useRef(null)
-
-  // Add state for autofill detection
-  const [isAutofilled, setIsAutofilled] = useState(false)
-
-  // Implemented makeAnimationStartHandler function for reusability
-  const handleAnimationStart = e => {
-    const autofilled = !!e.target?.matches('*:-webkit-autofill')
-    if (e.animationName === 'mui-auto-fill' || e.animationName === 'mui-auto-fill-cancel') {
-      setIsAutofilled(autofilled)
-    }
-  }
 
   useEffect(() => {
     // Save the cursor position before the value changes
@@ -56,18 +46,17 @@ const CustomTextField = ({
         inputProps={{
           readOnly: _readOnly,
           maxLength: maxLength,
+          dir: dir, // Set direction to right-to-left
           inputMode: 'numeric',
           pattern: numberField && '[0-9]*', // Allow only numeric input
           style: {
             textAlign: numberField && 'right'
-          },
-          onAnimationStart: handleAnimationStart
+          }
         }}
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
-        InputLabelProps={{
-          shrink: isAutofilled || value // Shrink if autofilled or if value is present
-        }}
+        onInput={handleInput}
+        
         InputProps={{
           endAdornment: !readOnly &&
             value && ( // Only show the clear icon if readOnly is false

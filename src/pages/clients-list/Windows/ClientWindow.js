@@ -10,6 +10,7 @@ const ClientWindow = ({
     onSave,
     clientIndividualFormValidation,
     WorkAddressValidation,
+    requiredOptional,
     types,
     countryStore,
     cityStore,
@@ -50,13 +51,13 @@ const ClientWindow = ({
     maxAccess
 }) => {
 
-  console.log(cityAddressStore)
-  console.log(cityAddressWorkStore)
+  // console.log(cityAddressStore)
+  // console.log(cityAddressWorkStore)
 
 
 return (
         <Window id='CountryWindow' Title={_labels.pageTitle} onClose={onClose} width={width} height={height}
-         onSave={onSave} onInfo={onInfo} onInfoClose={onInfoClose}>
+         onSave={onSave} onInfo={onInfo} onInfoClose={onInfoClose} disabledSubmit={editMode && true}>
             <CustomTabPanel>
                 <ClientTab
                     clientIndividualFormValidation={clientIndividualFormValidation}
@@ -72,7 +73,7 @@ return (
                     lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
                     professionFilterStore={professionFilterStore}
                     fillFilterProfession={fillFilterProfession}
-
+                    requiredOptional={requiredOptional}
                     salaryRangeStore={salaryRangeStore}
                     incomeOfSourceStore={incomeOfSourceStore}
                     smsLanguageStore={smsLanguageStore}
