@@ -588,9 +588,24 @@ console.log(userData)
     validate : (values) => {
       const errors = {};
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (values.name || values.name || values.phone || values.countryId ||  values.street1)  {
+        if (!values.name ) {
+          errors.name = 'This field is required';
+        }
+        if (!values.street1 ) {
+          errors.street1 = 'This field is required';
+        }
+        if (!values.countryId ) {
+          errors.countryId = 'This field is required';
+        }
+        if (!values.cityId ) {
+          errors.cityId = 'This field is required';
+        }
+        if (!values.cityId ) {
+          errors.phone = 'This field is required';
+        }
 
-
+      }
       if (values.email1  && !emailRegex.test(values.email1) ) {
         errors.email1 = 'Invalid email format';
       }
@@ -599,7 +614,9 @@ console.log(userData)
         errors.email2 = 'Invalid email format';
       }
 
+
       return errors;
+
 
     },
     initialValues: {
@@ -623,13 +640,13 @@ console.log(userData)
       subNo: null
     },
 
-    validationSchema: !requiredOptional && yup.object({
-      name:  yup.string().required('This field is required'),
-      countryId:  yup.string().required('This field is required'),
-      cityId:  yup.string().required('This field is required'),
-      street1:  yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
-    }),
+    // validationSchema:  yup.object({
+    //   name:  yup.string().required('This field is required'),
+    //   countryId:  yup.string().required('This field is required'),
+    //   cityId:  yup.string().required('This field is required'),
+    //   street1:  yup.string().required('This field is required'),
+    //   phone: yup.string().required('This field is required')
+    // }),
     onSubmit: values => {
       // console.log(values);
 
