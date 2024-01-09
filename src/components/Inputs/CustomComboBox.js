@@ -73,7 +73,6 @@ const CustomComboBox = ({
 
                 if(typeof displayField =='object'){
                   displayField.forEach((header) => {
-                    console.log(header)
                     if(option[header]){
                       text += `${option[header]} `;
                     }else{
@@ -121,9 +120,9 @@ return search.trim(); // Trim to remove extra spaces
             }}
 
             getOptionLabels={option => {
- if(option.length ==1){
-  console.log('option')
- }
+                if(option.length ==1){
+                  console.log('option')
+                }
                 if (typeof option === 'object'){
                   console.log(option[valueField])
                   console.log(option)
