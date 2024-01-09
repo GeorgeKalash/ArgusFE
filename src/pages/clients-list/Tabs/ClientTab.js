@@ -56,7 +56,7 @@ const ClientTab = ({
 console.log(clientIndividualFormValidation)
 
   const encryptDigits = (v) => {
-    const input = v
+    const input = v?.replace(/\D/g, '')
 
     if(input?.length > 1){
 
@@ -828,15 +828,17 @@ return (
               <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
                   name="cellPhone"
+                  type="text"
                   phone={true}
                   label={_labels.cellPhone}
                   value={clientIndividualFormValidation.values?.cellPhone}
                   readOnly={editMode && true}
                   required
-                  onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
+                  onChange={clientIndividualFormValidation.handleChange}
                   maxLength="15"
-                  onCopy={handleCopy}
-                  onPaste={handleCopy}
+
+                  // onCopy={handleCopy}
+                  // onPaste={handleCopy}
                   onClear={() =>
                     clientIndividualFormValidation.setFieldValue(
                       "cellPhone",

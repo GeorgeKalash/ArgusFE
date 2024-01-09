@@ -272,7 +272,7 @@ const AddressTab = ({
                 valueField='stateId'
                 displayField='name'
                 store={stateStore}
-                readOnly={readOnly}
+                readOnly={(readOnly || !addressValidation.values.countryId) && true}
                 value={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
                 onChange={(event, newValue) => {
                   addressValidation.setFieldValue('stateId', newValue?.recordId)
@@ -293,7 +293,7 @@ const AddressTab = ({
               name='city'
               label={labels.city}
               required={requiredOptional ? false : true}
-              readOnly={readOnly}
+              readOnly={(readOnly || !addressValidation.values.countryId) && true}
               valueField='name'
               displayField='name'
               store={cityStore}
