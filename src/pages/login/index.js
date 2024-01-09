@@ -1,4 +1,5 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Typography from '@mui/material/Typography'
 
 // ** React Imports
 import { useState } from 'react'
@@ -88,8 +89,8 @@ const LoginPage = () => {
 
   return (
     <>
-      <Box className='content-center'>
-        <Card sx={{ zIndex: 1, width: '28rem' }}>
+      <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 20 }}>
           <CardMedia
             component='img'
             image='/images/logos/ArgusLogo.png'
@@ -170,6 +171,28 @@ const LoginPage = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Language Selection Section */}
+        <Box sx={{ my: 5, display: 'flex', gap: 3 }}>
+          {/* Adjust gap as needed */}
+          <Typography variant='body2'>Argus offered in:</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
+            <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
+              English
+            </LinkStyled>
+            <LinkStyled href='/pages/auth/login-fr' sx={{ color: 'red' }}>
+              Français
+            </LinkStyled>
+            <LinkStyled href='/pages/auth/login-ar' sx={{ color: 'red' }}>
+              عربي
+            </LinkStyled>
+          </Box>
+        </Box>
+
+        {/* Footer Section */}
+        <Box component='footer' sx={{ mt: 'auto' }}>
+          © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
+        </Box>
       </Box>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
