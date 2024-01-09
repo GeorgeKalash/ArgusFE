@@ -1,5 +1,6 @@
 // ** React Import
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useContext } from 'react'
+import * as React from 'react';
 
 // ** MUI Imports
 import List from '@mui/material/List'
@@ -18,12 +19,17 @@ import themeConfig from 'src/configs/themeConfig'
 import Drawer from './Drawer'
 import VerticalNavItems from './VerticalNavItems'
 import VerticalNavHeader from './VerticalNavHeader'
+import Dropdown from './Dropdown';
 
 // ** Theme Options
 import themeOptions from 'src/@core/theme/ThemeOptions'
 
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
+
+import { useRouter } from 'next/router';
+import { MenuContext } from 'src/providers/MenuContext';
+
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   top: 60,
@@ -45,9 +51,12 @@ const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   }
 }))
 
-const Navigation = props => {
+const Navigation = props => {  
+
+  const router = useRouter();
   // ** Props
-  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
+  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props 
+  const {  setLastOpenedPage } = useContext(MenuContext)
 
   // ** States
   const [navHover, setNavHover] = useState(false)
@@ -189,6 +198,25 @@ const Navigation = props => {
     return [filteredItemsWithoutNull, hasMatchingItem]
   };
 
+  const filterFav = (menu) => {
+    const iconName = "FavIcon"; 
+    const favorites = [];
+  
+    const traverse = (items) => {
+      items?.forEach(item => {
+        if (item?.children && item?.children?.length > 0) {
+          traverse(item?.children);
+        } else {
+          if(item?.iconName === iconName){
+            favorites?.push(item);
+          }
+        }
+      });
+    };
+    traverse(menu);
+    return favorites;
+  };
+
   useEffect(() => {
     setFilteredMenu(props.verticalNavItems)
   }, [props.verticalNavItems])
@@ -215,7 +243,6 @@ const Navigation = props => {
             label="Search"
             variant="outlined"
             fullWidth
-            margin="normal"
             size="small"
             onChange={handleSearch}
             autoComplete='off'
@@ -236,6 +263,17 @@ const Navigation = props => {
             }}
           />
           <TextField sx={{display:'none'}}/>
+          <Dropdown
+            ImageSRC="/images/folderIcons/FavIcon.png"
+            TooltipTitle="Favorite Items"
+            onClickAction={(favorite) => {
+              router.push(favorite?.path);
+              setLastOpenedPage(favorite);
+            }}
+            map={filterFav(menu)}
+            navCollapsed={navCollapsed}
+            navHover={navHover}
+          />
         </Box>
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
           {/* @ts-ignore */}
