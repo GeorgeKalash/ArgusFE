@@ -219,7 +219,6 @@ const AddressTab = ({
                     required
                     onChange={(event, newValue) => {
                       setCityStore([])
-                      fillStateStore(newValue?.recordId)
                       addressValidation.setFieldValue('stateId', null)
                       addressValidation.setFieldValue('cityId', null)
                       addressValidation.setFieldValue('city', null)
@@ -228,16 +227,13 @@ const AddressTab = ({
 
 
                     if(newValue){
+                      fillStateStore(newValue?.recordId)
 
 
                       addressValidation.setFieldValue(
                         "countryId",
                         newValue?.recordId,
                       );
-
-
-
-
 
                     }else{
 

@@ -1,7 +1,7 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -55,6 +55,11 @@ const ClientTab = ({
 
 console.log(clientIndividualFormValidation)
 
+const [showAsPassword , setShowAsPassword]  = useState(false)
+const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)
+const [showAsPasswordPhone , setShowAsPasswordPhone]  = useState(false)
+const [showAsPasswordPhoneRepeat , setShowAsPasswordPhoneRepeat]  = useState(false)
+
   const encryptDigits = (v) => {
     const input = v?.replace(/\D/g, '')
 
@@ -80,6 +85,8 @@ console.log(clientIndividualFormValidation)
   const handleCopy = (event) => {
     event.preventDefault();
   };
+
+
 
 return (
         <>
@@ -189,7 +196,7 @@ return (
                   sx={{color: 'white'}}
                     name="idNo"
                     label={_labels.number}
-                    type=""
+                    type={ showAsPassword && "password"}
                     value={clientIndividualFormValidation.values?.idNo }
                     required
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
@@ -197,6 +204,9 @@ return (
                     onPaste={handleCopy}
                     readOnly={editMode && true}
                     maxLength="15"
+                    onBlur={(e) =>{ setShowAsPassword(true) }}
+                    onFocus={(e) =>{ setShowAsPassword(false) }}
+
                     onClear={() =>{
                       clientIndividualFormValidation.setFieldValue("idNo", "")
 
@@ -212,9 +222,10 @@ return (
                       clientIndividualFormValidation.errors.idNo
                     }
                   />
-                          <Grid
+                          {/* <Grid
+
                            sx={{
-                              position: 'absolute',
+                              // position: 'absolute',
                               width: '88%',
                               height: clientIndividualFormValidation.touched.idNo ? '50%': '70%',
                               top:  '10px',
@@ -227,7 +238,7 @@ return (
                               pointerEvents: 'none',
                               fontFamily: 'Arial'
                           }}
-                          >{encryptDigits(clientIndividualFormValidation.values?.idNo)}</Grid>
+                          >{encryptDigits(clientIndividualFormValidation.values?.idNo)}</Grid> */}
 
                 </Grid>
                 <Grid item xs={12}
@@ -237,12 +248,18 @@ return (
                     label={_labels.confirmNb}
                     value={clientIndividualFormValidation.values?.idNoRepeat}
                     required
+                    type={ showAsPasswordRepeat && "password"}
 
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
-                    onBlur={clientIndividualFormValidation.handleBlur}
+
+                    // onBlur={clientIndividualFormValidation.handleBlur}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
                     readOnly={editMode && true}
+
+                    onBlur={(e) =>{ setShowAsPasswordRepeat(true) , clientIndividualFormValidation.handleBlur(e)}}
+
+                    onFocus={(e) =>{ setShowAsPasswordRepeat(false) }}
 
                     maxLength="15"
                     onClear={() =>{
@@ -259,7 +276,7 @@ return (
                       clientIndividualFormValidation.errors.idNoRepeat
                     }
                   />
-                  <Grid
+                  {/* <Grid
                      sx={{
                       position: 'absolute',
                       width: '88%',
@@ -276,7 +293,7 @@ return (
 
                           }}
                           >
-                            {encryptDigits(clientIndividualFormValidation.values?.idNoRepeat)}</Grid>
+                            {encryptDigits(clientIndividualFormValidation.values?.idNoRepeat)}</Grid> */}
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
@@ -831,7 +848,7 @@ return (
               <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
                   name="cellPhone"
-                  type="text"
+                  type={showAsPasswordPhone && "password"}
                   phone={true}
                   label={_labels.cellPhone}
                   value={clientIndividualFormValidation.values?.cellPhone}
@@ -840,8 +857,11 @@ return (
                   onChange={clientIndividualFormValidation.handleChange}
                   maxLength="15"
 
-                  // onCopy={handleCopy}
-                  // onPaste={handleCopy}
+                  onCopy={handleCopy}
+                  onPaste={handleCopy}
+
+                  onBlur={(e) =>{ setShowAsPasswordPhone(true) , clientIndividualFormValidation.handleBlur(e)}}
+                  onFocus={(e) =>{ setShowAsPasswordPhone(false) }}
                   onClear={() =>
                     clientIndividualFormValidation.setFieldValue(
                       "cellPhone",
@@ -857,7 +877,7 @@ return (
                     clientIndividualFormValidation.errors.cellPhone
                   }
                 />
-                 <Grid
+                 {/* <Grid
                           sx={{
                             position: 'absolute',
                             top:  '15px',
@@ -866,14 +886,15 @@ return (
                             marginLeft:'15px',
                             padding: '0px',
                             backgroundColor: '#fff',
-                            pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
+                            pointerEvents: 'none',
                             fontFamily: 'Arial'
                         }}
-                          >{encryptDigits(clientIndividualFormValidation.values?.cellPhone)}</Grid>
+                          >{encryptDigits(clientIndividualFormValidation.values?.cellPhone)}</Grid> */}
               </Grid>
               <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
                   name="cellPhoneRepeat"
+                  type={showAsPasswordPhoneRepeat && 'password'}
                   label={_labels.confirmCell}
                   value={clientIndividualFormValidation.values?.cellPhoneRepeat}
                   phone={true}
@@ -881,6 +902,10 @@ return (
                   readOnly={editMode && true}
                   maxLength="15"
                   onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
+                  onBlur={(e) =>{ setShowAsPasswordPhoneRepeat(true) , clientIndividualFormValidation.handleBlur(e)}}
+                  onFocus={(e) =>{ setShowAsPasswordPhoneRepeat(false) }}
+
+
                   onCopy={handleCopy}
                   onPaste={handleCopy}
                   onClear={() =>
@@ -893,14 +918,14 @@ return (
                     clientIndividualFormValidation.touched.cellPhoneRepeat &&
                     Boolean(clientIndividualFormValidation.errors.cellPhoneRepeat)
                   }
-                  onBlur={clientIndividualFormValidation.handleBlur}
+
 
                   helperText={
                     clientIndividualFormValidation.touched.cellPhoneRepeat &&
                     clientIndividualFormValidation.errors.cellPhoneRepeat
                   }
                 />
-                 <Grid
+                 {/* <Grid
                          sx={{
                           position: 'absolute',
                           top:  '15px',
@@ -908,10 +933,10 @@ return (
                           marginLeft:'15px',
                           padding: '0px',
                           backgroundColor: '#fff',
-                          pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
+                          pointerEvents: 'none',
                           fontFamily: 'Arial'
                       }}
-                          >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid>
+                          >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid> */}
               </Grid>
               <Grid container  spacing={2} sx={{paddingTop: '20px'}} >
                 <Grid item xs={3}>
