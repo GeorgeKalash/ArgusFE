@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, useCallback } from 'react'
 
 // ** MUI Imports
 import { Box } from '@mui/material'
@@ -608,10 +608,8 @@ const Users = () => {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSecurityGrpDataChange = (allData, selectedData) => {
-    console.log('allmain ', allData)
-    console.log('selectedmain ', selectedData)
-
     // Update the state in the parent component when the child component data changes
     setSecurityGrpALLData(allData)
     setSecurityGrpSelectedData(selectedData)
@@ -735,7 +733,7 @@ const Users = () => {
           setCashAccStore={setCashAccStore}
           cashAccStore={cashAccStore}
           lookupCashAcc={lookupCashAcc}
-          
+
           //Security Grp
           securityGrpGridData={securityGrpGridData}
           getSecurityGrpGridData={getSecurityGrpGridData}

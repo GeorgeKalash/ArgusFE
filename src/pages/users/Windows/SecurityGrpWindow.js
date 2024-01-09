@@ -21,7 +21,6 @@ const SecurityGrpWindow = ({
   const [newAll, setNewAll] = useState([])
 
   useEffect(() => {
-    console.log('useEffect fires')
 
     // Loop through securityGrpALLData and assign each object to allItems
     if (Array.isArray(securityGrpALLData)) {
@@ -43,8 +42,6 @@ const SecurityGrpWindow = ({
       // Update the selected state with the new array
       setSelected(updatedSelectedItems)
     }
-
-    //handleSecurityGrpDataChange(allItems,selected);
   }, [securityGrpALLData, securityGrpSelectedData])
 
   const handleToggle = value => {
@@ -52,12 +49,12 @@ const SecurityGrpWindow = ({
 
     if (selected.includes(value)) {
       if (isChecked === false) {
-        // Remove the item from newAll
+        // Remove the item from newAll (because by default before clicking thr arrows it's inserted in all List so we need to remove it)
         setNewAll(prevSelected => prevSelected.filter(selectedItem => selectedItem.sgId !== value.sgId))
 
-        // Add the item to newSelectedList
+        // Add the item to newSelectedList (return it back to its list)
         setNewSelected(prevSelected => {
-          // Check if prevSelected contains an object with the same sgId
+          // Check if prevSelected contains an object with the same sgId (to prevent duplicate)
           if (!prevSelected.some(item => item.sgId === value.sgId)) {
             return [...prevSelected, value]
           }
@@ -68,7 +65,7 @@ const SecurityGrpWindow = ({
       } else {
         // add the item to newAllList
         setNewAll(prevSelected => {
-          // Check if prevSelected contains an object with the same sgId
+          // Check if prevSelected contains an object with the same sgId (to prevent duplicate)
           if (!prevSelected.some(item => item.sgId === value.sgId)) {
             return [...prevSelected, value]
           }
@@ -79,10 +76,10 @@ const SecurityGrpWindow = ({
       }
     } else {
       if (isChecked === false) {
-        // Remove the item from newSelected
+        // Remove the item from newSelected (because by default before clicking thr arrows it's inserted in selected List so we need to remove it)
         setNewSelected(prevSelected => prevSelected.filter(selectedItem => selectedItem.sgId !== value.sgId))
 
-        // Add the item to newAllList
+        // Add the item to newAllList (return it back to its list)
         setNewAll(prevSelected => {
           // Check if prevSelected contains an object with the same sgId
           if (!prevSelected.some(item => item.sgId === value.sgId)) {
@@ -118,33 +115,50 @@ const SecurityGrpWindow = ({
   }
 
   const handleMoveLeft = () => {
+    let all = []
+
     // Move selected items from selected to the all
     setAllItems(prevItems => {
       const uniqueNewAll = newAll.filter(newAllItem => !prevItems.some(prevItem => prevItem.sgId === newAllItem.sgId))
+      all = prevItems.concat(uniqueNewAll)
 
       return prevItems.concat(uniqueNewAll)
     })
 
     //remove item from selected list
-    setSelected(prevItems => prevItems.filter(item => !newAll.some(selectedItem => selectedItem.sgId === item.sgId)))
+    setSelected(prevItems => {
+      const updatedItems = prevItems.filter(item => !newAll.some(selectedItem => selectedItem.sgId === item.sgId))
+
+      // Use the updatedItems directly
+      handleSecurityGrpDataChange(all, updatedItems)
+
+      return updatedItems
+    })
+
     setNewAll([])
   }
 
   const handleMoveRight = () => {
-    // Move selected items from all to the selected
+    let selected = []
+
     setSelected(prevSelected => {
-      // Filter out items from newAll that already exist in prevSelected
       const uniqueNewSelected = newSelected.filter(
         newSelectedItem => !prevSelected.some(prevSelectedItem => prevSelectedItem.sgId === newSelectedItem.sgId)
       )
+      selected = prevSelected.concat(uniqueNewSelected)
 
       return prevSelected.concat(uniqueNewSelected)
     })
 
-    //remove item from all list
-    setAllItems(prevItems =>
-      prevItems.filter(item => !newSelected.some(selectedItem => selectedItem.sgId === item.sgId))
-    )
+    setAllItems(prevItems => {
+      const updatedItems = prevItems.filter(item => !newSelected.some(selectedItem => selectedItem.sgId === item.sgId))
+
+      // Use the updatedItems directly
+      handleSecurityGrpDataChange(updatedItems, selected)
+
+      return updatedItems
+    })
+
     setNewSelected([])
   }
 
@@ -171,7 +185,10 @@ const SecurityGrpWindow = ({
             </div>
             <ul style={{ listStyleType: 'none', padding: 0 }}>
               {allItems.map(item => (
-                <li key={item.sgId} style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}>
+                <li
+                  key={`key1_${item.sgId}`}
+                  style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
+                >
                   <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
                     <input
                       id={item.sgId}
@@ -215,7 +232,10 @@ const SecurityGrpWindow = ({
             </div>
             <ul style={{ listStyleType: 'none', padding: 0 }}>
               {selected.map(item => (
-                <li key={item.sgId} style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}>
+                <li
+                  key={`key2_${item.sgId}`}
+                  style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
+                >
                   <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
                     <input
                       id={item.sgId}
