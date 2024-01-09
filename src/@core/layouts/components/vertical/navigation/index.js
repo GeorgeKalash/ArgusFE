@@ -2,11 +2,16 @@
 import { useEffect, useRef, useState, useContext } from 'react'
 import * as React from 'react';
 
+// ** Next Imports
+import Image from 'next/image';
+
 // ** MUI Imports
 import List from '@mui/material/List'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
+import SettingsIcon from '@mui/icons-material/Settings';
+import GradeIcon from '@mui/icons-material/Grade';
 import { createTheme, responsiveFontSizes, styled, ThemeProvider } from '@mui/material/styles'
 
 // ** Third Party Components
@@ -64,6 +69,7 @@ const Navigation = props => {
   const [filteredMenu, setFilteredMenu] = useState([]) //menu
   const [openFolders, setOpenFolders] = useState([]);
   const menu = props.verticalNavItems //menu
+  const gear = useContext(MenuContext)
 
   // ** Ref
   const shadowRef = useRef(null)
@@ -263,17 +269,30 @@ const Navigation = props => {
             }}
           />
           <TextField sx={{display:'none'}}/>
-          <Dropdown
-            ImageSRC="/images/folderIcons/FavIcon.png"
-            TooltipTitle="Favorite Items"
-            onClickAction={(favorite) => {
-              router.push(favorite?.path);
-              setLastOpenedPage(favorite);
+           <Dropdown
+            Image={<SettingsIcon />}
+            TooltipTitle="Gear Items"
+            onClickAction={(GearItem) => {
+              router.push(GearItem?.path);
+              setLastOpenedPage(GearItem);
             }}
-            map={filterFav(menu)}
+            map={gear.gear}
             navCollapsed={navCollapsed}
             navHover={navHover}
           />
+          {filterFav(menu) && filterFav(menu).length > 0 &&(
+            <Dropdown
+              Image={ <GradeIcon style={{ color: 'yellow' }}/>}
+              TooltipTitle="Favorite Items"
+              onClickAction={(favorite) => {
+                router.push(favorite?.path);
+                setLastOpenedPage(favorite);
+              }}
+              map={filterFav(menu)}
+              navCollapsed={navCollapsed}
+              navHover={navHover}
+            />
+          )}
         </Box>
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
           {/* @ts-ignore */}

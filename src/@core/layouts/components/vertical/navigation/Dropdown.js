@@ -8,7 +8,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useRouter } from 'next/router';
 
-function Dropdown({ ImageSRC, TooltipTitle, onClickAction, name, map, navCollapsed, navHover }) {
+function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed, navHover }) {
 
   const router = useRouter();
 
@@ -42,11 +42,7 @@ function Dropdown({ ImageSRC, TooltipTitle, onClickAction, name, map, navCollaps
             margin: '0px',
           }}
         >
-          <Image
-            src={ImageSRC}
-            width={18}
-            height={18}
-          />
+          {Image}
         </div>
         <Tooltip title={TooltipTitle}>
           <IconButton
