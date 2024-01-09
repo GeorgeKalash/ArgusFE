@@ -45,9 +45,9 @@ const SmsTemplate = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    smsTemplate: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    smsBody: labels && labels.find(item => item.key === 3).value
+    smsTemplate: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    smsBody: labels && labels.find(item => item.key === "3").value
   }
 
   const columns = [

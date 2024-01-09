@@ -58,13 +58,8 @@ console.log(clientIndividualFormValidation)
   const encryptDigits = (v) => {
     const input = v
 
-    // const lengthToShow = Math.max(2, input.length - 2);
+    if(input?.length > 1){
 
-    // // Display asterisks for all characters except the last two
-    // const displayedValue = '*'.repeat(lengthToShow) + input.substring(lengthToShow);
-
-    // return displayedValue;
-if(input?.length > 1){
     const showLength = Math.max(0, input?.length - 4);
 
     // Check if input has at least four digits
@@ -88,8 +83,8 @@ if(input?.length > 1){
 
 return (
         <>
-            <Grid container spacing={2}>
-            <Grid container xs={12} spacing={2} sx={{ padding: "40px" }}>
+        <Grid container spacing={2}>
+        <Grid container xs={12} spacing={2} sx={{ padding: "40px" }}>
         <Grid item xs={6} sx={{ padding: "40px" }}>
           <Grid container spacing={2}>
             <Grid item xs={6}>
@@ -129,27 +124,6 @@ return (
                 label={_labels.isResident}
               />
             </Grid>
-{/*
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name="birthDate"
-                label={_labels.birthDate}
-                value={clientIndividualFormValidation.values?.birthDate}
-                required={true}
-                onChange={clientIndividualFormValidation.handleChange}
-                onClear={() =>
-                  clientIndividualFormValidation.setFieldValue("birthDate", "")
-                }
-                error={
-                  clientIndividualFormValidation.touched.birthDate &&
-                  Boolean(clientIndividualFormValidation.errors.birthDate)
-                }
-                helperText={
-                  clientIndividualFormValidation.touched.birthDate &&
-                  clientIndividualFormValidation.errors.birthDate
-                }
-              />
-            </Grid> */}
 
             <Grid container xs={12}></Grid>
             <Grid item xs={12}>
@@ -175,11 +149,8 @@ return (
                         if(newValue){
                         fillFilterProfession(newValue.isDiplomat)
                         }else{
-                          fillFilterProfession('')
-
+                        fillFilterProfession('')
                         }
-
-
 
                       if(newValue){
 
@@ -213,8 +184,7 @@ return (
                     }
                   />
                 </Grid>
-                <Grid item xs={12} sx={{position: 'relative',
-  width: '100%'}}>
+                <Grid item xs={12} sx={{position: 'relative', width: '100%'}}>
                   <CustomTextField
                     name="idNo"
                     label={_labels.number}
@@ -224,9 +194,6 @@ return (
                     required
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
 
-                    // onChange={ (e) =>{ console.log(e.target.value)
-                    //   clientIndividualFormValidation.setFieldValue('idNo', encryptDigits(e.target.value))
-                    //   clientIndividualFormValidation.setFieldValue('idNoEncrypt', e.target.value) }}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
                     readOnly={editMode && true}
@@ -249,7 +216,7 @@ return (
                           <Grid
                            sx={{
                               position: 'absolute',
-                              top: '35%',
+                              top:  '15px',
                               letterSpacing: "3px",
                               marginLeft:'10px',
                               padding: '0px',
@@ -292,7 +259,8 @@ return (
                   <Grid
                      sx={{
                               position: 'absolute',
-                              top: '25%',
+                              top:  '15px',
+
                               marginRight: '25px',
                               letterSpacing: "3px",
                                left: '0', /* Adjust the right offset as needed */
@@ -339,6 +307,7 @@ return (
                     label={_labels.issusDate}
                     value={clientIndividualFormValidation.values?.issusDate}
                     readOnly={editMode && true}
+                    disabledDate={'>'}
 
                     // required={true}
                     onChange={clientIndividualFormValidation.handleChange}
@@ -625,6 +594,7 @@ return (
                     }
                   />
                 </Grid>
+
                 <Grid item xs={12}>
                   <CustomComboBox
                     name="smsLanguage"
@@ -633,13 +603,14 @@ return (
                     displayField="value"
                     store={smsLanguageStore}
                     value={
-                      smsLanguageStore.filter(
+                      clientIndividualFormValidation.values.smsLanguage &&   smsLanguageStore.filter(
                         (item) =>
-                          item.key ===
+                          item.key ==
                           clientIndividualFormValidation.values.smsLanguage,
                       )[0]
                     }
                     required
+
                     readOnly={editMode && true}
                     onChange={(event, newValue) => {
 
@@ -648,20 +619,14 @@ return (
                         "smsLanguage",
                         newValue?.key,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "smsLanguageName",
-                        newValue?.value,
-                      );
+
                     }else{
 
                         clientIndividualFormValidation.setFieldValue(
                           "smsLanguage",
                           '',
                         );
-                        clientIndividualFormValidation.setFieldValue(
-                          "smsLanguageName",
-                          '',
-                        );
+
                       }
                     }}
                     error={
@@ -860,10 +825,10 @@ return (
 
             <Grid container xs={12} >
               <FieldSet title={_labels.customerInformation}>
-              <Grid item xs={6} sx={{position: 'relative',
-  width: '100%'}}>
+              <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
                   name="cellPhone"
+                  phone={true}
                   label={_labels.cellPhone}
                   value={clientIndividualFormValidation.values?.cellPhone}
                   readOnly={editMode && true}
@@ -890,7 +855,8 @@ return (
                  <Grid
                           sx={{
                             position: 'absolute',
-                            top: '25%',
+                            top:  '15px',
+
                             letterSpacing: "3px",
                             marginLeft:'15px',
                             padding: '0px',
@@ -905,6 +871,7 @@ return (
                   name="cellPhoneRepeat"
                   label={_labels.confirmCell}
                   value={clientIndividualFormValidation.values?.cellPhoneRepeat}
+                  phone={true}
                   required
                   readOnly={editMode && true}
                   maxLength="15"
@@ -931,7 +898,7 @@ return (
                  <Grid
                          sx={{
                           position: 'absolute',
-                          top: '25%',
+                          top:  '15px',
                           letterSpacing: "3px",
                           marginLeft:'15px',
                           padding: '0px',
@@ -941,6 +908,7 @@ return (
                       }}
                           >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid>
               </Grid>
+              <Grid container  spacing={2} sx={{paddingTop: '20px'}} >
                 <Grid item xs={3}>
                   <CustomTextField
                     name="firstName"
@@ -1015,8 +983,6 @@ return (
                     }
                   />
                 </Grid>
-
-
                 <Grid item xs={3}>
                   <CustomTextField
                     name="familyName"
@@ -1042,11 +1008,11 @@ return (
                   />
                 </Grid>
 
+                </Grid>
 
 
 
-
-
+  <Grid container  spacing={2} sx={{ flexDirection: 'row-reverse' , paddingTop:'5px'}} >
                 <Grid item xs={3}>
                   <CustomTextField
                     name="fl_familyName"
@@ -1156,6 +1122,7 @@ return (
                       clientIndividualFormValidation.errors.fl_firstName
                     }
                   />
+                </Grid>
                 </Grid>
                 <Grid item xs={12}>
                 <CustomComboBox

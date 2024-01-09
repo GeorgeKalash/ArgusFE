@@ -103,107 +103,105 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
   }, [access])
 
   const _labels = {
-    category: labels && labels.find(item => item.key === 1).value,
-    reference: labels && labels.find((item) => item.key === 2).value,
-    name: labels && labels.find((item) => item.key === 3).value,
-    flName : labels && labels.find((item) => item.key === 4).value,
-    cellPhone: labels && labels.find((item) => item.key === 5).value,
-    plant: labels && labels.find(item => item.key === 6).value,
-    nationality: labels && labels.find((item) => item.key === 7).value,
-    keyword: labels && labels.find((item) => item.key === 8).value,
-    status: labels && labels.find((item) => item.key === 9).value,
-    createdDate: labels && labels.find((item) => item.key === 10).value,
-    expiryDate: labels && labels.find(item => item.key === 11).value,
-    otp: labels && labels.find((item) => item.key === 12).value,
+    category: labels && labels.find(item => item.key === "1").value,
+    reference: labels && labels.find((item) => item.key === "2").value,
+    name: labels && labels.find((item) => item.key === "3").value,
+    flName : labels && labels.find((item) => item.key === "4").value,
+    cellPhone: labels && labels.find((item) => item.key === "5").value,
+    plant: labels && labels.find(item => item.key === "6").value,
+    nationality: labels && labels.find((item) => item.key === "7").value,
+    keyword: labels && labels.find((item) => item.key === "8").value,
+    status: labels && labels.find((item) => item.key === "9").value,
+    createdDate: labels && labels.find((item) => item.key === "10").value,
+    expiryDate: labels && labels.find(item => item.key === "11").value,
+    otp: labels && labels.find((item) => item.key === "12").value,
 
   }
 
 
   const _labels2 = {
-    reference: labels2 && labels2.find((item) => item.key === 1).value,
-    birthDate: labels2 && labels2.find((item) => item.key === 2).value,
-    isResident: labels2 && labels2.find((item) => item.key === 3).value,
+    reference: labels2 && labels2.find((item) => item.key === "1").value,
+    birthDate: labels2 && labels2.find((item) => item.key === "2").value,
+    isResident: labels2 && labels2.find((item) => item.key === "3").value,
 
-    number: labels2 && labels2.find((item) => item.key === 5).value,
+    number: labels2 && labels2.find((item) => item.key === "5").value,
 
     // number: labels2 && labels2.find((item) => item.key === 5).value,
-    type: labels2 && labels2.find((item) => item.key === 6).value,
-    expiryDate: labels2 && labels2.find((item) => item.key === 7).value,
-    issusDate: labels2 && labels2.find((item) => item.key === 8).value,
-    country: labels2 && labels2.find((item) => item.key === 9).value,
-    city: labels2 && labels2.find((item) => item.key === 10).value,
-    first: labels2 && labels2.find((item) => item.key === 11).value,
-    last: labels2 && labels2.find((item) => item.key === 12).value,
-    middle: labels2 && labels2.find((item) => item.key === 13).value,
-    family: labels2 && labels2.find((item) => item.key === 14).value,
+    type: labels2 && labels2.find((item) => item.key === "6").value,
+    expiryDate: labels2 && labels2.find((item) => item.key === "7").value,
+    issusDate: labels2 && labels2.find((item) => item.key === "8").value,
+    country: labels2 && labels2.find((item) => item.key === "9").value,
+    city: labels2 && labels2.find((item) => item.key === "10").value,
+    first: labels2 && labels2.find((item) => item.key === "11").value,
+    last: labels2 && labels2.find((item) => item.key === "12").value,
+    middle: labels2 && labels2.find((item) => item.key === "13").value,
+    family: labels2 && labels2.find((item) => item.key === "14").value,
 
-    nationality: labels2 && labels2.find((item) => item.key === 15).value,
-    profession: labels2 && labels2.find((item) => item.key === 16).value,
-    cellPhone: labels2 && labels2.find((item) => item.key === 17).value,
-    status: labels2 && labels2.find((item) => item.key === 18).value,
-    oldReference: labels2 && labels2.find((item) => item.key === 19).value,
-    whatsapp: labels2 && labels2.find((item) => item.key === 20).value,
-    sponsor: labels2 && labels2.find((item) => item.key === 21).value,
-    salaryRange: labels2 && labels2.find((item) => item.key === 22).value,
-    riskLevel: labels2 && labels2.find((item) => item.key === 23).value,
-    smsLanguage: labels2 && labels2.find((item) => item.key === 24).value,
-    incomeSource: labels2 && labels2.find((item) => item.key === 25).value,
-    civilStatus: labels2 && labels2.find((item) => item.key === 26).value,
-    educationLevel: labels2 && labels2.find((item) => item.key === 27).value,
-    gender: labels2 && labels2.find((item) => item.key === 28).value,
-    title: labels2 && labels2.find((item) => item.key === 29).value,
-    id: labels2 && labels2.find((item) => item.key === 30).value,
-    name: labels2 && labels2.find((item) => item.key === 31).value,
-    main: labels2 && labels2.find((item) => item.key === 32).value,
+    nationality: labels2 && labels2.find((item) => item.key === "15").value,
+    profession: labels2 && labels2.find((item) => item.key === "16").value,
+    cellPhone: labels2 && labels2.find((item) => item.key === "17").value,
+    status: labels2 && labels2.find((item) => item.key === "18").value,
+    oldReference: labels2 && labels2.find((item) => item.key === "19").value,
+    whatsapp: labels2 && labels2.find((item) => item.key === "20").value,
+    sponsor: labels2 && labels2.find((item) => item.key === "21").value,
+    salaryRange: labels2 && labels2.find((item) => item.key === "22").value,
+    riskLevel: labels2 && labels2.find((item) => item.key === "23").value,
+    smsLanguage: labels2 && labels2.find((item) => item.key === "24").value,
+    incomeSource: labels2 && labels2.find((item) => item.key === "25").value,
+    civilStatus: labels2 && labels2.find((item) => item.key === "26").value,
+    educationLevel: labels2 && labels2.find((item) => item.key === "27").value,
+    gender: labels2 && labels2.find((item) => item.key === "28").value,
+    title: labels2 && labels2.find((item) => item.key === "29").value,
+    id: labels2 && labels2.find((item) => item.key === "30").value,
+    name: labels2 && labels2.find((item) => item.key === "31").value,
+    main: labels2 && labels2.find((item) => item.key === "32").value,
 
-    bankAccounts: labels2 && labels2.find((item) => item.key === 33).value,
-    isResident: labels2 && labels2.find((item) => item.key === 34).value,
-    mobileVerified: labels2 && labels2.find((item) => item.key === 35).value,
+    bankAccounts: labels2 && labels2.find((item) => item.key === "33").value,
+    isResident: labels2 && labels2.find((item) => item.key === "34").value,
+    mobileVerified: labels2 && labels2.find((item) => item.key === "35").value,
 
-    OTPVerified: labels2 && labels2.find((item) => item.key === 36).value,
-    coveredFace: labels2 && labels2.find((item) => item.key === 37).value,
-    isEmployed: labels2 && labels2.find((item) => item.key === 38).value,
+    OTPVerified: labels2 && labels2.find((item) => item.key === "36").value,
+    coveredFace: labels2 && labels2.find((item) => item.key === "37").value,
+    isEmployed: labels2 && labels2.find((item) => item.key === "38").value,
 
-    diplomat: labels2 && labels2.find((item) => item.key === 39).value,
+    diplomat: labels2 && labels2.find((item) => item.key === "39").value,
 
-    isDiplomat: labels2 && labels2.find((item) => item.key === 40).value,
+    isDiplomat: labels2 && labels2.find((item) => item.key === "40").value,
     isDiplomatRelative:
-      labels2 && labels2.find((item) => item.key === 41).value,
+      labels2 && labels2.find((item) => item.key === "41").value,
 
-    relativeDiplomatInfo: labels2 && labels2.find((item) => item.key === 42).value,
-    address: labels2 && labels2.find((item) => item.key === 43).value, // nationalityAddress
-    customerInformation: labels2 && labels2.find((item) => item.key === 44).value,
-    workAddress: labels2 && labels2.find((item) => item.key === 45).value,
-    phone: labels2 && labels2.find((item) => item.key === 46).value,
-    phone2: labels2 && labels2.find((item) => item.key === 47).value,
-    email: labels2 && labels2.find((item) => item.key === 48).value,
-    email2: labels2 && labels2.find((item) => item.key === 49).value,
-     phone3: labels2 && labels2.find((item) => item.key === 50).value,
-    bldgNo: labels2 && labels2.find((item) => item.key === 51).value,
-    unitNo :  labels2 && labels2.find((item) => item.key === 52).value,
-    subNo:  labels2 && labels2.find((item) => item.key === 53).value,
-    postalCode :  labels2 && labels2.find((item) => item.key === 54).value,
-    cityDistrict :  labels2 && labels2.find((item) => item.key === 55).value,
+    relativeDiplomatInfo: labels2 && labels2.find((item) => item.key === "42").value,
+    address: labels2 && labels2.find((item) => item.key === "43").value, // nationalityAddress
+    customerInformation: labels2 && labels2.find((item) => item.key === '44').value,
+    workAddress: labels2 && labels2.find((item) => item.key === '45').value,
+    phone: labels2 && labels2.find((item) => item.key === '46').value,
+    phone2: labels2 && labels2.find((item) => item.key === '47').value,
+    email: labels2 && labels2.find((item) => item.key === '48').value,
+    email2: labels2 && labels2.find((item) => item.key === '49').value,
+     phone3: labels2 && labels2.find((item) => item.key === '50').value,
+    bldgNo: labels2 && labels2.find((item) => item.key === '51').value,
+    unitNo :  labels2 && labels2.find((item) => item.key === '52').value,
+    subNo:  labels2 && labels2.find((item) => item.key === '53').value,
+    postalCode :  labels2 && labels2.find((item) => item.key === '54').value,
+    cityDistrict :  labels2 && labels2.find((item) => item.key === '55').value,
 
-    street1 :  labels2 && labels2.find((item) => item.key === 56).value,
-    street2 :  labels2 && labels2.find((item) => item.key === 57).value,
-    category :  labels2 && labels2.find((item) => item.key === 58).value,
-    foreignName :  labels2 && labels2.find((item) => item.key === 59).value,
-    keyword :  labels2 && labels2.find((item) => item.key === 60).value,
+    street1 :  labels2 && labels2.find((item) => item.key === '56').value,
+    street2 :  labels2 && labels2.find((item) => item.key === '57').value,
+    category :  labels2 && labels2.find((item) => item.key === '58').value,
+    foreignName :  labels2 && labels2.find((item) => item.key === '59').value,
+    keyword :  labels2 && labels2.find((item) => item.key === '60').value,
 
-    // createdDate :  labels2 && labels2.find((item) => item.key === 61).value,
+    fl_first: labels2 && labels2.find((item) => item.key === '62').value,
+    fl_last: labels2 && labels2.find((item) => item.key === '63').value,
+    fl_middle: labels2 && labels2.find((item) => item.key === '64').value,
+    fl_family: labels2 && labels2.find((item) => item.key === '65').value,
 
-    fl_first: labels2 && labels2.find((item) => item.key === 62).value,
-    fl_last: labels2 && labels2.find((item) => item.key === 63).value,
-    fl_middle: labels2 && labels2.find((item) => item.key === 64).value,
-    fl_family: labels2 && labels2.find((item) => item.key === 65).value,
-
-    state: labels2 && labels2.find((item) => item.key === 66).value,
-     confirmNb: labels2 && labels2.find((item) => item.key === 67).value,
-     confirmCell: labels2 && labels2.find((item) => item.key === 68).value,
-     issusCountry: labels2 && labels2.find((item) => item.key === 69).value,
-     issusPlace: labels2 && labels2.find((item) => item.key === 70).value,
-     pageTitle: labels2 && labels2.find((item) => item.key === 71).value,
+    state: labels2 && labels2.find((item) => item.key === '66').value,
+     confirmNb: labels2 && labels2.find((item) => item.key === '67').value,
+     confirmCell: labels2 && labels2.find((item) => item.key === '68').value,
+     issusCountry: labels2 && labels2.find((item) => item.key === '69').value,
+     issusPlace: labels2 && labels2.find((item) => item.key === '70').value,
+     pageTitle: labels2 && labels2.find((item) => item.key === '71').value,
 
 
   };
@@ -588,9 +586,24 @@ console.log(userData)
     validate : (values) => {
       const errors = {};
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (values.name || values.name || values.phone || values.countryId ||  values.street1)  {
+        if (!values.name ) {
+          errors.name = 'This field is required';
+        }
+        if (!values.street1 ) {
+          errors.street1 = 'This field is required';
+        }
+        if (!values.countryId ) {
+          errors.countryId = 'This field is required';
+        }
+        if (!values.cityId ) {
+          errors.cityId = 'This field is required';
+        }
+        if (!values.cityId ) {
+          errors.phone = 'This field is required';
+        }
 
-
+      }
       if (values.email1  && !emailRegex.test(values.email1) ) {
         errors.email1 = 'Invalid email format';
       }
@@ -599,7 +612,9 @@ console.log(userData)
         errors.email2 = 'Invalid email format';
       }
 
+
       return errors;
+
 
     },
     initialValues: {
@@ -623,13 +638,13 @@ console.log(userData)
       subNo: null
     },
 
-    validationSchema: !requiredOptional && yup.object({
-      name:  yup.string().required('This field is required'),
-      countryId:  yup.string().required('This field is required'),
-      cityId:  yup.string().required('This field is required'),
-      street1:  yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
-    }),
+    // validationSchema:  yup.object({
+    //   name:  yup.string().required('This field is required'),
+    //   countryId:  yup.string().required('This field is required'),
+    //   cityId:  yup.string().required('This field is required'),
+    //   street1:  yup.string().required('This field is required'),
+    //   phone: yup.string().required('This field is required')
+    // }),
     onSubmit: values => {
       // console.log(values);
 
@@ -692,6 +707,7 @@ console.log(userData)
   };
 
   const fillStateStoreAddress = countryId => {
+    setStateAddressStore([])
     var parameters = `_countryId=${countryId}`
     getRequest({
       extension: SystemRepository.State.qry,
@@ -706,6 +722,7 @@ console.log(userData)
   }
 
   const fillStateStoreAddressWork = countryId => {
+    setStateAddressWorkStore([])
     var parameters = `_countryId=${countryId}`
     getRequest({
       extension: SystemRepository.State.qry,

@@ -51,8 +51,7 @@ const ClientWindow = ({
     maxAccess
 }) => {
 
-  // console.log(cityAddressStore)
-  // console.log(cityAddressWorkStore)
+
 
 
 return (

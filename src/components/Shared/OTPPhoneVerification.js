@@ -15,6 +15,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
   const [otp, setOtp] = useState(['', '', '', '', '','']);
   const [timer, setTimer] = useState(60);
   const [error, setError] = useState('');
+  const [disabled, setDisabled] = useState(0);
 
   // const [errorMessage, setErrorMessage] = useState('');
 
@@ -34,6 +35,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
   }, [timer]);
 
   useEffect(()=>{
+    document.getElementById(`otp-input-${0}`).focus();
     otpSMS();
   },[])
 
@@ -56,6 +58,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
   }
 
   const  checkSMS = (value) =>{
+    if(value.length > 5){
 
     var data = {clientId: formValidation.values.clientId, OTPRequest: {secret: null, functionId: functionId, deviceId: formValidation.values.cellPhone, otp: value } }
     postRequest({
@@ -87,6 +90,9 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
 
       })
       formValidation.setFieldValue('OTPVerified', true )
+      }else{
+        setError('All Fields Required')
+      }
 
       // setShowOtpVerification(false)
       console.log(formValidation)
@@ -97,21 +103,85 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
 
 
 
-  const handleOtpChange = (index, value) => {
+  const handleOtpChange = (index, e) => {
+
+    console.log('Key Code:', e.nativeEvent.inputType);
+
+
+      document.getElementById(`otp-input-${index}`).select();
+
+    const value = e.target.value
+    const newOtp = [...otp];
     if (!isNaN(value) && value !== '') {
-      const newOtp = [...otp];
+
       newOtp[index] = value;
       setOtp(newOtp);
 
       if (index < otp.length - 1 && value !== '') {
         document.getElementById(`otp-input-${index + 1}`).focus();
+        document.getElementById(`otp-input-${index + 1}`).select();
       }
+    }else if( e.nativeEvent.inputType ==='deleteContentBackward'){
+        newOtp[index] = '';
+        setOtp(newOtp);
+
+        // if(index > 0 && document.getElementById(`otp-input-${index - 1}`).value ===''  ){
+        //   document.getElementById(`otp-input-${index}`).focus();
+        //   document.getElementById(`otp-input-${index}`).select();
+        // }
+        if(index > 0 && document.getElementById(`otp-input-${index - 1}`).value !==''  ){
+          document.getElementById(`otp-input-${index}`).focus();
+
+          // document.getElementById(`otp-input-${index}`).select();
+        }
+
+    }else if(value !== '' && document.getElementById(`otp-input-${index}`).value !==''){
+      document.getElementById(`otp-input-${index}`).select();
+      newOtp[index] = value;
+      setOtp(newOtp);
+
+  }
+  };
+
+  useEffect(()=>{
+
+checkDisable()
+  },[otp])
+
+function checkDisable(){
+  setDisabled(0)
+  var count = 0;
+   otp.map((digit, index) => (
+    digit !==''  &&  console.log('digit' + count++)
+   ))
+   if(count > 5){
+    setDisabled(count)
+
+   }
+
+}
+
+  const handleKeyUp = (index , e) => {
+    const currentValue = e.target.value;
+
+    if (e.key == 'ArrowRight' && index <6) {
+      document.getElementById(`otp-input-${index + 1 }`)?.focus();
+      document.getElementById(`otp-input-${index + 1 }`)?.select();
+
+    }else if (e.key == 'ArrowLeft' && index > 0) {
+        document.getElementById(`otp-input-${index -1 }`)?.focus();
+        document.getElementById(`otp-input-${index -1 }`)?.select();
+    }else if (currentValue === document.getElementById(`otp-input-${index}`).value ) {
+      console.log('Same value on KeyUp:',document.getElementById(`otp-input-${index}`).value , currentValue);
+      document.getElementById(`otp-input-${index}`)?.select();
+
+
     }
   };
 
   const handleResendOtp = () => {
     // Implement logic to resend OTP to the user's phone number
-    // You may want to set a cooldown to prevent frequent requests
+    // You may want to set a cool down to prevent frequent requests
     setTimer(60); // Reset the timer
     setError(''); // Clear any previous error
     setOtp(['', '', '', '', '','']); // Clear the entered OTP
@@ -139,13 +209,14 @@ checkSMS(enteredOtp)
       <Grid  className={styles.otpInputContainer}>
         {otp.map((digit, index) => (
           <input
-          className={styles.inputText}
+            className={styles.inputText}
             key={index}
             type="text"
             id={`otp-input-${index}`}
             maxLength="1"
+            onKeyUp={(e) => handleKeyUp(index, e)}
             value={digit}
-            onChange={(e) => handleOtpChange(index, e.target.value)}
+            onChange={(e) => handleOtpChange(index, e)}
           />
         ))}
       </Grid>
@@ -159,8 +230,8 @@ checkSMS(enteredOtp)
       <button  className={styles.resendButton} onClick={handleResendOtp} disabled={timer > 0}>
         Resend OTP
       </button>
-      <button className={styles.verifyButton} onClick={handleVerifyOtp} disabled={timer === 0}>
-        Verify OTP
+      <button className={styles.verifyButton} onClick={handleVerifyOtp} disabled={(timer === 0 || disabled < 5 ) ? true : false}>
+        Verify OTP  {disabled}
       </button>
         {error && <p   className={styles.errorMessage} >{error}</p>}
     </Grid>

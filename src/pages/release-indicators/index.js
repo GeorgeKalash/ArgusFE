@@ -51,12 +51,12 @@ const ReleaseIndicators = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    id: labels && labels.find(item => item.key === 3).value,
-    changeability: labels && labels.find(item => item.key === 4).value,
-    isReleased: labels && labels.find(item => item.key === 5).value,
-    releaseInd: labels && labels.find(item => item.key === 6).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    id: labels && labels.find(item => item.key === "3").value,
+    changeability: labels && labels.find(item => item.key === "4").value,
+    isReleased: labels && labels.find(item => item.key === "5").value,
+    releaseInd: labels && labels.find(item => item.key === "6").value
   }
 
   const columns = [

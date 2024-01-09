@@ -3,6 +3,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import UsersTab from 'src/pages/users/Tabs/UsersTab'
 import DefaultsTab from 'src/pages/users/Tabs/DefaultsTab'
+import SecurityGrpTab from 'src/pages/users/Tabs/SecurityGrpTab'
 
 const UsersWindow = ({
   onClose,
@@ -33,7 +34,13 @@ const UsersWindow = ({
   checkFieldDirect,
   emailPresent,
   passwordState,
-  setPasswordState
+  setPasswordState,
+
+  securityGrpGridData,
+  getSecurityGrpGridData,
+  addSecurityGrp,
+  delSecurityGrp,
+  popupSecurityGrp,
 }) => {
   return (
     <Window
@@ -79,6 +86,17 @@ const UsersWindow = ({
           cashAccStore={cashAccStore}
           lookupCashAcc={lookupCashAcc}>
           </DefaultsTab>
+      </CustomTabPanel>
+      <CustomTabPanel index={2} value={activeTab}>
+        <SecurityGrpTab
+          securityGrpGridData={securityGrpGridData}
+          getSecurityGrpGridData={getSecurityGrpGridData}
+          addSecurityGrp={addSecurityGrp}
+          delSecurityGrp={delSecurityGrp}
+          popupSecurityGrp={popupSecurityGrp}
+          labels={labels}
+          maxAccess={maxAccess}
+        />
       </CustomTabPanel>
     </Window>
   )

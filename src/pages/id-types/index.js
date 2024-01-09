@@ -56,18 +56,18 @@ const IdTypes = () => {
 
 
   const _labels = {
-    IdTypes: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    format: labels && labels.find(item => item.key === 3).value,
-    length: labels && labels.find(item => item.key === 4).value,
-    tab1: labels && labels.find(item => item.key === 5) && labels.find(item => item.key === 5).value,
-    tab2: labels && labels.find(item => item.key === 6) && labels.find(item => item.key === 6).value,
-    control: labels && labels.find(item => item.key === 7) && labels.find(item => item.key === 7).value,
-    accessLevel: labels && labels.find(item => item.key === 8) && labels.find(item => item.key === 8).value,
-    category: labels && labels.find(item => item.key === 9).value,
-    clientFileExpiryType: labels && labels.find(item => item.key === 10).value,
-    clientFileLifeTime: labels && labels.find(item => item.key === 11).value,
-    isDiplomat: labels && labels.find(item => item.key === 12).value
+    IdTypes: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    format: labels && labels.find(item => item.key === "3").value,
+    length: labels && labels.find(item => item.key === "4").value,
+    tab1: labels && labels.find(item => item.key === "5") && labels.find(item => item.key === "5").value,
+    tab2: labels && labels.find(item => item.key === "6") && labels.find(item => item.key === "6").value,
+    control: labels && labels.find(item => item.key === "7") && labels.find(item => item.key === "7").value,
+    accessLevel: labels && labels.find(item => item.key === "8") && labels.find(item => item.key === "8").value,
+    category: labels && labels.find(item => item.key === "9").value,
+    clientFileExpiryType: labels && labels.find(item => item.key === "10").value,
+    clientFileLifeTime: labels && labels.find(item => item.key === "11").value,
+    isDiplomat: labels && labels.find(item => item.key === "12").value
   }
 
   const columns = [
