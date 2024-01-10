@@ -5,6 +5,8 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import ResourceComboBox from './ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const AddressTab = ({
   labels,
@@ -195,13 +197,13 @@ const AddressTab = ({
             />
           </Grid> */}
               <Grid item xs={12}>
-                  <CustomComboBox
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Country.qry}
                     name="countryId"
                     label={labels.country}
                     valueField="recordId"
                     displayField={['reference','name']}
                     readOnly={readOnly}
-                    store={countryStore}
                     displayFieldWidth={2}
 
                 columnsInDropDown= {[
@@ -209,13 +211,7 @@ const AddressTab = ({
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'Foreign Language Name' }
                 ]}
-                    value={
-                      countryStore.filter(
-                        (item) =>
-                          item.recordId ===
-                          addressValidation.values.countryId,
-                      )[0]
-                    }
+                    values={addressValidation.values}
                     required
                     onChange={(event, newValue) => {
                       setCityStore([])
