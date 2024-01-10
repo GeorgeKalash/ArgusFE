@@ -46,7 +46,7 @@ const GeneralTab = ({
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-              resourceId={BusinessPartnerRepository.Group.qry}
+              endpointId={BusinessPartnerRepository.Group.qry}
               name='groupId'
               label={labels.group}
               valueField='recordId'
@@ -176,7 +176,7 @@ const GeneralTab = ({
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-              resourceId={SystemRepository.Country.qry}
+              endpointId={SystemRepository.Country.qry}
               name='nationalityId'
               label={labels.nationalityId}
               columnsInDropDown={[
@@ -198,7 +198,7 @@ const GeneralTab = ({
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-              resourceId={BusinessPartnerRepository.LegalStatus.qry}
+              endpointId={BusinessPartnerRepository.LegalStatus.qry}
               parameters={`_startAt=0&_pageSize=100`}
               name='legalStatusId'
               label={labels.legalStatus}

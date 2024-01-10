@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
-export default function ResourceComboBox({ resourceId, name, valueField, values, parameters = '_filter=', ...rest }) {
+export default function ResourceComboBox({ endpointId, name, valueField, values, parameters = '_filter=', ...rest }) {
   const { getRequest } = useContext(RequestsContext)
 
   const [store, setStore] = useState([])
@@ -12,7 +12,7 @@ export default function ResourceComboBox({ resourceId, name, valueField, values,
 
   useEffect(() => {
     getRequest({
-      extension: resourceId,
+      extension: endpointId,
       parameters
     })
       .then(res => {

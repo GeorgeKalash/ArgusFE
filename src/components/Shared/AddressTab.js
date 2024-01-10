@@ -198,7 +198,7 @@ const AddressTab = ({
           </Grid> */}
               <Grid item xs={12}>
                   <ResourceComboBox
-                    resourceId={SystemRepository.Country.qry}
+                    endpointId={SystemRepository.Country.qry}
                     name="countryId"
                     label={labels.country}
                     valueField="recordId"
