@@ -1,8 +1,9 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
+import { AuthContext } from 'src/providers/AuthContext'
 
 // ** React Imports
-import { useState } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -60,6 +61,7 @@ const LoginPage = () => {
   // ** Hooks
   const theme = useTheme()
   const auth = useAuth()
+  const { companyName } = useContext(AuthContext)
 
   const validation = useFormik({
     enableReinitialize: true,
@@ -104,6 +106,15 @@ const LoginPage = () => {
           />
           <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
             <Grid container spacing={5}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='companyName'
+                  value={companyName}
+                  size='small'
+                  fullWidth
+                  label='Company Name'
+                />
+              </Grid>
               <Grid item xs={12}>
                 <CustomTextField
                   name='username'
@@ -174,7 +185,6 @@ const LoginPage = () => {
 
         {/* Language Selection Section */}
         <Box sx={{ my: 5, display: 'flex', gap: 3 }}>
-          {/* Adjust gap as needed */}
           <Typography variant='body2'>Argus offered in:</Typography>
           <Box sx={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
             <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
