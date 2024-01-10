@@ -90,7 +90,7 @@ const LoginPage = () => {
   return (
     <>
       <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 20 }}>
+        <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 50 }}>
           <CardMedia
             component='img'
             image='/images/logos/ArgusLogo.png'
