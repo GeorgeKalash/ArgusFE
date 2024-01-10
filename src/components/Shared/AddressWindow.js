@@ -12,7 +12,6 @@ const AddressWindow = ({
   labels,
   addressValidation,
   maxAccess,
-  countryStore,
   stateStore,
   fillStateStore,
   lookupCity,
@@ -27,19 +26,17 @@ const AddressWindow = ({
     <Window
       id='AddressWindow'
       Title={labels.address}
-      onClose={onClose}    
+      onClose={onClose}
       width={width} //check
       height={height} //check
       onSave={onSave}
       addressValidation={addressValidation}
-      countryStore={countryStore}
       stateStore={stateStore}
       cityStore={cityStore}
       cityDistrictStore={cityDistrictStore}
     >
       <CustomTabPanel>
         <AddressTab
-          countryStore={countryStore}
           stateStore={stateStore}
           labels={labels}
           lookupCity={lookupCity}
