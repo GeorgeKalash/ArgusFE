@@ -68,13 +68,12 @@ const AuthProvider = ({ children }) => {
       try {
         const response = await axios({
           method: 'GET',
-          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=burger`
+          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
         })
 
         // Set companyName from the API response
         setCompanyName(response.data.record.companyName)
         setGetAC(response)
-
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -82,8 +81,6 @@ const AuthProvider = ({ children }) => {
 
     fetchData()
   }, [])
-
-
 
   const handleLogin = async (params, errorCallback) => {
     try {

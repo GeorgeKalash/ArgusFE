@@ -108,6 +108,7 @@ const LoginPage = () => {
             <Grid container spacing={5}>
               <Grid item xs={12}>
                 <CustomTextField
+                  readOnly
                   name='companyName'
                   value={companyName}
                   size='small'
