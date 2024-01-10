@@ -59,6 +59,7 @@ const StyledBoxForShadow = styled(Box)(({ theme }) => ({
 const Navigation = props => {  
 
   const router = useRouter();
+  
   // ** Props
   const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props 
   const {  setLastOpenedPage } = useContext(MenuContext)
@@ -220,6 +221,7 @@ const Navigation = props => {
       });
     };
     traverse(menu);
+
     return favorites;
   };
 

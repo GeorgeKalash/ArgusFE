@@ -91,6 +91,7 @@ const MenuProvider = ({ children }) => {
               }
         Gear.push(GearItem)}
           })
+          
           return Gear
       }
   
