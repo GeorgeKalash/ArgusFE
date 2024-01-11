@@ -41,7 +41,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
 
   const  otpSMS = () =>{
 
-    var data = {clientId: formValidation.values.clientId, OTPRequest: {secret: null, functionId: functionId, deviceId: formValidation.values.cellPhone, otp: null } }
+    var data = {clientId: formValidation.values.clientId, OTPRequest: {secret: null, functionId: functionId, deviceId: formValidation.values.cellPhone, otp: null , reference: formValidation.values.reference} }
     postRequest({
       extension: CTCLRepository.OTPRepository.sms,
        record: JSON.stringify(data),
@@ -60,7 +60,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
   const  checkSMS = (value) =>{
     if(value.length > 5){
 
-    var data = {clientId: formValidation.values.clientId, OTPRequest: {secret: null, functionId: functionId, deviceId: formValidation.values.cellPhone, otp: value } }
+    var data = {clientId: formValidation.values.clientId, OTPRequest: {secret: null, functionId: functionId, deviceId: formValidation.values.cellPhone, otp: value,  reference: formValidation.values.reference } }
     postRequest({
       extension: CTCLRepository.OTPRepository.checkSms,
       record: JSON.stringify(data),
@@ -231,7 +231,7 @@ checkSMS(enteredOtp)
         Resend OTP
       </button>
       <button className={styles.verifyButton} onClick={handleVerifyOtp} disabled={(timer === 0 || disabled < 5 ) ? true : false}>
-        Verify OTP  {disabled}
+        Verify OTP
       </button>
         {error && <p   className={styles.errorMessage} >{error}</p>}
     </Grid>
