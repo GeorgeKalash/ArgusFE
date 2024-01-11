@@ -43,6 +43,8 @@ const AuthProvider = ({ children }) => {
   // ** States
   const [user, setUser] = useState(defaultProvider.user)
   const [loading, setLoading] = useState(defaultProvider.loading)
+  const [companyName, setCompanyName] = useState('')
+  const [getAC, setGetAC] = useState({})
 
   // ** Hooks
   const router = useRouter()
@@ -61,15 +63,27 @@ const AuthProvider = ({ children }) => {
       }
     }
     initAuth()
+
+    const fetchData = async () => {
+      try {
+        const response = await axios({
+          method: 'GET',
+          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
+        })
+
+        // Set companyName from the API response
+        setCompanyName(response.data.record.companyName)
+        setGetAC(response)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+
+    fetchData()
   }, [])
 
   const handleLogin = async (params, errorCallback) => {
     try {
-      const getAC = await axios({
-        method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
-      })
-
       const getUS2 = await axios({
         method: 'GET',
         url: `${process.env.NEXT_PUBLIC_BASE_URL}/SY.asmx/getUS2?_email=${params.username}`,
@@ -200,6 +214,7 @@ const AuthProvider = ({ children }) => {
   const values = {
     user,
     loading,
+    companyName,
     setUser,
     setLoading,
     login: handleLogin,

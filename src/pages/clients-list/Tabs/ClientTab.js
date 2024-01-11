@@ -1,7 +1,7 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -55,10 +55,15 @@ const ClientTab = ({
 
 console.log(clientIndividualFormValidation)
 
-  const encryptDigits = (v) => {
-    const input = v
+const [showAsPassword , setShowAsPassword]  = useState(false)
+const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)
+const [showAsPasswordPhone , setShowAsPasswordPhone]  = useState(false)
+const [showAsPasswordPhoneRepeat , setShowAsPasswordPhoneRepeat]  = useState(false)
 
-    if(input?.length > 1){
+  const encryptDigits = (v) => {
+    const input = v?.replace(/\D/g, '')
+
+    if(input?.length > 0){
 
     const showLength = Math.max(0, input?.length - 4);
 
@@ -80,6 +85,8 @@ console.log(clientIndividualFormValidation)
   const handleCopy = (event) => {
     event.preventDefault();
   };
+
+
 
 return (
         <>
@@ -186,22 +193,24 @@ return (
                 </Grid>
                 <Grid item xs={12} sx={{position: 'relative', width: '100%'}}>
                   <CustomTextField
+                  sx={{color: 'white'}}
                     name="idNo"
                     label={_labels.number}
-
-                    // type="password"
+                    type={ showAsPassword && "password"}
                     value={clientIndividualFormValidation.values?.idNo }
                     required
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
-
+                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
                     readOnly={editMode && true}
-
                     maxLength="15"
+                    onBlur={(e) =>{ setShowAsPassword(true) }}
+                    onFocus={(e) =>{ setShowAsPassword(false) }}
+
                     onClear={() =>{
                       clientIndividualFormValidation.setFieldValue("idNo", "")
-                      clientIndividualFormValidation.setFieldValue("idNoEncrypt", "")}
+
+                    }
 
                     }
                     error={
@@ -213,18 +222,23 @@ return (
                       clientIndividualFormValidation.errors.idNo
                     }
                   />
-                          <Grid
+                          {/* <Grid
+
                            sx={{
-                              position: 'absolute',
-                              top:  '15px',
+                              // position: 'absolute',
+                              width: '88%',
+                              height: clientIndividualFormValidation.touched.idNo ? '50%': '70%',
+                              top:  '10px',
                               letterSpacing: "3px",
                               marginLeft:'10px',
-                              padding: '0px',
+                              marginRight:'10px',
+                              color:'#424242',
+                              paddingTop: '5px',
                               backgroundColor: '#fff',
-                              pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
+                              pointerEvents: 'none',
                               fontFamily: 'Arial'
                           }}
-                          >{encryptDigits(clientIndividualFormValidation.values?.idNo)}</Grid>
+                          >{encryptDigits(clientIndividualFormValidation.values?.idNo)}</Grid> */}
 
                 </Grid>
                 <Grid item xs={12}
@@ -234,12 +248,18 @@ return (
                     label={_labels.confirmNb}
                     value={clientIndividualFormValidation.values?.idNoRepeat}
                     required
+                    type={ showAsPasswordRepeat && "password"}
 
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
-                    onBlur={clientIndividualFormValidation.handleBlur}
+
+                    // onBlur={clientIndividualFormValidation.handleBlur}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
                     readOnly={editMode && true}
+
+                    onBlur={(e) =>{ setShowAsPasswordRepeat(true) , clientIndividualFormValidation.handleBlur(e)}}
+
+                    onFocus={(e) =>{ setShowAsPasswordRepeat(false) }}
 
                     maxLength="15"
                     onClear={() =>{
@@ -256,24 +276,24 @@ return (
                       clientIndividualFormValidation.errors.idNoRepeat
                     }
                   />
-                  <Grid
+                  {/* <Grid
                      sx={{
-                              position: 'absolute',
-                              top:  '15px',
-
-                              marginRight: '25px',
-                              letterSpacing: "3px",
-                               left: '0', /* Adjust the right offset as needed */
-                              // transform: 'translateY(-50%)',
-                              marginLeft: `${ clientIndividualFormValidation.values?.idNoRepeat?.length > 12? 22.5 : 20 }px`,
-                              padding: '2px',
-                              backgroundColor: '#fff',
-                              pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
-                              fontFamily: 'Arial'
+                      position: 'absolute',
+                      width: '88%',
+                      height: clientIndividualFormValidation.touched.idNoRepeat ? '50%': '70%',
+                      top:  '10px',
+                      letterSpacing: "3px",
+                      marginLeft:'10px',
+                      marginRight:'10px',
+                      color:'#424242',
+                      paddingTop: '5px',
+                      backgroundColor: '#fff',
+                      pointerEvents: 'none',
+                      fontFamily: 'Arial'
 
                           }}
                           >
-                            {encryptDigits(clientIndividualFormValidation.values?.idNoRepeat)}</Grid>
+                            {encryptDigits(clientIndividualFormValidation.values?.idNoRepeat)}</Grid> */}
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
@@ -423,7 +443,7 @@ return (
               onLookup={lookupCity}
               firstValue={clientIndividualFormValidation.values.cityName}
               secondDisplayField={false}
-              readOnly={editMode && true}
+              readOnly={(editMode || clientIndividualFormValidation.values.idCountry) && true}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -828,15 +848,20 @@ return (
               <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
                   name="cellPhone"
+                  type={showAsPasswordPhone && "password"}
                   phone={true}
                   label={_labels.cellPhone}
                   value={clientIndividualFormValidation.values?.cellPhone}
                   readOnly={editMode && true}
                   required
-                  onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
+                  onChange={clientIndividualFormValidation.handleChange}
                   maxLength="15"
+
                   onCopy={handleCopy}
                   onPaste={handleCopy}
+
+                  onBlur={(e) =>{ setShowAsPasswordPhone(true) , clientIndividualFormValidation.handleBlur(e)}}
+                  onFocus={(e) =>{ setShowAsPasswordPhone(false) }}
                   onClear={() =>
                     clientIndividualFormValidation.setFieldValue(
                       "cellPhone",
@@ -852,7 +877,7 @@ return (
                     clientIndividualFormValidation.errors.cellPhone
                   }
                 />
-                 <Grid
+                 {/* <Grid
                           sx={{
                             position: 'absolute',
                             top:  '15px',
@@ -861,14 +886,15 @@ return (
                             marginLeft:'15px',
                             padding: '0px',
                             backgroundColor: '#fff',
-                            pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
+                            pointerEvents: 'none',
                             fontFamily: 'Arial'
                         }}
-                          >{encryptDigits(clientIndividualFormValidation.values?.cellPhone)}</Grid>
+                          >{encryptDigits(clientIndividualFormValidation.values?.cellPhone)}</Grid> */}
               </Grid>
               <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
                   name="cellPhoneRepeat"
+                  type={showAsPasswordPhoneRepeat && 'password'}
                   label={_labels.confirmCell}
                   value={clientIndividualFormValidation.values?.cellPhoneRepeat}
                   phone={true}
@@ -876,6 +902,10 @@ return (
                   readOnly={editMode && true}
                   maxLength="15"
                   onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)  }}
+                  onBlur={(e) =>{ setShowAsPasswordPhoneRepeat(true) , clientIndividualFormValidation.handleBlur(e)}}
+                  onFocus={(e) =>{ setShowAsPasswordPhoneRepeat(false) }}
+
+
                   onCopy={handleCopy}
                   onPaste={handleCopy}
                   onClear={() =>
@@ -888,14 +918,14 @@ return (
                     clientIndividualFormValidation.touched.cellPhoneRepeat &&
                     Boolean(clientIndividualFormValidation.errors.cellPhoneRepeat)
                   }
-                  onBlur={clientIndividualFormValidation.handleBlur}
+
 
                   helperText={
                     clientIndividualFormValidation.touched.cellPhoneRepeat &&
                     clientIndividualFormValidation.errors.cellPhoneRepeat
                   }
                 />
-                 <Grid
+                 {/* <Grid
                          sx={{
                           position: 'absolute',
                           top:  '15px',
@@ -903,10 +933,10 @@ return (
                           marginLeft:'15px',
                           padding: '0px',
                           backgroundColor: '#fff',
-                          pointerEvents: 'none', /* Prevent the last-four-digits div from capturing events */
+                          pointerEvents: 'none',
                           fontFamily: 'Arial'
                       }}
-                          >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid>
+                          >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid> */}
               </Grid>
               <Grid container  spacing={2} sx={{paddingTop: '20px'}} >
                 <Grid item xs={3}>
@@ -1013,58 +1043,31 @@ return (
 
 
   <Grid container  spacing={2} sx={{ flexDirection: 'row-reverse' , paddingTop:'5px'}} >
-                <Grid item xs={3}>
+  <Grid item xs={3}>
                   <CustomTextField
-                    name="fl_familyName"
-                    label={_labels.fl_family}
-                    value={clientIndividualFormValidation.values?.fl_familyName}
-                    onChange={clientIndividualFormValidation.handleChange}
-                    readOnly={editMode && true}
-                    dir='rtl'// Set direction to right-to-left
-
-                    onClear={() =>
-                      clientIndividualFormValidation.setFieldValue(
-                        "fl_familyName",
-                        "",
-                      )
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.fl_familyName &&
-                      Boolean(
-                        clientIndividualFormValidation.errors.fl_familyName,
-                      )
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.fl_familyName &&
-                      clientIndividualFormValidation.errors.fl_familyName
-                    }
-                  />
-                </Grid>
-
-
-                <Grid item xs={3}>
-                <CustomTextField
-                    name="fl_lastName"
-                    label={_labels.fl_last}
-                    value={clientIndividualFormValidation.values?.fl_lastName}
+                    name="fl_firstName"
+                    label={_labels.fl_first}
+                    value={clientIndividualFormValidation.values?.fl_firstName}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    readOnly={editMode && true}
                     dir='rtl'// Set direction to right-to-left
 
-                    readOnly={editMode && true}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
-                        "fl_lastName",
+                        "fl_firstName",
                         "",
                       )
                     }
                     error={
-                      clientIndividualFormValidation.touched.fl_lastName &&
-                      Boolean(clientIndividualFormValidation.errors.fl_lastName)
+                      clientIndividualFormValidation.touched.fl_firstName &&
+                      Boolean(
+                        clientIndividualFormValidation.errors.fl_firstName,
+                      )
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.fl_lastName &&
-                      clientIndividualFormValidation.errors.fl_lastName
+                      clientIndividualFormValidation.touched.fl_firstName &&
+                      clientIndividualFormValidation.errors.fl_firstName
                     }
                   />
                 </Grid>
@@ -1096,33 +1099,62 @@ return (
                   />
                 </Grid>
                 <Grid item xs={3}>
-                  <CustomTextField
-                    name="fl_firstName"
-                    label={_labels.fl_first}
-                    value={clientIndividualFormValidation.values?.fl_firstName}
+                <CustomTextField
+                    name="fl_lastName"
+                    label={_labels.fl_last}
+                    value={clientIndividualFormValidation.values?.fl_lastName}
                     onChange={clientIndividualFormValidation.handleChange}
                     maxLength="10"
+                    dir='rtl'// Set direction to right-to-left
+
+                    readOnly={editMode && true}
+                    onClear={() =>
+                      clientIndividualFormValidation.setFieldValue(
+                        "fl_lastName",
+                        "",
+                      )
+                    }
+                    error={
+                      clientIndividualFormValidation.touched.fl_lastName &&
+                      Boolean(clientIndividualFormValidation.errors.fl_lastName)
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.fl_lastName &&
+                      clientIndividualFormValidation.errors.fl_lastName
+                    }
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name="fl_familyName"
+                    label={_labels.fl_family}
+                    value={clientIndividualFormValidation.values?.fl_familyName}
+                    onChange={clientIndividualFormValidation.handleChange}
                     readOnly={editMode && true}
                     dir='rtl'// Set direction to right-to-left
 
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
-                        "fl_firstName",
+                        "fl_familyName",
                         "",
                       )
                     }
                     error={
-                      clientIndividualFormValidation.touched.fl_firstName &&
+                      clientIndividualFormValidation.touched.fl_familyName &&
                       Boolean(
-                        clientIndividualFormValidation.errors.fl_firstName,
+                        clientIndividualFormValidation.errors.fl_familyName,
                       )
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.fl_firstName &&
-                      clientIndividualFormValidation.errors.fl_firstName
+                      clientIndividualFormValidation.touched.fl_familyName &&
+                      clientIndividualFormValidation.errors.fl_familyName
                     }
                   />
                 </Grid>
+
+
+
+
                 </Grid>
                 <Grid item xs={12}>
                 <CustomComboBox

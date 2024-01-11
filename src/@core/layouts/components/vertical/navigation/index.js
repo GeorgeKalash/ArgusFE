@@ -1,11 +1,17 @@
 // ** React Import
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useContext } from 'react'
+import * as React from 'react';
+
+// ** Next Imports
+import Image from 'next/image';
 
 // ** MUI Imports
 import List from '@mui/material/List'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
+import SettingsIcon from '@mui/icons-material/Settings';
+import GradeIcon from '@mui/icons-material/Grade';
 import { createTheme, responsiveFontSizes, styled, ThemeProvider } from '@mui/material/styles'
 
 // ** Third Party Components
@@ -18,12 +24,17 @@ import themeConfig from 'src/configs/themeConfig'
 import Drawer from './Drawer'
 import VerticalNavItems from './VerticalNavItems'
 import VerticalNavHeader from './VerticalNavHeader'
+import Dropdown from './Dropdown';
 
 // ** Theme Options
 import themeOptions from 'src/@core/theme/ThemeOptions'
 
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
+
+import { useRouter } from 'next/router';
+import { MenuContext } from 'src/providers/MenuContext';
+
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   top: 60,
@@ -45,9 +56,13 @@ const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   }
 }))
 
-const Navigation = props => {
+const Navigation = props => {  
+
+  const router = useRouter();
+  
   // ** Props
-  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
+  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props 
+  const {  setLastOpenedPage } = useContext(MenuContext)
 
   // ** States
   const [navHover, setNavHover] = useState(false)
@@ -55,6 +70,7 @@ const Navigation = props => {
   const [filteredMenu, setFilteredMenu] = useState([]) //menu
   const [openFolders, setOpenFolders] = useState([]);
   const menu = props.verticalNavItems //menu
+  const gear = useContext(MenuContext)
 
   // ** Ref
   const shadowRef = useRef(null)
@@ -189,6 +205,26 @@ const Navigation = props => {
     return [filteredItemsWithoutNull, hasMatchingItem]
   };
 
+  const filterFav = (menu) => {
+    const iconName = "FavIcon"; 
+    const favorites = [];
+  
+    const traverse = (items) => {
+      items?.forEach(item => {
+        if (item?.children && item?.children?.length > 0) {
+          traverse(item?.children);
+        } else {
+          if(item?.iconName === iconName){
+            favorites?.push(item);
+          }
+        }
+      });
+    };
+    traverse(menu);
+
+    return favorites;
+  };
+
   useEffect(() => {
     setFilteredMenu(props.verticalNavItems)
   }, [props.verticalNavItems])
@@ -215,7 +251,6 @@ const Navigation = props => {
             label="Search"
             variant="outlined"
             fullWidth
-            margin="normal"
             size="small"
             onChange={handleSearch}
             autoComplete='off'
@@ -236,6 +271,30 @@ const Navigation = props => {
             }}
           />
           <TextField sx={{display:'none'}}/>
+           <Dropdown
+            Image={<SettingsIcon />}
+            TooltipTitle="Gear Items"
+            onClickAction={(GearItem) => {
+              router.push(GearItem?.path);
+              setLastOpenedPage(GearItem);
+            }}
+            map={gear.gear}
+            navCollapsed={navCollapsed}
+            navHover={navHover}
+          />
+          {filterFav(menu) && filterFav(menu).length > 0 &&(
+            <Dropdown
+              Image={ <GradeIcon style={{ color: 'yellow' }}/>}
+              TooltipTitle="Favorite Items"
+              onClickAction={(favorite) => {
+                router.push(favorite?.path);
+                setLastOpenedPage(favorite);
+              }}
+              map={filterFav(menu)}
+              navCollapsed={navCollapsed}
+              navHover={navHover}
+            />
+          )}
         </Box>
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
           {/* @ts-ignore */}

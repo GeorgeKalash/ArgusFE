@@ -325,13 +325,15 @@ console.log(userData)
 }
 
 
-  const search = e => {
+  const search = inp => {
+    console.log('inp' + inp)
     setGridData({count : 0, list: [] , message :"",  statusId:1})
-     const input = e.target.value
+     const input = inp
      console.log({list: []})
 
-     if(input.length > 1){
+     if(input){
     var parameters = `_size=30&_startAt=0&_filter=${input}`
+
     getRequest({
       extension: CTCLRepository.CtClientIndividual.snapshot,
       parameters: parameters
@@ -965,31 +967,9 @@ console.log(userData)
         }}
       >
 
-<Grid container spacing={2}>
-<Grid item xs={6}>
-            <CustomTextField
-              name='search'
 
-              label={_labels.search}
 
-              // value={ProfessionValidation.values.reference}
-              required
-              onKeyDown={(e) => e.key === 'Enter' && search(e)}
-
-              // onChange={search}
-
-              // maxLength = '10'
-
-              // maxAccess={maxAccess}
-
-              // onClear={() => ProfessionValidation.setFieldValue('search', '')}
-              // error={ProfessionValidation.touched.reference && Boolean(ProfessionValidation.errors.reference)}
-              // helperText={ProfessionValidation.touched.reference && ProfessionValidation.errors.reference}
-            />
-          </Grid>
-</Grid>
-
-<GridToolbar onAdd={addClient} maxAccess={access} />
+<GridToolbar onAdd={addClient} maxAccess={access}  validation={clientIndividualFormValidation}  onSearch={search} labels={_labels}  inputSearch={true}/>
 
 {gridData &&
         <Table

@@ -215,19 +215,21 @@ const AddressTab = ({
                     required
                     onChange={(event, newValue) => {
                       setCityStore([])
+                      addressValidation.setFieldValue('stateId', null)
+                      addressValidation.setFieldValue('cityId', null)
+                      addressValidation.setFieldValue('city', null)
+                      addressValidation.setFieldValue('cityDistrictId', null)
+                      addressValidation.setFieldValue('cityDistrict', null)
 
-                      if(newValue){
+
+                    if(newValue){
+                      fillStateStore(newValue?.recordId)
 
 
                       addressValidation.setFieldValue(
                         "countryId",
                         newValue?.recordId,
                       );
-
-
-                      fillStateStore(newValue?.recordId)
-
-
 
                     }else{
 
@@ -241,12 +243,14 @@ const AddressTab = ({
 
                       }
 
-                      addressValidation.setFieldValue('stateId', null)
-                      addressValidation.setFieldValue('cityId', null)
-                      addressValidation.setFieldValue('city', null)
-                      addressValidation.setFieldValue('cityDistrictId', null)
-                      addressValidation.setFieldValue('cityDistrict', null)
-                    }}
+
+
+
+
+                    }
+
+
+                  }
                     error={
                       addressValidation.touched.countryId &&
                       Boolean(addressValidation.errors.countryId)
@@ -259,17 +263,18 @@ const AddressTab = ({
                 </Grid>
 
           <Grid item xs={12}>
-            {
 
-              //stateStore &&
+
               <CustomComboBox
                 name='stateId'
                 label={labels.state}
                 valueField='stateId'
                 displayField='name'
+
                 store={stateStore}
-                readOnly={readOnly}
-                value={stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
+
+                readOnly={(readOnly || !addressValidation.values.countryId) && true}
+                value={addressValidation.values.stateId &&   stateStore.filter(item => item.recordId === addressValidation.values.stateId)[0]}
                 onChange={(event, newValue) => {
                   addressValidation.setFieldValue('stateId', newValue?.recordId)
                   addressValidation.setFieldValue('cityId', null)
@@ -279,9 +284,10 @@ const AddressTab = ({
                 }}
                 error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
                 helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
-                maxAccess={maxAccess}
+
+                // maxAccess={maxAccess}
               />
-            }
+
           </Grid>
 
           <Grid item xs={12}>
@@ -289,7 +295,7 @@ const AddressTab = ({
               name='city'
               label={labels.city}
               required={requiredOptional ? false : true}
-              readOnly={readOnly}
+              readOnly={(readOnly || !addressValidation.values.countryId) && true}
               valueField='name'
               displayField='name'
               store={cityStore}
@@ -320,7 +326,8 @@ const AddressTab = ({
               label={labels.cityDistrict}
               valueField='name'
               displayField='name'
-              readOnly={readOnly}
+              readOnly={(readOnly || !addressValidation.values.cityId) && true}
+
               store={cityDistrictStore}
               setStore={setCityDistrictStore}
               onLookup={lookupCityDistrict}
