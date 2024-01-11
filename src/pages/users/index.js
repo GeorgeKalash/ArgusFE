@@ -229,8 +229,9 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
-        getSecurityGrpGridData(obj.recordId)
-        setWindowOpen(false)
+        usersValidation.setFieldValue('recordId', res.recordId)
+        setWindowOpen(true)
+        setEditMode(true)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
@@ -286,7 +287,8 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
-        getSecurityGrpGridData(obj.recordId)
+        console.log('usersssssss new',res.record.recordId)
+        getSecurityGrpGridData(res.record.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
         setActiveTab(0)
@@ -533,6 +535,7 @@ const Users = () => {
 
   const getSecurityGrpGridData = userId => {
     setSecurityGrpGridData([])
+    console.log('userssssssss ',userId)
     const defaultParams = `_userId=${userId}&_filter=&_sgId=0`
     var parameters = defaultParams
 
