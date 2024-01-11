@@ -574,6 +574,8 @@ console.log(userData)
          clientIndividualFormValidation.setFieldValue('clientId' , res.recordId)
         setShowOtpVerification(true)
         setEditMode(true)
+        getClient(res.recordId)
+
         }
       })
       .catch((error) => {
@@ -666,7 +668,13 @@ console.log(userData)
   const editClient= obj => {
     setEditMode(true)
     const _recordId = obj.recordId
-    const defaultParams = `_clientId=${_recordId}`
+    getClient(_recordId)
+
+  }
+
+
+  const getClient=(recordId)=>{
+    const defaultParams = `_clientId=${recordId}`
     var parameters = defaultParams
     getRequest({
       extension: RTCLRepository.CtClientIndividual.get,
@@ -1028,7 +1036,7 @@ onEdit={editClient}
 
        />
        )}
-       {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={3600}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
+       {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={"3600"}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
        {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
 />}
 
