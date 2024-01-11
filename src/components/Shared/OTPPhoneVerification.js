@@ -95,7 +95,6 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
       }
 
       // setShowOtpVerification(false)
-      console.log(formValidation)
 
       // setEditMode(true)
 
@@ -105,7 +104,6 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
 
   const handleOtpChange = (index, e) => {
 
-    console.log('Key Code:', e.nativeEvent.inputType);
 
 
       document.getElementById(`otp-input-${index}`).select();
@@ -152,7 +150,7 @@ function checkDisable(){
   setDisabled(0)
   var count = 0;
    otp.map((digit, index) => (
-    digit !==''  &&  console.log('digit' + count++)
+    digit !==''  &&  count++
    ))
    if(count > 5){
     setDisabled(count)
@@ -172,7 +170,6 @@ function checkDisable(){
         document.getElementById(`otp-input-${index -1 }`)?.focus();
         document.getElementById(`otp-input-${index -1 }`)?.select();
     }else if (currentValue === document.getElementById(`otp-input-${index}`).value ) {
-      console.log('Same value on KeyUp:',document.getElementById(`otp-input-${index}`).value , currentValue);
       document.getElementById(`otp-input-${index}`)?.select();
 
 
@@ -191,7 +188,7 @@ function checkDisable(){
 
   const handleVerifyOtp = () => {
     const enteredOtp = otp.join('');
-console.log(enteredOtp)
+
 checkSMS(enteredOtp)
 
     // Implement logic to send the entered OTP to the backend for verification

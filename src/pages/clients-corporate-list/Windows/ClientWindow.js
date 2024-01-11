@@ -41,7 +41,6 @@ const {
   // maxAccess
 } = props
 
-// console.log("width"  + industryStore)
 
 return (
 
