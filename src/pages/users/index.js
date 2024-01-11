@@ -159,9 +159,7 @@ const Users = () => {
           })
     }),
     onSubmit: values => {
-      console.log('valuesss ', values)
-
-      //postUsers(values)
+      postUsers(values)
     }
   })
 
