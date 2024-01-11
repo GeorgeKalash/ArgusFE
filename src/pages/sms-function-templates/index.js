@@ -4,7 +4,7 @@ import { useEffect, useState, useContext } from 'react'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -41,75 +41,86 @@ const SmsFunctionTemplate = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    functionId: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    templateName: labels && labels.find(item => item.key === 3).value
+    functionId: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    templateName: labels && labels.find(item => item.key === "3").value
   }
 
   const lookupTemplate = searchQry => {
-
     setTemplateStore([])
-    if(searchQry){
-    var parameters = `_filter=${searchQry}`
-    getRequest({
-      extension: SystemRepository.SMSTemplate.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setTemplateStore(res.list)
+    if (searchQry) {
+      var parameters = `_filter=${searchQry}`
+      getRequest({
+        extension: SystemRepository.SMSTemplate.snapshot,
+        parameters: parameters
       })
-      .catch(error => {
-         setErrorMessage(error)
-      })}
+        .then(res => {
+          setTemplateStore(res.list)
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
+    }
   }
-    
+
   const columns = [
     {
-        field: 'textfield',
-        header: _labels.functionId,
-        name: 'functionId',
-        mandatory: true,
-        readOnly: true,
-        width: 150, 
+      field: 'textfield',
+      header: _labels.functionId,
+      name: 'functionId',
+      mandatory: true,
+      readOnly: true,
+      width: 150
     },
     {
-        field: 'textfield',
-        header: _labels.name,
-        name: 'functionName',
-        mandatory: true,
-        readOnly: true,
-        width: 200, 
+      field: 'textfield',
+      header: _labels.name,
+      name: 'functionName',
+      mandatory: true,
+      readOnly: true,
+      width: 300
     },
     {
-      field: 'templateName',
+      field: 'lookup',
       header: _labels.templateName,
       nameId: 'templateId',
       name: 'templateName',
-      customComponent: CustomLookup,
-      onLookup: { lookupTemplate },
-      setStore: templateStore,
+      mandatory: false,
+      store: templateStore,
       valueField: 'templateId',
       displayField: 'templateName',
-      columnsInDropDown: [{ key: 'templateId', value: 'templateName' }],
-      width: 250,
-      readOnly:false,
-      disabled:false,
+      fieldsToUpdate: [{ from: 'recordId', to: 'templateId' }, { from: 'name', to: 'templateName' }],
+      columnsInDropDown: [{ key: 'name', value: 'name' }],
+      onLookup: lookupTemplate
+    }
 
-    },
-];
+    // {
+    //   field: 'lookup',
+    //   header: _labels.templateName,
+    //   nameId: 'templateId',
+    //   name: 'templateName',
+    //   onLookup: lookupTemplate,
+    //   setStore: templateStore.list,
+    //   valueField: 'templateId',
+    //   displayField: 'templateName',
+    //   columnsInDropDown: [{ key: 'templateId', value: 'templateName' }],
+    //   width: 250,
+    //   readOnly:false,
+    //   disabled:false,
+
+    // },
+  ]
 
   const smsFunctionTemplatesValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
-    validate: values => {
-    },
+    validate: values => {},
     initialValues: {
       rows: [
         {
-          functionId:''
+          functionId: ''
         }
       ]
-
     },
     onSubmit: values => {
       postSmsFunctionTemplates(values.rows)
@@ -118,57 +129,53 @@ const SmsFunctionTemplate = () => {
 
   const getGridData = () => {
     try {
-      const parameters = '';
-      
+      const parameters = ''
+
       const resSystemFunctionPromise = getRequest({
         extension: SystemRepository.SystemFunction.qry,
         parameters: parameters
-      });
-  
+      })
+
       const resSmsFunctionTemplatePromise = getRequest({
         extension: SystemRepository.SMSFunctionTemplate.qry,
         parameters: parameters
-      });
-  
-       Promise.all([resSystemFunctionPromise, resSmsFunctionTemplatePromise])
-        .then(([resSystemFunction, resSmsFunctionTemplate]) => {
-          const finalList = resSystemFunction.list.map((x) => {
+      })
+
+      Promise.all([resSystemFunctionPromise, resSmsFunctionTemplatePromise]).then(
+        ([resSystemFunction, resSmsFunctionTemplate]) => {
+          const finalList = resSystemFunction.list.map(x => {
             const n = {
               functionId: parseInt(x.functionId),
               templateId: null,
               functionName: x.sfName,
               templateName: null
-            };
-  
-            const matchingTemplate = resSmsFunctionTemplate.list.find(
-              (y) => n.functionId === y.functionId
-            );
-  
-            if (matchingTemplate) {
-              n.templateId = matchingTemplate.templateId;
-              n.templateName = matchingTemplate.templateName;
             }
-  
-            return n;
-          });
-  
+
+            const matchingTemplate = resSmsFunctionTemplate.list.find(y => n.functionId === y.functionId)
+
+            if (matchingTemplate) {
+              n.templateId = matchingTemplate.templateId
+              n.templateName = matchingTemplate.templateName
+            }
+
+            return n
+          })
+
           smsFunctionTemplatesValidation.setValues({
             ...smsFunctionTemplatesValidation.values,
             rows: finalList
-          });
-
-        });
-
+          })
+        }
+      )
     } catch (error) {
-      setErrorMessage(error.res);
+      setErrorMessage(error.res)
 
-      return Promise.reject(error); // You can choose to reject the promise if an error occurs
+      return Promise.reject(error) // You can choose to reject the promise if an error occurs
     }
-  };
-  
+  }
 
-    const postSmsFunctionTemplates = obj => {
-      /* const recordId = obj.recordId
+  const postSmsFunctionTemplates = obj => {
+    /* const recordId = obj.recordId
        postRequest({
          extension: SystemRepository.SMSTemplate.set,
          record: JSON.stringify(obj)
@@ -182,20 +189,20 @@ const SmsFunctionTemplate = () => {
          .catch(error => {
            setErrorMessage(error)
          })*/
-     }
-  
-     useEffect(() => {
-      if (!access) getAccess(ResourceIds.SmsFunctionTemplates, setAccess)
-      else {
-        if (access.record.maxAccess > 0) {
-          getGridData()
-          getLabels(ResourceIds.SmsFunctionTemplates, setLabels)
-        } else {
-          setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-        }
+  }
+
+  useEffect(() => {
+    if (!access) getAccess(ResourceIds.SmsFunctionTemplates, setAccess)
+    else {
+      if (access.record.maxAccess > 0) {
+        getGridData()
+        getLabels(ResourceIds.SmsFunctionTemplates, setLabels)
+      } else {
+        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [access])
+  }, [access])
 
   return (
     <>

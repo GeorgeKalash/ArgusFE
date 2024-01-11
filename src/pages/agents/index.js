@@ -45,11 +45,11 @@ const Agent = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    name: labels && labels.find(item => item.key === 1).value,
-    agents: labels && labels.find(item => item.key === 2).value,
-    country: labels && labels.find(item => item.key === 3).value,
-    countryRef: labels && labels.find(item => item.key === 4).value,
-    countryName: labels && labels.find(item => item.key === 5).value
+    name: labels && labels.find(item => item.key === "1").value,
+    agents: labels && labels.find(item => item.key === "2").value,
+    country: labels && labels.find(item => item.key === "3").value,
+    countryRef: labels && labels.find(item => item.key === "4").value,
+    countryName: labels && labels.find(item => item.key === "5").value
   }
 
   const columns = [

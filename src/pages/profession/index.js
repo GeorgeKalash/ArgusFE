@@ -58,13 +58,13 @@ const Professions = () => {
   }, [access])
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    flName: labels && labels.find(item => item.key === 3).value,
-    monthlyIncome: labels && labels.find(item => item.key === 4).value,
-    riskFactor: labels && labels.find(item => item.key === 5).value,
-    profession: labels && labels.find(item => item.key === 6).value,
-    diplomatStatus: labels && labels.find(item => item.key === 7).value,
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    flName: labels && labels.find(item => item.key === "3").value,
+    monthlyIncome: labels && labels.find(item => item.key === "4").value,
+    riskFactor: labels && labels.find(item => item.key === "5").value,
+    profession: labels && labels.find(item => item.key === "6").value,
+    diplomatStatus: labels && labels.find(item => item.key === "7").value,
   }
 
   const columns = [

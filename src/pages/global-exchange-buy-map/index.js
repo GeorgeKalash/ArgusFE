@@ -121,10 +121,10 @@ const GlobalExchangeBuyMap = () => {
   })
 
   const _labels = {
-    country: labels && labels.find(item => item.key === 1) && labels.find(item => item.key === 1).value,
-    currency: labels && labels.find(item => item.key === 2) && labels.find(item => item.key === 2).value,
-    exchangeTable: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
-    name: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value
+    country: labels && labels.find(item => item.key === "1") && labels.find(item => item.key === "1").value,
+    currency: labels && labels.find(item => item.key === "2") && labels.find(item => item.key === "2").value,
+    exchangeTable: labels && labels.find(item => item.key === "3") && labels.find(item => item.key === "3").value,
+    name: labels && labels.find(item => item.key === "4") && labels.find(item => item.key === "4").value
 
   }
 

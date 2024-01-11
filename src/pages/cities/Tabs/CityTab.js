@@ -41,6 +41,10 @@ const CityTab = ({ labels, cityValidation, countryStore, stateStore, fillStateSt
           label={labels.country}
           valueField='recordId'
           displayField='name'
+          columnsInDropDown= {[
+            { key: 'reference', value: 'Reference' },
+            { key: 'name', value: 'Name' }
+          ]}
           store={countryStore}
           value={countryStore.filter(item => item.recordId === cityValidation.values.countryId)[0]} // Ensure the value matches an option or set it to null
           required

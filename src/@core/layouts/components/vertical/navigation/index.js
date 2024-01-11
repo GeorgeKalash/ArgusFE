@@ -1,11 +1,17 @@
 // ** React Import
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useContext } from 'react'
+import * as React from 'react';
+
+// ** Next Imports
+import Image from 'next/image';
 
 // ** MUI Imports
 import List from '@mui/material/List'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
+import SettingsIcon from '@mui/icons-material/Settings';
+import GradeIcon from '@mui/icons-material/Grade';
 import { createTheme, responsiveFontSizes, styled, ThemeProvider } from '@mui/material/styles'
 
 // ** Third Party Components
@@ -18,12 +24,17 @@ import themeConfig from 'src/configs/themeConfig'
 import Drawer from './Drawer'
 import VerticalNavItems from './VerticalNavItems'
 import VerticalNavHeader from './VerticalNavHeader'
+import Dropdown from './Dropdown';
 
 // ** Theme Options
 import themeOptions from 'src/@core/theme/ThemeOptions'
 
 // ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
+
+import { useRouter } from 'next/router';
+import { MenuContext } from 'src/providers/MenuContext';
+
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   top: 60,
@@ -45,9 +56,13 @@ const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   }
 }))
 
-const Navigation = props => {
+const Navigation = props => {  
+
+  const router = useRouter();
+  
   // ** Props
-  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
+  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props 
+  const {  setLastOpenedPage } = useContext(MenuContext)
 
   // ** States
   const [navHover, setNavHover] = useState(false)
@@ -55,6 +70,7 @@ const Navigation = props => {
   const [filteredMenu, setFilteredMenu] = useState([]) //menu
   const [openFolders, setOpenFolders] = useState([]);
   const menu = props.verticalNavItems //menu
+  const gear = useContext(MenuContext)
 
   // ** Ref
   const shadowRef = useRef(null)
@@ -112,7 +128,7 @@ const Navigation = props => {
   // ** filterMenu
   const handleSearch = (e) => {
     const term = e.target.value;
-
+    
     if (term === '') {
       setFilteredMenu(menu)
       setOpenFolders([])
@@ -189,14 +205,34 @@ const Navigation = props => {
     return [filteredItemsWithoutNull, hasMatchingItem]
   };
 
+  const filterFav = (menu) => {
+    const iconName = "FavIcon"; 
+    const favorites = [];
+  
+    const traverse = (items) => {
+      items?.forEach(item => {
+        if (item?.children && item?.children?.length > 0) {
+          traverse(item?.children);
+        } else {
+          if(item?.iconName === iconName){
+            favorites?.push(item);
+          }
+        }
+      });
+    };
+    traverse(menu);
+
+    return favorites;
+  };
+
   useEffect(() => {
     setFilteredMenu(props.verticalNavItems)
   }, [props.verticalNavItems])
 
-  useEffect(() => {
-    if (navCollapsed)
-      setOpenFolders([])
-  }, [navCollapsed])
+  // useEffect(() => {
+  //   if (navCollapsed)
+  //     setOpenFolders([])
+  // }, [navCollapsed])
 
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 
@@ -210,22 +246,56 @@ const Navigation = props => {
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        {!navCollapsed &&
-          <Box sx={{ display: 'flex', alignItems: 'center', px: 4 }}>
-            <TextField
-              label="Search"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              size="small"
-              onChange={handleSearch}
-              autoComplete='off'
-              InputProps={{
-                endAdornment: <SearchIcon />,
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 4 }}>
+          <TextField
+            label="Search"
+            variant="outlined"
+            fullWidth
+            size="small"
+            onChange={handleSearch}
+            autoComplete='off'
+            InputLabelProps={{
+              sx: { color: 'rgba(231, 227, 252, 0.87) !important',backgroundColor:'#383838',padding:'0px 3px !important',
+              display:  navCollapsed && !navHover ? 'none':'flex',},
+            }}
+            InputProps={{
+              sx: { 
+                display: 'flex',
+                alignItems: navCollapsed && !navHover ? 'center !important' : 'left',
+                justifyContent: navCollapsed && !navHover ? 'center !important' : 'left',
+                border: '1px solid rgba(231, 227, 252, 0.87)',
+                fieldset: {
+                  borderColor: 'transparent !important', },},
+              endAdornment: <SearchIcon 
+              sx={{ border: '0px' }}  />,
+            }}
+          />
+          <TextField sx={{display:'none'}}/>
+           <Dropdown
+            Image={<SettingsIcon />}
+            TooltipTitle="Gear Items"
+            onClickAction={(GearItem) => {
+              router.push(GearItem?.path);
+              setLastOpenedPage(GearItem);
+            }}
+            map={gear.gear}
+            navCollapsed={navCollapsed}
+            navHover={navHover}
+          />
+          {filterFav(menu) && filterFav(menu).length > 0 &&(
+            <Dropdown
+              Image={ <GradeIcon style={{ color: 'yellow' }}/>}
+              TooltipTitle="Favorite Items"
+              onClickAction={(favorite) => {
+                router.push(favorite?.path);
+                setLastOpenedPage(favorite);
               }}
+              map={filterFav(menu)}
+              navCollapsed={navCollapsed}
+              navHover={navHover}
             />
-          </Box>
-        }
+          )}
+        </Box>
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
           {/* @ts-ignore */}
           <ScrollWrapper
@@ -253,7 +323,7 @@ const Navigation = props => {
                   transition: 'padding .25s ease',
                   '& > :first-child': { mt: '0' },
 
-                  pr: !navCollapsed || (navCollapsed && navHover) ? '10px' : 1.25
+                  // pr: !navCollapsed || (navCollapsed && navHover) ? '10px' : 1.25
 
                 }}
               >

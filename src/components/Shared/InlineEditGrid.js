@@ -266,7 +266,7 @@ const InlineEditGrid = ({
             getOptionLabel={option => {
               if (typeof option === 'object') return option[column.displayField]
               else {
-                const selectedOption = column.store.find(item => {
+                const selectedOption = column.store?.find(item => {
                   return item[column.valueField] === option
                 })
                 if (selectedOption) return selectedOption[column?.displayField]
@@ -298,7 +298,9 @@ const InlineEditGrid = ({
               }
             }}
             PaperComponent={props =>
-              column.columnsInDropDown && column.columnsInDropDown.length > 0 && CustomPaper(props, widthDropDown)
+              column.columnsInDropDown &&
+              column.columnsInDropDown.length > 0 &&
+              CustomPaper(props, column.widthDropDown)
             }
             renderOption={(props, option) => {
               if (column.columnsInDropDown && column.columnsInDropDown.length > 0)

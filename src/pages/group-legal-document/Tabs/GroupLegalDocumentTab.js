@@ -21,6 +21,10 @@ const GroupLegalDocumentTab=({
                   label={labels.group}
                   valueField='recordId'
                   displayField='name'
+                  columnsInDropDown= {[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
                   store={groupStore}
                   value={groupStore.filter(item => item.recordId === groupLegalDocumentValidation.values.groupId)[0]}
                   required

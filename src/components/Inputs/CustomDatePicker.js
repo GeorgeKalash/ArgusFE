@@ -23,6 +23,7 @@ const CustomDatePicker = ({
   required = false,
   autoFocus = false,
   disabled = false,
+  disabledDate = null,
   readOnly = false,
   editMode = false,
   ...props
@@ -34,6 +35,29 @@ const CustomDatePicker = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
+  console.log(value +'value')
+
+
+   // Function to check if a date should be disabled
+    const shouldDisableDate = (dates) => {
+      console.log('dates' + dates )
+      const date = new Date(dates);
+      console.log(date )
+
+    const today = new Date();
+    today.setDate(today.getDate());
+    date.setDate(date.getDate());
+  if(disabledDate === '>=' ){
+    return date   >= today  ;
+  }
+  if(disabledDate === '<' ){
+    return date   < today  ; // Disable today and future dates
+  }
+  if(disabledDate === '>' ){
+    return date   > today  ; // Disable today and future dates
+  }
+
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -45,12 +69,15 @@ const CustomDatePicker = ({
         fullWidth={fullWidth}
         autoFocus={autoFocus}
         format={dateFormat}
+
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
         disabled={disabled}
         readOnly={_readOnly}
         clearable //bug from mui not working for now
+        shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
+
         slotProps={{
           // replacing clearable behaviour
           textField: {

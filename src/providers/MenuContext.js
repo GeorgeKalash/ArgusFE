@@ -16,6 +16,7 @@ const MenuProvider = ({ children }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [menu, setMenu] = useState([])
+  const [gear, setGear] = useState([])
   const [lastOpenedPage, setLastOpenedPage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -27,6 +28,8 @@ const MenuProvider = ({ children }) => {
     })
       .then(async res => {
         const builtMenu = buildMenu(res.record.folders, res.record.commandLines)
+        const builtGear = buildGear(res.record.commandLines)
+        setGear(builtGear)
         setMenu(builtMenu)
       })
       .catch(error => {
@@ -71,6 +74,27 @@ const MenuProvider = ({ children }) => {
 
     return menu
   }
+
+  const buildGear = (commandLines) => {
+    const Gear = []
+    commandLines
+          .filter(commandLine => commandLine.folderId === 0)
+          .forEach(commandLine => {
+            if (commandLine.nextAPI){
+              const GearItem={
+                id: commandLine.id,
+                title: commandLine.name,
+                path: `/${commandLine.nextAPI}`,
+                name: commandLine.name,
+                folderId:commandLine.folderId,
+                iconName: commandLine.addToBookmarks && 'FavIcon'
+              }
+        Gear.push(GearItem)}
+          })
+          
+          return Gear
+      }
+  
 
   const handleBookmark = (item, isBookmarked, callBack = undefined) => {
     //TEMP userData later replace with userProvider
@@ -123,6 +147,7 @@ const MenuProvider = ({ children }) => {
 
   const values = {
     menu,
+    gear,
     handleBookmark,
     lastOpenedPage,
     setLastOpenedPage

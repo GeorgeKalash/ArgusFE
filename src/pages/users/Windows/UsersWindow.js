@@ -2,6 +2,8 @@
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import UsersTab from 'src/pages/users/Tabs/UsersTab'
+import DefaultsTab from 'src/pages/users/Tabs/DefaultsTab'
+import SecurityGrpTab from 'src/pages/users/Tabs/SecurityGrpTab'
 
 const UsersWindow = ({
   onClose,
@@ -18,7 +20,27 @@ const UsersWindow = ({
   activeStatusStore,
   employeeStore,
   setEmployeeStore,
-  lookupEmployee
+  lookupEmployee, 
+  tabs,
+  activeTab,
+  setActiveTab,
+  defaultsValidation,
+  siteStore,
+  plantStore,
+  salesPersonStore,
+  setCashAccStore,
+  cashAccStore,
+  lookupCashAcc,
+  checkFieldDirect,
+  emailPresent,
+  passwordState,
+  setPasswordState,
+
+  securityGrpGridData,
+  getSecurityGrpGridData,
+  addSecurityGrp,
+  delSecurityGrp,
+  popupSecurityGrp,
 }) => {
   return (
     <Window
@@ -29,8 +51,11 @@ const UsersWindow = ({
       height={height}
       onSave={onSave}
       usersValidation={usersValidation}
+      tabs={tabs}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
     >
-      <CustomTabPanel>
+      <CustomTabPanel index={0} value={activeTab}>
         <UsersTab
           labels={labels}
           usersValidation={usersValidation}
@@ -43,6 +68,34 @@ const UsersWindow = ({
           employeeStore={employeeStore}
           setEmployeeStore={setEmployeeStore}
           lookupEmployee={lookupEmployee}
+          checkFieldDirect={checkFieldDirect}
+          emailPresent={emailPresent}
+          passwordState={passwordState}
+          setPasswordState={setPasswordState}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel index={1} value={activeTab}>
+        <DefaultsTab
+          labels={labels}
+          maxAccess={maxAccess}
+          defaultsValidation={defaultsValidation}
+          siteStore={siteStore}
+          plantStore={plantStore}
+          salesPersonStore={salesPersonStore}
+          setCashAccStore={setCashAccStore}
+          cashAccStore={cashAccStore}
+          lookupCashAcc={lookupCashAcc}>
+          </DefaultsTab>
+      </CustomTabPanel>
+      <CustomTabPanel index={2} value={activeTab}>
+        <SecurityGrpTab
+          securityGrpGridData={securityGrpGridData}
+          getSecurityGrpGridData={getSecurityGrpGridData}
+          addSecurityGrp={addSecurityGrp}
+          delSecurityGrp={delSecurityGrp}
+          popupSecurityGrp={popupSecurityGrp}
+          labels={labels}
+          maxAccess={maxAccess}
         />
       </CustomTabPanel>
     </Window>

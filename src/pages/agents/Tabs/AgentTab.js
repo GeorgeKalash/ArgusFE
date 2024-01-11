@@ -26,6 +26,10 @@ const AgentTab = ({ labels, agentValidation, countryStore, maxAccess }) => {
         <CustomComboBox
           name='countryId'
           label={labels.country}
+          columnsInDropDown= {[
+            { key: 'reference', value: 'Reference' },
+            { key: 'name', value: 'Name' }
+          ]}
           valueField='recordId'
           displayField='name'
           store={countryStore}

@@ -1,0 +1,66 @@
+.phoneVerificationContainer {
+  max-width: 350px;
+  margin: 20px auto;
+  padding: 0px;
+  /* border: 1px solid #ccc; */
+  border-radius: 5px;
+  text-align: center;
+}
+
+.otpInputContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.inputText {
+  width: 40px;
+  height: 40px;
+  /* Other styles for input[type="text"] */
+
+  /* input[type="text"] { */
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 5px;
+
+}
+
+
+.timerContainer {
+  margin-bottom: 20px;
+}
+
+.expiredTimer {
+  color: red;
+}
+
+.resendButton,
+.verifyButton {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-right: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.resendButton:disabled,
+.verifyButton:disabled {
+  background-color: #ddd;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  color: red;
+  margin-top: 10px;
+}

@@ -56,9 +56,9 @@ const RelationTypes = () => {
 
 
   const _labels = {
-    min: labels && labels.find(item => item.key ===2).value ,
-    max: labels && labels.find(item => item.key === 3).value,
-    salaryRange: labels && labels.find(item => item.key === 1).value,
+    min: labels && labels.find(item => item.key ==="2").value ,
+    max: labels && labels.find(item => item.key === "3").value,
+    salaryRange: labels && labels.find(item => item.key === "1").value,
   }
 
   const columns = [

@@ -46,11 +46,11 @@ const CityDistricts = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    country: labels && labels.find(item => item.key === 3).value,
-    cityDistrict: labels && labels.find(item => item.key === 4).value,
-    city: labels && labels.find(item => item.key === 5).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    country: labels && labels.find(item => item.key === "3").value,
+    cityDistrict: labels && labels.find(item => item.key === "4").value,
+    city: labels && labels.find(item => item.key === "5").value
   }
 
   const columns = [

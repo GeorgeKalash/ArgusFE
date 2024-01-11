@@ -61,13 +61,13 @@ const ExchangeTables = () => {
   }, [access])
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    currency: labels && labels.find(item => item.key === 3).value,
-    rcm: labels && labels.find(item => item.key === 4).value,
-    rateAgainst: labels && labels.find(item => item.key === 5).value,
-    fCurrency: labels && labels.find(item => item.key === 6).value,
-    ExchangeTable: labels && labels.find(item => item.key === 7).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    currency: labels && labels.find(item => item.key === "3").value,
+    rcm: labels && labels.find(item => item.key === "4").value,
+    rateAgainst: labels && labels.find(item => item.key === "5").value,
+    fCurrency: labels && labels.find(item => item.key === "6").value,
+    ExchangeTable: labels && labels.find(item => item.key === "7").value
   }
 
   const columns = [

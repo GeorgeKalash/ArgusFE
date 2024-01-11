@@ -1,5 +1,9 @@
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Typography from '@mui/material/Typography'
+import { AuthContext } from 'src/providers/AuthContext'
+
 // ** React Imports
-import { useState } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -57,16 +61,17 @@ const LoginPage = () => {
   // ** Hooks
   const theme = useTheme()
   const auth = useAuth()
+  const { companyName } = useContext(AuthContext)
 
   const validation = useFormik({
     enableReinitialize: true,
     initialValues: {
-      email: '',
+      username: '',
       password: '',
       rememberMe: false
     },
     validationSchema: yup.object({
-      email: yup.string().email().required(),
+      username: yup.string().required(),
       password: yup.string().min(5, 'Must be at least 6 characters').required(),
       rememberMe: yup.boolean()
     }),
@@ -86,8 +91,8 @@ const LoginPage = () => {
 
   return (
     <>
-      <Box className='content-center'>
-        <Card sx={{ zIndex: 1, width: '28rem' }}>
+      <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Card sx={{ zIndex: 1, width: '28rem', marginBottom: 10, marginTop: 50 }}>
           <CardMedia
             component='img'
             image='/images/logos/ArgusLogo.png'
@@ -102,19 +107,30 @@ const LoginPage = () => {
           <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
             <Grid container spacing={5}>
               <Grid item xs={12}>
-                <TextField
-                  name='email'
+                <CustomTextField
+                  readOnly
+                  name='companyName'
+                  value={companyName}
                   size='small'
                   fullWidth
-                  label='Email'
-                  value={validation.values.email}
-                  onChange={validation.handleChange}
-                  error={validation.touched.email && validation.errors.email}
-                  helperText={validation.touched.email && validation.errors.email}
+                  label='Company Name'
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <CustomTextField
+                  name='username'
+                  size='small'
+                  fullWidth
+                  label='Username'
+                  value={validation.values.username}
+                  type='text'
+                  onChange={validation.handleChange}
+                  error={validation.touched.username && Boolean(validation.errors.username)}
+                  helperText={validation.touched.username && validation.errors.username}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
                   name='password'
                   size='small'
                   fullWidth
@@ -167,6 +183,27 @@ const LoginPage = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Language Selection Section */}
+        <Box sx={{ my: 5, display: 'flex', gap: 3 }}>
+          <Typography variant='body2'>Argus offered in:</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
+            <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
+              English
+            </LinkStyled>
+            <LinkStyled href='/pages/auth/login-fr' sx={{ color: 'red' }}>
+              Français
+            </LinkStyled>
+            <LinkStyled href='/pages/auth/login-ar' sx={{ color: 'red' }}>
+              عربي
+            </LinkStyled>
+          </Box>
+        </Box>
+
+        {/* Footer Section */}
+        <Box component='footer' sx={{ mt: 'auto' }}>
+          © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
+        </Box>
       </Box>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>

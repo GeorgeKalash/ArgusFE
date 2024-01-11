@@ -56,16 +56,16 @@ const  UpdateExchangeRates = () => {
   const _labels= {
 
 
-     country: labels && labels.find(item => item.key === 1) && labels.find(item => item.key === 2).value,
-     currency: labels && labels.find(item => item.key === 2) && labels.find(item => item.key === 1).value,
-     exchangeTable: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
-     RCM: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value,
-     rates: labels && labels.find(item => item.key === 6) && labels.find(item => item.key === 6).value,
-     sellMin: labels && labels.find(item => item.key === 5) && labels.find(item => item.key ===5).value,
-     sellMax: labels && labels.find(item => item.key === 7) && labels.find(item => item.key === 7).value,
-     exchangeBuy: labels && labels.find(item => item.key === 10) && labels.find(item => item.key === 10).value,
-     against: labels && labels.find(item => item.key === 9) && labels.find(item => item.key === 9).value,
-     rate: labels && labels.find(item => item.key === 8) && labels.find(item => item.key === 8).value,
+     country: labels && labels.find(item => item.key === "1") && labels.find(item => item.key === "2").value,
+     currency: labels && labels.find(item => item.key === "2") && labels.find(item => item.key === "1").value,
+     exchangeTable: labels && labels.find(item => item.key === "3") && labels.find(item => item.key === "3").value,
+     RCM: labels && labels.find(item => item.key === "4") && labels.find(item => item.key === "4").value,
+     rates: labels && labels.find(item => item.key === "6") && labels.find(item => item.key === "6").value,
+     sellMin: labels && labels.find(item => item.key === "5") && labels.find(item => item.key ==="5").value,
+     sellMax: labels && labels.find(item => item.key === "7") && labels.find(item => item.key === "7").value,
+     exchangeBuy: labels && labels.find(item => item.key === "10") && labels.find(item => item.key === "10").value,
+     against: labels && labels.find(item => item.key === "9") && labels.find(item => item.key === "9").value,
+     rate: labels && labels.find(item => item.key === "8") && labels.find(item => item.key === "8").value,
 
    }
 

@@ -48,14 +48,14 @@ const Countries = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    flName: labels && labels.find(item => item.key === 3).value,
-    currencyName: labels && labels.find(item => item.key === 4).value,
-    regionName: labels && labels.find(item => item.key === 5).value,
-    ibanLength: labels && labels.find(item => item.key === 6).value,
-    country: labels && labels.find(item => item.key === 7).value,
-    isInactive: labels && labels.find(item => item.key === 8).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    flName: labels && labels.find(item => item.key === "3").value,
+    currencyName: labels && labels.find(item => item.key === "4").value,
+    regionName: labels && labels.find(item => item.key === "5").value,
+    ibanLength: labels && labels.find(item => item.key === "6").value,
+    country: labels && labels.find(item => item.key === "7").value,
+    isInactive: labels && labels.find(item => item.key === "8").value
   }
 
   const columns = [

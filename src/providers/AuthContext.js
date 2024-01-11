@@ -43,6 +43,8 @@ const AuthProvider = ({ children }) => {
   // ** States
   const [user, setUser] = useState(defaultProvider.user)
   const [loading, setLoading] = useState(defaultProvider.loading)
+  const [companyName, setCompanyName] = useState('')
+  const [getAC, setGetAC] = useState({})
 
   // ** Hooks
   const router = useRouter()
@@ -61,19 +63,30 @@ const AuthProvider = ({ children }) => {
       }
     }
     initAuth()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const fetchData = async () => {
+      try {
+        const response = await axios({
+          method: 'GET',
+          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
+        })
+
+        // Set companyName from the API response
+        setCompanyName(response.data.record.companyName)
+        setGetAC(response)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+
+    fetchData()
   }, [])
 
   const handleLogin = async (params, errorCallback) => {
     try {
-      const getAC = await axios({
-        method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
-      })
-
       const getUS2 = await axios({
         method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/SY.asmx/getUS2?_email=${params.email}`,
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/SY.asmx/getUS2?_email=${params.username}`,
         headers: {
           accountId: JSON.parse(getAC.data.record.accountId),
           dbe: JSON.parse(getAC.data.record.dbe),
@@ -81,8 +94,13 @@ const AuthProvider = ({ children }) => {
         }
       })
 
-      const signIn3Params = `_email=${params.email}&_password=${encryptePWD(params.password)}&_accountId=${getAC.data.record.accountId
-        }&_userId=${getUS2.data.record.recordId}`
+      if (getUS2.data.record === null) {
+        throw new Error(`User ${params.username} not found`)
+      }
+
+      const signIn3Params = `_email=${params.username}&_password=${encryptePWD(params.password)}&_accountId=${
+        getAC.data.record.accountId
+      }&_userId=${getUS2.data.record.recordId}`
 
       const signIn3 = await axios({
         method: 'GET',
@@ -94,11 +112,6 @@ const AuthProvider = ({ children }) => {
         }
       })
 
-      // console.log({ getAC: getAC.data.record })
-      // console.log({ getUS2: getUS2.data.record })
-      // console.log({ signIn3: signIn3.data.record })
-
-
       const defaultSettings = await axios({
         method: 'GET',
         url: `${process.env.NEXT_PUBLIC_BASE_URL}SY.asmx/getDE?_key=dateFormat`,
@@ -108,20 +121,19 @@ const AuthProvider = ({ children }) => {
         }
       })
 
-      console.log("defaultSettings")
+      console.log('defaultSettings')
       console.log(defaultSettings)
 
       const defaultSet = {
-        dateFormat :  defaultSettings.data.record && defaultSettings.data.record.value
+        dateFormat: defaultSettings.data.record && defaultSettings.data.record.value
       }
 
       window.localStorage.setItem('default', JSON.stringify(defaultSet))
 
-
       const loggedUser = {
         accountId: getAC.data.record.accountId,
         userId: getUS2.data.record.recordId,
-        email: getUS2.data.record.email,
+        username: getUS2.data.record.username,
         languageId: getUS2.data.record.languageId,
         userType: getUS2.data.record.userType,
         employeeId: getUS2.data.record.employeeId,
@@ -133,12 +145,7 @@ const AuthProvider = ({ children }) => {
         ...signIn3.data.record
       }
 
-      // params.rememberMe
-      //   ? window.localStorage.setItem(authConfig.storageTokenKeyName, signIn3.data.record.accessToken)
-      //   : null
-      // console.log({ loggedUser })
       setUser({ ...loggedUser })
-
 
       params.rememberMe
         ? window.localStorage.setItem('userData', JSON.stringify(loggedUser))
@@ -158,7 +165,6 @@ const AuthProvider = ({ children }) => {
     window.localStorage.removeItem('userData')
     window.sessionStorage.removeItem('userData')
 
-    // window.localStorage.removeItem(authConfig.storageTokenKeyName)
     router.push('/login')
   }
 
@@ -208,6 +214,7 @@ const AuthProvider = ({ children }) => {
   const values = {
     user,
     loading,
+    companyName,
     setUser,
     setLoading,
     login: handleLogin,

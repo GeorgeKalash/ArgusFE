@@ -29,6 +29,20 @@ const RequestsProvider = ({ children }) => {
     }).then(res => res.data)
   }
 
+  const getIdentityRequest = async body => {
+    const accessToken = await getAccessToken()
+
+    return axios({
+      method: 'GET',
+      url: process.env.NEXT_PUBLIC_AuthURL  + body.extension + '?' + body.parameters,
+      headers: {
+        Authorization: 'Bearer ' + accessToken,
+        'Content-Type': 'multipart/form-data',
+        LanguageId: user.languageId
+      }
+    }).then(res => res.data)
+  }
+
   const postRequest = async body => {
     const accessToken = await getAccessToken()
     const url = body.url ? body.url : process.env.NEXT_PUBLIC_BASE_URL
@@ -136,7 +150,8 @@ const RequestsProvider = ({ children }) => {
 
   const values = {
     getRequest,
-    postRequest
+    postRequest,
+    getIdentityRequest
   }
 
   return <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>

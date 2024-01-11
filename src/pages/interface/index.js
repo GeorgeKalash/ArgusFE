@@ -43,11 +43,11 @@ const Interface = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    path: labels && labels.find(item => item.key === 3).value,
-    description: labels && labels.find(item => item.key === 4).value,
-    interface: labels && labels.find(item => item.key === 5).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    path: labels && labels.find(item => item.key === "3").value,
+    description: labels && labels.find(item => item.key === "4").value,
+    interface: labels && labels.find(item => item.key === "5").value
   }
 
   const columns = [

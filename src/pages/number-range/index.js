@@ -50,16 +50,16 @@ const NumberRange = () => {
   }, [access])
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    description: labels && labels.find(item => item.key === 2).value,
-    min: labels && labels.find(item => item.key === 3).value,
-    max: labels && labels.find(item => item.key === 4).value,
-    current: labels && labels.find(item => item.key === 5).value,
-    external: labels && labels.find(item => item.key === 6).value,
-    dateRange: labels && labels.find(item => item.key === 7).value,
-    startDate: labels && labels.find(item => item.key === 8).value,
-    endDate: labels && labels.find(item => item.key === 9).value,
-    title: labels && labels.find(item => item.key === 10).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    description: labels && labels.find(item => item.key === "2").value,
+    min: labels && labels.find(item => item.key === "3").value,
+    max: labels && labels.find(item => item.key === "4").value,
+    current: labels && labels.find(item => item.key === "5").value,
+    external: labels && labels.find(item => item.key === "6").value,
+    dateRange: labels && labels.find(item => item.key === "7").value,
+    startDate: labels && labels.find(item => item.key === "8").value,
+    endDate: labels && labels.find(item => item.key === "9").value,
+    title: labels && labels.find(item => item.key === "10").value
   }
 
   const columns = [

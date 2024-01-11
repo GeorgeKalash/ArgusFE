@@ -52,17 +52,17 @@ const Currencies = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    foreignLanguage: labels && labels.find(item => item.key === 3).value,
-    decimals: labels && labels.find(item => item.key === 4).value,
-    profile: labels && labels.find(item => item.key === 5).value,
-    currencyType: labels && labels.find(item => item.key === 6).value,
-    sales: labels && labels.find(item => item.key === 7).value,
-    purchase: labels && labels.find(item => item.key === 8).value,
-    currency: labels && labels.find(item => item.key === 9).value,
-    isoCode: labels && labels.find(item => item.key === 10).value,
-    symbol: labels && labels.find(item => item.key === 11).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    foreignLanguage: labels && labels.find(item => item.key === "3").value,
+    decimals: labels && labels.find(item => item.key === "4").value,
+    profile: labels && labels.find(item => item.key === "5").value,
+    currencyType: labels && labels.find(item => item.key === "6").value,
+    sales: labels && labels.find(item => item.key === "7").value,
+    purchase: labels && labels.find(item => item.key === "8").value,
+    currency: labels && labels.find(item => item.key === "9").value,
+    isoCode: labels && labels.find(item => item.key === "10").value,
+    symbol: labels && labels.find(item => item.key === "11").value
   }
 
   const columns = [

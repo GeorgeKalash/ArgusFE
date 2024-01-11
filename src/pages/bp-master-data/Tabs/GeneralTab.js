@@ -179,6 +179,10 @@ const GeneralTab = ({
             <CustomComboBox
               name='nationalityId'
               label={labels.nationalityId}
+              columnsInDropDown= {[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               valueField='recordId'
               displayField='name'
               store={countryStore}
@@ -197,6 +201,10 @@ const GeneralTab = ({
             <CustomComboBox
               name='legalStatusId'
               label={labels.legalStatus}
+              columnsInDropDown= {[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               valueField='recordId'
               displayField='name'
               store={legalStatusStore}

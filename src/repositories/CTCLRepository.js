@@ -8,5 +8,10 @@ export const CTCLRepository = {
     set2: service + 'set2CLR',
 
   },
+  OTPRepository:{
+    sms: service + "smsOTP",
+    checkSms : service + "checkOTP"
+
+  }
 
 }

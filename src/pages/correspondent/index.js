@@ -56,22 +56,22 @@ const Correspondent = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    bpRef: labels && labels.find(item => item.key === 3).value,
-    outward: labels && labels.find(item => item.key === 4).value,
-    inward: labels && labels.find(item => item.key === 5).value,
-    isInactive: labels && labels.find(item => item.key === 6).value,
-    correspondent: labels && labels.find(item => item.key === 7).value,
-    country: labels && labels.find(item => item.key === 8).value,
-    currency: labels && labels.find(item => item.key === 9).value,
-    glCurrency: labels && labels.find(item => item.key === 10).value,
-    exchangeTable: labels && labels.find(item => item.key === 11).value,
-    bankDeposit: labels && labels.find(item => item.key === 12).value,
-    deal: labels && labels.find(item => item.key === 13).value,
-    exchange: labels && labels.find(item => item.key === 14).value,
-    plant: labels && labels.find(item => item.key === 15).value,
-    exchangeMap: labels && labels.find(item => item.key === 16).value
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    bpRef: labels && labels.find(item => item.key === "3").value,
+    outward: labels && labels.find(item => item.key === "4").value,
+    inward: labels && labels.find(item => item.key === "5").value,
+    isInactive: labels && labels.find(item => item.key === "6").value,
+    correspondent: labels && labels.find(item => item.key === "7").value,
+    country: labels && labels.find(item => item.key === "8").value,
+    currency: labels && labels.find(item => item.key === "9").value,
+    glCurrency: labels && labels.find(item => item.key === "10").value,
+    exchangeTable: labels && labels.find(item => item.key === "11").value,
+    bankDeposit: labels && labels.find(item => item.key === "12").value,
+    deal: labels && labels.find(item => item.key === "13").value,
+    exchange: labels && labels.find(item => item.key === "14").value,
+    plant: labels && labels.find(item => item.key === "15").value,
+    exchangeMap: labels && labels.find(item => item.key === "16").value
   }
 
   const columns = [

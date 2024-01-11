@@ -10,6 +10,7 @@ const ClientWindow = ({
     onSave,
     clientIndividualFormValidation,
     WorkAddressValidation,
+    requiredOptional,
     types,
     countryStore,
     cityStore,
@@ -18,11 +19,12 @@ const ClientWindow = ({
     setCityAddressStore,
     cityAddressWorkStore,
     setCityAddressWorkStore,
-    professionStore,
+    professionFilterStore,
     salaryRangeStore,
     incomeOfSourceStore,
     smsLanguageStore,
     civilStatusStore,
+    mobileVerifiedStore,
     genderStore,
     fillStateStoreAddress,
     fillStateStoreAddressWork,
@@ -38,20 +40,23 @@ const ClientWindow = ({
      lookupCity,
     lookupCityAddress,
     lookupCityAddressWork,
+    fillFilterProfession,
     width,
     height,
     _labels,
     editMode,
+    onInfo,
+    onInfoClose,
+
     maxAccess
 }) => {
 
-  console.log(cityAddressStore)
-  console.log(cityAddressWorkStore)
+
 
 
 return (
-        <Window id='CountryWindow' Title={_labels.country} onClose={onClose} width={width} height={height}
-         onSave={onSave}>
+        <Window id='CountryWindow' Title={_labels.pageTitle} onClose={onClose} width={width} height={height}
+         onSave={onSave} onInfo={onInfo} onInfoClose={onInfoClose} disabledSubmit={editMode && true}>
             <CustomTabPanel>
                 <ClientTab
                     clientIndividualFormValidation={clientIndividualFormValidation}
@@ -65,12 +70,15 @@ return (
                     cityAddressWorkStore={cityAddressWorkStore}
                     lookupCityDistrictAddress={lookupCityDistrictAddress}
                     lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
-                    professionStore={professionStore}
+                    professionFilterStore={professionFilterStore}
+                    fillFilterProfession={fillFilterProfession}
+                    requiredOptional={requiredOptional}
                     salaryRangeStore={salaryRangeStore}
                     incomeOfSourceStore={incomeOfSourceStore}
                     smsLanguageStore={smsLanguageStore}
                     civilStatusStore={civilStatusStore}
                     genderStore={genderStore}
+                    mobileVerifiedStore={mobileVerifiedStore}
                     fillStateStoreAddress={fillStateStoreAddress}
                     fillStateStoreAddressWork={fillStateStoreAddressWork}
                     stateAddressWorkStore={stateAddressWorkStore}

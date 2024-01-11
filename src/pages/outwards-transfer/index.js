@@ -56,9 +56,9 @@ const OutwardsTransfer = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === 1).value,
-    name: labels && labels.find(item => item.key === 2).value,
-    foreignLanguage: labels && labels.find(item => item.key === 3).value,
+    reference: labels && labels.find(item => item.key === "1").value,
+    name: labels && labels.find(item => item.key === "2").value,
+    foreignLanguage: labels && labels.find(item => item.key === "3").value,
   }
 
   const columns = [

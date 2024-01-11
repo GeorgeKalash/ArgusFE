@@ -35,6 +35,7 @@ import { handleURLQueries } from 'src/@core/layouts/utils'
 
 // ** Context
 import { MenuContext } from 'src/providers/MenuContext'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
 
 // ** Styled Components
 const MenuNavLink = styled(ListItemButton)(({ theme }) => ({
@@ -207,29 +208,17 @@ const VerticalNavLink = ({
           }
         </MenuNavLink>
       </ListItem>
-      <Dialog
-        open={isDialogOpen}
-        onClose={closeDialog}
-        fullWidth={true}
-        maxWidth="xs"
-      >
-        <DialogTitle>Confirmation</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {isBookmarked ?
-              'Remove from favorites ?' : 'Add to favorites ?'
-            }
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => handleBookmark(item, isBookmarked, toggleBookmarked)} color="primary">
-            OK
-          </Button>
-          <Button onClick={closeDialog} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmationDialog
+          openCondition={isDialogOpen}
+          closeCondition={closeDialog}
+          DialogText={
+            isBookmarked ? 'Remove from favorites ?' : 'Add to favorites ?'
+          }
+          okButtonAction={() =>
+            handleBookmark(item, isBookmarked, toggleBookmarked)
+          }
+          cancelButtonAction={closeDialog}
+        />
     </CanViewNavLink >
   )
 }

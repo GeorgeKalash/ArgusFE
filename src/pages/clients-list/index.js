@@ -15,7 +15,8 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateToApi } from 'src/lib/date-helper'
+import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -25,6 +26,8 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import ClientWindow from './Windows/ClientWindow'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { getNewClients, populateIClients } from 'src/Models/RemittanceSettings/clients'
+import TransactionLog from 'src/components/Shared/TransactionLog'
+import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 
 const ClientsList = () => {
 
@@ -39,6 +42,10 @@ const ClientsList = () => {
 
   const [access, setAccess] = useState(null)
   const [windowOpen, setWindowOpen] = useState(null)
+  const [windowInfo, setWindowInfo] = useState(null)
+  const [editMode, setEditMode] = useState(null)
+const requiredOptional = true
+
 
   //stores
   const [gridData, setGridData] = useState([])
@@ -51,6 +58,8 @@ const ClientsList = () => {
   const [cityAddressStore, setCityAddressStore] = useState([]);
   const [cityAddressWorkStore, setCityAddressWorkStore] = useState([]);
   const [professionStore, setProfessionStore] = useState([]);
+  const [professionFilterStore, setProfessionFilterStore] = useState([]);
+
   const [salaryRangeStore, setSalaryRangeStore] = useState([]);
   const [incomeOfSourceStore, setIncomeOfSourceStore] = useState([]);
   const [smsLanguageStore, setSMSLanguageStore] = useState([]);
@@ -63,9 +72,9 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
   const [educationStore, setEducationStore] = useState([]);
   const [idTypeStore, setIdTypeStore] = useState([]);
   const [titleStore, setTitleStore] = useState([]);
-
+const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
   const [errorMessage, setErrorMessage] = useState(null)
-
+ const [showOtpVerification , setShowOtpVerification] = useState(false)
   useEffect(() => {
     if (!access) getAccess(ResourceIds.ClientList, setAccess)
     else {
@@ -74,7 +83,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
 
         getLabels(ResourceIds.ClientList, setLabels)
         getLabels(ResourceIds.ClientMaster, setLabels2)
-
+        fillMobileVerifiedStore()
         fillType();
         fillCountryStore();
         fillProfessionStore();
@@ -86,7 +95,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
         fillEducationStore();
         fillIdTypeStore()
         fillTitleStore()
-
+        fillMobileVerifiedStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -94,103 +103,105 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
   }, [access])
 
   const _labels = {
-    category: labels && labels.find(item => item.key === 1).value,
-    reference: labels && labels.find((item) => item.key === 2).value,
-    name: labels && labels.find((item) => item.key === 3).value,
-    flName : labels && labels.find((item) => item.key === 4).value,
-    cellPhone: labels && labels.find((item) => item.key === 5).value,
-    plant: labels && labels.find(item => item.key === 6).value,
-    nationality: labels && labels.find((item) => item.key === 7).value,
-    keyword: labels && labels.find((item) => item.key === 8).value,
-    status: labels && labels.find((item) => item.key === 9).value,
-    createdDate: labels && labels.find((item) => item.key === 10).value,
-    expiryDate: labels && labels.find(item => item.key === 11).value,
-    otp: labels && labels.find((item) => item.key === 12).value,
+    category: labels && labels.find(item => item.key === "1").value,
+    reference: labels && labels.find((item) => item.key === "2").value,
+    name: labels && labels.find((item) => item.key === "3").value,
+    flName : labels && labels.find((item) => item.key === "4").value,
+    cellPhone: labels && labels.find((item) => item.key === "5").value,
+    plant: labels && labels.find(item => item.key === "6").value,
+    nationality: labels && labels.find((item) => item.key === "7").value,
+    keyword: labels && labels.find((item) => item.key === "8").value,
+    status: labels && labels.find((item) => item.key === "9").value,
+    createdDate: labels && labels.find((item) => item.key === "10").value,
+    expiryDate: labels && labels.find(item => item.key === "11").value,
+    otp: labels && labels.find((item) => item.key === "12").value,
 
   }
 
 
   const _labels2 = {
-    reference: labels2 && labels2.find((item) => item.key === 1).value,
-    birthDate: labels2 && labels2.find((item) => item.key === 2).value,
-    isResident: labels2 && labels2.find((item) => item.key === 3).value,
+    reference: labels2 && labels2.find((item) => item.key === "1").value,
+    birthDate: labels2 && labels2.find((item) => item.key === "2").value,
+    isResident: labels2 && labels2.find((item) => item.key === "3").value,
 
-    // number: labels2 && labels2.find((item) => item.key === 4).value,
-    number: labels2 && labels2.find((item) => item.key === 5).value,
-    type: labels2 && labels2.find((item) => item.key === 6).value,
-    expiryDate: labels2 && labels2.find((item) => item.key === 7).value,
-    issusDate: labels2 && labels2.find((item) => item.key === 8).value,
-    country: labels2 && labels2.find((item) => item.key === 9).value,
-    city: labels2 && labels2.find((item) => item.key === 10).value,
-    first: labels2 && labels2.find((item) => item.key === 11).value,
-    last: labels2 && labels2.find((item) => item.key === 12).value,
-    middle: labels2 && labels2.find((item) => item.key === 13).value,
-    family: labels2 && labels2.find((item) => item.key === 14).value,
+    number: labels2 && labels2.find((item) => item.key === "5").value,
 
-    nationality: labels2 && labels2.find((item) => item.key === 15).value,
-    profession: labels2 && labels2.find((item) => item.key === 16).value,
-    cellPhone: labels2 && labels2.find((item) => item.key === 17).value,
-    status: labels2 && labels2.find((item) => item.key === 18).value,
-    oldReference: labels2 && labels2.find((item) => item.key === 19).value,
-    whatsapp: labels2 && labels2.find((item) => item.key === 20).value,
-    sponsor: labels2 && labels2.find((item) => item.key === 21).value,
-    salaryRange: labels2 && labels2.find((item) => item.key === 22).value,
-    riskLevel: labels2 && labels2.find((item) => item.key === 23).value,
-    smsLanguage: labels2 && labels2.find((item) => item.key === 24).value,
-    incomeSource: labels2 && labels2.find((item) => item.key === 25).value,
-    civilStatus: labels2 && labels2.find((item) => item.key === 26).value,
-    educationLevel: labels2 && labels2.find((item) => item.key === 27).value,
-    gender: labels2 && labels2.find((item) => item.key === 28).value,
-    title: labels2 && labels2.find((item) => item.key === 29).value,
-    id: labels2 && labels2.find((item) => item.key === 30).value,
-    name: labels2 && labels2.find((item) => item.key === 31).value,
-    main: labels2 && labels2.find((item) => item.key === 32).value,
+    // number: labels2 && labels2.find((item) => item.key === 5).value,
+    type: labels2 && labels2.find((item) => item.key === "6").value,
+    expiryDate: labels2 && labels2.find((item) => item.key === "7").value,
+    issusDate: labels2 && labels2.find((item) => item.key === "8").value,
+    country: labels2 && labels2.find((item) => item.key === "9").value,
+    city: labels2 && labels2.find((item) => item.key === "10").value,
+    first: labels2 && labels2.find((item) => item.key === "11").value,
+    last: labels2 && labels2.find((item) => item.key === "12").value,
+    middle: labels2 && labels2.find((item) => item.key === "13").value,
+    family: labels2 && labels2.find((item) => item.key === "14").value,
 
-    bankAccounts: labels2 && labels2.find((item) => item.key === 33).value,
-    isResident: labels2 && labels2.find((item) => item.key === 34).value,
-    mobileVerified: labels2 && labels2.find((item) => item.key === 35).value,
+    nationality: labels2 && labels2.find((item) => item.key === "15").value,
+    profession: labels2 && labels2.find((item) => item.key === "16").value,
+    cellPhone: labels2 && labels2.find((item) => item.key === "17").value,
+    status: labels2 && labels2.find((item) => item.key === "18").value,
+    oldReference: labels2 && labels2.find((item) => item.key === "19").value,
+    whatsapp: labels2 && labels2.find((item) => item.key === "20").value,
+    sponsor: labels2 && labels2.find((item) => item.key === "21").value,
+    salaryRange: labels2 && labels2.find((item) => item.key === "22").value,
+    riskLevel: labels2 && labels2.find((item) => item.key === "23").value,
+    smsLanguage: labels2 && labels2.find((item) => item.key === "24").value,
+    incomeSource: labels2 && labels2.find((item) => item.key === "25").value,
+    civilStatus: labels2 && labels2.find((item) => item.key === "26").value,
+    educationLevel: labels2 && labels2.find((item) => item.key === "27").value,
+    gender: labels2 && labels2.find((item) => item.key === "28").value,
+    title: labels2 && labels2.find((item) => item.key === "29").value,
+    id: labels2 && labels2.find((item) => item.key === "30").value,
+    name: labels2 && labels2.find((item) => item.key === "31").value,
+    main: labels2 && labels2.find((item) => item.key === "32").value,
 
-    otpVerified: labels2 && labels2.find((item) => item.key === 36).value,
-    coveredFace: labels2 && labels2.find((item) => item.key === 37).value,
-    isEmployed: labels2 && labels2.find((item) => item.key === 38).value,
+    bankAccounts: labels2 && labels2.find((item) => item.key === "33").value,
+    isResident: labels2 && labels2.find((item) => item.key === "34").value,
+    mobileVerified: labels2 && labels2.find((item) => item.key === "35").value,
 
-    diplomat: labels2 && labels2.find((item) => item.key === 39).value,
+    OTPVerified: labels2 && labels2.find((item) => item.key === "36").value,
+    coveredFace: labels2 && labels2.find((item) => item.key === "37").value,
+    isEmployed: labels2 && labels2.find((item) => item.key === "38").value,
 
-    isDiplomat: labels2 && labels2.find((item) => item.key === 40).value,
+    diplomat: labels2 && labels2.find((item) => item.key === "39").value,
+
+    isDiplomat: labels2 && labels2.find((item) => item.key === "40").value,
     isDiplomatRelative:
-      labels2 && labels2.find((item) => item.key === 41).value,
+      labels2 && labels2.find((item) => item.key === "41").value,
 
-    relativeDiplomateInfo: labels2 && labels2.find((item) => item.key === 42).value,
-    address: labels2 && labels2.find((item) => item.key === 43).value, // nationalityAddress
-    customerInformation: labels2 && labels2.find((item) => item.key === 44).value,
-    workAddress: labels2 && labels2.find((item) => item.key === 45).value,
-    phone: labels2 && labels2.find((item) => item.key === 46).value,
-    phone2: labels2 && labels2.find((item) => item.key === 47).value,
-    email: labels2 && labels2.find((item) => item.key === 48).value,
-    email2: labels2 && labels2.find((item) => item.key === 49).value,
-     phone3: labels2 && labels2.find((item) => item.key === 50).value,
-    bldgNo: labels2 && labels2.find((item) => item.key === 51).value,
-    unitNo :  labels2 && labels2.find((item) => item.key === 52).value,
-    subNo:  labels2 && labels2.find((item) => item.key === 53).value,
-    postalCode :  labels2 && labels2.find((item) => item.key === 54).value,
-    cityDistrict :  labels2 && labels2.find((item) => item.key === 55).value,
+    relativeDiplomatInfo: labels2 && labels2.find((item) => item.key === "42").value,
+    address: labels2 && labels2.find((item) => item.key === "43").value, // nationalityAddress
+    customerInformation: labels2 && labels2.find((item) => item.key === '44').value,
+    workAddress: labels2 && labels2.find((item) => item.key === '45').value,
+    phone: labels2 && labels2.find((item) => item.key === '46').value,
+    phone2: labels2 && labels2.find((item) => item.key === '47').value,
+    email: labels2 && labels2.find((item) => item.key === '48').value,
+    email2: labels2 && labels2.find((item) => item.key === '49').value,
+     phone3: labels2 && labels2.find((item) => item.key === '50').value,
+    bldgNo: labels2 && labels2.find((item) => item.key === '51').value,
+    unitNo :  labels2 && labels2.find((item) => item.key === '52').value,
+    subNo:  labels2 && labels2.find((item) => item.key === '53').value,
+    postalCode :  labels2 && labels2.find((item) => item.key === '54').value,
+    cityDistrict :  labels2 && labels2.find((item) => item.key === '55').value,
 
-    street1 :  labels2 && labels2.find((item) => item.key === 56).value,
-    street2 :  labels2 && labels2.find((item) => item.key === 57).value,
-    category :  labels2 && labels2.find((item) => item.key === 58).value,
-    foreignName :  labels2 && labels2.find((item) => item.key === 59).value,
-    keyword :  labels2 && labels2.find((item) => item.key === 60).value,
+    street1 :  labels2 && labels2.find((item) => item.key === '56').value,
+    street2 :  labels2 && labels2.find((item) => item.key === '57').value,
+    category :  labels2 && labels2.find((item) => item.key === '58').value,
+    foreignName :  labels2 && labels2.find((item) => item.key === '59').value,
+    keyword :  labels2 && labels2.find((item) => item.key === '60').value,
 
-    // createdDate :  labels2 && labels2.find((item) => item.key === 61).value,
+    fl_first: labels2 && labels2.find((item) => item.key === '62').value,
+    fl_last: labels2 && labels2.find((item) => item.key === '63').value,
+    fl_middle: labels2 && labels2.find((item) => item.key === '64').value,
+    fl_family: labels2 && labels2.find((item) => item.key === '65').value,
 
-    fl_first: labels2 && labels2.find((item) => item.key === 62).value,
-    fl_last: labels2 && labels2.find((item) => item.key === 63).value,
-    fl_middle: labels2 && labels2.find((item) => item.key === 64).value,
-    fl_family: labels2 && labels2.find((item) => item.key === 65).value,
-
-    state: labels2 && labels2.find((item) => item.key === 66).value,
-     confirmNb: labels2 && labels2.find((item) => item.key === 67).value,
-     confirmCell: labels2 && labels2.find((item) => item.key === 68).value,
+    state: labels2 && labels2.find((item) => item.key === '66').value,
+     confirmNb: labels2 && labels2.find((item) => item.key === '67').value,
+     confirmCell: labels2 && labels2.find((item) => item.key === '68').value,
+     issusCountry: labels2 && labels2.find((item) => item.key === '69').value,
+     issusPlace: labels2 && labels2.find((item) => item.key === '70').value,
+     pageTitle: labels2 && labels2.find((item) => item.key === '71').value,
 
 
   };
@@ -291,24 +302,19 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
     }
   ]
 
-const getPlantId = obj=>{
+const getPlantId = ()=>{
 
-  const userData = window.sessionStorage.getItem('userData') ?JSON.parse( window.sessionStorage.getItem('userData')) : null
-  console.log(userData)
+  const userData = window.sessionStorage.getItem('userData') ? JSON.parse( window.sessionStorage.getItem('userData')) : null
+console.log(userData)
   var parameters = `_userId=${userData && userData.userId}&_key=plantId`
   getRequest({
     extension: SystemRepository.SystemPlant.get,
     parameters: parameters
   })
     .then(res => {
-console.log(res)
+
 
       clientIndividualFormValidation.setFieldValue('plantId', res.record.value)
-
-//
-      // console.log(clientIndividualFormValidation)
-
-      // console.log(clientIndividualFormValidation)
 
 
     })
@@ -319,14 +325,15 @@ console.log(res)
 }
 
 
-  const search = e => {
+  const search = inp => {
+    console.log('inp' + inp)
     setGridData({count : 0, list: [] , message :"",  statusId:1})
-     const input = e.target.value
+     const input = inp
      console.log({list: []})
 
-  console.log(gridData)
-     if(input.length > 1){
+     if(input){
     var parameters = `_size=30&_startAt=0&_filter=${input}`
+
     getRequest({
       extension: CTCLRepository.CtClientIndividual.snapshot,
       parameters: parameters
@@ -346,62 +353,73 @@ console.log(res)
   }
 
 
+
   const clientIndividualFormValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: true, // Trigger validation on change
+    validateOnChange: false,
     validateOnBlur: true,
+    validate : (values) => {
+      const errors = {};
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (values.isRelativeDiplomat  && !values.relativeDiplomatInfo ) {
+        errors.relativeDiplomatInfo = 'Relative Diplomat Info is required';
+      }
+
+      if (values.email1  && !emailRegex.test(values.email1) ) {
+        errors.email1 = 'Invalid email format';
+      }
+
+      if (values.email2 && !emailRegex.test(values.email2) ) {
+        errors.email2 = 'Invalid email format';
+      }
+
+      return errors;
+
+    },
     validationSchema: yup.object({
       // reference: yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
-      number:  yup.string().required("This field is required"),
-      numberRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('number'), null], 'Number must match'),
+      idNo:  yup.string().required("This field is required"),
+      idNoRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('idNo'), null], 'Number must match'),
+
       expiryDate: yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
       cityId: yup.string().required("This field is required"),
       idCountry: yup.string().required("This field is required"),
-      idCity: yup.string().required("This field is required"),
+
+       name: yup.string().required("This field is required"),
       firstName: yup.string().required("This field is required"),
       lastName: yup.string().required("This field is required"),
       nationalityId: yup.string().required("This field is required"),
       professionId: yup.string().required("This field is required"),
+
       cellPhone: yup.string().required("This field is required"),
       cellPhoneRepeat : yup.string().required('Repeat Password is required')
       .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-
-      // status: yup.string().required("This field is required"),
-      salaryRangeId: yup.string().required("This field is required"),
       smsLanguage: yup.string().required("This field is required"),
       incomeSourceId: yup.string().required("This field is required"),
-
       gender: yup.string().required("This field is required"),
-
-      // otpVerified: yup.string().required("This field is required"),
-      // coveredFace: yup.string().required("This field is required"),
-      // isEmployee: yup.string().required("This field is required"),
-      isDiplomat: yup.string().required("This field is required"),
-      isRelativeDiplomate: yup.string().required("This field is required"),
-      relativeDiplomateInfo: yup.string().required("This field is required"),
-
-      // name:  yup.string().required('This field is required'),
-
       street1:  yup.string().required('This field is required'),
       phone: yup.string().required('This field is required')
     }),
     onSubmit: (values) => {
       console.log("values" + values);
-      postRtDefault(values);
+       console.log(WorkAddressValidation)
+       Object.keys(WorkAddressValidation.errors).length < 1 && postRtDefault(values);
     },
   });
 
+      // console.log("values" + values);
+
   const postRtDefault = (obj) => {
-    console.log("obj", obj);
-   const date = new Date()
+
+     const date = new Date()
 
     //CTCL
-
 
     const obj1 = {
       category: 1,
@@ -412,30 +430,34 @@ console.log(res)
 
       // status: obj.status,
       addressId: null,
-      plantId: clientIndividualFormValidation.values.plantId,
+      plantId: clientIndividualFormValidation.values.plantId || 3,
       cellPhone: obj.cellPhone,
+
       createdDate:  formatDateToApi(date.toISOString()),
-      expiryDate: obj.expiryDate,
-      otp: obj.otpVerified,
+
+      expiryDate: formatDateToApiFunction(obj.expiryDate),
+      OTPVerified:  obj.OTPVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
       status:1, //obj.statusName,
-      categoryName: obj.categoryName
+      categoryName: obj.categoryName,
+      oldReference:obj.oldReference
+
 
     };
 
 
     //CCTD
     const obj2 = {
-      idNo : "1",
+      idNo : obj.idNo,
 
-      // clientID: null,
+      // clientID: obj.clientID,
       idCountryId: obj.idCountry,
       idtId: obj.idtId ,  //5
-      idExpiryDate: obj.expiryDate,
-      issusDate: obj.issusDate,
-      idCity: obj.idCity,
-      isDiplomatic: obj.isDiplomat,
+      idExpiryDate: formatDateToApiFunction(obj.expiryDate),
+      issusDate: formatDateToApiFunction(obj.issusDate),
+      idCityId: obj.idCity,
+      isDiplomat: obj.isDiplomat,
 
     };
 
@@ -443,7 +465,7 @@ console.log(res)
 
     //CTCLI
     const obj3 = {
-      // clientID: null,
+      // clientID: obj.clientID,
       firstName: obj.firstName,
       lastName: obj.lastName,
       middleName: obj.middleName,
@@ -452,7 +474,8 @@ console.log(res)
       fl_lastName: obj.fl_lastName,
       fl_middleName: obj.fl_middleName,
       fl_familyName: obj.fl_familyName,
-      birthDate: obj.birthDate,
+
+      birthDate:  formatDateToApiFunction(obj.birthDate),
       isResident: obj.isResident,
 
     };
@@ -464,25 +487,21 @@ console.log(res)
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
       sponsorName: obj.sponsorName,
-      whatsAppNo: obj.whatsappNo,
+      whatsAppNo: obj.whatsAppNo,
       gender: obj.gender,
       title: obj.title,
       civilStatus: obj.civilStatus,
       mobileVerificationStatus: 1, //obj.mobileVerified,
       educationLevel: obj.educationLevel,
       isDiplomat: obj.isDiplomat,
-      isRelativeDiplomat: obj.isRelativeDiplomate,
-      relativeDiplomatInfo: obj.relativeDiplomateInfo,
+      isRelativeDiplomat: obj.isRelativeDiplomat,
+      relativeDiplomatInfo: obj.relativeDiplomatInfo,
       OTPVerified: obj.OTPVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
 
-      // status: obj.status,
-
-      // isVerified: true,
-      // reference: obj.reference,
       professionId:obj.professionId,
-      idNo : "1",
+      idNo : obj.idNo,
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
@@ -535,23 +554,27 @@ console.log(res)
      }
 
     const data = {
-      plantId: clientIndividualFormValidation.values.plantId,
+      plantId: clientIndividualFormValidation.values.plantId || 3,
       clientMaster: obj1, //CTCL
       clientID: obj2, //CTID
       ClientIndividual: obj3, //CTCLI
       clientRemittance: obj4,
       address: obj5,
-      workAddress: obj6
+      workAddress: (obj6.name && obj6.countryId && obj6.city && obj6.phone && obj6.street1 ) ? obj6 : null
 
     };
 
-    console.log(data)
     postRequest({
       extension: RTCLRepository.CtClientIndividual.set2,
-      record: JSON.stringify(data), // JSON.stringify({  sysDefaults  : data })
+      record: JSON.stringify(data),
     })
       .then((res) => {
-        if (res) toast.success("Record Successfully");
+        if (res){
+         toast.success("Record Successfully");
+         clientIndividualFormValidation.setFieldValue('clientId' , res.recordId)
+        setShowOtpVerification(true)
+        setEditMode(true)
+        }
       })
       .catch((error) => {
         setErrorMessage(error);
@@ -561,13 +584,47 @@ console.log(res)
 
   const WorkAddressValidation = useFormik({
     enableReinitialize: false,
-    validateOnChange: true,
+    validateOnChange: false,
+    validate : (values) => {
+      const errors = {};
+
+      if (values.name || values.name || values.phone || values.countryId ||  values.street1)  {
+        if (!values.name ) {
+          errors.name = 'This field is required';
+        }
+        if (!values.street1 ) {
+          errors.street1 = 'This field is required';
+        }
+        if (!values.countryId ) {
+          errors.countryId = 'This field is required';
+        }
+        if (!values.cityId ) {
+          errors.cityId = 'This field is required';
+        }
+        if (!values.cityId ) {
+          errors.phone = 'This field is required';
+        }
+
+      }
+      if (values.email1  && !emailRegex.test(values.email1) ) {
+        errors.email1 = 'Invalid email format';
+      }
+
+      if (values.email2 && !emailRegex.test(values.email2) ) {
+        errors.email2 = 'Invalid email format';
+      }
+
+
+      return errors;
+
+
+    },
     initialValues: {
       name: null,
       countryId: null,
       stateId: null,
       cityId: null,
-      cityName: null,
+      city: null,
       street1: null,
       street2: null,
       email1: null,
@@ -582,15 +639,16 @@ console.log(res)
       unitNo: null,
       subNo: null
     },
-    validationSchema: yup.object({
-      name:  yup.string().required('This field is required'),
-      countryId:  yup.string().required('This field is required'),
-      cityId:  yup.string().required('This field is required'),
-      street1:  yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
-    }),
+
+    // validationSchema:  yup.object({
+    //   name:  yup.string().required('This field is required'),
+    //   countryId:  yup.string().required('This field is required'),
+    //   cityId:  yup.string().required('This field is required'),
+    //   street1:  yup.string().required('This field is required'),
+    //   phone: yup.string().required('This field is required')
+    // }),
     onSubmit: values => {
-      console.log(values);
+      // console.log(values);
 
     }
   })
@@ -598,15 +656,15 @@ console.log(res)
 
 
   const addClient= obj => {
-
+     setEditMode(false)
     clientIndividualFormValidation.setValues(getNewClients())
+    WorkAddressValidation.setValues(getNewAddress())
     getPlantId()
-    console.log(clientIndividualFormValidation)
     setWindowOpen(true)
   }
 
   const editClient= obj => {
-
+    setEditMode(true)
     const _recordId = obj.recordId
     const defaultParams = `_clientId=${_recordId}`
     var parameters = defaultParams
@@ -616,6 +674,9 @@ console.log(res)
     })
       .then(res => {
         clientIndividualFormValidation.setValues(populateIClients(res.record))
+        res.record.workAddressView &&  WorkAddressValidation.setValues(populateAddress(res.record.workAddressView))
+
+
         getPlantId()
         setWindowOpen(true)
       })
@@ -625,8 +686,9 @@ console.log(res)
   }
 
   const handleSubmit = () => {
-    clientIndividualFormValidation.handleSubmit();
+    // setShowOtpVerification(true)
 
+    clientIndividualFormValidation.handleSubmit();
     WorkAddressValidation.handleSubmit();
 
   };
@@ -647,6 +709,7 @@ console.log(res)
   };
 
   const fillStateStoreAddress = countryId => {
+    setStateAddressStore([])
     var parameters = `_countryId=${countryId}`
     getRequest({
       extension: SystemRepository.State.qry,
@@ -661,6 +724,7 @@ console.log(res)
   }
 
   const fillStateStoreAddressWork = countryId => {
+    setStateAddressWorkStore([])
     var parameters = `_countryId=${countryId}`
     getRequest({
       extension: SystemRepository.State.qry,
@@ -696,7 +760,7 @@ console.log(res)
       parameters: parameters,
     })
       .then((res) => {
-        console.log(res.list);
+        // console.log(res.list);
         setCityStore(res.list);
       })
       .catch((error) => {
@@ -712,13 +776,15 @@ console.log(res)
       parameters: parameters,
     })
       .then((res) => {
-        console.log(res.list);
+        // console.log(res.list);
         setCityAddressStore(res.list);
       })
       .catch((error) => {
         setErrorMessage(error);
       });
   };
+
+
 
   const lookupCityDistrictAddress = searchQry => {
     setCityDistrictAddressStore([])
@@ -729,7 +795,7 @@ console.log(res)
       parameters: parameters
     })
       .then(res => {
-        console.log(res.list)
+
         setCityDistrictAddressStore(res.list)
       })
       .catch(error => {
@@ -746,7 +812,7 @@ console.log(res)
       parameters: parameters
     })
       .then(res => {
-        console.log(res.list)
+
         setCityDistrictAddressWorkStore(res.list)
       })
       .catch(error => {
@@ -762,7 +828,7 @@ console.log(res)
       parameters: parameters,
     })
       .then((res) => {
-        console.log(res.list);
+
         setCityAddressWorkStore(res.list);
       })
       .catch((error) => {
@@ -785,13 +851,14 @@ console.log(res)
   };
 
   const fillProfessionStore = (cId) => {
-    var parameters = `_filter=`;
+    var parameters = `_filter=&_isDiplomat=`+cId;
     getRequest({
       extension: RemittanceSettingsRepository.Profession.qry,
       parameters: parameters,
     })
       .then((res) => {
         setProfessionStore(res.list);
+        setProfessionFilterStore(res.list)
       })
       .catch((error) => {
         setErrorMessage(error);
@@ -836,7 +903,7 @@ console.log(res)
 
   const fillTitleStore = () => {
     getAllKvsByDataset({
-      _dataset: DataSets.Title,
+      _dataset: DataSets.TITLE,
       callback: setTitleStore
     })
   };
@@ -863,8 +930,31 @@ console.log(res)
     })
   };
 
+  const fillMobileVerifiedStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.MOBILE_VERIFIED,
+      callback: setMobileVerifiedStore
+    })
+  };
 
 
+
+  const fillFilterProfession=(value)=>{
+
+    if(value){
+      const filteredList =  professionStore.filter(item => item.diplomatStatus === 2);
+      clientIndividualFormValidation.setFieldValue('isDiplomat',true )
+      clientIndividualFormValidation.setFieldValue('isDiplomatReadOnly',true )
+      setProfessionFilterStore(filteredList)
+    }else{
+      const filteredList =  professionStore;
+      clientIndividualFormValidation.setFieldValue('isDiplomat',false )
+      clientIndividualFormValidation.setFieldValue('isDiplomatReadOnly',false )
+
+      setProfessionFilterStore(filteredList)
+      }
+
+  }
 
 
   return (
@@ -877,29 +967,9 @@ console.log(res)
         }}
       >
 
-<Grid container spacing={2}>
-<Grid item xs={6}>
-            <CustomTextField
-              name='search'
 
-              // label={labels.reference}
-              // value={ProfessionValidation.values.reference}
-              required
 
-              onChange={search}
-
-              // maxLength = '10'
-
-              // maxAccess={maxAccess}
-
-              // onClear={() => ProfessionValidation.setFieldValue('search', '')}
-              // error={ProfessionValidation.touched.reference && Boolean(ProfessionValidation.errors.reference)}
-              // helperText={ProfessionValidation.touched.reference && ProfessionValidation.errors.reference}
-            />
-          </Grid>
-</Grid>
-
-<GridToolbar onAdd={addClient} maxAccess={access} />
+<GridToolbar onAdd={addClient} maxAccess={access}  validation={clientIndividualFormValidation}  onSearch={search} labels={_labels}  inputSearch={true}/>
 
 {gridData &&
         <Table
@@ -913,21 +983,25 @@ onEdit={editClient}
  {windowOpen && (
        <ClientWindow
        onClose={() => setWindowOpen(false)}
-       width={1000}
+       width={1100}
        height={600}
        onSave={handleSubmit}
+       onInfo={()=>{setWindowInfo(true)}}
+       onInfoClose={()=>{setWindowInfo(false)}}
        clientIndividualFormValidation={clientIndividualFormValidation}
        WorkAddressValidation={WorkAddressValidation}
        countryStore={countryStore}
        cityStore={cityStore}
-setCityStore={setCityStore}
+       setCityStore={setCityStore}
        types={types}
-  professionStore={professionStore}
+       requiredOptional={requiredOptional}
+  professionFilterStore={professionFilterStore}
   salaryRangeStore={salaryRangeStore}
   incomeOfSourceStore={incomeOfSourceStore}
   smsLanguageStore={smsLanguageStore}
   civilStatusStore={civilStatusStore}
   genderStore={genderStore}
+  mobileVerifiedStore={mobileVerifiedStore}
   educationStore={educationStore}
   idTypeStore={idTypeStore}
   titleStore={titleStore}
@@ -945,14 +1019,20 @@ setCityStore={setCityStore}
   cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
   cityDistrictAddressStore={cityDistrictAddressStore}
   stateAddressWorkStore={stateAddressWorkStore}
+  fillFilterProfession={fillFilterProfession}
   stateAddressStore={stateAddressStore}
   _labels ={_labels2}
   maxAccess={access}
+  editMode={editMode}
+
 
        />
        )}
+       {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={3600}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
+       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
+/>}
 
-<ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+<ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
 
       </Box>
 
