@@ -181,7 +181,6 @@ fillIndustryStore()
 
     {
       field: 'activityName',
-
       headerName: _labels.activity,
       flex: 1,
       editable: false
@@ -299,6 +298,8 @@ const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
       expiryDate: yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
       cityId: yup.string().required("This field is required"),
+      name1: yup.string().required("This field is required"),
+
        name: yup.string().required("This field is required"),
       nationalityId: yup.string().required("This field is required"),
       cellPhone: yup.string().required("This field is required"),

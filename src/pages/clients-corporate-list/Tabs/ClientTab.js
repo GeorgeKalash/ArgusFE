@@ -159,7 +159,7 @@ return (
                           name="flName"
                           label={_labels.flName}
                           value={clientCorporateFormValidation.values?.flName}
-                          onChange={clientCorporateFormValidation.handleChange}
+                          onChange={clientCorporateFormValidation.flName}
                           maxLength="10"
                           readOnly={editMode && true}
                           onClear={() =>
@@ -320,16 +320,18 @@ return (
                           name="industry"
                           label={_labels.industry}
                           valueField="key"
-                          displayField='value'
 
                           // displayField="name"
                           store={industryStore}
+                          displayField='value'
 
-                          // readOnly={editMode && true}
-                          value={ industryStore &&   clientCorporateFormValidation.values.industry &&
+                          readOnly={editMode && true}
+                          value={
                             industryStore.filter(
                               (item) =>
-                                item.key === clientCorporateFormValidation.values.industry.toString()
+                                item.key ===
+                                clientCorporateFormValidation.values
+                                  .industry
                             )[0]
                           }
                           required
@@ -340,19 +342,25 @@ return (
                                 newValue?.key
                               );
 
+                            } else {
+                              clientCorporateFormValidation.setFieldValue(
+                                "industry",
+                                ""
+                              );
+
                             }
                           }}
                           error={
                             clientCorporateFormValidation.touched
-                              .industry &&
+                              .nationalityId &&
                             Boolean(
-                              clientCorporateFormValidation.errors.industry
+                              clientCorporateFormValidation.errors.nationalityId
                             )
                           }
                           helperText={
                             clientCorporateFormValidation.touched
-                              .industry &&
-                            clientCorporateFormValidation.errors.industry
+                              .nationalityId &&
+                            clientCorporateFormValidation.errors.nationalityId
                           }
                         />
                       </Grid>
@@ -474,7 +482,7 @@ return (
                               checked={
                                 clientCorporateFormValidation.values?.outward
                               }
-                              onChange={clientCorporateFormValidation.handleChange}
+                              onChange={clientCorporateFormValidation.outward}
                             />
                           }
                           label={_labels?.outward}
