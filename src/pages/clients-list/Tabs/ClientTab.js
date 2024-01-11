@@ -98,12 +98,11 @@ return (
               <CustomTextField
                 name="reference"
                 label={_labels.reference}
-                value={clientIndividualFormValidation.values?.reference}
+                value={clientIndividualFormValidation.values.reference}
 
                 // required
                 readOnly={true}
                 onChange={clientIndividualFormValidation.handleChange}
-                maxLength="10"
                 onClear={() =>
                   clientIndividualFormValidation.setFieldValue("reference", "")
                 }

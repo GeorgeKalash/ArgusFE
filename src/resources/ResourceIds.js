@@ -45,6 +45,8 @@ export const ResourceIds = {
   SmsTemplates : 20130,
   SmsFunctionTemplates : 20131,
   Users : 23101,
+  ClientCorporate : 35205,
+
 
 
 
