@@ -11,6 +11,7 @@ import AgentBranchWindow from './Windows/AgentBranchWindow'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { getNewAgentBranch, populateAgentBranch } from 'src/Models/RemittanceSettings/AgentBranch'
+import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import toast from 'react-hot-toast'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -33,7 +34,6 @@ const Agent = () => {
   const [cityDistrictStore, setCityDistrictStore] = useState([])
 
   const [stateStore, setStateStore] = useState([])
-  const [record, setRecord] = useState(null)
 
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -54,16 +54,18 @@ const Agent = () => {
         setErrorMessage(error)
       })
   }
+
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
-
         getLabels(ResourceIds.CorrespondentAgentBranch, setLabels)
         getLabels(ResourceIds.Address, setAddressLabels)
-        fillStore()
-        fillCountryStore()
+
+        //CHANGE
+        //fillStore()
+        //fillCountryStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -75,21 +77,29 @@ const Agent = () => {
     validateOnChange: false,
     validationSchema: yup.object({
       agentId: yup.string().required('This field is required'),
-      swiftCode: yup.string().required('This field is required'),
-      name: activeTab === 1 && yup.string().required('This field is required'),
-      countryId: activeTab === 1 && yup.string().required('This field is required'),
-      stateId: activeTab === 1 && yup.string().required('This field is required'),
-      street1: activeTab === 1 && yup.string().required('This field is required'),
-      phone: activeTab === 1 && yup.string().required('This field is required'),
-      cityId: activeTab === 1 && yup.string().required('This field is required')
+      swiftCode: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log('{ values }' + activeTab)
-      if (activeTab === 0) {
         postAgent(values)
-      } else {
-        postAgentBranch(values)
-      }
+    }
+  })
+
+  const addressValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      /* agentId: yup.string().required('This field is required'),
+      swiftCode: yup.string().required('This field is required'), */ //this can help since no common names in validation
+      name: yup.string().required('This field is required'),
+      countryId: yup.string().required('This field is required'),
+      stateId: yup.string().required('This field is required'),
+      street1: yup.string().required('This field is required'),
+      phone: yup.string().required('This field is required'),
+      cityId: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+      console.log('addressVal:' + values)
+      postAgentBranch(values)
     }
   })
 
@@ -97,6 +107,7 @@ const Agent = () => {
     agent: labels && labels.find(item => item.key === 1) && labels.find(item => item.key === 1).value,
     swiftCode: labels && labels.find(item => item.key === 3) && labels.find(item => item.key === 3).value,
     title: labels && labels.find(item => item.key === 4) && labels.find(item => item.key === 4).value,
+    main: labels && labels.find(item => item.key === 5) && labels.find(item => item.key === 5).value,
 
     name:
       addressLabels && addressLabels.find(item => item.key === 1) && addressLabels.find(item => item.key === 1).value,
@@ -151,23 +162,31 @@ const Agent = () => {
       editable: false
     }
   ]
-  const tabs = [{ label: 'Main' }, { label: 'Address' }]
+  const tabs = [{ label: _labels.main }, { label: _labels.address }]
 
   function addAgentBranch() {
-    setRecord(0)
     setActiveTab(0)
-    agentBranchValidation.setValues({})
+
+    //agentBranchValidation.setValues({}) WHYY??
     agentBranchValidation.setValues(getNewAgentBranch)
+    addressValidation.setValues(getNewAddress) 
+    fillStore()
     setWindowOpen(true)
   }
 
-  const editAgentBranch = obj => {
+  const editAgentBranch = obj => { //FIX
+    console.log(obj) //to check if address complex is returned or no in this screen
     setActiveTab(0)
-    var parameters = `_filter=` + '&_recordId=' + obj.addressId
+    addressValidation.setValues(getNewAddress)
+
+    fillStore()
+    fillCountryStore()
+    fillStateStore(obj.countryId)
+
+    /*var parameters = `_filter=` + '&_recordId=' + obj.addressId
     var object = obj
     console.log('here')
     console.log(obj)
-    setRecord(0)
     if (obj.addressId) {
       getRequest({
         extension: SystemRepository.Address.get,
@@ -201,9 +220,6 @@ const Agent = () => {
           console.log(object)
           agentBranchValidation.setValues(populateAgentBranch(object))
 
-          //agentBranchValidation.values.countryId && lookupCity(object.cityName)
-          //agentBranchValidation.values.cityId && lookupCityDistrict(object.cityDistrictName)
-
           // setActiveTab(0)
           // setWindowOpen(true)
         })
@@ -212,12 +228,14 @@ const Agent = () => {
       agentBranchValidation.setValues(populateAgentBranch(object))
       setActiveTab(0)
       setWindowOpen(true)
-    }
+    }*/
   }
-  useEffect(() => {
+
+//WHAT IS THIS?
+  /*useEffect(() => {
     // setActiveTab(0)
     stateStore.length > 0 && setWindowOpen(true)
-  }, [stateStore])
+  }, [stateStore])*/
 
   const fillCountryStore = () => {
     var parameters = `_filter=`
@@ -250,7 +268,11 @@ const Agent = () => {
   }
 
   const handleSubmit = () => {
-    agentBranchValidation.handleSubmit()
+    if (activeTab === 0) agentBranchValidation.handleSubmit()   
+    else if (activeTab === 1) {
+      addressValidation.handleSubmit() && agentBranchValidation.handleSubmit() //this will cause to save tab 1 first! is their always a need in edit mode?
+      
+    }
   }
 
   const fillStore = () => {
@@ -278,8 +300,13 @@ const Agent = () => {
     })
       .then(res => {
         getGridData({})
-        setRecord(res.recordId)
-        if (!recordId) toast.success('Record Added Successfully')
+        agentBranchValidation.setFieldValue('recordId', res.recordId)  
+
+        //setRecord(res.recordId) i replaced this by setting it in validation directly
+        if (!recordId) 
+        {
+          toast.success('Record Added Successfully')
+        }
         else toast.success('Record Editted Successfully')
       })
       .catch(error => {
@@ -294,9 +321,9 @@ const Agent = () => {
     const object = obj
 
     //const Id = object.recordId
-    obj.recordId = obj.addressId > 0 ? obj.addressId : obj.recordId
-    console.log('object')
-    console.log(object)
+   // obj.recordId = obj.addressId > 0 ? obj.addressId : obj.recordId
+    //console.log('object')
+    //console.log(object)
     
     //console.log(Id)
 
@@ -305,27 +332,32 @@ const Agent = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        obj.addressId = res.addressId > 0 ? res.addressId : res.recordId
+        //obj.addressId = res.addressId > 0 ? res.addressId : res.recordId
 
         //console.log(record)
-        object.recordId = record > 0 ? record : object.recordId
+        //object.recordId = record > 0 ? record : object.recordId
 
         //object.recordId = Id
+        obj.recordId = res.recordId
+        addressValidation.setFieldValue('recordId', obj.recordId) 
         console.log(object.recordId)
-        postRequest({
+        agentBranchValidation.setFieldValue('addressId',  obj.recordId )
+        agentBranchValidation.handleSubmit()
+
+        /*postRequest({
           extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
           record: JSON.stringify(object)
         })
           .then(res => {
             getGridData({})
             setWindowOpen(false)
-            setRecord(0)
             if (!res.recordId) toast.success('Record Added Successfully')
             else toast.success('Record Editted Successfully')
           })
           .catch(error => {
             setErrorMessage(error)
-          })
+          })*/
+
       })
       .catch(error => {
         setErrorMessage(error)
@@ -422,6 +454,7 @@ const Agent = () => {
           lookupCityDistrict={lookupCityDistrict}
           fillCountryStore={fillCountryStore}
           agentBranchValidation={agentBranchValidation}
+          addressValidation={addressValidation}
           maxAccess={access}
         />
       )}
@@ -431,3 +464,5 @@ const Agent = () => {
 }
 
 export default Agent
+
+// setedit mode not done in this screen

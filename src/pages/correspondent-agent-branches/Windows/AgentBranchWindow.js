@@ -13,6 +13,7 @@ const AgentBranchWindow = ({
   setActiveTab,
   onSave,
   agentBranchValidation,
+  addressValidation,
   labels,
   agentStore,
   setAgentStore,
@@ -61,7 +62,7 @@ const AgentBranchWindow = ({
           cityStore={cityStore}
           setCityStore={setCityStore}
           fillCountryStore={fillCountryStore}
-          addressValidation={agentBranchValidation}
+          addressValidation={addressValidation}
           maxAccess={maxAccess}
           lookupCityDistrict={lookupCityDistrict}
           cityDistrictStore={cityDistrictStore}
