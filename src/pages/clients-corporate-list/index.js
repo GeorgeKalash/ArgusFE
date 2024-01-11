@@ -179,13 +179,13 @@ fillIndustryStore()
       editable: false
     },
 
-    // {
-    //   field: 'plantName',
+    {
+      field: 'activityName',
 
-    //   headerName: _labels.plant,
-    //   flex: 1,
-    //   editable: false
-    // },
+      headerName: _labels.activity,
+      flex: 1,
+      editable: false
+    },
 
     // {
     //   field: 'nationalityName',
