@@ -69,11 +69,10 @@ const VerticalNavItems = props => {
               setLastOpenedPage(node)
             }
           }}
+          onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
         >
           <div
-            style={{ display: 'flex', alignItems: 'center', overflowX: navCollapsed && !navHover ? '':'hidden'}}
-            onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
-          >
+            style={{ display: 'flex', alignItems: 'center', overflowX: navCollapsed && !navHover ? '':'hidden'}} >
             {imgName ? (
               <div
               style={{
