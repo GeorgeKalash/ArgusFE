@@ -54,6 +54,7 @@ const BPMasterData = () => {
 
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
   const [cityDistrictStore, setCityDistrictStore] = useState([])
+
   //states
   const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
@@ -845,6 +846,7 @@ const BPMasterData = () => {
           onClose={() => setAddressWindowOpen(false)}
           onSave={handleAddressSubmit}
           addressValidation={addressValidation}
+          
           //approverComboStore={approverComboStore.list} why list?
           maxAccess={access}
           labels={_labels}
