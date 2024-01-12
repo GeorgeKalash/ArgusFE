@@ -88,8 +88,8 @@ const Agent = () => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      /* agentId: yup.string().required('This field is required'),
-      swiftCode: yup.string().required('This field is required'), */ //this can help since no common names in validation
+      /*agentId: yup.string().required('This field is required'),
+      swiftCode: yup.string().required('This field is required'),*/
       name: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required'),
       stateId: yup.string().required('This field is required'),
@@ -107,7 +107,7 @@ const Agent = () => {
     agent: labels && labels.find(item => item.key === "1") && labels.find(item => item.key === "1").value,
     swiftCode: labels && labels.find(item => item.key === "3") && labels.find(item => item.key === "3").value,
     title: labels && labels.find(item => item.key === "4") && labels.find(item => item.key === "4").value,
-    main: labels && labels.find(item => item.key === "5") && labels.find(item => item.key === 5).value,
+    main: labels && labels.find(item => item.key === "5") && labels.find(item => item.key === "5").value,
 
     name:
       addressLabels && addressLabels.find(item => item.key === "1") && addressLabels.find(item => item.key === "1").value,
@@ -270,7 +270,7 @@ const Agent = () => {
   const handleSubmit = () => {
     if (activeTab === 0) agentBranchValidation.handleSubmit()   
     else if (activeTab === 1) {
-      addressValidation.handleSubmit() && agentBranchValidation.handleSubmit() //this will cause to save tab 1 first! is their always a need in edit mode?
+      agentBranchValidation.handleSubmit() &&  addressValidation.handleSubmit() //this will cause to save tab 1 first! is their always a need in edit mode?
       
     }
   }
