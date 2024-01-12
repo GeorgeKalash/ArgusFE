@@ -221,9 +221,6 @@ const AddressTab = ({
 
 
                     if(newValue){
-                      fillStateStore(newValue?.recordId)
-
-
                       addressValidation.setFieldValue(
                         "countryId",
                         newValue?.recordId,
