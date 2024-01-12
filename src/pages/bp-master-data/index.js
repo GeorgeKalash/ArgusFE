@@ -53,10 +53,7 @@ const BPMasterData = () => {
   const [businessPartnerStore, setBusinessPartnerStore] = useState([])
 
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
-  const [cityStore, setCityStore] = useState([])
   const [cityDistrictStore, setCityDistrictStore] = useState([])
-  const [stateStore, setStateStore] = useState([])
-
   //states
   const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
@@ -770,61 +767,6 @@ const BPMasterData = () => {
   }
 
 
-  const fillStateStore = countryId => {
-    setStateStore([])
-    var parameters = `_countryId=${countryId}`
-    if (countryId) {
-      getRequest({
-        extension: SystemRepository.State.qry,
-        parameters: parameters
-      })
-        .then(res => {
-          setStateStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  }
-
-  const lookupCity = searchQry => {
-    setCityStore([])
-    if (!addressValidation.values.countryId)
-    {
-      console.log('false')
-
-     return false
-    }
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${addressValidation.values.countryId}&_stateId=${addressValidation.values.stateId}`
-    getRequest({
-      extension: SystemRepository.City.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res.list)
-        setCityStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const lookupCityDistrict = searchQry => {
-    setCityDistrictStore([])
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${addressValidation.values.cityId}`
-
-    getRequest({
-      extension: SystemRepository.CityDistrict.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res.list)
-        setCityDistrictStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   return (
     <>
@@ -903,15 +845,6 @@ const BPMasterData = () => {
           onClose={() => setAddressWindowOpen(false)}
           onSave={handleAddressSubmit}
           addressValidation={addressValidation}
-          stateStore={stateStore}
-          fillStateStore={fillStateStore}
-          cityStore={cityStore}
-          setCityStore={setCityStore}
-          lookupCity={lookupCity}
-          cityDistrictStore={cityDistrictStore}
-          setCityDistrictStore={setCityDistrictStore}
-          lookupCityDistrict={lookupCityDistrict}
-
           //approverComboStore={approverComboStore.list} why list?
           maxAccess={access}
           labels={_labels}
