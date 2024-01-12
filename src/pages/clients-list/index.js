@@ -431,7 +431,7 @@ console.log(userData)
       // status: obj.status,
       addressId: null,
 
-      // plantId: clientIndividualFormValidation.values.plantId ?clientIndividualFormValidation.values.plantId : 3,
+      plantId: clientIndividualFormValidation.values.plantId ?clientIndividualFormValidation.values.plantId : 3,
       cellPhone: obj.cellPhone,
 
       createdDate:  formatDateToApi(date.toISOString()),
@@ -451,6 +451,7 @@ console.log(userData)
     //CCTD
     const obj2 = {
       idNo : obj.idNo,
+      plantId: clientIndividualFormValidation.values.plantId ?clientIndividualFormValidation.values.plantId : 3,
 
       // clientID: obj.clientID,
       idCountryId: obj.idCountry,
