@@ -37,7 +37,6 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 const BPMasterData = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //control
   const [labels, setLabels] = useState(null)
@@ -46,15 +45,10 @@ const BPMasterData = () => {
 
   //stores
   const [gridData, setGridData] = useState([])
-  const [categoryStore, setCategoryStore] = useState([])
   const [idCategoryStore, setIDCategoryStore] = useState([])
   const [relationGridData, setRelationGridData] = useState([])
-  const [relationStore, setRelationStore] = useState([])
-  const [businessPartnerStore, setBusinessPartnerStore] = useState([])
 
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
-  const [cityDistrictStore, setCityDistrictStore] = useState([])
-
   //states
   const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
@@ -226,7 +220,6 @@ const BPMasterData = () => {
         obj.recordId = res.recordId
         fillIdNumberStore(obj)
         getRelationGridData(obj.recordId)
-        fillRelationComboStore()
         if (!recordId) {
           bpMasterDataValidation.setFieldValue('recordId', res.recordId)
           toast.success('Record Added Successfully')
@@ -257,7 +250,6 @@ const BPMasterData = () => {
     setEditMode(false)
     setWindowOpen(true)
     fillIdCategoryStore(null)
-    fillCategoryStore()
     resetIdNumber()
     setRelationGridData([])
     setdefaultValue(null)
@@ -277,11 +269,9 @@ const BPMasterData = () => {
       .then(res => {
         bpMasterDataValidation.setValues(populateBPMasterData(res.record))
         fillIdCategoryStore(res.record.category)
-        fillCategoryStore()
         resetIdNumber(res.record.recordId)
         fillIdNumberStore(obj)
         getRelationGridData(obj.recordId)
-        fillRelationComboStore()
         setdefaultValue(null)
         if (obj.defaultInc != null){getDefault(obj)}
         setEditMode(true)
@@ -296,58 +286,19 @@ const BPMasterData = () => {
       })
   }
 
-  const fillCategoryStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.BP_CATEGORY,
-      callback: setCategoryStore
-    })
-  }
-
-      async function fillResource({ resourceId, setter, parameters = '_filter=' }) {
-        getRequest({
-          extension: resourceId,
-          parameters
-        })
-          .then(res => {
-            setter(res.list)
-          })
-          .catch(error => {
-            setErrorMessage(error.response.data)
-          })
-      }
-
   const fillIdCategoryStore = async categId => {
-    setIDCategoryStore([])
-    const list = await filterIdCategory(categId)
-    setIDCategoryStore(list)
-    }
+    setIDCategoryStore(await filterIdCategory(categId))
+  }
 
 
   const filterIdCategory = async categId => {
     try {
-      var parameters = `_startAt=0&_pageSize=1000`
-
       const res = await getRequest({
         extension: BusinessPartnerRepository.CategoryID.qry,
-        parameters: parameters
-      })
+        parameters: `_startAt=0&_pageSize=1000`
+      });
 
-      var filteredList = []
-      if (categId != null) {
-        res.list.forEach(item => {
-          if (categId === 1 && item.person) {
-            filteredList.push(item)
-          }
-          if (categId === 2 && item.org) {
-            filteredList.push(item)
-          }
-          if (categId === 3 && item.group) {
-            filteredList.push(item)
-          }
-        })
-      }
-
-      return filteredList
+      return categId ? res.list.filter((item) => ((categId === 1 && item.person) || (categId === 2 && item.org) || (categId === 3 && item.group))): []
     } catch (error) {
       setErrorMessage(error.res)
 
@@ -583,29 +534,6 @@ const BPMasterData = () => {
       })
   }
 
-  const fillRelationComboStore = () => {
-    fillResource({
-      resourceId: BusinessPartnerRepository.RelationTypes.qry,
-      setter: setRelationStore
-    })
-  }
-
-  const lookupBusinessPartner = searchQry => {
-
-    setBusinessPartnerStore([])
-    if(searchQry){
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
-    getRequest({
-      extension: BusinessPartnerRepository.MasterData.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setBusinessPartnerStore(res.list)
-      })
-      .catch(error => {
-         setErrorMessage(error)
-      })}
-  }
   useEffect(() => {
     if (!access) getAccess(ResourceIds.BPMasterData, setAccess)
     else {
@@ -803,7 +731,6 @@ const BPMasterData = () => {
 
           //General Tab
           bpMasterDataValidation={bpMasterDataValidation}
-          categoryStore={categoryStore}
           idCategoryStore={idCategoryStore}
           fillIdCategoryStore={fillIdCategoryStore}
           defaultValue={defaultValue}
@@ -833,10 +760,6 @@ const BPMasterData = () => {
           onClose={() => setRelationWindowOpen(false)}
           onSave={handleRelationSubmit}
           relationValidation={relationValidation}
-          relationStore={relationStore}
-          businessPartnerStore={businessPartnerStore}
-          setBusinessPartnerStore={setBusinessPartnerStore}
-          lookupBusinessPartner={lookupBusinessPartner}
           labels={_labels}
           maxAccess={access}
         />
@@ -846,7 +769,7 @@ const BPMasterData = () => {
           onClose={() => setAddressWindowOpen(false)}
           onSave={handleAddressSubmit}
           addressValidation={addressValidation}
-          
+
           //approverComboStore={approverComboStore.list} why list?
           maxAccess={access}
           labels={_labels}
