@@ -2,12 +2,14 @@
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
+import SearchIcon from '@mui/icons-material/Search';
 
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type
   variant = 'outlined', //outlined, standard, filled
   value,
   onClear,
+  onSearch,
   size = 'small', //small, medium
   fullWidth = true,
   autoFocus = false,
@@ -20,6 +22,7 @@ const CustomTextField = ({
   dir='ltr',
   hidden = false,
   phone = false,
+  search= false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -71,19 +74,26 @@ const CustomTextField = ({
 
           }
         }}
+
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
         onInput={handleInput}
-
+        onKeyDown={(e)=> e.key === 'Enter' && search && onSearch(e.target.value)}
         InputProps={{
-          endAdornment: !readOnly &&
+
+          endAdornment:
+         <InputAdornment position='end'>
+            {search &&   <IconButton tabIndex={-1} edge='start' onClick={() =>onSearch(value)}  aria-label='search input'>
+                  <SearchIcon />
+                </IconButton>}
+         { !readOnly &&
             value && ( // Only show the clear icon if readOnly is false
-              <InputAdornment position='end'>
                 <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                   <ClearIcon />
                 </IconButton>
-              </InputAdornment>
-            )
+            )}
+
+            </InputAdornment>
         }}
         {...props}
       />

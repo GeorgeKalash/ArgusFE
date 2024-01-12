@@ -12,6 +12,12 @@ export const CTCLRepository = {
     sms: service + "smsOTP",
     checkSms : service + "checkOTP"
 
+  },
+  ClientCorporate: {
+    page : service + "pageCLC",
+    set2: service + 'set2CLC',
+    get: service + 'get2CLC',
+
   }
 
 }

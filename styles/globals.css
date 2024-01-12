@@ -97,6 +97,18 @@ code[class*='language-'] {
   line-height:0 !important;
 }
 
+.css-5chs84-MuiPaper-root-MuiMenu-paper-MuiPopover-paper {
+  background-color:#231f20 !important;
+}
+.MuiTabs-scrollButtons.Mui-disabled {
+  display: none;
+  -webkit-transform: scaleX(0);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: -webkit-transform 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+
 /***** phone verification *****/
 
 

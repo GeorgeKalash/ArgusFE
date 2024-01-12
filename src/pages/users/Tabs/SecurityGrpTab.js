@@ -15,7 +15,6 @@ const SecurityGrpTab = ({ securityGrpGridData, getSecurityGrpGridData, addSecuri
       flex: 1
     }
   ]
-  console.log('ressss ',securityGrpGridData)
 
   return (
     <>
@@ -30,14 +29,14 @@ const SecurityGrpTab = ({ securityGrpGridData, getSecurityGrpGridData, addSecuri
         <Table
           columns={columns}
           gridData={securityGrpGridData}
-          rowId={['recordId']}
+          rowId={['sgId']}
           api={getSecurityGrpGridData}
           onEdit={popupSecurityGrp}
           onDelete={delSecurityGrp}
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={200}
+          height={300}
         />
       </Box>
     </>

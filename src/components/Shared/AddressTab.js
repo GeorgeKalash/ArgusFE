@@ -213,17 +213,21 @@ const AddressTab = ({
                     required
                     onChange={(event, newValue) => {
                       setCityStore([])
+                      addressValidation.setFieldValue('stateId', null)
+                      addressValidation.setFieldValue('cityId', null)
+                      addressValidation.setFieldValue('city', null)
+                      addressValidation.setFieldValue('cityDistrictId', null)
+                      addressValidation.setFieldValue('cityDistrict', null)
 
-                      if(newValue){
+
+                    if(newValue){
+                      fillStateStore(newValue?.recordId)
 
 
                       addressValidation.setFieldValue(
                         "countryId",
                         newValue?.recordId,
                       );
-
-
-
 
                     }else{
 
@@ -234,14 +238,12 @@ const AddressTab = ({
 
 
 
-                      }
+                        }
 
-                      addressValidation.setFieldValue('stateId', null)
-                      addressValidation.setFieldValue('cityId', null)
-                      addressValidation.setFieldValue('city', null)
-                      addressValidation.setFieldValue('cityDistrictId', null)
-                      addressValidation.setFieldValue('cityDistrict', null)
-                    }}
+                    }
+
+
+                  }
                     error={
                       addressValidation.touched.countryId &&
                       Boolean(addressValidation.errors.countryId)
@@ -261,7 +263,7 @@ const AddressTab = ({
                 label={labels.state}
                 valueField='recordId'
                 displayField='name'
-                readOnly={readOnly}
+                readOnly={(readOnly || !addressValidation.values.countryId) && true}
                 values={addressValidation.values}
                 onChange={(event, newValue) => {
                   addressValidation.setFieldValue('stateId', newValue?.recordId)
@@ -272,7 +274,8 @@ const AddressTab = ({
                 }}
                 error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
                 helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
-                maxAccess={maxAccess}
+
+                // maxAccess={maxAccess}
               />
           </Grid>
 
@@ -281,7 +284,7 @@ const AddressTab = ({
               name='city'
               label={labels.city}
               required={requiredOptional ? false : true}
-              readOnly={readOnly}
+              readOnly={(readOnly || !addressValidation.values.countryId) && true}
               valueField='name'
               displayField='name'
               store={cityStore}
@@ -331,7 +334,8 @@ const AddressTab = ({
               label={labels.cityDistrict}
               valueField='name'
               displayField='name'
-              readOnly={readOnly}
+              readOnly={(readOnly || !addressValidation.values.cityId) && true}
+
               store={cityDistrictStore}
               setStore={setCityDistrictStore}
               onLookup={searchQry => {
