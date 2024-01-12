@@ -100,7 +100,7 @@ const IdTypes = () => {
       length: yup.string().required('This field is required'),
       category: yup.string().required('This field is required'),
       clientFileExpiryType: yup.string().required('This field is required'),
-      clientFileLifeTime: type===1 ? yup.string().required('This field is required') : yup.string().notRequired(),
+      clientFileLifeTime: type==="1" ? yup.string().required('This field is required') : yup.string().notRequired(),
       isDiplomat: yup.string().required('This field is required')
     }),
     onSubmit: values => {
