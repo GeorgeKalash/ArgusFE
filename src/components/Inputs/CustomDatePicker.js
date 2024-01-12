@@ -35,7 +35,7 @@ const CustomDatePicker = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
-  console.log(value +'value')
+
 
 
    // Function to check if a date should be disabled
