@@ -63,7 +63,7 @@ const ProductDispersalWindow = ({
                   valueField='key'
                   displayField='value'
                   store={dispersalTypeStore}
-                  value={dispersalTypeStore.filter(item => item.key === productDispersalValidation.values.dispersalType)[0]}
+                  value={dispersalTypeStore.filter(item => item.key === productDispersalValidation.values.dispersalType?.toString())[0]}
                   required
                   onChange={(event, newValue) => {
                     productDispersalValidation.setFieldValue('dispersalType', newValue?.key)
