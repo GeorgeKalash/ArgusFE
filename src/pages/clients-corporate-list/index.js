@@ -150,98 +150,95 @@ fillIndustryStore()
 
 
   const columns = [
+
     {
-      field: 'categoryName',
-      headerName: _labels?.category,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'reference',
+      field: 'clientRef',
       headerName: _labels.reference,
       flex: 1,
       editable: false
     },
-    {
-      field: 'name',
 
-      headerName: _labels.name,
+    {
+      field: 'clientName',
+      headerName: _labels?.name,
+      flex: 1,
+      editable: false
+    },
+
+
+    // {
+    //   field: 'flName',
+    //   headerName: _labels.flName,
+    //   flex: 1,
+    //   editable: false
+    // },
+    {
+      field: 'lgsName',
+      headerName: _labels.legalStatus,
       flex: 1,
       editable: false
     },
 
     {
-      field: 'flName',
-
-      headerName: _labels.flName,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'cellPhone',
-      headerName: _labels.cellPhone,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'plantName',
-
-      headerName: _labels.plant,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'nationalityName',
-
-      headerName: _labels.nationality,
+      field: 'activityName',
+      headerName: _labels.activity,
       flex: 1,
       editable: false
     },
 
-    {
-      field: 'keyword',
+    // {
+    //   field: 'nationalityName',
 
-      headerName: _labels.keyword,
-      flex: 1,
-      editable: false
-    },
+    //   headerName: _labels.nationality,
+    //   flex: 1,
+    //   editable: false
+    // },
 
-    {
-      field: 'statusName',
+    // {
+    //   field: 'keyword',
 
-      headerName: _labels.status,
-      flex: 1,
-      editable: false,
+    //   headerName: _labels.keyword,
+    //   flex: 1,
+    //   editable: false
+    // },
 
+    // {
+    //   field: 'statusName',
 
-    },
-    {
-      field: 'createdDate',
-
-      headerName: _labels.createdDate,
-      flex: 1,
-      editable: false,
-      valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
-
-    },
-    {
-      field: 'expiryDate',
-
-      headerName: _labels.expiryDate,
-      flex: 1,
-      editable: false,
-      valueGetter: ({ row }) => formatDateFromApi(row?.expiryDate)
+    //   headerName: _labels.status,
+    //   flex: 1,
+    //   editable: false,
 
 
-    },
-    {
-      field: 'otp',
+    // },
 
-      headerName: _labels.otp,
-      flex: 1,
-      editable: false,
+    // {
+    //   field: 'createdDate',
 
-    }
+    //   headerName: _labels.createdDate,
+    //   flex: 1,
+    //   editable: false,
+    //   valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
+
+    // },
+    // {
+    //   field: 'expiryDate',
+
+    //   headerName: _labels.expiryDate,
+    //   flex: 1,
+    //   editable: false,
+    //   valueGetter: ({ row }) => formatDateFromApi(row?.expiryDate)
+
+
+    // },
+    // {
+    //   field: 'otp',
+
+    //   headerName: _labels.otp,
+    //   flex: 1,
+    //   editable: false,
+
+    // }
   ]
 
 const getPlantId = ()=>{
@@ -301,6 +298,8 @@ const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
       expiryDate: yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
       cityId: yup.string().required("This field is required"),
+      name1: yup.string().required("This field is required"),
+
        name: yup.string().required("This field is required"),
       nationalityId: yup.string().required("This field is required"),
       cellPhone: yup.string().required("This field is required"),
@@ -577,7 +576,7 @@ return (
         <Table
           columns={columns}
           gridData={gridData}
-          rowId={['recordId']}
+          rowId={['clientId']}
           isLoading={false}
           maxAccess={access}
           onEdit={editClient}
