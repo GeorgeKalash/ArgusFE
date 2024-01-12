@@ -430,7 +430,8 @@ console.log(userData)
 
       // status: obj.status,
       addressId: null,
-      plantId: clientIndividualFormValidation.values.plantId || 3,
+
+      // plantId: clientIndividualFormValidation.values.plantId ?clientIndividualFormValidation.values.plantId : 3,
       cellPhone: obj.cellPhone,
 
       createdDate:  formatDateToApi(date.toISOString()),
@@ -474,7 +475,7 @@ console.log(userData)
       fl_lastName: obj.fl_lastName,
       fl_middleName: obj.fl_middleName,
       fl_familyName: obj.fl_familyName,
-
+      professionId:obj.professionId,
       birthDate:  formatDateToApiFunction(obj.birthDate),
       isResident: obj.isResident,
 
@@ -500,7 +501,6 @@ console.log(userData)
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
 
-      professionId:obj.professionId,
       idNo : obj.idNo,
       wip: 1,
       releaseStatus: 1,
