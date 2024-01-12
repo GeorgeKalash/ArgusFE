@@ -17,11 +17,7 @@ const BPMasterDataWindow = ({
   bpMasterDataValidation,
   labels,
   maxAccess,
-  categoryStore,
-  groupStore,
   idCategoryStore,
-  countryStore,
-  legalStatusStore,
   editMode,
   idNumberValidation,
   idNumberGridColumn,
@@ -40,9 +36,8 @@ const BPMasterDataWindow = ({
   getAddressGridData,
   addAddress,
   delAddress,
-  editAddress,
+  editAddress
 }) => {
-
   return (
     <Window
       id='BPMasterDataWindow'
@@ -61,11 +56,7 @@ const BPMasterDataWindow = ({
         <GeneralTab
           labels={labels}
           bpMasterDataValidation={bpMasterDataValidation}
-          categoryStore={categoryStore}
           maxAccess={maxAccess}
-          groupStore={groupStore}
-          countryStore={countryStore}
-          legalStatusStore={legalStatusStore}
           idCategoryStore={idCategoryStore}
           fillIdCategoryStore={fillIdCategoryStore}
           editMode={editMode}

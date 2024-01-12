@@ -8,12 +8,12 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 const GeneralTab = ({
   labels,
   bpMasterDataValidation,
   maxAccess,
-  categoryStore,
   idCategoryStore,
   editMode,
   fillIdCategoryStore,
@@ -25,13 +25,13 @@ const GeneralTab = ({
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              datasetId={DataSets.BP_CATEGORY}
               name='category'
               label={labels.category}
               valueField='key'
               displayField='value'
-              store={categoryStore}
-              value={categoryStore.filter(item => item.key === bpMasterDataValidation.values.category)[0]}
+              values={bpMasterDataValidation.values}
               required
               readOnly={editMode}
               maxAccess={maxAccess}
