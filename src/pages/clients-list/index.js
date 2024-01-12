@@ -305,7 +305,7 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
 const getPlantId = ()=>{
 
   const userData = window.sessionStorage.getItem('userData') ? JSON.parse( window.sessionStorage.getItem('userData')) : null
-console.log(userData)
+
   var parameters = `_userId=${userData && userData.userId}&_key=plantId`
   getRequest({
     extension: SystemRepository.SystemPlant.get,
@@ -326,10 +326,10 @@ console.log(userData)
 
 
   const search = inp => {
-    console.log('inp' + inp)
+
     setGridData({count : 0, list: [] , message :"",  statusId:1})
      const input = inp
-     console.log({list: []})
+
 
      if(input){
     var parameters = `_size=30&_startAt=0&_filter=${input}`
@@ -379,41 +379,40 @@ console.log(userData)
     },
     validationSchema: yup.object({
       // reference: yup.string().required("This field is required"),
-      isResident: yup.string().required("This field is required"),
-      birthDate: yup.string().required("This field is required"),
-      idtId: yup.string().required("This field is required"),
-      idNo:  yup.string().required("This field is required"),
-      idNoRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('idNo'), null], 'Number must match'),
+      // isResident: yup.string().required("This field is required"),
+      // birthDate: yup.string().required("This field is required"),
+      // idtId: yup.string().required("This field is required"),
+      // idNo:  yup.string().required("This field is required"),
+      // idNoRepeat : yup.string().required('Repeat Password is required')
+      // .oneOf([yup.ref('idNo'), null], 'Number must match'),
 
-      expiryDate: yup.string().required("This field is required"),
-      countryId: yup.string().required("This field is required"),
-      cityId: yup.string().required("This field is required"),
-      idCountry: yup.string().required("This field is required"),
+      // expiryDate: yup.string().required("This field is required"),
+      // countryId: yup.string().required("This field is required"),
+      // cityId: yup.string().required("This field is required"),
+      // idCountry: yup.string().required("This field is required"),
 
-       name: yup.string().required("This field is required"),
-      firstName: yup.string().required("This field is required"),
-      lastName: yup.string().required("This field is required"),
-      nationalityId: yup.string().required("This field is required"),
-      professionId: yup.string().required("This field is required"),
+      //  name: yup.string().required("This field is required"),
+      // firstName: yup.string().required("This field is required"),
+      // lastName: yup.string().required("This field is required"),
+      // nationalityId: yup.string().required("This field is required"),
+      // professionId: yup.string().required("This field is required"),
 
-      cellPhone: yup.string().required("This field is required"),
-      cellPhoneRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-      smsLanguage: yup.string().required("This field is required"),
-      incomeSourceId: yup.string().required("This field is required"),
-      gender: yup.string().required("This field is required"),
-      street1:  yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
+      // cellPhone: yup.string().required("This field is required"),
+      // cellPhoneRepeat : yup.string().required('Repeat Password is required')
+      // .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
+      // smsLanguage: yup.string().required("This field is required"),
+      // incomeSourceId: yup.string().required("This field is required"),
+      // gender: yup.string().required("This field is required"),
+      // street1:  yup.string().required('This field is required'),
+      // phone: yup.string().required('This field is required')
     }),
     onSubmit: (values) => {
-      console.log("values" + values);
-       console.log(WorkAddressValidation)
+
+console.log(values)
        Object.keys(WorkAddressValidation.errors).length < 1 && postRtDefault(values);
     },
   });
 
-      // console.log("values" + values);
 
   const postRtDefault = (obj) => {
 
@@ -642,15 +641,9 @@ console.log(userData)
       subNo: null
     },
 
-    // validationSchema:  yup.object({
-    //   name:  yup.string().required('This field is required'),
-    //   countryId:  yup.string().required('This field is required'),
-    //   cityId:  yup.string().required('This field is required'),
-    //   street1:  yup.string().required('This field is required'),
-    //   phone: yup.string().required('This field is required')
-    // }),
+
     onSubmit: values => {
-      // console.log(values);
+
 
     }
   })
@@ -768,7 +761,7 @@ console.log(userData)
       parameters: parameters,
     })
       .then((res) => {
-        // console.log(res.list);
+
         setCityStore(res.list);
       })
       .catch((error) => {
@@ -784,7 +777,7 @@ console.log(userData)
       parameters: parameters,
     })
       .then((res) => {
-        // console.log(res.list);
+
         setCityAddressStore(res.list);
       })
       .catch((error) => {

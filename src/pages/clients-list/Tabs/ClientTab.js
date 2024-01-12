@@ -13,6 +13,8 @@ import AddressTab from 'src/components/Shared/AddressTab'
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const ClientTab = ({
   clientIndividualFormValidation,
@@ -53,7 +55,6 @@ const ClientTab = ({
    _labels, maxAccess, editMode
  }) => {
 
-console.log(clientIndividualFormValidation)
 
 const [showAsPassword , setShowAsPassword]  = useState(false)
 const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)
@@ -348,25 +349,21 @@ return (
                 </Grid>
 
                 <Grid item xs={12}>
-                  <CustomComboBox
+                  <ResourceComboBox
                     name="idCountry"
                     label={_labels.issusCountry}
                     valueField="recordId"
                     displayField={['reference','name','flName']}
                     readOnly={editMode && true}
-                store={countryStore}
+                    endpointId={SystemRepository.Country.qry}
+
+                // store={countryStore}
                 columnsInDropDown= {[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'Foreign Language Name' }
                 ]}
-                    value={
-                      countryStore.filter(
-                        (item) =>
-                          item.recordId ===
-                          clientIndividualFormValidation.values.idCountry,
-                      )[0]
-                    }
+                    values={clientIndividualFormValidation.values}
                     required
                     onChange={(event, newValue) => {
                       setCityStore([])
@@ -431,6 +428,7 @@ return (
 
 
                 <Grid item xs={12}>
+                  {/* {clientIndividualFormValidation.values.idCountry} */}
             <CustomLookup
               name='idCity'
               label={_labels.issusPlace}
@@ -442,7 +440,8 @@ return (
               onLookup={lookupCity}
               firstValue={clientIndividualFormValidation.values.cityName}
               secondDisplayField={false}
-              readOnly={(editMode || clientIndividualFormValidation.values.idCountry) && true}
+
+              readOnly={(editMode || !clientIndividualFormValidation.values.idCountry) && true}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 if (newValue) {
