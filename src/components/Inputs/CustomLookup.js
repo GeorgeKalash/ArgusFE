@@ -1,6 +1,8 @@
 // ** MUI Imports
 import { Box, Autocomplete, TextField, Paper } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'; // Import the icon you want to use
+import SearchIcon  from '@mui/icons-material/Search'; // Import the icon you want to use
+import ClearIcon from '@mui/icons-material/Clear';
+import {  InputAdornment, IconButton } from '@mui/material'
 
 const CustomPaper = props => {
   return <Paper sx={{ position: 'absolute', width: '100%', zIndex: 999, mt: 1 }} {...props} />
@@ -89,13 +91,43 @@ const CustomLookup = ({
                 autoFocus={autoFocus}
                 error={error}
                 helperText={helperText}
+                style={{ textAlign: 'right' }}
                 InputProps={{
+
                   ...params.InputProps,
-                  startAdornment: (
-                    <>
-                      <SearchIcon color="action" /> {/* Adjust color as needed */}
+                  endAdornment: (
+                    <div  style={{
+                      position: 'absolute',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      right: 15,
+                      display: 'flex',
+                    }}>
+
+                {firstValue && (
+                  <InputAdornment position='end'>
+                  <IconButton tabIndex={-1} edge='end' onClick={(e)=>onChange('')}  aria-label='clear input'>
+                    <ClearIcon />
+                  </IconButton>
+                 </InputAdornment>
+                )
+                }
+                 <InputAdornment position='end'>
+                  <IconButton tabIndex={-1} edge='end'   aria-label='clear input'>
+
+                  <SearchIcon
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    // Handle search action if needed
+                    console.log('Search clicked');
+                  }}
+                />
+                 </IconButton>
+                 </InputAdornment>
+
+                       {/* Adjust color as needed */}
                       {/* {params.InputProps.startAdornment} */}
-                    </>
+                    </div>
                   ),
                 }}
 
