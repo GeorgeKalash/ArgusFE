@@ -192,8 +192,6 @@ const InlineEditGrid = ({
               }
             }}
             isOptionEqualToValue={(option, value) => {
-              // console.log(column.valueField)
-              // console.log(option[column.valueField])
 
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
             }}
@@ -257,9 +255,7 @@ const InlineEditGrid = ({
         )
       case 'lookup':
 
-      console.log(gridValidation.values.rows[rowIndex][`${column.nameId}`])
-
-return (
+        return (
           <Autocomplete
             id={cellId}
             size='small'
@@ -356,8 +352,6 @@ return (
             renderInput={params => (
               <TextField
                 {...params}
-
-                // onClick={(e)=>column.onLookup(e.target.value)}
                 onChange={e => (e.target.value ? column.onLookup && column.onLookup(e.target.value) : column.onClear && column.onClear())}
                 required={column?.mandatory}
                 InputProps={{
