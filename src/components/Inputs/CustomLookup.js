@@ -1,5 +1,6 @@
 // ** MUI Imports
 import { Box, Autocomplete, TextField, Paper } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'; // Import the icon you want to use
 
 const CustomPaper = props => {
   return <Paper sx={{ position: 'absolute', width: '100%', zIndex: 999, mt: 1 }} {...props} />
@@ -88,6 +89,16 @@ const CustomLookup = ({
                 autoFocus={autoFocus}
                 error={error}
                 helperText={helperText}
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <SearchIcon color="action" /> {/* Adjust color as needed */}
+                      {/* {params.InputProps.startAdornment} */}
+                    </>
+                  ),
+                }}
+
               />
             )}
             readOnly={_readOnly}
