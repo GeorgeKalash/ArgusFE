@@ -24,6 +24,7 @@ const InlineEditGrid = ({
   allowAddNewLine = true,
   onDelete
 }) => {
+
   const tableWidth = width
 
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
@@ -255,6 +256,7 @@ const InlineEditGrid = ({
           />
         )
       case 'lookup':
+
         return (
           <Autocomplete
             id={cellId}
@@ -302,40 +304,64 @@ const InlineEditGrid = ({
               column.columnsInDropDown.length > 0 &&
               CustomPaper(props, column.widthDropDown)
             }
-            renderOption={(props, option) => {
-              if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
-                return (
-                  <Box>
-                    {props.id.endsWith('-0') && (
-                      <li className={props.className}>
-                        {column.columnsInDropDown.map((header, i) => {
-                          return (
-                            <Box key={i} sx={{ flex: 1 }}>
-                              {header.value.toUpperCase()}
-                            </Box>
-                          )
-                        })}
-                      </li>
-                    )}
-                    <li {...props}>
-                      {column.columnsInDropDown.map((header, i) => {
-                        return (
-                          <Box key={i} sx={{ flex: 1 }}>
-                            {option[header.key]}
-                          </Box>
-                        )
-                      })}
-                    </li>
-                  </Box>
-                )
-            }}
+
+            renderOption={(props, option) => (
+              <Box>
+                {props.id.endsWith('-0') && (
+                  <li className={props.className}>
+                   <Box sx={{ flex: 1 }}>{column.displayField.toUpperCase()}</Box>
+                  </li>
+                )}
+                <li {...props}>
+                  <Box sx={{ flex: 1 }}>{option[column.displayField]}</Box>
+                </li>
+              </Box>
+            )}
+
+          //   renderOption={(props, option) => {
+          //     console.log(option.columnsInDropDown + "column.store-2")
+
+          //     // if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
+          //       return (
+          //         <Box>
+          //           {props.id.endsWith('-0') && (
+          //             <li className={props.className}>
+          //               {column.columnsInDropDown.map((header, i) => {
+          //                 return (
+          //                   <Box key={i} sx={{ flex: 1 }}>
+          //                     {header.value.toUpperCase()}
+          //                   </Box>
+          //                 )
+          //               })}
+          //             </li>
+          //           )}
+          //           <li {...props}>
+          //             {column.columnsInDropDown.map((header, i) => {
+          //               return (
+          //                 <Box key={i} sx={{ flex: 1 }}>
+          //                   {option[header.key]}
+          //                 </Box>
+          //               )
+          //             })}
+          //           </li>
+          //         </Box>
+          //       )
+          //   }
+
+          // }
             fullWidth={true}
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (e.target.value ? column.onLookup && column.onLookup(e.target.value) : column.onClear())}
+                onClick={(e)=>column.onLookup(e.target.value)}
+                onChange={e => (e.target.value ? column.onLookup && column.onLookup(e.target.value) : column.onClear && column.onClear())}
                 required={column?.mandatory}
-                sx={{ flex: 1 }}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: null, // Set endAdornment to null to remove the arrow button
+                }}
+                sx={{ ...params.sx, flex: 1 }}
+
               />
             )}
           />
