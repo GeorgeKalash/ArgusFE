@@ -257,7 +257,9 @@ const InlineEditGrid = ({
         )
       case 'lookup':
 
-        return (
+      console.log(gridValidation.values.rows[rowIndex][`${column.nameId}`])
+
+return (
           <Autocomplete
             id={cellId}
             size='small'
@@ -266,6 +268,7 @@ const InlineEditGrid = ({
             readOnly={column?.readOnly}
             options={column.store}
             getOptionLabel={option => {
+
               if (typeof option === 'object') return option[column.displayField]
               else {
                 const selectedOption = column.store?.find(item => {
@@ -308,8 +311,8 @@ const InlineEditGrid = ({
             renderOption={(props, option) => (
               <Box>
                 {props.id.endsWith('-0') && (
-                  <li className={props.className}>
-                   <Box sx={{ flex: 1 }}>{column.displayField.toUpperCase()}</Box>
+                  <li className={props.className} >
+                   <Box sx={{ flex: 1 , fontWeight: 'bold' }}>{column.displayField.toUpperCase()}</Box>
                   </li>
                 )}
                 <li {...props}>
@@ -353,7 +356,8 @@ const InlineEditGrid = ({
             renderInput={params => (
               <TextField
                 {...params}
-                onClick={(e)=>column.onLookup(e.target.value)}
+
+                // onClick={(e)=>column.onLookup(e.target.value)}
                 onChange={e => (e.target.value ? column.onLookup && column.onLookup(e.target.value) : column.onClear && column.onClear())}
                 required={column?.mandatory}
                 InputProps={{
