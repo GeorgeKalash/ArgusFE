@@ -88,6 +88,7 @@ const CustomLookup = ({
                 autoFocus={autoFocus}
                 error={error}
                 helperText={helperText}
+
               />
             )}
             readOnly={_readOnly}

@@ -8,6 +8,7 @@ import CustomTextField from '../Inputs/CustomTextField'
 import DeleteDialog from './DeleteDialog'
 import Icon from 'src/@core/components/icon'
 import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import SearchIcon from '@mui/icons-material/Search';
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
@@ -352,11 +353,51 @@ const InlineEditGrid = ({
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (e.target.value ? column.onLookup && column.onLookup(e.target.value) : column.onClear && column.onClear())}
+                onChange={e => (e.target.value ? column && column.onLookup(e.target.value) : column.onClear && column.onClear())}
                 required={column?.mandatory}
                 InputProps={{
+
                   ...params.InputProps,
-                  endAdornment: null, // Set endAdornment to null to remove the arrow button
+                  endAdornment: (
+                    <div  style={{
+                      position: 'absolute',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      right: 15,
+                      display: 'flex',
+                    }}>
+
+                {gridValidation.values.rows[rowIndex][`${column.nameId}`] && (
+                  <InputAdornment position='end'>
+                  <IconButton tabIndex={-1} edge='end' onClick={()=>{
+                     gridValidation.setFieldValue( `rows[${rowIndex}].${column.nameId}`, null )
+                    gridValidation.setFieldValue( `rows[${rowIndex}].${column.name}`, null)
+
+                  }
+
+                  }  aria-label='clear input'>
+                    <ClearIcon />
+                  </IconButton>
+                 </InputAdornment>
+                )
+                }
+                 <InputAdornment position='end'>
+                  <IconButton tabIndex={-1} edge='end'   aria-label='clear input'>
+
+                  <SearchIcon
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    // Handle search action if needed
+                    console.log('Search clicked');
+                  }}
+                />
+                 </IconButton>
+                 </InputAdornment>
+
+                       {/* Adjust color as needed */}
+                      {/* {params.InputProps.startAdornment} */}
+                    </div>
+                  ),
                 }}
                 sx={{ ...params.sx, flex: 1 }}
 
