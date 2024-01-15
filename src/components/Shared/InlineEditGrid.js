@@ -307,7 +307,6 @@ const InlineEditGrid = ({
               column.columnsInDropDown.length > 0 &&
               CustomPaper(props, column.widthDropDown)
             }
-
             renderOption={(props, option) => (
               <Box>
                 {props.id.endsWith('-0') && (
@@ -357,11 +356,7 @@ const InlineEditGrid = ({
               <TextField
                 {...params}
                 onChange={e => (e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
-
                 onFocus={e =>  column.onLookup('')}
-
-                // // onFocus={e =>  console.log(e.target.value)}
-
                 required={column?.mandatory}
                 InputProps={{
 
