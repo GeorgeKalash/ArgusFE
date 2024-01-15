@@ -356,9 +356,9 @@ const InlineEditGrid = ({
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && (  column.onClear()))}
+                onChange={e => (e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
 
-                // onFocus={e =>  column.onLookup(e.target.value)}
+                onFocus={e =>  column.onLookup('')}
 
                 // // onFocus={e =>  console.log(e.target.value)}
 

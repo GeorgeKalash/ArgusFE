@@ -48,6 +48,7 @@ const SmsFunctionTemplate = () => {
 
   const lookupTemplate = searchQry => {
     setTemplateStore([])
+
     if (searchQry) {
       var parameters = `_filter=${searchQry}`
       getRequest({
