@@ -1,6 +1,5 @@
 // ** Next Import
 import Link from 'next/link'
-import Image from 'next/image'
 
 // ** MUI Imports
 import IconButton from '@mui/material/IconButton'
@@ -12,7 +11,6 @@ import Typography from '@mui/material/Typography'
 import Icon from 'src/@core/components/icon'
 
 // ** Configs
-import themeConfig from 'src/configs/themeConfig'
 import UserDropdown from '../../shared-components/UserDropdown'
 
 // ** Styled Components
