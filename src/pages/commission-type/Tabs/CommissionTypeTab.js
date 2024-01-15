@@ -49,7 +49,7 @@ const CommissionTypeTab=({
               valueField='key'
               displayField='value'
               store={typeStore}
-              value={typeStore.filter(item => item.key === commissiontypeValidation.values.type)[0]}
+              value={typeStore.filter(item => item.key === commissiontypeValidation.values.type?.toString())[0]}
               required
               maxAccess={maxAccess}
               onChange={(event, newValue) => {

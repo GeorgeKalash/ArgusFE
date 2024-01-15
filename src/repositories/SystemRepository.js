@@ -128,5 +128,12 @@ export const SystemRepository = {
     qry: service + 'qryTL',
     get: service + 'getTL',
   },
+  State:{
+    qry: service + 'qryST',
+    get: service + 'getST',
+    set: service + 'setST',
+    del: service + 'delST',
+    page: service + 'pageST'
+  }
 
 }

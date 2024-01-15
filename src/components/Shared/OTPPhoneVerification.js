@@ -41,7 +41,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
 
   const  otpSMS = () =>{
 
-    var data = {clientId: formValidation.values.clientId, OTPRequest: {secret: null, functionId: functionId, deviceId: formValidation.values.cellPhone, otp: null } }
+    var data = {clientId: formValidation.values.clientId, secret: '', functionId: functionId, deviceId: formValidation.values.cellPhone, otp: null }
     postRequest({
       extension: CTCLRepository.OTPRepository.sms,
        record: JSON.stringify(data),
@@ -58,9 +58,9 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
   }
 
   const  checkSMS = (value) =>{
-    if(value.length > 5){
+    if(value.length > 1){
 
-    var data = {clientId: formValidation.values.clientId, OTPRequest: {secret: null, functionId: functionId, deviceId: formValidation.values.cellPhone, otp: value } }
+    var data = {clientId: formValidation.values.clientId, secret: '', functionId: functionId, deviceId: formValidation.values.cellPhone, otp: value  }
     postRequest({
       extension: CTCLRepository.OTPRepository.checkSms,
       record: JSON.stringify(data),
@@ -95,7 +95,6 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
       }
 
       // setShowOtpVerification(false)
-      console.log(formValidation)
 
       // setEditMode(true)
 
@@ -105,7 +104,6 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
 
   const handleOtpChange = (index, e) => {
 
-    console.log('Key Code:', e.nativeEvent.inputType);
 
 
       document.getElementById(`otp-input-${index}`).select();
@@ -152,7 +150,7 @@ function checkDisable(){
   setDisabled(0)
   var count = 0;
    otp.map((digit, index) => (
-    digit !==''  &&  console.log('digit' + count++)
+    digit !==''  &&  count++
    ))
    if(count > 5){
     setDisabled(count)
@@ -172,7 +170,6 @@ function checkDisable(){
         document.getElementById(`otp-input-${index -1 }`)?.focus();
         document.getElementById(`otp-input-${index -1 }`)?.select();
     }else if (currentValue === document.getElementById(`otp-input-${index}`).value ) {
-      console.log('Same value on KeyUp:',document.getElementById(`otp-input-${index}`).value , currentValue);
       document.getElementById(`otp-input-${index}`)?.select();
 
 
@@ -191,7 +188,7 @@ function checkDisable(){
 
   const handleVerifyOtp = () => {
     const enteredOtp = otp.join('');
-console.log(enteredOtp)
+
 checkSMS(enteredOtp)
 
     // Implement logic to send the entered OTP to the backend for verification
@@ -231,7 +228,7 @@ checkSMS(enteredOtp)
         Resend OTP
       </button>
       <button className={styles.verifyButton} onClick={handleVerifyOtp} disabled={(timer === 0 || disabled < 5 ) ? true : false}>
-        Verify OTP  {disabled}
+        Verify OTP
       </button>
         {error && <p   className={styles.errorMessage} >{error}</p>}
     </Grid>

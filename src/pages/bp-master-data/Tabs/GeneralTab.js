@@ -5,18 +5,18 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 const GeneralTab = ({
   labels,
   bpMasterDataValidation,
   maxAccess,
-  categoryStore,
-  groupStore,
   idCategoryStore,
   editMode,
-  countryStore,
   fillIdCategoryStore,
-  legalStatusStore,
   defaultValue
 }) => {
   return (
@@ -25,13 +25,13 @@ const GeneralTab = ({
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              datasetId={DataSets.BP_CATEGORY}
               name='category'
               label={labels.category}
               valueField='key'
               displayField='value'
-              store={categoryStore}
-              value={categoryStore.filter(item => item.key === bpMasterDataValidation.values.category)[0]}
+              values={bpMasterDataValidation.values}
               required
               readOnly={editMode}
               maxAccess={maxAccess}
@@ -39,20 +39,19 @@ const GeneralTab = ({
                 bpMasterDataValidation.setFieldValue('category', newValue?.key)
                 const selectedCategory = newValue?.key || ''
                 fillIdCategoryStore(selectedCategory) // Fetch and update state data based on the selected category
-                
               }}
               error={bpMasterDataValidation.touched.category && Boolean(bpMasterDataValidation.errors.category)}
               helperText={bpMasterDataValidation.touched.category && bpMasterDataValidation.errors.category}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={BusinessPartnerRepository.Group.qry}
               name='groupId'
               label={labels.group}
               valueField='recordId'
               displayField='name'
-              store={groupStore}
-              value={groupStore.filter(item => item.recordId === bpMasterDataValidation.values.groupId)[0]}
+              values={bpMasterDataValidation.values}
               required
               readOnly={editMode}
               maxAccess={maxAccess}
@@ -147,21 +146,21 @@ const GeneralTab = ({
             />
           </Grid>
           <Grid item xs={12}>
-          {idCategoryStore && (  
-          <CustomComboBox
-              name='defaultInc'
-              label={labels.idCategory}
-              valueField='recordId'
-              displayField='name'
-              store={idCategoryStore}
-              value={idCategoryStore.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
-              }}
-              error={bpMasterDataValidation.touched.defaultInc && Boolean(bpMasterDataValidation.errors.defaultInc)}
-              helperText={bpMasterDataValidation.touched.defaultInc && bpMasterDataValidation.errors.defaultInc}
-            />
+            {idCategoryStore && (
+              <CustomComboBox
+                name='defaultInc'
+                label={labels.idCategory}
+                valueField='recordId'
+                displayField='name'
+                store={idCategoryStore}
+                value={idCategoryStore.filter(item => item.recordId === bpMasterDataValidation.values.defaultInc)[0]}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  bpMasterDataValidation && bpMasterDataValidation.setFieldValue('defaultInc', newValue?.recordId)
+                }}
+                error={bpMasterDataValidation.touched.defaultInc && Boolean(bpMasterDataValidation.errors.defaultInc)}
+                helperText={bpMasterDataValidation.touched.defaultInc && bpMasterDataValidation.errors.defaultInc}
+              />
             )}
           </Grid>
           <Grid item xs={12}>
@@ -176,17 +175,17 @@ const GeneralTab = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
               name='nationalityId'
               label={labels.nationalityId}
-              columnsInDropDown= {[
+              columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
+              values={bpMasterDataValidation.values}
               valueField='recordId'
               displayField='name'
-              store={countryStore}
-              value={countryStore?.filter(item => item.recordId === bpMasterDataValidation.values.nationalityId)[0]}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation && bpMasterDataValidation.setFieldValue('nationalityId', newValue?.recordId)
@@ -198,17 +197,18 @@ const GeneralTab = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={BusinessPartnerRepository.LegalStatus.qry}
+              parameters={`_startAt=0&_pageSize=100`}
               name='legalStatusId'
               label={labels.legalStatus}
-              columnsInDropDown= {[
+              columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
               valueField='recordId'
               displayField='name'
-              store={legalStatusStore}
-              value={legalStatusStore?.filter(item => item.recordId === bpMasterDataValidation.values.legalStatusId)[0]}
+              values={bpMasterDataValidation.values}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 bpMasterDataValidation && bpMasterDataValidation.setFieldValue('legalStatusId', newValue?.recordId)
