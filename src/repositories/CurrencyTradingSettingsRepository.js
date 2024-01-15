@@ -39,5 +39,10 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getACT',
     set: service + 'setACT',
     del: service + 'delACT'
+  },
+   Reference: {
+    get : service + 'getDE'
+
   }
+
 }

@@ -47,7 +47,7 @@ const ClientWindow = ({
     editMode,
     onInfo,
     onInfoClose,
-
+    setReferenceRequired,
     maxAccess
 }) => {
 
@@ -94,6 +94,7 @@ return (
                     lookupCityAddressWork={lookupCityAddressWork}
                     cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
                     cityDistrictAddressStore={cityDistrictAddressStore}
+                    setReferenceRequired={setReferenceRequired}
                     _labels={_labels}
                     maxAccess={maxAccess}
                     editMode={editMode}

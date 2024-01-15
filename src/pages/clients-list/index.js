@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -45,6 +44,7 @@ const ClientsList = () => {
   const [windowInfo, setWindowInfo] = useState(null)
   const [editMode, setEditMode] = useState(null)
 const requiredOptional = true
+const [referenceRequired, setReferenceRequired] = useState(false)
 
 
   //stores
@@ -378,7 +378,7 @@ console.log(userData)
 
     },
     validationSchema: yup.object({
-      // reference: yup.string().required("This field is required"),
+      reference: referenceRequired &&yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
@@ -1029,6 +1029,7 @@ onEdit={editClient}
   stateAddressWorkStore={stateAddressWorkStore}
   fillFilterProfession={fillFilterProfession}
   stateAddressStore={stateAddressStore}
+  setReferenceRequired={setReferenceRequired}
   _labels ={_labels2}
   maxAccess={access}
   editMode={editMode}
