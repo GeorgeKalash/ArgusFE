@@ -25,7 +25,7 @@ const InlineEditGrid = ({
   allowAddNewLine = true,
   onDelete
 }) => {
-  const [open, setOpen] = useState(false);
+  const [write, setWrite] = useState(false);
 
   const tableWidth = width
 
@@ -267,8 +267,11 @@ const InlineEditGrid = ({
             readOnly={column?.readOnly}
             options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
-            open={open}
-            onBlur={()=>setOpen(false)}
+
+            open={write}
+            onBlur={() => setWrite(false)}
+
+            // onFocus={() => setOpen(true)}
 
             // getOptionLabel={option => {
 
@@ -286,6 +289,7 @@ const InlineEditGrid = ({
             }}
             onChange={(event, newValue) => {
               event.stopPropagation()
+              setWrite(false)
               gridValidation.setFieldValue(
                 `rows[${rowIndex}].${column.nameId}`,
                 newValue ? newValue[column.valueField] : newValue
@@ -305,6 +309,8 @@ const InlineEditGrid = ({
                 }
               }
             }}
+
+            // noOptionsText=""
             PaperComponent={props =>
               column.columnsInDropDown &&
               column.columnsInDropDown.length > 0 &&
@@ -357,8 +363,10 @@ const InlineEditGrid = ({
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (setOpen(e.target.value.length > 0) ,  column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
-                onClick={e =>  column.onLookup('')}
+                onChange={e => setWrite(e.target.value.length > 0 ,  column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
+                onBlur={() => setWrite(false)}
+
+                // onClick={e =>  column.onLookup('')}
                 required={column?.mandatory}
                 InputProps={{
 
