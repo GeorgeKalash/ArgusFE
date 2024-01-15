@@ -71,7 +71,7 @@ const IdTypesWindow = ({
       {windowInfo && (
         <TransactionLog
           resourceId={ResourceIds && ResourceIds.IdTypes}
-          recordId={idFieldsValidation.values.recordId}
+          recordId={idTypesValidation.values.recordId}
           onInfoClose={() => setWindowInfo(false)}
         />
       )}

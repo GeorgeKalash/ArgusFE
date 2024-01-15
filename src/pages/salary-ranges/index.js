@@ -97,7 +97,8 @@ const SalaryRange = () => {
 
   const editSalaryRange = obj => {
     salaryRangeValidation.setValues(populateSalaryRange(obj))
-
+    
+    setEditMode(true)
     setWindowOpen(true)
   }
 

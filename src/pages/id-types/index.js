@@ -159,11 +159,15 @@ const IdTypes = () => {
     const data = {
       idtId: idTypesValidation.values.recordId,
       items: obj
+      
     }
+    
 
     postRequest({
+      
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
       record: JSON.stringify(data)
+      
     })
       .then(res => {
         getGridData({})
