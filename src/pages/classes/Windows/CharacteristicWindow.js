@@ -39,10 +39,12 @@ const CharacteristicWindow = ({
                   value={characteristicComboStore && characteristicComboStore.filter(item => item.recordId === characteristicValidation.values.chId)[0]}
                   required
                   onChange={(event, newValue) => {
-                    characteristicValidation.setFieldValue('chId', newValue?.recordId)
+                    characteristicValidation.setFieldValue('chId', newValue?.recordId)  
                     const selectedCharacId = newValue?.recordId || ''
                     console.log('chId ' + selectedCharacId)
                     fillCharacValueComboStore(selectedCharacId) // Fetch and update according to this selection
+                    console.log('characValueCombo')
+                    console.log(characValueComboStore)
                   }}
                   error={characteristicValidation.touched.chId && Boolean(characteristicValidation.errors.chId)}
                   helperText={characteristicValidation.touched.chId && characteristicValidation.errors.chId}
@@ -59,7 +61,6 @@ const CharacteristicWindow = ({
                   store={characValueComboStore}
                   value={characValueComboStore.filter(item => item.seqNo === characteristicValidation.values.seqNo)[0]}
                   required
-                  readOnly={characteristicValidation.values.seqNo !== null}
                   onChange={(event, newValue) => {
                     characteristicValidation.setFieldValue('seqNo', newValue?.seqNo)
                   }}

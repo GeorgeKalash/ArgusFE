@@ -35,7 +35,7 @@ const FunctionWindow = ({
                   valueField='key'
                   displayField='value'
                   store={functionComboStore}
-                  value={functionComboStore && functionComboStore.filter(item => item.key === functionValidation.values.functionId)[0]}
+                  value={functionComboStore && functionComboStore.filter(item => item.key === functionValidation.values.functionId.toString())[0]}
                   required
                   onChange={(event, newValue) => {
                     functionValidation.setFieldValue('functionId', newValue?.key)

@@ -112,11 +112,11 @@ const Classes = () => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
     getRequest({
-      extension: DocumentReleaseRepository.Class.qry,
+      extension: DocumentReleaseRepository.Class.page,
       parameters: parameters
     })
       .then(res => {
-        setGridData(res)
+        setGridData({ ...res, _startAt })
         console.log(res)
       })
       .catch(error => {
@@ -333,17 +333,18 @@ const Classes = () => {
       })
   }
 
-  const fillCharacValueComboStore = (chId) => {
+  const fillCharacValueComboStore = chId => {
+    setCharacValueComboStore([])
     const defaultParams = `_chId=${chId}`
     var parameters = defaultParams
-    getRequest({
+    chId && getRequest({
       extension: DocumentReleaseRepository.CharacteristicsValues.qry,
       parameters: parameters
     })
       .then(res => {
         console.log('value')
         console.log(res)
-        setCharacteristicComboStore(res.list)
+        setCharacValueComboStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error.response.data)

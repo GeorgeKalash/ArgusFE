@@ -44,6 +44,7 @@ export const DocumentReleaseRepository = {
   },
   Class:
   {
+    page:service + 'pageCLS',
     qry: service + 'qryCLS',
     get: service + 'getCLS',
     set: service + 'setCLS',
