@@ -48,6 +48,7 @@ const SmsFunctionTemplate = () => {
 
   const lookupTemplate = searchQry => {
     setTemplateStore([])
+
     if (searchQry) {
       var parameters = `_filter=${searchQry}`
       getRequest({
@@ -87,8 +88,8 @@ const SmsFunctionTemplate = () => {
       name: 'templateName',
       mandatory: false,
       store: templateStore,
-      valueField: 'templateId',
-      displayField: 'templateName',
+      valueField: 'recordId',
+      displayField: 'name',
       fieldsToUpdate: [{ from: 'recordId', to: 'templateId' }, { from: 'name', to: 'templateName' }],
       columnsInDropDown: [{ key: 'name', value: 'name' }],
       onLookup: lookupTemplate
