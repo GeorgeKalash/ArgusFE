@@ -25,6 +25,7 @@ const InlineEditGrid = ({
   allowAddNewLine = true,
   onDelete
 }) => {
+  const [write, setWrite] = useState(false);
 
   const tableWidth = width
 
@@ -267,6 +268,10 @@ const InlineEditGrid = ({
             options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
 
+            open={write}
+
+            // onFocus={() => setOpen(true)}
+
             // getOptionLabel={option => {
 
             //   if (typeof option === 'object') return option[column.displayField]
@@ -283,6 +288,7 @@ const InlineEditGrid = ({
             }}
             onChange={(event, newValue) => {
               event.stopPropagation()
+              setWrite(false)
               gridValidation.setFieldValue(
                 `rows[${rowIndex}].${column.nameId}`,
                 newValue ? newValue[column.valueField] : newValue
@@ -302,6 +308,8 @@ const InlineEditGrid = ({
                 }
               }
             }}
+
+            // noOptionsText=""
             PaperComponent={props =>
               column.columnsInDropDown &&
               column.columnsInDropDown.length > 0 &&
@@ -354,7 +362,10 @@ const InlineEditGrid = ({
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => ( column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
+                onChange={e => setWrite(e.target.value.length > 0 ,  column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
+                onBlur={() => setWrite(false)}
+
+                // onClick={e =>  column.onLookup('')}
                 required={column?.mandatory}
                 InputProps={{
 
