@@ -322,7 +322,6 @@ const InlineEditGrid = ({
 
           //   renderOption={(props, option) => {
           //     console.log(option.columnsInDropDown + "column.store-2")
-
           //     // if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
           //       return (
           //         <Box>
