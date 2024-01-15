@@ -4,16 +4,11 @@ import IconButton from '@mui/material/IconButton'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
-
-const SecurityGrpWindow = ({
-  onClose,
-  onSave,
-  securityGrpALLData,
-  securityGrpSelectedData,
+const ItemSelectorWindow = ({
+  initialAllListData,
+  initialSelectedListData,
+  handleListsDataChange,
   labels,
-  handleSecurityGrpDataChange
 }) => {
   const [selected, setSelected] = useState([])
   const [allItems, setAllItems] = useState([])
@@ -21,9 +16,9 @@ const SecurityGrpWindow = ({
   const [newAll, setNewAll] = useState([])
 
   useEffect(() => {
-    // Loop through securityGrpALLData and assign each object to allItems
-    if (Array.isArray(securityGrpALLData)) {
-      const updatedAllItems = securityGrpALLData.map(item => ({
+    // Loop through initialAllListData and assign each object to allItems
+    if (Array.isArray(initialAllListData)) {
+      const updatedAllItems = initialAllListData.map(item => ({
         sgId: item.sgId,
         sgName: item.sgName,
         userId: item.userId
@@ -31,8 +26,8 @@ const SecurityGrpWindow = ({
       setAllItems(updatedAllItems)
     }
 
-    if (Array.isArray(securityGrpSelectedData)) {
-      const updatedSelectedItems = securityGrpSelectedData.map(item => ({
+    if (Array.isArray(initialSelectedListData)) {
+      const updatedSelectedItems = initialSelectedListData.map(item => ({
         sgId: item.sgId,
         sgName: item.sgName,
         userId: item.userId
@@ -41,7 +36,8 @@ const SecurityGrpWindow = ({
       // Update the selected state with the new array
       setSelected(updatedSelectedItems)
     }
-  }, [securityGrpALLData, securityGrpSelectedData])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAllListData, initialSelectedListData])
 
   const handleToggle = value => {
     const isChecked = document.getElementById(value.sgId).checked
@@ -129,7 +125,7 @@ const SecurityGrpWindow = ({
       const updatedItems = prevItems.filter(item => !newAll.some(selectedItem => selectedItem.sgId === item.sgId))
 
       // Use the updatedItems directly
-      handleSecurityGrpDataChange(all, updatedItems)
+      handleListsDataChange(all, updatedItems)
 
       return updatedItems
     })
@@ -154,7 +150,7 @@ const SecurityGrpWindow = ({
       const updatedItems = prevItems.filter(item => !newSelected.some(selectedItem => selectedItem.sgId === item.sgId))
 
       // Use the updatedItems directly
-      handleSecurityGrpDataChange(updatedItems, selected)
+      handleListsDataChange(updatedItems, selected)
 
       return updatedItems
     })
@@ -164,114 +160,113 @@ const SecurityGrpWindow = ({
   }
 
   return (
-    <Window width={600} height={400} onClose={onClose} onSave={onSave} Title={labels.securityGrp}>
+   <div>
     {/* Empty Toolbar*/}
     <div style={{ backgroundColor: 'transparent', padding: '8px', textAlign: 'center' }}></div>
 
-    <div style={{ display: 'flex', justifyContent: 'space-between'}}>
-      {/* Left List */}
-      <div
-        style={{
-          border: '1px solid #ccc',
-          padding: '10px',
-          marginLeft: '30px',
-          width: '50%', // Set width as a percentage,so the div expanded also when window is maximized
-          textAlign: 'center',
-          minWidth: '250px',
-          maxHeight: '380px',
-        }}
-      >
-        <div style={{ margin: 'auto' }}>
-        <div style={{ backgroundColor: 'black' }}>
-            <h3 style={{ margin: '0', color: 'white'}}>{labels.all}</h3>
-          </div>
-          <div style={{ //add another div with overflowY for list scrolling
-          maxHeight:'290px',
-          overflowY: 'auto',
-          border: '1px solid transparent',
-          }}>
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {allItems.map(item => (
-              <li
-                key={`key1_${item.sgId}`}
-                style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
-              >
-                <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
-                  <input
-                    id={item.sgId}
-                    type='checkbox'
-                    onChange={() => handleToggle(item)}
-                    checked={item.checked || false}
-                    style={{ marginRight: '8px' }}
-                  />
-                  {item.sgName}
-                </label>
-              </li>
-            ))}
-          </ul>
-          </div>
+    <div style={{ display: 'flex'}}>
+        {/* Left List */}
+        <div
+            style={{
+                border: '1px solid #ccc',
+                padding: '10px',
+                marginLeft: '30px',
+                flex: '1',
+                textAlign: 'center',
+                width: '50%',
+                maxHeight: '380px',
+                overflowY: 'auto',
+            }}
+        >
+            <div style={{ margin: 'auto' }}>
+                <div style={{ backgroundColor: 'black' }}>
+                    <h3 style={{ margin: '0', color: 'white' }}>{labels.all}</h3>
+                </div>
+                <div style={{
+                    maxHeight: '330px',
+                    overflowY: 'auto',
+                    border: '1px solid transparent',
+                }}>
+                    <ul style={{ listStyleType: 'none', padding: 0 }}>
+                        {allItems.map(item => (
+                            <li
+                                key={`key1_${item.sgId}`}
+                                style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
+                            >
+                                <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+                                    <input
+                                        id={item.sgId}
+                                        type='checkbox'
+                                        onChange={() => handleToggle(item)}
+                                        checked={item.checked || false}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    {item.sgName}
+                                </label>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
         </div>
-      </div>
 
-       {/* Centered Arrows */}
-       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-      
-        <IconButton onClick={handleMoveRight}>
-          <ArrowForwardIcon />
-        </IconButton>
-        <IconButton onClick={handleMoveLeft}>
-          <ArrowBackIcon />
-        </IconButton>
-      </div>
-  
-      {/* Right List */}
-      <div
-        style={{
-          border: '1px solid #ccc',
-          padding: '10px',
-          marginRight: '30px',
-          width: '50%', // Set width as a percentage,so the div expanded also when window is maximized
-          textAlign: 'center',
-          minWidth: '250px',
-          overflowY: 'auto',
-          maxHeight: '380px',
-        }}
-      >
-        <div style={{ margin: 'auto' }}>
-          <div style={{ backgroundColor: 'black' }}>
-            <h3 style={{ margin: '0', color: 'white' }}>{labels.selected}</h3>
-          </div>
-          <div style={{ //add another div with overflowY for list scrolling
-          maxHeight:'290px',
-          overflowY: 'auto',
-          border: '1px solid transparent',
-          }}>
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {selected.map(item => (
-              <li
-                key={`key2_${item.sgId}`}
-                style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
-              >
-                <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
-                  <input
-                    id={item.sgId}
-                    type='checkbox'
-                    onChange={() => handleToggle(item)}
-                    checked={item.checked || false}
-                    style={{ marginRight: '8px' }}
-                  />
-                  {item.sgName}
-                </label>
-              </li>
-            ))}
-          </ul>
-          </div>
+        {/* Centered Arrows */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <IconButton onClick={handleMoveRight}>
+                <ArrowForwardIcon />
+            </IconButton>
+            <IconButton onClick={handleMoveLeft}>
+                <ArrowBackIcon />
+            </IconButton>
         </div>
-      </div>
+
+        {/* Right List */}
+        <div
+            style={{
+                border: '1px solid #ccc',
+                padding: '10px',
+                marginRight: '30px',
+                flex: '1',
+                textAlign: 'center',
+                width: '50%',
+                maxHeight: '380px',
+                overflowY: 'auto',
+            }}
+        >
+            <div style={{ margin: 'auto' }}>
+                <div style={{ backgroundColor: 'black' }}>
+                    <h3 style={{ margin: '0', color: 'white' }}>{labels.selected}</h3>
+                </div>
+                <div style={{
+                      maxHeight: '330px',
+                      overflowY: 'auto',
+                      border: '1px solid transparent',
+                }}>
+                    <ul style={{ listStyleType: 'none', padding: 0 }}>
+                        {selected.map(item => (
+                            <li
+                                key={`key2_${item.sgId}`}
+                                style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
+                            >
+                                <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+                                    <input
+                                        id={item.sgId}
+                                        type='checkbox'
+                                        onChange={() => handleToggle(item)}
+                                        checked={item.checked || false}
+                                        style={{ marginRight: '8px' }}
+                                    />
+                                    {item.sgName}
+                                </label>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-  </Window>
-  
+  </div>
   )
 }
 
-export default SecurityGrpWindow
+export default ItemSelectorWindow
