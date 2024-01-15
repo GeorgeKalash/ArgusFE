@@ -26,7 +26,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import { getNewUserInfo, populateUserInfo } from 'src/Models/System/UserInfo'
-import { getNewSecurityGroup, populateSecurityGroup } from 'src/Models/AccessControl/SecurityGroup'
 
 // ** Windows
 import UsersWindow from './Windows/UsersWindow'
@@ -287,7 +286,6 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
-        console.log('usersssssss new',res.record.recordId)
         getSecurityGrpGridData(res.record.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
@@ -535,12 +533,11 @@ const Users = () => {
 
   const getSecurityGrpGridData = userId => {
     setSecurityGrpGridData([])
-    console.log('userssssssss ',userId)
     const defaultParams = `_userId=${userId}&_filter=&_sgId=0`
     var parameters = defaultParams
 
     getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
+      extension: AccessControlRepository.SecurityGroupUser.qry,
       parameters: parameters
     })
       .then(res => {
@@ -561,12 +558,12 @@ const Users = () => {
       var parameters = defaultParams
 
       const GrpRequest = getRequest({
-        extension: AccessControlRepository.Group.qry,
+        extension: AccessControlRepository.SecurityGroup.qry,
         parameters: parameters
       })
 
       const GUSRequest = getRequest({
-        extension: AccessControlRepository.SecurityGroup.qry,
+        extension: AccessControlRepository.SecurityGroupUser.qry,
         parameters: parameters
       })
 
@@ -601,7 +598,6 @@ const Users = () => {
         setSecurityGrpALLData(filteredAllList)
       })
       setSecurityGrpWindowOpen(true)
-      console.log('finallll ', setSecurityGrpALLData, ' ', setSecurityGrpSelectedData)
     } catch (error) {
       setErrorMessage(error.res)
 
@@ -626,7 +622,7 @@ const Users = () => {
     }
 
     postRequest({
-      extension: AccessControlRepository.SecurityGroup.set2,
+      extension: AccessControlRepository.SecurityGroupUser.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -647,7 +643,7 @@ const Users = () => {
     const userId = usersValidation.values.recordId
 
     postRequest({
-      extension: AccessControlRepository.SecurityGroup.del,
+      extension: AccessControlRepository.SecurityGroupUser.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -711,7 +707,7 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-
+          
           //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
