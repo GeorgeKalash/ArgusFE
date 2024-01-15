@@ -10,7 +10,7 @@ import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import ProfessionWindow from './Windows/ProfessionWindow'
-import { getFormattedNumberMax} from 'src/lib/numberField-helper'
+import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 
 import { useFormik } from 'formik'
 import { getNewProfession, populateProfession } from 'src/Models/CurrencyTradingSettings/Profession'
@@ -25,8 +25,6 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const Professions = () => {
-
-
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
@@ -42,6 +40,7 @@ const Professions = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [editMode, setEditMode] = useState(false)
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Profession, setAccess)
@@ -54,17 +53,17 @@ const Professions = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    flName: labels && labels.find(item => item.key === "3").value,
-    monthlyIncome: labels && labels.find(item => item.key === "4").value,
-    riskFactor: labels && labels.find(item => item.key === "5").value,
-    profession: labels && labels.find(item => item.key === "6").value,
-    diplomatStatus: labels && labels.find(item => item.key === "7").value,
+    reference: labels && labels.find(item => item.key === '1').value,
+    name: labels && labels.find(item => item.key === '2').value,
+    flName: labels && labels.find(item => item.key === '3').value,
+    monthlyIncome: labels && labels.find(item => item.key === '4').value,
+    riskFactor: labels && labels.find(item => item.key === '5').value,
+    profession: labels && labels.find(item => item.key === '6').value,
+    diplomatStatus: labels && labels.find(item => item.key === '7').value
   }
 
   const columns = [
@@ -92,7 +91,7 @@ const Professions = () => {
       flex: 1,
       editable: false,
       align: 'right',
-      valueGetter: ({ row }) => getFormattedNumberMax(row?.monthlyIncome, 8,2)
+      valueGetter: ({ row }) => getFormattedNumberMax(row?.monthlyIncome, 8, 2)
     },
     {
       field: 'riskFactor',
@@ -105,6 +104,9 @@ const Professions = () => {
   const addProfession = () => {
     ProfessionValidation.setValues(getNewProfession())
     fillDiplomatStore()
+
+    setEditMode(false)
+
     setWindowOpen(true)
   }
 
@@ -132,15 +134,16 @@ const Professions = () => {
     })
       .then(res => {
         ProfessionValidation.setValues(populateProfession(res.record))
-        getFormattedNumberMax(obj?.monthlyIncome,8,2)
-        obj.monthlyIncome = typeof obj.monthlyIncome !== undefined && getFormattedNumberMax(obj?.monthlyIncome,8,2)
+        getFormattedNumberMax(obj?.monthlyIncome, 8, 2)
+        obj.monthlyIncome = typeof obj.monthlyIncome !== undefined && getFormattedNumberMax(obj?.monthlyIncome, 8, 2)
         fillDiplomatStore()
         setWindowOpen(true)
+        setEditMode(true)
       })
-    .catch(error => {
-      setErrorMessage(error)
-    })
-}
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
@@ -152,13 +155,14 @@ const Professions = () => {
     })
       .then(res => {
         setGridData(res)
+        setEditMode(true)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const fillDiplomatStore= () => {
+  const fillDiplomatStore = () => {
     getAllKvsByDataset({
       _dataset: DataSets.DIPLOMAT_STATUS,
       callback: setDiplomatStore
@@ -235,9 +239,11 @@ const Professions = () => {
           labels={_labels}
           maxAccess={access}
           diplomatStore={diplomatStore}
+          onInfo={() => setWindowInfo(true)}
+          editMode={editMode}
         />
       )}
-       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
