@@ -30,7 +30,7 @@ import { getNewSecurityGroup, populateSecurityGroup } from 'src/Models/AccessCon
 
 // ** Windows
 import UsersWindow from './Windows/UsersWindow'
-import SecurityGroupWindow from 'src/components/Shared/SecurityGroupWindow'
+import SecurityGroupWindow from './Windows/SecurityGroupWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -56,8 +56,8 @@ const Users = () => {
   const [cashAccStore, setCashAccStore] = useState([])
   const [salesPersonStore, setSalesPersonStore] = useState([])
   const [securityGrpGridData, setSecurityGrpGridData] = useState([])
-  const [securityGrpALLData, setSecurityGrpALLData] = useState([])
-  const [securityGrpSelectedData, setSecurityGrpSelectedData] = useState([])
+  const [initialAllListData, setSecurityGrpALLData] = useState([])
+  const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -610,7 +610,7 @@ const Users = () => {
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleSecurityGrpDataChange = (allData, selectedData) => {
+  const handleListsDataChange = (allData, selectedData) => {
     // Update the state in the parent component when the child component data changes
     setSecurityGrpALLData(allData)
     setSecurityGrpSelectedData(selectedData)
@@ -622,7 +622,7 @@ const Users = () => {
     const data = {
       sgId: 0,
       userId: userId,
-      groups: securityGrpSelectedData
+      groups: initialSelectedListData
     }
 
     postRequest({
@@ -746,9 +746,9 @@ const Users = () => {
         <SecurityGroupWindow
           onClose={() => setSecurityGrpWindowOpen(false)}
           onSave={handleSecurityGrpSubmit}
-          securityGrpALLData={securityGrpALLData}
-          securityGrpSelectedData={securityGrpSelectedData}
-          handleSecurityGrpDataChange={handleSecurityGrpDataChange}
+          initialAllListData={initialAllListData}
+          initialSelectedListData={initialSelectedListData}
+          handleListsDataChange={handleListsDataChange}
           labels={_labels}
           maxAccess={access}
         />

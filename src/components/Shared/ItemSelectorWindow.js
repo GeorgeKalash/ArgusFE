@@ -4,16 +4,11 @@ import IconButton from '@mui/material/IconButton'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
-
-const SecurityGroupWindow = ({
-  onClose,
-  onSave,
-  securityGrpALLData,
-  securityGrpSelectedData,
+const ItemSelectorWindow = ({
+  initialAllListData,
+  initialSelectedListData,
+  handleListsDataChange,
   labels,
-  handleSecurityGrpDataChange
 }) => {
   const [selected, setSelected] = useState([])
   const [allItems, setAllItems] = useState([])
@@ -21,9 +16,9 @@ const SecurityGroupWindow = ({
   const [newAll, setNewAll] = useState([])
 
   useEffect(() => {
-    // Loop through securityGrpALLData and assign each object to allItems
-    if (Array.isArray(securityGrpALLData)) {
-      const updatedAllItems = securityGrpALLData.map(item => ({
+    // Loop through initialAllListData and assign each object to allItems
+    if (Array.isArray(initialAllListData)) {
+      const updatedAllItems = initialAllListData.map(item => ({
         sgId: item.sgId,
         sgName: item.sgName,
         userId: item.userId
@@ -31,8 +26,8 @@ const SecurityGroupWindow = ({
       setAllItems(updatedAllItems)
     }
 
-    if (Array.isArray(securityGrpSelectedData)) {
-      const updatedSelectedItems = securityGrpSelectedData.map(item => ({
+    if (Array.isArray(initialSelectedListData)) {
+      const updatedSelectedItems = initialSelectedListData.map(item => ({
         sgId: item.sgId,
         sgName: item.sgName,
         userId: item.userId
@@ -41,7 +36,8 @@ const SecurityGroupWindow = ({
       // Update the selected state with the new array
       setSelected(updatedSelectedItems)
     }
-  }, [securityGrpALLData, securityGrpSelectedData])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialAllListData, initialSelectedListData])
 
   const handleToggle = value => {
     const isChecked = document.getElementById(value.sgId).checked
@@ -129,7 +125,7 @@ const SecurityGroupWindow = ({
       const updatedItems = prevItems.filter(item => !newAll.some(selectedItem => selectedItem.sgId === item.sgId))
 
       // Use the updatedItems directly
-      handleSecurityGrpDataChange(all, updatedItems)
+      handleListsDataChange(all, updatedItems)
 
       return updatedItems
     })
@@ -154,7 +150,7 @@ const SecurityGroupWindow = ({
       const updatedItems = prevItems.filter(item => !newSelected.some(selectedItem => selectedItem.sgId === item.sgId))
 
       // Use the updatedItems directly
-      handleSecurityGrpDataChange(updatedItems, selected)
+      handleListsDataChange(updatedItems, selected)
 
       return updatedItems
     })
@@ -164,7 +160,7 @@ const SecurityGroupWindow = ({
   }
 
   return (
-    <Window width={600} height={400} onClose={onClose} onSave={onSave} Title={labels.securityGrp}>
+   <div>
     {/* Empty Toolbar*/}
     <div style={{ backgroundColor: 'transparent', padding: '8px', textAlign: 'center' }}></div>
 
@@ -269,10 +265,8 @@ const SecurityGroupWindow = ({
             </div>
         </div>
     </div>
-</Window>
-
-  
+  </div>
   )
 }
 
-export default SecurityGroupWindow
+export default ItemSelectorWindow
