@@ -25,6 +25,7 @@ const InlineEditGrid = ({
   allowAddNewLine = true,
   onDelete
 }) => {
+  const [open, setOpen] = useState(false);
 
   const tableWidth = width
 
@@ -264,8 +265,10 @@ const InlineEditGrid = ({
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.name}`]}
             readOnly={column?.readOnly}
-            options={column.store || ''}
+            options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
+            open={open}
+            onBlur={()=>setOpen(false)}
 
             // getOptionLabel={option => {
 
@@ -354,9 +357,8 @@ const InlineEditGrid = ({
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => ( column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
-                onClick={e => column.onLookup('')}
-
+                onChange={e => (setOpen(e.target.value.length > 0) ,  column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
+                onClick={e =>  column.onLookup('')}
                 required={column?.mandatory}
                 InputProps={{
 
