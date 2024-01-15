@@ -355,8 +355,7 @@ const InlineEditGrid = ({
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
-                onFocus={e =>  column.onLookup('')}
+                onChange={e => ( column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
                 required={column?.mandatory}
                 InputProps={{
 
@@ -406,7 +405,8 @@ const InlineEditGrid = ({
 
               />
             )}
-            openOnFocus
+
+            //  openOnFocus
           />
         )
       case 'checkbox':
