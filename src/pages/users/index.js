@@ -30,7 +30,7 @@ import { getNewSecurityGroup, populateSecurityGroup } from 'src/Models/AccessCon
 
 // ** Windows
 import UsersWindow from './Windows/UsersWindow'
-import SecurityGrpWindow from './Windows/SecurityGrpWindow'
+import SecurityGroupWindow from './Windows/SecurityGroupWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -56,8 +56,8 @@ const Users = () => {
   const [cashAccStore, setCashAccStore] = useState([])
   const [salesPersonStore, setSalesPersonStore] = useState([])
   const [securityGrpGridData, setSecurityGrpGridData] = useState([])
-  const [securityGrpALLData, setSecurityGrpALLData] = useState([])
-  const [securityGrpSelectedData, setSecurityGrpSelectedData] = useState([])
+  const [initialAllListData, setSecurityGrpALLData] = useState([])
+  const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -159,9 +159,7 @@ const Users = () => {
           })
     }),
     onSubmit: values => {
-      console.log('valuesss ', values)
-
-      //postUsers(values)
+      postUsers(values)
     }
   })
 
@@ -205,7 +203,7 @@ const Users = () => {
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_size=${_pageSize}&_filter=&_sortBy=fullName`
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=${_pageSize}&_filter=&_sortBy=fullName`
     var parameters = defaultParams
 
     getRequest({
@@ -231,8 +229,9 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
-        getSecurityGrpGridData(obj.recordId)
-        setWindowOpen(false)
+        usersValidation.setFieldValue('recordId', res.recordId)
+        setWindowOpen(true)
+        setEditMode(true)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
@@ -288,7 +287,8 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
-        getSecurityGrpGridData(obj.recordId)
+        console.log('usersssssss new',res.record.recordId)
+        getSecurityGrpGridData(res.record.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
         setActiveTab(0)
@@ -535,6 +535,7 @@ const Users = () => {
 
   const getSecurityGrpGridData = userId => {
     setSecurityGrpGridData([])
+    console.log('userssssssss ',userId)
     const defaultParams = `_userId=${userId}&_filter=&_sgId=0`
     var parameters = defaultParams
 
@@ -609,7 +610,7 @@ const Users = () => {
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleSecurityGrpDataChange = (allData, selectedData) => {
+  const handleListsDataChange = (allData, selectedData) => {
     // Update the state in the parent component when the child component data changes
     setSecurityGrpALLData(allData)
     setSecurityGrpSelectedData(selectedData)
@@ -621,7 +622,7 @@ const Users = () => {
     const data = {
       sgId: 0,
       userId: userId,
-      groups: securityGrpSelectedData
+      groups: initialSelectedListData
     }
 
     postRequest({
@@ -742,12 +743,12 @@ const Users = () => {
         />
       )}
       {securityGrpWindowOpen && (
-        <SecurityGrpWindow
+        <SecurityGroupWindow
           onClose={() => setSecurityGrpWindowOpen(false)}
           onSave={handleSecurityGrpSubmit}
-          securityGrpALLData={securityGrpALLData}
-          securityGrpSelectedData={securityGrpSelectedData}
-          handleSecurityGrpDataChange={handleSecurityGrpDataChange}
+          initialAllListData={initialAllListData}
+          initialSelectedListData={initialSelectedListData}
+          handleListsDataChange={handleListsDataChange}
           labels={_labels}
           maxAccess={access}
         />
