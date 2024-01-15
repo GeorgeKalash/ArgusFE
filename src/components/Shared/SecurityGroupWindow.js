@@ -7,7 +7,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 
-const SecurityGrpWindow = ({
+const SecurityGroupWindow = ({
   onClose,
   onSave,
   securityGrpALLData,
@@ -275,4 +275,4 @@ const SecurityGrpWindow = ({
   )
 }
 
-export default SecurityGrpWindow
+export default SecurityGroupWindow

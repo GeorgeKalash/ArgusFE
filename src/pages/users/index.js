@@ -30,7 +30,7 @@ import { getNewSecurityGroup, populateSecurityGroup } from 'src/Models/AccessCon
 
 // ** Windows
 import UsersWindow from './Windows/UsersWindow'
-import SecurityGrpWindow from './Windows/SecurityGrpWindow'
+import SecurityGroupWindow from 'src/components/Shared/SecurityGroupWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -743,7 +743,7 @@ const Users = () => {
         />
       )}
       {securityGrpWindowOpen && (
-        <SecurityGrpWindow
+        <SecurityGroupWindow
           onClose={() => setSecurityGrpWindowOpen(false)}
           onSave={handleSecurityGrpSubmit}
           securityGrpALLData={securityGrpALLData}
