@@ -269,7 +269,6 @@ const InlineEditGrid = ({
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
 
             open={write}
-            onBlur={() => setWrite(false)}
 
             // onFocus={() => setOpen(true)}
 
