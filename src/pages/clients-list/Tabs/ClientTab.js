@@ -1252,7 +1252,8 @@ return (
                           item.key ===
                           clientIndividualFormValidation.values.gender,
                       )[0]
-                    }                    onChange={(event, newValue) => {
+                    }
+                       onChange={(event, newValue) => {
 
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
@@ -1605,7 +1606,7 @@ return (
                         readOnly={editMode && true}
                         name="coveredFace"
                         checked={
-                          clientIndividualFormValidation.values?.coveredFace
+                          clientIndividualFormValidation.values?.coveredFace || clientIndividualFormValidation.values.gender==2
                         }
                         onChange={clientIndividualFormValidation.handleChange}
                       />
