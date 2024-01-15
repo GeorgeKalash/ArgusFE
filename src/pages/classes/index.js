@@ -97,7 +97,6 @@ const Classes = () => {
       characteristicOperator: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log(values)
       postClass(values)
     }
   })
@@ -117,7 +116,6 @@ const Classes = () => {
     })
       .then(res => {
         setGridData({ ...res, _startAt })
-        console.log(res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -178,7 +176,6 @@ const Classes = () => {
 
   const editClass = obj => {
     setActiveTab(0)
-    console.log(obj)
     fillCharOperatorComboStore()
     getCharacteristicGridData(obj.recordId)
     getFunctionGridData(obj.recordId)
@@ -318,14 +315,11 @@ const Classes = () => {
   const fillCharacteristicComboStore = ({ _startAt = 0, _pageSize = 1000 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
-    console.log(_pageSize)
     getRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.qry,
       parameters: parameters
     })
       .then(res => {
-        console.log('char')
-        console.log(res)
         setCharacteristicComboStore(res)
       })
       .catch(error => {
@@ -342,8 +336,6 @@ const Classes = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log('value')
-        console.log(res)
         setCharacValueComboStore(res.list)
       })
       .catch(error => {
@@ -440,8 +432,6 @@ const Classes = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log('functionstrat')
-        console.log(res.record)
         functionValidation.setValues(populateClassFunction(res.record))
         setFunctionEditMode(true)
         setFunctionWindowOpen(true)

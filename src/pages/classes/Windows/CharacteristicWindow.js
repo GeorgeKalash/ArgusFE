@@ -43,8 +43,6 @@ const CharacteristicWindow = ({
                     const selectedCharacId = newValue?.recordId || ''
                     console.log('chId ' + selectedCharacId)
                     fillCharacValueComboStore(selectedCharacId) // Fetch and update according to this selection
-                    console.log('characValueCombo')
-                    console.log(characValueComboStore)
                   }}
                   error={characteristicValidation.touched.chId && Boolean(characteristicValidation.errors.chId)}
                   helperText={characteristicValidation.touched.chId && characteristicValidation.errors.chId}
