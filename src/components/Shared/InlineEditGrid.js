@@ -75,6 +75,7 @@ const InlineEditGrid = ({
     const fieldName = row.field
     const cellId = `table-cell-${rowIndex}-${column.id}` // Unique identifier for the cell
 
+
     switch (field) {
       case 'incremented':
         return (
@@ -261,20 +262,22 @@ const InlineEditGrid = ({
             id={cellId}
             size='small'
             name={fieldName}
-            value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
+            value={gridValidation.values.rows[rowIndex][`${column.name}`]}
             readOnly={column?.readOnly}
             options={column.store}
-            getOptionLabel={option => {
+            getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
 
-              if (typeof option === 'object') return option[column.displayField]
-              else {
-                const selectedOption = column.store?.find(item => {
-                  return item[column.valueField] === option
-                })
-                if (selectedOption) return selectedOption[column?.displayField]
-                else return ''
-              }
-            }}
+            // getOptionLabel={option => {
+
+            //   if (typeof option === 'object') return option[column.displayField]
+            //   else {
+            //     const selectedOption = column.store?.find(item => {
+            //       return item[column.valueField] === option
+            //     })
+            //     if (selectedOption) return selectedOption[column?.displayField]
+            //     else return ''
+            //   }
+            // }}
             isOptionEqualToValue={(option, value) => {
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
             }}
@@ -353,7 +356,12 @@ const InlineEditGrid = ({
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (e.target.value ? column && column.onLookup(e.target.value) : column.onClear && column.onClear())}
+                onChange={e => (e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && (  column.onClear()))}
+
+                onFocus={e =>  column.onLookup(e.target.value)}
+
+                // onFocus={e =>  console.log(e.target.value)}
+
                 required={column?.mandatory}
                 InputProps={{
 
@@ -403,6 +411,7 @@ const InlineEditGrid = ({
 
               />
             )}
+            openOnFocus
           />
         )
       case 'checkbox':
