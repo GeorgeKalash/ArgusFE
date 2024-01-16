@@ -167,10 +167,10 @@ const AddressTab = ({
               onChange={(event, newValue) => {
                 setCityStore([])
                 addressValidation.setFieldValue('stateId', null)
-                addressValidation.setFieldValue('cityId', null)
+
                 addressValidation.setFieldValue('city', null)
                 addressValidation.setFieldValue('cityDistrictId', null)
-                addressValidation.setFieldValue('cityDistrict', null)
+
 
                 if (newValue) {
                   addressValidation.setFieldValue('countryId', newValue?.recordId)
