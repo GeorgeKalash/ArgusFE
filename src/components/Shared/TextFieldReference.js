@@ -10,6 +10,9 @@ export const TextFieldReference = ({endpointId , param = '', setReferenceRequire
    const [errorMessage, setErrorMessage] = useState(null)
 
    useEffect(() => {
+
+    setReferenceRequired(true)
+
     var parameters = '_key=' + param;
 
     getRequest({
@@ -17,7 +20,7 @@ export const TextFieldReference = ({endpointId , param = '', setReferenceRequire
       parameters,
     })
       .then((res) => {
-        if (res.record) {
+        if (res?.record?.value) {
           const value = res?.record?.value;
           parameters = '_recordId=' + value;
 

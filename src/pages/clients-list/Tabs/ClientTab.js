@@ -56,7 +56,6 @@ const ClientTab = ({
    _labels, maxAccess, editMode
  }) => {
 
-console.log(clientIndividualFormValidation)
 
 const [showAsPassword , setShowAsPassword]  = useState(false)
 const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)

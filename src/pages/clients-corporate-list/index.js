@@ -75,7 +75,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
         fillCountryStore();
         fillLegalStatusStore()
         fillActivityStore()
-fillIndustryStore()
+        fillIndustryStore()
 
         // fillMobileVerifiedStore()
       } else {
