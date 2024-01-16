@@ -9,8 +9,6 @@ export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck,
   const [errorMessage, setErrorMessage]= useState()
   const [store, setStore] = useState([])
 
-  // let newParameters = parameters
-
   const onLookup = searchQry => {
     setStore([])
 
