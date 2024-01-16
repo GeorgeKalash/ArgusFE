@@ -118,26 +118,7 @@ return (
                   clientIndividualFormValidation.errors.reference
                 }
               />
-              {/* <CustomTextField
-                name="reference"
-                label={_labels.reference}
-                value={clientIndividualFormValidation.values.reference}
 
-                // required
-                readOnly={true}
-                onChange={clientIndividualFormValidation.handleChange}
-                onClear={() =>
-                  clientIndividualFormValidation.setFieldValue("reference", "")
-                }
-                error={
-                  clientIndividualFormValidation.touched.reference &&
-                  Boolean(clientIndividualFormValidation.errors.reference)
-                }
-                helperText={
-                  clientIndividualFormValidation.touched.reference &&
-                  clientIndividualFormValidation.errors.reference
-                }
-              /> */}
             </Grid>
             <Grid item xs={6}>
               <FormControlLabel

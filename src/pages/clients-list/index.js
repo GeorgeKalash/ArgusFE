@@ -44,7 +44,7 @@ const ClientsList = () => {
   const [windowInfo, setWindowInfo] = useState(null)
   const [editMode, setEditMode] = useState(null)
 const requiredOptional = true
-const [referenceRequired, setReferenceRequired] = useState(false)
+const [referenceRequired, setReferenceRequired] = useState(true)
 
 
   //stores
@@ -378,7 +378,7 @@ console.log(userData)
 
     },
     validationSchema: yup.object({
-      reference: referenceRequired &&yup.string().required("This field is required"),
+      reference: referenceRequired && yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
