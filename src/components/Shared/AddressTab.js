@@ -18,7 +18,6 @@ const AddressTab = ({
   editMode // not used since all fields are editable in edit mode
 }) => {
   const { getRequest } = useContext(RequestsContext)
-
   const [cityStore, setCityStore] = useState([])
   const [cityDistrictStore, setCityDistrictStore] = useState([])
 
