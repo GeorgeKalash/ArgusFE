@@ -255,9 +255,7 @@ const Strategy = () => {
   })
 
   const postCode = obj => {
-    console.log(obj)
     const strategyId = obj.strategyId ? obj.strategyId : strategyValidation.values.recordId
-    console.log(strategyId)
     obj.strategyId = strategyId
     postRequest({
       extension: DocumentReleaseRepository.StrategyCode.set,
@@ -315,30 +313,6 @@ const Strategy = () => {
     codeValidation.setValues(getNewStrategyCode(strategyValidation.values.recordId))
     setCodeWindowOpen(true)
   }
-
- /* const editCode = obj => {
-    console.log(obj)
-    getCodeById(obj)
-  }
-
-   const getCodeById = obj => {
-    const _codeId = obj.codeId
-    const _groupId = obj.groupId
-    const defaultParams = `_codeId=${_codeId}&_groupId=${_groupId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.GroupCode.get,
-      parameters: parameters
-    })
-      .then(res => {
-        codeValidation.setValues(populateStrategyCodes(res.record))
-        setCodeEditMode(true)
-        setCodeWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  } */
 
   const handleCodeSubmit = () => {
     codeValidation.handleSubmit()
@@ -455,39 +429,12 @@ const Strategy = () => {
     })
       .then(res => {
         setPrerequisiteComboStore(res.list.filter(item => item.codeId != codeId))
-        console.log('PrerequisiteComboStore')
-        console.log(prerequisiteComboStore)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  /*const editPrerequisite = obj => {
-    fillGroupComboStore(obj.strategyId)
-    fillPrerequisiteComboStore(obj.strategyId, obj.codeId)
-    console.log(obj)
-    getPrerequisiteById(obj)
-  }
-
-   const getPrerequisiteById = obj => {
-    const _prerequisiteId = obj.prerequisiteId
-    const _strategyId = obj.strategyId
-    const defaultParams = `_prerequisiteId=${_prerequisiteId}&_strategyId=${_strategyId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.StrategyPrerequisite.get,
-      parameters: parameters
-    })
-      .then(res => {
-        prerequisiteValidation.setValues(populateStrategyPrerequisite(res.record))
-        setPrerequisiteEditMode(true)
-        setPrerequisiteWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  } */
 
   const handlePrerequisiteSubmit = () => {
     prerequisiteValidation.handleSubmit()
@@ -578,8 +525,6 @@ const Strategy = () => {
 
   const postIndicators = obj => {
     obj.forEach(element => {
-      console.log('element')
-      console.log(element)
       postRequest({
         extension: DocumentReleaseRepository.StrategyIndicator.set,
         record: JSON.stringify(element)
@@ -607,8 +552,6 @@ const Strategy = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log('indidcators list')
-        console.log(res)
         if (res.list.length > 0) indicatorGridValidation.setValues({ rows: res.list })
         else resetCorrespondentIndicators()
       })
@@ -618,8 +561,6 @@ const Strategy = () => {
   }
 
   const applyStrategy = () => {
-    console.log('strategyForm')
-    console.log(strategyValidation.values)
     postRequest({
       extension: DocumentReleaseRepository.ApplySTG.apply,
       record: JSON.stringify(strategyValidation.values)
