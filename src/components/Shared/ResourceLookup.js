@@ -3,35 +3,32 @@ import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import ErrorWindow from './ErrorWindow'
 
-export const ResourceLookup = ({endpointId, name, firstValues, parameters,  errorCheck,  ...rest}) => {
+export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck,  ...rest}) => {
 
   const { getRequest } = useContext(RequestsContext)
   const [errorMessage, setErrorMessage]= useState()
   const [store, setStore] = useState([])
 
-  var newParameters = parameters
+  // let newParameters = parameters
 
   const onLookup = searchQry => {
     setStore([])
-    newParameters = new URLSearchParams(newParameters)
-    newParameters =  newParameters + '&_filter='+ searchQry
 
     getRequest({
       extension: endpointId,
-      parameters: newParameters
+      parameters: new URLSearchParams({ ...parameters, '_filter': searchQry })
       })
       .then(res => {
         setStore(res.list)
-        console.log(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const firstValue = firstValues.values[name]
-  const error = firstValues?.touched && firstValues.touched[errorCheck] && Boolean(firstValues.errors[errorCheck])
-  const helperText= firstValues?.touched && firstValues.touched[errorCheck] && firstValues.errors[errorCheck]
+  const firstValue = form.values[name]
+  const error = form?.touched && form.touched[name] && Boolean(form.errors[name])
+  const helperText= form?.touched && form.touched[name] && form.errors[name]
 
 return (
     <>
