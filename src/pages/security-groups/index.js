@@ -62,7 +62,9 @@ const SecurityGroup = () => {
     users: labels && labels.find(item => item.key === "6").value,
     all: labels && labels.find(item => item.key === "7").value,
     inGroup: labels && labels.find(item => item.key === "8").value,
+    groupUsers: labels && labels.find(item => item.key === "9").value,
   }
+  const itemSelectorLabels=[_labels.groupUsers,_labels.all,_labels.inGroup]
 
   const columns = [
     {
@@ -139,6 +141,7 @@ const SecurityGroup = () => {
         getGridData({})
         groupInfoValidation.setFieldValue('recordId', res.recordId)
         setWindowOpen(true)
+        setEditMode(true)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
@@ -153,7 +156,6 @@ const SecurityGroup = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ res })
         getGridData({})
         toast.success('Record Deleted Successfully')
       })
@@ -234,8 +236,8 @@ const SecurityGroup = () => {
         parameters: parameters
       })
 
-      Promise.all([USRequest, GUSRequest]).then(([resGRPFunction, resGUSTemplate]) => {
-        const allList = resGRPFunction.list.map(x => {
+      Promise.all([USRequest, GUSRequest]).then(([resUSFunction, resGUSTemplate]) => {
+        const allList = resUSFunction.list.map(x => {
           const n = {
             id: x.recordId,
             name: x.fullName,
@@ -246,9 +248,8 @@ const SecurityGroup = () => {
 
         const selectedList = resGUSTemplate.list.map(x => {
           const n2 = {
-            id: sgId,
-            name: x.fullName,
-            userId: x.userId
+            id: x.userId,
+            name: x.fullName
           }
 
           return n2
@@ -258,10 +259,9 @@ const SecurityGroup = () => {
         // Remove items from allList that have the same sgId and userId as items in selectedList
         const filteredAllList = allList.filter(item => {
           return !selectedList.some(
-            selectedItem => selectedItem.userId === item.id && selectedItem.userId === item.id
+            selectedItem => selectedItem.id === item.id && selectedItem.id === item.id
           )
         })
-        console.log('filteredAllList ',filteredAllList)
         setAllUsers(filteredAllList)
       })
       setUsersWindowOpen(true)
@@ -281,11 +281,16 @@ const SecurityGroup = () => {
 
   const postUsers = () => {
     const sgId = groupInfoValidation.values.recordId
+    const selectedItems = [];
+
+    initialSelectedListData.forEach(item => {
+      selectedItems.push({sgId:sgId , userId: item.id})
+  });
 
     const data = {
       sgId: sgId,
       userId: 0,
-      groups: initialSelectedListData
+      groups: selectedItems
     }
 
     postRequest({
@@ -294,7 +299,7 @@ const SecurityGroup = () => {
     })
       .then(res => {
         setUsersWindowOpen(false)
-        getUsersGridData(userId)
+        getUsersGridData(sgId)
         if (!res.recordId) {
           toast.success('Record Added Successfully')
         } else {
@@ -304,7 +309,9 @@ const SecurityGroup = () => {
       .catch(error => {
         setErrorMessage(error)
       })
-  }
+
+  };
+  
 
   const delUsers = obj => {
     const sgId = groupInfoValidation.values.recordId
@@ -387,10 +394,8 @@ const SecurityGroup = () => {
           initialAllListData={initialAllListData}
           initialSelectedListData={initialSelectedListData}
           handleListsDataChange={handleListsDataChange}
-          firstTitle={labels.all}
-          secondTitle={labels.inGroup}
-          title={labels.users}
           maxAccess={access}
+          itemSelectorLabels={itemSelectorLabels}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

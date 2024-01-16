@@ -8,8 +8,7 @@ const ItemSelectorWindow = ({
   initialAllListData,
   initialSelectedListData,
   handleListsDataChange,
-  firstTitle,
-  secondTitle,
+  itemSelectorLabels
 }) => {
   const [selected, setSelected] = useState([])
   const [allItems, setAllItems] = useState([])
@@ -17,6 +16,7 @@ const ItemSelectorWindow = ({
   const [newAll, setNewAll] = useState([])
 
   useEffect(() => {
+
     // Loop through initialAllListData and assign each object to allItems
     if (Array.isArray(initialAllListData)) {
       const updatedAllItems = initialAllListData.map(item => ({
@@ -179,7 +179,7 @@ const ItemSelectorWindow = ({
         >
             <div style={{ margin: 'auto' }}>
                 <div style={{ backgroundColor: 'black' }}>
-                    <h3 style={{ margin: '0', color: 'white' }}>{firstTitle}</h3>
+                    <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels[1]}</h3>
                 </div>
                 <div style={{
                     maxHeight: '330px',
@@ -234,7 +234,7 @@ const ItemSelectorWindow = ({
         >
             <div style={{ margin: 'auto' }}>
                 <div style={{ backgroundColor: 'black' }}>
-                    <h3 style={{ margin: '0', color: 'white' }}>{secondTitle}</h3>
+                    <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels[2]}</h3>
                 </div>
                 <div style={{
                       maxHeight: '330px',

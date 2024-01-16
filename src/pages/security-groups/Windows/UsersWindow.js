@@ -7,19 +7,16 @@ const UsersWindow = ({
   onSave,
   initialAllListData,
   initialSelectedListData,
-  firstTitle,
-  secondTitle,
-  title,
+  itemSelectorLabels,
   handleListsDataChange
 }) => {
   return (
-    <Window width={600} height={400} onClose={onClose} onSave={onSave} Title={title}>
+    <Window width={600} height={400} onClose={onClose} onSave={onSave} Title={itemSelectorLabels[0]}>
     <ItemSelectorWindow
           initialAllListData={initialAllListData}
           initialSelectedListData={initialSelectedListData}
           handleListsDataChange={handleListsDataChange} 
-          firstTitle={firstTitle}
-          secondTitle={secondTitle}
+          itemSelectorLabels={itemSelectorLabels}
         />
         </Window>
   )

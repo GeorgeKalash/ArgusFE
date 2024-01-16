@@ -97,6 +97,8 @@ const Users = () => {
     group: labels && labels.find(item => item.key === '22').value
   }
 
+  const itemSelectorLabels=[_labels.securityGrp,_labels.all,_labels.selected]
+
   const columns = [
     {
       field: 'fullName',
@@ -175,7 +177,6 @@ const Users = () => {
       cashAccountName: ''
     },
     onSubmit: values => {
-      console.log('values ', values)
       postDefaults(values)
     }
   })
@@ -245,7 +246,6 @@ const Users = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ res })
         getGridData({})
         toast.success('Record Deleted Successfully')
       })
@@ -255,6 +255,7 @@ const Users = () => {
   }
 
   const addUsers = () => {
+    defaultsValidation.resetForm()
     usersValidation.setValues(getNewUserInfo())
     setActiveTab(0)
     setEditMode(false)
@@ -442,7 +443,6 @@ const Users = () => {
       )
 
       await defaultsValidation.setValues(UserDocObject)
-      console.log('dvdvdv ', defaultsValidation.values)
     } catch (error) {
       setErrorMessage(error)
     }
@@ -570,9 +570,8 @@ const Users = () => {
       Promise.all([GrpRequest, GUSRequest]).then(([resGRPFunction, resGUSTemplate]) => {
         const allList = resGRPFunction.list.map(x => {
           const n = {
-            sgId: x.recordId,
-            sgName: x.name,
-            userId: userId
+            id: x.recordId,
+            name: x.name,
           }
 
           return n
@@ -580,9 +579,8 @@ const Users = () => {
 
         const selectedList = resGUSTemplate.list.map(x => {
           const n2 = {
-            sgId: x.sgId,
-            sgName: x.sgName,
-            userId: userId
+            id: x.sgId,
+            name: x.sgName
           }
 
           return n2
@@ -592,7 +590,7 @@ const Users = () => {
         // Remove items from allList that have the same sgId and userId as items in selectedList
         const filteredAllList = allList.filter(item => {
           return !selectedList.some(
-            selectedItem => selectedItem.sgId === item.sgId && selectedItem.userId === item.userId
+            selectedItem => selectedItem.id === item.id && selectedItem.id === item.id
           )
         })
         setSecurityGrpALLData(filteredAllList)
@@ -614,11 +612,16 @@ const Users = () => {
 
   const postSecurityGrp = () => {
     const userId = usersValidation.values.recordId
+    const selectedItems = [];
+
+    initialSelectedListData.forEach(item => {
+      selectedItems.push({userId:userId , sgId: item.id})
+  });
 
     const data = {
       sgId: 0,
       userId: userId,
-      groups: initialSelectedListData
+      groups: selectedItems
     }
 
     postRequest({
@@ -745,7 +748,7 @@ const Users = () => {
           initialAllListData={initialAllListData}
           initialSelectedListData={initialSelectedListData}
           handleListsDataChange={handleListsDataChange}
-          labels={_labels}
+          itemSelectorLabels={itemSelectorLabels}
           maxAccess={access}
         />
       )}
