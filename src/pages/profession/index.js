@@ -97,7 +97,7 @@ const Professions = () => {
       field: 'riskFactor',
       headerName: _labels.riskFactor,
       flex: 1,
-      editable: false
+      editable: false,
     }
   ]
 
@@ -155,7 +155,6 @@ const Professions = () => {
     })
       .then(res => {
         setGridData(res)
-        setEditMode(true)
       })
       .catch(error => {
         setErrorMessage(error)
