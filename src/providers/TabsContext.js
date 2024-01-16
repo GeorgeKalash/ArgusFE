@@ -14,7 +14,6 @@ import MenuItem from '@mui/material/MenuItem'
 
 // ** Context
 import { MenuContext } from 'src/providers/MenuContext'
-import { t } from 'i18next';
 
 const TabsContext = createContext()
 
@@ -90,6 +89,8 @@ const TabsProvider = ({ children }) => {
   const [value, setValue] = useState(0)
   const [TabsIndex, setTabsIndex] = useState()
   const [length, setLength] = useState(1)
+  const [closing, setClosing] = useState(false)
+
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
@@ -113,6 +114,7 @@ const TabsProvider = ({ children }) => {
   }
 
   const closeTab = (tabRoute) => {
+    setClosing(true)
     const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
     const lastValue = activeTabs.length;
 
@@ -130,7 +132,7 @@ const TabsProvider = ({ children }) => {
       } else if (value === lastValue - 1) {
         setValue(lastValue - 2);
       }
-  
+      
       setActiveTabs((prevState) => {
         return prevState.filter((tab) => tab.route !== tabRoute);
       });
@@ -171,6 +173,12 @@ const TabsProvider = ({ children }) => {
   }, [children, router.asPath])
 
   useEffect(() => {
+    if(closing && value){
+      if(activeTabs[value].route!=router.asPath){
+        router.push(activeTabs[value].route)
+      }
+    }
+
     if (!activeTabs[0] && router.route != '/default' && router.asPath && menu.length > 0) {
       setActiveTabs([
         {
@@ -180,7 +188,7 @@ const TabsProvider = ({ children }) => {
         }
       ])
       setInitialLoadDone(true)
-    }
+    } setClosing(false)
   }, [activeTabs, router, menu])
 
   return (
