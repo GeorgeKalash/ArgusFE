@@ -178,6 +178,8 @@ const Countries = () => {
     fillCurrencyStore()
     fillRegionStore({})
     getCountryById(obj)
+    setEditMode(true)
+    
   }
 
   
@@ -192,7 +194,7 @@ const Countries = () => {
       .then(res => {
         res.ibanLength = typeof res.ibanLength !== undefined && getFormattedNumberMax(res?.ibanLength, 5, 0)
         countryValidation.setValues(populateCountry(res.record))
-        setEditMode(true)
+
         setWindowOpen(true)
       })
       .catch(error => {
@@ -279,6 +281,7 @@ const Countries = () => {
        _labels ={_labels}
        maxAccess={access}
        editMode={editMode}
+       onInfo={() => setWindowInfo(true)}
        />
        )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

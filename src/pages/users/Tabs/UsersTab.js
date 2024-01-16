@@ -96,7 +96,12 @@ const UsersTab = ({
             label={labels.cellPhone}
             value={usersValidation.values.cellPhone}
             maxAccess={maxAccess}
-            onChange={usersValidation.handleChange}
+            onChange={(e) => {
+              const inputValue = e.target.value;
+              if (/^[0-9]*$/.test(inputValue)) {
+                usersValidation.handleChange(e);
+              }
+            }}
             onClear={() => usersValidation.setFieldValue('cellPhone', '')}
             error={usersValidation.touched.cellPhone && Boolean(usersValidation.errors.cellPhone)}
             helperText={usersValidation.touched.cellPhone && usersValidation.errors.cellPhone}
@@ -109,7 +114,7 @@ const UsersTab = ({
             valueField='key'
             displayField='value'
             store={activeStatusStore}
-            value={activeStatusStore.filter(item => item.key === usersValidation.values.activeStatus)[0]}
+            value={activeStatusStore.filter(item => item.key === usersValidation.values.activeStatus?.toString())[0]}
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
@@ -128,7 +133,7 @@ const UsersTab = ({
             valueField='key'
             displayField='value'
             store={userTypeStore}
-            value={userTypeStore.filter(item => item.key === usersValidation.values.userType)[0]}
+            value={userTypeStore.filter(item => item.key === usersValidation.values.userType?.toString())[0]}
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
@@ -145,7 +150,7 @@ const UsersTab = ({
             valueField='key'
             displayField='value'
             store={languageStore}
-            value={languageStore.filter(item => item.key === usersValidation.values.languageId)[0]}
+            value={languageStore.filter(item => item.key === usersValidation.values.languageId?.toString())[0]}
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
