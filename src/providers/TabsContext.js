@@ -117,9 +117,9 @@ const TabsProvider = ({ children }) => {
     const lastValue = activeTabs.length;
 
     if (lastValue === 1) {
+      setLength(0);
       router.push('/default');
       setActiveTabs([]);
-      setLength(0);
     } else {
       if (index === lastValue - 1) {
         const newValue = index > 0 ? index - 1 : 0;
@@ -128,9 +128,6 @@ const TabsProvider = ({ children }) => {
         }
         setValue(newValue);
       } else if (value === lastValue - 1) {
-        if (activeTabs[index - 1]) {
-          router.push(activeTabs[index - 1].route);
-        }
         setValue(lastValue - 2);
       }
   
@@ -139,9 +136,6 @@ const TabsProvider = ({ children }) => {
       });
     }
   };
-  
-  
-  
 
   useEffect(() => {
     if(length === 0){
@@ -149,7 +143,15 @@ const TabsProvider = ({ children }) => {
       setLength(1)
     } else {
     if (initialLoadDone && router.asPath != '/default') {
-      const isTabOpen = activeTabs.some(activeTab => activeTab.page === children || activeTab.route === router.asPath)
+      const isTabOpen = activeTabs.some((activeTab, index) => {
+        if (activeTab.page === children || activeTab.route === router.asPath) {
+          setValue(index);
+          
+          return true;
+        }
+        
+          return false;
+      })
       if (isTabOpen) return
       else {
         const newValueState = activeTabs.length
