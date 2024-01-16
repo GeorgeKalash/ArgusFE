@@ -1,35 +1,33 @@
-const reference = (endpointId , param) => {
 
+import { SystemRepository } from 'src/repositories/SystemRepository';
+
+const Reference = async ( getRequest, endpointId, param) => {
   let parameters = '_key=' + param;
 
-  getRequest({
-    extension: endpointId,
-    parameters,
-  })
-    .then((res) => {
-      if (res.record.value) {
-        const value = res?.record?.value;
-        parameters = '_recordId=' + value;
-
-        return getRequest({
-          extension: SystemRepository.NumberRange.get,
-          parameters,
-        });
-      }
-    })
-    .then((res) => {
-      if (res && !res.record.external) {
-      return { enabled: true, mandatory: false };
-
-      }
-    })
-    .catch((error) => {
-      setErrorMessage(error);
+  try {
+    const res1 = await getRequest({
+      extension: endpointId,
+      parameters,
     });
 
-    return { enabled: false, mandatory: true };
+    if (res1?.record?.value) {
+      const value = res1.record.value;
+      parameters = '_recordId=' + value;
 
-}
+      const res2 = await getRequest({
+        extension: SystemRepository.NumberRange.get,
+        parameters,
+      });
 
+      if (res2 && !res2.record.external) {
+        return { readOnly: true, mandatory: false };
+      }
+    }
+  } catch (error) {
+    return { readOnly: false, mandatory: true, error };
+  }
 
-export {reference};
+  return { readOnly: false, mandatory: true };
+};
+
+export { Reference };

@@ -1,44 +1,39 @@
 import React, {useContext, useEffect, useState} from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
+
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ErrorWindow from './ErrorWindow'
+import { Reference } from 'src/lib/reference-helper'
 
-export const TextFieldReference = ({endpointId , param = '', setReferenceRequired,  ...rest}  ) => {
+export const TextFieldReference = ({endpointId , param = '', setReferenceRequired, editMode,  ...rest}  ) => {
    const { getRequest } = useContext(RequestsContext)
-   const [state ,setState] = useState({enabled: false , mandatory : true})
+   const [state ,setState] = useState({readOnly: false , mandatory : true})
    const [errorMessage, setErrorMessage] = useState(null)
 
    useEffect(() => {
-
     setReferenceRequired(true)
 
-    var parameters = '_key=' + param;
 
-    getRequest({
-      extension: endpointId,
-      parameters,
-    })
-      .then((res) => {
-        if (res?.record?.value) {
-          const value = res?.record?.value;
-          parameters = '_recordId=' + value;
+    const fetchData = async () => {
+      const result = await Reference(getRequest, endpointId, param);
+      console.log(result);
+     if(!result.error){
+       setState({ readOnly: result.readOnly, mandatory: result.mandatory });
+       setReferenceRequired(result.mandatory)
 
-          return getRequest({
-            extension: SystemRepository.NumberRange.get,
-            parameters,
-          });
-        }
-      })
-      .then((res) => {
-        if (res && !res.record.external) {
-          setState({ enabled: true, mandatory: false });
-          setReferenceRequired(false);
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
+      }else{
+        setErrorMessage(result.error)
+      }
+    };
+    if(!editMode){
+    fetchData();
+    }else{
+      setReferenceRequired(false)
+      setState({ readOnly: true, mandatory: false });
+
+    }
+
   }, [param]);
 
   return (
@@ -48,7 +43,7 @@ export const TextFieldReference = ({endpointId , param = '', setReferenceRequire
    <CustomTextField
     {...{
       required : state.mandatory,
-      readOnly : state.enabled,
+      readOnly : state.readOnly,
         ...rest}}
     />
     </>

@@ -28,7 +28,9 @@ export const CurrencyTradingSettingsRepository = {
   },
   Defaults: {
     qry: service + 'qryDE',
+    get : service + 'getDE',
     set2: service + 'set2DE'
+
   },
   IdFields: {
     qry: service + 'qryIDF',
@@ -39,10 +41,7 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getACT',
     set: service + 'setACT',
     del: service + 'delACT'
-  },
-   Reference: {
-    get : service + 'getDE'
-
   }
+
 
 }

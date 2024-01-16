@@ -48,11 +48,12 @@ return (
                   name="reference"
                   label={_labels.reference}
                   value={clientCorporateFormValidation.values?.reference}
-                  endpointId={CurrencyTradingSettingsRepository.Reference.get}
+                  endpointId={CurrencyTradingSettingsRepository.Defaults.get}
                   param={'ct-nra-corporate'}
                   setReferenceRequired={setReferenceRequired}
                   onChange={clientCorporateFormValidation.handleChange}
                   maxLength="10"
+                  editMode={editMode}
                   onClear={() =>
                     clientCorporateFormValidation.setFieldValue("reference", "")
                   }

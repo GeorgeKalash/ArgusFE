@@ -98,10 +98,11 @@ return (
           <Grid container spacing={2}>
             <Grid item xs={6}>
             <TextFieldReference
-                endpointId={CurrencyTradingSettingsRepository.Reference.get}
+                endpointId={CurrencyTradingSettingsRepository.Defaults.get}
                 param={'ct-nra-individual'}
                 name="reference"
                 label={_labels.reference}
+                editMode={editMode}
                 value={clientIndividualFormValidation.values.reference}
                 setReferenceRequired={setReferenceRequired}
                 onChange={clientIndividualFormValidation.handleChange}
