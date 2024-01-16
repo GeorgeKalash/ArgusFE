@@ -116,10 +116,7 @@ export const SystemRepository = {
     del: service + 'delUS',
     page: service + 'pageUS'
   },
-  SystemPlant:{
-    get: service + 'getUD'
-  },
-  UserDocument: {
+  UserDefaults: {
     qry: service + 'qryUD',
     get: service + 'getUD',
     set: service + 'setUD'

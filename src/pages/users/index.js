@@ -386,7 +386,7 @@ const Users = () => {
         userId: recordId
       }
       postRequest({
-        extension: SystemRepository.UserDocument.set,
+        extension: SystemRepository.UserDefaults.set,
         record: JSON.stringify(request)
       })
         .then(res => {})
@@ -408,7 +408,7 @@ const Users = () => {
       const parameters = defaultParams
 
       const res = await getRequest({
-        extension: SystemRepository.UserDocument.qry,
+        extension: SystemRepository.UserDefaults.qry,
         parameters: parameters
       })
 
