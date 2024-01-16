@@ -66,10 +66,36 @@ export const DocumentReleaseRepository = {
   },
   Strategy:
   {
+    page: service + 'pageSTG',
     qry: service + 'qrySTG',
     get: service + 'getSTG',
     set: service + 'setSTG',
     del: service + 'delSTG'
+  },
+  StrategyCode:
+  {
+    qry: service + 'qrySCO',
+    get: service + 'getSCO',
+    set: service + 'setSCO',
+    del: service + 'delSCO'
+  },
+  StrategyIndicator:
+  {
+    qry: service + 'qrySTS',
+    get: service + 'getSTS',
+    set: service + 'setSTS',
+    del: service + 'delSTS'
+  },
+  StrategyPrereq:
+  {
+    qry: service + 'qryPRE',
+    get: service + 'getPRE',
+    set: service + 'setPRE',
+    del: service + 'delPRE'
+  },
+  ApplySTG:
+  {
+    apply: service + 'applySTG',
   }
 
 

@@ -32,6 +32,8 @@ const Window = ({
   editMode = false,
   disabledSubmit,
   disabledInfo,
+  onApply,
+  disabledApply,
   ...props
 }) => {
   const { settings } = useSettings()
@@ -123,7 +125,7 @@ const Window = ({
             <DialogContent sx={{ height: expanded ? `calc(100vh - 48px - 180px)` : height, p: 0 }}>
               {children}
             </DialogContent>
-            {windowToolbarVisible && <WindowToolbar onSave={onSave}  onClear={onClear} onInfo={onInfo} disabledSubmit={disabledSubmit}  disabledInfo={disabledInfo} />}
+            {windowToolbarVisible && <WindowToolbar onSave={onSave}  onClear={onClear} onInfo={onInfo} disabledSubmit={disabledSubmit}  disabledInfo={disabledInfo} onApply={onApply} disabledApply={disabledApply} />}
           </Paper>
         </Box>
       </Draggable>
