@@ -104,7 +104,7 @@ const CustomLookup = ({
                       display: 'flex',
                     }}>
 
-                {firstValue && (
+                { !readOnly && (
                   <InputAdornment position='end'>
                   <IconButton tabIndex={-1} edge='end' onClick={(e)=>onChange('')}  aria-label='clear input'>
                     <ClearIcon />
@@ -113,8 +113,8 @@ const CustomLookup = ({
                 )
                 }
                  <InputAdornment position='end'>
-                  <IconButton tabIndex={-1} edge='end'   aria-label='clear input'>
-
+                  <IconButton tabIndex={-1} edge='end'
+                  style={{ pointerEvents: 'none' }}>
                   <SearchIcon style={{ cursor: 'pointer' }}  />
                  </IconButton>
                  </InputAdornment>
