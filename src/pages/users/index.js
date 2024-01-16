@@ -571,7 +571,7 @@ const Users = () => {
         const allList = resGRPFunction.list.map(x => {
           const n = {
             id: x.recordId,
-            name: x.name,
+            name: x.name, 
           }
 
           return n
@@ -613,7 +613,9 @@ const Users = () => {
   const postSecurityGrp = () => {
     const userId = usersValidation.values.recordId
     const selectedItems = [];
-
+ 
+    //initialSelectedListData returns an array that contain id, where id is sgId
+   //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
     initialSelectedListData.forEach(item => {
       selectedItems.push({userId:userId , sgId: item.id})
   });

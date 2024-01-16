@@ -283,6 +283,8 @@ const SecurityGroup = () => {
     const sgId = groupInfoValidation.values.recordId
     const selectedItems = [];
 
+     //initialSelectedListData returns an array that contain id, where id is userId
+    //so we add selectedItems array that loops on initialSelectedListData & pass sgId beside userId to each object (this new array will be sent to set2GUS)
     initialSelectedListData.forEach(item => {
       selectedItems.push({sgId:sgId , userId: item.id})
   });
