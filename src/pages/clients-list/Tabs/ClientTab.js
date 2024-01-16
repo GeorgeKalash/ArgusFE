@@ -308,7 +308,7 @@ return (
                         "",
                       )
                     }
-                    disabledDate={'<'}
+                    disabledDate={!editMode && '<'}
                     error={
                       clientIndividualFormValidation.touched.expiryDate &&
                       Boolean(clientIndividualFormValidation.errors.expiryDate)
@@ -579,7 +579,7 @@ return (
                       countryStore.filter(
                         (item) =>
                           item.recordId ===
-                          clientIndividualFormValidation.values.riskLevel,
+                          clientIndividualFormValidation.values.riskLevel?.toString(),
                       )[0]
                     }
                     required
@@ -802,7 +802,7 @@ return (
                       titleStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.title,
+                          clientIndividualFormValidation.values.title?.toString(),
                       )[0]
                     }
                       onChange={(event, newValue) => {
@@ -1250,7 +1250,7 @@ return (
                       genderStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.gender,
+                          clientIndividualFormValidation.values.gender?.toString(),
                       )[0]
                     }                    onChange={(event, newValue) => {
 
@@ -1266,11 +1266,11 @@ return (
                     }else{
 
                       clientIndividualFormValidation.setFieldValue(
-                        "genderId",
+                        "gender",
                         '',
                       );
                       clientIndividualFormValidation.setFieldValue(
-                        "gender",
+                        "genderName",
                         '',
                       );
                     }
@@ -1302,7 +1302,7 @@ return (
                       educationStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.educationLevel,
+                          clientIndividualFormValidation.values.educationLevel?.toString(),
                       )[0]
                     }
                     onChange={(event, newValue) => {
@@ -1340,38 +1340,7 @@ return (
                     }
                   />
                 </Grid>
-                {/* <Grid item xs={7}>
-                  <CustomComboBox
-                    name="category"
-                    label={_labels.educationLevel}
-                    valueField="recordId"
-                    displayField="name"
-                    store={countryStore}
-                    value={
-                      clientIndividualFormValidation.values?.educationLevelId
-                    }
-                    onChange={(event, newValue) => {
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevelId",
-                        newValue?.recordId,
-                      );
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevel",
-                        newValue?.name,
-                      );
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.educationLevelId &&
-                      Boolean(
-                        clientIndividualFormValidation.errors.educationLevelId,
-                      )
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.educationLevelId &&
-                      clientIndividualFormValidation.errors.educationLevelId
-                    }
-                  />
-                </Grid> */}
+
                 <Grid item xs={12}>
                   <CustomComboBox
                     name="incomeSourceId"
@@ -1418,29 +1387,7 @@ return (
                 </Grid>
 
 
-                {/* <Grid item xs={12}>
-                  <CustomTextField
-                    name="salary"
-                    label='salary'    //{_labels.whatsapp}
-                    value={clientIndividualFormValidation.values?.salary}
 
-                    onChange={clientIndividualFormValidation.handleChange}
-                    onClear={() =>
-                      clientIndividualFormValidation.setFieldValue(
-                        "salary",
-                        "",
-                      )
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.salary &&
-                      Boolean(clientIndividualFormValidation.errors.salary)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.salary &&
-                      clientIndividualFormValidation.errors.salary
-                    }
-                  />
-                </Grid> */}
 
                 <Grid item xs={12}>
                   <CustomTextField
@@ -1571,7 +1518,7 @@ return (
                       mobileVerifiedStore &&    mobileVerifiedStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.mobileVerified,
+                          clientIndividualFormValidation.values.mobileVerified?.toString(),
                       )[0]
                     }
                     readOnly
@@ -1601,11 +1548,13 @@ return (
                   <FormControlLabel
                     control={
                       <Checkbox
-                        disabled={clientIndividualFormValidation.values.genderId ===2 ? editMode? true : false : true}
-                        readOnly={editMode && true}
+
+                         disabled={clientIndividualFormValidation.values.gender === 2 ? editMode? true : false : true}
+
+                         readOnly={editMode && true}
                         name="coveredFace"
                         checked={
-                          clientIndividualFormValidation.values?.coveredFace
+                          clientIndividualFormValidation.values.gender=== "2" ? true :  clientIndividualFormValidation.values?.coveredFace
                         }
                         onChange={clientIndividualFormValidation.handleChange}
                       />

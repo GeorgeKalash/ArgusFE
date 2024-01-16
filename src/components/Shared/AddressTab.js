@@ -163,7 +163,7 @@ const AddressTab = ({
                 { key: 'flName', value: 'Foreign Language Name' }
               ]}
               values={addressValidation.values}
-              required
+              required={requiredOptional ? false : true}
               onChange={(event, newValue) => {
                 setCityStore([])
                 addressValidation.setFieldValue('stateId', null)
