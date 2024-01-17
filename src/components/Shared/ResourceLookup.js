@@ -9,6 +9,10 @@ export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck,
   const [errorMessage, setErrorMessage]= useState()
   const [store, setStore] = useState([])
 
+  useEffect(()=>{
+    setStore([])
+  },[parameters])
+
   const onLookup = searchQry => {
     setStore([])
     getRequest({

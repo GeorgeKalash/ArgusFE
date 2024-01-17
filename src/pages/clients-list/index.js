@@ -588,6 +588,7 @@ console.log(userData)
   const WorkAddressValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
+    validateOnBlur:true,
     validate : (values) => {
       const errors = {};
 
@@ -638,6 +639,7 @@ console.log(userData)
       addressId: null,
       postalCode:null,
       cityDistrictId: null,
+      cityDistrict: null,
       bldgNo: null,
       unitNo: null,
       subNo: null
@@ -965,9 +967,12 @@ console.log(userData)
 
   }
 useEffect(()=>{
-  if((WorkAddressValidation.values.name || WorkAddressValidation.values.street1 || WorkAddressValidation.values.phone || WorkAddressValidation.values.countryId ||  WorkAddressValidation.values.street1) && requiredOptional){
+  if((WorkAddressValidation.values.name || WorkAddressValidation.values.street1 || WorkAddressValidation.values.phone || WorkAddressValidation.values.countryId ||  WorkAddressValidation.values.cityId) && requiredOptional){
+    setRequiredOptional(false)
+   }
 
-setRequiredOptional(false)
+   if((!WorkAddressValidation.values.name && !WorkAddressValidation.values.street1 && !WorkAddressValidation.values.phone && !WorkAddressValidation.values.countryId &&  !WorkAddressValidation.values.cityId)){
+    setRequiredOptional(true)
    }
 }, [WorkAddressValidation.values])
 

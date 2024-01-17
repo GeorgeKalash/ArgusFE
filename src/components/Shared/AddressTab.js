@@ -15,12 +15,8 @@ const AddressTab = ({
   addressValidation,
   maxAccess,
   readOnly = false,
-  requiredOptional = false,
-  editMode // not used since all fields are editable in edit mode
+  requiredOptional = false, // work address
 }) => {
-  const { getRequest } = useContext(RequestsContext)
-  const [cityStore, setCityStore] = useState([])
-  const [cityDistrictStore, setCityDistrictStore] = useState([])
 
   return (
     <>
@@ -163,20 +159,20 @@ const AddressTab = ({
                 { key: 'flName', value: 'Foreign Language Name' }
               ]}
               values={addressValidation.values}
-              required={!requiredOptional}
+              required
               onChange={(event, newValue) => {
-                setCityStore([])
-                addressValidation.setFieldValue('stateId', null)
-
-                addressValidation.setFieldValue('city', null)
-                addressValidation.setFieldValue('cityDistrictId', null)
-
-
+                addressValidation.setFieldValue('stateId', 0)
+                addressValidation.setFieldValue('cityId', '')
+                addressValidation.setFieldValue('city', '')
+                addressValidation.setFieldValue('cityDistrictId', '')
+                addressValidation.setFieldValue('cityDistrict', '')
                 if (newValue) {
                   addressValidation.setFieldValue('countryId', newValue?.recordId)
                 } else {
+
                   addressValidation.setFieldValue('countryId', '')
                 }
+
               }}
               error={addressValidation.touched.countryId && Boolean(addressValidation.errors.countryId)}
               helperText={addressValidation.touched.countryId && addressValidation.errors.countryId}
@@ -195,10 +191,10 @@ const AddressTab = ({
               values={addressValidation.values}
               onChange={(event, newValue) => {
                 addressValidation.setFieldValue('stateId', newValue?.recordId)
-                addressValidation.setFieldValue('cityId', null)
-                addressValidation.setFieldValue('cityDistrictId', null)
-                addressValidation.setFieldValue('city', null)
-                addressValidation.setFieldValue('cityDistrict', null)
+                addressValidation.setFieldValue('cityId', '')
+                addressValidation.setFieldValue('cityDistrictId', '')
+                addressValidation.setFieldValue('city', '')
+                addressValidation.setFieldValue('cityDistrict', '')
               }}
               error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
               helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
@@ -229,11 +225,13 @@ const AddressTab = ({
                 addressValidation.setFieldValue('cityId', newValue?.recordId)
                 addressValidation.setFieldValue('city', newValue?.name)
               } else {
-                addressValidation.setFieldValue('cityId', null)
-                addressValidation.setFieldValue('city', null)
+                addressValidation.setFieldValue('cityId', '')
+                addressValidation.setFieldValue('city', '')
               }
-              addressValidation.setFieldValue('cityDistrictId', null)
-              addressValidation.setFieldValue('cityDistrict', null)
+              addressValidation.setFieldValue('cityDistrictId', '')
+              addressValidation.setFieldValue('cityDistrict', '')
+
+
             }}
             errorCheck={'cityId'}
 
@@ -251,7 +249,6 @@ const AddressTab = ({
              displayField='name'
              name='cityDistrict'
              label={labels.cityDistrict}
-             required={!requiredOptional}
 
              readOnly={(readOnly || !addressValidation.values.cityId) && true}
 
@@ -259,12 +256,13 @@ const AddressTab = ({
              secondDisplayField={false}
 
              onChange={(event, newValue) => {
+
               if (newValue) {
                 addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)
                 addressValidation.setFieldValue('cityDistrict', newValue?.name)
               } else {
-                addressValidation.setFieldValue('cityDistrictId', null)
-                addressValidation.setFieldValue('cityDistrict', null)
+                addressValidation.setFieldValue('cityDistrictId', '')
+                addressValidation.setFieldValue('cityDistrict', '')
               }
             }}
 
