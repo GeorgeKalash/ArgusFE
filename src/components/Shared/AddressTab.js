@@ -33,7 +33,7 @@ const AddressTab = ({
               name='name'
               label={labels.name}
               value={addressValidation.values.name}
-              required={requiredOptional ? false : true}
+              required={!requiredOptional}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
@@ -48,7 +48,7 @@ const AddressTab = ({
               name='street1'
               label={labels.street1}
               value={addressValidation.values.street1}
-              required={requiredOptional ? false : true}
+              required={!requiredOptional}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
@@ -164,7 +164,7 @@ const AddressTab = ({
                 { key: 'flName', value: 'Foreign Language Name' }
               ]}
               values={addressValidation.values}
-              required
+              required={!requiredOptional}
               onChange={(event, newValue) => {
                 setCityStore([])
                 addressValidation.setFieldValue('stateId', null)
@@ -221,7 +221,7 @@ const AddressTab = ({
              displayField='name'
              name='city'
              label={labels.city}
-             required={requiredOptional ? false : true}
+             required={!requiredOptional}
              readOnly={(readOnly || !addressValidation.values.countryId) && true}
              form={addressValidation}
              secondDisplayField={false}
@@ -252,7 +252,7 @@ const AddressTab = ({
              displayField='name'
              name='cityDistrict'
              label={labels.cityDistrict}
-             required={requiredOptional ? false : true}
+             required={!requiredOptional}
 
              readOnly={(readOnly || !addressValidation.values.cityId) && true}
 
@@ -296,7 +296,7 @@ const AddressTab = ({
               maxLength='15'
               type='text'
               phone={true}
-              required={requiredOptional ? false : true}
+              required={!requiredOptional}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}

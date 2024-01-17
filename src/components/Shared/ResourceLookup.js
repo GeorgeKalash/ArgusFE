@@ -1,4 +1,4 @@
-import React , {useContext, useState} from 'react'
+import React , {useContext, useState, useEffect} from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import ErrorWindow from './ErrorWindow'
@@ -11,7 +11,6 @@ export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck,
 
   const onLookup = searchQry => {
     setStore([])
-
     getRequest({
       extension: endpointId,
       parameters: new URLSearchParams({ ...parameters, '_filter': searchQry })
