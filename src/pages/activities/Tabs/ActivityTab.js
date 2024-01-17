@@ -66,7 +66,7 @@ const ActivityTab = ({
             displayField='value'
             required
             store={industryStore}
-            value={industryStore.filter(item => item.key === activityValidation.values.industry)[0]}
+            value={industryStore.filter(item => item.key === activityValidation.values.industry?.toString())[0]}
             onChange={(event, newValue) => {
               activityValidation.setFieldValue('industry', newValue?.key)
             }}

@@ -62,7 +62,7 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           valueField='key'
           displayField='value'
           store={categoryStore}
-          value={categoryStore.filter(item => item.key === idTypesValidation.values.category)[0]}
+          value={categoryStore.filter(item => item.key === idTypesValidation.values.category?.toString())[0]}
           required
           maxAccess={maxAccess}
           onChange={(event, newValue) => {
@@ -80,7 +80,7 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           valueField='key'
           displayField='value'
           store={clientStore}
-          value={clientStore.filter(item => item.key === idTypesValidation.values.clientFileExpiryType)[0]}
+          value={clientStore.filter(item => item.key === idTypesValidation.values.clientFileExpiryType?.toString())[0]}
           required
           maxAccess={maxAccess}
           onChange={(event, newValue) => {
@@ -98,8 +98,8 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           name='clientFileLifeTime'
           label={labels.clientFileLifeTime}
           value={idTypesValidation.values.clientFileLifeTime}
-          required={idTypesValidation.values.clientFileExpiryType === 1 ? true : false}
-          readOnly={idTypesValidation.values.clientFileExpiryType === 1 ? false : true}
+          required={idTypesValidation.values.clientFileExpiryType === "1" ? true : false}
+          readOnly={idTypesValidation.values.clientFileExpiryType === "1" ? false : true}
           maxAccess={maxAccess}
           onChange={idTypesValidation.handleChange}
           onClear={() => idTypesValidation.setFieldValue('clientFileLifeTime', '')}

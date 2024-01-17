@@ -34,7 +34,7 @@ const CharacteristicTab = ({ characteristicValidation, _labels, maxAccess, editM
             valueField='key'
             displayField='value'
             store={dataTypeStore}
-            value={dataTypeStore.filter(item => item.key === characteristicValidation.values.dataType)[0]}
+            value={dataTypeStore.filter(item => item.key === characteristicValidation.values.dataType?.toString())[0]}
             required
             onChange={(event, newValue) => {
               characteristicValidation.setFieldValue('dataType', newValue?.key)

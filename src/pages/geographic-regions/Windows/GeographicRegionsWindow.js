@@ -2,6 +2,9 @@
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GeographicRegionsTab from 'src/pages/geographic-regions/Tabs/GeographicRegionsTab'
+import TransactionLog from 'src/components/Shared/TransactionLog'
+import { useState } from 'react'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const GeographicRegionsWindow = ({
   onClose,
@@ -13,7 +16,10 @@ const GeographicRegionsWindow = ({
   labels,
   maxAccess
 }) => {
+  const [windowInfo, setWindowInfo] = useState(null)
+
   return (
+    <>
     <Window
       id='GeographicRegionsWindow'
       Title={labels.geographicRegion}
@@ -22,6 +28,9 @@ const GeographicRegionsWindow = ({
       height={height}
       onSave={onSave}
       geographicRegionsValidation={geographicRegionsValidation}
+      onInfo={() => setWindowInfo(true)}
+      disabledInfo={!editMode && true}
+      onInfoClose={() => setWindowInfo(false)}
     >
       <CustomTabPanel>
         <GeographicRegionsTab
@@ -31,7 +40,15 @@ const GeographicRegionsWindow = ({
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-    </Window>
+      </Window>
+        {windowInfo && (
+        <TransactionLog
+          resourceId={ResourceIds && ResourceIds.GeographicRegions}
+          recordId={geographicRegionsValidation.values.recordId}
+          onInfoClose={() => setWindowInfo(false)}
+        />
+      )}
+    </>
   )
 }
 

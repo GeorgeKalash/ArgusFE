@@ -1,5 +1,5 @@
-import React , {useContext, useEffect} from 'react'
-import { Box, Grid} from '@mui/material'
+import React, { useContext, useEffect } from 'react'
+import { Box, Grid } from '@mui/material'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
@@ -17,30 +17,28 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const RelationTypes = () => {
-
-
-
+const SalaryRange = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-    //control
+  //control
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
 
+  const [windowInfo, setWindowInfo] = useState(null)
 
-     //stores
-     const [gridData, setGridData] = useState([])
-     const [typeStore, setTypeStore] = useState([])
+  //stores
+  const [gridData, setGridData] = useState([])
+  const [typeStore, setTypeStore] = useState([])
 
-    //states
-    const [activeTab, setActiveTab] = useState(0)
-     const [windowOpen, setWindowOpen] = useState(false)
-     const [errorMessage, setErrorMessage] = useState(null)
+  //states
+  const [activeTab, setActiveTab] = useState(0)
+  const [windowOpen, setWindowOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [editMode, setEditMode] = useState(false)
 
   useEffect(() => {
-    if (!access)
-      getAccess(ResourceIds.SalaryRange, setAccess)
+    if (!access) getAccess(ResourceIds.SalaryRange, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getGridData({ _startAt: 0, _pageSize: 30 })
@@ -54,11 +52,10 @@ const RelationTypes = () => {
     }
   }, [access])
 
-
   const _labels = {
-    min: labels && labels.find(item => item.key ==="2").value ,
-    max: labels && labels.find(item => item.key === "3").value,
-    salaryRange: labels && labels.find(item => item.key === "1").value,
+    min: labels && labels.find(item => item.key === '2').value,
+    max: labels && labels.find(item => item.key === '3').value,
+    salaryRange: labels && labels.find(item => item.key === '1').value
   }
 
   const columns = [
@@ -69,7 +66,6 @@ const RelationTypes = () => {
       editable: false
     },
     {
-
       field: 'max',
       headerName: _labels.max,
       flex: 1,
@@ -77,16 +73,15 @@ const RelationTypes = () => {
     }
   ]
 
-  const addSalaryRange = ()=>{
+  const addSalaryRange = () => {
     salaryRangeValidation.setValues(getNewSalaryRange())
+    setEditMode(false)
 
     // setEditMode(false)
     setWindowOpen(true)
   }
 
-
-
-   const delSalaryRange = obj => {
+  const delSalaryRange = obj => {
     postRequest({
       extension: RemittanceSettingsRepository.SalaryRange.del,
       record: JSON.stringify(obj)
@@ -100,13 +95,12 @@ const RelationTypes = () => {
       })
   }
 
-   const editSalaryRange = obj=>{
+  const editSalaryRange = obj => {
     salaryRangeValidation.setValues(populateSalaryRange(obj))
-
-    // setEditMode(true)
+    
+    setEditMode(true)
     setWindowOpen(true)
-
-   }
+  }
 
   const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
@@ -118,6 +112,8 @@ const RelationTypes = () => {
     })
       .then(res => {
         setGridData({ ...res, _startAt })
+
+        setEditMode(true)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -129,15 +125,13 @@ const RelationTypes = () => {
     validateOnChange: false,
     validationSchema: yup.object({
       min: yup.string().required('This field is required'),
-      max: yup.string().required('This field is required'),
+      max: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       console.log({ values })
       postSalaryRange(values)
     }
   })
-
-
 
   const postSalaryRange = obj => {
     const recordId = obj.recordId
@@ -156,27 +150,22 @@ const RelationTypes = () => {
       })
   }
 
-
-
   const handleSubmit = () => {
     salaryRangeValidation.handleSubmit()
   }
 
-
-
-return (
+  return (
     <>
       <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%'
-              }}
-            >
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%'
+        }}
+      >
+        <GridToolbar onAdd={addSalaryRange} maxAccess={access} />
 
-             <GridToolbar  onAdd={addSalaryRange} maxAccess={access} />
-
-              <Table
+        <Table
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
@@ -188,27 +177,25 @@ return (
         />
       </Box>
 
-
-
       {windowOpen && (
-
-<SalaryRangeWindow
-onClose={() => setWindowOpen(false)}
-width={600}
-height={400}
-onSave={handleSubmit}
-salaryRangeValidation={salaryRangeValidation}
-labels={_labels}
-maxAccess={access}
-  />
-
-
+        <SalaryRangeWindow
+          onClose={() => setWindowOpen(false)}
+          width={600}
+          height={400}
+          onSave={handleSubmit}
+          salaryRangeValidation={salaryRangeValidation}
+          labels={_labels}
+          maxAccess={access}
+          onInfo={() => setWindowInfo(true)}
+          editMode={editMode}
+        />
       )}
-    <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-
-
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
 
-export default RelationTypes;
+export default SalaryRange
+
+// set edit mode on add false from api
+// set edit mode on edit true

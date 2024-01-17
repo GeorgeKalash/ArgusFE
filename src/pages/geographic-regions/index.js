@@ -206,6 +206,7 @@ const GeographicRegions = () => {
           geographicRegionsValidation={geographicRegionsValidation}
           labels={_labels}
           maxAccess={access}
+          onInfo={() => setWindowInfo(true)}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

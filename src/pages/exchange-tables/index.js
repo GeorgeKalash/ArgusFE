@@ -180,7 +180,7 @@ const ExchangeTables = () => {
       rateCalcMethod: yup.string().required('This field is required'),
 
        rateAgainst: yup.string().required('This field is required'),
-       rateAgainstCurrencyId: rateAgainst==2 && yup.string().required('This field is required')
+       rateAgainstCurrencyId: rateAgainst==="2" && yup.string().required('This field is required')
 
        // No validation when Rate Against is not 2
 

@@ -61,7 +61,7 @@ const ReleaseIndicatorTab = ({ releaseIndValidation, changeabilityStore, _labels
             displayField='value'
             required
             store={changeabilityStore}
-            value={changeabilityStore.filter(item => item.key === releaseIndValidation.values.changeability)[0]}
+            value={changeabilityStore.filter(item => item.key === releaseIndValidation.values.changeability?.toString())[0]}
             onChange={(event, newValue) => {
               releaseIndValidation.setFieldValue('changeability', newValue?.key)
             }}

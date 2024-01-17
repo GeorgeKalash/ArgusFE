@@ -5,6 +5,10 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 // **Tabs
 import CityDistrictTab from 'src/pages/city-districts/Tabs/CityDistrictTab'
 
+import TransactionLog from 'src/components/Shared/TransactionLog'
+import { useState } from 'react'
+import { ResourceIds } from 'src/resources/ResourceIds'
+
 const CityDistrictWindow = ({
     onClose,
     onSave,
@@ -19,9 +23,15 @@ const CityDistrictWindow = ({
     editMode,
     maxAccess
 }) => {
+    const [windowInfo, setWindowInfo] = useState(null)
+
     return (
+        <>
         <Window id='CityDistrictWindow' Title={_labels.cityDistrict} onClose={onClose} width={width} height={height} 
-         onSave={onSave}>
+         onSave={onSave}
+         onInfo={() => setWindowInfo(true)}
+         disabledInfo={!editMode && true}
+         onInfoClose={() => setWindowInfo(false)}>
             <CustomTabPanel>
                 <CityDistrictTab
                     cityDistrictValidation={cityDistrictValidation}
@@ -34,9 +44,16 @@ const CityDistrictWindow = ({
                     editMode={editMode}
                 />
             </CustomTabPanel>
-        </Window>
-    )
+            </Window>
+        {windowInfo && (
+        <TransactionLog
+          resourceId={ResourceIds && ResourceIds.CityDistrict}
+          recordId={cityDistrictValidation.values.recordId}
+          onInfoClose={() => setWindowInfo(false)}
+        />
+      )}
+    </>
+  )
 }
-
 
 export default CityDistrictWindow

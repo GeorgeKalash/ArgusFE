@@ -35,7 +35,7 @@ const IdTypes = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
-  
+
   //control
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
@@ -54,20 +54,19 @@ const IdTypes = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [type, setType] = useState(0)
 
-
   const _labels = {
-    IdTypes: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    format: labels && labels.find(item => item.key === "3").value,
-    length: labels && labels.find(item => item.key === "4").value,
-    tab1: labels && labels.find(item => item.key === "5") && labels.find(item => item.key === "5").value,
-    tab2: labels && labels.find(item => item.key === "6") && labels.find(item => item.key === "6").value,
-    control: labels && labels.find(item => item.key === "7") && labels.find(item => item.key === "7").value,
-    accessLevel: labels && labels.find(item => item.key === "8") && labels.find(item => item.key === "8").value,
-    category: labels && labels.find(item => item.key === "9").value,
-    clientFileExpiryType: labels && labels.find(item => item.key === "10").value,
-    clientFileLifeTime: labels && labels.find(item => item.key === "11").value,
-    isDiplomat: labels && labels.find(item => item.key === "12").value
+    IdTypes: labels && labels.find(item => item.key === '1').value,
+    name: labels && labels.find(item => item.key === '2').value,
+    format: labels && labels.find(item => item.key === '3').value,
+    length: labels && labels.find(item => item.key === '4').value,
+    tab1: labels && labels.find(item => item.key === '5') && labels.find(item => item.key === '5').value,
+    tab2: labels && labels.find(item => item.key === '6') && labels.find(item => item.key === '6').value,
+    control: labels && labels.find(item => item.key === '7') && labels.find(item => item.key === '7').value,
+    accessLevel: labels && labels.find(item => item.key === '8') && labels.find(item => item.key === '8').value,
+    category: labels && labels.find(item => item.key === '9').value,
+    clientFileExpiryType: labels && labels.find(item => item.key === '10').value,
+    clientFileLifeTime: labels && labels.find(item => item.key === '11').value,
+    isDiplomat: labels && labels.find(item => item.key === '12').value
   }
 
   const columns = [
@@ -100,7 +99,7 @@ const IdTypes = () => {
       length: yup.string().required('This field is required'),
       category: yup.string().required('This field is required'),
       clientFileExpiryType: yup.string().required('This field is required'),
-      clientFileLifeTime: type===1 ? yup.string().required('This field is required') : yup.string().notRequired(),
+      clientFileLifeTime: type === '1' ? yup.string().required('This field is required') : yup.string().notRequired(),
       isDiplomat: yup.string().required('This field is required')
     }),
     onSubmit: values => {
@@ -160,11 +159,15 @@ const IdTypes = () => {
     const data = {
       idtId: idTypesValidation.values.recordId,
       items: obj
+      
     }
+    
 
     postRequest({
+      
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
       record: JSON.stringify(data)
+      
     })
       .then(res => {
         getGridData({})
@@ -225,6 +228,7 @@ const IdTypes = () => {
     })
       .then(res => {
         setGridData(res)
+        setEditMode(true)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -333,6 +337,7 @@ const IdTypes = () => {
         setEditMode(true)
         setWindowOpen(true)
         setActiveTab(0)
+        setEditMode(true)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -352,7 +357,7 @@ const IdTypes = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
   return (
@@ -391,6 +396,7 @@ const IdTypes = () => {
           categoryStore={categoryStore}
           clientStore={clientStore}
           accessLevelStore={accessLevelStore.list}
+          onInfo={() => setWindowInfo(true)}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

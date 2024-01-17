@@ -194,6 +194,7 @@ const populateIClients= obj => {
       fl_middleName: obj.clientIndividual.fl_middleName,
       fl_familyName: obj.clientIndividual.fl_familyName,
       isResident: obj.clientIndividual.isResident,
+      professionId: obj.clientIndividual.professionId,
 
       // end clientIndividual
 
@@ -254,7 +255,6 @@ const populateIClients= obj => {
       mobileVerified: obj.clientRemittance.mobileVerifiedStatus,
       isRelativeDiplomat: obj.clientRemittance.isRelativeDiplomat,
 
-      professionId: obj.clientRemittance.professionId,
 
       // profession: obj.profession,
       // professionId: obj.professionId,

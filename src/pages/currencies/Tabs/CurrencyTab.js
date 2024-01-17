@@ -79,7 +79,7 @@ const CurrencyTab = ({
           valueField='key'
           displayField='value'
           store={profileStore}
-          value={profileStore.filter(item => item.key === currencyValidation.values.profileId)[0]}
+          value={profileStore.filter(item => item.key === currencyValidation.values.profileId?.toString())[0]}
           required
           maxAccess={maxAccess}
           onChange={(event, newValue) => {
@@ -96,7 +96,7 @@ const CurrencyTab = ({
           valueField='key'
           displayField='value'
           store={currencyStore}
-          value={currencyStore.filter(item => item.key === currencyValidation.values.currencyType)[0]}
+          value={currencyStore.filter(item => item.key === currencyValidation.values.currencyType.toString())[0]}
           required
           maxAccess={maxAccess}
           readOnly={editMode}

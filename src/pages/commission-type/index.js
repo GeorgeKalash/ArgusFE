@@ -33,6 +33,7 @@ const CommissionType = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
+  const [windowInfo, setWindowInfo] = useState(null)
 
   //stores
   const [gridData, setGridData] = useState(null)
@@ -48,10 +49,10 @@ const CommissionType = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    type: labels && labels.find(item => item.key === "3").value,
-    comissiontype: labels && labels.find(item => item.key === "4").value
+    reference: labels && labels.find(item => item.key === '1').value,
+    name: labels && labels.find(item => item.key === '2').value,
+    type: labels && labels.find(item => item.key === '3').value,
+    comissiontype: labels && labels.find(item => item.key === '4').value
   }
 
   const columns = [
@@ -211,6 +212,7 @@ const CommissionType = () => {
           typeStore={typeStore}
           labels={_labels}
           maxAccess={access}
+          onInfo={() => setWindowInfo(true)}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

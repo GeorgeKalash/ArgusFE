@@ -134,7 +134,7 @@ return (
               valueField='key'
               displayField='value'
               store={diplomatStore}
-              value={diplomatStore.filter(item => item.key === ProfessionValidation.values.diplomatStatus)[0]}
+              value={diplomatStore.filter(item => item.key === ProfessionValidation.values.diplomatStatus?.toString())[0]}
               required
               maxAccess={maxAccess}
               onChange={(event, newValue) => {

@@ -57,7 +57,7 @@ const SourceOfIncomeTab = ({ labels, sourceOfIncomeValidation, incomeTypeStore, 
           valueField='key'
           displayField='value'
           store={incomeTypeStore}
-          value={incomeTypeStore.filter(item => item.key === sourceOfIncomeValidation.values.incomeType)[0]}
+          value={incomeTypeStore.filter(item => item.key === sourceOfIncomeValidation.values.incomeType?.toString())[0]}
           required
           maxAccess={maxAccess}
           onChange={(event, newValue) => {

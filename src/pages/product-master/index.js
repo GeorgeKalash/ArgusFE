@@ -122,7 +122,7 @@ const ProductMaster = () => {
       interfaceId:  yup.string().required('This field is required'),
       commissionBase:  yup.string().required('This field is required'),
       isInactive:  yup.string().required('This field is required'),
-      corId : type===1 ? yup.string().required('This field is required') : yup.string().notRequired()
+      corId : type==="1" ? yup.string().required('This field is required') : yup.string().notRequired()
     }),
     onSubmit: values => {
       postProductMaster(values)
