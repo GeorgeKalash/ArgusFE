@@ -170,6 +170,7 @@ const Strategy = () => {
 
     //setIndicatorGridData([])
     fillTypeComboStore()
+    fillIndicatorComboStore({})
     fillStrategyGroupComboStore({})
     setEditMode(false)
     setWindowOpen(true)
@@ -467,7 +468,7 @@ const Strategy = () => {
       const isValidIndicatorid = values.rows.every(row => !!row.indicatorId)
       const isValidName = values.rows.every(row => !!row.name)
 
-      return  (isValidSeqno && isValidIndicatorid & isValidName )
+      return  (isValidSeqno && isValidIndicatorid && isValidName )
           ? {}
           : { rows: Array(values.rows && values.rows.length).fill({ seqNo: 'Seq No is required',
           indicatorId: 'Indicator is required', name: 'Name is required' }) }
@@ -523,7 +524,7 @@ const Strategy = () => {
     }
   ]
 
-  const postIndicators = obj => {
+  const postIndicators = (obj) => {
     const data = {
       strategyId: strategyValidation.values.recordId,
       codeId: "0",
@@ -546,7 +547,7 @@ const Strategy = () => {
     indicatorGridValidation.setValues({ rows: [] })
   }
 
-  const getCorrespondentIndicators = recordId => {
+  const getCorrespondentIndicators = (recordId) => {
     const _recordId = recordId
     const defaultParams = `_strategyId=${_recordId}`
     var parameters = defaultParams
@@ -555,6 +556,7 @@ const Strategy = () => {
       parameters: parameters
     })
       .then(res => {
+        console.log(res)
         if (res.list.length > 0) indicatorGridValidation.setValues({ rows: res.list })
         else resetCorrespondentIndicators()
       })
