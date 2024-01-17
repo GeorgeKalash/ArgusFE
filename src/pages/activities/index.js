@@ -22,7 +22,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewActivity, populateActivity } from 'src/Models/CurrencyTradingSettings/Activity'
 
 // ** Helpers
-import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -47,15 +47,15 @@ const Activities = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false) 
+  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    flName: labels && labels.find(item => item.key === "3").value,
-    industryId: labels && labels.find(item => item.key === "4").value,
-    activity: labels && labels.find(item => item.key === "5").value
+    reference: labels && labels.find(item => item.key === '1').value,
+    name: labels && labels.find(item => item.key === '2').value,
+    flName: labels && labels.find(item => item.key === '3').value,
+    industryId: labels && labels.find(item => item.key === '4').value,
+    activity: labels && labels.find(item => item.key === '5').value
   }
 
   const columns = [
@@ -103,6 +103,7 @@ const Activities = () => {
       .then(res => {
         setGridData(res)
         console.log(res)
+        setEditMode(true)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -178,13 +179,12 @@ const Activities = () => {
       if (access.record.maxAccess > 0) {
         getGridData()
         fillIndustryStore()
-        getLabels(ResourceIds.Activity,setLabels)
+        getLabels(ResourceIds.Activity, setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
   }, [access])
-
 
   const fillIndustryStore = () => {
     getAllKvsByDataset({
@@ -192,7 +192,6 @@ const Activities = () => {
       callback: setIndustryStore
     })
   }
-
 
   return (
     <>
@@ -218,18 +217,19 @@ const Activities = () => {
         />
       </Box>
       {windowOpen && (
-       <ActivityWindow
-       onClose={() => setWindowOpen(false)}
-       width={600}
-       height={400}
-       onSave={handleSubmit}
-       activityValidation={activityValidation}
-       industryStore={industryStore}
-       _labels ={_labels}
-       maxAccess={access}
-       editMode={editMode}
-       />
-       )}
+        <ActivityWindow
+          onClose={() => setWindowOpen(false)}
+          width={600}
+          height={400}
+          onSave={handleSubmit}
+          activityValidation={activityValidation}
+          industryStore={industryStore}
+          _labels={_labels}
+          maxAccess={access}
+          editMode={editMode}
+          onInfo={() => setWindowInfo(true)}
+        />
+      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
