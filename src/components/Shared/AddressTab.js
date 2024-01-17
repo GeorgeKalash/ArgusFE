@@ -19,7 +19,6 @@ const AddressTab = ({
   editMode // not used since all fields are editable in edit mode
 }) => {
   const { getRequest } = useContext(RequestsContext)
-
   const [cityStore, setCityStore] = useState([])
   const [cityDistrictStore, setCityDistrictStore] = useState([])
 
@@ -168,10 +167,10 @@ const AddressTab = ({
               onChange={(event, newValue) => {
                 setCityStore([])
                 addressValidation.setFieldValue('stateId', null)
-                addressValidation.setFieldValue('cityId', null)
+
                 addressValidation.setFieldValue('city', null)
                 addressValidation.setFieldValue('cityDistrictId', null)
-                addressValidation.setFieldValue('cityDistrict', null)
+
 
                 if (newValue) {
                   addressValidation.setFieldValue('countryId', newValue?.recordId)

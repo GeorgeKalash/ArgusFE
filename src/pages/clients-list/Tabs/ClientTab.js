@@ -164,19 +164,13 @@ return (
                         "idtId",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "typeName",
-                        newValue?.name,
-                      );}else{
+                      }else{
 
                         clientIndividualFormValidation.setFieldValue(
                           "idtId",
                           '',
                         );
-                        clientIndividualFormValidation.setFieldValue(
-                          "typeName",
-                          '',
-                        );
+
 
                       }
                     }}
@@ -221,23 +215,7 @@ return (
                       clientIndividualFormValidation.errors.idNo
                     }
                   />
-                          {/* <Grid
 
-                           sx={{
-                              // position: 'absolute',
-                              width: '88%',
-                              height: clientIndividualFormValidation.touched.idNo ? '50%': '70%',
-                              top:  '10px',
-                              letterSpacing: "3px",
-                              marginLeft:'10px',
-                              marginRight:'10px',
-                              color:'#424242',
-                              paddingTop: '5px',
-                              backgroundColor: '#fff',
-                              pointerEvents: 'none',
-                              fontFamily: 'Arial'
-                          }}
-                          >{encryptDigits(clientIndividualFormValidation.values?.idNo)}</Grid> */}
 
                 </Grid>
                 <Grid item xs={12}
@@ -251,7 +229,6 @@ return (
 
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
 
-                    // onBlur={clientIndividualFormValidation.handleBlur}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
                     readOnly={editMode && true}
@@ -263,9 +240,7 @@ return (
                     maxLength="15"
                     onClear={() =>{
                       clientIndividualFormValidation.setFieldValue("idNoRepeat", "")
-                      clientIndividualFormValidation.setFieldValue("idNoRepeat", "")}
-
-                    }
+                    } }
                     error={
                       clientIndividualFormValidation.touched.idNoRepeat &&
                       Boolean(clientIndividualFormValidation.errors.idNoRepeat)
@@ -275,24 +250,7 @@ return (
                       clientIndividualFormValidation.errors.idNoRepeat
                     }
                   />
-                  {/* <Grid
-                     sx={{
-                      position: 'absolute',
-                      width: '88%',
-                      height: clientIndividualFormValidation.touched.idNoRepeat ? '50%': '70%',
-                      top:  '10px',
-                      letterSpacing: "3px",
-                      marginLeft:'10px',
-                      marginRight:'10px',
-                      color:'#424242',
-                      paddingTop: '5px',
-                      backgroundColor: '#fff',
-                      pointerEvents: 'none',
-                      fontFamily: 'Arial'
 
-                          }}
-                          >
-                            {encryptDigits(clientIndividualFormValidation.values?.idNoRepeat)}</Grid> */}
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
@@ -308,7 +266,7 @@ return (
                         "",
                       )
                     }
-                    disabledDate={'<'}
+                    disabledDate={!editMode && '<'}
                     error={
                       clientIndividualFormValidation.touched.expiryDate &&
                       Boolean(clientIndividualFormValidation.errors.expiryDate)
@@ -378,11 +336,7 @@ return (
                         "idCountry",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "country",
-                        newValue?.name,
 
-                      );
 
 
                       clientIndividualFormValidation.setFieldValue(
@@ -401,10 +355,8 @@ return (
                           "idCountry",
                           ''
                         );
-                        clientIndividualFormValidation.setFieldValue(
-                          "country",
-                          ''
-                        );
+
+
 
                         clientIndividualFormValidation.setFieldValue(
                           "idCity",
@@ -442,7 +394,7 @@ return (
               onLookup={lookupCity}
               firstValue={clientIndividualFormValidation.values.cityName}
               secondDisplayField={false}
-              readOnly={(editMode || clientIndividualFormValidation.values.idCountry) && true}
+              readOnly={(editMode || !clientIndividualFormValidation.values.idCountry) && true}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -536,19 +488,13 @@ return (
                         "salaryRangeId",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "salaryRange",
-                        newValue?.name,
-                      );
+
                     }else{
                       clientIndividualFormValidation.setFieldValue(
                         "salaryRangeId",
                         '',
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "salaryRange",
-                        '',
-                      );
+
 
                     }
                     }}
@@ -579,7 +525,7 @@ return (
                       countryStore.filter(
                         (item) =>
                           item.recordId ===
-                          clientIndividualFormValidation.values.riskLevel,
+                          clientIndividualFormValidation.values.riskLevel?.toString(),
                       )[0]
                     }
                     required
@@ -593,13 +539,10 @@ return (
                      }else{
 
                         clientIndividualFormValidation.setFieldValue(
-                          "riskLevelId",
-                          null,
-                        );
-                        clientIndividualFormValidation.setFieldValue(
                           "riskLevel",
                           null,
                         );
+
 
                       }
                     }}
@@ -686,19 +629,13 @@ return (
                           "civilStatus",
                           newValue?.key,
                         );
-                        clientIndividualFormValidation.setFieldValue(
-                          "civilStatusName",
-                          newValue?.value,
-                        );
+
                       }else{
                       clientIndividualFormValidation.setFieldValue(
                         "civilStatus",
                         newValue?.key,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "civilStatusName",
-                        newValue?.value,
-                      );
+
 
                       }
                     }}
@@ -802,7 +739,7 @@ return (
                       titleStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.title,
+                          clientIndividualFormValidation.values.title?.toString(),
                       )[0]
                     }
                       onChange={(event, newValue) => {
@@ -1186,18 +1123,11 @@ return (
                       "nationalityId",
                       newValue?.recordId,
                     );
-                    clientIndividualFormValidation.setFieldValue(
-                      "nationalityName",
-                      newValue?.name,
-                    );}else{
+                   }else{
 
                       clientIndividualFormValidation.setFieldValue(
                         "nationalityId",
                         ''
-                      );
-                      clientIndividualFormValidation.setFieldValue(
-                        "nationalityName",
-                        '',
                       );
 
 
@@ -1250,29 +1180,24 @@ return (
                       genderStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.gender,
+                          clientIndividualFormValidation.values.gender?.toString(),
                       )[0]
-                    }                    onChange={(event, newValue) => {
+                    }
+                    onChange={(event, newValue) => {
 
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "gender",
                         newValue?.key,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "genderName",
-                        newValue?.value,
-                      );
+
                     }else{
 
-                      clientIndividualFormValidation.setFieldValue(
-                        "genderId",
-                        '',
-                      );
                       clientIndividualFormValidation.setFieldValue(
                         "gender",
                         '',
                       );
+
                     }
                     }}
                     error={
@@ -1302,7 +1227,7 @@ return (
                       educationStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.educationLevel,
+                          clientIndividualFormValidation.values.educationLevel?.toString(),
                       )[0]
                     }
                     onChange={(event, newValue) => {
@@ -1312,19 +1237,13 @@ return (
                         "educationLevel",
                         newValue?.key,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevelName",
-                        newValue?.Value,
-                      );
+
                     }else{
                       clientIndividualFormValidation.setFieldValue(
                         "educationLevel",
                         null,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevelName",
-                        null,
-                      );
+
 
                       }
                     }}
@@ -1340,38 +1259,7 @@ return (
                     }
                   />
                 </Grid>
-                {/* <Grid item xs={7}>
-                  <CustomComboBox
-                    name="category"
-                    label={_labels.educationLevel}
-                    valueField="recordId"
-                    displayField="name"
-                    store={countryStore}
-                    value={
-                      clientIndividualFormValidation.values?.educationLevelId
-                    }
-                    onChange={(event, newValue) => {
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevelId",
-                        newValue?.recordId,
-                      );
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevel",
-                        newValue?.name,
-                      );
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.educationLevelId &&
-                      Boolean(
-                        clientIndividualFormValidation.errors.educationLevelId,
-                      )
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.educationLevelId &&
-                      clientIndividualFormValidation.errors.educationLevelId
-                    }
-                  />
-                </Grid> */}
+
                 <Grid item xs={12}>
                   <CustomComboBox
                     name="incomeSourceId"
@@ -1399,10 +1287,7 @@ return (
                         "incomeSourceId",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "incomeSource",
-                        newValue?.name,
-                      );
+
                     }}
                     error={
                       clientIndividualFormValidation.touched.incomeSourceId &&
@@ -1418,29 +1303,7 @@ return (
                 </Grid>
 
 
-                {/* <Grid item xs={12}>
-                  <CustomTextField
-                    name="salary"
-                    label='salary'    //{_labels.whatsapp}
-                    value={clientIndividualFormValidation.values?.salary}
 
-                    onChange={clientIndividualFormValidation.handleChange}
-                    onClear={() =>
-                      clientIndividualFormValidation.setFieldValue(
-                        "salary",
-                        "",
-                      )
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.salary &&
-                      Boolean(clientIndividualFormValidation.errors.salary)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.salary &&
-                      clientIndividualFormValidation.errors.salary
-                    }
-                  />
-                </Grid> */}
 
                 <Grid item xs={12}>
                   <CustomTextField
@@ -1517,10 +1380,6 @@ return (
                       "professionId",
                       newValue?.recordId,
                     );
-                    clientIndividualFormValidation.setFieldValue(
-                      "professionName",
-                      newValue?.name,
-                    );
 
 
                   }}
@@ -1571,7 +1430,7 @@ return (
                       mobileVerifiedStore &&    mobileVerifiedStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.mobileVerified,
+                          clientIndividualFormValidation.values.mobileVerified?.toString(),
                       )[0]
                     }
                     readOnly
@@ -1580,10 +1439,7 @@ return (
                         "mobileVerified",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "mobileVerifiedName",
-                        newValue?.name,
-                      );
+
                     }}
                     error={
                       clientIndividualFormValidation.touched.mobileVerified &&
@@ -1601,11 +1457,13 @@ return (
                   <FormControlLabel
                     control={
                       <Checkbox
-                        disabled={clientIndividualFormValidation.values.genderId ===2 ? editMode? true : false : true}
-                        readOnly={editMode && true}
+
+                         disabled={clientIndividualFormValidation.values.gender === 2 ? editMode? true : false : true}
+
+                         readOnly={editMode && true}
                         name="coveredFace"
                         checked={
-                          clientIndividualFormValidation.values?.coveredFace
+                          clientIndividualFormValidation.values.gender=== "2" ? true :  clientIndividualFormValidation.values?.coveredFace
                         }
                         onChange={clientIndividualFormValidation.handleChange}
                       />

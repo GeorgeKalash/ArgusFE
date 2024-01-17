@@ -103,7 +103,6 @@ const ClientWindow = ({
           maxAccess={maxAccess}
           editMode={editMode}
         />
-        console.log('editMode in ClientWindow:', editMode);
       </CustomTabPanel>
     </Window>
   )
