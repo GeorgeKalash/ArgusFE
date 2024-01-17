@@ -591,6 +591,7 @@ console.log(userData)
     validateOnBlur:true,
     validate : (values) => {
       const errors = {};
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       if (values.name || values.street1 || values.phone || values.countryId ||  values.street1)  {
         if (!values.name ) {
@@ -610,11 +611,11 @@ console.log(userData)
         }
 
       }
-      if (values.email1  && !emailRegex.test(values.email1) ) {
+      if (values.email1  && !emailRegex?.test(values?.email1) ) {
         errors.email1 = 'Invalid email format';
       }
 
-      if (values.email2 && !emailRegex.test(values.email2) ) {
+      if (values.email2 && !emailRegex?.test(values?.email2) ) {
         errors.email2 = 'Invalid email format';
       }
 
