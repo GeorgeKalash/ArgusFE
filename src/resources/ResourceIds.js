@@ -46,5 +46,6 @@ export const ResourceIds = {
   SmsFunctionTemplates: 20131,
   Users: 23101,
   ClientCorporate: 35205,
-  States: 20107
+  States: 20107,
+  SecurityGroup: 23102
 }

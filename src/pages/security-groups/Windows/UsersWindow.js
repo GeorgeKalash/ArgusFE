@@ -2,7 +2,7 @@
 import Window from 'src/components/Shared/Window'
 import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
 
-const SecurityGroupWindow = ({
+const UsersWindow = ({
   onClose,
   onSave,
   initialAllListData,
@@ -16,10 +16,10 @@ const SecurityGroupWindow = ({
           initialAllListData={initialAllListData}
           initialSelectedListData={initialSelectedListData}
           handleListsDataChange={handleListsDataChange} 
-          itemSelectorLabels={itemSelectorLabels}      
+          itemSelectorLabels={itemSelectorLabels}
         />
         </Window>
   )
 }
 
-export default SecurityGroupWindow
+export default UsersWindow
