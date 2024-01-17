@@ -1,5 +1,5 @@
 // ** React Imports
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 
 // ** Next Imports
@@ -10,12 +10,14 @@ import Image from 'next/image'
 import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 
 // ** Context
 import { MenuContext } from 'src/providers/MenuContext'
 import { createTheme } from '@mui/system'
 import themeOptions from 'src/@core/theme/ThemeOptions'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { useAuth } from 'src/hooks/useAuth'
 
 const VerticalNavItems = props => {
   const router = useRouter()
@@ -25,6 +27,9 @@ const VerticalNavItems = props => {
   const { verticalNavItems, settings, openFolders, setOpenFolders, navHover, navCollapsed } = props
 
   const [selectedNode, setSelectedNode] = useState(false)
+  const auth = useAuth()
+  const [isArabic, setIsArabic] = useState(false)
+
   let theme = createTheme(themeOptions(settings, 'light'))
 
   const closeDialog = () => {
@@ -44,6 +49,11 @@ const VerticalNavItems = props => {
       setOpenFolders([...openFolders, folderId])
     }
   }
+
+  useEffect (()=>{
+    if(auth?.user?.languageId === 2) setIsArabic(true)
+    else setIsArabic(false)
+  }, [])
 
   const renderNode = node => {
     const isOpen = openFolders.includes(node.id)
@@ -103,12 +113,19 @@ const VerticalNavItems = props => {
                   <span>{node.title}</span>
                 </div>
                 {isFolder && (
-                  <div className='arrow'>
-                    {isOpen ? (
+                  <div className='arrow' style={{ 
+                    right: isArabic? '260px' :'8px',
+                  }}>
+                   {isOpen ? (
                       <ExpandMoreIcon style={{ fontSize: 20 }} />
                     ) : (
-                      <ChevronRightIcon style={{ fontSize: 20 }} />
+                      isArabic ? (
+                        <ArrowBackIosIcon style={{ fontSize: 13, height:'100%', paddingBottom:'5px' }} />
+                      ) : (
+                        <ChevronRightIcon style={{ fontSize: 20 }} />
+                      )
                     )}
+
                   </div>
                 )}
                 </div>
