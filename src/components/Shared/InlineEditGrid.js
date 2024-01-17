@@ -364,8 +364,6 @@ const InlineEditGrid = ({
                 {...params}
                 onChange={e => setWrite(e.target.value.length > 0 ,  column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
                 onBlur={() => setWrite(false)}
-
-                // onClick={e =>  column.onLookup('')}
                 required={column?.mandatory}
                 InputProps={{
 
@@ -382,7 +380,7 @@ const InlineEditGrid = ({
                 {gridValidation.values.rows[rowIndex][`${column.nameId}`] && (
                   <InputAdornment position='end'>
                   <IconButton tabIndex={-1} edge='end' onClick={()=>{
-                     gridValidation.setFieldValue( `rows[${rowIndex}].${column.nameId}`, null )
+                    gridValidation.setFieldValue( `rows[${rowIndex}].${column.nameId}`, null )
                     gridValidation.setFieldValue( `rows[${rowIndex}].${column.name}`, null)
 
                   }
@@ -395,14 +393,7 @@ const InlineEditGrid = ({
                 }
                  <InputAdornment position='end'>
                   <IconButton tabIndex={-1} edge='end'   aria-label='clear input'>
-
-                  <SearchIcon
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    // Handle search action if needed
-                    console.log('Search clicked');
-                  }}
-                />
+                  <SearchIcon/>
                  </IconButton>
                  </InputAdornment>
 
