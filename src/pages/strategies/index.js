@@ -524,19 +524,22 @@ const Strategy = () => {
   ]
 
   const postIndicators = obj => {
-    obj.forEach(element => {
-      postRequest({
-        extension: DocumentReleaseRepository.StrategyIndicator.set,
-        record: JSON.stringify(element)
+    const data = {
+      strategyId: strategyValidation.values.recordId,
+      codeId: "0",
+      items: obj
+    }
+    postRequest({
+      extension: DocumentReleaseRepository.StrategyIndicator.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (res) 
+        toast.success('Record Successfully')
       })
-        .then(res => {
-          if (res) {}
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    });
-    toast.success('Record Successfully')
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   const resetCorrespondentIndicators = () => {

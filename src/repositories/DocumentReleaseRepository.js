@@ -84,6 +84,7 @@ export const DocumentReleaseRepository = {
     qry: service + 'qrySTS',
     get: service + 'getSTS',
     set: service + 'setSTS',
+    set2: service + 'set2STS',
     del: service + 'delSTS'
   },
   StrategyPrereq:
