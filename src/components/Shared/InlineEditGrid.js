@@ -267,22 +267,7 @@ const InlineEditGrid = ({
             readOnly={column?.readOnly}
             options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
-
             open={write}
-
-            // onFocus={() => setOpen(true)}
-
-            // getOptionLabel={option => {
-
-            //   if (typeof option === 'object') return option[column.displayField]
-            //   else {
-            //     const selectedOption = column.store?.find(item => {
-            //       return item[column.valueField] === option
-            //     })
-            //     if (selectedOption) return selectedOption[column?.displayField]
-            //     else return ''
-            //   }
-            // }}
             isOptionEqualToValue={(option, value) => {
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
             }}
@@ -309,7 +294,6 @@ const InlineEditGrid = ({
               }
             }}
 
-            // noOptionsText=""
             PaperComponent={props =>
               column.columnsInDropDown &&
               column.columnsInDropDown.length > 0 &&
@@ -328,36 +312,7 @@ const InlineEditGrid = ({
               </Box>
             )}
 
-          //   renderOption={(props, option) => {
-          //     console.log(option.columnsInDropDown + "column.store-2")
-          //     // if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
-          //       return (
-          //         <Box>
-          //           {props.id.endsWith('-0') && (
-          //             <li className={props.className}>
-          //               {column.columnsInDropDown.map((header, i) => {
-          //                 return (
-          //                   <Box key={i} sx={{ flex: 1 }}>
-          //                     {header.value.toUpperCase()}
-          //                   </Box>
-          //                 )
-          //               })}
-          //             </li>
-          //           )}
-          //           <li {...props}>
-          //             {column.columnsInDropDown.map((header, i) => {
-          //               return (
-          //                 <Box key={i} sx={{ flex: 1 }}>
-          //                   {option[header.key]}
-          //                 </Box>
-          //               )
-          //             })}
-          //           </li>
-          //         </Box>
-          //       )
-          //   }
 
-          // }
             fullWidth={true}
             renderInput={params => (
               <TextField
@@ -377,7 +332,7 @@ const InlineEditGrid = ({
                       display: 'flex',
                     }}>
 
-                {gridValidation.values.rows[rowIndex][`${column.nameId}`] && (
+                {!column?.readOnly && (
                   <InputAdornment position='end'>
                   <IconButton tabIndex={-1} edge='end' onClick={()=>{
                     gridValidation.setFieldValue( `rows[${rowIndex}].${column.nameId}`, null )
@@ -392,14 +347,13 @@ const InlineEditGrid = ({
                 )
                 }
                  <InputAdornment position='end'>
-                  <IconButton tabIndex={-1} edge='end'   aria-label='clear input'>
-                  <SearchIcon/>
+                  <IconButton tabIndex={-1} edge='end'
+                  style={{ pointerEvents: 'none' }}>
+                  <SearchIcon  />
                  </IconButton>
                  </InputAdornment>
 
-                       {/* Adjust color as needed */}
-                      {/* {params.InputProps.startAdornment} */}
-                    </div>
+                </div>
                   ),
                 }}
                 sx={{ ...params.sx, flex: 1 }}
