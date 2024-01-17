@@ -23,10 +23,10 @@ export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck,
         setErrorMessage(error)
       })
   }
-
+  const check = errorCheck ? errorCheck : name
   const firstValue = form.values[name]
-  const error = form?.touched && form.touched[name] && Boolean(form.errors[name])
-  const helperText= form?.touched && form.touched[name] && form.errors[name]
+  const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
+  const helperText= form?.touched && form.touched[check] && form.errors[check]
 
 return (
     <>

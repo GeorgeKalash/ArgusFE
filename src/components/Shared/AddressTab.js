@@ -213,15 +213,13 @@ const AddressTab = ({
             <ResourceLookup
              endpointId={SystemRepository.City.snapshot}
              parameters={{
-              _size: 30,
-              _startAt: 0,
               _countryId: addressValidation.values.countryId,
               _stateId: addressValidation.values.stateId ?? 0
              }}
 
              valueField='name'
              displayField='name'
-             name='cityId'
+             name='city'
              label={labels.city}
              required={requiredOptional ? false : true}
              readOnly={(readOnly || !addressValidation.values.countryId) && true}
@@ -238,6 +236,7 @@ const AddressTab = ({
               addressValidation.setFieldValue('cityDistrictId', null)
               addressValidation.setFieldValue('cityDistrict', null)
             }}
+            errorCheck={'cityId'}
 
             />
           </Grid>
@@ -247,14 +246,11 @@ const AddressTab = ({
            <ResourceLookup
              endpointId={SystemRepository.CityDistrict.snapshot}
              parameters={{
-              _size: 30,
-              _startAt: 0,
               _cityId: addressValidation.values.cityId
              }}
-
              valueField='name'
              displayField='name'
-             name='cityDistrictId'
+             name='cityDistrict'
              label={labels.cityDistrict}
              required={requiredOptional ? false : true}
 
@@ -272,6 +268,8 @@ const AddressTab = ({
                 addressValidation.setFieldValue('cityDistrict', null)
               }
             }}
+
+            errorCheck={'cityDistrictId'}
             />
           </Grid>
 
