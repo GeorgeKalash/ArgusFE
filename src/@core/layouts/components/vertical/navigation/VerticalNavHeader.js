@@ -41,7 +41,6 @@ const VerticalNavHeader = props => {
   // ** Props
   const {
     hidden,
-    navHover,
     settings,
     saveSettings,
     collapsedNavWidth,
@@ -55,10 +54,10 @@ const VerticalNavHeader = props => {
   // ** Hooks & Vars
   const theme = useTheme()
   const { navCollapsed } = settings
-  const menuCollapsedStyles = navCollapsed && !navHover ? { opacity: 0 } : { opacity: 1 }
+  const menuCollapsedStyles = navCollapsed ? { mb: 3 } : { mb: 0}
 
   const menuHeaderPaddingLeft = () => {
-    if (navCollapsed && !navHover) {
+    if (navCollapsed) {
       if (userNavMenuBranding) {
         return 0
       } else {
@@ -72,7 +71,11 @@ const VerticalNavHeader = props => {
   const MenuUnlockedIcon = () => userMenuUnlockedIcon || <Icon icon='mdi:radiobox-blank' />
 
   return (
-    <MenuHeaderWrapper className='nav-header' sx={{ pl: menuHeaderPaddingLeft() }}>
+    <MenuHeaderWrapper className='nav-header' sx={{
+      pl: menuHeaderPaddingLeft(),
+      display:'flex',
+      flexDirection : navCollapsed ? 'column' : 'row',
+    }}>
       <Box sx={{ minHeight: 48, display: 'flex', alignItems: 'center' }}>
         {userNavMenuBranding ? (
           userNavMenuBranding(props)
@@ -80,7 +83,7 @@ const VerticalNavHeader = props => {
           <LinkStyled href='/'>
             <img
               src={
-                !navCollapsed || (navCollapsed && navHover) ? '/images/logos/ArgusLogo.png' : '/images/logos/ArgusA.png'
+                !navCollapsed ? '/images/logos/ArgusLogo.png' : '/images/logos/ArgusA.png'
               }
               alt='Argus'
               style={{ maxHeight: '30px' }}
@@ -149,12 +152,11 @@ const VerticalNavHeader = props => {
                   </HeaderTitle> */}
           </LinkStyled>
         )}
-        {(!navCollapsed || navHover) && <UserDropdown settings={settings} />}
+        {(!navCollapsed) && <UserDropdown settings={settings} />}
       </Box>
       {hidden ? (
         <IconButton
           disableRipple
-          disableFocusRipple
           onClick={toggleNavVisibility}
           sx={{ p: 0, backgroundColor: 'transparent !important' }}
         >

@@ -28,7 +28,7 @@ const TypographyHeaderText = styled(Typography)(({ theme }) => ({
 
 const VerticalNavSectionTitle = props => {
   // ** Props
-  const { item, navHover, settings, collapsedNavWidth, navigationBorderWidth } = props
+  const { item, settings, collapsedNavWidth, navigationBorderWidth } = props
 
   // ** Vars
   const { navCollapsed } = settings
@@ -38,7 +38,7 @@ const VerticalNavSectionTitle = props => {
       <ListSubheader
         className='nav-section-title'
         sx={{
-          ...(navCollapsed && !navHover
+          ...(navCollapsed
             ? {
               py: 3.5,
               pr: (collapsedNavWidth - navigationBorderWidth - 24) / 8 - 1,
@@ -52,7 +52,7 @@ const VerticalNavSectionTitle = props => {
           sx={{
             m: '0 !important',
             lineHeight: 'normal',
-            ...(navCollapsed && !navHover
+            ...(navCollapsed
               ? {
                 width: 22,
                 borderColor: theme => `rgba(${theme.palette.customColors.main}, 0.3)`
@@ -65,7 +65,7 @@ const VerticalNavSectionTitle = props => {
               })
           }}
         >
-          {navCollapsed && !navHover ? null : (
+          {navCollapsed ? null : (
             <TypographyHeaderText noWrap sx={{ color: 'text.disabled' }}>
               <Translations text={item.sectionTitle} />
             </TypographyHeaderText>
