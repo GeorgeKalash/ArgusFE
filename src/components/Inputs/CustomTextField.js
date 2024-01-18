@@ -14,7 +14,7 @@ const CustomTextField = ({
   fullWidth = true,
   autoFocus = false,
   readOnly = false,
-  autoComplete = 'off',
+  autoComplete = 'true',
   numberField = false,
   editMode = false,
   maxLength = '',
@@ -23,12 +23,23 @@ const CustomTextField = ({
   hidden = false,
   phone = false,
   search= false,
+
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
   const inputRef = useRef(null)
+  const [forceRerender, setForceRerender] = useState(0);
+
+  // useEffect(() => {
+  //   setForceRerender((prev) => prev + 1);
+  // }, [value]); // Include value in dependencies
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, [value]);
+
 
   useEffect(() => {
     // Save the cursor position before the value changes
@@ -54,14 +65,20 @@ const CustomTextField = ({
 
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
+
       <TextField
+
+        key={value}
         inputRef={inputRef}
         type={type}
         variant={variant}
-        value={phone ? value?.replace(/\D/g, '') : value}
+        defaultValue={phone ? value?.replace(/\D/g, '') : value}
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
+
+        // InputLabelProps={{ shrink: value && true }}
+
         inputProps={{
           readOnly: _readOnly,
           maxLength: maxLength,
