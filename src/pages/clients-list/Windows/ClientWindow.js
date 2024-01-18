@@ -4,6 +4,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // **Tabs
 import ClientTab from '../Tabs/ClientTab'
+import AddressTab from 'src/components/Shared/AddressTab'
 
 const ClientWindow = ({
   onClose,
@@ -47,7 +48,9 @@ const ClientWindow = ({
   editMode,
   onInfo,
   onInfoClose,
-
+  setShowWorkAddress,
+  showWorkAddress,
+  setShowConfirmNumber,
   maxAccess
 }) => {
   return (
@@ -58,10 +61,11 @@ const ClientWindow = ({
       width={width}
       height={height}
       onSave={onSave}
-      onInfo={onInfo}
       disabledInfo={!editMode && true}
+      onInfo={onInfo}
       onInfoClose={onInfoClose}
       disabledSubmit={editMode && true}
+
     >
       <CustomTabPanel>
         <ClientTab
@@ -99,10 +103,14 @@ const ClientWindow = ({
           lookupCityAddressWork={lookupCityAddressWork}
           cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
           cityDistrictAddressStore={cityDistrictAddressStore}
+          setShowWorkAddress={setShowWorkAddress}
+          showWorkAddress={showWorkAddress}
+          setShowConfirmNumber={setShowConfirmNumber}
           _labels={_labels}
           maxAccess={maxAccess}
           editMode={editMode}
         />
+
       </CustomTabPanel>
     </Window>
   )

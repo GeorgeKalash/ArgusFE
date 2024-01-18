@@ -10,7 +10,7 @@ const ErrorWindow = ({ open, onClose, message }) => {
 console.log(message)
 
     const errorMessage =
-        !message?.response ?
+        !message?.response ? message?.error ?   message.error  :
             message?.message :
             message?.response?.data?.error ? message.response.data.error : message?.response?.data
 

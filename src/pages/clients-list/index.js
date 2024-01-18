@@ -29,6 +29,9 @@ import { getNewClients, populateIClients } from 'src/Models/RemittanceSettings/c
 import TransactionLog from 'src/components/Shared/TransactionLog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 
+import AddressWorkWindow from './Windows/AddressWorkWindow'
+import ConfirmNumberWindow from './Windows/ConfirmNumberWindow'
+
 const ClientsList = () => {
 
 
@@ -75,6 +78,8 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
 const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
   const [errorMessage, setErrorMessage] = useState(null)
  const [showOtpVerification , setShowOtpVerification] = useState(false)
+ const [showWorkAddress , setShowWorkAddress] = useState(false)
+const [showConfirmNumber, setShowConfirmNumber] = useState(false)
   useEffect(() => {
     if (!access) getAccess(ResourceIds.ClientList, setAccess)
     else {
@@ -301,28 +306,6 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
 
     }
   ]
-
-const getPlantId = ()=>{
-
-  const userData = window.sessionStorage.getItem('userData') ? JSON.parse( window.sessionStorage.getItem('userData')) : null
-console.log(userData)
-  var parameters = `_userId=${userData && userData.userId}&_key=plantId`
-  getRequest({
-    extension: SystemRepository.SystemPlant.get,
-    parameters: parameters
-  })
-    .then(res => {
-
-
-      clientIndividualFormValidation.setFieldValue('plantId', res.record.value)
-
-
-    })
-    .catch(error => {
-      setErrorMessage(error)
-    })
-
-}
 
 
   const search = inp => {
@@ -657,14 +640,54 @@ console.log(userData)
   })
 
 
+  const addClient = async (obj) => {
+    clientIndividualFormValidation.setValues(getNewClients());
+    WorkAddressValidation.setValues(getNewAddress());
 
-  const addClient= obj => {
-     setEditMode(false)
-    clientIndividualFormValidation.setValues(getNewClients())
-    WorkAddressValidation.setValues(getNewAddress())
-    getPlantId()
-    setWindowOpen(true)
-  }
+    try {
+      const plantId = await getPlantId();
+
+      if (plantId !== '') {
+        setEditMode(false);
+        setWindowOpen(true);
+      } else {
+        setErrorMessage({ error: 'The user does not have a default plant' });
+      }
+    } catch (error) {
+      // Handle errors if needed
+      console.error(error);
+    }
+  };
+
+  const getPlantId = async () => {
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null;
+    const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.SystemPlant.get,
+        parameters: parameters,
+      });
+
+      if (res.record.value) {
+        clientIndividualFormValidation.setFieldValue('plantId', res.record.value);
+
+        return res.record.value;
+      }
+
+      return '';
+    } catch (error) {
+      // Handle errors if needed
+      setErrorMessage(error);
+
+return '';
+    }
+  };
+
+
+
 
   const editClient= obj => {
     setEditMode(true)
@@ -1035,16 +1058,26 @@ onEdit={editClient}
   stateAddressWorkStore={stateAddressWorkStore}
   fillFilterProfession={fillFilterProfession}
   stateAddressStore={stateAddressStore}
+  setShowWorkAddress={setShowWorkAddress}
+  showWorkAddress={showWorkAddress}
+  setShowConfirmNumber={setShowConfirmNumber}
   _labels ={_labels2}
   maxAccess={access}
   editMode={editMode}
 
 
+
        />
-       )}
+
+       )
+
+       }
+
+       {showConfirmNumber &&  <ConfirmNumberWindow labels={_labels2} clientIndividualFormValidation={clientIndividualFormValidation} onClose={()=>setShowConfirmNumber(false)} width={400}/>}
+       { showWorkAddress && <AddressWorkWindow labels={_labels2} setShowWorkAddress={setShowWorkAddress} addressValidation={WorkAddressValidation} onSave={()=>setShowWorkAddress(false)}  onClose={()=>setShowWorkAddress(false)}/>}
        {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={"3600"}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
        {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
-/>}
+    />}
 
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
 

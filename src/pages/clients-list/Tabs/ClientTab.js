@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox, Button, DialogActions } from '@mui/material'
 
 import { useEffect, useState } from 'react'
 
@@ -16,24 +16,17 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 
 const ClientTab = ({
   clientIndividualFormValidation,
-  WorkAddressValidation,
   countryStore,
   cityStore,
-  requiredOptional,
   setCityStore,
   cityAddressStore,
-  cityDistrictAddressWorkStore,
   cityDistrictAddressStore,
   setCityAddressStore,
-  cityAddressWorkStore,
-  setCityAddressWorkStore,
 
   lookupCity,
   lookupCityAddress,
-  lookupCityAddressWork,
   lookupCityDistrictAddress,
-  lookupCityDistrictAddressWork,
-  types,
+
   professionFilterStore,
   fillFilterProfession,
 
@@ -44,12 +37,13 @@ const ClientTab = ({
   genderStore,
   mobileVerifiedStore,
   fillStateStoreAddress,
-  fillStateStoreAddressWork,
-  stateAddressWorkStore,
+
   stateAddressStore,
   educationStore,
   idTypeStore,
   titleStore,
+  setShowWorkAddress,
+  setShowConfirmNumber,
    _labels, maxAccess, editMode
  }) => {
 
@@ -60,26 +54,7 @@ const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)
 const [showAsPasswordPhone , setShowAsPasswordPhone]  = useState(false)
 const [showAsPasswordPhoneRepeat , setShowAsPasswordPhoneRepeat]  = useState(false)
 
-  const encryptDigits = (v) => {
-    const input = v?.replace(/\D/g, '')
 
-    if(input?.length > 0){
-
-    const showLength = Math.max(0, input?.length - 4);
-
-    // Check if input has at least four digits
-
-    const maskedValue =
-    '*'.repeat(showLength) + input?.substring(showLength);
-
-
-     return maskedValue;
-    }else{
-
-      return ;
-    }
-
-  };
 
 
   const handleCopy = (event) => {
@@ -130,7 +105,29 @@ return (
                 label={_labels.isResident}
               />
             </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name="birthDate"
+                label={_labels.birthDate}
+                value={clientIndividualFormValidation.values?.birthDate}
+                required={true}
+                onChange={clientIndividualFormValidation.setFieldValue}
+                onClear={() =>
+                  clientIndividualFormValidation.setFieldValue("birthDate", "")
+                }
+                disabledDate={'>='}
+                readOnly={editMode && true}
 
+                error={
+                  clientIndividualFormValidation.touched.birthDate &&
+                  Boolean(clientIndividualFormValidation.errors.birthDate)
+                }
+                helperText={
+                  clientIndividualFormValidation.touched.birthDate &&
+                  clientIndividualFormValidation.errors.birthDate
+                }
+              />
+            </Grid>
             <Grid container xs={12}></Grid>
             <Grid item xs={12}>
               <FieldSet title={_labels.id}>
@@ -218,7 +215,11 @@ return (
 
 
                 </Grid>
-                <Grid item xs={12}
+
+                <Grid item xs={12}>
+               <Button  onClick={()=>setShowConfirmNumber(true)} >{_labels.workAddress}</Button>
+              </Grid>
+                {/* <Grid item xs={12}
                 sx={{position: 'relative', width: '100%',}}>
                   <CustomTextField
                     name="idNoRepeat"
@@ -251,7 +252,7 @@ return (
                     }
                   />
 
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name="expiryDate"
@@ -1144,7 +1145,7 @@ return (
                 />
               </Grid>
 
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <CustomDatePicker
                 name="birthDate"
                 label={_labels.birthDate}
@@ -1166,7 +1167,7 @@ return (
                   clientIndividualFormValidation.errors.birthDate
                 }
               />
-            </Grid>
+            </Grid> */}
             <Grid item xs={12}>
                   <CustomComboBox
                     name="gender"
@@ -1394,14 +1395,14 @@ return (
                 />
               </Grid>
               </FieldSet>
-
-
-               <Grid container sx={{marginTop: '20px'}}>
-              <FieldSet title={_labels.workAddress}>
-              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} requiredOptional={requiredOptional} readOnly={editMode && true} />
-
+              <Grid item xs={12}>
+              <Button onClick={()=>setShowWorkAddress(true)} >{_labels.workAddress}</Button>
+              </Grid>
+              {/* <Grid container sx={{marginTop: '20px'}}>
+               <FieldSet title={_labels.workAddress}>
+                <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} requiredOptional={requiredOptional} readOnly={editMode && true} />
                </FieldSet>
-               </Grid>
+               </Grid> */}
 
                <Grid container xs={6} spacing={2} sx={{ padding: "5px" }}>
                 <Grid item xs={12}>
