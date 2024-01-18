@@ -40,15 +40,15 @@ const CustomDatePicker = ({
 
    // Function to check if a date should be disabled
     const shouldDisableDate = (dates) => {
-      console.log('dates' + dates )
       const date = new Date(dates);
-      console.log(date )
+
 
     const today = new Date();
     today.setDate(today.getDate());
     date.setDate(date.getDate());
+
   if(disabledDate === '>=' ){
-    return date   >= today  ;
+    return date  >= today  ;
   }
   if(disabledDate === '<' ){
     return date   < today  ; // Disable today and future dates
