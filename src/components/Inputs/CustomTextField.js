@@ -74,11 +74,7 @@ const CustomTextField = ({
         inputRef={inputRef}
         type={type}
         variant={variant}
-
         defaultValue={phone ? value?.replace(/\D/g, '') : value}
-
-        // value={value || ''}
-
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
