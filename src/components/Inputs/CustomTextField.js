@@ -30,22 +30,22 @@ const CustomTextField = ({
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
   const inputRef = useRef(null)
-  const [forceRerender, setForceRerender] = useState(0);
+  const [focus, setFocus] = useState(false);
 
   // useEffect(() => {
   //   setForceRerender((prev) => prev + 1);
   // }, [value]); // Include value in dependencies
 
   useEffect(() => {
-    if(inputRef.current.selectionStart !== undefined && position){
-    inputRef.current.focus();
+    if(inputRef.current.selectionStart !== undefined && focus  ){
+         inputRef.current.focus();
       }
   }, [value]);
 
 
   useEffect(() => {
     // Save the cursor position before the value changes
-    if (typeof inputRef.current.selectionStart !== undefined && position) {
+    if (typeof inputRef.current.selectionStart !== undefined && position && value) {
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
@@ -79,6 +79,7 @@ const CustomTextField = ({
         fullWidth={fullWidth}
         autoFocus={autoFocus}
         inputProps={{
+          autoComplete: "off",
           readOnly: _readOnly,
           maxLength: maxLength,
           dir: dir, // Set direction to right-to-left
@@ -94,7 +95,7 @@ const CustomTextField = ({
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
         onInput={handleInput}
-        onKeyDown={(e)=> e.key === 'Enter' && search && onSearch(e.target.value)}
+        onKeyDown={(e)=> e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)}
         InputProps={{
 
           endAdornment:
