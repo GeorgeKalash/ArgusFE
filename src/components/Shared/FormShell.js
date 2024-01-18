@@ -19,9 +19,7 @@ export default function FormShell({ form, children, height, editMode, maxAccess 
   return (
     <>
       <DialogContent sx={{ height: false ? `calc(100vh - 48px - 180px)` : height, p: 0 }}>{children}</DialogContent>
-      {windowToolbarVisible && (
-        <WindowToolbar onSave={() => formik.handleSubmit()} onInfo={() => setWindowInfo(true)} />
-      )}
+      {windowToolbarVisible && <WindowToolbar onSave={() => form.handleSubmit()} onInfo={() => setWindowInfo(true)} />}
       {windowInfo && (
         <TransactionLog
           resourceId={ResourceIds && ResourceIds.BPMasterData}
