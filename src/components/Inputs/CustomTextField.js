@@ -37,7 +37,9 @@ const CustomTextField = ({
   // }, [value]); // Include value in dependencies
 
   useEffect(() => {
+    if(inputRef.current.selectionStart !== undefined && position){
     inputRef.current.focus();
+      }
   }, [value]);
 
 
@@ -72,13 +74,14 @@ const CustomTextField = ({
         inputRef={inputRef}
         type={type}
         variant={variant}
+
         defaultValue={phone ? value?.replace(/\D/g, '') : value}
+
+        // value={value || ''}
+
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
-
-        // InputLabelProps={{ shrink: value && true }}
-
         inputProps={{
           readOnly: _readOnly,
           maxLength: maxLength,
