@@ -8,6 +8,7 @@ import CustomTextField from '../Inputs/CustomTextField'
 import DeleteDialog from './DeleteDialog'
 import Icon from 'src/@core/components/icon'
 import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import SearchIcon from '@mui/icons-material/Search';
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
@@ -24,6 +25,8 @@ const InlineEditGrid = ({
   allowAddNewLine = true,
   onDelete
 }) => {
+  const [write, setWrite] = useState(false);
+
   const tableWidth = width
 
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
@@ -72,6 +75,7 @@ const InlineEditGrid = ({
     if (!row.rowData) return
     const fieldName = row.field
     const cellId = `table-cell-${rowIndex}-${column.id}` // Unique identifier for the cell
+
 
     switch (field) {
       case 'incremented':
@@ -191,8 +195,6 @@ const InlineEditGrid = ({
               }
             }}
             isOptionEqualToValue={(option, value) => {
-              // console.log(column.valueField)
-              // console.log(option[column.valueField])
 
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
             }}
@@ -255,29 +257,38 @@ const InlineEditGrid = ({
           />
         )
       case 'lookup':
+
         return (
           <Autocomplete
             id={cellId}
             size='small'
             name={fieldName}
-            value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
+            value={gridValidation.values.rows[rowIndex][`${column.name}`]}
             readOnly={column?.readOnly}
             options={column.store}
-            getOptionLabel={option => {
-              if (typeof option === 'object') return option[column.displayField]
-              else {
-                const selectedOption = column.store?.find(item => {
-                  return item[column.valueField] === option
-                })
-                if (selectedOption) return selectedOption[column?.displayField]
-                else return ''
-              }
-            }}
+            getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
+
+            open={write}
+
+            // onFocus={() => setOpen(true)}
+
+            // getOptionLabel={option => {
+
+            //   if (typeof option === 'object') return option[column.displayField]
+            //   else {
+            //     const selectedOption = column.store?.find(item => {
+            //       return item[column.valueField] === option
+            //     })
+            //     if (selectedOption) return selectedOption[column?.displayField]
+            //     else return ''
+            //   }
+            // }}
             isOptionEqualToValue={(option, value) => {
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
             }}
             onChange={(event, newValue) => {
               event.stopPropagation()
+              setWrite(false)
               gridValidation.setFieldValue(
                 `rows[${rowIndex}].${column.nameId}`,
                 newValue ? newValue[column.valueField] : newValue
@@ -297,47 +308,115 @@ const InlineEditGrid = ({
                 }
               }
             }}
+
+            // noOptionsText=""
             PaperComponent={props =>
               column.columnsInDropDown &&
               column.columnsInDropDown.length > 0 &&
               CustomPaper(props, column.widthDropDown)
             }
-            renderOption={(props, option) => {
-              if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
-                return (
-                  <Box>
-                    {props.id.endsWith('-0') && (
-                      <li className={props.className}>
-                        {column.columnsInDropDown.map((header, i) => {
-                          return (
-                            <Box key={i} sx={{ flex: 1 }}>
-                              {header.value.toUpperCase()}
-                            </Box>
-                          )
-                        })}
-                      </li>
-                    )}
-                    <li {...props}>
-                      {column.columnsInDropDown.map((header, i) => {
-                        return (
-                          <Box key={i} sx={{ flex: 1 }}>
-                            {option[header.key]}
-                          </Box>
-                        )
-                      })}
-                    </li>
-                  </Box>
-                )
-            }}
+            renderOption={(props, option) => (
+              <Box>
+                {props.id.endsWith('-0') && (
+                  <li className={props.className} >
+                   <Box sx={{ flex: 1 , fontWeight: 'bold' }}>{column.displayField.toUpperCase()}</Box>
+                  </li>
+                )}
+                <li {...props}>
+                  <Box sx={{ flex: 1 }}>{option[column.displayField]}</Box>
+                </li>
+              </Box>
+            )}
+
+          //   renderOption={(props, option) => {
+          //     console.log(option.columnsInDropDown + "column.store-2")
+          //     // if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
+          //       return (
+          //         <Box>
+          //           {props.id.endsWith('-0') && (
+          //             <li className={props.className}>
+          //               {column.columnsInDropDown.map((header, i) => {
+          //                 return (
+          //                   <Box key={i} sx={{ flex: 1 }}>
+          //                     {header.value.toUpperCase()}
+          //                   </Box>
+          //                 )
+          //               })}
+          //             </li>
+          //           )}
+          //           <li {...props}>
+          //             {column.columnsInDropDown.map((header, i) => {
+          //               return (
+          //                 <Box key={i} sx={{ flex: 1 }}>
+          //                   {option[header.key]}
+          //                 </Box>
+          //               )
+          //             })}
+          //           </li>
+          //         </Box>
+          //       )
+          //   }
+
+          // }
             fullWidth={true}
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (e.target.value ? column.onLookup && column.onLookup(e.target.value) : column.onClear())}
+                onChange={e => setWrite(e.target.value.length > 0 ,  column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
+                onBlur={() => setWrite(false)}
+
+                // onClick={e =>  column.onLookup('')}
                 required={column?.mandatory}
-                sx={{ flex: 1 }}
+                InputProps={{
+
+                  ...params.InputProps,
+                  endAdornment: (
+                    <div  style={{
+                      position: 'absolute',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      right: 15,
+                      display: 'flex',
+                    }}>
+
+                {gridValidation.values.rows[rowIndex][`${column.nameId}`] && (
+                  <InputAdornment position='end'>
+                  <IconButton tabIndex={-1} edge='end' onClick={()=>{
+                     gridValidation.setFieldValue( `rows[${rowIndex}].${column.nameId}`, null )
+                    gridValidation.setFieldValue( `rows[${rowIndex}].${column.name}`, null)
+
+                  }
+
+                  }  aria-label='clear input'>
+                    <ClearIcon />
+                  </IconButton>
+                 </InputAdornment>
+                )
+                }
+                 <InputAdornment position='end'>
+                  <IconButton tabIndex={-1} edge='end'   aria-label='clear input'>
+
+                  <SearchIcon
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    // Handle search action if needed
+                    console.log('Search clicked');
+                  }}
+                />
+                 </IconButton>
+                 </InputAdornment>
+
+                       {/* Adjust color as needed */}
+                      {/* {params.InputProps.startAdornment} */}
+                    </div>
+                  ),
+                }}
+                sx={{ ...params.sx, flex: 1 }}
+
               />
             )}
+
+            //  openOnFocus
           />
         )
       case 'checkbox':

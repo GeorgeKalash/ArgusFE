@@ -17,7 +17,7 @@ const CustomTextField = ({
   autoComplete = 'off',
   numberField = false,
   editMode = false,
-  maxLength = '',
+  maxLength = '1000',
   position,
   dir='ltr',
   hidden = false,
