@@ -5,7 +5,7 @@ import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function FormShell({ formik, children, height, editMode, maxAccess }) {
+export default function FormShell({ form, children, height, editMode, maxAccess }) {
   const [windowInfo, setWindowInfo] = useState(null)
 
   const windowToolbarVisible = editMode
@@ -26,7 +26,7 @@ export default function FormShell({ formik, children, height, editMode, maxAcces
         <TransactionLog
           resourceId={ResourceIds && ResourceIds.BPMasterData}
           onInfoClose={() => setWindowInfo(false)}
-          recordId={formik.values.recordId}
+          recordId={form.values.recordId}
         />
       )}
     </>

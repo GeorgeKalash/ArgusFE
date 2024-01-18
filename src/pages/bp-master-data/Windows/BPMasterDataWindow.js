@@ -56,7 +56,7 @@ const BPMasterDataWindow = ({
         </CustomTabPanel>
 
         <CustomTabPanel index={1} value={activeTab}>
-          <FormShell formik={idNumberValidation}>
+          <FormShell form={idNumberValidation}>
             <IDNumberTab
               recordId={recordId}
               idNumberValidation={idNumberValidation}

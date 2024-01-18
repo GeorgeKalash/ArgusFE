@@ -125,7 +125,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
   }, [formik?.values?.category])
 
   return (
-    <FormShell formik={formik} height={400} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell form={formik} height={400} maxAccess={maxAccess} editMode={editMode}>
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
