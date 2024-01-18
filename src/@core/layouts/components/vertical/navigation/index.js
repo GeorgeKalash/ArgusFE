@@ -245,7 +245,7 @@ const Navigation = props => {
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 4, pb:2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 4, pb:'10px' }}>
           <TextField
             label="Search"
             variant="outlined"

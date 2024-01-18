@@ -9,6 +9,8 @@ import Typography from '@mui/material/Typography'
 
 // ** Custom Icon Import
 import Icon from 'src/@core/components/icon'
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 // ** Configs
 import UserDropdown from '../../shared-components/UserDropdown'
@@ -67,8 +69,8 @@ const VerticalNavHeader = props => {
       return 6
     }
   }
-  const MenuLockedIcon = () => userMenuLockedIcon || <Icon icon='mdi:radiobox-marked' />
-  const MenuUnlockedIcon = () => userMenuUnlockedIcon || <Icon icon='mdi:radiobox-blank' />
+  const MenuLockedIcon = () => userMenuLockedIcon || <ArrowBackIosIcon />
+  const MenuUnlockedIcon = () => userMenuUnlockedIcon || <ArrowForwardIosIcon />
 
   return (
     <MenuHeaderWrapper className='nav-header' sx={{
@@ -172,7 +174,7 @@ const VerticalNavHeader = props => {
             color: 'text.primary',
             backgroundColor: 'transparent !important',
             '& svg': {
-              fontSize: '1.25rem',
+              fontSize: '1.15rem',
               ...menuCollapsedStyles,
               transition: 'opacity .25s ease-in-out'
             }
