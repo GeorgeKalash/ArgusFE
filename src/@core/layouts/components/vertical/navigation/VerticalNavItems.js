@@ -17,18 +17,15 @@ import { MenuContext } from 'src/providers/MenuContext'
 import { createTheme } from '@mui/system'
 import themeOptions from 'src/@core/theme/ThemeOptions'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
-import { useAuth } from 'src/hooks/useAuth'
 
 const VerticalNavItems = props => {
   const router = useRouter()
   const { handleBookmark, setLastOpenedPage } = useContext(MenuContext)
 
   // ** Props
-  const { verticalNavItems, settings, openFolders, setOpenFolders, navCollapsed } = props
+  const { verticalNavItems, settings, openFolders, setOpenFolders, navCollapsed,isArabic } = props
 
   const [selectedNode, setSelectedNode] = useState(false)
-  const auth = useAuth()
-  const [isArabic, setIsArabic] = useState(false)
 
   let theme = createTheme(themeOptions(settings, 'light'))
 
@@ -50,10 +47,6 @@ const VerticalNavItems = props => {
     }
   }
 
-  useEffect (()=>{
-    if(auth?.user?.languageId === 2) setIsArabic(true)
-    else setIsArabic(false)
-  }, [])
 
   const renderNode = node => {
     const isOpen = openFolders.includes(node.id)

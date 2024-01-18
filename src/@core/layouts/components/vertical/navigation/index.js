@@ -35,6 +35,7 @@ import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import { useRouter } from 'next/router';
 import { MenuContext } from 'src/providers/MenuContext';
 
+import { useAuth } from 'src/hooks/useAuth'
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   top: 60,
@@ -71,6 +72,8 @@ const Navigation = props => {
   const [openFolders, setOpenFolders] = useState([]);
   const menu = props.verticalNavItems //menu
   const gear = useContext(MenuContext)
+  const [isArabic, setIsArabic] = useState(false)
+  const auth = useAuth()
 
   // ** Ref
   const shadowRef = useRef(null)
@@ -106,6 +109,11 @@ const Navigation = props => {
       }
     }
   }
+
+  useEffect (()=>{
+    if(auth?.user?.languageId === 2) setIsArabic(true)
+    else setIsArabic(false)
+  }, [])
 
   // ** Scroll Menu
   const scrollMenu = container => {
@@ -238,7 +246,10 @@ const Navigation = props => {
   return (
     <ThemeProvider theme={darkTheme}>
       <Drawer {...props}>
-        <VerticalNavHeader {...props} />
+        <VerticalNavHeader   
+          isArabic={isArabic}
+          {...props} 
+        />
         {beforeNavMenuContent && beforeVerticalNavMenuContentPosition === 'fixed'
           ? beforeNavMenuContent(navMenuContentProps)
           : null}
@@ -332,6 +343,7 @@ const Navigation = props => {
                   setOpenFolders={setOpenFolders}
                   {...props}
                   verticalNavItems={filteredMenu}
+                  isArabic={isArabic}
                 />
               </List>
             )}

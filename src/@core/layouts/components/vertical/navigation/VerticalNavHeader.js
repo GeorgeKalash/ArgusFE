@@ -182,8 +182,8 @@ const VerticalNavHeader = props => {
           }}
         >
           {navCollapsed ? 
-          (isArabic ? MenuUnlockedIcon():MenuLockedIcon()) :
-          (isArabic ? MenuLockedIcon():MenuUnlockedIcon())}
+          (isArabic ? MenuLockedIcon():MenuUnlockedIcon()) :
+          (isArabic ? MenuUnlockedIcon():MenuLockedIcon())}
         </IconButton>
       )}
     </MenuHeaderWrapper>
