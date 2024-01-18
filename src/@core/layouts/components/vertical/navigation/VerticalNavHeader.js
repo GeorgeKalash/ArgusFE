@@ -50,7 +50,8 @@ const VerticalNavHeader = props => {
     navigationBorderWidth,
     menuLockedIcon: userMenuLockedIcon,
     navMenuBranding: userNavMenuBranding,
-    menuUnlockedIcon: userMenuUnlockedIcon
+    menuUnlockedIcon: userMenuUnlockedIcon,
+    isArabic,
   } = props
 
   // ** Hooks & Vars
@@ -180,7 +181,9 @@ const VerticalNavHeader = props => {
             }
           }}
         >
-          {navCollapsed ? MenuUnlockedIcon() : MenuLockedIcon()}
+          {navCollapsed ? 
+          (isArabic ? MenuUnlockedIcon():MenuLockedIcon()) :
+          (isArabic ? MenuLockedIcon():MenuUnlockedIcon())}
         </IconButton>
       )}
     </MenuHeaderWrapper>
