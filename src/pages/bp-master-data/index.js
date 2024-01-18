@@ -29,129 +29,18 @@ import AddressWindow from 'src/components/Shared/AddressWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 const BPMasterData = () => {
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [addressLabels, setAddressLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  //What should be placed for most pages
+  const [tableData, setTableData] = useState([])
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [relationGridData, setRelationGridData] = useState([])
-
-  const [addressGridData, setAddressGridData] = useState([]) //for address tab
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [defaultValue, setdefaultValue] = useState(null)
-
-  const [relationWindowOpen, setRelationWindowOpen] = useState(false)
-
-  const [addressWindowOpen, setAddressWindowOpen] = useState(false)
-  const [addressEditMode, setAddressEditMode] = useState(false)
-
-  const _labels = {
-    general: labels && labels.find(item => item.key === '1').value,
-    group: labels && labels.find(item => item.key === '2').value,
-    reference: labels && labels.find(item => item.key === '3').value,
-    name: labels && labels.find(item => item.key === '4').value,
-    foreignLanguage: labels && labels.find(item => item.key === '5').value,
-    keywords: labels && labels.find(item => item.key === '6').value,
-    idCategory: labels && labels.find(item => item.key === '7').value,
-    defaultId: labels && labels.find(item => item.key === '8').value,
-    inactive: labels && labels.find(item => item.key === '9').value,
-    masterData: labels && labels.find(item => item.key === '10').value,
-    category: labels && labels.find(item => item.key === '11').value,
-    birthPlace: labels && labels.find(item => item.key === '12').value,
-    isBlackListed: labels && labels.find(item => item.key === '13').value,
-    nationalityRef: labels && labels.find(item => item.key === '14').value,
-    nationalityName: labels && labels.find(item => item.key === '15').value,
-    birthDate: labels && labels.find(item => item.key === '16').value,
-    nationalityId: labels && labels.find(item => item.key === '17').value,
-    legalStatus: labels && labels.find(item => item.key === '18').value,
-    idCategory: labels && labels.find(item => item.key === '19').value,
-    idNumber: labels && labels.find(item => item.key === '20').value,
-    relation: labels && labels.find(item => item.key === '21').value,
-    businessPartner: labels && labels.find(item => item.key === '22').value,
-    from: labels && labels.find(item => item.key === '23').value,
-    to: labels && labels.find(item => item.key === '24').value,
-
-    name:
-      addressLabels &&
-      addressLabels.find(item => item.key === '1') &&
-      addressLabels.find(item => item.key === '1').value,
-    street1:
-      addressLabels &&
-      addressLabels.find(item => item.key === '2') &&
-      addressLabels.find(item => item.key === '2').value,
-    street2:
-      addressLabels &&
-      addressLabels.find(item => item.key === '3') &&
-      addressLabels.find(item => item.key === '3').value,
-    email:
-      addressLabels &&
-      addressLabels.find(item => item.key === '4') &&
-      addressLabels.find(item => item.key === '4').value,
-    email2:
-      addressLabels &&
-      addressLabels.find(item => item.key === '5') &&
-      addressLabels.find(item => item.key === '5').value,
-
-    country:
-      addressLabels &&
-      addressLabels.find(item => item.key === '6') &&
-      addressLabels.find(item => item.key === '6').value,
-    state:
-      addressLabels &&
-      addressLabels.find(item => item.key === '7') &&
-      addressLabels.find(item => item.key === '7').value,
-    city:
-      addressLabels &&
-      addressLabels.find(item => item.key === '8') &&
-      addressLabels.find(item => item.key === '8').value,
-
-    postalCode:
-      addressLabels &&
-      addressLabels.find(item => item.key === '9') &&
-      addressLabels.find(item => item.key === '9').value,
-    phone:
-      addressLabels &&
-      addressLabels.find(item => item.key === '10') &&
-      addressLabels.find(item => item.key === '10').value,
-    phone2:
-      addressLabels &&
-      addressLabels.find(item => item.key === '11') &&
-      addressLabels.find(item => item.key === '11').value,
-    phone3:
-      addressLabels &&
-      addressLabels.find(item => item.key === '12') &&
-      addressLabels.find(item => item.key === '12').value,
-    address:
-      addressLabels &&
-      addressLabels.find(item => item.key === '13') &&
-      addressLabels.find(item => item.key === '13').value,
-
-    cityDistrict:
-      addressLabels &&
-      addressLabels.find(item => item.key === '14') &&
-      addressLabels.find(item => item.key === '14').value,
-    bldgNo:
-      addressLabels &&
-      addressLabels.find(item => item.key === '15') &&
-      addressLabels.find(item => item.key === '15').value,
-    unitNo:
-      addressLabels &&
-      addressLabels.find(item => item.key === '16') &&
-      addressLabels.find(item => item.key === '16').value,
-    subNo:
-      addressLabels &&
-      addressLabels.find(item => item.key === '17') &&
-      addressLabels.find(item => item.key === '17').value
-  }
+  const { labels: _labels, access } = useResourceParams({
+    datasetId: ResourceIds.BPMasterData
+  })
 
   const columns = [
     {
@@ -192,23 +81,16 @@ const BPMasterData = () => {
     }
   ]
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: BusinessPartnerRepository.MasterData.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const add = () => {
+    setWindowOpen(true)
   }
 
-  const delBPMasterData = obj => {
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
+  }
+
+  const del = obj => {
     postRequest({
       extension: BusinessPartnerRepository.MasterData.del,
       record: JSON.stringify(obj)
@@ -222,15 +104,42 @@ const BPMasterData = () => {
       })
   }
 
-  const addBPMasterData = () => {
-    setWindowOpen(true)
-  }
+  useEffect(() => {
+    if (access?.record?.maxAccess > 0) {
+      getGridData({ _startAt: 0, _pageSize: 50 })
+    }
+  }, [access])
 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
+  // End
 
-  const editBPMasterData = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+  //stores
+  const [relationGridData, setRelationGridData] = useState([])
+
+  const [addressGridData, setAddressGridData] = useState([]) //for address tab
+  //states
+  const [windowOpen, setWindowOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [defaultValue, setdefaultValue] = useState(null)
+
+  const [relationWindowOpen, setRelationWindowOpen] = useState(false)
+
+  const [addressWindowOpen, setAddressWindowOpen] = useState(false)
+  const [addressEditMode, setAddressEditMode] = useState(false)
+
+  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
+    var parameters = defaultParams
+
+    getRequest({
+      extension: BusinessPartnerRepository.MasterData.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setTableData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   const filterIdCategory = async categId => {
@@ -475,17 +384,9 @@ const BPMasterData = () => {
   }
 
   useEffect(() => {
-    if (!access) getAccess(ResourceIds.BPMasterData, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 50 })
-        getLabels(ResourceIds.BPMasterData, setLabels)
-        getLabels(ResourceIds.Address, setAddressLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
+    if (access?.record?.maxAccess > 0) {
+      getGridData({ _startAt: 0, _pageSize: 50 })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
   // Address Tab
@@ -638,14 +539,14 @@ const BPMasterData = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addBPMasterData} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={tableData}
           rowId={['recordId']}
           api={getGridData}
-          onEdit={editBPMasterData}
-          onDelete={delBPMasterData}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationType='client'
