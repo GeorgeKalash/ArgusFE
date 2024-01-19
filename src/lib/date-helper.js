@@ -26,7 +26,16 @@ const   formatDateToApiFunction = (value)=>{
     day: 'numeric',
   })
 
-  return date
+  const parsedDate = new Date(date);
+
+  // Format the date as "yyyy-MM-dd"
+  const year = parsedDate.getFullYear();
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const day = String(parsedDate.getDate()).padStart(2, '0');
+
+  const formattedDateYYYYMMDD = `${year}-${month}-${day}`;
+
+  return formattedDateYYYYMMDD;
  }
 
 

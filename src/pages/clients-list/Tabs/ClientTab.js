@@ -42,12 +42,13 @@ const ClientTab = ({
   educationStore,
   idTypeStore,
   titleStore,
-  setShowWorkAddress,
-  setShowConfirmNumber,
+  setWindowWorkAddressOpen,
+  setWindowConfirmNumberOpen,
    _labels, maxAccess, editMode
  }) => {
 
 console.log(clientIndividualFormValidation)
+
 
 const [showAsPassword , setShowAsPassword]  = useState(false)
 const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)
@@ -217,42 +218,9 @@ return (
                 </Grid>
 
                 <Grid item xs={12}>
-               <Button  variant='contained' onClick={()=>setShowConfirmNumber(true)} disabled={clientIndividualFormValidation && !clientIndividualFormValidation.values.birthDate&& !clientIndividualFormValidation.values.idNo  && true}>{_labels.confirmNb}</Button>
+               <Button  variant='contained' onClick={()=>setWindowConfirmNumberOpen(true)} disabled={ (!clientIndividualFormValidation?.values?.idtId || !clientIndividualFormValidation?.values?.birthDate || !clientIndividualFormValidation.values.idNo ) ? true : false}>{_labels.fetch}</Button>
               </Grid>
-                {/* <Grid item xs={12}
-                sx={{position: 'relative', width: '100%',}}>
-                  <CustomTextField
-                    name="idNoRepeat"
-                    label={_labels.confirmNb}
-                    value={clientIndividualFormValidation.values?.idNoRepeat}
-                    required
-                    type={ showAsPasswordRepeat && "password"}
 
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
-
-                    onCopy={handleCopy}
-                    onPaste={handleCopy}
-                    readOnly={editMode && true}
-
-                    onBlur={(e) =>{ setShowAsPasswordRepeat(true) , clientIndividualFormValidation.handleBlur(e)}}
-
-                    onFocus={(e) =>{ setShowAsPasswordRepeat(false) }}
-
-                    maxLength="15"
-                    onClear={() =>{
-                      clientIndividualFormValidation.setFieldValue("idNoRepeat", "")
-                    } }
-                    error={
-                      clientIndividualFormValidation.touched.idNoRepeat &&
-                      Boolean(clientIndividualFormValidation.errors.idNoRepeat)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.idNoRepeat &&
-                      clientIndividualFormValidation.errors.idNoRepeat
-                    }
-                  />
-
-                </Grid> */}
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name="expiryDate"
@@ -313,12 +281,12 @@ return (
                     valueField="recordId"
                     displayField={['reference','name','flName']}
                     readOnly={editMode && true}
-                store={countryStore}
-                columnsInDropDown= {[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'flName', value: 'Foreign Language Name' }
-                ]}
+                    store={countryStore}
+                    columnsInDropDown= {[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'flName', value: 'Foreign Language Name' }
+                    ]}
                     value={
                       countryStore.filter(
                         (item) =>
@@ -1396,7 +1364,7 @@ return (
               </Grid>
               </FieldSet>
               <Grid item xs={12}>
-              <Button onClick={()=>setShowWorkAddress(true)} >{_labels.workAddress}</Button>
+              <Button variant='contained' onClick={()=>setWindowWorkAddressOpen(true)}  >{_labels.workAddress}</Button>
               </Grid>
               {/* <Grid container sx={{marginTop: '20px'}}>
                <FieldSet title={_labels.workAddress}>

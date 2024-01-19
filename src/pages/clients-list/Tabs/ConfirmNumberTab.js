@@ -5,11 +5,15 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useState } from 'react'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const ConfirmNumberTab=({
     labels,
     clientIndividualFormValidation,
     editMode,
+    idTypeStore,
     maxAccess
 }) =>{
   const [showAsPassword , setShowAsPassword]  = useState(false)
@@ -21,7 +25,52 @@ const ConfirmNumberTab=({
 
 return (
         <Grid container spacing={4}>
-       <Grid item xs={12}>
+           <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
+                    name="idtId"
+                    label={labels.type}
+                    valueField="recordId"
+                    displayField="name"
+                    readOnly={editMode && true}
+                    store={idTypeStore}
+                    values={clientIndividualFormValidation.values}
+                    required
+                    onChange={(event, newValue) => {
+
+                        if(newValue){
+                        fillFilterProfession(newValue.isDiplomat)
+                        }else{
+                        fillFilterProfession('')
+                        }
+
+                      if(newValue){
+
+                      clientIndividualFormValidation.setFieldValue(
+                        "idtId",
+                        newValue?.recordId,
+                      );
+                      }else{
+
+                        clientIndividualFormValidation.setFieldValue(
+                          "idtId",
+                          '',
+                        );
+
+
+                      }
+                    }}
+                    error={
+                      clientIndividualFormValidation.touched.idtId &&
+                      Boolean(clientIndividualFormValidation.errors.idtId)
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.idtId &&
+                      clientIndividualFormValidation.errors.idtId
+                    }
+                  />
+                </Grid>
+             <Grid item xs={12}>
               <CustomDatePicker
                 name="birthDate"
                 label={labels.birthDate}
@@ -32,7 +81,7 @@ return (
                   clientIndividualFormValidation.setFieldValue("birthDate", "")
                 }
                 disabledDate={'>='}
-                readOnly={ true}
+                readOnly={editMode && true}
 
                 error={
                   clientIndividualFormValidation.touched.birthDate &&
@@ -44,6 +93,7 @@ return (
                 }
               />
             </Grid>
+
             <Grid item xs={12} sx={{position: 'relative', width: '100%'}}>
                   <CustomTextField
                   sx={{color: 'white'}}
@@ -55,7 +105,7 @@ return (
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
-                    readOnly={true}
+                    readOnly={editMode && true}
                     maxLength="15"
                     onBlur={(e) =>{ setShowAsPassword(true) }}
                     onFocus={(e) =>{ setShowAsPassword(false) }}
@@ -64,7 +114,6 @@ return (
                       clientIndividualFormValidation.setFieldValue("idNo", "")
 
                     }
-
                     }
                     error={
                       clientIndividualFormValidation.touched.idNo &&

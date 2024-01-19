@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -77,9 +76,9 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
   const [titleStore, setTitleStore] = useState([]);
 const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
   const [errorMessage, setErrorMessage] = useState(null)
- const [showOtpVerification , setShowOtpVerification] = useState(false)
- const [showWorkAddress , setShowWorkAddress] = useState(false)
-const [showConfirmNumber, setShowConfirmNumber] = useState(false)
+ const [showOtpVerification , setWindowOtpVerification] = useState(false)
+ const [windowWorkAddressOpen , setWindowWorkAddressOpen] = useState(false)
+const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
   useEffect(() => {
     if (!access) getAccess(ResourceIds.ClientList, setAccess)
     else {
@@ -207,6 +206,7 @@ const [showConfirmNumber, setShowConfirmNumber] = useState(false)
      issusCountry: labels2 && labels2.find((item) => item.key === '69').value,
      issusPlace: labels2 && labels2.find((item) => item.key === '70').value,
      pageTitle: labels2 && labels2.find((item) => item.key === '71').value,
+     fetch: labels2 && labels2.find((item) => item.key === '72').value,
 
 
   };
@@ -390,9 +390,7 @@ const [showConfirmNumber, setShowConfirmNumber] = useState(false)
       phone: yup.string().required('This field is required')
     }),
     onSubmit: (values) => {
-      console.log("values" + values);
-       console.log(WorkAddressValidation)
-       Object.keys(WorkAddressValidation.errors).length < 1 && postRtDefault(values);
+           Object.keys(WorkAddressValidation.errors).length < 1 && postRtDefault(values);
     },
   });
 
@@ -639,6 +637,30 @@ const [showConfirmNumber, setShowConfirmNumber] = useState(false)
     }
   })
 
+  const fetchValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: false,
+
+
+    initialValues: {
+      idtId: '',
+      birthDate: '',
+      idNo: '',
+      idNoRepeat: '',
+    },
+
+    validationSchema:  yup.object({
+      birthDate: yup.string().required("This field is required"),
+      idtId: yup.string().required("This field is required"),
+      idNo:  yup.string().required("This field is required"),
+      idNoRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('idNo'), null], 'Number must match'),
+    }),
+    onSubmit: values => {
+      // console.log(values);
+
+    }
+  })
 
   const addClient = async (obj) => {
     clientIndividualFormValidation.setValues(getNewClients());
@@ -1058,9 +1080,10 @@ onEdit={editClient}
   stateAddressWorkStore={stateAddressWorkStore}
   fillFilterProfession={fillFilterProfession}
   stateAddressStore={stateAddressStore}
-  setShowWorkAddress={setShowWorkAddress}
-  showWorkAddress={showWorkAddress}
-  setShowConfirmNumber={setShowConfirmNumber}
+  setWindowWorkAddressOpen={setWindowWorkAddressOpen}
+
+  // showWorkAddress={showWorkAddress}
+  setWindowConfirmNumberOpen={setWindowConfirmNumberOpen}
   _labels ={_labels2}
   maxAccess={access}
   editMode={editMode}
@@ -1073,8 +1096,9 @@ onEdit={editClient}
 
        }
 
-       {showConfirmNumber &&  <ConfirmNumberWindow labels={_labels2} clientIndividualFormValidation={clientIndividualFormValidation} onClose={()=>setShowConfirmNumber(false)} width={400}/>}
-       { showWorkAddress && <AddressWorkWindow labels={_labels2} setShowWorkAddress={setShowWorkAddress} addressValidation={WorkAddressValidation} onSave={()=>setShowWorkAddress(false)}  onClose={()=>setShowWorkAddress(false)}/>}
+       {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels2} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}        onSave={handleSubmit}
+        onClose={()=>setWindowConfirmNumberOpen(false)} width={400} height={300} />}
+       {windowWorkAddressOpen && <AddressWorkWindow labels={_labels2} setShowWorkAddress={setWindowWorkAddressOpen} addressValidation={WorkAddressValidation} onSave={()=>setWindowWorkAddressOpen(false)}  onClose={()=>setWindowWorkAddressOpen(false)}/>}
        {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={"3600"}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
        {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
     />}

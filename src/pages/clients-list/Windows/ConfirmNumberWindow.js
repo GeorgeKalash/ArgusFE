@@ -14,6 +14,7 @@ const ConfirmNumberWindow = ({
   labels,
   editMode,
   clientIndividualFormValidation,
+  idTypeStore,
   maxAccess
 }) => {
 
@@ -31,7 +32,7 @@ return (
       disabledSubmit={editMode && true}
        >
       <CustomTabPanel>
-        <ConfirmNumberTab clientIndividualFormValidation={clientIndividualFormValidation} labels={labels} />
+        <ConfirmNumberTab idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation} labels={labels} />
       </CustomTabPanel>
     </Window>
   )

@@ -14,7 +14,6 @@ const AddressWorkWindow = ({
   height,
   labels,
   editMode,
-  setShowWorkAddress,
   maxAccess
 }) => {
   return (

@@ -48,9 +48,9 @@ const ClientWindow = ({
   editMode,
   onInfo,
   onInfoClose,
-  setShowWorkAddress,
+  setWindowWorkAddressOpen,
   showWorkAddress,
-  setShowConfirmNumber,
+  setWindowConfirmNumberOpen,
   maxAccess
 }) => {
   return (
@@ -103,9 +103,9 @@ const ClientWindow = ({
           lookupCityAddressWork={lookupCityAddressWork}
           cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
           cityDistrictAddressStore={cityDistrictAddressStore}
-          setShowWorkAddress={setShowWorkAddress}
+          setWindowWorkAddressOpen={setWindowWorkAddressOpen}
           showWorkAddress={showWorkAddress}
-          setShowConfirmNumber={setShowConfirmNumber}
+          setWindowConfirmNumberOpen={setWindowConfirmNumberOpen}
           _labels={_labels}
           maxAccess={maxAccess}
           editMode={editMode}
