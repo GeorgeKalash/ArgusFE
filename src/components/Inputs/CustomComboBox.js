@@ -53,6 +53,7 @@ const CustomComboBox = ({
             value={value}
             size={size}
             options={store}
+
             PaperComponent={({ children }) => (
 
     <Paper style={{ width: `${displayFieldWidth*100}%` }}>{children}</Paper>
