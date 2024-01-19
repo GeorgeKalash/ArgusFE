@@ -13,6 +13,8 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import { useInvalidate } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId }) {
   const [idCategoryStore, setIDCategoryStore] = useState([])
@@ -67,6 +69,10 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
     }
   }
 
+  const invalidate = useInvalidate({
+    endpointId: BusinessPartnerRepository.MasterData.qry
+  })
+
   const formik = useFormik({
     initialValues,
     enableReinitialize: true,
@@ -77,24 +83,18 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required')
     }),
-    onSubmit: obj => {
+    onSubmit: async obj => {
       const recordId = obj.recordId
-      postRequest({
+
+      await postRequest({
         extension: BusinessPartnerRepository.MasterData.set,
         record: JSON.stringify(obj)
       })
-        .then(res => {
-          // fillIdNumberStore(obj)
-          // getRelationGridData(obj.recordId)
-          if (!recordId) {
-            formik.setFieldValue('recordId', res.recordId)
-            toast.success('Record Added Successfully')
-          } else toast.success('Record Editted Successfully')
-        })
-        .catch(error => {
-          console.error(error)
-          setErrorMessage(error)
-        })
+
+      if (!recordId) toast.success('Record Added Successfully')
+      else toast.success('Record Edited Successfully')
+
+      invalidate()
     }
   })
 
@@ -125,7 +125,13 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
   }, [formik?.values?.category])
 
   return (
-    <FormShell form={formik} height={400} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.BPMasterData}
+      form={formik}
+      height={400}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>

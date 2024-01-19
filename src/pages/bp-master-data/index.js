@@ -20,7 +20,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewRelation, populateRelation } from 'src/Models/BusinessPartner/Relation'
 import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
@@ -29,17 +28,35 @@ import AddressWindow from 'src/components/Shared/AddressWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import useResourceParams from 'src/hooks/useResourceParams'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   //What should be placed for most pages
-  const [tableData, setTableData] = useState([])
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
-  const { labels: _labels, access } = useResourceParams({
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: BusinessPartnerRepository.MasterData.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
+    })
+  }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: BusinessPartnerRepository.MasterData.qry,
     datasetId: ResourceIds.BPMasterData
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: BusinessPartnerRepository.MasterData.qry
   })
 
   const columns = [
@@ -90,25 +107,14 @@ const BPMasterData = () => {
     setWindowOpen(true)
   }
 
-  const del = obj => {
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: BusinessPartnerRepository.MasterData.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
-
-  useEffect(() => {
-    if (access?.record?.maxAccess > 0) {
-      getGridData({ _startAt: 0, _pageSize: 50 })
-    }
-  }, [access])
 
   // End
 
@@ -125,22 +131,6 @@ const BPMasterData = () => {
 
   const [addressWindowOpen, setAddressWindowOpen] = useState(false)
   const [addressEditMode, setAddressEditMode] = useState(false)
-
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: BusinessPartnerRepository.MasterData.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setTableData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   const filterIdCategory = async categId => {
     try {
@@ -383,12 +373,6 @@ const BPMasterData = () => {
       })
   }
 
-  useEffect(() => {
-    if (access?.record?.maxAccess > 0) {
-      getGridData({ _startAt: 0, _pageSize: 50 })
-    }
-  }, [access])
-
   // Address Tab
 
   const addressValidation = useFormik({
@@ -542,9 +526,8 @@ const BPMasterData = () => {
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={tableData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
           onEdit={edit}
           onDelete={del}
           isLoading={false}

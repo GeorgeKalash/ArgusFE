@@ -3,9 +3,8 @@ import { useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
-import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function FormShell({ form, children, height, editMode, maxAccess }) {
+export default function FormShell({ form, children, height, editMode, resourceId, maxAccess }) {
   const [windowInfo, setWindowInfo] = useState(null)
 
   const windowToolbarVisible = editMode
@@ -22,7 +21,7 @@ export default function FormShell({ form, children, height, editMode, maxAccess 
       {windowToolbarVisible && <WindowToolbar onSave={() => form.handleSubmit()} onInfo={() => setWindowInfo(true)} />}
       {windowInfo && (
         <TransactionLog
-          resourceId={ResourceIds && ResourceIds.BPMasterData}
+          resourceId={resourceId}
           onInfoClose={() => setWindowInfo(false)}
           recordId={form.values.recordId}
         />
