@@ -37,7 +37,7 @@ return (
                   { key: 'name', value: 'Name' },
                 ]}
                 store={dispersalStore}
-                value={dispersalStore?.filter(item => item.key === agentsHeaderValidation.values.dispersalId)[0]}
+                value={dispersalStore?.filter(item => item.key === agentsHeaderValidation.values.dispersalId?.toString())[0]}
                 required
                 onChange={(event, newValue) => {
                   agentsHeaderValidation.setFieldValue('dispersalId', newValue?.recordId)

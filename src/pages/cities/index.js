@@ -27,6 +27,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 // ** Windows
 import CityWindow from './Windows/CityWindow'
 
+
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)

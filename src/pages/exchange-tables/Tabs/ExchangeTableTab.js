@@ -73,7 +73,7 @@ const ExchangeTableTab=({
               valueField='key'
               displayField='value'
               store={RCMStore}
-              value={RCMStore.filter(item => item.key === exchangeTableValidation.values.rateCalcMethod)[0]}
+              value={RCMStore.filter(item => item.key === exchangeTableValidation.values.rateCalcMethod?.toString())[0]}
               required
               onChange={(event, newValue) => {
 
@@ -90,7 +90,7 @@ const ExchangeTableTab=({
               valueField='key'
               displayField='value'
               store={rateAgainstStore}
-              value={rateAgainstStore.filter(item => item.key === exchangeTableValidation.values.rateAgainst)[0]}
+              value={rateAgainstStore.filter(item => item.key === exchangeTableValidation.values.rateAgainst?.toString())[0]}
               required
               onChange={(event, newValue) => {
                 // exchangeTableValidation.setFieldValue('rateAgainst','');
@@ -98,7 +98,7 @@ const ExchangeTableTab=({
                 console.log(exchangeTableValidation)
 
                 newValue?.key && setRateAgainst(newValue?.key)
-                newValue?.key=== 1 && exchangeTableValidation.setFieldValue('rateAgainstCurrencyId', '');
+                newValue?.key=== "1" && exchangeTableValidation.setFieldValue('rateAgainstCurrencyId', '');
               }}
               error={exchangeTableValidation.touched.rateAgainst && Boolean(exchangeTableValidation.errors.rateAgainst)}
               helperText={exchangeTableValidation.touched.rateAgainst && exchangeTableValidation.errors.rateAgainst}
@@ -115,9 +115,9 @@ const ExchangeTableTab=({
               store={currencyStore}
 
               value={exchangeTableValidation.values.rateAgainstCurrencyId && currencyStore.filter(item => item.recordId === exchangeTableValidation.values.rateAgainstCurrencyId)[0]}
-              required={exchangeTableValidation.values.rateAgainst ===2 && true}
+              required={exchangeTableValidation.values.rateAgainst ==="2" && true}
 
-              readOnly={!exchangeTableValidation.values.rateAgainstCurrencyId && exchangeTableValidation.values.rateAgainst !==2 ? true : false}
+              readOnly={!exchangeTableValidation.values.rateAgainstCurrencyId && exchangeTableValidation.values.rateAgainst !=="2" ? true : false}
 
               onChange={(event, newValue) => {
 

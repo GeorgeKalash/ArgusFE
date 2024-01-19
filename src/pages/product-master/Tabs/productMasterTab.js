@@ -57,12 +57,9 @@ return (
               valueField='key'
               displayField='value'
               store={typeStore}
-              value={typeStore.filter(item => item.key === productMasterValidation.values.type)[0]}
+              value={typeStore.filter(item => item.key === productMasterValidation.values.type?.toString())[0]}
               required
               onChange={(event, newValue) => {
-                // console.log("productMasterValidation")
-                // console.log(productMasterValidation)
-                //  console.log("productMasterValidation")
                 productMasterValidation && productMasterValidation.setFieldValue('type', newValue?.key);
               }}
               error={productMasterValidation.touched.type && Boolean(productMasterValidation.errors.type)}
@@ -76,7 +73,7 @@ return (
               valueField='key'
               displayField='value'
               store={functionStore}
-              value={functionStore.filter(item => item.key === productMasterValidation.values.functionId)[0]}
+              value={functionStore.filter(item => item.key === productMasterValidation.values.functionId?.toString())[0]}
               required
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('functionId', newValue?.key)
@@ -92,7 +89,7 @@ return (
               // label={labels.correspondent}
               label='Correspondent'
               value={productMasterValidation.values.corId}
-              required={productMasterValidation.values.type === 1 ? true : false}
+              required={productMasterValidation.values.type === "1" ? true : false}
               valueField='reference'
               displayField='name'
               store={correspondentStore}
@@ -143,7 +140,7 @@ return (
               valueField='key'
               displayField='value'
               store={languageStore}
-              value={languageStore.filter(item => item.key === productMasterValidation.values.languages)[0]}
+              value={languageStore.filter(item => item.key === productMasterValidation.values.languages?.toString())[0]}
               onChange={(event, newValue) => {
                 productMasterValidation.setFieldValue('languages', newValue?.key)
               }}
@@ -176,7 +173,7 @@ return (
               valueField='key'
               displayField='value'
               store={commissionBaseStore}
-              value={commissionBaseStore.filter(item => item.key === productMasterValidation.values.commissionBase)[0]}
+              value={commissionBaseStore.filter(item => item.key === productMasterValidation.values.commissionBase?.toString())[0]}
               required
               onChange={(event, newValue) => {
              productMasterValidation.setFieldValue('commissionBase', newValue?.key)

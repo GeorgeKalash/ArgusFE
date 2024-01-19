@@ -44,7 +44,7 @@ const ClientsList = () => {
   const [windowOpen, setWindowOpen] = useState(null)
   const [windowInfo, setWindowInfo] = useState(null)
   const [editMode, setEditMode] = useState(null)
-const requiredOptional = true
+ const [requiredOptional, setRequiredOptional] = useState(true)
 
 
   //stores
@@ -386,7 +386,7 @@ console.log(userData)
       idNoRepeat : yup.string().required('Repeat Password is required')
       .oneOf([yup.ref('idNo'), null], 'Number must match'),
 
-      expiryDate: yup.string().required("This field is required"),
+      expiryDate: !editMode && yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
       cityId: yup.string().required("This field is required"),
       idCountry: yup.string().required("This field is required"),
@@ -430,7 +430,8 @@ console.log(userData)
 
       // status: obj.status,
       addressId: null,
-      plantId: clientIndividualFormValidation.values.plantId || 3,
+
+      plantId: clientIndividualFormValidation.values.plantId ?clientIndividualFormValidation.values.plantId : 3,
       cellPhone: obj.cellPhone,
 
       createdDate:  formatDateToApi(date.toISOString()),
@@ -450,6 +451,7 @@ console.log(userData)
     //CCTD
     const obj2 = {
       idNo : obj.idNo,
+      plantId: clientIndividualFormValidation.values.plantId ?clientIndividualFormValidation.values.plantId : 3,
 
       // clientID: obj.clientID,
       idCountryId: obj.idCountry,
@@ -474,7 +476,7 @@ console.log(userData)
       fl_lastName: obj.fl_lastName,
       fl_middleName: obj.fl_middleName,
       fl_familyName: obj.fl_familyName,
-
+      professionId:obj.professionId,
       birthDate:  formatDateToApiFunction(obj.birthDate),
       isResident: obj.isResident,
 
@@ -500,7 +502,6 @@ console.log(userData)
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
 
-      professionId:obj.professionId,
       idNo : obj.idNo,
       wip: 1,
       releaseStatus: 1,
@@ -590,7 +591,7 @@ console.log(userData)
     validate : (values) => {
       const errors = {};
 
-      if (values.name || values.name || values.phone || values.countryId ||  values.street1)  {
+      if (values.name || values.street1 || values.phone || values.countryId ||  values.street1)  {
         if (!values.name ) {
           errors.name = 'This field is required';
         }
@@ -963,7 +964,12 @@ console.log(userData)
       }
 
   }
+useEffect(()=>{
+  if((WorkAddressValidation.values.name || WorkAddressValidation.values.street1 || WorkAddressValidation.values.phone || WorkAddressValidation.values.countryId ||  WorkAddressValidation.values.street1) && requiredOptional){
 
+setRequiredOptional(false)
+   }
+}, [WorkAddressValidation.values])
 
   return (
     <>
