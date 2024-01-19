@@ -217,7 +217,7 @@ return (
                 </Grid>
 
                 <Grid item xs={12}>
-               <Button  onClick={()=>setShowConfirmNumber(true)} >{_labels.workAddress}</Button>
+               <Button  variant='contained' onClick={()=>setShowConfirmNumber(true)} disabled={clientIndividualFormValidation && !clientIndividualFormValidation.values.birthDate&& !clientIndividualFormValidation.values.idNo  && true}>{_labels.confirmNb}</Button>
               </Grid>
                 {/* <Grid item xs={12}
                 sx={{position: 'relative', width: '100%',}}>

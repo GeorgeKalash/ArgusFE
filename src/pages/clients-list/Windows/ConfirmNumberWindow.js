@@ -21,8 +21,8 @@ const ConfirmNumberWindow = ({
 
 return (
     <Window
-      id='WordAddressWindow'
-      Title={labels.pageTitle}
+      id='ConfirmNumberWindow'
+      Title={labels.confirmNb}
       onClose={onClose}
       width={width}
       height={height}

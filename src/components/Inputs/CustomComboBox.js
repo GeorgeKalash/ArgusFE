@@ -239,6 +239,7 @@ return search.trim(); // Trim to remove extra spaces
                     autoFocus={autoFocus}
                     error={error}
                     helperText={helperText}
+
                 />
             }
         />

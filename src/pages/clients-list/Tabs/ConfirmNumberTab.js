@@ -32,7 +32,7 @@ return (
                   clientIndividualFormValidation.setFieldValue("birthDate", "")
                 }
                 disabledDate={'>='}
-                readOnly={editMode && true}
+                readOnly={ true}
 
                 error={
                   clientIndividualFormValidation.touched.birthDate &&
@@ -55,7 +55,7 @@ return (
                     onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
-                    readOnly={editMode && true}
+                    readOnly={true}
                     maxLength="15"
                     onBlur={(e) =>{ setShowAsPassword(true) }}
                     onFocus={(e) =>{ setShowAsPassword(false) }}
