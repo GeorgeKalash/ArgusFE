@@ -12,12 +12,12 @@ const FunctionTab = ({ functionGridData, getFunctionGridData, addFunction, delFu
 
   const columns = [
     {
-      field: 'functionId',
+      field: 'functionName',
       headerName: _labels.function,
       flex: 1
     },
     {
-      field: 'strategyId',
+      field: 'strategyName',
       headerName: _labels.strategy,
       flex: 1
     }
