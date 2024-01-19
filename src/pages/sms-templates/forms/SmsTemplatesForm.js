@@ -6,6 +6,8 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -26,6 +28,10 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
     const { getRequest, postRequest } = useContext(RequestsContext)
 
     const editMode = !!recordId
+
+    const invalidate = useInvalidate({
+        endpointId: SystemRepository.SMSTemplate.page
+      })
   
     const formik = useFormik({
         initialValues,
@@ -35,21 +41,18 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
           name: yup.string().required('This field is required'),
           smsBody: yup.string().required('This field is required'),
         }),
-        onSubmit: obj => {
+        onSubmit: async obj => {
           const recordId = obj.recordId
-          postRequest({
+
+          await postRequest({
             extension: SystemRepository.SMSTemplate.set,
             record: JSON.stringify(obj)
           })
-            .then(res => {
-              if (!recordId) {
-                formik.setFieldValue('recordId', res.recordId)
-                toast.success('Record Added Successfully')
-              } else toast.success('Record Editted Successfully')
-            })
-            .catch(error => {
-              setErrorMessage(error)
-            })
+          
+            if (!recordId) toast.success('Record Added Successfully')
+            else toast.success('Record Edited Successfully')
+
+            invalidate()
         }
       })
     
@@ -74,7 +77,13 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
       }, [])
       
     return (
-        <FormShell form={formik} height={300} maxAccess={maxAccess} editMode={editMode}>
+        <FormShell 
+            resourceId={ResourceIds.SmsTemplates}
+            form={formik} 
+            height={300} 
+            maxAccess={maxAccess} 
+            editMode={editMode}
+        >
             <Grid container rowGap={2} xs={12} sx={{ px: 2 }}>
                 <Grid item xs={12}>
                     <CustomTextField

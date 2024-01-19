@@ -18,7 +18,7 @@ import SmsTemplatesWindow from './Windows/SmsTemplatesWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import useResourceParams from 'src/hooks/useResourceParams'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -27,16 +27,33 @@ const SmsTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   //What should be placed for most pages
-  const [tableData, setTableData] = useState([])
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  const { labels: _labels, access } = useResourceParams({
+    return await getRequest({
+      extension: SystemRepository.SMSTemplate.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
+  }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.SMSTemplate.page,
     datasetId: ResourceIds.SmsTemplates
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.SMSTemplate.page
   })
 
   const columns = [
@@ -52,21 +69,6 @@ const SmsTemplate = () => {
     }
   ]
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: SystemRepository.SMSTemplate.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setTableData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   const add = () => {
     setSelectedRecordId(null)
@@ -78,25 +80,15 @@ const SmsTemplate = () => {
     setWindowOpen(true)
   }
 
-  const del= obj => {
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: SystemRepository.SMSTemplate.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
   
-  useEffect(() => {
-    if (access?.record?.maxAccess > 0) {
-      getGridData({ _startAt: 0, _pageSize: 50 })
-    }
-  }, [access])
 
   return (
     <>
@@ -104,9 +96,8 @@ const SmsTemplate = () => {
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={tableData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
