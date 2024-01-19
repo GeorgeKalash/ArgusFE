@@ -4,22 +4,25 @@ import { Grid, Box} from '@mui/material'
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { useContext, useState } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 
 const BPRelationWindow = ({
   onClose,
   onSave,
   relationValidation,
-  relationStore,
-  lookupBusinessPartner,
-  businessPartnerStore,
-  setBusinessPartnerStore,
   labels,
   maxAccess
 }) => {
+  const { getRequest } = useContext(RequestsContext)
+
+  const [businessPartnerStore, setBusinessPartnerStore] = useState([])
+
   return (
     <Window id='BPRelationWindow' Title={labels.relation} onClose={onClose} onSave={onSave} width={600} height={400}>
       <CustomTabPanel index={0} value={0}>
@@ -44,7 +47,21 @@ const BPRelationWindow = ({
               firstValue={relationValidation.values.toBPRef}
               secondValue={relationValidation.values.toBPName}
               setStore={setBusinessPartnerStore}
-              onLookup={lookupBusinessPartner}
+              onLookup={searchQry => {
+    setBusinessPartnerStore([])
+    if(searchQry){
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
+    getRequest({
+      extension: BusinessPartnerRepository.MasterData.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setBusinessPartnerStore(res.list)
+      })
+      .catch(error => {
+         setErrorMessage(error)
+      })}
+  }}
               onChange={(event, newValue) => {
                 if (newValue) {
                   relationValidation.setFieldValue('toBPId', newValue?.recordId)
@@ -67,7 +84,8 @@ const BPRelationWindow = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+            endpointId={BusinessPartnerRepository.RelationTypes.qry}
               name='relationId'
               label={labels.relation}
               columnsInDropDown= {[
@@ -76,8 +94,7 @@ const BPRelationWindow = ({
               ]}
               valueField='recordId'
               displayField='name'
-              store={relationStore}
-              value={relationStore.filter(item => item.recordId === relationValidation.values.relationId)[0]}
+              values={relationValidation.values}
               required
               onChange={(event, newValue) => {
                 relationValidation && relationValidation.setFieldValue('relationId', newValue?.recordId);

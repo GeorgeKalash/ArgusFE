@@ -35,6 +35,7 @@ import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import { useRouter } from 'next/router';
 import { MenuContext } from 'src/providers/MenuContext';
 
+import { useAuth } from 'src/hooks/useAuth'
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   top: 60,
@@ -65,12 +66,14 @@ const Navigation = props => {
   const {  setLastOpenedPage } = useContext(MenuContext)
 
   // ** States
-  const [navHover, setNavHover] = useState(false)
+  // const [navHover, setNavHover] = useState(false)
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
   const [filteredMenu, setFilteredMenu] = useState([]) //menu
   const [openFolders, setOpenFolders] = useState([]);
   const menu = props.verticalNavItems //menu
   const gear = useContext(MenuContext)
+  const [isArabic, setIsArabic] = useState(false)
+  const auth = useAuth()
 
   // ** Ref
   const shadowRef = useRef(null)
@@ -81,7 +84,6 @@ const Navigation = props => {
 
   const navMenuContentProps = {
     ...props,
-    navHover,
     currentActiveGroup,
     setCurrentActiveGroup
   }
@@ -107,6 +109,11 @@ const Navigation = props => {
       }
     }
   }
+
+  useEffect (()=>{
+    if(auth?.user?.languageId === 2) setIsArabic(true)
+    else setIsArabic(false)
+  }, [])
 
   // ** Scroll Menu
   const scrollMenu = container => {
@@ -238,15 +245,18 @@ const Navigation = props => {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <Drawer {...props} navHover={navHover} setNavHover={setNavHover}>
-        <VerticalNavHeader {...props} navHover={navHover} />
+      <Drawer {...props}>
+        <VerticalNavHeader   
+          isArabic={isArabic}
+          {...props} 
+        />
         {beforeNavMenuContent && beforeVerticalNavMenuContentPosition === 'fixed'
           ? beforeNavMenuContent(navMenuContentProps)
           : null}
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 4 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 4, pb:'10px' }}>
           <TextField
             label="Search"
             variant="outlined"
@@ -256,13 +266,13 @@ const Navigation = props => {
             autoComplete='off'
             InputLabelProps={{
               sx: { color: 'rgba(231, 227, 252, 0.87) !important',backgroundColor:'#383838',padding:'0px 3px !important',
-              display:  navCollapsed && !navHover ? 'none':'flex',},
+              display:  navCollapsed ? 'none':'flex',},
             }}
             InputProps={{
               sx: { 
                 display: 'flex',
-                alignItems: navCollapsed && !navHover ? 'center !important' : 'left',
-                justifyContent: navCollapsed && !navHover ? 'center !important' : 'left',
+                alignItems: navCollapsed ? 'center !important' : 'left',
+                justifyContent: navCollapsed ? 'center !important' : 'left',
                 border: '1px solid rgba(231, 227, 252, 0.87)',
                 fieldset: {
                   borderColor: 'transparent !important', },},
@@ -280,7 +290,6 @@ const Navigation = props => {
             }}
             map={gear.gear}
             navCollapsed={navCollapsed}
-            navHover={navHover}
           />
           {filterFav(menu) && filterFav(menu).length > 0 &&(
             <Dropdown
@@ -292,7 +301,6 @@ const Navigation = props => {
               }}
               map={filterFav(menu)}
               navCollapsed={navCollapsed}
-              navHover={navHover}
             />
           )}
         </Box>
@@ -328,7 +336,6 @@ const Navigation = props => {
                 }}
               >
                 <VerticalNavItems
-                  navHover={navHover}
                   navCollapsed={navCollapsed}
                   currentActiveGroup={currentActiveGroup}
                   setCurrentActiveGroup={setCurrentActiveGroup}
@@ -336,6 +343,7 @@ const Navigation = props => {
                   setOpenFolders={setOpenFolders}
                   {...props}
                   verticalNavItems={filteredMenu}
+                  isArabic={isArabic}
                 />
               </List>
             )}

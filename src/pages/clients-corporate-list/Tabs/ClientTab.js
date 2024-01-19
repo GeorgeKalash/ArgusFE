@@ -82,7 +82,7 @@ return (
                       ""
                     )
                   }
-                  disabledDate={"<"}
+                  disabledDate={!editMode && "<"}
                   error={
                     clientCorporateFormValidation.touched.expiryDate &&
                     Boolean(clientCorporateFormValidation.errors.expiryDate)

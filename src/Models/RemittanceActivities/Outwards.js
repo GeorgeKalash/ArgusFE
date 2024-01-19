@@ -15,7 +15,7 @@ const getNewOutwards = () => {
     amount: null,
     productId: null,
     fees: null,
-    baseAmount: null,
+    baseAmount: '',
     net: null,
   }
 }

@@ -17,7 +17,7 @@ export const ResourceIds = {
   CorrespondentAgents: 36102,
   CorrespondentAgentBranch: 36107,
   CityDistrict: 20206,
-  TransactionLog:20100,
+  TransactionLog: 20100,
   Address: 20102,
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
@@ -37,7 +37,7 @@ export const ResourceIds = {
   ReleaseIndicators: 10105,
   ReleaseCodes: 10104,
   DRGroups: 10103,
-  ClientMaster : 36201,
+  ClientMaster: 36201,
   ClientList: 35201,
   Characteristics : 10102,
   Strategies : 10106,
@@ -47,7 +47,6 @@ export const ResourceIds = {
   Users : 23101,
   ClientCorporate : 35205,
   DRClasses: 10101
-
-
-
+  States: 20107,
+  SecurityGroup: 23102
 }
