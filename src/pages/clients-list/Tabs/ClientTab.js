@@ -19,14 +19,7 @@ const ClientTab = ({
   countryStore,
   cityStore,
   setCityStore,
-  cityAddressStore,
-  cityDistrictAddressStore,
-  setCityAddressStore,
-
   lookupCity,
-  lookupCityAddress,
-  lookupCityDistrictAddress,
-
   professionFilterStore,
   fillFilterProfession,
 
@@ -36,9 +29,7 @@ const ClientTab = ({
   civilStatusStore,
   genderStore,
   mobileVerifiedStore,
-  fillStateStoreAddress,
 
-  stateAddressStore,
   educationStore,
   idTypeStore,
   titleStore,
@@ -47,16 +38,11 @@ const ClientTab = ({
    _labels, maxAccess, editMode
  }) => {
 
-console.log(clientIndividualFormValidation)
 
 
 const [showAsPassword , setShowAsPassword]  = useState(false)
-const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)
 const [showAsPasswordPhone , setShowAsPasswordPhone]  = useState(false)
 const [showAsPasswordPhoneRepeat , setShowAsPasswordPhoneRepeat]  = useState(false)
-
-
-
 
   const handleCopy = (event) => {
     event.preventDefault();
@@ -402,7 +388,7 @@ return (
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
-               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress} readOnly={editMode && true} />
+               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation}  readOnly={editMode && true} />
                </FieldSet>
                 {/* <Grid item xs={12}>
                   <CustomTextField
@@ -429,7 +415,7 @@ return (
                   />
                 </Grid> */}
 
-<Grid container spacing={2} sx={{ marginTop: "20px" }}>
+            <Grid container spacing={2} sx={{ marginTop: "20px" }}>
               <Grid container xs={12} spacing={2} >
                 <Grid item xs={12}>
                   <CustomComboBox
@@ -782,19 +768,7 @@ return (
                     clientIndividualFormValidation.errors.cellPhone
                   }
                 />
-                 {/* <Grid
-                          sx={{
-                            position: 'absolute',
-                            top:  '15px',
 
-                            letterSpacing: "3px",
-                            marginLeft:'15px',
-                            padding: '0px',
-                            backgroundColor: '#fff',
-                            pointerEvents: 'none',
-                            fontFamily: 'Arial'
-                        }}
-                          >{encryptDigits(clientIndividualFormValidation.values?.cellPhone)}</Grid> */}
               </Grid>
               <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
@@ -830,18 +804,7 @@ return (
                     clientIndividualFormValidation.errors.cellPhoneRepeat
                   }
                 />
-                 {/* <Grid
-                         sx={{
-                          position: 'absolute',
-                          top:  '15px',
-                          letterSpacing: "3px",
-                          marginLeft:'15px',
-                          padding: '0px',
-                          backgroundColor: '#fff',
-                          pointerEvents: 'none',
-                          fontFamily: 'Arial'
-                      }}
-                          >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid> */}
+
               </Grid>
               <Grid container  spacing={2} sx={{paddingTop: '20px'}} >
                 <Grid item xs={3}>

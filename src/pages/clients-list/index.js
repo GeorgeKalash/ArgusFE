@@ -35,7 +35,7 @@ const ClientsList = () => {
 
 
   const { getLabels, getAccess } = useContext(ControlContext)
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest , getMicroRequest} = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   //control
@@ -633,34 +633,51 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
     // }),
     onSubmit: values => {
       // console.log(values);
-
+        setWindowWorkAddressOpen(false)
     }
   })
 
   const fetchValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-
+    enableReinitialize: true,
+    validateOnChange: true,
 
     initialValues: {
-      idtId: '',
-      birthDate: '',
-      idNo: '',
+      idtId: clientIndividualFormValidation.values?.idtId,
+      birthDate: clientIndividualFormValidation.values?.birthDate,
+      idNo: clientIndividualFormValidation.values?.idNo,
       idNoRepeat: '',
     },
 
     validationSchema:  yup.object({
-      birthDate: yup.string().required("This field is required"),
-      idtId: yup.string().required("This field is required"),
-      idNo:  yup.string().required("This field is required"),
-      idNoRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('idNo'), null], 'Number must match'),
+      // birthDate: yup.string().required("This field is required"),
+      // idtId: yup.string().required("This field is required"),
+      // idNo:  yup.string().required("This field is required"),
+      // idNoRepeat : yup.string().required('Repeat Password is required')
+      // .oneOf([yup.ref('idNo'), null], 'Number must match'),
+
     }),
     onSubmit: values => {
-      // console.log(values);
+
+      postFetchDefault(values)
 
     }
   })
+
+  const  postFetchDefault=(obj)=>{
+    const defaultParams = `_number=${obj.idNo}&_dateTime=${formatDateToApiFunction(obj.birthDate)}&_type=${obj.idtId}`
+    var parameters = defaultParams
+    getMicroRequest({
+      extension: 'getInformation',
+      parameters: parameters,
+
+    })
+      .then(res => {
+
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const addClient = async (obj) => {
     clientIndividualFormValidation.setValues(getNewClients());
@@ -739,11 +756,16 @@ return '';
       })
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (param) => {
     // setShowOtpVerification(true)
-
-    clientIndividualFormValidation.handleSubmit();
-    WorkAddressValidation.handleSubmit();
+    if(param==='fetch'){
+      fetchValidation.handleSubmit();
+    }else if(param==='address'){
+      WorkAddressValidation.handleSubmit();
+    }else{
+      clientIndividualFormValidation.handleSubmit();
+      WorkAddressValidation.handleSubmit();
+    }
 
   };
 
@@ -1064,25 +1086,9 @@ onEdit={editClient}
   educationStore={educationStore}
   idTypeStore={idTypeStore}
   titleStore={titleStore}
-  cityAddressStore={cityAddressStore}
-  cityAddressWorkStore={cityAddressWorkStore}
-  setCityAddressWorkStore={setCityAddressWorkStore}
-  setCityAddressStore={setCityAddressStore}
   lookupCity={lookupCity}
-  lookupCityAddress={lookupCityAddress}
-  lookupCityAddressWork={lookupCityAddressWork}
-  lookupCityDistrictAddress={lookupCityDistrictAddress}
-  lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
-  fillStateStoreAddress={fillStateStoreAddress}
-  fillStateStoreAddressWork={fillStateStoreAddressWork}
-  cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
-  cityDistrictAddressStore={cityDistrictAddressStore}
-  stateAddressWorkStore={stateAddressWorkStore}
   fillFilterProfession={fillFilterProfession}
-  stateAddressStore={stateAddressStore}
   setWindowWorkAddressOpen={setWindowWorkAddressOpen}
-
-  // showWorkAddress={showWorkAddress}
   setWindowConfirmNumberOpen={setWindowConfirmNumberOpen}
   _labels ={_labels2}
   maxAccess={access}
@@ -1096,9 +1102,9 @@ onEdit={editClient}
 
        }
 
-       {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels2} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}        onSave={handleSubmit}
+       {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels2} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}        onSave={()=>handleSubmit('fetch')}
         onClose={()=>setWindowConfirmNumberOpen(false)} width={400} height={300} />}
-       {windowWorkAddressOpen && <AddressWorkWindow labels={_labels2} setShowWorkAddress={setWindowWorkAddressOpen} addressValidation={WorkAddressValidation} onSave={()=>setWindowWorkAddressOpen(false)}  onClose={()=>setWindowWorkAddressOpen(false)}/>}
+       {windowWorkAddressOpen && <AddressWorkWindow labels={_labels2} setShowWorkAddress={setWindowWorkAddressOpen} addressValidation={WorkAddressValidation}  onSave={()=>handleSubmit('address')}  onClose={()=>setWindowWorkAddressOpen(false)} requiredOptional={requiredOptional} readOnly={editMode && true}/>}
        {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={"3600"}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
        {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
     />}

@@ -19,7 +19,7 @@ const AddressWorkWindow = ({
   return (
     <Window
       id='WordAddressWindow'
-      Title={labels.pageTitle}
+      Title={labels.workAddress}
       onClose={onClose}
       width={width}
       height={height}

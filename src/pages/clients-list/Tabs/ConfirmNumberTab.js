@@ -1,6 +1,9 @@
 // ** MUI Imports
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { useFormik } from 'formik'
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -11,7 +14,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 
 const ConfirmNumberTab=({
     labels,
-    clientIndividualFormValidation,
+    formValidation,
     editMode,
     idTypeStore,
     maxAccess
@@ -22,6 +25,36 @@ const ConfirmNumberTab=({
   const handleCopy = (event) => {
     event.preventDefault();
   };
+
+  const onSave = (event) => {
+    event.preventDefault();
+  };
+
+  const fetchValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: false,
+
+
+    initialValues: {
+      idtId: formValidation.values.idtId,
+      birthDate: formValidation.values.birthDate,
+      idNo: formValidation.values.idNo,
+      idNoRepeat: '',
+    },
+
+    validationSchema:  yup.object({
+      birthDate: yup.string().required("This field is required"),
+      idtId: yup.string().required("This field is required"),
+      idNo:  yup.string().required("This field is required"),
+      idNoRepeat : yup.string().required('Repeat Password is required')
+      .oneOf([yup.ref('idNo'), null], 'Number must match'),
+
+    }),
+    onSubmit: values => {
+      // console.log(values);
+
+    }
+  })
 
 return (
         <Grid container spacing={4}>
@@ -34,7 +67,7 @@ return (
                     displayField="name"
                     readOnly={editMode && true}
                     store={idTypeStore}
-                    values={clientIndividualFormValidation.values}
+                    values={fetchValidation.values}
                     required
                     onChange={(event, newValue) => {
 
@@ -46,13 +79,13 @@ return (
 
                       if(newValue){
 
-                      clientIndividualFormValidation.setFieldValue(
+                      fetchValidation.setFieldValue(
                         "idtId",
                         newValue?.recordId,
                       );
                       }else{
 
-                        clientIndividualFormValidation.setFieldValue(
+                        fetchValidation.setFieldValue(
                           "idtId",
                           '',
                         );
@@ -61,12 +94,12 @@ return (
                       }
                     }}
                     error={
-                      clientIndividualFormValidation.touched.idtId &&
-                      Boolean(clientIndividualFormValidation.errors.idtId)
+                      fetchValidation.touched.idtId &&
+                      Boolean(fetchValidation.errors.idtId)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.idtId &&
-                      clientIndividualFormValidation.errors.idtId
+                      fetchValidation.touched.idtId &&
+                      fetchValidation.errors.idtId
                     }
                   />
                 </Grid>
@@ -74,22 +107,22 @@ return (
               <CustomDatePicker
                 name="birthDate"
                 label={labels.birthDate}
-                value={clientIndividualFormValidation.values?.birthDate}
+                value={fetchValidation.values?.birthDate}
                 required={true}
-                onChange={clientIndividualFormValidation.setFieldValue}
+                onChange={fetchValidation.setFieldValue}
                 onClear={() =>
-                  clientIndividualFormValidation.setFieldValue("birthDate", "")
+                  fetchValidation.setFieldValue("birthDate", "")
                 }
                 disabledDate={'>='}
                 readOnly={editMode && true}
 
                 error={
-                  clientIndividualFormValidation.touched.birthDate &&
-                  Boolean(clientIndividualFormValidation.errors.birthDate)
+                  fetchValidation.touched.birthDate &&
+                  Boolean(fetchValidation.errors.birthDate)
                 }
                 helperText={
-                  clientIndividualFormValidation.touched.birthDate &&
-                  clientIndividualFormValidation.errors.birthDate
+                  fetchValidation.touched.birthDate &&
+                  fetchValidation.errors.birthDate
                 }
               />
             </Grid>
@@ -100,9 +133,9 @@ return (
                     name="idNo"
                     label={labels.number}
                     type={ showAsPassword && "password"}
-                    value={clientIndividualFormValidation.values?.idNo }
+                    value={fetchValidation.values?.idNo }
                     required
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
+                    onChange={ (e) =>{ fetchValidation.handleChange(e) }}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
                     readOnly={editMode && true}
@@ -111,17 +144,17 @@ return (
                     onFocus={(e) =>{ setShowAsPassword(false) }}
 
                     onClear={() =>{
-                      clientIndividualFormValidation.setFieldValue("idNo", "")
+                      fetchValidation.setFieldValue("idNo", "")
 
                     }
                     }
                     error={
-                      clientIndividualFormValidation.touched.idNo &&
-                      Boolean(clientIndividualFormValidation.errors.idNo)
+                      fetchValidation.touched.idNo &&
+                      Boolean(fetchValidation.errors.idNo)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.idNo &&
-                      clientIndividualFormValidation.errors.idNo
+                      fetchValidation.touched.idNo &&
+                      fetchValidation.errors.idNo
                     }
                   />
 
@@ -134,31 +167,31 @@ return (
                   <CustomTextField
                     name="idNoRepeat"
                     label={labels.confirmNb}
-                    value={clientIndividualFormValidation.values?.idNoRepeat}
+                    value={fetchValidation.values?.idNoRepeat}
                     required
                     type={ showAsPasswordRepeat && "password"}
 
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
+                    onChange={ (e) =>{ fetchValidation.handleChange(e) }}
 
                     onCopy={handleCopy}
                     onPaste={handleCopy}
                     readOnly={editMode && true}
 
-                    onBlur={(e) =>{ setShowAsPasswordRepeat(true) , clientIndividualFormValidation.handleBlur(e)}}
+                    onBlur={(e) =>{ setShowAsPasswordRepeat(true) , fetchValidation.handleBlur(e)}}
 
                     onFocus={(e) =>{ setShowAsPasswordRepeat(false) }}
 
                     maxLength="15"
                     onClear={() =>{
-                      clientIndividualFormValidation.setFieldValue("idNoRepeat", "")
+                      fetchValidation.setFieldValue("idNoRepeat", "")
                     } }
                     error={
-                      clientIndividualFormValidation.touched.idNoRepeat &&
-                      Boolean(clientIndividualFormValidation.errors.idNoRepeat)
+                      fetchValidation.touched.idNoRepeat &&
+                      Boolean(fetchValidation.errors.idNoRepeat)
                     }
                     helperText={
-                      clientIndividualFormValidation.touched.idNoRepeat &&
-                      clientIndividualFormValidation.errors.idNoRepeat
+                      fetchValidation.touched.idNoRepeat &&
+                      fetchValidation.errors.idNoRepeat
                     }
                   />
 
