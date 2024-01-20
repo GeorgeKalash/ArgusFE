@@ -25,11 +25,9 @@ const Drawer = props => {
   const {
     hidden,
     children,
-    navHover,
     navWidth,
     settings,
     navVisible,
-    setNavHover,
     navMenuProps,
     setNavVisible,
     collapsedNavWidth,
@@ -58,18 +56,6 @@ const Drawer = props => {
     open: true,
     onOpen: () => null,
     onClose: () => null,
-    onMouseEnter: () => {
-      // Declared flag to resolve first time flicker issue while trying to collapse the menu
-      if (flag || navCollapsed) {
-        setNavHover(true)
-        flag = false
-      }
-    },
-    onMouseLeave: () => {
-      if (navCollapsed) {
-        setNavHover(false)
-      }
-    }
   }
   let userNavMenuStyle = {}
   let userNavMenuPaperStyle = {}
@@ -91,8 +77,8 @@ const Drawer = props => {
       PaperProps={{
         sx: {
           backgroundColor: 'background.default',
-          width: navCollapsed && !navHover ? collapsedNavWidth : navWidth,
-          ...(!hidden && navCollapsed && navHover ? { boxShadow: 9 } : {}),
+          width: navCollapsed ? collapsedNavWidth : navWidth,
+          ...(!hidden && navCollapsed ? { boxShadow: 9 } : {}),
           borderRight: navigationBorderWidth === 0 ? 0 : `${navigationBorderWidth}px solid ${theme.palette.divider}`,
           ...userNavMenuPaperStyle
         },

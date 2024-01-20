@@ -26,11 +26,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import { getNewUserInfo, populateUserInfo } from 'src/Models/System/UserInfo'
-import { getNewSecurityGroup, populateSecurityGroup } from 'src/Models/AccessControl/SecurityGroup'
 
 // ** Windows
 import UsersWindow from './Windows/UsersWindow'
-import SecurityGrpWindow from './Windows/SecurityGrpWindow'
+import SecurityGroupWindow from './Windows/SecurityGroupWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -56,8 +55,8 @@ const Users = () => {
   const [cashAccStore, setCashAccStore] = useState([])
   const [salesPersonStore, setSalesPersonStore] = useState([])
   const [securityGrpGridData, setSecurityGrpGridData] = useState([])
-  const [securityGrpALLData, setSecurityGrpALLData] = useState([])
-  const [securityGrpSelectedData, setSecurityGrpSelectedData] = useState([])
+  const [initialAllListData, setSecurityGrpALLData] = useState([])
+  const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -97,6 +96,8 @@ const Users = () => {
     selected: labels && labels.find(item => item.key === '21').value,
     group: labels && labels.find(item => item.key === '22').value
   }
+
+  const itemSelectorLabels=[_labels.securityGrp,_labels.all,_labels.selected]
 
   const columns = [
     {
@@ -159,9 +160,7 @@ const Users = () => {
           })
     }),
     onSubmit: values => {
-      console.log('valuesss ', values)
-
-      //postUsers(values)
+      postUsers(values)
     }
   })
 
@@ -178,7 +177,6 @@ const Users = () => {
       cashAccountName: ''
     },
     onSubmit: values => {
-      console.log('values ', values)
       postDefaults(values)
     }
   })
@@ -205,7 +203,7 @@ const Users = () => {
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_size=${_pageSize}&_filter=&_sortBy=fullName`
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=${_pageSize}&_filter=&_sortBy=fullName`
     var parameters = defaultParams
 
     getRequest({
@@ -231,8 +229,9 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
-        getSecurityGrpGridData(obj.recordId)
-        setWindowOpen(false)
+        usersValidation.setFieldValue('recordId', res.recordId)
+        setWindowOpen(true)
+        setEditMode(true)
         if (!recordId) toast.success('Record Added Successfully')
         else toast.success('Record Edited Successfully')
       })
@@ -247,7 +246,6 @@ const Users = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ res })
         getGridData({})
         toast.success('Record Deleted Successfully')
       })
@@ -257,6 +255,7 @@ const Users = () => {
   }
 
   const addUsers = () => {
+    defaultsValidation.resetForm()
     usersValidation.setValues(getNewUserInfo())
     setActiveTab(0)
     setEditMode(false)
@@ -288,7 +287,7 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
-        getSecurityGrpGridData(obj.recordId)
+        getSecurityGrpGridData(res.record.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
         setActiveTab(0)
@@ -444,7 +443,6 @@ const Users = () => {
       )
 
       await defaultsValidation.setValues(UserDocObject)
-      console.log('dvdvdv ', defaultsValidation.values)
     } catch (error) {
       setErrorMessage(error)
     }
@@ -539,7 +537,7 @@ const Users = () => {
     var parameters = defaultParams
 
     getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
+      extension: AccessControlRepository.SecurityGroupUser.qry,
       parameters: parameters
     })
       .then(res => {
@@ -560,21 +558,20 @@ const Users = () => {
       var parameters = defaultParams
 
       const GrpRequest = getRequest({
-        extension: AccessControlRepository.Group.qry,
+        extension: AccessControlRepository.SecurityGroup.qry,
         parameters: parameters
       })
 
       const GUSRequest = getRequest({
-        extension: AccessControlRepository.SecurityGroup.qry,
+        extension: AccessControlRepository.SecurityGroupUser.qry,
         parameters: parameters
       })
 
       Promise.all([GrpRequest, GUSRequest]).then(([resGRPFunction, resGUSTemplate]) => {
         const allList = resGRPFunction.list.map(x => {
           const n = {
-            sgId: x.recordId,
-            sgName: x.name,
-            userId: userId
+            id: x.recordId,
+            name: x.name, 
           }
 
           return n
@@ -582,9 +579,8 @@ const Users = () => {
 
         const selectedList = resGUSTemplate.list.map(x => {
           const n2 = {
-            sgId: x.sgId,
-            sgName: x.sgName,
-            userId: userId
+            id: x.sgId,
+            name: x.sgName
           }
 
           return n2
@@ -594,13 +590,12 @@ const Users = () => {
         // Remove items from allList that have the same sgId and userId as items in selectedList
         const filteredAllList = allList.filter(item => {
           return !selectedList.some(
-            selectedItem => selectedItem.sgId === item.sgId && selectedItem.userId === item.userId
+            selectedItem => selectedItem.id === item.id && selectedItem.id === item.id
           )
         })
         setSecurityGrpALLData(filteredAllList)
       })
       setSecurityGrpWindowOpen(true)
-      console.log('finallll ', setSecurityGrpALLData, ' ', setSecurityGrpSelectedData)
     } catch (error) {
       setErrorMessage(error.res)
 
@@ -609,7 +604,7 @@ const Users = () => {
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleSecurityGrpDataChange = (allData, selectedData) => {
+  const handleListsDataChange = (allData, selectedData) => {
     // Update the state in the parent component when the child component data changes
     setSecurityGrpALLData(allData)
     setSecurityGrpSelectedData(selectedData)
@@ -617,15 +612,22 @@ const Users = () => {
 
   const postSecurityGrp = () => {
     const userId = usersValidation.values.recordId
+    const selectedItems = [];
+ 
+    //initialSelectedListData returns an array that contain id, where id is sgId
+   //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
+    initialSelectedListData.forEach(item => {
+      selectedItems.push({userId:userId , sgId: item.id})
+  });
 
     const data = {
       sgId: 0,
       userId: userId,
-      groups: securityGrpSelectedData
+      groups: selectedItems
     }
 
     postRequest({
-      extension: AccessControlRepository.SecurityGroup.set2,
+      extension: AccessControlRepository.SecurityGroupUser.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -646,7 +648,7 @@ const Users = () => {
     const userId = usersValidation.values.recordId
 
     postRequest({
-      extension: AccessControlRepository.SecurityGroup.del,
+      extension: AccessControlRepository.SecurityGroupUser.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -710,7 +712,7 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-
+          
           //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
@@ -742,13 +744,13 @@ const Users = () => {
         />
       )}
       {securityGrpWindowOpen && (
-        <SecurityGrpWindow
+        <SecurityGroupWindow
           onClose={() => setSecurityGrpWindowOpen(false)}
           onSave={handleSecurityGrpSubmit}
-          securityGrpALLData={securityGrpALLData}
-          securityGrpSelectedData={securityGrpSelectedData}
-          handleSecurityGrpDataChange={handleSecurityGrpDataChange}
-          labels={_labels}
+          initialAllListData={initialAllListData}
+          initialSelectedListData={initialSelectedListData}
+          handleListsDataChange={handleListsDataChange}
+          itemSelectorLabels={itemSelectorLabels}
           maxAccess={access}
         />
       )}

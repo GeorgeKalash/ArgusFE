@@ -50,11 +50,11 @@ const SourceOfIncome = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    foreignLanguage: labels && labels.find(item => item.key === "3").value,
-    incomeType: labels && labels.find(item => item.key === "4").value,
-    sourceOfIncome: labels && labels.find(item => item.key === "5").value
+    reference: labels && labels.find(item => item.key === '1').value,
+    name: labels && labels.find(item => item.key === '2').value,
+    foreignLanguage: labels && labels.find(item => item.key === '3').value,
+    incomeType: labels && labels.find(item => item.key === '4').value,
+    sourceOfIncome: labels && labels.find(item => item.key === '5').value
   }
 
   const columns = [
@@ -116,6 +116,7 @@ const SourceOfIncome = () => {
     })
       .then(res => {
         setGridData(res)
+        setEditMode(true)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -221,6 +222,8 @@ const SourceOfIncome = () => {
           incomeTypeStore={incomeTypeStore}
           labels={_labels}
           maxAccess={access}
+          onInfo={() => setWindowInfo(true)}
+          editMode={editMode}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

@@ -68,7 +68,6 @@ const MenuItemTextMetaWrapper = styled(Box)(({ theme }) => ({
 const VerticalNavLink = ({
   item,
   parent,
-  navHover,
   settings,
   navVisible,
   isSubToSub,
@@ -141,8 +140,8 @@ const VerticalNavLink = ({
           sx={{
             py: 2.25,
             ...(item.disabled ? { pointerEvents: 'none' } : { cursor: 'pointer' }),
-            pl: navCollapsed && !navHover ? (collapsedNavWidth - navigationBorderWidth - 24) / 8 : 5.5,
-            pr: navCollapsed && !navHover ? ((collapsedNavWidth - navigationBorderWidth - 24) / 2 - 5) / 4 : 3.5
+            pl: navCollapsed ? (collapsedNavWidth - navigationBorderWidth - 24) / 8 : 5.5,
+            pr: navCollapsed ? ((collapsedNavWidth - navigationBorderWidth - 24) / 2 - 5) / 4 : 3.5
           }}
         >
           {/* {isSubToSub ? null : (
@@ -166,11 +165,11 @@ const VerticalNavLink = ({
           <MenuItemTextMetaWrapper
             sx={{
               ...(isSubToSub ? { ml: 2 } : {}), //original ml: 9
-              ...(navCollapsed && !navHover ? { opacity: 0 } : { opacity: 1 })
+              ...(navCollapsed ? { opacity: 0 } : { opacity: 1 })
             }}
           >
             <Typography
-              {...((themeConfig.menuTextTruncate || (!themeConfig.menuTextTruncate && navCollapsed && !navHover)) && {
+              {...((themeConfig.menuTextTruncate || (!themeConfig.menuTextTruncate && navCollapsed)) && {
                 noWrap: true
               })}
             >
@@ -193,7 +192,7 @@ const VerticalNavLink = ({
               sx={{
                 color: 'text.primary',
                 transition: 'margin .25s ease-in-out',
-                ...(navCollapsed && !navHover ? { mr: 0 } : { mr: 2.5 }),
+                ...(navCollapsed ? { mr: 0 } : { mr: 2.5 }),
                 ...(parent ? { ml: 1.25, mr: 1 } : {}),
                 '& svg': {
                   fontSize: '0.875rem',

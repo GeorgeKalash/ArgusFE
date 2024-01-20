@@ -39,8 +39,6 @@ const getNewUserInfo = () => {
         fullName: obj.fullName,
         username: obj.username,
         umcpnl: obj.umcpnl,
-
-         //umcpnl: obj.umcpnl !== null ? obj.umcpnl : false,
         email: obj.email,
         cellPhone: obj.cellPhone,
         activeStatus: obj.activeStatus,

@@ -6,6 +6,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import ClientTab from '../Tabs/ClientTab'
 
 const ClientWindow = ({
+
     onClose,
     onSave,
     clientIndividualFormValidation,
@@ -102,7 +103,7 @@ return (
             </CustomTabPanel>
         </Window>
     )
-}
 
+}
 
 export default ClientWindow
