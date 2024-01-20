@@ -284,7 +284,13 @@ const GlobalExchangeBuyMap = () => {
             {currencyId > 0 && (
 
               <Grid xs={12} spacing={5}>
-                <Box sx={{ padding: '15px' }}>
+                <Box
+      sx={{
+        padding: '15px',
+        height: '100vh', // Set the height of the page to 100% of the viewport height
+        overflowY: 'auto', // Enable vertical scrolling if content exceeds the viewport height
+      }}
+    >
                       <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
                     columns={exchangeMapsInlineGridColumns}
@@ -301,7 +307,7 @@ const GlobalExchangeBuyMap = () => {
                     }}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={'75vh'}
+                    scrollHeight={'90vh'}
                   />
                 </Box>
                 <Grid sx={{
