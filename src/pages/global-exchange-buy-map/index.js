@@ -39,18 +39,8 @@ const GlobalExchangeBuyMap = () => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        var parameters = `_filter=`
-        getRequest({
-          extension: SystemRepository.Currency.qry,
-          parameters: parameters
-        })
-          .then(res => {
-            setCurrencyStore(res.list)
-          })
-          .catch(error => {})
-
-          console.log(window.innerHeight)
-        fillCountryStore()
+        fillCurrencyStore()
+           fillCountryStore()
 
         // fillExchangeTableStore()
         getLabels(ResourceIds.GlobalExchangeBuyMap, setLabels)
@@ -59,6 +49,20 @@ const GlobalExchangeBuyMap = () => {
       }
     }
   }, [access])
+
+
+
+  const fillCurrencyStore=()=>{
+    var parameters = `_filter=`
+    getRequest({
+      extension: SystemRepository.Currency.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCurrencyStore(res.list)
+      })
+      .catch(error => {})
+  }
 
   const fillCountryStore = () => {
     var parameters = `_filter=`
@@ -280,8 +284,8 @@ const GlobalExchangeBuyMap = () => {
             {currencyId > 0 && (
 
               <Grid xs={12} spacing={5}>
-                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' ,marginRight:'5px'}}>
-                  <InlineEditGrid
+                <Box sx={{ padding: '15px' }}>
+                      <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
                     columns={exchangeMapsInlineGridColumns}
                     defaultRow={{
@@ -297,10 +301,19 @@ const GlobalExchangeBuyMap = () => {
                     }}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={'70vh'}
+                    scrollHeight={'75vh'}
                   />
                 </Box>
-                <WindowToolbar onSave={handleSubmit} />
+                <Grid sx={{
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  padding: 3,
+                  textAlign: 'center',
+                }}>
+              <WindowToolbar onSave={handleSubmit} />
+              </Grid>
               </Grid>
             )}
           </Grid>

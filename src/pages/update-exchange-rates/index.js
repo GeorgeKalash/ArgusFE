@@ -245,7 +245,6 @@ const  UpdateExchangeRates = () => {
               });
 
               exchangeRatesGridValidation.setValues({ rows })
-              setProductLegWindowOpen(true)
           })
           .catch(error => {
             setErrorMessage(error)
@@ -547,24 +546,33 @@ const handleSubmit = () => {
           </Grid>
           {exchangeRatesValidation.values.currencyId > 0 && exchangeRatesValidation.values.countryId > 0 && (
             <Grid xs={12}>
-              <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+              <Box sx={{ padding: '15px' }}>
                 <InlineEditGrid
                   gridValidation={exchangeRatesGridValidation}
                   columns={exchangeRatesInlineGridColumns}
                   allowDelete={false}
                   allowAddNewLine={false}
                   scrollable={true}
-                  scrollHeight={560}
+                  scrollHeight={'75vh'}
                   width={'1200'}
                 />
               </Box>
+              <Grid sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          padding: 3,
+          textAlign: 'center',
+        }}>
               <WindowToolbar onSave={handleSubmit} />
+              </Grid>
             </Grid>
           )}
         </Grid>
       </Box>
     </CustomTabPanel>
-    <WindowToolbar />
+
     <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
 
   </Box>
