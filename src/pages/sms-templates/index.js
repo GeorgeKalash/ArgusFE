@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
 import {Box } from '@mui/material'
@@ -26,7 +26,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 const SmsTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
-  //What should be placed for most pages
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -71,7 +70,6 @@ const SmsTemplate = () => {
 
 
   const add = () => {
-    setSelectedRecordId(null)
     setWindowOpen(true)
   }
 
@@ -115,6 +113,7 @@ const SmsTemplate = () => {
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

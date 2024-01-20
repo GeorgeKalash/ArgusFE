@@ -17,8 +17,8 @@ export default function FormShell({ form, children, height, editMode, resourceId
 
   return (
     <>
-      <DialogContent sx={{ height: false ? `calc(100vh - 48px - 180px)` : height, p: 0 }}>{children}</DialogContent>
-      {windowToolbarVisible && <WindowToolbar onSave={() => form.handleSubmit()} onInfo={() => setWindowInfo(true)} />}
+      <DialogContent sx={{ height: false ? `calc(100vh - 48px - 180px)` : height, p: 1 }}>{children}</DialogContent>
+      {windowToolbarVisible && <WindowToolbar onSave={() => form.handleSubmit()} onInfo={() => setWindowInfo(true)} editMode={editMode}/>}
       {windowInfo && (
         <TransactionLog
           resourceId={resourceId}

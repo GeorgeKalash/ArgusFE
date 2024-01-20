@@ -18,6 +18,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
+    const [editMode, setEditMode] = useState(!!recordId)
     
     const [initialValues, setInitialData] = useState({
         recordId: null,
@@ -27,7 +28,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
 
     const { getRequest, postRequest } = useContext(RequestsContext)
 
-    const editMode = !!recordId
+    //const editMode = !!recordId
 
     const invalidate = useInvalidate({
         endpointId: SystemRepository.SMSTemplate.page
@@ -44,15 +45,22 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
         onSubmit: async obj => {
           const recordId = obj.recordId
 
-          await postRequest({
+          const response = await postRequest({
             extension: SystemRepository.SMSTemplate.set,
             record: JSON.stringify(obj)
           })
           
-            if (!recordId) toast.success('Record Added Successfully')
-            else toast.success('Record Edited Successfully')
+          if (!recordId) {
+            toast.success('Record Added Successfully')
+            setInitialData({
+              ...obj, // Spread the existing properties
+              recordId: response.recordId, // Update only the recordId field
+            });
+          }
+          else toast.success('Record Edited Successfully')
+          setEditMode(true)
 
-            invalidate()
+          invalidate()
         }
       })
     
@@ -66,7 +74,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
                 extension: SystemRepository.SMSTemplate.get,
                 parameters: `_recordId=${recordId}`
               })
-    
+              
               setInitialData(res.record)
             }
           } catch (exception) {
@@ -84,7 +92,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
             maxAccess={maxAccess} 
             editMode={editMode}
         >
-            <Grid container rowGap={2} xs={12} sx={{ px: 2 }}>
+            <Grid container spacing={4}>
                 <Grid item xs={12}>
                     <CustomTextField
                     name='name'
