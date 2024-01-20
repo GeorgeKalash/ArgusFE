@@ -18,6 +18,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import {useWindowDimensions} from 'src/providers/WindowDimensionsContext'
 
 const  UpdateExchangeRates = () => {
 
@@ -30,6 +31,7 @@ const  UpdateExchangeRates = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const [labels, setLabels] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const { width, height } = useWindowDimensions();
 
    const exchangeRatesValidation = useFormik({
     enableReinitialize: false,
@@ -416,14 +418,12 @@ const handleSubmit = () => {
 
 
   return (
-    <Box>
+    <Box   sx={{
+      height: `${height-80}px`
+     }}>
     <CustomTabPanel index={0} value={0}>
       <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
+
       >
         <Grid container>
           <Grid container xs={12} spacing={2}>
@@ -553,18 +553,20 @@ const handleSubmit = () => {
                   allowDelete={false}
                   allowAddNewLine={false}
                   scrollable={true}
-                  scrollHeight={'75vh'}
+                  scrollHeight={`${height- 280}px`}
                   width={'1200'}
                 />
               </Box>
               <Grid sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          padding: 3,
-          textAlign: 'center',
-        }}>
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  padding: 3,
+                  textAlign: 'center',
+                  backgroundColor: 'white'
+                }}
+                >
               <WindowToolbar onSave={handleSubmit} />
               </Grid>
             </Grid>

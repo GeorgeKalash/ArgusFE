@@ -19,6 +19,7 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import {useWindowDimensions} from 'src/providers/WindowDimensionsContext'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,6 +33,7 @@ const NumberRange = () => {
   const [currencyId, setCurrencyId] = useState(0)
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
+  const { width, height } = useWindowDimensions();
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.currencyExchangeMap, setAccess)
@@ -299,14 +301,12 @@ const NumberRange = () => {
   }
 
   return (
-    <Box>
+    <Box   sx={{
+      height: `${height-80}px`
+     }}>
       <CustomTabPanel index={0} value={0}>
         <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%'
-          }}
+
         >
           <Grid container>
             <Grid container xs={12} spacing={2}>
@@ -395,7 +395,8 @@ const NumberRange = () => {
                     allowAddNewLine={false}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={'75vh'}
+                    scrollHeight={`${height- 250}px`}
+
 
                   />
                 </Box>
@@ -407,7 +408,9 @@ const NumberRange = () => {
                   width: '100%',
                   padding: 3,
                   textAlign: 'center',
-                }}>
+                  backgroundColor: 'white'
+                }}
+                >
               <WindowToolbar onSave={handleSubmit} />
               </Grid>
               </Grid>

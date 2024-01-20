@@ -19,10 +19,12 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import {useWindowDimensions} from 'src/providers/WindowDimensionsContext'
 
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { width, height } = useWindowDimensions();
 
   //state
   const [currencyStore, setCurrencyStore] = useState([])
@@ -34,7 +36,20 @@ const GlobalExchangeBuyMap = () => {
   const [labels, setLabels] = useState(null)
 
 
+    // const [pageHeight, setPageHeight] = useState(window.innerHeight);
 
+    // useEffect(() => {
+    //   const handleResize = () => {
+    //     setPageHeight(window.innerHeight);
+    //   };
+
+    //   window.addEventListener('resize', handleResize);
+
+    //   // Cleanup: remove the event listener on component unmount
+    //   return () => {
+    //     window.removeEventListener('resize', handleResize);
+    //   };
+    // }, []); //
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
     else {
@@ -239,14 +254,15 @@ const GlobalExchangeBuyMap = () => {
   }
 
   return (
-    <Box>
+  <Box
+  sx={{
+    height: `${height-80}px`
+   }}
+    >
       <CustomTabPanel index={0} value={0}>
         <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%'
-          }}
+
+
         >
           <Grid container>
             <Grid container xs={12} spacing={2}>
@@ -283,14 +299,8 @@ const GlobalExchangeBuyMap = () => {
             </Grid>
             {currencyId > 0 && (
 
-              <Grid xs={12} spacing={5}>
-                <Box
-      sx={{
-        padding: '15px',
-        height: '100vh', // Set the height of the page to 100% of the viewport height
-        overflowY: 'auto', // Enable vertical scrolling if content exceeds the viewport height
-      }}
-    >
+              <Grid xs={12} spacing={5}>{height}
+                <Box>
                       <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
                     columns={exchangeMapsInlineGridColumns}
@@ -307,26 +317,32 @@ const GlobalExchangeBuyMap = () => {
                     }}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={'90vh'}
+                    scrollHeight={`${height- 280}px`}
                   />
                 </Box>
-                <Grid sx={{
+
+              </Grid>
+            )}
+          </Grid>
+        </Box>
+        <Grid sx={{
                   position: 'fixed',
                   bottom: 0,
                   left: 0,
                   width: '100%',
                   padding: 3,
                   textAlign: 'center',
-                }}>
+                  backgroundColor: 'white'
+                }}
+                >
               <WindowToolbar onSave={handleSubmit} />
               </Grid>
-              </Grid>
-            )}
-          </Grid>
-        </Box>
       </CustomTabPanel>
-      <WindowToolbar />
+
+
     </Box>
+
+
   )
 }
 
