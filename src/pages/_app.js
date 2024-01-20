@@ -40,7 +40,6 @@ import { ControlProvider } from 'src/providers/ControlContext'
 import { CommonProvider } from 'src/providers/CommonContext'
 import { MenuProvider } from 'src/providers/MenuContext'
 import { TabsProvider } from 'src/providers/TabsContext'
-import WindowDimensionsProvider from 'src/providers/WindowDimensionsContext'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
 import { PrimeReactProvider } from 'primereact/api'
 
@@ -129,7 +128,6 @@ const App = props => {
         <AuthProvider>
           <RequestsProvider>
             <ControlProvider>
-            <WindowDimensionsProvider>
               <CommonProvider>
 
                 <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
@@ -157,7 +155,6 @@ const App = props => {
                   </SettingsConsumer>
                 </SettingsProvider>
               </CommonProvider>
-              </WindowDimensionsProvider>
             </ControlProvider>
           </RequestsProvider>
         </AuthProvider>

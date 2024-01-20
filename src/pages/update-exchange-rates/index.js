@@ -18,7 +18,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import {useWindowDimensions} from 'src/providers/WindowDimensionsContext'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const  UpdateExchangeRates = () => {
 
@@ -545,7 +545,7 @@ const handleSubmit = () => {
           </Grid>
           </Grid>
           {exchangeRatesValidation.values.currencyId > 0 && exchangeRatesValidation.values.countryId > 0 && (
-            <Grid xs={12}>
+            <Grid container xs={12}>
               <Box sx={{ padding: '15px' }}>
                 <InlineEditGrid
                   gridValidation={exchangeRatesGridValidation}
@@ -553,11 +553,17 @@ const handleSubmit = () => {
                   allowDelete={false}
                   allowAddNewLine={false}
                   scrollable={true}
-                  scrollHeight={`${height- 280}px`}
+                  scrollHeight={`${ height- 280}px`}
                   width={'1200'}
                 />
               </Box>
-              <Grid sx={{
+
+            </Grid>
+          )}
+
+        </Grid>
+      </Box>
+      <Grid sx={{
                   position: 'fixed',
                   bottom: 0,
                   left: 0,
@@ -569,10 +575,6 @@ const handleSubmit = () => {
                 >
               <WindowToolbar onSave={handleSubmit} />
               </Grid>
-            </Grid>
-          )}
-        </Grid>
-      </Box>
     </CustomTabPanel>
 
     <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

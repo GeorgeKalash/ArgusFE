@@ -19,7 +19,7 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import {useWindowDimensions} from 'src/providers/WindowDimensionsContext'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

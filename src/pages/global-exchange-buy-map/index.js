@@ -19,7 +19,7 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import {useWindowDimensions} from 'src/providers/WindowDimensionsContext'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -261,8 +261,6 @@ const GlobalExchangeBuyMap = () => {
     >
       <CustomTabPanel index={0} value={0}>
         <Box
-
-
         >
           <Grid container>
             <Grid container xs={12} spacing={2}>
@@ -299,7 +297,7 @@ const GlobalExchangeBuyMap = () => {
             </Grid>
             {currencyId > 0 && (
 
-              <Grid xs={12} spacing={5}>{height}
+              <Grid xs={12} spacing={5}>
                 <Box>
                       <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
