@@ -415,7 +415,8 @@ const NumberRange = () => {
                   width: '100%',
                   padding: 0,
                   textAlign: 'center',
-                  backgroundColor: 'white'
+
+                  // backgroundColor: 'white'
                 }}
                 >
               <WindowToolbar onSave={handleSubmit} />

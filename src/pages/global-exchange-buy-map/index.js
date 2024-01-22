@@ -328,9 +328,10 @@ const GlobalExchangeBuyMap = () => {
                   bottom: 0,
                   left: 0,
                   width: '100%',
-                  padding: 1,
+                  padding: 0,
                   textAlign: 'center',
-                  backgroundColor: 'white'
+
+                  // backgroundColor: 'white'
                 }}
                 >
               <WindowToolbar onSave={handleSubmit} />

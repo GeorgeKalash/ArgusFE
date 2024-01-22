@@ -203,6 +203,7 @@ const  UpdateExchangeRates = () => {
 
   const getExchangeRates = (cuId, coId) => {
     exchangeRatesGridValidation.setValues({rows: []})
+  if(cuId && coId){
     const defaultParams = `_currencyId=${cuId}&_countryId=${coId}`;
     const parameters = defaultParams;
 
@@ -257,75 +258,75 @@ const  UpdateExchangeRates = () => {
         setErrorMessage(error)
       })
 
-
+}
 
     //step 3: merge both
   }
 
-const getExchangeRatess = async (cuId, coId) => {
-  try {
+// const getExchangeRatess = async (cuId, coId) => {
+//   try {
 
 
-    exchangeRatesGridValidation.setValues({rows: []})
-    const defaultParams = `_currencyId=${cuId}&_countryId=${coId}`;
-    const parameters = defaultParams;
+//     exchangeRatesGridValidation.setValues({rows: []})
+//     const defaultParams = `_currencyId=${cuId}&_countryId=${coId}`;
+//     const parameters = defaultParams;
 
-    const res = await getRequest({
-      extension: RemittanceSettingsRepository.UpdateExchangeRates.qry,
-      parameters: parameters,
-    });
+//     const res = await getRequest({
+//       extension: RemittanceSettingsRepository.UpdateExchangeRates.qry,
+//       parameters: parameters,
+//     });
 
-    console.log(res);
+//     console.log(res);
 
-    // Use Promise.all to wait for all asynchronous calls to complete
-      const exchangePromises = res.list.map(async (exchangeTable) => {
-      const exchangeId = exchangeTable.exchangeId;
-      const exchangeName = exchangeTable.exchangeName;
-      const exchangeRef = exchangeTable.exchangeRef
-      const rateCalcMethod = exchangeTable.rateCalcMethod;
+//     // Use Promise.all to wait for all asynchronous calls to complete
+//       const exchangePromises = res.list.map(async (exchangeTable) => {
+//       const exchangeId = exchangeTable.exchangeId;
+//       const exchangeName = exchangeTable.exchangeName;
+//       const exchangeRef = exchangeTable.exchangeRef
+//       const rateCalcMethod = exchangeTable.rateCalcMethod;
 
-      // const plantId = exchangeTable.plantId;
-      const defaultParams = `_exchangeId=${exchangeId}`;
-      const parameters = defaultParams;
+//       // const plantId = exchangeTable.plantId;
+//       const defaultParams = `_exchangeId=${exchangeId}`;
+//       const parameters = defaultParams;
 
-      const  exchangeResult =  getRequest({
-        extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.qry,
-        parameters: parameters,
-      });
+//       const  exchangeResult =  getRequest({
+//         extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.qry,
+//         parameters: parameters,
+//       });
 
-      var obj = {
-        // countryId: coId,
-        // currencyId: cuId,
-        // plantId: plantId,
-        exchangeName: exchangeName,
-        exchangeRef: exchangeRef,
-        exchangeId: exchangeId,
-        rateCalcMethod: rateCalcMethod,
-        rate: exchangeResult.rate ? exchangeResult.rate : '',
-        minRate: exchangeResult.minRate ? exchangeResult.minRate : '',
-        maxRate: exchangeResult.sellMaxRate? exchangeResult.maxRate : '',
-      };
+//       var obj = {
+//         // countryId: coId,
+//         // currencyId: cuId,
+//         // plantId: plantId,
+//         exchangeName: exchangeName,
+//         exchangeRef: exchangeRef,
+//         exchangeId: exchangeId,
+//         rateCalcMethod: rateCalcMethod,
+//         rate: exchangeResult.rate ? exchangeResult.rate : '',
+//         minRate: exchangeResult.minRate ? exchangeResult.minRate : '',
+//         maxRate: exchangeResult.sellMaxRate? exchangeResult.maxRate : '',
+//       };
 
-      // Modify the obj or use exchangeRes.list as needed
+//       // Modify the obj or use exchangeRes.list as needed
 
-      return obj;
-    });
+//       return obj;
+//     });
 
-    const exchangeRows = await Promise.all(exchangePromises);
+//     const exchangeRows = await Promise.all(exchangePromises);
 
-    exchangeRatesGridValidation.setValues((prevValues) => ({
-      ...prevValues,
-      rows: [...prevValues.rows, ...exchangeRows], // Append new rows to the existing ones
-    }));
+//     exchangeRatesGridValidation.setValues((prevValues) => ({
+//       ...prevValues,
+//       rows: [...prevValues.rows, ...exchangeRows], // Append new rows to the existing ones
+//     }));
 
 
 
-    console.log(exchangeRatesGridValidation);
+//     console.log(exchangeRatesGridValidation);
 
-  } catch (error) {
-    setErrorMessage(error);
-  }
-};
+//   } catch (error) {
+//     setErrorMessage(error);
+//   }
+// };
 
 const handleSubmit = () => {
   exchangeRatesGridValidation.handleSubmit()
@@ -370,19 +371,22 @@ const handleSubmit = () => {
     exchangeRatesValidation.setFieldValue('exchangeRef' , '')
     exchangeRatesValidation.setFieldValue('exchangeId' ,'')
     const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
+
     var parameters = defaultParams
+    if(currencyId && countryId)
     getRequest({
       extension: RemittanceSettingsRepository.UpdateExchangeRates.get,
       parameters: parameters
     })
       .then(res => {
-        exchangeRatesValidation.setFieldValue('exchangeRef' , res.record.exchangeRef)
-        exchangeRatesValidation.setFieldValue('exchangeId' , res.record.exchangeId)
+        if(res?.record?.exchangeId){
+        exchangeRatesValidation.setFieldValue('exchangeRef' , res.record?.exchangeRef)
+        exchangeRatesValidation.setFieldValue('exchangeId' , res.record?.exchangeId)
 
 
         const defaultParams = `_recordId=${res.record.exchangeId}`
         var parameters = defaultParams
-        getRequest({
+           getRequest({
           extension: MultiCurrencyRepository.ExchangeTable.get,
           parameters: parameters
         })
@@ -396,9 +400,9 @@ const handleSubmit = () => {
             setErrorMessage(error)
           })
 
-          const dParams = `_exchangeId=${res.record.exchangeId}`
+          const dParams = `_exchangeId=${res.record?.exchangeId}`
           var parameters = dParams
-        getRequest({
+          if(res.record.exchangeId)   getRequest({
           extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.get,
           parameters: parameters
         })
@@ -409,7 +413,7 @@ const handleSubmit = () => {
           .catch(error => {
             setErrorMessage(error)
           })
-
+}
       })
       .catch(error => {
         setErrorMessage(error)
@@ -568,7 +572,8 @@ const handleSubmit = () => {
                   width: '100%',
                   padding: 0,
                   textAlign: 'center',
-                  backgroundColor: 'white'
+
+                  // backgroundColor: 'white'
                 }}
                 >
               <WindowToolbar onSave={handleSubmit} />
