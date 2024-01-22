@@ -482,7 +482,7 @@ return (
                               checked={
                                 clientCorporateFormValidation.values?.outward
                               }
-                              onChange={clientCorporateFormValidation.outward}
+                              onChange={clientCorporateFormValidation.handleChange}
                             />
                           }
                           label={_labels?.outward}
