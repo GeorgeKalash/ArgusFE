@@ -491,7 +491,7 @@ const handleSubmit = () => {
                   allowAddNewLine={false}
                   width={'1200'}
                   scrollable={true}
-                  scrollHeight={`${height-350}px`}
+                  scrollHeight={`${height-300}px`}
                 />
               </Box>
 
@@ -511,7 +511,7 @@ const handleSubmit = () => {
                   // backgroundColor: 'white'
                 }}
                 >
-              <WindowToolbar onSave={handleSubmit} />
+              <WindowToolbar onSave={handleSubmit} smallBox={true}/>
               </Grid>
     </CustomTabPanel>
 

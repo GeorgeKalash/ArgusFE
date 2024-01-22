@@ -395,7 +395,7 @@ const NumberRange = () => {
                     allowAddNewLine={false}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={`${height-210}px`}
+                    scrollHeight={`${height-190}px`}
 
 
                   />
@@ -417,7 +417,7 @@ const NumberRange = () => {
                   textAlign: 'center',
                 }}
                 >
-              <WindowToolbar onSave={handleSubmit} />
+              <WindowToolbar onSave={handleSubmit} smallBox={true} />
               </Grid>
       </CustomTabPanel>
 
