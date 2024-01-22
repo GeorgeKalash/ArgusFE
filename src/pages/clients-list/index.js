@@ -46,7 +46,10 @@ const ClientsList = () => {
   const [windowOpen, setWindowOpen] = useState(null)
   const [windowInfo, setWindowInfo] = useState(null)
   const [editMode, setEditMode] = useState(null)
+
+ const [referenceRequired, setReferenceRequired] = useState(true)
  const [requiredOptional, setRequiredOptional] = useState(true)
+
 
 
   //stores
@@ -361,7 +364,7 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
 
     },
     validationSchema: yup.object({
-      // reference: yup.string().required("This field is required"),
+      reference: referenceRequired && yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
@@ -1090,6 +1093,8 @@ onEdit={editClient}
   fillFilterProfession={fillFilterProfession}
   setWindowWorkAddressOpen={setWindowWorkAddressOpen}
   setWindowConfirmNumberOpen={setWindowConfirmNumberOpen}
+  stateAddressStore={stateAddressStore}
+  setReferenceRequired={setReferenceRequired}
   _labels ={_labels2}
   maxAccess={access}
   editMode={editMode}
@@ -1106,8 +1111,8 @@ onEdit={editClient}
         onClose={()=>setWindowConfirmNumberOpen(false)} width={400} height={300} />}
        {windowWorkAddressOpen && <AddressWorkWindow labels={_labels2} setShowWorkAddress={setWindowWorkAddressOpen} addressValidation={WorkAddressValidation}  onSave={()=>handleSubmit('address')}  onClose={()=>setWindowWorkAddressOpen(false)} requiredOptional={requiredOptional} readOnly={editMode && true}/>}
        {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={"3600"}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
-       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
-    />}
+       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.clientId}  onInfoClose={() => setWindowInfo(false)}
+/>}
 
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
 
