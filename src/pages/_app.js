@@ -135,7 +135,8 @@ const App = props => {
           <meta name='viewport' content='initial-scale=1, width=device-width' />
         </Head>
 
-        <AuthProvider>
+        <AuthProvider>          
+
           <QueryClientProvider client={queryClient}>
             <RequestsProvider>
               <ControlProvider>

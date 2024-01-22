@@ -1,7 +1,8 @@
 // ** MUI Imports
 import { DialogActions, Button } from '@mui/material'
 
-const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, editMode}) => {
+const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, disabledInfo , smallBox=false}) => {
+
   return (
     <DialogActions>
       {onClear && (
@@ -15,7 +16,7 @@ const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, editMode}) =>
         </Button>
       )}
       {onSave && (
-        <Button onClick={onSave} variant='contained' disabled={disabledSubmit}>
+        <Button onClick={onSave} variant='contained' sx={{mt: smallBox && 0}} disabled={disabledSubmit}>
           Submit
         </Button>
       )}
