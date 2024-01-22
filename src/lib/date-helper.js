@@ -1,5 +1,6 @@
 // ** Third Party Imports
 import dayjs from 'dayjs'
+import moment from 'moment';
 
 const formatDateFromApi = (date) => {
 
@@ -38,9 +39,26 @@ const   formatDateToApiFunction = (value)=>{
   return formattedDateYYYYMMDD;
  }
 
+ function formatDateDefault(date) {
+  const format = window.localStorage.getItem('default') &&  window.localStorage.getItem('default')
+console.log(format + 'format')
+
+    // Check if the date is valid
+
+    if (!moment(date).isValid()) {
+      return <div>Error: Invalid Date</div>;
+    }
+
+    // Format the date
+    const formattedDate = moment(date , format).format(format);
+
+    return formattedDate;
+  };
+
 
 export {
     formatDateFromApi,
     formatDateToApi,
-    formatDateToApiFunction
+    formatDateToApiFunction,
+    formatDateDefault
 }

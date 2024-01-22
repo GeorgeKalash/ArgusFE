@@ -12,7 +12,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CommonContext } from 'src/providers/CommonContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateToApi, formatDateToApiFunction, formatDateDefault } from 'src/lib/date-helper'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { DataSets } from 'src/resources/DataSets'
 
@@ -216,7 +216,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
       headerName: _labels.createdDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
+      valueGetter: ({ row }) => formatDateDefault(formatDateFromApi(row?.createdDate))
 
     },
 
@@ -226,7 +226,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
       headerName: _labels.expiryDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateFromApi(row?.expiryDate)
+      valueGetter: ({ row }) =>formatDateDefault(formatDateFromApi(row?.expiryDate))
 
 
     },
