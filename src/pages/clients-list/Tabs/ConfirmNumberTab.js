@@ -65,7 +65,7 @@ return (
                     label={labels.type}
                     valueField="recordId"
                     displayField="name"
-                    readOnly={editMode && true}
+                    readOnly={ true}
                     store={idTypeStore}
                     values={fetchValidation.values}
                     required
@@ -114,7 +114,7 @@ return (
                   fetchValidation.setFieldValue("birthDate", "")
                 }
                 disabledDate={'>='}
-                readOnly={editMode && true}
+                readOnly={true}
 
                 error={
                   fetchValidation.touched.birthDate &&
@@ -132,13 +132,13 @@ return (
                   sx={{color: 'white'}}
                     name="idNo"
                     label={labels.number}
-                    type={ showAsPassword && "password"}
+                    type={"password"}
                     value={fetchValidation.values?.idNo }
                     required
                     onChange={ (e) =>{ fetchValidation.handleChange(e) }}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
-                    readOnly={editMode && true}
+                    readOnly={ true}
                     maxLength="15"
                     onBlur={(e) =>{ setShowAsPassword(true) }}
                     onFocus={(e) =>{ setShowAsPassword(false) }}

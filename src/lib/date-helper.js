@@ -40,17 +40,19 @@ const   formatDateToApiFunction = (value)=>{
  }
 
  function formatDateDefault(date) {
-  const format = window.localStorage.getItem('default') &&  window.localStorage.getItem('default')
-console.log(format + 'format')
+  var format = JSON.parse(window.localStorage.getItem('default') &&  window.localStorage.getItem('default'))
+  format = format['dateFormat']
+
+  const timestamp = date && parseInt(date.match(/\d+/)[0], 10)
 
     // Check if the date is valid
 
-    if (!moment(date).isValid()) {
+    if (!moment(timestamp).isValid()) {
       return <div>Error: Invalid Date</div>;
     }
 
     // Format the date
-    const formattedDate = moment(date , format).format(format);
+    const formattedDate = moment(timestamp).format(format);
 
     return formattedDate;
   };

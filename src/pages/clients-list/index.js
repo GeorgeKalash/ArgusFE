@@ -14,7 +14,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateToApi, formatDateToApiFunction , formatDateDefault} from 'src/lib/date-helper'
 import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 
 // ** Resources
@@ -284,7 +284,7 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
       headerName: _labels.createdDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
+      valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
 
     },
     {
@@ -293,7 +293,7 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
       headerName: _labels.expiryDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateFromApi(row?.expiryDate)
+      valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
 
 
     },

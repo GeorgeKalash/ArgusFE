@@ -216,7 +216,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
       headerName: _labels.createdDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateDefault(formatDateFromApi(row?.createdDate))
+      valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
 
     },
 
@@ -226,7 +226,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
       headerName: _labels.expiryDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) =>formatDateDefault(formatDateFromApi(row?.expiryDate))
+      valueGetter: ({ row }) =>formatDateDefault(row?.expiryDate)
 
 
     },
