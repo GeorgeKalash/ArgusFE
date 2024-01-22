@@ -345,7 +345,7 @@ const handleSubmit = () => {
 
           })
           .catch(error => {
-            // setErrorMessage(error)
+            setErrorMessage(error)
           })
 }
       })
