@@ -242,7 +242,7 @@ const  UpdateExchangeRates = () => {
                   exchangeName: exchange.exchangeName,
                   rateCalcMethod: exchange.rateCalcMethod,
                   rateCalcMethodName: exchange.rateCalcMethodName,
-                  rate: value.rate ? value.rate : '',
+                  rate: value?.rate ? value.rate : '',
                   minRate: value.minRate ? value.minRate : '',
                   maxRate: value.maxRate? value.maxRate : '',
                 };
@@ -335,9 +335,9 @@ const handleSubmit = () => {
             setErrorMessage(error)
           })
 
-          const dParams = `_exchangeId=${res.record?.exchangeId}`
+          const dParams = `_exchangeId=${res?.record?.exchangeId}`
           var parameters = dParams
-          if(res.record.exchangeId)   getRequest({
+         getRequest({
           extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.get,
           parameters: parameters
         })

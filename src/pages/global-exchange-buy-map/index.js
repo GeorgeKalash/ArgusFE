@@ -315,27 +315,24 @@ const GlobalExchangeBuyMap = () => {
                     }}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={`${height- 210}px`}
+                    scrollHeight={`${height- 190}px`}
                   />
                 </Box>
 
               </Grid>
             )}
           </Grid>
-        </Box>
-              <Grid sx={{
+               </Box>
+              <Box sx={{
                   position: 'fixed',
                   bottom: 0,
                   left: 0,
                   width: '100%',
-                  padding: 0,
-                  textAlign: 'center',
-
-                  // backgroundColor: 'white'
+                  margin: 0,
                 }}
                 >
-              <WindowToolbar onSave={handleSubmit} />
-              </Grid>
+              <WindowToolbar onSave={handleSubmit}  smallBox={true}/>
+              </Box>
       </CustomTabPanel>
 
 
