@@ -13,7 +13,7 @@ const CtRiskLevelsWindow = ({
   return (
     <Window
       id='CtRiskLevelsWindow'
-      Title={labels.Risklevel}
+      Title={labels.risklevel}
       controlled={true}
       onClose={onClose}
       width={500}
