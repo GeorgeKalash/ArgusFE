@@ -222,8 +222,7 @@ const  UpdateExchangeRates = () => {
 
             // Create a mapping of commissionId to values entry for efficient lookup
               const valuesMap = values.list.reduce((acc, fee) => {
-                // console.log(acc)
-                // console.log(fee)
+
                 acc[fee.exchangeId] = fee;
 
                 return acc;
