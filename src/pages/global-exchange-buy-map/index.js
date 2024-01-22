@@ -263,7 +263,7 @@ const GlobalExchangeBuyMap = () => {
         <Box
         >
           <Grid container>
-            <Grid container xs={12} spacing={2}>
+            <Grid container xs={12} spacing={4}>
               <Grid item xs={6}>
                 <CustomComboBox
                   name='currencyId'
@@ -297,7 +297,7 @@ const GlobalExchangeBuyMap = () => {
             </Grid>
             {currencyId > 0 && (
 
-              <Grid xs={12} spacing={5}>
+              <Grid xs={12} sx={{pt:2}}>
                 <Box>
                       <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
@@ -315,7 +315,7 @@ const GlobalExchangeBuyMap = () => {
                     }}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={`${height- 280}px`}
+                    scrollHeight={`${height- 210}px`}
                   />
                 </Box>
 
@@ -323,12 +323,12 @@ const GlobalExchangeBuyMap = () => {
             )}
           </Grid>
         </Box>
-        <Grid sx={{
+              <Grid sx={{
                   position: 'fixed',
                   bottom: 0,
                   left: 0,
                   width: '100%',
-                  padding: 3,
+                  padding: 1,
                   textAlign: 'center',
                   backgroundColor: 'white'
                 }}

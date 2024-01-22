@@ -422,9 +422,7 @@ const handleSubmit = () => {
       height: `${height-80}px`
      }}>
     <CustomTabPanel index={0} value={0}>
-      <Box
-
-      >
+      <Box >
         <Grid container>
           <Grid container xs={12} spacing={2}>
             <Grid item xs={6}>
@@ -545,16 +543,16 @@ const handleSubmit = () => {
           </Grid>
           </Grid>
           {exchangeRatesValidation.values.currencyId > 0 && exchangeRatesValidation.values.countryId > 0 && (
-            <Grid container xs={12}>
-              <Box sx={{ padding: '15px' }}>
+        <Grid xs={12} sx={{pt:2}}>
+        <Box>
                 <InlineEditGrid
                   gridValidation={exchangeRatesGridValidation}
                   columns={exchangeRatesInlineGridColumns}
                   allowDelete={false}
                   allowAddNewLine={false}
-                  scrollable={true}
-                  scrollHeight={`${ height- 280}px`}
                   width={'1200'}
+                  scrollable={true}
+                  scrollHeight={`${height-350}px`}
                 />
               </Box>
 
@@ -568,7 +566,7 @@ const handleSubmit = () => {
                   bottom: 0,
                   left: 0,
                   width: '100%',
-                  padding: 3,
+                  padding: 0,
                   textAlign: 'center',
                   backgroundColor: 'white'
                 }}

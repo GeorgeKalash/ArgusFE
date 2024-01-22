@@ -371,9 +371,9 @@ const NumberRange = () => {
               </Grid>
             </Grid>
             {exchangeMapsValidation.values.currencyId > 0 && exchangeMapsValidation.values.countryId > 0 && (
-              <Grid xs={12}>
-<Box sx={{ padding: '15px' }}>
-     <InlineEditGrid
+               <Grid xs={12} sx={{pt:2}}>
+           <Box>
+                   <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
                     columns={exchangeMapsInlineGridColumns}
                     defaultRow={{
@@ -395,31 +395,33 @@ const NumberRange = () => {
                     allowAddNewLine={false}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={`${height- 250}px`}
+                    scrollHeight={`${height-210}px`}
 
 
                   />
                 </Box>
 
-                <Grid sx={{
+
+              </Grid>
+
+            )}
+          </Grid>
+        </Box>
+        <Grid sx={{
+                  // height:`${height/10}px`,
                   position: 'fixed',
                   bottom: 0,
                   left: 0,
                   width: '100%',
-                  padding: 3,
+                  padding: 0,
                   textAlign: 'center',
                   backgroundColor: 'white'
                 }}
                 >
               <WindowToolbar onSave={handleSubmit} />
               </Grid>
-              </Grid>
-
-            )}
-          </Grid>
-        </Box>
       </CustomTabPanel>
-      <WindowToolbar />
+
     </Box>
   )
 }
