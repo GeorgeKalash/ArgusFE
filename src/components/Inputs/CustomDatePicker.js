@@ -28,7 +28,7 @@ const CustomDatePicker = ({
   editMode = false,
   ...props
 }) => {
-  const dateFormat = window.localStorage.getItem('default') && window.localStorage.getItem('default')['formatDate']
+  const dateFormat = window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
 
@@ -68,7 +68,8 @@ const CustomDatePicker = ({
         label={label}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
-        format={dateFormat}
+
+        // format={dateFormat}
 
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
