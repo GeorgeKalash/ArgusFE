@@ -42,6 +42,7 @@ const ClientsCorporateList = () => {
   const [windowOpen, setWindowOpen] = useState(null)
   const [windowInfo, setWindowInfo] = useState(null)
   const [editMode, setEditMode] = useState(null)
+  const [referenceRequired, setReferenceRequired] = useState(true)
 
 
   //stores
@@ -74,7 +75,7 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
         fillCountryStore();
         fillLegalStatusStore()
         fillActivityStore()
-fillIndustryStore()
+        fillIndustryStore()
 
         // fillMobileVerifiedStore()
       } else {
@@ -292,7 +293,7 @@ const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     validateOnBlur: true,
 
     validationSchema: yup.object({
-      // reference: yup.string().required("This field is required"),
+       reference: referenceRequired && yup.string().required("This field is required"),
 
 
       expiryDate: yup.string().required("This field is required"),
@@ -600,6 +601,8 @@ return (
       fillStateStoreAddress={fillStateStoreAddress}
       cityDistrictAddressStore={cityDistrictAddressStore}
       stateAddressStore={stateAddressStore}
+      setReferenceRequired={setReferenceRequired}
+
       industryStore ={industryStore}
       _labels ={_labels}
       maxAccess={access}

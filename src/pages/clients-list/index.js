@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -44,7 +43,10 @@ const ClientsList = () => {
   const [windowOpen, setWindowOpen] = useState(null)
   const [windowInfo, setWindowInfo] = useState(null)
   const [editMode, setEditMode] = useState(null)
-const requiredOptional = true
+
+ const [referenceRequired, setReferenceRequired] = useState(true)
+ const [requiredOptional, setRequiredOptional] = useState(true)
+
 
 
   //stores
@@ -378,7 +380,7 @@ console.log(userData)
 
     },
     validationSchema: yup.object({
-      // reference: yup.string().required("This field is required"),
+      reference: referenceRequired && yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
@@ -386,7 +388,7 @@ console.log(userData)
       idNoRepeat : yup.string().required('Repeat Password is required')
       .oneOf([yup.ref('idNo'), null], 'Number must match'),
 
-      expiryDate: yup.string().required("This field is required"),
+      expiryDate: !editMode && yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
       cityId: yup.string().required("This field is required"),
       idCountry: yup.string().required("This field is required"),
@@ -591,7 +593,7 @@ console.log(userData)
     validate : (values) => {
       const errors = {};
 
-      if (values.name || values.name || values.phone || values.countryId ||  values.street1)  {
+      if (values.name || values.street1 || values.phone || values.countryId ||  values.street1)  {
         if (!values.name ) {
           errors.name = 'This field is required';
         }
@@ -964,7 +966,12 @@ console.log(userData)
       }
 
   }
+useEffect(()=>{
+  if((WorkAddressValidation.values.name || WorkAddressValidation.values.street1 || WorkAddressValidation.values.phone || WorkAddressValidation.values.countryId ||  WorkAddressValidation.values.street1) && requiredOptional){
 
+setRequiredOptional(false)
+   }
+}, [WorkAddressValidation.values])
 
   return (
     <>
@@ -1030,6 +1037,7 @@ onEdit={editClient}
   stateAddressWorkStore={stateAddressWorkStore}
   fillFilterProfession={fillFilterProfession}
   stateAddressStore={stateAddressStore}
+  setReferenceRequired={setReferenceRequired}
   _labels ={_labels2}
   maxAccess={access}
   editMode={editMode}
@@ -1038,7 +1046,7 @@ onEdit={editClient}
        />
        )}
        {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={"3600"}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
-       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
+       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.clientId}  onInfoClose={() => setWindowInfo(false)}
 />}
 
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />

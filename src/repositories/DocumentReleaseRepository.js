@@ -96,7 +96,7 @@ export const DocumentReleaseRepository = {
   },
   ApplySTG:
   {
-    apply: service + 'applySTG',
+    apply: service + 'applySTG'
   }
 
 

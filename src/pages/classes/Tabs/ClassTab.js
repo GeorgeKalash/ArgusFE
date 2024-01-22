@@ -29,7 +29,7 @@ const ClassTab = ({ classValidation, _labels, maxAccess, editMode, charOperatorC
             valueField='key'
             displayField='value'
             store={charOperatorComboStore}
-            value={charOperatorComboStore.filter(item => item.key === classValidation.values.characteristicOperator.toString())[0]}
+            value={classValidation.values.characteristicOperator && charOperatorComboStore.filter(item => item.key === classValidation.values.characteristicOperator.toString())[0]}
             required
             onChange={(event, newValue) => {
               classValidation.setFieldValue('characteristicOperator', newValue?.key)

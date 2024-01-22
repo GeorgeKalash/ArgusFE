@@ -9,6 +9,8 @@ import Typography from '@mui/material/Typography'
 
 // ** Custom Icon Import
 import Icon from 'src/@core/components/icon'
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 // ** Configs
 import UserDropdown from '../../shared-components/UserDropdown'
@@ -41,7 +43,6 @@ const VerticalNavHeader = props => {
   // ** Props
   const {
     hidden,
-    navHover,
     settings,
     saveSettings,
     collapsedNavWidth,
@@ -49,16 +50,17 @@ const VerticalNavHeader = props => {
     navigationBorderWidth,
     menuLockedIcon: userMenuLockedIcon,
     navMenuBranding: userNavMenuBranding,
-    menuUnlockedIcon: userMenuUnlockedIcon
+    menuUnlockedIcon: userMenuUnlockedIcon,
+    isArabic,
   } = props
 
   // ** Hooks & Vars
   const theme = useTheme()
   const { navCollapsed } = settings
-  const menuCollapsedStyles = navCollapsed && !navHover ? { opacity: 0 } : { opacity: 1 }
+  const menuCollapsedStyles = navCollapsed ? { mb: 3 } : { mb: 0}
 
   const menuHeaderPaddingLeft = () => {
-    if (navCollapsed && !navHover) {
+    if (navCollapsed) {
       if (userNavMenuBranding) {
         return 0
       } else {
@@ -68,11 +70,15 @@ const VerticalNavHeader = props => {
       return 6
     }
   }
-  const MenuLockedIcon = () => userMenuLockedIcon || <Icon icon='mdi:radiobox-marked' />
-  const MenuUnlockedIcon = () => userMenuUnlockedIcon || <Icon icon='mdi:radiobox-blank' />
+  const MenuLockedIcon = () => userMenuLockedIcon || <ArrowBackIosIcon />
+  const MenuUnlockedIcon = () => userMenuUnlockedIcon || <ArrowForwardIosIcon />
 
   return (
-    <MenuHeaderWrapper className='nav-header' sx={{ pl: menuHeaderPaddingLeft() }}>
+    <MenuHeaderWrapper className='nav-header' sx={{
+      pl: menuHeaderPaddingLeft(),
+      display:'flex',
+      flexDirection : navCollapsed ? 'column' : 'row',
+    }}>
       <Box sx={{ minHeight: 48, display: 'flex', alignItems: 'center' }}>
         {userNavMenuBranding ? (
           userNavMenuBranding(props)
@@ -80,7 +86,7 @@ const VerticalNavHeader = props => {
           <LinkStyled href='/'>
             <img
               src={
-                !navCollapsed || (navCollapsed && navHover) ? '/images/logos/ArgusLogo.png' : '/images/logos/ArgusA.png'
+                !navCollapsed ? '/images/logos/ArgusLogo.png' : '/images/logos/ArgusA.png'
               }
               alt='Argus'
               style={{ maxHeight: '30px' }}
@@ -149,12 +155,11 @@ const VerticalNavHeader = props => {
                   </HeaderTitle> */}
           </LinkStyled>
         )}
-        {(!navCollapsed || navHover) && <UserDropdown settings={settings} />}
+        {(!navCollapsed) && <UserDropdown settings={settings} />}
       </Box>
       {hidden ? (
         <IconButton
           disableRipple
-          disableFocusRipple
           onClick={toggleNavVisibility}
           sx={{ p: 0, backgroundColor: 'transparent !important' }}
         >
@@ -170,13 +175,15 @@ const VerticalNavHeader = props => {
             color: 'text.primary',
             backgroundColor: 'transparent !important',
             '& svg': {
-              fontSize: '1.25rem',
+              fontSize: '1.15rem',
               ...menuCollapsedStyles,
               transition: 'opacity .25s ease-in-out'
             }
           }}
         >
-          {navCollapsed ? MenuUnlockedIcon() : MenuLockedIcon()}
+          {navCollapsed ? 
+          (isArabic ? MenuLockedIcon():MenuUnlockedIcon()) :
+          (isArabic ? MenuUnlockedIcon():MenuLockedIcon())}
         </IconButton>
       )}
     </MenuHeaderWrapper>
