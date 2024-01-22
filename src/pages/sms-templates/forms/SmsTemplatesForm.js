@@ -18,7 +18,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
+    
     
     const [initialValues, setInitialData] = useState({
         recordId: null,
@@ -58,7 +58,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
             });
           }
           else toast.success('Record Edited Successfully')
-          setEditMode(true)
+          
 
           invalidate()
         }
@@ -90,7 +90,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
-            editMode={editMode}
+            recordId={recordId}
         >
             <Grid container spacing={4}>
                 <Grid item xs={12}>
