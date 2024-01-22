@@ -16,7 +16,7 @@ const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, disabledInfo 
         </Button>
       )}
       {onSave && (
-        <Button onClick={onSave} variant='contained' sx={{mt: smallBox && -5}} disabled={disabledSubmit}>
+        <Button onClick={onSave} variant='contained' sx={{mt: smallBox && 0}} disabled={disabledSubmit}>
           Submit
         </Button>
       )}
