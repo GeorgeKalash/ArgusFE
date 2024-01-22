@@ -1,33 +1,31 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import SmsTemplatesTab from 'src/pages/sms-templates/Tabs/SmsTemplatesTab'
+import SmsTemplatesForm from '../forms/SmsTemplatesForm'
 
 const SmsTemplatesWindow = ({
   onClose,
-  width,
-  height,
-  onSave,
-  smsTemplatesValidation,
   labels,
-  maxAccess
+  maxAccess,
+  recordId
 }) => {
+  
   return (
     <Window
       id='SmsTemplatesWindow'
       Title={labels.smsTemplate}
+      controlled={true}
       onClose={onClose}
-      width={width}
-      height={height}
-      onSave={onSave}
-      smsTemplatesValidation={smsTemplatesValidation}
+      width={500}
+      height={300}
     >
       <CustomTabPanel>
-        <SmsTemplatesTab
+        <SmsTemplatesForm
           labels={labels}
-          smsTemplatesValidation={smsTemplatesValidation}
           maxAccess={maxAccess}
+          recordId={recordId}
         />
+       
       </CustomTabPanel>
     </Window>
   )

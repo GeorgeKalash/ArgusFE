@@ -65,6 +65,7 @@ import 'primereact/resources/themes/saga-blue/theme.css'
 
 // ** Global css styles
 import '../../styles/globals.css'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -90,6 +91,14 @@ const Guard = ({ children, authGuard, guestGuard }) => {
     return <AuthGuard fallback={<Spinner />}>{children}</AuthGuard>
   }
 }
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity
+    }
+  }
+})
 
 // ** Configure JSS & ClassName
 const App = props => {

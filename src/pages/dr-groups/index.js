@@ -101,7 +101,7 @@ const DRGroups = () => {
       parameters: parameters
     })
       .then(res => {
-        setGridData(res)
+        setGridData({ ...res, _startAt })
         console.log(res)
       })
       .catch(error => {
