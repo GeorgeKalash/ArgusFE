@@ -89,7 +89,8 @@ const  UpdateExchangeRates = () => {
       header: _labels.exchangeTable,
       name: 'exchangeName',
       mandatory: true,
-      readOnly: true
+      readOnly: true,
+      width: 350
 
     },
     {
@@ -260,80 +261,14 @@ const  UpdateExchangeRates = () => {
 
 }
 
-    //step 3: merge both
   }
 
-// const getExchangeRatess = async (cuId, coId) => {
-//   try {
 
-
-//     exchangeRatesGridValidation.setValues({rows: []})
-//     const defaultParams = `_currencyId=${cuId}&_countryId=${coId}`;
-//     const parameters = defaultParams;
-
-//     const res = await getRequest({
-//       extension: RemittanceSettingsRepository.UpdateExchangeRates.qry,
-//       parameters: parameters,
-//     });
-
-//     console.log(res);
-
-//     // Use Promise.all to wait for all asynchronous calls to complete
-//       const exchangePromises = res.list.map(async (exchangeTable) => {
-//       const exchangeId = exchangeTable.exchangeId;
-//       const exchangeName = exchangeTable.exchangeName;
-//       const exchangeRef = exchangeTable.exchangeRef
-//       const rateCalcMethod = exchangeTable.rateCalcMethod;
-
-//       // const plantId = exchangeTable.plantId;
-//       const defaultParams = `_exchangeId=${exchangeId}`;
-//       const parameters = defaultParams;
-
-//       const  exchangeResult =  getRequest({
-//         extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.qry,
-//         parameters: parameters,
-//       });
-
-//       var obj = {
-//         // countryId: coId,
-//         // currencyId: cuId,
-//         // plantId: plantId,
-//         exchangeName: exchangeName,
-//         exchangeRef: exchangeRef,
-//         exchangeId: exchangeId,
-//         rateCalcMethod: rateCalcMethod,
-//         rate: exchangeResult.rate ? exchangeResult.rate : '',
-//         minRate: exchangeResult.minRate ? exchangeResult.minRate : '',
-//         maxRate: exchangeResult.sellMaxRate? exchangeResult.maxRate : '',
-//       };
-
-//       // Modify the obj or use exchangeRes.list as needed
-
-//       return obj;
-//     });
-
-//     const exchangeRows = await Promise.all(exchangePromises);
-
-//     exchangeRatesGridValidation.setValues((prevValues) => ({
-//       ...prevValues,
-//       rows: [...prevValues.rows, ...exchangeRows], // Append new rows to the existing ones
-//     }));
-
-
-
-//     console.log(exchangeRatesGridValidation);
-
-//   } catch (error) {
-//     setErrorMessage(error);
-//   }
-// };
 
 const handleSubmit = () => {
   exchangeRatesGridValidation.handleSubmit()
 }
 
-// Usage of getExchangeRates
-// getExchangeRates(yourCuId, yourCoId);
 
 
   const fillCurrencyStore = () => {
