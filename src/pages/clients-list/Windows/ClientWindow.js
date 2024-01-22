@@ -4,7 +4,6 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // **Tabs
 import ClientTab from '../Tabs/ClientTab'
-import AddressTab from 'src/components/Shared/AddressTab'
 
 const ClientWindow = ({
 
