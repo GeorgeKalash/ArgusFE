@@ -1,8 +1,8 @@
 // ** React Importsport
-import { useEffect, useState, useContext } from 'react'
+import React, { useState, useContext, use } from 'react'
 
 // ** MUI Imports
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -29,6 +29,46 @@ import AddressWindow from 'src/components/Shared/AddressWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
+
+function SampleWindow() {
+  const { stack } = useWindow()
+
+  return (
+    <div>
+      <Button
+        onClick={() => {
+          stack({
+            Component: SampleWindow,
+            title: 'New Window'
+          })
+        }}
+      >
+        Open New Window
+      </Button>
+      Hello World.
+    </div>
+  )
+}
+
+function WindowConsumer() {
+  const { stack } = useWindow()
+
+  return (
+    <div>
+      <Button
+        onClick={() => {
+          stack({
+            Component: SampleWindow,
+            title: 'Sample Window'
+          })
+        }}
+      >
+        Open Window
+      </Button>
+    </div>
+  )
+}
 
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -523,6 +563,7 @@ const BPMasterData = () => {
   return (
     <>
       <Box>
+        <WindowConsumer />
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}

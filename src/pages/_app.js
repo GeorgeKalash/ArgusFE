@@ -66,6 +66,7 @@ import 'primereact/resources/themes/saga-blue/theme.css'
 // ** Global css styles
 import '../../styles/globals.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { WindowProvider } from 'src/windows'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -146,7 +147,13 @@ const App = props => {
                           <ThemeComponent settings={settings}>
                             <Guard authGuard={authGuard} guestGuard={guestGuard}>
                               <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                                <PrimeReactProvider>{getLayout(<Component {...pageProps} />)}</PrimeReactProvider>
+                                <PrimeReactProvider>
+                                  {getLayout(
+                                    <WindowProvider>
+                                      <Component {...pageProps} />
+                                    </WindowProvider>
+                                  )}
+                                </PrimeReactProvider>
                               </AclGuard>
                             </Guard>
                             <ReactHotToast>
