@@ -68,9 +68,7 @@ const CustomDatePicker = ({
         label={label}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
-
-        // format={dateFormat}
-
+        format={dateFormat}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
