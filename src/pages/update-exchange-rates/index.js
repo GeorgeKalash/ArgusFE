@@ -26,6 +26,7 @@ const  UpdateExchangeRates = () => {
    const [currencyStore,  setCurrencyStore] = useState([])
    const [access , setAccess] = useState()
    const { getRequest, postRequest } = useContext(RequestsContext)
+
    const [exchangeTableStore, setExchangeTableStore] = useState([])
   const [CrmStore , setCrmSore] = useState([])
   const { getLabels, getAccess } = useContext(ControlContext)
@@ -185,8 +186,6 @@ const  UpdateExchangeRates = () => {
       }
     }
   }, [access])
-
-
 
   useEffect(() => {
     if (
@@ -507,8 +506,6 @@ const handleSubmit = () => {
                   width: '100%',
                   padding: 0,
                   textAlign: 'center',
-
-                  // backgroundColor: 'white'
                 }}
                 >
               <WindowToolbar onSave={handleSubmit} smallBox={true}/>

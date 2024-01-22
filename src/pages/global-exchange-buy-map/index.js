@@ -315,7 +315,7 @@ const GlobalExchangeBuyMap = () => {
                     }}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={`${height- 190}px`}
+                    scrollHeight={`${ height - 190}px`}
                   />
                 </Box>
 

@@ -135,10 +135,10 @@ const App = props => {
         </Head>
 
         <AuthProvider>
+        <QueryClientProvider client={queryClient}>
           <RequestsProvider>
             <ControlProvider>
               <CommonProvider>
-
                 <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
                   <SettingsConsumer>
                     {({ settings }) => {
@@ -166,6 +166,13 @@ const App = props => {
               </CommonProvider>
             </ControlProvider>
           </RequestsProvider>
+          </QueryClientProvider>
+
+
+
+
+
+
         </AuthProvider>
       </CacheProvider>
     </Provider>
