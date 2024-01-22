@@ -341,11 +341,11 @@ const handleSubmit = () => {
           parameters: parameters
         })
           .then(res => {
-            exchangeRatesValidation.setFieldValue('rate' , res.record.rate)
+            exchangeRatesValidation.setFieldValue('rate' , res.record?.rate)
 
           })
           .catch(error => {
-            setErrorMessage(error)
+            // setErrorMessage(error)
           })
 }
       })
