@@ -42,6 +42,8 @@ const ClientWindow = ({
     lookupCityAddress,
     lookupCityAddressWork,
     fillFilterProfession,
+    setWindowWorkAddressOpen,
+    setWindowConfirmNumberOpen,
     width,
     height,
     _labels,
@@ -51,8 +53,6 @@ const ClientWindow = ({
     setReferenceRequired,
     maxAccess
 }) => {
-
-
 
 
 return (
@@ -96,6 +96,8 @@ return (
                     cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
                     cityDistrictAddressStore={cityDistrictAddressStore}
                     setReferenceRequired={setReferenceRequired}
+                    setWindowWorkAddressOpen={setWindowWorkAddressOpen}
+                    setWindowConfirmNumberOpen={setWindowConfirmNumberOpen}
                     _labels={_labels}
                     maxAccess={maxAccess}
                     editMode={editMode}

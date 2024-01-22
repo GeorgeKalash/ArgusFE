@@ -1204,7 +1204,6 @@ return (
                     valueField="recordId"
                     readOnly={editMode && true}
                     displayField={['reference','name','flName']}
-
                     columnsInDropDown= {[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' },

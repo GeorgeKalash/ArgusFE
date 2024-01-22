@@ -67,7 +67,6 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
     if (!access) getAccess(ResourceIds.ClientCorporate, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
         getLabels(ResourceIds.ClientCorporate, setLabels)
         getLabels(ResourceIds.Address, setAddressLabels)
 
@@ -76,8 +75,6 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
         fillLegalStatusStore()
         fillActivityStore()
         fillIndustryStore()
-
-        // fillMobileVerifiedStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -153,85 +150,87 @@ const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
   const columns = [
 
     {
-      field: 'clientRef',
+      field: 'reference',
       headerName: _labels.reference,
       flex: 1,
       editable: false
     },
 
     {
-      field: 'clientName',
+      field: 'name',
       headerName: _labels?.name,
       flex: 1,
       editable: false
     },
 
 
-    // {
-    //   field: 'flName',
-    //   headerName: _labels.flName,
-    //   flex: 1,
-    //   editable: false
-    // },
     {
-      field: 'lgsName',
-      headerName: _labels.legalStatus,
-      flex: 1,
-      editable: false
-    },
-
-    {
-      field: 'activityName',
-      headerName: _labels.activity,
+      field: 'cellPhone',
+      headerName: _labels.cellPhone,
       flex: 1,
       editable: false
     },
 
     // {
-    //   field: 'nationalityName',
-
-    //   headerName: _labels.nationality,
+    //   field: 'lgsName',
+    //   headerName: _labels.legalStatus,
     //   flex: 1,
     //   editable: false
     // },
+
+    // {
+    //   field: 'activityName',
+    //   headerName: _labels.activity,
+    //   flex: 1,
+    //   editable: false
+    // },
+
+    {
+      field: 'nationalityName',
+
+      headerName: _labels.nationality,
+      flex: 1,
+      editable: false
+    },
 
     // {
     //   field: 'keyword',
-
     //   headerName: _labels.keyword,
     //   flex: 1,
     //   editable: false
     // },
 
-    // {
-    //   field: 'statusName',
+    {
+      field: 'statusName',
 
-    //   headerName: _labels.status,
-    //   flex: 1,
-    //   editable: false,
-
-
-    // },
-
-    // {
-    //   field: 'createdDate',
-
-    //   headerName: _labels.createdDate,
-    //   flex: 1,
-    //   editable: false,
-    //   valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
-
-    // },
-    // {
-    //   field: 'expiryDate',
-
-    //   headerName: _labels.expiryDate,
-    //   flex: 1,
-    //   editable: false,
-    //   valueGetter: ({ row }) => formatDateFromApi(row?.expiryDate)
+      headerName: _labels.status,
+      flex: 1,
+      editable: false,
 
 
-    // },
+    },
+
+    {
+      field: 'createdDate',
+
+      headerName: _labels.createdDate,
+      flex: 1,
+      editable: false,
+      valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
+
+    },
+
+    {
+      field: 'expiryDate',
+
+      headerName: _labels.expiryDate,
+      flex: 1,
+      editable: false,
+      valueGetter: ({ row }) => formatDateFromApi(row?.expiryDate)
+
+
+    },
+
     // {
     //   field: 'otp',
 
@@ -262,28 +261,6 @@ const getPlantId = ()=>{
     })
 
 }
-
-
-const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-  const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-  var parameters = defaultParams
-
-
-
-    getRequest({
-      extension: CTCLRepository.ClientCorporate.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-
-
-
-  }
 
 
 
@@ -343,7 +320,7 @@ const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
 
     //ClientMaster
     const obj2 = {
-      category:3,
+      category: 2,
       reference : obj.reference,
       name: obj.name1,
       flName: obj.flName,
@@ -422,7 +399,7 @@ const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
 
   const editClient= obj => {
     setEditMode(true)
-    const recordId = obj.clientId
+    const recordId = obj.recordId
 
     getClient(recordId)
 
@@ -559,6 +536,32 @@ const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
     })
   };
 
+  const search = inp => {
+    setGridData({count : 0, list: [] , message :"",  statusId:1})
+     const input = inp
+     console.log({list: []})
+
+     if(input){
+    var parameters = `_size=30&_startAt=0&_filter=${input}&_category=2`
+
+    getRequest({
+      extension: CTCLRepository.ClientCorporate.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+
+    }else{
+
+      setGridData({count : 0, list: [] , message :"",  statusId:1})
+    }
+
+  }
+
 return (
     <>
       <Box
@@ -571,7 +574,7 @@ return (
 
 
 
-<GridToolbar onAdd={addClient} maxAccess={access}    labels={_labels}  />
+<GridToolbar onAdd={addClient} maxAccess={access}    onSearch={search} labels={_labels}  inputSearch={true}  />
 
 {gridData &&
         <Table

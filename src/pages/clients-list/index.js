@@ -60,8 +60,7 @@ const ClientsList = () => {
   const [types, setTypes] = useState([]);
   const [countryStore, setCountryStore] = useState([]);
   const [cityStore, setCityStore] = useState([]);
-  const [cityAddressStore, setCityAddressStore] = useState([]);
-  const [cityAddressWorkStore, setCityAddressWorkStore] = useState([]);
+
   const [professionStore, setProfessionStore] = useState([]);
   const [professionFilterStore, setProfessionFilterStore] = useState([]);
 
@@ -71,9 +70,7 @@ const ClientsList = () => {
   const [civilStatusStore, setCivilStatusStore] = useState([]);
   const [genderStore, setGenderStore] = useState([]);
   const [stateAddressStore, setStateAddressStore] = useState([]);
-  const [stateAddressWorkStore, setStateAddressWorkStore] = useState([]);
-const [cityDistrictAddressWorkStore , setCityDistrictAddressWorkStore] = useState([])
-const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
+
   const [educationStore, setEducationStore] = useState([]);
   const [idTypeStore, setIdTypeStore] = useState([]);
   const [titleStore, setTitleStore] = useState([]);
@@ -318,7 +315,7 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
      console.log({list: []})
 
      if(input){
-    var parameters = `_size=30&_startAt=0&_filter=${input}`
+    var parameters = `_size=30&_startAt=0&_filter=${input}&_category=1`
 
     getRequest({
       extension: CTCLRepository.CtClientIndividual.snapshot,
@@ -369,8 +366,9 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
       idNo:  yup.string().required("This field is required"),
-      idNoRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('idNo'), null], 'Number must match'),
+
+      // idNoRepeat : yup.string().required('Repeat Password is required')
+      // .oneOf([yup.ref('idNo'), null], 'Number must match'),
 
       expiryDate: !editMode && yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
@@ -463,16 +461,17 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
       professionId:obj.professionId,
       birthDate:  formatDateToApiFunction(obj.birthDate),
       isResident: obj.isResident,
-
+      incomeSourceId: obj.incomeSourceId,
+      sponsorName: obj.sponsorName,
     };
 
 
     const obj4 = {
-      incomeSourceId: obj.incomeSourceId,
+
+
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
-      sponsorName: obj.sponsorName,
       whatsAppNo: obj.whatsAppNo,
       gender: obj.gender,
       title: obj.title,
