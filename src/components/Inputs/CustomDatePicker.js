@@ -35,7 +35,6 @@ const CustomDatePicker = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
-  console.log(value +'value')
 
 
    // Function to check if a date should be disabled
@@ -58,13 +57,12 @@ const CustomDatePicker = ({
   }
 
   };
-  
+
 return (
     <LocalizationProvider dateAdapter={AdapterDayjs} >
       <DatePicker
         variant={variant}
         size={size}
-        locale="es"
         value={value}
         label={label}
         fullWidth={fullWidth}
