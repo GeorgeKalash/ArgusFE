@@ -278,7 +278,7 @@ const getPlantId = ()=>{
       cityId: yup.string().required("This field is required"),
       name1: yup.string().required("This field is required"),
 
-       name: yup.string().required("This field is required"),
+      name: yup.string().required("This field is required"),
       nationalityId: yup.string().required("This field is required"),
       cellPhone: yup.string().required("This field is required"),
       capital: yup.string().required("This field is required"),

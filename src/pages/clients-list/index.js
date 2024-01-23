@@ -571,10 +571,12 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
   const WorkAddressValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
+    validateOnBlur:true,
     validate : (values) => {
       const errors = {};
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      if (values.name || values.street1 || values.phone || values.countryId ||  values.street1)  {
+      if (values.name || values.cityId || values.phone || values.countryId ||  values.street1)  {
         if (!values.name ) {
           errors.name = 'This field is required';
         }
@@ -592,11 +594,11 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
         }
 
       }
-      if (values.email1  && !emailRegex.test(values.email1) ) {
+      if (values.email1  && !emailRegex?.test(values?.email1) ) {
         errors.email1 = 'Invalid email format';
       }
 
-      if (values.email2 && !emailRegex.test(values.email2) ) {
+      if (values.email2 && !emailRegex?.test(values?.email2) ) {
         errors.email2 = 'Invalid email format';
       }
 
@@ -621,6 +623,7 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
       addressId: null,
       postalCode:null,
       cityDistrictId: null,
+      cityDistrict: null,
       bldgNo: null,
       unitNo: null,
       subNo: null
@@ -1034,9 +1037,12 @@ return '';
 
   }
 useEffect(()=>{
-  if((WorkAddressValidation.values.name || WorkAddressValidation.values.street1 || WorkAddressValidation.values.phone || WorkAddressValidation.values.countryId ||  WorkAddressValidation.values.street1) && requiredOptional){
+  if((WorkAddressValidation.values.name || WorkAddressValidation.values.street1 || WorkAddressValidation.values.phone || WorkAddressValidation.values.countryId ||  WorkAddressValidation.values.cityId) && requiredOptional){
+    setRequiredOptional(false)
+   }
 
-setRequiredOptional(false)
+   if((!WorkAddressValidation.values.name && !WorkAddressValidation.values.street1 && !WorkAddressValidation.values.phone && !WorkAddressValidation.values.countryId &&  !WorkAddressValidation.values.cityId)){
+    setRequiredOptional(true)
    }
 }, [WorkAddressValidation.values])
 

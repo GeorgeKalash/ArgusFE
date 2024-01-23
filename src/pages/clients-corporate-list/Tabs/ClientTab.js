@@ -36,6 +36,7 @@ const ClientTab = ({props}) => {
   } = props
 
   // alert(stateAddressStore)
+console.log(clientCorporateFormValidation)
 
 return (
     <>
@@ -331,7 +332,7 @@ return (
                               (item) =>
                                 item.key ===
                                 clientCorporateFormValidation.values
-                                  .industry
+                                  .industry?.toString()
                             )[0]
                           }
                           required
@@ -352,15 +353,15 @@ return (
                           }}
                           error={
                             clientCorporateFormValidation.touched
-                              .nationalityId &&
+                              .industry &&
                             Boolean(
-                              clientCorporateFormValidation.errors.nationalityId
+                              clientCorporateFormValidation.errors.industry
                             )
                           }
                           helperText={
                             clientCorporateFormValidation.touched
-                              .nationalityId &&
-                            clientCorporateFormValidation.errors.nationalityId
+                              .industry &&
+                            clientCorporateFormValidation.errors.industry
                           }
                         />
                       </Grid>
