@@ -421,14 +421,16 @@ const Strategy = () => {
       })
   }
 
-  const fillPrerequisiteComboStore = (strategyId, codeId) => { // store the list and fill this combo without second request??
-    const defaultParams = `_strategyId=${strategyId}`
+  const fillPrerequisiteComboStore = (codeId) => { // store the list and fill this combo without second request??
+    setPrerequisiteComboStore([])
+    const defaultParams = `_strategyId=${strategyValidation.values.recordId}`
     var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.StrategyCode.qry,
       parameters: parameters
     })
       .then(res => {
+        console.log(res.list)
         setPrerequisiteComboStore(res.list.filter(item => item.codeId != codeId))
       })
       .catch(error => {
