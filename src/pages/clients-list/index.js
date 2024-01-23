@@ -595,7 +595,7 @@ console.log(userData)
       const errors = {};
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      if (values.name || values.street1 || values.phone || values.countryId ||  values.street1)  {
+      if (values.name || values.cityId || values.phone || values.countryId ||  values.street1)  {
         if (!values.name ) {
           errors.name = 'This field is required';
         }

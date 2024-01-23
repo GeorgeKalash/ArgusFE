@@ -3,11 +3,8 @@ import { Grid } from '@mui/material'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import ResourceComboBox from './ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { useContext, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceLookup } from './ResourceLookup'
 
 const AddressTab = ({
@@ -161,7 +158,7 @@ const AddressTab = ({
               values={addressValidation.values}
               required={!requiredOptional}
               onChange={(event, newValue) => {
-                addressValidation.setFieldValue('stateId', 0)
+                addressValidation.setFieldValue('stateId', '')
                 addressValidation.setFieldValue('cityId', '')
                 addressValidation.setFieldValue('city', '')
                 addressValidation.setFieldValue('cityDistrictId', '')
