@@ -1,24 +1,17 @@
-//not used anywhere until now 
-
 const getNewSecurityGroup = () => {
-    return {
-      sgId: null,
-      sgName: null,
-      userId: null,
-      fullName: null,
-      email:  null
-    }
+  return {
+    recordId: null,
+    name: null,
+    description: null
   }
-  
-  const populateSecurityGroup = obj => {
-    return {
-      sgId: obj.sgId,
-      sgName: obj.sgName,
-      userId: obj.userId,
-      fullName: obj.fullName,
-      email: obj.email
-    }
+}
+
+const populateSecurityGroup = obj => {
+  return {
+    recordId: obj.recordId,
+    name: obj.name,
+    description: obj.description
   }
-  
-  export { getNewSecurityGroup, populateSecurityGroup }
-  
+}
+
+export { getNewSecurityGroup, populateSecurityGroup }

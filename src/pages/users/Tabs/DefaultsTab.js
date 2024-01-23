@@ -16,9 +16,6 @@ const DefaultsTab = ({
   cashAccStore,
   lookupCashAcc
 }) => {
-    console.log('defaultsValidation  ',   defaultsValidation.values    )
-    console.log('salesStore ',salesPersonStore)
-
   return (
     <Grid container spacing={4}>
         <Grid item xs={12}>

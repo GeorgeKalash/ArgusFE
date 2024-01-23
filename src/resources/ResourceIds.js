@@ -39,12 +39,15 @@ export const ResourceIds = {
   DRGroups: 10103,
   ClientMaster: 36201,
   ClientList: 35201,
-  Characteristics: 10102,
-  Strategies: 10106,
-  Classes: 10101,
-  SmsTemplates: 20130,
-  SmsFunctionTemplates: 20131,
-  Users: 23101,
-  ClientCorporate: 35205,
-  States: 20107
+  Characteristics : 10102,
+  Strategies : 10106,
+  Classes : 10101,
+  SmsTemplates : 20130,
+  SmsFunctionTemplates : 20131,
+  Users : 23101,
+  ClientCorporate : 35205,
+  DRClasses: 10101,
+  States: 20107,
+  SecurityGroup: 23102,
+  RiskLevel : 35104
 }

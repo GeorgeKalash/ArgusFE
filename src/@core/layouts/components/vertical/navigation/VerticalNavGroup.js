@@ -48,7 +48,6 @@ const VerticalNavGroup = props => {
     item,
     parent,
     settings,
-    navHover,
     navVisible,
     isSubToSub,
     groupActive,
@@ -146,28 +145,28 @@ const VerticalNavGroup = props => {
     setCurrentActiveGroup([...groupActive])
 
     // Empty Active Group When Menu is collapsed and not hovered, to fix issue route change
-    if (navCollapsed && !navHover) {
+    if (navCollapsed) {
       setGroupActive([])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.asPath])
   useEffect(() => {
-    if (navCollapsed && !navHover) {
+    if (navCollapsed) {
       setGroupActive([])
     }
-    if ((navCollapsed && navHover) || (groupActive.length === 0 && !navCollapsed)) {
+    if ((navCollapsed) || (groupActive.length === 0 && !navCollapsed)) {
       setGroupActive([...currentActiveGroup])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navCollapsed, navHover])
+  }, [navCollapsed])
   useEffect(() => {
     if (groupActive.length === 0 && !navCollapsed) {
       setGroupActive([])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navHover])
+  }, [ ])
   const icon = parent && !item.icon ? themeConfig.navSubItemIcon : item.icon
-  const menuGroupCollapsedStyles = navCollapsed && !navHover ? { opacity: 0 } : { opacity: 1 }
+  const menuGroupCollapsedStyles = navCollapsed ? { opacity: 0 } : { opacity: 1 }
 
   return (
     <CanViewNavGroup navGroup={item}>
@@ -188,8 +187,8 @@ const VerticalNavGroup = props => {
               borderTopRightRadius: 100,
               borderBottomRightRadius: 100,
               transition: 'padding-left .25s ease-in-out',
-              pl: navCollapsed && !navHover ? (collapsedNavWidth - navigationBorderWidth - 24) / 8 : 5.5,
-              pr: navCollapsed && !navHover ? ((collapsedNavWidth - navigationBorderWidth - 24) / 2 - 5) / 4 : 3.5,
+              pl: navCollapsed ? (collapsedNavWidth - navigationBorderWidth - 24) / 8 : 5.5,
+              pr: navCollapsed ? ((collapsedNavWidth - navigationBorderWidth - 24) / 2 - 5) / 4 : 3.5,
               '&.Mui-selected': {
                 backgroundColor: 'action.hover',
                 '&:hover': {
@@ -209,8 +208,8 @@ const VerticalNavGroup = props => {
                 sx={{
                   color: 'text.primary',
                   transition: 'margin .25s ease-in-out',
-                  ...(parent && navCollapsed && !navHover ? {} : { mr: 2.5 }),
-                  ...(navCollapsed && !navHover ? { mr: 0 } : {}),
+                  ...(parent && navCollapsed ? {} : { mr: 2.5 }),
+                  ...(navCollapsed ? { mr: 0 } : {}),
                   ...(parent && item.children ? { ml: 1.25, mr: 3.75 } : {})
                 }}
               >
@@ -219,7 +218,7 @@ const VerticalNavGroup = props => {
             )}
             <MenuItemTextWrapper sx={{ ...menuGroupCollapsedStyles, ...(isSubToSub ? { ml: 9 } : {}) }}>
               <Typography
-                {...((themeConfig.menuTextTruncate || (!themeConfig.menuTextTruncate && navCollapsed && !navHover)) && {
+                {...((themeConfig.menuTextTruncate || (!themeConfig.menuTextTruncate && navCollapsed)) && {
                   noWrap: true
                 })}
               >

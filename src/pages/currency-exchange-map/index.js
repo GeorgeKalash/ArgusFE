@@ -19,6 +19,7 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,6 +33,7 @@ const NumberRange = () => {
   const [currencyId, setCurrencyId] = useState(0)
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
+  const { width, height } = useWindowDimensions();
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.currencyExchangeMap, setAccess)
@@ -299,14 +301,12 @@ const NumberRange = () => {
   }
 
   return (
-    <Box>
+    <Box   sx={{
+      height: `${height-80}px`
+     }}>
       <CustomTabPanel index={0} value={0}>
         <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%'
-          }}
+
         >
           <Grid container>
             <Grid container xs={12} spacing={2}>
@@ -371,9 +371,9 @@ const NumberRange = () => {
               </Grid>
             </Grid>
             {exchangeMapsValidation.values.currencyId > 0 && exchangeMapsValidation.values.countryId > 0 && (
-              <Grid xs={12}>
-                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                  <InlineEditGrid
+               <Grid xs={12} sx={{pt:2}}>
+           <Box>
+                   <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
                     columns={exchangeMapsInlineGridColumns}
                     defaultRow={{
@@ -395,16 +395,32 @@ const NumberRange = () => {
                     allowAddNewLine={false}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={560}
+                    scrollHeight={`${height-190}px`}
+
+
                   />
                 </Box>
-                <WindowToolbar onSave={handleSubmit} />
+
+
               </Grid>
+
             )}
           </Grid>
         </Box>
+        <Grid sx={{
+                  // height:`${height/10}px`,
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  padding: 0,
+                  textAlign: 'center',
+                }}
+                >
+              <WindowToolbar onSave={handleSubmit} smallBox={true} />
+              </Grid>
       </CustomTabPanel>
-      <WindowToolbar />
+
     </Box>
   )
 }

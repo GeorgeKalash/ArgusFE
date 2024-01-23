@@ -13,6 +13,8 @@ import AddressTab from 'src/components/Shared/AddressTab'
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import { TextFieldReference } from 'src/components/Shared/TextFieldReference'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const ClientTab = ({
   clientIndividualFormValidation,
@@ -50,10 +52,10 @@ const ClientTab = ({
   educationStore,
   idTypeStore,
   titleStore,
+  setReferenceRequired,
    _labels, maxAccess, editMode
  }) => {
 
-console.log(clientIndividualFormValidation)
 
 const [showAsPassword , setShowAsPassword]  = useState(false)
 const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)
@@ -95,13 +97,14 @@ return (
         <Grid item xs={6} sx={{ padding: "40px" }}>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <CustomTextField
+            <TextFieldReference
+                endpointId={CurrencyTradingSettingsRepository.Defaults.get}
+                param={'ct-nra-individual'}
                 name="reference"
                 label={_labels.reference}
+                editMode={editMode}
                 value={clientIndividualFormValidation.values.reference}
-
-                // required
-                readOnly={true}
+                setReferenceRequired={setReferenceRequired}
                 onChange={clientIndividualFormValidation.handleChange}
                 onClear={() =>
                   clientIndividualFormValidation.setFieldValue("reference", "")
@@ -115,6 +118,7 @@ return (
                   clientIndividualFormValidation.errors.reference
                 }
               />
+
             </Grid>
             <Grid item xs={6}>
               <FormControlLabel

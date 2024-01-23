@@ -41,6 +41,35 @@ export const DocumentReleaseRepository = {
     get: service + 'getCHV',
     set: service + 'setCHV',
     del: service + 'delCHV'
+  },
+  Class:
+  {
+    page:service + 'pageCLS',
+    qry: service + 'qryCLS',
+    get: service + 'getCLS',
+    set: service + 'setCLS',
+    del: service + 'delCLS'
+  },
+  ClassCharacteristics:
+  {
+    qry: service + 'qryCLC',
+    get: service + 'getCLC',
+    set: service + 'setCLC',
+    del: service + 'delCLC'
+  },
+  ClassFunction:
+  {
+    qry: service + 'qryCFU',
+    get: service + 'getCFU',
+    set: service + 'setCFU',
+    del: service + 'delCFU'
+  },
+  Strategy:
+  {
+    qry: service + 'qrySTG',
+    get: service + 'getSTG',
+    set: service + 'setSTG',
+    del: service + 'delSTG'
   }
 
 

@@ -53,6 +53,7 @@ const RelationTypes = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
+    
   }, [access])
 
   const _labels = {

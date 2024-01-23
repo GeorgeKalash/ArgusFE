@@ -1,5 +1,5 @@
 // ** React Imports
-import { createContext, useEffect, useState, useContext } from 'react'
+import React, { createContext, useEffect, useState, useContext } from 'react';
 
 // ** Next Import
 import { useRouter } from 'next/router'
@@ -9,6 +9,8 @@ import { Tabs, Tab, Box } from '@mui/material'
 import { IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
 
 // ** Context
 import { MenuContext } from 'src/providers/MenuContext'
@@ -51,6 +53,21 @@ const TabsProvider = ({ children }) => {
     return parts[parts.length - 1]
   }
 
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const open = Boolean(anchorEl)
+
+  const OpenItems = (event, i) => {
+    setTabsIndex(i)
+    event.preventDefault()
+    setAnchorEl(event.currentTarget)
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null)
+    
+    setTabsIndex()
+  };
+
   const findNode = (nodes, targetRouter) => {
     for (const node of nodes) {
       if (node.children) {
@@ -62,7 +79,7 @@ const TabsProvider = ({ children }) => {
         return node.name
       }
     }
-
+    
     return null
   }
 
@@ -70,36 +87,73 @@ const TabsProvider = ({ children }) => {
   const [activeTabs, setActiveTabs] = useState([])
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [value, setValue] = useState(0)
+  const [TabsIndex, setTabsIndex] = useState()
+  const [length, setLength] = useState(1)
+  const [closing, setClosing] = useState(false)
+
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
   }
 
-  const closeTab = tabRoute => {
-    const index = activeTabs.findIndex(tab => tab.route === tabRoute)
-    if (index === value) {
-      const newValue = index > 0 ? index - 1 : 1
-      if (activeTabs[newValue]) {
-        router.push(activeTabs[newValue].route)
-      }
-      setValue(newValue - 1 >= 0 ? newValue - 1 : 0)
-    } else if (value === activeTabs.length - 1) {
-      if (activeTabs[index - 1]) {
-        router.push(activeTabs[index - 1].route)
-      }
-      setValue(activeTabs.length - 2)
-    }
+  const handleCloseAllTabs =  () => {
+    router.push('/default');
+    setActiveTabs([]);
+    setLength(0);
+    setValue()
+  };
 
-    setActiveTabs(prevState => {
-      prevState = prevState.filter(tab => tab.route !== tabRoute)
+  const handleCloseOtherTab = (Tab) => {
+    const tab = activeTabs[Tab]
+      router.push(tab.route)
+      setActiveTabs([])
+      setActiveTabs([tab])
+      setLength(0)
+      setValue(0)
 
-      return prevState
-    })
   }
 
+  const closeTab = (tabRoute) => {
+    setClosing(true)
+    const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
+    const lastValue = activeTabs.length;
+
+    if (lastValue === 1) {
+      setLength(0);
+      router.push('/default');
+      setActiveTabs([]);
+    } else {
+      if (index === lastValue - 1) {
+        const newValue = index > 0 ? index - 1 : 0;
+        if (activeTabs[newValue]) {
+          router.push(activeTabs[newValue].route);
+        }
+        setValue(newValue);
+      } else if (value === lastValue - 1) {
+        setValue(lastValue - 2);
+      }
+      
+      setActiveTabs((prevState) => {
+        return prevState.filter((tab) => tab.route !== tabRoute);
+      });
+    }
+  };
+
   useEffect(() => {
+    if(length === 0){
+      setActiveTabs([])
+      setLength(1)
+    } else {
     if (initialLoadDone && router.asPath != '/default') {
-      const isTabOpen = activeTabs.some(activeTab => activeTab.page === children || activeTab.route === router.asPath)
+      const isTabOpen = activeTabs.some((activeTab, index) => {
+        if (activeTab.page === children || activeTab.route === router.asPath) {
+          setValue(index);
+          
+          return true;
+        }
+        
+          return false;
+      })
       if (isTabOpen) return
       else {
         const newValueState = activeTabs.length
@@ -115,10 +169,16 @@ const TabsProvider = ({ children }) => {
         })
         setValue(newValueState)
       }
-    }
+    }}
   }, [children, router.asPath])
 
   useEffect(() => {
+    if(closing && value){
+      if(activeTabs[value].route!=router.asPath){
+        router.push(activeTabs[value].route)
+      }
+    }
+
     if (!activeTabs[0] && router.route != '/default' && router.asPath && menu.length > 0) {
       setActiveTabs([
         {
@@ -128,7 +188,7 @@ const TabsProvider = ({ children }) => {
         }
       ])
       setInitialLoadDone(true)
-    }
+    } setClosing(false)
   }, [activeTabs, router, menu])
 
   return (
@@ -151,12 +211,13 @@ const TabsProvider = ({ children }) => {
                       key={i}
                       label={activeTab?.label}
                       onClick={() => router?.push(activeTab.route)}
+                      onContextMenu={(event) => OpenItems(event, i)}
                       icon={
                         <IconButton
                           size='small'
-                          onClick={event => {
-                            event.stopPropagation()
-                            closeTab(activeTab.route)
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            closeTab(activeTab.route);
                           }}
                         >
                           <CloseIcon fontSize='small' />
@@ -177,8 +238,45 @@ const TabsProvider = ({ children }) => {
             </CustomTabPanel>
           ))}
       </Box>
+      <Menu
+        anchorEl={anchorEl}
+        id="account-menu"
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose} 
+        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+      >
+        <MenuItem onClick={(event) => {
+          closeTab(activeTabs[TabsIndex]?.route);
+          event.stopPropagation();
+          handleClose();
+        }}>
+          <div>
+            Close Tab
+          </div>
+        </MenuItem>
+        <MenuItem onClick={(event) =>{
+          event.stopPropagation();
+          handleCloseOtherTab(TabsIndex);
+          handleClose();
+        }}>
+          <div>
+            Close Other Tabs
+          </div>
+        </MenuItem>
+        <MenuItem onClick={(event) =>{
+          event.stopPropagation();
+          handleCloseAllTabs();
+          handleClose();
+        }}>
+          <div>
+            Close All Tabs
+          </div>
+        </MenuItem>
+      </Menu>
     </>
-  )
-}
+  );
+};
 
 export { TabsContext, TabsProvider }

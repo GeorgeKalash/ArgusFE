@@ -7,16 +7,16 @@ const SecurityGroupWindow = ({
   onSave,
   initialAllListData,
   initialSelectedListData,
-  labels,
+  itemSelectorLabels,
   handleListsDataChange
 }) => {
   return (
-    <Window width={600} height={400} onClose={onClose} onSave={onSave} Title={labels.securityGrp}>
+    <Window width={600} height={400} onClose={onClose} onSave={onSave} Title={itemSelectorLabels[0]}>
     <ItemSelectorWindow
           initialAllListData={initialAllListData}
           initialSelectedListData={initialSelectedListData}
           handleListsDataChange={handleListsDataChange} 
-          labels={labels}      
+          itemSelectorLabels={itemSelectorLabels}      
         />
         </Window>
   )

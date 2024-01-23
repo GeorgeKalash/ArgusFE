@@ -1,8 +1,8 @@
 // ** React Importsport
-import { useEffect, useState, useContext } from 'react'
+import React, { useState, useContext, use } from 'react'
 
 // ** MUI Imports
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -12,19 +12,14 @@ import toast from 'react-hot-toast'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import TransactionLog from 'src/components/Shared/TransactionLog'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CommonContext } from 'src/providers/CommonContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewBPMasterData, populateBPMasterData } from 'src/Models/BusinessPartner/BPMasterData'
 import { getNewRelation, populateRelation } from 'src/Models/BusinessPartner/Relation'
 import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { ControlContext } from 'src/providers/ControlContext'
-import { DataSets } from 'src/resources/DataSets'
 
 // ** Windows
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
@@ -33,99 +28,76 @@ import AddressWindow from 'src/components/Shared/AddressWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
+
+function SampleWindow() {
+  const { stack } = useWindow()
+
+  return (
+    <div>
+      <Button
+        onClick={() => {
+          stack({
+            Component: SampleWindow,
+            title: 'New Window'
+          })
+        }}
+      >
+        Open New Window
+      </Button>
+      Hello World.
+    </div>
+  )
+}
+
+function WindowConsumer() {
+  const { stack } = useWindow()
+
+  return (
+    <div>
+      <Button
+        onClick={() => {
+          stack({
+            Component: SampleWindow,
+            title: 'Sample Window'
+          })
+        }}
+      >
+        Open Window
+      </Button>
+    </div>
+  )
+}
 
 const BPMasterData = () => {
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [addressLabels, setAddressLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  //What should be placed for most pages
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [idCategoryStore, setIDCategoryStore] = useState([])
-  const [relationGridData, setRelationGridData] = useState([])
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  const [addressGridData, setAddressGridData] = useState([]) //for address tab
-  //states
-  const [activeTab, setActiveTab] = useState(0)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [defaultValue, setdefaultValue] = useState(null)
-  const [windowInfo, setWindowInfo] = useState(null)
-
-  const [relationWindowOpen, setRelationWindowOpen] = useState(false)
-
-  const [addressWindowOpen, setAddressWindowOpen] = useState(false)
-  const [addressEditMode, setAddressEditMode] = useState(false)
-
-  const _labels = {
-    general: labels && labels.find(item => item.key === "1").value,
-    group: labels && labels.find(item => item.key === "2").value,
-    reference: labels && labels.find(item => item.key === "3").value,
-    name: labels && labels.find(item => item.key === "4").value,
-    foreignLanguage: labels && labels.find(item => item.key === "5").value,
-    keywords: labels && labels.find(item => item.key === "6").value,
-    idCategory: labels && labels.find(item => item.key === "7").value,
-    defaultId: labels && labels.find(item => item.key === "8").value,
-    inactive: labels && labels.find(item => item.key === "9").value,
-    masterData: labels && labels.find(item => item.key === "10").value,
-    category: labels && labels.find(item => item.key === "11").value,
-    birthPlace: labels && labels.find(item => item.key === "12").value,
-    isBlackListed: labels && labels.find(item => item.key === "13").value,
-    nationalityRef: labels && labels.find(item => item.key === "14").value,
-    nationalityName: labels && labels.find(item => item.key === "15").value,
-    birthDate: labels && labels.find(item => item.key === "16").value,
-    nationalityId: labels && labels.find(item => item.key === "17").value,
-    legalStatus: labels && labels.find(item => item.key === "18").value,
-    idCategory: labels && labels.find(item => item.key === "19").value,
-    idNumber: labels && labels.find(item => item.key === "20").value,
-    relation: labels && labels.find(item => item.key === "21").value,
-    businessPartner: labels && labels.find(item => item.key === "22").value,
-    from: labels && labels.find(item => item.key === "23").value,
-    to: labels && labels.find(item => item.key === "24").value,
-
-    name:
-      addressLabels && addressLabels.find(item => item.key === "1") && addressLabels.find(item => item.key === "1").value,
-    street1:
-      addressLabels && addressLabels.find(item => item.key === "2") && addressLabels.find(item => item.key === "2").value,
-    street2:
-      addressLabels && addressLabels.find(item => item.key === "3") && addressLabels.find(item => item.key === "3").value,
-    email:
-      addressLabels && addressLabels.find(item => item.key === "4") && addressLabels.find(item => item.key === "4").value,
-    email2:
-      addressLabels && addressLabels.find(item => item.key === "5") && addressLabels.find(item => item.key === "5").value,
-
-    country:
-      addressLabels && addressLabels.find(item => item.key === "6") && addressLabels.find(item => item.key === "6").value,
-    state:
-      addressLabels && addressLabels.find(item => item.key === "7") && addressLabels.find(item => item.key === "7").value,
-    city:
-      addressLabels && addressLabels.find(item => item.key === "8") && addressLabels.find(item => item.key === "8").value,
-
-    postalCode:
-      addressLabels && addressLabels.find(item => item.key === "9") && addressLabels.find(item => item.key === "9").value,
-    phone:
-      addressLabels && addressLabels.find(item => item.key === "10") && addressLabels.find(item => item.key === "10").value,
-    phone2:
-      addressLabels && addressLabels.find(item => item.key === "11") && addressLabels.find(item => item.key === "11").value,
-    phone3:
-      addressLabels && addressLabels.find(item => item.key === "12") && addressLabels.find(item => item.key === "12").value,
-    address:
-      addressLabels && addressLabels.find(item => item.key === "13") && addressLabels.find(item => item.key === "13").value,
-
-    cityDistrict:
-      addressLabels && addressLabels.find(item => item.key === "14") && addressLabels.find(item => item.key === "14").value,
-    bldgNo:
-      addressLabels && addressLabels.find(item => item.key === "15") && addressLabels.find(item => item.key === "15").value,
-    unitNo:
-      addressLabels && addressLabels.find(item => item.key === "16") && addressLabels.find(item => item.key === "16").value,
-    subNo:
-      addressLabels && addressLabels.find(item => item.key === "17") && addressLabels.find(item => item.key === "17").value
+    return await getRequest({
+      extension: BusinessPartnerRepository.MasterData.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
+    })
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: BusinessPartnerRepository.MasterData.qry,
+    datasetId: ResourceIds.BPMasterData
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: BusinessPartnerRepository.MasterData.qry
+  })
 
   const columns = [
     {
@@ -166,139 +138,52 @@ const BPMasterData = () => {
     }
   ]
 
-  const tabs = [{ label: _labels.general }, { label: _labels.idNumber, disabled: !editMode }, { label: _labels.relation, disabled: !editMode },
-    { label: _labels.address , disabled: !editMode }]
-
-  const bpMasterDataValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      category: yup.string().required('This field is required'),
-      groupId: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      postBPMasterData(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    if (activeTab === 0) bpMasterDataValidation.handleSubmit()
-    else if (activeTab === 1) idNumberValidation.handleSubmit()
-    else if (activeTab === 2) relationGridData.handleSubmit()
-
-    //didn't mention address because it is not affected by submit button
+  const add = () => {
+    setWindowOpen(true)
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&_sortBy=reference desc`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: BusinessPartnerRepository.MasterData.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
   }
 
-  const postBPMasterData = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: BusinessPartnerRepository.MasterData.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setEditMode(true)
-        resetIdNumber(res.recordId)
-        obj.recordId = res.recordId
-        fillIdNumberStore(obj)
-        getRelationGridData(obj.recordId)
-        if (!recordId) {
-          bpMasterDataValidation.setFieldValue('recordId', res.recordId)
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delBPMasterData = obj => {
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: BusinessPartnerRepository.MasterData.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
 
-  const addBPMasterData = () => {
-    bpMasterDataValidation.setValues(getNewBPMasterData())
-    setActiveTab(0)
-    setEditMode(false)
-    setWindowOpen(true)
-    fillIdCategoryStore(null)
-    resetIdNumber()
-    setRelationGridData([])
-    setdefaultValue(null)
+  // End
 
-    //address
-    setAddressGridData([]) //state store will be filled upon country selection
-  }
+  //stores
+  const [relationGridData, setRelationGridData] = useState([])
 
-  const editBPMasterData = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: BusinessPartnerRepository.MasterData.get,
-      parameters: parameters
-    })
-      .then(res => {
-        bpMasterDataValidation.setValues(populateBPMasterData(res.record))
-        fillIdCategoryStore(res.record.category)
-        resetIdNumber(res.record.recordId)
-        fillIdNumberStore(obj)
-        getRelationGridData(obj.recordId)
-        setdefaultValue(null)
-        if (obj.defaultInc != null){getDefault(obj)}
-        setEditMode(true)
-        setWindowOpen(true)
-        setActiveTab(0)
+  const [addressGridData, setAddressGridData] = useState([]) //for address tab
+  //states
+  const [windowOpen, setWindowOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [defaultValue, setdefaultValue] = useState(null)
 
-        //address
-        getAddressGridData(obj.recordId)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
+  const [relationWindowOpen, setRelationWindowOpen] = useState(false)
 
-  const fillIdCategoryStore = async categId => {
-    setIDCategoryStore(await filterIdCategory(categId))
-  }
-
+  const [addressWindowOpen, setAddressWindowOpen] = useState(false)
+  const [addressEditMode, setAddressEditMode] = useState(false)
 
   const filterIdCategory = async categId => {
     try {
       const res = await getRequest({
         extension: BusinessPartnerRepository.CategoryID.qry,
         parameters: `_startAt=0&_pageSize=1000`
-      });
+      })
 
-      return categId ? res.list.filter((item) => ((categId === 1 && item.person) || (categId === 2 && item.org) || (categId === 3 && item.group))): []
+      return categId
+        ? res.list.filter(
+            item => (categId === 1 && item.person) || (categId === 2 && item.org) || (categId === 3 && item.group)
+          )
+        : []
     } catch (error) {
       setErrorMessage(error.res)
 
@@ -309,16 +194,16 @@ const BPMasterData = () => {
   const getDefault = obj => {
     const bpId = obj.recordId
     const incId = obj.defaultInc
-    var parameters =`_bpId=${bpId}&_incId=${incId}`
+    var parameters = `_bpId=${bpId}&_incId=${incId}`
 
     getRequest({
       extension: BusinessPartnerRepository.MasterIDNum.get,
       parameters: parameters
     })
-    .then(res => {
-      if (res.record && res.record.idNum != null) {
-        setdefaultValue(res.record.idNum)
-      }
+      .then(res => {
+        if (res.record && res.record.idNum != null) {
+          setdefaultValue(res.record.idNum)
+        }
       })
       .catch(error => {
         setErrorMessage(error)
@@ -347,11 +232,7 @@ const BPMasterData = () => {
     initialValues: {
       rows: [
         {
-          bpId: bpMasterDataValidation.values
-            ? bpMasterDataValidation.values.recordId
-              ? bpMasterDataValidation.values.recordId
-              : ''
-            : '',
+          bpId: selectedRecordId || '',
           incId: '',
           idNum: '',
           incName: ''
@@ -434,7 +315,6 @@ const BPMasterData = () => {
     }
   }
 
-
   //Relation Tab
   const relationValidation = useFormik({
     enableReinitialize: true,
@@ -444,7 +324,7 @@ const BPMasterData = () => {
       relationId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log('relation values '+ JSON.stringify(values))
+      console.log('relation values ' + JSON.stringify(values))
       postRelation(values)
     }
   })
@@ -477,8 +357,8 @@ const BPMasterData = () => {
 
   const postRelation = obj => {
     const recordId = obj.recordId
-    const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
-    obj.fromBPId=bpId
+    const bpId = obj.bpId ? obj.bpId : bpMasterDataValidation.values.recordId
+    obj.fromBPId = bpId
     postRequest({
       extension: BusinessPartnerRepository.Relation.set,
       record: JSON.stringify(obj)
@@ -486,8 +366,7 @@ const BPMasterData = () => {
       .then(res => {
         if (!recordId) {
           toast.success('Record Added Successfully')
-        }
-        else toast.success('Record Editted Successfully')
+        } else toast.success('Record Editted Successfully')
 
         setRelationWindowOpen(false)
         getRelationGridData(bpId)
@@ -506,7 +385,7 @@ const BPMasterData = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log('get '+JSON.stringify())
+        console.log('get ' + JSON.stringify())
         relationValidation.setValues(populateRelation(res.record))
         setRelationWindowOpen(true)
       })
@@ -520,7 +399,7 @@ const BPMasterData = () => {
   }
 
   const delRelation = obj => {
-    const bpId = obj.bpId  ? obj.bpId : bpMasterDataValidation.values.recordId
+    const bpId = obj.bpId ? obj.bpId : bpMasterDataValidation.values.recordId
     postRequest({
       extension: BusinessPartnerRepository.Relation.del,
       record: JSON.stringify(obj)
@@ -533,21 +412,6 @@ const BPMasterData = () => {
         setErrorMessage(error)
       })
   }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.BPMasterData, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 50 })
-        getLabels(ResourceIds.BPMasterData, setLabels)
-        getLabels(ResourceIds.Address, setAddressLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [access])
-
 
   // Address Tab
 
@@ -592,12 +456,12 @@ const BPMasterData = () => {
           extension: BusinessPartnerRepository.BPAddress.set,
           record: JSON.stringify(object)
         })
-        .then(bpResponse => {
-          getAddressGridData(bpId)
-         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+          .then(bpResponse => {
+            getAddressGridData(bpId)
+          })
+          .catch(error => {
+            setErrorMessage(error)
+          })
 
         //bill to and ship to are with formik (hidden or not from security grps)
       })
@@ -617,7 +481,7 @@ const BPMasterData = () => {
       .then(res => {
         console.log('grid')
         console.log(res) //address is complex object so data are not appearing in grid setAddressGridData(res).. should find solution
-        res.list = res.list.map((row) => row = row.address) //sol
+        res.list = res.list.map(row => (row = row.address)) //sol
         console.log(res)
         setAddressGridData(res)
       })
@@ -626,10 +490,11 @@ const BPMasterData = () => {
       })
   }
 
-  const delAddress = obj => { //talk about problem of getting only address body: create empty object or keep this full body??
+  const delAddress = obj => {
+    //talk about problem of getting only address body: create empty object or keep this full body??
     console.log(obj)
     const bpId = bpMasterDataValidation.values.recordId
-    obj.bpId =  bpId
+    obj.bpId = bpId
     obj.addressId = obj.recordId
     console.log(obj)
     postRequest({
@@ -655,12 +520,12 @@ const BPMasterData = () => {
     getAddressById(obj)
   }
 
-   const getAddressById = obj => {
+  const getAddressById = obj => {
     const _bpId = bpMasterDataValidation.values.recordId
 
-    const defaultParams = `_recordId=${obj.recordId}`//addressId the object i am getting was the bpAddress
+    const defaultParams = `_recordId=${obj.recordId}` //addressId the object i am getting was the bpAddress
     // after modifying list it is normal address so i send obj.recordId
-    const bpAddressDefaultParams =  `_addressId=${obj.recordId}&_bpId=${_bpId}`
+    const bpAddressDefaultParams = `_addressId=${obj.recordId}&_bpId=${_bpId}`
     var parameters = defaultParams
     getRequest({
       extension: SystemRepository.Address.get,
@@ -695,19 +560,17 @@ const BPMasterData = () => {
     addressValidation.handleSubmit()
   }
 
-
-
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addBPMasterData} maxAccess={access} />
+        <WindowConsumer />
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editBPMasterData}
-          onDelete={delBPMasterData}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationType='client'
@@ -716,37 +579,21 @@ const BPMasterData = () => {
       </Box>
       {windowOpen && (
         <BPMasterDataWindow
-          onClose={() => setWindowOpen(false)}
-          width={800}
-          height={400}
-          tabs={tabs}
-          onSave={handleSubmit}
-          onInfo={()=>{setWindowInfo(true)}}
-          onInfoClose={()=>{setWindowInfo(false)}}
-          editMode={editMode}
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
+          recordId={selectedRecordId}
           labels={_labels}
           maxAccess={access}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-
-          //General Tab
-          bpMasterDataValidation={bpMasterDataValidation}
-          idCategoryStore={idCategoryStore}
-          fillIdCategoryStore={fillIdCategoryStore}
           defaultValue={defaultValue}
-
-          //ID Number Tab
           idNumberGridColumn={idNumberGridColumn}
           idNumberValidation={idNumberValidation}
-
-          //Relation Tab
           relationGridData={relationGridData}
           getRelationGridData={getRelationGridData}
           delRelation={delRelation}
           addRelation={addRelation}
           popupRelation={popupRelation}
-
-          //Address tab (grid)
           addressGridData={addressGridData}
           getAddressGridData={getAddressGridData}
           addAddress={addAddress}
@@ -755,7 +602,7 @@ const BPMasterData = () => {
         />
       )}
 
-       {relationWindowOpen && (
+      {relationWindowOpen && (
         <BPRelationWindow
           onClose={() => setRelationWindowOpen(false)}
           onSave={handleRelationSubmit}
@@ -769,15 +616,12 @@ const BPMasterData = () => {
           onClose={() => setAddressWindowOpen(false)}
           onSave={handleAddressSubmit}
           addressValidation={addressValidation}
-
-          //approverComboStore={approverComboStore.list} why list?
           maxAccess={access}
           labels={_labels}
-          width ={600}
+          width={600}
           height={400}
         />
       )}
-             {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.BPMasterData}  onInfoClose={() => setWindowInfo(false)} recordId={bpMasterDataValidation.values.recordId}/>}
 
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
