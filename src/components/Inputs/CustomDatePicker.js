@@ -58,10 +58,9 @@ const CustomDatePicker = ({
   }
 
   };
-  const locale = 'es';
-
-  return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale}>
+  
+return (
+    <LocalizationProvider dateAdapter={AdapterDayjs} >
       <DatePicker
         variant={variant}
         size={size}
