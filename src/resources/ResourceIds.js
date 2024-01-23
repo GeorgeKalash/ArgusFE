@@ -48,5 +48,6 @@ export const ResourceIds = {
   ClientCorporate : 35205,
   DRClasses: 10101,
   States: 20107,
-  SecurityGroup: 23102
+  SecurityGroup: 23102,
+  RiskLevel : 35104
 }

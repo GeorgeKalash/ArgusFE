@@ -1,9 +1,9 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import SmsTemplatesForm from '../forms/SmsTemplatesForm'
+import CtRiskLevelsForm from '../forms/CtRiskLevelsForm'
 
-const SmsTemplatesWindow = ({
+const CtRiskLevelsWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -12,15 +12,15 @@ const SmsTemplatesWindow = ({
   
   return (
     <Window
-      id='SmsTemplatesWindow'
-      Title={labels.smsTemplate}
+      id='CtRiskLevelsWindow'
+      Title={labels.riskLevel}
       controlled={true}
       onClose={onClose}
       width={500}
       height={300}
     >
       <CustomTabPanel>
-        <SmsTemplatesForm
+        <CtRiskLevelsForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
@@ -31,4 +31,4 @@ const SmsTemplatesWindow = ({
   )
 }
 
-export default SmsTemplatesWindow
+export default CtRiskLevelsWindow

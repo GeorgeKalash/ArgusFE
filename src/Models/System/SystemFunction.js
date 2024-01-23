@@ -8,7 +8,7 @@ const getNewSystemFunction = () => {
         batchNRARef: null
     }
   }
-  
+
   const populateSystemFunction = obj => {
     return {
         sfName: obj.sfName,
@@ -19,6 +19,5 @@ const getNewSystemFunction = () => {
         batchNRARef: obj.batchNRARef
     }
   }
-  
+
   export { getNewSystemFunction , populateSystemFunction }
-  

@@ -11,10 +11,11 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 // ** Windows
-import SmsTemplatesWindow from './Windows/SmsTemplatesWindow'
+import CtRiskLevelsWindow from './Windows/CtRiskLevesWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -23,7 +24,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const SmsTemplate = () => {
+const CtRiskLevel = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -36,7 +37,7 @@ const SmsTemplate = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: SystemRepository.SMSTemplate.page,
+      extension: CurrencyTradingSettingsRepository.RiskLevel.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -47,23 +48,23 @@ const SmsTemplate = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.SMSTemplate.page,
-    datasetId: ResourceIds.SmsTemplates
+    endpointId: CurrencyTradingSettingsRepository.RiskLevel.page,
+    datasetId: ResourceIds.RiskLevel
   })
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.SMSTemplate.page
+    endpointId: CurrencyTradingSettingsRepository.RiskLevel.page
   })
 
   const columns = [
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'smsBody',
-      headerName: _labels.smsBody,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     }
   ]
@@ -80,7 +81,7 @@ const SmsTemplate = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: SystemRepository.SMSTemplate.del,
+      extension: CurrencyTradingSettingsRepository.RiskLevel.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -105,7 +106,7 @@ const SmsTemplate = () => {
         />
       </Box>
       {windowOpen && (
-        <SmsTemplatesWindow
+        <CtRiskLevelsWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -121,4 +122,4 @@ const SmsTemplate = () => {
   )
 }
 
-export default SmsTemplate
+export default CtRiskLevel

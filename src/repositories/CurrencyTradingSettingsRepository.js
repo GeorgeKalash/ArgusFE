@@ -41,7 +41,14 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getACT',
     set: service + 'setACT',
     del: service + 'delACT'
+  },
+  RiskLevel :{
+    qry: service + 'qryRSK',
+    get: service + 'getRSK',
+    set: service + 'setRSK',
+    del: service + 'delRSK',
+    page: service + 'pageRSK',
+  
   }
-
 
 }

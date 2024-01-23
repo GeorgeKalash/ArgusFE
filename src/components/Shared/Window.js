@@ -29,6 +29,7 @@ const Window = ({
   onSave,
   onClear,
   onInfo,
+  controlled,
   editMode = false,
   disabledSubmit,
   disabledInfo,
@@ -122,10 +123,24 @@ const Window = ({
                 ))}
               </Tabs>
             )}
-            <DialogContent sx={{ height: expanded ? `calc(100vh - 48px - 180px)` : height, p: 0 }}>
-              {children}
-            </DialogContent>
-            {windowToolbarVisible && <WindowToolbar onSave={onSave}  onClear={onClear} onInfo={onInfo} disabledSubmit={disabledSubmit}  disabledInfo={disabledInfo} onApply={onApply} disabledApply={disabledApply} />}
+            {!controlled ? (
+              <>
+                <DialogContent sx={{ height: expanded ? `calc(100vh - 48px - 180px)` : height, p: 0 }}>
+                  {children}
+                </DialogContent>
+                {windowToolbarVisible && (
+                  <WindowToolbar
+                    onSave={onSave}
+                    onClear={onClear}
+                    onInfo={onInfo}
+                    disabledSubmit={disabledSubmit}
+                    disabledInfo={disabledInfo}
+                  />
+                )}
+              </>
+            ) : (
+              children
+            )}
           </Paper>
         </Box>
       </Draggable>
