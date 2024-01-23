@@ -50,11 +50,11 @@ const Window = ({
     ? false
     : true
 
-  const handleKeyDown = event => {
-    if (event.key === 'Enter') {
-      onSave()
-    }
-  }
+  // const handleKeyDown = event => {
+  //   if (event.key === 'Enter') {
+  //     onSave()
+  //   }
+  // }
 
   const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
   const containerHeight = `calc(100vh - 48px)`
@@ -85,7 +85,8 @@ const Window = ({
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
-            onKeyDown={handleKeyDown}
+
+            //onKeyDown={handleKeyDown}
             sx={{
               width: expanded ? containerWidth : width, // Expand width to 100% when expanded
               minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded

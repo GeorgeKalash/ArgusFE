@@ -7,5 +7,13 @@ export const MultiCurrencyRepository = {
     get: service + 'getEX',
     set: service + 'setEX',
     del: service + 'delEX'
+  },
+  RateType: {
+    qry: service + 'qryRT',
+    get: service + 'getRT',
+    set: service + 'setRT',
+    del: service + 'delRT',
+    page: service + 'pageRT',
   }
+
 }
