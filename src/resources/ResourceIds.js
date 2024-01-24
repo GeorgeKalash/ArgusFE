@@ -51,6 +51,6 @@ export const ResourceIds = {
   States: 20107,
   SecurityGroup: 23102,
   RiskLevel : 35104,
+  PurposeOfExchange : 35103,
   RateType : 32100,
-
 }
