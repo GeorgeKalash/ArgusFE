@@ -4,9 +4,10 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 // ** Helpers
-import { getFormattedNumberMax } from 'src/lib/numberField-helper'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clientStore }) => {
   return (
@@ -66,7 +67,8 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           required
           maxAccess={maxAccess}
           onChange={(event, newValue) => {
-            idTypesValidation && idTypesValidation.setFieldValue('category', newValue?.key)
+            idTypesValidation.setFieldValue('type', '')
+            idTypesValidation && idTypesValidation.setFieldValue('category', parseInt(newValue?.key))
           }}
           error={idTypesValidation.touched.category && Boolean(idTypesValidation.errors.category)}
           helperText={idTypesValidation.touched.category && idTypesValidation.errors.category}
@@ -107,6 +109,40 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           helperText={idTypesValidation.touched.clientFileLifeTime && idTypesValidation.errors.clientFileLifeTime}
         />
       </Grid>
+      <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.ID_TYPE}
+                    name="type"
+                    label={labels.type}
+                    valueField='key'
+                    displayField='value'
+                    values={idTypesValidation.values}
+                    required={idTypesValidation.values.category ===1 && true}
+                    readOnly={idTypesValidation.values.category !==1 && true}
+
+                    onChange={(event, newValue) => {
+                     if(newValue){
+                      idTypesValidation.setFieldValue(
+                        "type",
+                        newValue?.key,
+                      );
+                     }else{
+                        idTypesValidation.setFieldValue(
+                          "type",
+                          null,
+                        );
+                      }
+                    }}
+                    error={
+                      idTypesValidation.touched.type &&
+                      Boolean(idTypesValidation.errors.type)
+                    }
+                    helperText={
+                      idTypesValidation.touched.type &&
+                      idTypesValidation.errors.type
+                    }
+                  />
+                </Grid>
       <Grid item xs={12}>
         <FormControlLabel
           control={

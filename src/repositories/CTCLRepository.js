@@ -14,6 +14,7 @@ export const CTCLRepository = {
 
   },
   ClientCorporate: {
+    snapshot : service + "snapshotCL",
     page : service + "pageCLC",
     set2: service + 'set2CLC',
     get: service + 'get2CLC',

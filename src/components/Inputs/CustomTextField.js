@@ -17,35 +17,22 @@ const CustomTextField = ({
   autoComplete = 'off',
   numberField = false,
   editMode = false,
-  maxLength = '1000',
+  maxLength = '',
   position,
   dir='ltr',
   hidden = false,
   phone = false,
   search= false,
-
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
   const inputRef = useRef(null)
-  const [focus, setFocus] = useState(false);
-
-  // useEffect(() => {
-  //   setForceRerender((prev) => prev + 1);
-  // }, [value]); // Include value in dependencies
-
-  useEffect(() => {
-    if(inputRef.current.selectionStart !== undefined && focus  ){
-         inputRef.current.focus();
-      }
-  }, [value]);
-
 
   useEffect(() => {
     // Save the cursor position before the value changes
-    if (typeof inputRef.current.selectionStart !== undefined && position && value) {
+    if (typeof inputRef.current.selectionStart !== undefined && position) {
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
@@ -67,19 +54,15 @@ const CustomTextField = ({
 
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
-
       <TextField
-
-        key={value}
         inputRef={inputRef}
         type={type}
         variant={variant}
-        defaultValue={phone ? value?.replace(/\D/g, '') : value}
+        value={phone ? value?.replace(/\D/g, '') : value}
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
         inputProps={{
-          autoComplete: "off",
           readOnly: _readOnly,
           maxLength: maxLength,
           dir: dir, // Set direction to right-to-left
@@ -95,7 +78,7 @@ const CustomTextField = ({
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
         onInput={handleInput}
-        onKeyDown={(e)=> e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)}
+        onKeyDown={(e)=> e.key === 'Enter' && search && onSearch(e.target.value)}
         InputProps={{
 
           endAdornment:
