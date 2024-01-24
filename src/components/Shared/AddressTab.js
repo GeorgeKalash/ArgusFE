@@ -158,7 +158,7 @@ const AddressTab = ({
               values={addressValidation.values}
               required={!requiredOptional}
               onChange={(event, newValue) => {
-                addressValidation.setFieldValue('stateId', '')
+                addressValidation.setFieldValue('stateId', null)
                 addressValidation.setFieldValue('cityId', '')
                 addressValidation.setFieldValue('city', '')
                 addressValidation.setFieldValue('cityDistrictId', '')
