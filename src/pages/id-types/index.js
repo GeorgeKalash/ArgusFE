@@ -93,6 +93,15 @@ const IdTypes = () => {
   const idTypesValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
+    validate : (values) => {
+      const errors = {};
+      if (values.category==='1' && !values.type ) {
+        errors.type = 'This field is required';
+      }
+
+      return errors;
+
+    },
     validationSchema: yup.object({
       name: yup.string().required('This field is required'),
       format: yup.string().required('This field is required'),

@@ -76,7 +76,7 @@ const ClientsList = () => {
   const [titleStore, setTitleStore] = useState([]);
 const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
   const [errorMessage, setErrorMessage] = useState(null)
- const [showOtpVerification , setWindowOtpVerification] = useState(false)
+ const [showOtpVerification , setShowOtpVerification] = useState(false)
  const [windowWorkAddressOpen , setWindowWorkAddressOpen] = useState(false)
 const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
   useEffect(() => {

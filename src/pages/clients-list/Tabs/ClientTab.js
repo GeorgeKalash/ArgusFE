@@ -263,8 +263,6 @@ return (
                     value={clientIndividualFormValidation.values?.issusDate}
                     readOnly={editMode && true}
                     disabledDate={'>'}
-
-                    // required={true}
                     onChange={clientIndividualFormValidation.handleChange}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
@@ -1033,7 +1031,12 @@ return (
                     label={_labels.riskLevel}
                     readOnly={editMode && true}
                     valueField="recordId"
-                    displayField="name"
+                    displayField={['reference','name']}
+
+                  columnsInDropDown= {[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                  ]}
 
                     values={clientIndividualFormValidation.values}
                     onChange={(event, newValue) => {

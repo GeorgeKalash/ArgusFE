@@ -448,6 +448,8 @@ return (
                           control={
                             <Checkbox
                               name="trading"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.trading
                               }
@@ -464,6 +466,8 @@ return (
                           control={
                             <Checkbox
                               name="inward"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.inward
                               }
@@ -480,6 +484,8 @@ return (
                           control={
                             <Checkbox
                               name="outward"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.outward
                               }
