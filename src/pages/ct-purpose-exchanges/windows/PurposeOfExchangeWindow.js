@@ -13,7 +13,7 @@ const PurposeOfExchangeWindow = ({
   return (
     <Window
       id='PurposeOfExchangeWindow'
-      Title={labels.PurposeExchange}
+      Title={labels.purposeOfExchange}
       controlled={true}
       onClose={onClose}
       width={500}
