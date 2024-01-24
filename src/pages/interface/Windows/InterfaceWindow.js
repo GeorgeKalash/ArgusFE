@@ -1,33 +1,27 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import InterfaceTab from 'src/pages/interface/Tabs/InterfaceTab'
+import InterfaceForm from '../forms/InterfaceForm'
 
 const InterfaceWindow = ({
     onClose,
-    width,
-    height,
-    onSave,
-    editMode,
-    interfaceValidation,
     labels,
-    maxAccess
+    maxAccess,
+    recordId
 }) => {
     return (
         <Window
         id='InterfaceWindow'
         Title={labels.interface}
+        controlled={true}
         onClose={onClose}
-        width={width}
-        height={height}
-        onSave={onSave}
-        interfaceValidation={interfaceValidation}
+        width={500} //600,400
+        height={300}
         >
              <CustomTabPanel>
-               <InterfaceTab
+               <InterfaceForm
                   labels={labels}
-                  interfaceValidation={interfaceValidation}
-                  editMode={editMode}
+                  recordId={recordId}
                   maxAccess={maxAccess}
                />
                </CustomTabPanel>

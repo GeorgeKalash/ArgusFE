@@ -1,195 +1,128 @@
-import React, { useContext, useEffect } from 'react'
-import { Box, Grid } from '@mui/material'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import Table from 'src/components/Shared/Table'
-import { useState } from 'react'
-import { ControlContext } from 'src/providers/ControlContext'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+// ** React Imports
+import { useState, useContext } from 'react'
+
+// ** MUI Imports
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-import { getNewRelationType, populateRelationType } from 'src/Models/BusinessPartner/RelationTypes'
+
+// ** Custom Imports
+import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+
+// ** API
+import { RequestsContext } from 'src/providers/RequestsContext'
+
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+
+// ** Windows
+import RelationTypeWindow from '../bp-relation-types/Windows/RelationTypeWindow'
+
+// ** Helpers
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import RelationTypeWindow from '../bp-relation-types/Windows/RelationTypeWindow'
 
 const BpRelationTypes = () => {
-
-
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [typeStore, setTypeStore] = useState([])
+ 
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
-  const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.BpRelationType, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-        // fillSysFunctionsStore()
-        // fillActiveStatusStore()
-        getLabels(ResourceIds.BpRelationType, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
-
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    title: labels && labels.find(item => item.key === "3").value,
-
+    return await getRequest({
+      extension: BusinessPartnerRepository.RelationTypes.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: BusinessPartnerRepository.RelationTypes.page,
+    datasetId: ResourceIds.BpRelationType
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: BusinessPartnerRepository.RelationTypes.page
+  })
 
   const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1,
-      editable: false
+      flex: 1
     },
     {
       field: 'name',
       headerName: _labels.name,
-      flex: 1,
-      editable: false
+      flex: 1
     }
   ]
 
 
-  const RelationTypeValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-
-    }),
-    onSubmit: values => {
-      console.log({ values })
-      postRelationType(values)
-    }
-  })
-
-  const addRelationType = () => {
-    RelationTypeValidation.setValues(getNewRelationType())
-
-    // setEditMode(false)
+  const add = () => {
     setWindowOpen(true)
   }
 
-  const delRelationType = obj => {
-    postRequest({
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
+  }
+
+  const del = async obj => {
+    await postRequest({
       extension: BusinessPartnerRepository.RelationTypes.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
 
-  const editRelationType = obj => {
-
-    RelationTypeValidation.setValues(populateRelationType(obj))
-
-    // setEditMode(true)
-    setWindowOpen(true)
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + '&_dgId=0'
-
-    getRequest({
-      extension: BusinessPartnerRepository.RelationTypes.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-
-
-  const postRelationType = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: BusinessPartnerRepository.RelationTypes.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const handleSubmit = () => {
-    RelationTypeValidation.handleSubmit()
-  }
+  
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addRelationType} maxAccess={access} />
-
+      <Box>
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
+          pageSize={50}
+          paginationType='client'
           maxAccess={access}
-          onEdit={editRelationType}
-          onDelete={delRelationType}
         />
       </Box>
-
       {windowOpen && (
         <RelationTypeWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          RelationTypeValidation={RelationTypeValidation}
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
           labels={_labels}
           maxAccess={access}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
         />
       )}
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
 
 export default BpRelationTypes
+
+

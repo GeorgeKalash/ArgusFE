@@ -30,12 +30,13 @@ import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 
 import AddressWorkWindow from './Windows/AddressWorkWindow'
 import ConfirmNumberWindow from './Windows/ConfirmNumberWindow'
+import Confirmation from 'src/components/Shared/Confirmation'
 
 const ClientsList = () => {
 
 
   const { getLabels, getAccess } = useContext(ControlContext)
-  const { getRequest, postRequest , getMicroRequest} = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   //control
@@ -642,47 +643,47 @@ const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
     }
   })
 
-  const fetchValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
+  // const fetchValidation = useFormik({
+  //   enableReinitialize: true,
+  //   validateOnChange: true,
 
-    initialValues: {
-      idtId: clientIndividualFormValidation.values?.idtId,
-      birthDate: clientIndividualFormValidation.values?.birthDate,
-      idNo: clientIndividualFormValidation.values?.idNo,
-      idNoRepeat: '',
-    },
+  //   initialValues: {
+  //     idtId: clientIndividualFormValidation.values?.idtId,
+  //     birthDate: clientIndividualFormValidation.values?.birthDate,
+  //     idNo: clientIndividualFormValidation.values?.idNo,
+  //     idNoRepeat: '',
+  //   },
 
-    validationSchema:  yup.object({
-      // birthDate: yup.string().required("This field is required"),
-      // idtId: yup.string().required("This field is required"),
-      // idNo:  yup.string().required("This field is required"),
-      // idNoRepeat : yup.string().required('Repeat Password is required')
-      // .oneOf([yup.ref('idNo'), null], 'Number must match'),
+  //   validationSchema:  yup.object({
+  //     // birthDate: yup.string().required("This field is required"),
+  //     // idtId: yup.string().required("This field is required"),
+  //     // idNo:  yup.string().required("This field is required"),
+  //     // idNoRepeat : yup.string().required('Repeat Password is required')
+  //     // .oneOf([yup.ref('idNo'), null], 'Number must match'),
 
-    }),
-    onSubmit: values => {
+  //   }),
+  //   onSubmit: values => {
 
-      postFetchDefault(values)
+  //     postFetchDefault(values)
 
-    }
-  })
+  //   }
+  // })
 
-  const  postFetchDefault=(obj)=>{
-    const defaultParams = `_number=${obj.idNo}&_dateTime=${formatDateToApiFunction(obj.birthDate)}&_type=${obj.idtId}`
-    var parameters = defaultParams
-    getMicroRequest({
-      extension: 'getInformation',
-      parameters: parameters,
+  // const  postFetchDefault=(obj)=>{
+  //   const defaultParams = `_number=${obj.idNo}&_dateTime=${formatDateToApiFunction(obj.birthDate)}&_type=${obj.idtId}`
+  //   var parameters = defaultParams
+  //   getMicroRequest({
+  //     extension: 'getInformation',
+  //     parameters: parameters,
 
-    })
-      .then(res => {
+  //   })
+  //     .then(res => {
 
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
+  //     })
+  //     .catch(error => {
+  //       setErrorMessage(error)
+  //     })
+  // }
 
   const addClient = async (obj) => {
     clientIndividualFormValidation.setValues(getNewClients());
@@ -1112,7 +1113,7 @@ onEdit={editClient}
 
        }
 
-       {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels2} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}        onSave={()=>handleSubmit('fetch')}
+       {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels2} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}
         onClose={()=>setWindowConfirmNumberOpen(false)} width={400} height={300} />}
        {windowWorkAddressOpen && <AddressWorkWindow labels={_labels2} setShowWorkAddress={setWindowWorkAddressOpen} addressValidation={WorkAddressValidation}  onSave={()=>handleSubmit('address')}  onClose={()=>setWindowWorkAddressOpen(false)} requiredOptional={requiredOptional} readOnly={editMode && true}/>}
        {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={"3600"}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}

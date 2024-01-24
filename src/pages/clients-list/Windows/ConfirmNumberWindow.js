@@ -4,38 +4,29 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // **Tabs
 
-import ConfirmNumberTab from '../Tabs/ConfirmNumberTab'
+import Confirmation from 'src/components/Shared/Confirmation'
 
 const ConfirmNumberWindow = ({
-  onSave,
   onClose,
-  width,
-  height,
   labels,
-  editMode,
   clientIndividualFormValidation,
   setWindowConfirmNumberOpen,
   idTypeStore,
-  maxAccess
 }) => {
 
-// const  onSave =()=>{
 
-// }
 
 return (
     <Window
-      id='ConfirmNumberWindow'
       Title={labels.confirmNb}
       onClose={onClose}
-      width={width}
-      height={height}
-      onSave={onSave}
-      disabledInfo={!editMode && true}
-      disabledSubmit={editMode && true}
+      controlled={true}
+      width={350}
+      height={300}
        >
       <CustomTabPanel>
-        <ConfirmNumberTab setWindowConfirmNumberOpen={setWindowConfirmNumberOpen} idTypeStore={idTypeStore} formValidation={clientIndividualFormValidation} labels={labels}  />
+         <Confirmation   setWindowConfirmNumberOpen ={setWindowConfirmNumberOpen} idTypeStore={idTypeStore} formik={clientIndividualFormValidation} labels={labels}  />
+
       </CustomTabPanel>
     </Window>
   )

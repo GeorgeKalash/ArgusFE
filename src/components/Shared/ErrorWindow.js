@@ -7,7 +7,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 
 const ErrorWindow = ({ open, onClose, message }) => {
-console.log(message)
 
     const errorMessage =
         !message?.response ? message?.error ?   message.error  :

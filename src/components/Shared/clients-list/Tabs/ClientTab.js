@@ -17,8 +17,6 @@ import { TextFieldReference } from 'src/components/Shared/TextFieldReference'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import UseIdType from 'src/hooks/useIdType'
-import ConfirmNumberWindow from '../Windows/ConfirmNumberWindow'
-import FormShell from 'src/components/Shared/FormShell'
 
 const ClientTab = ({
   clientIndividualFormValidation,
@@ -39,8 +37,9 @@ const ClientTab = ({
   educationStore,
   idTypeStore,
   titleStore,
-  setWindowConfirmNumberOpen,
+
   setWindowWorkAddressOpen,
+  setWindowConfirmNumberOpen,
   setReferenceRequired,
    _labels, maxAccess, editMode
  }) => {
@@ -50,16 +49,11 @@ const [showAsPassword , setShowAsPassword]  = useState(false)
 const [showAsPasswordPhone , setShowAsPasswordPhone]  = useState(false)
 const [showAsPasswordPhoneRepeat , setShowAsPasswordPhoneRepeat]  = useState(false)
 
-// const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
-
   const handleCopy = (event) => {
     event.preventDefault();
   };
 
   const [getValue] = UseIdType();
-
-
-
 
   async function checkTypes (value) {
     if(!value){
@@ -1172,13 +1166,14 @@ return (
                   name="statusName"
                   label={_labels.status}
                   value={clientIndividualFormValidation.values?.statusName}
+                  required
                   type="number"
                   onChange={clientIndividualFormValidation.handleChange}
                   maxLength="10"
                   onClear={() =>
                     clientIndividualFormValidation.setFieldValue("statusName", "")
                   }
-                  readonly={true}
+                  readonly
 
                   error={
                     clientIndividualFormValidation.touched.statusName &&
@@ -1471,8 +1466,6 @@ return (
         </Grid>
       </Grid>
             </Grid>
-            {/* {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}        onSave={()=>handleSubmit('fetch')}
-        onClose={()=>setWindowConfirmNumberOpen(false)} width={400} height={300} />} */}
         </>
     )
 }
