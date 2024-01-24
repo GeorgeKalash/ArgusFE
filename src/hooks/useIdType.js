@@ -25,7 +25,11 @@ export default function useIdType() {
   }, [store])
 
   const getTypeValue = (value) => {
-    const formatted = store?.find(item => item.format?.replace('*','') === value);
+
+    var  formatted = store?.find(item => item.format === value);
+     if(!formatted?.recordId){
+      formatted = store?.find(item => value.startsWith(item && item.format.includes("*") && item.format.replace('*', ''))) ?? '';
+     }
 
     return  formatted?.recordId
   };

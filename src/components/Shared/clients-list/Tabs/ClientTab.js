@@ -1166,15 +1166,13 @@ return (
                   name="statusName"
                   label={_labels.status}
                   value={clientIndividualFormValidation.values?.statusName}
-                  required
                   type="number"
                   onChange={clientIndividualFormValidation.handleChange}
                   maxLength="10"
                   onClear={() =>
                     clientIndividualFormValidation.setFieldValue("statusName", "")
                   }
-                  readonly
-
+                  readonly={true}
                   error={
                     clientIndividualFormValidation.touched.statusName &&
                     Boolean(clientIndividualFormValidation.errors.statusName)

@@ -68,7 +68,7 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
           maxAccess={maxAccess}
           onChange={(event, newValue) => {
             idTypesValidation.setFieldValue('type', '')
-            idTypesValidation && idTypesValidation.setFieldValue('category', newValue?.key)
+            idTypesValidation && idTypesValidation.setFieldValue('category', parseInt(newValue?.key))
           }}
           error={idTypesValidation.touched.category && Boolean(idTypesValidation.errors.category)}
           helperText={idTypesValidation.touched.category && idTypesValidation.errors.category}
@@ -117,8 +117,8 @@ const IdTypesTab = ({ labels, idTypesValidation, maxAccess, categoryStore, clien
                     valueField='key'
                     displayField='value'
                     values={idTypesValidation.values}
-                    required={idTypesValidation.values.category ==='1' && true}
-                    readOnly={idTypesValidation.values.category !=='1' && true}
+                    required={idTypesValidation.values.category ===1 && true}
+                    readOnly={idTypesValidation.values.category !==1 && true}
 
                     onChange={(event, newValue) => {
                      if(newValue){

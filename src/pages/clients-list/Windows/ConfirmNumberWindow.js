@@ -26,7 +26,6 @@ return (
        >
       <CustomTabPanel>
          <Confirmation   setWindowConfirmNumberOpen ={setWindowConfirmNumberOpen} idTypeStore={idTypeStore} formik={clientIndividualFormValidation} labels={labels}  />
-
       </CustomTabPanel>
     </Window>
   )

@@ -14,6 +14,7 @@ const AddressWorkWindow = ({
   height,
   labels,
   editMode,
+  readOnly,
   maxAccess
 }) => {
   return (
@@ -28,7 +29,7 @@ const AddressWorkWindow = ({
       disabledSubmit={editMode && true}
        >
       <CustomTabPanel>
-           <AddressTab labels={labels} addressValidation={addressValidation}  requiredOptional={requiredOptional} readOnly={editMode && true} />
+           <AddressTab labels={labels} addressValidation={addressValidation}  requiredOptional={requiredOptional} readOnly={readOnly}  />
       </CustomTabPanel>
     </Window>
   )

@@ -17,8 +17,10 @@ import { TextFieldReference } from 'src/components/Shared/TextFieldReference'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import UseIdType from 'src/hooks/useIdType'
-import ConfirmNumberWindow from '../Windows/ConfirmNumberWindow'
 import FormShell from 'src/components/Shared/FormShell'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const ClientTab = ({
   clientIndividualFormValidation,
@@ -26,10 +28,7 @@ const ClientTab = ({
   cityStore,
   setCityStore,
   lookupCity,
-  professionFilterStore,
   fillFilterProfession,
-
-  salaryRangeStore,
   incomeOfSourceStore,
   smsLanguageStore,
   civilStatusStore,
@@ -77,7 +76,7 @@ const [showAsPasswordPhoneRepeat , setShowAsPasswordPhoneRepeat]  = useState(fal
   };
 
 return (
-        <>
+        <FormShell>
         <Grid container spacing={2}>
         <Grid container xs={12} spacing={2} sx={{ padding: "40px" }}>
         <Grid item xs={6} sx={{ padding: "40px" }}>
@@ -155,12 +154,12 @@ return (
                     type={ showAsPassword && "password"}
                     value={clientIndividualFormValidation.values?.idNo}
                     required
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e), checkTypes(e.target.value)}}
+                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)}}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
+                    onBlur={(e) =>{ checkTypes(e.target.value) , setShowAsPassword(true)}}
                     readOnly={editMode && true}
                     maxLength="15"
-                    onBlur={(e) =>{ setShowAsPassword(true) }}
                     onFocus={(e) =>{ setShowAsPassword(false) }}
 
                     onClear={() =>{
@@ -233,7 +232,7 @@ return (
 
 
                 <Grid item xs={12}>
-               <Button  variant='contained' onClick={()=>setWindowConfirmNumberOpen(true)} disabled={ (!clientIndividualFormValidation?.values?.idtId || !clientIndividualFormValidation?.values?.birthDate || !clientIndividualFormValidation.values.idNo ) ? true : false}>{_labels.fetch}</Button>
+               <Button  variant='contained' onClick={()=>setWindowConfirmNumberOpen(true)} disabled={ (!clientIndividualFormValidation?.values?.idtId || !clientIndividualFormValidation?.values?.birthDate || !clientIndividualFormValidation.values.idNo || editMode ) ? true : false}>{_labels.fetch}</Button>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -288,32 +287,25 @@ return (
                 </Grid>
 
                 <Grid item xs={12}>
-                  <CustomComboBox
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Country.qry}
                     name="idCountry"
                     label={_labels.issusCountry}
                     valueField="recordId"
                     displayField={['reference','name','flName']}
                     readOnly={editMode && true}
-                    store={countryStore}
                     columnsInDropDown= {[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    value={
-                      countryStore.filter(
-                        (item) =>
-                          item.recordId ===
-                          clientIndividualFormValidation.values.idCountry,
-                      )[0]
-                    }
+                    values={clientIndividualFormValidation.values}
+
                     required
                     onChange={(event, newValue) => {
                       setCityStore([])
 
                       if(newValue){
-
-
                       clientIndividualFormValidation.setFieldValue(
                         "idCountry",
                         newValue?.recordId,
@@ -365,14 +357,18 @@ return (
 
 
                 <Grid item xs={12}>
-            <CustomLookup
+            <ResourceLookup
+                endpointId={SystemRepository.City.snapshot}
+                parameters={{
+                  _countryId: clientIndividualFormValidation.values.idCountry,
+                  _stateId:  0
+                }}
+
               name='idCity'
               label={_labels.issusPlace}
-
+              form={clientIndividualFormValidation}
               valueField='name'
               displayField='name'
-              store={cityStore}
-              setStore={setCityStore}
               onLookup={lookupCity}
               firstValue={clientIndividualFormValidation.values.cityName}
               secondDisplayField={false}
@@ -724,8 +720,6 @@ return (
                   name="nationalityId"
                   label={_labels.nationality}
                   valueField="recordId"
-
-                  // displayField="name"
                   store={countryStore}
                    displayField={['reference','name','flName']}
 
@@ -789,12 +783,20 @@ return (
                       )[0]
                     }
                     onChange={(event, newValue) => {
-
+                      clientIndividualFormValidation.setFieldValue(
+                        "coveredFace", false
+                      );
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "gender",
                         newValue?.key,
                       );
+
+                      if(newValue.key ==='2'){
+                        clientIndividualFormValidation.setFieldValue(
+                          "coveredFace", true
+                        );
+                      }
 
                     }else{
 
@@ -802,6 +804,7 @@ return (
                         "gender",
                         '',
                       );
+
 
                     }
                     }}
@@ -935,7 +938,8 @@ return (
                 </Grid>
 
               <Grid item xs={12} >
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={RemittanceSettingsRepository.Profession.qry}
                   name="professionId"
                   label={_labels.profession}
                   valueField="recordId"
@@ -946,15 +950,9 @@ return (
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  store={professionFilterStore}
                   readOnly={editMode && true}
-                  value={
-                    professionFilterStore.filter(
-                      (item) =>
-                        item.recordId ===
-                        clientIndividualFormValidation.values.professionId,
-                    )[0]
-                  }
+                  values={clientIndividualFormValidation.values}
+
                   required
                   onChange={(event, newValue) => {
                     clientIndividualFormValidation.setFieldValue(
@@ -980,9 +978,10 @@ return (
               </Grid>
 
 
-<Grid container xs={12} spacing={2} sx={{p:5}} >
+              <Grid container xs={12} spacing={2} sx={{p:5}} >
                 <Grid item xs={12}>
-                  <CustomComboBox
+                  <ResourceComboBox
+                    endpointId={RemittanceSettingsRepository.SalaryRange.qry}
                     name="salaryRangeId"
                     label={_labels.salaryRange}
                     valueField="recordId"
@@ -992,14 +991,7 @@ return (
                       { key: "max", value: "max" },
                     ]}
                     readOnly={editMode && true}
-                    store={salaryRangeStore}
-                    value={
-                      salaryRangeStore.filter(
-                        (item) =>
-                          item.recordId ===
-                          clientIndividualFormValidation.values.salaryRangeId,
-                      )[0]
-                    }
+                    values={clientIndividualFormValidation.values }
                     onChange={(event, newValue) => {
 
                       if(newValue){
@@ -1347,12 +1339,11 @@ return (
                     control={
                       <Checkbox
 
-                         disabled={clientIndividualFormValidation.values.gender === 2 ? editMode? true : false : true}
-
-                         readOnly={editMode && true}
+                         disabled={clientIndividualFormValidation.values.gender === "2" && !editMode ?  false :  true}
                         name="coveredFace"
-                        checked={
-                          clientIndividualFormValidation.values.gender=== "2" ? true :  clientIndividualFormValidation.values?.coveredFace
+                        checked={clientIndividualFormValidation.values.coveredFace
+
+                          // clientIndividualFormValidation.values.gender === "2" && !clientIndividualFormValidation.values.coveredFace  ? true :  clientIndividualFormValidation.values.coveredFace
                         }
                         onChange={clientIndividualFormValidation.handleChange}
                       />
@@ -1473,7 +1464,7 @@ return (
             </Grid>
             {/* {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}        onSave={()=>handleSubmit('fetch')}
         onClose={()=>setWindowConfirmNumberOpen(false)} width={400} height={300} />} */}
-        </>
+        </FormShell>
     )
 }
 
