@@ -63,6 +63,7 @@ const IdCategories = () => {
       headerName: _labels.name,
       flex: 1
     }
+
   ]
 
 

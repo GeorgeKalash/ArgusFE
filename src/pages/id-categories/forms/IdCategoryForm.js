@@ -9,6 +9,8 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
+import {  FormControlLabel, Checkbox } from '@mui/material'
+
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -24,6 +26,10 @@ export default function IdCategoryForm({ labels, maxAccess, recordId }) {
         recordId: null,
         
         name: '',
+        org: false,
+        person: false,
+        group: false,
+        isUnique: false
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -121,6 +127,64 @@ export default function IdCategoryForm({ labels, maxAccess, recordId }) {
                     helperText={formik.touched.name && formik.errors.name}
                     />
                 </Grid>
+
+          <Grid item xs={12}>
+          <FormControlLabel
+           control={
+            <Checkbox
+              name="org"
+              checked={formik.values.org}
+              onChange={formik.handleChange}
+
+              maxAccess={maxAccess}
+            />
+          }
+          label={labels.organization}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <FormControlLabel
+          control={
+            <Checkbox
+            name="person"
+            checked={formik.values.person}
+              onChange={formik.handleChange}
+              maxAccess={maxAccess}
+            />
+          }
+          label={labels.person}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <FormControlLabel
+          control={
+            <Checkbox
+            name='group'
+            checked={formik.values.group}
+            onChange={formik.handleChange}
+            maxAccess={maxAccess}
+            />
+          }
+          label={labels.group}
+          />
+      </Grid>
+
+      <Grid item xs={12}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              name="isUnique"
+              checked={formik.values.isUnique}
+              onChange={formik.handleChange}
+              maxAccess={maxAccess}
+            />
+          }
+          label={labels.unique}
+          />
+      </Grid>
+                
             </Grid>
         </FormShell>
   )
