@@ -1,10 +1,8 @@
-// ** React Importsport
+// ** React Imports
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -13,11 +11,11 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 // ** Windows
-import InterfaceWindow from './Windows/InterfaceWindow'
+import RateTypesWindow from './Windows/RateTypesWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -26,11 +24,10 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const Interface = () => {
+const RateTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+ 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -40,7 +37,7 @@ const Interface = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: RemittanceSettingsRepository.Interface.page,
+      extension: MultiCurrencyRepository.RateType.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -51,12 +48,12 @@ const Interface = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.Interface.page,
-    datasetId: ResourceIds.Interface
+    endpointId: MultiCurrencyRepository.RateType.page,
+    datasetId: ResourceIds.RateType
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.Interface.page
+    endpointId: MultiCurrencyRepository.RateType.page
   })
 
   const columns = [
@@ -69,19 +66,9 @@ const Interface = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
-    ,
-    {
-      field: 'path',
-      headerName: _labels.path,
-      flex: 1
-    },
-    {
-      field: 'description',
-      headerName: _labels.description,
-      flex: 1
     }
   ]
+
 
   const add = () => {
     setWindowOpen(true)
@@ -91,15 +78,16 @@ const Interface = () => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
-  
+
   const del = async obj => {
     await postRequest({
-      extension: RemittanceSettingsRepository.Interface.del,
+      extension: MultiCurrencyRepository.RateType.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
+  
 
   return (
     <>
@@ -118,8 +106,9 @@ const Interface = () => {
         />
       </Box>
       {windowOpen && (
-        <InterfaceWindow
-          onClose={() => {setWindowOpen(false)
+        <RateTypesWindow
+          onClose={() => {
+            setWindowOpen(false)
             setSelectedRecordId(null)
           }}
           labels={_labels}
@@ -133,4 +122,4 @@ const Interface = () => {
   )
 }
 
-export default Interface
+export default RateTypes

@@ -7,6 +7,7 @@ export const ResourceIds = {
   GroupLegalDocument: 21109,
   ProductMaster: 36103,
   CommissionType: 35102,
+  CurrencyRateExchangeMap: 35112,
   Interface: 36108,
   Countries: 20101,
   LegalStatus: 21108,
@@ -51,4 +52,5 @@ export const ResourceIds = {
   SecurityGroup: 23102,
   RiskLevel : 35104,
   PurposeOfExchange : 35103,
+  RateType : 32100,
 }

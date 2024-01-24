@@ -1,9 +1,8 @@
-// ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import LegalStatusForm from '../forms/LegalStatusForm'
+import RateTypesForm from '../forms/RateTypesForm'
 
-const LegalStatusWindow = ({
+const RateTypesWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -12,15 +11,15 @@ const LegalStatusWindow = ({
   
   return (
     <Window
-      id='LegalStatusWindow'
-      Title={labels.legalStatus}
+      id='RateTypesWindow'
+      Title={labels.rateType}
       controlled={true}
       onClose={onClose}
       width={500}
       height={300}
     >
       <CustomTabPanel>
-        <LegalStatusForm
+        <RateTypesForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
@@ -31,5 +30,4 @@ const LegalStatusWindow = ({
   )
 }
 
-
-export default LegalStatusWindow
+export default RateTypesWindow

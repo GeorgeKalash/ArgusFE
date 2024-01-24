@@ -13,10 +13,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 
-
-export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
+export default function RelationTypeForm({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
     
@@ -31,7 +30,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
     //const editMode = !!recordId
 
     const invalidate = useInvalidate({
-        endpointId: CurrencyTradingSettingsRepository.RiskLevel.page
+        endpointId: BusinessPartnerRepository.RelationTypes.page
       })
   
     const formik = useFormik({
@@ -46,7 +45,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
           const recordId = obj.recordId
 
           const response = await postRequest({
-            extension: CurrencyTradingSettingsRepository.RiskLevel.set,
+            extension: BusinessPartnerRepository.RelationTypes.set,
             record: JSON.stringify(obj)
           })
           
@@ -71,7 +70,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
               setIsLoading(true)
     
               const res = await getRequest({
-                extension: CurrencyTradingSettingsRepository.RiskLevel.get,
+                extension: BusinessPartnerRepository.RelationTypes.get,
                 parameters: `_recordId=${recordId}`
               })
               
@@ -86,7 +85,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
       
     return (
         <FormShell 
-            resourceId={ResourceIds.RiskLevel}
+            resourceId={ResourceIds.BpRelationType}
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 

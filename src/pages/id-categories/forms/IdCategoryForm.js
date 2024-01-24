@@ -9,21 +9,27 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
+import {  FormControlLabel, Checkbox } from '@mui/material'
+
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 
 
-export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
+export default function IdCategoryForm({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
     
     const [initialValues, setInitialData] = useState({
         recordId: null,
-        reference: '',
+        
         name: '',
+        org: false,
+        person: false,
+        group: false,
+        isUnique: false
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,7 +37,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
     //const editMode = !!recordId
 
     const invalidate = useInvalidate({
-        endpointId: CurrencyTradingSettingsRepository.RiskLevel.page
+        endpointId: BusinessPartnerRepository.CategoryID.page
       })
   
     const formik = useFormik({
@@ -39,14 +45,14 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
-          reference: yup.string().required('This field is required'),
+          
           name: yup.string().required('This field is required'),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
 
           const response = await postRequest({
-            extension: CurrencyTradingSettingsRepository.RiskLevel.set,
+            extension: BusinessPartnerRepository.CategoryID.set,
             record: JSON.stringify(obj)
           })
           
@@ -71,7 +77,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
               setIsLoading(true)
     
               const res = await getRequest({
-                extension: CurrencyTradingSettingsRepository.RiskLevel.get,
+                extension: BusinessPartnerRepository.CategoryID.get,
                 parameters: `_recordId=${recordId}`
               })
               
@@ -86,14 +92,14 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
       
     return (
         <FormShell 
-            resourceId={ResourceIds.RiskLevel}
+            resourceId={ResourceIds.IdCategories}
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
             editMode={editMode}
         >
             <Grid container spacing={4}>
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                     <CustomTextField
                     name='reference'
                     label={labels.reference}
@@ -106,7 +112,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
                     helperText={formik.touched.reference && formik.errors.reference}
                     />
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12}>
                     <CustomTextField
                     name='name'
@@ -121,6 +127,64 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
                     helperText={formik.touched.name && formik.errors.name}
                     />
                 </Grid>
+
+          <Grid item xs={12}>
+          <FormControlLabel
+           control={
+            <Checkbox
+              name="org"
+              checked={formik.values.org}
+              onChange={formik.handleChange}
+
+              maxAccess={maxAccess}
+            />
+          }
+          label={labels.organization}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <FormControlLabel
+          control={
+            <Checkbox
+            name="person"
+            checked={formik.values.person}
+              onChange={formik.handleChange}
+              maxAccess={maxAccess}
+            />
+          }
+          label={labels.person}
+        />
+      </Grid>
+
+      <Grid item xs={12}>
+        <FormControlLabel
+          control={
+            <Checkbox
+            name='group'
+            checked={formik.values.group}
+            onChange={formik.handleChange}
+            maxAccess={maxAccess}
+            />
+          }
+          label={labels.group}
+          />
+      </Grid>
+
+      <Grid item xs={12}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              name="isUnique"
+              checked={formik.values.isUnique}
+              onChange={formik.handleChange}
+              maxAccess={maxAccess}
+            />
+          }
+          label={labels.unique}
+          />
+      </Grid>
+                
             </Grid>
         </FormShell>
   )

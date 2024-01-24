@@ -13,10 +13,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 
-export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
+export default function RateTypesForm({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
     
@@ -31,7 +31,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
     //const editMode = !!recordId
 
     const invalidate = useInvalidate({
-        endpointId: CurrencyTradingSettingsRepository.RiskLevel.page
+        endpointId: MultiCurrencyRepository.RateType.page
       })
   
     const formik = useFormik({
@@ -46,7 +46,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
           const recordId = obj.recordId
 
           const response = await postRequest({
-            extension: CurrencyTradingSettingsRepository.RiskLevel.set,
+            extension: MultiCurrencyRepository.RateType.set,
             record: JSON.stringify(obj)
           })
           
@@ -71,7 +71,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
               setIsLoading(true)
     
               const res = await getRequest({
-                extension: CurrencyTradingSettingsRepository.RiskLevel.get,
+                extension: MultiCurrencyRepository.RateType.get,
                 parameters: `_recordId=${recordId}`
               })
               
@@ -86,7 +86,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
       
     return (
         <FormShell 
-            resourceId={ResourceIds.RiskLevel}
+            resourceId={ResourceIds.RateType}
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
