@@ -1,42 +1,35 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import IdCategoryTab from '../Tabs/IdCategoryTab'
+import IdCategoryForm from '../forms/IdCategoryForm'
 
-const IdCategoryWindow = ({
-    onClose,
-    width,
-    height,
-    onSave,
-    editMode,
-    typeStore,
-    IdCategoryValidation,
-    labels,
-    maxAccess
+const IdCategoriesWindow = ({
+  onClose,
+  labels,
+  maxAccess,
+  recordId
 }) => {
-
-return (
-
+  
+  return (
     <Window
-    id='test'
-    Title={labels.title}
-    onClose={onClose}
-    width={width}
-    height={height}
-    onSave={onSave}
-    IdCategoryValidation={IdCategoryValidation}
-    typeStore={typeStore}
+      id='IdCategoriesWindow'
+      Title={labels.idCategory}
+      controlled={true}
+      onClose={onClose}
+      width={500}
+      height={300}
     >
-         <CustomTabPanel>
-           <IdCategoryTab
-              labels={labels}
-              IdCategoryValidation={IdCategoryValidation}
-              typeStore={typeStore}
-              maxAccess={maxAccess}
-           />
-           </CustomTabPanel>
-        </Window>
-     )
+      <CustomTabPanel>
+        <IdCategoryForm
+          labels={labels}
+          maxAccess={maxAccess}
+          recordId={recordId}
+        />
+       
+      </CustomTabPanel>
+    </Window>
+  )
 }
 
-export default IdCategoryWindow
+export default IdCategoriesWindow
+
