@@ -1,42 +1,36 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import RelationTypeTab from '../Tabs/RelationTypeTab'
+import RelationTypeForm from '../forms/RelationTypeForm'
 
 const RelationTypeWindow = ({
-    onClose,
-    width,
-    height,
-    onSave,
-    editMode,
-    typeStore,
-    RelationTypeValidation,
-    labels,
-    maxAccess
-}) => { console.log(RelationTypeValidation)
-
-return (
-
-    <Window
-    id='RelationWindow'
-    Title={labels.title}
-    onClose={onClose}
-    width={width}
-    height={height}
-    onSave={onSave}
-    RelationTypeValidation={RelationTypeValidation}
-    typeStore={typeStore}
-    >
-         <CustomTabPanel>
-           <RelationTypeTab
-              labels={labels}
-              RelationTypeValidation={RelationTypeValidation}
-              typeStore={typeStore}
-              maxAccess={maxAccess}
-           />
-           </CustomTabPanel>
-        </Window>
-     )
-}
+   onClose,
+   labels,
+   maxAccess,
+   recordId
+ }) => {
+   
+   return (
+     <Window
+       id='RelationTypeWindow'
+       Title={labels.relationType}
+       
+       controlled={true}
+       onClose={onClose}
+       width={500}
+       height={300}
+     >
+       <CustomTabPanel>
+         <RelationTypeForm
+           labels={labels}
+           maxAccess={maxAccess}
+           recordId={recordId}
+         />
+        
+       </CustomTabPanel>
+     </Window>
+   )
+ }
+ 
 
 export default RelationTypeWindow
