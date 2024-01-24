@@ -49,6 +49,13 @@ export const CurrencyTradingSettingsRepository = {
     del: service + 'delRSK',
     page: service + 'pageRSK',
   
-  }
+  },
+  PurposeExchange: {
+    qry: service + 'qryPEX',
+    get: service + 'getPEX',
+    set: service + 'setPEX',
+    del: service + 'delPEX',
+    page: service + 'pagePEX'
+  },
 
 }

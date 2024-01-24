@@ -49,5 +49,6 @@ export const ResourceIds = {
   DRClasses: 10101,
   States: 20107,
   SecurityGroup: 23102,
-  RiskLevel : 35104
+  RiskLevel : 35104,
+  PurposeOfExchange : 35103,
 }
