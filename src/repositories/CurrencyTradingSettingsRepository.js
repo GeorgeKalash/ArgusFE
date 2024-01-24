@@ -30,7 +30,6 @@ export const CurrencyTradingSettingsRepository = {
     qry: service + 'qryDE',
     get : service + 'getDE',
     set2: service + 'set2DE'
-
   },
   IdFields: {
     qry: service + 'qryIDF',
@@ -42,13 +41,17 @@ export const CurrencyTradingSettingsRepository = {
     set: service + 'setACT',
     del: service + 'delACT'
   },
-  RiskLevel :{
+  RiskLevel: {
     qry: service + 'qryRSK',
     get: service + 'getRSK',
     set: service + 'setRSK',
     del: service + 'delRSK',
     page: service + 'pageRSK',
-  
+  },
+  ExchangeMap: {
+    qry: service + 'qryEXM',
+    get: service + 'getEXM',
+    set2: service + 'set2EXM'
   }
 
 }
