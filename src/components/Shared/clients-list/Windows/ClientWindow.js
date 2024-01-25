@@ -20,7 +20,8 @@ const ClientWindow = ({
     setCityAddressStore,
     cityAddressWorkStore,
     setCityAddressWorkStore,
-
+    professionFilterStore,
+    salaryRangeStore,
     incomeOfSourceStore,
     smsLanguageStore,
     civilStatusStore,
@@ -55,17 +56,13 @@ const ClientWindow = ({
 
 
 return (
-        <Window
-        Title={_labels.pageTitle}
-        onClose={onClose} width={width}
-        height={height}
-        disabledInfo={!editMode && true}
-        onInfoClose={onInfoClose}
-        disabledSubmit={editMode && true}>
+        <Window id='CountryWindow' Title={_labels.pageTitle} onClose={onClose} width={width} height={height}
+         onSave={onSave} onInfo={onInfo}  disabledInfo={!editMode && true} onInfoClose={onInfoClose} disabledSubmit={editMode && true}>
             <CustomTabPanel>
                 <ClientTab
                     clientIndividualFormValidation={clientIndividualFormValidation}
                     WorkAddressValidation={WorkAddressValidation}
+
                     types={types}
                     countryStore={countryStore}
                     cityStore={cityStore}
@@ -74,9 +71,10 @@ return (
                     cityAddressWorkStore={cityAddressWorkStore}
                     lookupCityDistrictAddress={lookupCityDistrictAddress}
                     lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
+                    professionFilterStore={professionFilterStore}
                     fillFilterProfession={fillFilterProfession}
                     requiredOptional={requiredOptional}
-
+                    salaryRangeStore={salaryRangeStore}
                     incomeOfSourceStore={incomeOfSourceStore}
                     smsLanguageStore={smsLanguageStore}
                     civilStatusStore={civilStatusStore}

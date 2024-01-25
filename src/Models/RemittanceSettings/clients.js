@@ -74,6 +74,8 @@ const getNewClients= () => {
  fl_middleName: null,
  fl_familyName: null,
  isResident: false,
+ incomeSourceId: null,
+
 
  // end clientIndividual
 
@@ -115,7 +117,6 @@ const getNewClients= () => {
  educationLevel:null,
  gender: null,
  idNo: null,
- incomeSourceId: null,
  isDiplomat: false,
  isEmployee:false,
  relativeDiplomatInfo: null,
@@ -124,7 +125,6 @@ const getNewClients= () => {
  salary: null,
  salaryRange: null,
  smsLanguage: null,
- sponsorName: null,
  status: null,
  whatsAppNo: null,
  wip: null,
@@ -198,6 +198,8 @@ const populateIClients= obj => {
       fl_familyName: obj.clientIndividual.fl_familyName,
       isResident: obj.clientIndividual.isResident,
       professionId: obj.clientIndividual.professionId,
+      incomeSourceId: obj.clientIndividual.incomeSourceId,
+      sponsorName: obj.clientIndividual.sponsorName,
 
       // end clientIndividual
 
@@ -238,7 +240,7 @@ const populateIClients= obj => {
       educationLevel:obj.clientRemittance.educationLevel,
       gender: obj.clientRemittance.gender,
       idNo: obj.clientRemittance.idNo,
-      incomeSourceId: obj.clientRemittance.incomeSourceId,
+
 
       // isDiplomat: obj.clientRemittance.isDiplomat,
       isEmployee: obj.clientRemittance.isEmployee,
@@ -249,7 +251,6 @@ const populateIClients= obj => {
       // salary: obj.clientRemittance.salary,
       salaryRangeId: obj.clientRemittance.salaryRangeId,
       smsLanguage: obj.clientRemittance.smsLanguage,
-      sponsorName: obj.clientRemittance.sponsorName,
       status:obj.clientRemittance.status,
       whatsAppNo: obj.clientRemittance.whatsAppNo,
       wip:obj.clientRemittance.wip,
