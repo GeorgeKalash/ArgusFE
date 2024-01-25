@@ -6,7 +6,10 @@ const MultiCurrencyWindow = ({
   onClose,
   labels,
   maxAccess,
-  recordId
+  recordId,
+  currencyId,
+  rateTypeId,
+
 }) => {
   
   return (
@@ -23,6 +26,9 @@ const MultiCurrencyWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
+          currencyId={currencyId}
+          rateTypeId={rateTypeId}
+         
         />
        
       </CustomTabPanel>

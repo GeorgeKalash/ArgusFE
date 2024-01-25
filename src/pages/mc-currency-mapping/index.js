@@ -24,6 +24,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
+
 const MultiCurrencyMapping = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
@@ -32,6 +33,10 @@ const MultiCurrencyMapping = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  const [selectedCurrencyId, setSelectedCurrencyId] = useState(null)
+  const [selectedRateTypeId, setSelectedRateTypeId] = useState(null)
+  
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -77,11 +82,18 @@ const MultiCurrencyMapping = () => {
 
   const add = () => {
     setWindowOpen(true)
+    setSelectedCurrencyId(null)
+    setSelectedRateTypeId(null)
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
+    // setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
+    
+    setSelectedCurrencyId(obj.currencyId)
+    setSelectedRateTypeId(obj.rateTypeId)
+   
+
   }
 
   const del = async obj => {
@@ -120,6 +132,9 @@ const MultiCurrencyMapping = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
+          
+          currencyId={selectedCurrencyId}
+          rateTypeId={selectedRateTypeId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

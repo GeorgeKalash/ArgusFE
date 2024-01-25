@@ -18,9 +18,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 
-export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, recordId }){
+export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, currencyId, rateTypeId}){
     const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
+    const [editMode, setEditMode] = useState(!!currencyId && !!rateTypeId )
     
     const [initialValues, setInitialData] = useState({
         currencyId: null,
@@ -46,19 +46,25 @@ export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, rec
             exId: yup.string().required('This field is required'),
         }),
         onSubmit: async obj => {
-          const recordId = obj.recordId
+          const currencyId = obj.currencyId
+          const rateTypeId = obj.rateTypeId
+          
 
           const response = await postRequest({
             extension: MultiCurrencyRepository.McExchangeMap.set,
             record: JSON.stringify(obj)
           })
           
-          if (!recordId) {
+          if (!currencyId&&!rateTypeId) {
+            
             toast.success('Record Added Successfully')
             setInitialData({
               ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
+              currencyId: response.currencyId,
+              rateTypeId : response.rateTypeId,
+              
             });
+            setEditMode(false)
           }
           else toast.success('Record Edited Successfully')
           setEditMode(true)
@@ -70,12 +76,12 @@ export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, rec
       useEffect(() => {
         ;(async function () {
           try {
-            if (recordId) {
+            if (rateTypeId && currencyId ) {
               setIsLoading(true)
     
               const res = await getRequest({
                 extension: MultiCurrencyRepository.McExchangeMap.get,
-                parameters: `_recordId=${recordId}`
+                parameters: `_currencyId=${currencyId}&_rateTypeId=${rateTypeId}`
               })
               
               setInitialData(res.record)
@@ -98,23 +104,25 @@ export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, rec
             <Grid container spacing={4}>
                 <Grid item xs={12}>
                 <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField= {['reference', 'name']}
-                    columnsInDropDown= {[
-                      { key: 'reference', value: 'Currency Ref' },
-                      { key: 'name', value: 'Name' },
-                    ]}
-                    values={formik.values}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('currencyId', newValue?.recordId)
-                    }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                    helperText={formik.touched.currencyId && formik.errors.currencyId}
+                readOnly={editMode}
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currency}
+                valueField='recordId'
+                displayField= {['reference', 'name']}
+                
+                columnsInDropDown= {[
+                    { key: 'reference', value: 'Currency Ref' },
+                    { key: 'name', value: 'Name' },
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('currencyId', newValue?.recordId)
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                helperText={formik.touched.currencyId && formik.errors.currencyId}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -131,6 +139,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, rec
                     values={formik.values}
                     required
                     maxAccess={maxAccess}
+                    readOnly={editMode}
                     onChange={(event, newValue) => {
                       formik && formik.setFieldValue('rateTypeId', newValue?.recordId)
                     }}
@@ -140,6 +149,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, rec
                 </Grid>
                 <Grid item xs={12}>
                 <ResourceComboBox
+                  
                     endpointId={MultiCurrencyRepository.ExchangeTable.qry}
                     name='exId'
                     label={labels.exchangeTable}
