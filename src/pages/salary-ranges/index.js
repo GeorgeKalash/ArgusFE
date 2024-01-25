@@ -1,193 +1,118 @@
-import React, { useContext, useEffect } from 'react'
-import { Box, Grid } from '@mui/material'
+// ** React Imports
+import { useContext,useState } from 'react'
+
+// ** MUI Imports
+import { Box } from '@mui/material'
+import toast from 'react-hot-toast'
+
+// ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-import { useState } from 'react'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import SalaryRangeWindow from './Windows/SalaryRangeWindow'
-import { useFormik } from 'formik'
-import { getNewSalaryRange, populateSalaryRange } from 'src/Models/CurrencyTradingSettings/SalaryRange'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+
+// ** API
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
+
+// ** Windows
+import SalaryRangeWindow from './Windows/SalaryRangeWindow'
+
+// ** Helpers
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const SalaryRange = () => {
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-
-  const [windowInfo, setWindowInfo] = useState(null)
-
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [typeStore, setTypeStore] = useState([])
-
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
+  
   //states
-  const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [editMode, setEditMode] = useState(false)
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.SalaryRange, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-        // fillSysFunctionsStore()
-        // fillActiveStatusStore()
-        getLabels(ResourceIds.SalaryRange, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
-
-  const _labels = {
-    min: labels && labels.find(item => item.key === '2').value,
-    max: labels && labels.find(item => item.key === '3').value,
-    salaryRange: labels && labels.find(item => item.key === '1').value
+    return await getRequest({
+      extension: RemittanceSettingsRepository.SalaryRange.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
   }
 
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: RemittanceSettingsRepository.SalaryRange.qry,
+    datasetId: ResourceIds.SalaryRange
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: RemittanceSettingsRepository.SalaryRange.qry
+  })
+  
   const columns = [
     {
       field: 'min',
-      headerName: _labels.min,
+      headerName: _labels[2],
       flex: 1,
       editable: false
     },
     {
       field: 'max',
-      headerName: _labels.max,
+      headerName: _labels[3],
       flex: 1,
       editable: false
     }
   ]
 
-  const addSalaryRange = () => {
-    salaryRangeValidation.setValues(getNewSalaryRange())
-    setEditMode(false)
-
-    // setEditMode(false)
+  const add = () => {
     setWindowOpen(true)
   }
-
-  const delSalaryRange = obj => {
-    postRequest({
+  
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
+  }
+  
+  const del = async obj => {
+    await postRequest({
       extension: RemittanceSettingsRepository.SalaryRange.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const editSalaryRange = obj => {
-    salaryRangeValidation.setValues(populateSalaryRange(obj))
-    
-    setEditMode(true)
-    setWindowOpen(true)
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + '&_dgId=0'
-
-    getRequest({
-      extension: RemittanceSettingsRepository.SalaryRange.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-
-        setEditMode(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const salaryRangeValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validationSchema: yup.object({
-      min: yup.string().required('This field is required'),
-      max: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log({ values })
-      postSalaryRange(values)
-    }
-  })
-
-  const postSalaryRange = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: RemittanceSettingsRepository.SalaryRange.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const handleSubmit = () => {
-    salaryRangeValidation.handleSubmit()
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addSalaryRange} maxAccess={access} />
+      <Box>
+        <GridToolbar onAdd={add} maxAccess={access} />
 
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
+          pageSize={50}
           maxAccess={access}
-          onEdit={editSalaryRange}
-          onDelete={delSalaryRange}
+          paginationType='client'
         />
       </Box>
-
       {windowOpen && (
         <SalaryRangeWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          salaryRangeValidation={salaryRangeValidation}
+          onClose={() =>{setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
           labels={_labels}
           maxAccess={access}
-          onInfo={() => setWindowInfo(true)}
-          editMode={editMode}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
@@ -196,6 +121,3 @@ const SalaryRange = () => {
 }
 
 export default SalaryRange
-
-// set edit mode on add false from api
-// set edit mode on edit true
