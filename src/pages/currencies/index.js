@@ -5,8 +5,6 @@ import { useState, useContext } from 'react'
 import { Box } from '@mui/material'
 
 // ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -99,21 +97,6 @@ const Currencies = () => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
-
-  /*useEffect(() => {
-    if (!access) getAccess(ResourceIds.Currencies, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 50 })
-        fillDecimalStore()
-        getLabels(ResourceIds.Currencies, setLabels)
-        const decimalDataSource = [{ decimals: 0 }, { decimals: 1 }, { decimals: 2 }, { decimals: 3 }]
-        setDecimalStore(decimalDataSource)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])*/
 
   return (
     <>
