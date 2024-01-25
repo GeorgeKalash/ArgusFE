@@ -35,7 +35,7 @@ const SalaryRange = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: RemittanceSettingsRepository.SalaryRange.qry,
+      extension: RemittanceSettingsRepository.SalaryRange.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -46,12 +46,12 @@ const SalaryRange = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.SalaryRange.qry,
+    endpointId: RemittanceSettingsRepository.SalaryRange.page,
     datasetId: ResourceIds.SalaryRange
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.SalaryRange.qry
+    endpointId: RemittanceSettingsRepository.SalaryRange.page
   })
   
   const columns = [

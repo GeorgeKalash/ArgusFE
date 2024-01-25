@@ -27,7 +27,7 @@ export default function SalaryRangeForm ({labels, maxAccess,recordId}){
     const { getRequest, postRequest } = useContext(RequestsContext)
 
     const invalidate = useInvalidate({
-      endpointId: RemittanceSettingsRepository.SalaryRange.qry,
+      endpointId: RemittanceSettingsRepository.SalaryRange.page,
     })
 
     const formik = useFormik({
