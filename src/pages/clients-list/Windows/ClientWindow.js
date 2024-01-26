@@ -16,9 +16,7 @@ const ClientWindow = ({
 }) => {
 
 
-return (
-
-
+     return (
 
                 <ClientTemplateForm
                     _labels={_labels}

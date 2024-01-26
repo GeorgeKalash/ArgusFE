@@ -211,6 +211,25 @@ const ClientsList = () => {
 
   }
 
+
+  function openForm (recordId){
+    stack({
+      Component: ClientTemplateForm,
+      props: {
+        setErrorMessage: setErrorMessage,
+        _labels : _labels,
+        maxAccess: access,
+        editMode: editMode,
+        recordId: recordId ? recordId : null ,
+        setSelectedRecordId: setSelectedRecordId,
+        maxAccess: access
+      },
+      width: 1100,
+      height: 400,
+      title: _labels.pageTitle
+    })
+  }
+
   const addClient = async (obj) => {
 
     try {
@@ -219,23 +238,7 @@ const ClientsList = () => {
       if (plantId !== '') {
         setEditMode(false);
 
-        stack({
-          Component: ClientTemplateForm,
-          props: {
-            setErrorMessage: setErrorMessage,
-            _labels : _labels,
-            maxAccess: access,
-            editMode: editMode,
-
-            // recordId: recordId ? recordId : null ,
-
-            // setSelectedRecordId: setSelectedRecordId,
-            maxAccess: access
-          },
-          width: 1200,
-          height: 400,
-          title: 'Hadi'
-        })
+        openForm('')
 
         // setWindowOpen(true);
       } else {
@@ -275,7 +278,7 @@ const ClientsList = () => {
     setEditMode(true)
     const _recordId = obj.recordId
     setSelectedRecordId(_recordId)
-setWindowOpen(true)
+    openForm(_recordId)
 
     // getClient(_recordId)
 

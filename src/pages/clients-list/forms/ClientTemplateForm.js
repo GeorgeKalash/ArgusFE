@@ -32,11 +32,12 @@ import { formatDateToApi, formatDateToApiFunction , formatDateFromApi} from 'src
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { useWindow } from 'src/windows'
 import Confirmation from 'src/components/Shared/Confirmation'
+import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 
 const ClientTemplateForm = ({
-  setErrorMessage ,
+  setErrorMessage,
   recordId,
-  setSelectedRecordId,
+   setSelectedRecordId,
    _labels, maxAccess
  }) => {
   const { stack } = useWindow()
@@ -52,7 +53,7 @@ const [requiredOptional, setRequiredOptional] = useState(true)
 const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
 const [professionStore, setProfessionStore] = useState([]);
 const [professionFilterStore, setProfessionFilterStore] = useState([]);
-const [showOtpVerification , setShowOtpVerification] = useState(false)
+const [address , setAddress] = useState([])
 const [editMode, setEditMode] = useState(null)
 const [idTypeStore, setIdTypeStore] = useState([]);
 
@@ -199,6 +200,7 @@ useEffect(()=>{ fillProfessionStore(); fillType()
   })
     .then(res => {
      const obj = res?.record
+    obj?.workAddressView && setAddress(obj.workAddressView)
 
       // getPlantId()
       setInitialData({
@@ -400,7 +402,6 @@ useEffect(()=>{ fillProfessionStore(); fillType()
       lastName: yup.string().required("This field is required"),
       nationalityId: yup.string().required("This field is required"),
       professionId: yup.string().required("This field is required"),
-
       cellPhone: yup.string().required("This field is required"),
       cellPhoneRepeat : yup.string().required('Repeat Password is required')
       .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
@@ -411,7 +412,7 @@ useEffect(()=>{ fillProfessionStore(); fillType()
       phone: yup.string().required('This field is required')
     }),
     onSubmit: (values) => {
-           Object.keys(WorkAddressFormik.errors).length < 1 && postRtDefault(values);
+            postRtDefault(values);
     },
   });
 
@@ -534,24 +535,24 @@ useEffect(()=>{ fillProfessionStore(); fillType()
      }
 
      const obj6 = {
-      name: WorkAddressFormik.values.name,
-      countryId: WorkAddressFormik.values.countryId,
-      stateId: WorkAddressFormik.values.stateId,
-      cityId: WorkAddressFormik.values.cityId,
-      cityName: WorkAddressFormik.values.cityName,
-      street1: WorkAddressFormik.values.street1,
-      street2: WorkAddressFormik.values.street2,
-      email1: WorkAddressFormik.values.email1,
-      email2: WorkAddressFormik.values.email2,
-      phone: WorkAddressFormik.values.phone,
-      phone2: WorkAddressFormik.values.phone2,
-      phone3: WorkAddressFormik.values.phone3,
-      addressId: WorkAddressFormik.values.addressId,
-      postalCode:WorkAddressFormik.values.postalCode,
-      cityDistrictId: WorkAddressFormik.values.cityDistrictId,
-      bldgNo: WorkAddressFormik.values.bldgNo,
-      unitNo: WorkAddressFormik.values.unitNo,
-      subNo: WorkAddressFormik.values.subNo
+      name: address.name,
+      countryId: address.countryId,
+      stateId: address.stateId,
+      cityId: address.cityId,
+      cityName: address.cityName,
+      street1: address.street1,
+      street2: address.street2,
+      email1: address.email1,
+      email2: address.email2,
+      phone: address.phone,
+      phone2: address.phone2,
+      phone3: address.phone3,
+      addressId: address.addressId,
+      postalCode:address.postalCode,
+      cityDistrictId: address.cityDistrictId,
+      bldgNo: address.bldgNo,
+      unitNo: address.unitNo,
+      subNo: address.subNo
      }
 
     const data = {
@@ -574,18 +575,19 @@ useEffect(()=>{ fillProfessionStore(); fillType()
          toast.success("Record Successfully");
          clientIndividualFormik.setFieldValue('clientId' , res.recordId)
         stack({
-          component: OTPPhoneVerification,
+          Component: OTPPhoneVerification,
           props: {
             idTypeStore: idTypeStore,
             formValidation: clientIndividualFormik,
             functionId: 3600,
             setEditMode: setEditMode,
-            labels : _labels,
-            title : 'Verify My Account'
+
+            // labels : _labels,
+
           },
           width: 400,
           height: 400,
-        title: label
+          title : 'Verify My Account'
 
         })
 
@@ -600,80 +602,81 @@ useEffect(()=>{ fillProfessionStore(); fillType()
   };
 
 
-  const WorkAddressFormik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validateOnBlur:true,
-    validate : (values) => {
-      const errors = {};
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // const WorkAddressFormik = useFormik({
+  //   enableReinitialize: true,
+  //   validateOnChange: true,
+  //   validateOnBlur:true,
+  //   validate : (values) => {
+  //     const errors = {};
+  //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      if (values.name || values.cityId || values.phone || values.countryId ||  values.street1)  {
-        if (!values.name ) {
-          errors.name = 'This field is required';
-        }
-        if (!values.street1 ) {
-          errors.street1 = 'This field is required';
-        }
-        if (!values.countryId ) {
-          errors.countryId = 'This field is required';
-        }
-        if (!values.cityId ) {
-          errors.cityId = 'This field is required';
-        }
-        if (!values.cityId ) {
-          errors.phone = 'This field is required';
-        }
+  //     if (values.name || values.cityId || values.phone || values.countryId ||  values.street1)  {
+  //       if (!values.name ) {
+  //         errors.name = 'This field is required';
+  //       }
+  //       if (!values.street1 ) {
+  //         errors.street1 = 'This field is required';
+  //       }
+  //       if (!values.countryId ) {
+  //         errors.countryId = 'This field is required';
+  //       }
+  //       if (!values.cityId ) {
+  //         errors.cityId = 'This field is required';
+  //       }
+  //       if (!values.cityId ) {
+  //         errors.phone = 'This field is required';
+  //       }
 
-      }
-      if (values.email1  && !emailRegex?.test(values?.email1) ) {
-        errors.email1 = 'Invalid email format';
-      }
+  //     }
+  //     if (values.email1  && !emailRegex?.test(values?.email1) ) {
+  //       errors.email1 = 'Invalid email format';
+  //     }
 
-      if (values.email2 && !emailRegex?.test(values?.email2) ) {
-        errors.email2 = 'Invalid email format';
-      }
-
-
-      return errors;
+  //     if (values.email2 && !emailRegex?.test(values?.email2) ) {
+  //       errors.email2 = 'Invalid email format';
+  //     }
 
 
-    },
-    initialValues: {
-      name: null,
-      countryId: null,
-      stateId: null,
-      cityId: null,
-      city: null,
-      street1: null,
-      street2: null,
-      email1: null,
-      email2: null,
-      phone: null,
-      phone2: null,
-      phone3: null,
-      addressId: null,
-      postalCode:null,
-      cityDistrictId: null,
-      cityDistrict: null,
-      bldgNo: null,
-      unitNo: null,
-      subNo: null
-    },
+  //     return errors;
 
-    onSubmit: values => {
-        setWindowWorkAddressOpen(false)
-    }
-  })
-  useEffect(()=>{
-    if((WorkAddressFormik.values.name || WorkAddressFormik.values.street1 || WorkAddressFormik.values.phone || WorkAddressFormik.values.countryId ||  WorkAddressFormik.values.cityId) && requiredOptional){
-      setRequiredOptional(false)
-     }
 
-     if((!WorkAddressFormik.values.name && !WorkAddressFormik.values.street1 && !WorkAddressFormik.values.phone && !WorkAddressFormik.values.countryId &&  !WorkAddressFormik.values.cityId)){
-      setRequiredOptional(true)
-     }
-  }, [WorkAddressFormik.values])
+  //   },
+  //   initialValues: {
+  //     name: null,
+  //     countryId: null,
+  //     stateId: null,
+  //     cityId: null,
+  //     city: null,
+  //     street1: null,
+  //     street2: null,
+  //     email1: null,
+  //     email2: null,
+  //     phone: null,
+  //     phone2: null,
+  //     phone3: null,
+  //     addressId: null,
+  //     postalCode:null,
+  //     cityDistrictId: null,
+  //     cityDistrict: null,
+  //     bldgNo: null,
+  //     unitNo: null,
+  //     subNo: null
+  //   },
+
+  //   onSubmit: values => {
+  //       setWindowWorkAddressOpen(false)
+  //   }
+  // })
+
+  // useEffect(()=>{
+  //   if((WorkAddressFormik.values.name || WorkAddressFormik.values.street1 || WorkAddressFormik.values.phone || WorkAddressFormik.values.countryId ||  WorkAddressFormik.values.cityId) && requiredOptional){
+  //     setRequiredOptional(false)
+  //    }
+
+  //    if((!WorkAddressFormik.values.name && !WorkAddressFormik.values.street1 && !WorkAddressFormik.values.phone && !WorkAddressFormik.values.countryId &&  !WorkAddressFormik.values.cityId)){
+  //     setRequiredOptional(true)
+  //    }
+  // }, [WorkAddressFormik.values])
 
 
   const fillFilterProfession=(value)=>{
@@ -698,7 +701,7 @@ return (
         form={clientIndividualFormik}
         height={500}
         maxAccess={maxAccess}
-        editMode={editMode} >
+        editMode={editMode} disabledSubmit={editMode} >
         <Grid container spacing={4}>
         <Grid container xs={12} spacing={2} sx={{ padding: "20px" }}>
         <Grid item xs={6} sx={{ padding: "30px" }}>
@@ -725,6 +728,7 @@ return (
                   clientIndividualFormik.touched.reference &&
                   clientIndividualFormik.errors.reference
                 }
+                maxAccess={maxAccess}
               />
 
             </Grid>
@@ -763,6 +767,8 @@ return (
                   clientIndividualFormik.touched.birthDate &&
                   clientIndividualFormik.errors.birthDate
                 }
+
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid container xs={12}></Grid>
@@ -799,6 +805,7 @@ return (
                       clientIndividualFormik.touched.idNo &&
                       clientIndividualFormik.errors.idNo
                     }
+                    maxAccess={maxAccess}
                   />
                    </Grid>
                 <Grid item xs={12}>
@@ -849,6 +856,7 @@ return (
                       clientIndividualFormik.touched.idtId &&
                       clientIndividualFormik.errors.idtId
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
@@ -862,6 +870,7 @@ return (
                     formik: clientIndividualFormik,
                     labels : _labels
                   },
+                  title: _labels.fetch,
                   width: 400,
                   height: 400,
 
@@ -892,6 +901,7 @@ return (
                       clientIndividualFormik.touched.expiryDate &&
                       clientIndividualFormik.errors.expiryDate
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
@@ -917,6 +927,7 @@ return (
                       clientIndividualFormik.touched.issusDate &&
                       clientIndividualFormik.errors.issusDate
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
@@ -985,6 +996,7 @@ return (
                       clientIndividualFormik.touched.idCountry &&
                       clientIndividualFormik.errors.idCountry
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
@@ -1092,6 +1104,7 @@ return (
                     clientIndividualFormik.touched.cellPhone &&
                     clientIndividualFormik.errors.cellPhone
                   }
+                  maxAccess={maxAccess}
                 />
 
               </Grid>
@@ -1128,6 +1141,7 @@ return (
                     clientIndividualFormik.touched.cellPhoneRepeat &&
                     clientIndividualFormik.errors.cellPhoneRepeat
                   }
+                  maxAccess={maxAccess}
                 />
 
               </Grid>
@@ -1155,6 +1169,7 @@ return (
                       clientIndividualFormik.touched.firstName &&
                       clientIndividualFormik.errors.firstName
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1179,6 +1194,7 @@ return (
                       clientIndividualFormik.touched.middleName &&
                       clientIndividualFormik.errors.middleName
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1204,6 +1220,7 @@ return (
                       clientIndividualFormik.touched.lastName &&
                       clientIndividualFormik.errors.lastName
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1228,6 +1245,7 @@ return (
                       clientIndividualFormik.touched.familyName &&
                       clientIndividualFormik.errors.familyName
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
@@ -1262,6 +1280,7 @@ return (
                       clientIndividualFormik.touched.fl_firstName &&
                       clientIndividualFormik.errors.fl_firstName
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1289,6 +1308,7 @@ return (
                       clientIndividualFormik.touched.fl_middleName &&
                       clientIndividualFormik.errors.fl_middleName
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1315,6 +1335,7 @@ return (
                       clientIndividualFormik.touched.fl_lastName &&
                       clientIndividualFormik.errors.fl_lastName
                     }
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1605,18 +1626,36 @@ return (
               </Grid>
               </FieldSet>
               <Grid item xs={12}>
-              <Button variant='contained' onClick={()=> stack({
-                  component: AddressTab,
-                  props: {
-                    addressValidation: WorkAddressFormik,
-                    readOnly: editMode,
-                    requiredOptional: requiredOptional,
-                    labels : _labels
-                  },
-                  width: 400,
-                  height: 400,
-                  title: _labels.workAddress
-                  })}>{_labels.workAddress}</Button>
+              <Button variant='contained'
+              onClick={()=>stack({
+                Component: AddressFormShell,
+                props: {
+                  // addressValidation: WorkAddressFormik,
+                  readOnly: editMode,
+                  requiredOptional: requiredOptional,
+                  labels: _labels,
+                  setAddress: setAddress,
+                  address: address
+                },
+                width: 500,
+                height: 400,
+
+                // title: 'Cash Invoice'
+                })}
+
+              // onClick={()=> stack({
+              //     component: AddressTab,
+              //     props: {
+              //       addressValidation: WorkAddressFormik,
+              //       readOnly: editMode,
+              //       requiredOptional: requiredOptional,
+              //       labels : _labels
+              //     },
+              //     width: 400,
+              //     height: 400,
+              //     title: _labels.workAddress
+              //     })}
+                  >{_labels.workAddress}</Button>
               </Grid>
 
 
