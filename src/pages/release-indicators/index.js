@@ -1,63 +1,60 @@
 // ** React Imports
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ControlContext } from 'src/providers/ControlContext'
-import { CommonContext } from 'src/providers/CommonContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewReleaseInd, populateReleaseInd } from 'src/Models/DocumentRelease/ReleaseIndicator'
-
-// ** Helpers
-import { validateNumberField } from 'src/lib/numberField-helper'
-
-// ** Resources
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { DataSets } from 'src/resources/DataSets'
-
-// ** Windows
 import ReleaseIndicatorWindow from './Windows/ReleaseIndicatorWindow'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-const ReleaseIndicators = () => {
+// ** Windows
+
+
+// ** Helpers
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
+
+const ReleaseIndicators =  () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
-
-  //controls
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [changeabilityStore, setChangeabilityStore] = useState([])
+ 
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    id: labels && labels.find(item => item.key === "3").value,
-    changeability: labels && labels.find(item => item.key === "4").value,
-    isReleased: labels && labels.find(item => item.key === "5").value,
-    releaseInd: labels && labels.find(item => item.key === "6").value
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: DocumentReleaseRepository.ReleaseIndicator.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.ReleaseIndicator.page,
+    datasetId: ResourceIds.ReleaseIndicators
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.ReleaseIndicator.page
+  })
 
   const columns = [
     {
@@ -85,162 +82,51 @@ const ReleaseIndicators = () => {
     }
   ]
 
-  const releaseIndValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      recordId: yup
-        .number()
-        .required('This field is required')
-        .transform((value, originalValue) => validateNumberField(value, originalValue))
-        .min(0, 'Value must be greater than or equal to 0')
-        .max(9, 'Value must be less than or equal to 9'),
-      changeability: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log(values)
-      postReleaseInd(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    releaseIndValidation.handleSubmit()
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.ReleaseIndicator.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-        console.log(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const postReleaseInd = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: DocumentReleaseRepository.ReleaseIndicator.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delReleaseInd = obj => {
-    postRequest({
-      extension: DocumentReleaseRepository.ReleaseIndicator.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        console.log({ res })
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const addReleaseInd = () => {
-    releaseIndValidation.setValues(getNewReleaseInd)
-    fillChangeabilityStore()
-    setEditMode(false)
+  const add = () => {
     setWindowOpen(true)
   }
 
-  const editReleaseInd = obj => {
-    console.log(obj)
-    fillChangeabilityStore()
-    getCharById(obj)
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
   }
 
-  const getCharById = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.ReleaseIndicator.get,
-      parameters: parameters
+  const del = async obj => {
+    await postRequest({
+      extension: DocumentReleaseRepository.ReleaseIndicator.del,
+      record: JSON.stringify(obj)
     })
-      .then(res => {
-        releaseIndValidation.setValues(populateReleaseInd(res.record))
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.ReleaseIndicators, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
-        fillChangeabilityStore()
-        getLabels(ResourceIds.ReleaseIndicators, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
-
-  const fillChangeabilityStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.DR_CHANGEABILITY,
-      callback: setChangeabilityStore
-    })
-  }
+  
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addReleaseInd} maxAccess={access} />
+      <Box>
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editReleaseInd}
-          onDelete={delReleaseInd}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
+          paginationType='client'
           maxAccess={access}
         />
       </Box>
       {windowOpen && (
         <ReleaseIndicatorWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          releaseIndValidation={releaseIndValidation}
-          changeabilityStore={changeabilityStore}
-          _labels={_labels}
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
+          labels={_labels}
           maxAccess={access}
-          editMode={editMode}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
