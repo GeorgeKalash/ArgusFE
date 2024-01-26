@@ -17,6 +17,7 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 // ** Windows
 
 
+
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
@@ -71,9 +72,9 @@ const ReleaseIndicators =  () => {
       field: 'recordId',
       headerName: _labels.id,
       flex: 1,
-      align: 'right'
+      align: 'right',
 
-      //valueGetter: ({ row }) => getFormattedNumberMax(row?.recordId, 1, 0)
+      
     },
     {
       field: 'changeabilityName',
