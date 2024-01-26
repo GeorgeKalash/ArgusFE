@@ -9,34 +9,26 @@ export function WindowProvider({ children }) {
   return (
     <WindowContext.Provider
       value={{
-        stack({ title, Component }) {
-          setStack(stack => [
-            ...stack,
-            {
-              title,
-              Component
-            }
-          ])
+        stack(options) {
+          setStack(stack => [...stack, options])
         }
       }}
     >
       {children}
-      {stack.map(({ Component, title, width = 800, height = 400 }, index) => (
+      {stack.map(({ Component, title, width = 800, height = 400, props }, index) => (
         <Window
           key={index}
           Title={title}
           controlled={true}
           onClose={() => {
             setStack(stack => {
-              const [, ...rest] = stack
-
-              return rest
+              return stack.slice(0, stack.length - 1)
             })
           }}
           width={width}
           height={height}
         >
-          <Component />
+          <Component {...props} />
         </Window>
       ))}
     </WindowContext.Provider>
