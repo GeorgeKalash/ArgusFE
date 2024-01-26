@@ -49,14 +49,11 @@ const Users = () => {
   const [languageStore, setLanguageStore] = useState([])
   const [notificationGrpStore, setNotificationGrpStore] = useState([])
   const [employeeStore, setEmployeeStore] = useState([])
-
   const [siteStore, setSiteStore] = useState([])
   const [plantStore, setPlantStore] = useState([])
   const [cashAccStore, setCashAccStore] = useState([])
   const [salesPersonStore, setSalesPersonStore] = useState([])
-  const [securityGrpGridData, setSecurityGrpGridData] = useState([])
-  const [initialAllListData, setSecurityGrpALLData] = useState([])
-  const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
+  const [moduleStore, setModuleStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -66,6 +63,9 @@ const Users = () => {
   const [emailPresent, setEmailPresent] = useState(false)
   const [passwordState, setPasswordState] = useState(false)
   const [securityGrpWindowOpen, setSecurityGrpWindowOpen] = useState(false)
+  const [securityGrpGridData, setSecurityGrpGridData] = useState([])
+  const [initialAllListData, setSecurityGrpALLData] = useState([])
+  const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
 
   //control
   const [labels, setLabels] = useState(null)
@@ -94,10 +94,15 @@ const Users = () => {
     securityGrp: labels && labels.find(item => item.key === '19').value,
     all: labels && labels.find(item => item.key === '20').value,
     selected: labels && labels.find(item => item.key === '21').value,
-    group: labels && labels.find(item => item.key === '22').value
+    group: labels && labels.find(item => item.key === '22').value,
+    rowAccess: labels && labels.find(item => item.key === '23').value,
+    selectModule: labels && labels.find(item => item.key === '24').value,
+    checkAll: labels && labels.find(item => item.key === '25').value,
+    unCheckAll: labels && labels.find(item => item.key === '26').value,
+    active: labels && labels.find(item => item.key === '27').value
   }
 
-  const itemSelectorLabels=[_labels.securityGrp,_labels.all,_labels.selected]
+  const itemSelectorLabels = [_labels.securityGrp, _labels.all, _labels.selected]
 
   const columns = [
     {
@@ -135,7 +140,8 @@ const Users = () => {
   const tabs = [
     { label: _labels.users },
     { label: _labels.defaults, disabled: !editMode },
-    { label: _labels.securityGrp, disabled: !editMode }
+    { label: _labels.securityGrp, disabled: !editMode },
+    { label: _labels.rowAccess, disabled: !editMode }
   ]
 
   const usersValidation = useFormik({
@@ -200,6 +206,7 @@ const Users = () => {
     else if (activeTab === 1 && (defaultsValidation.values != undefined || defaultsValidation.values != null)) {
       defaultsValidation.handleSubmit()
     } else if (activeTab === 2) securityGrpValidation.handleSubmit()
+    else if (activeTab === 3) rowAccessValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -290,6 +297,7 @@ const Users = () => {
         getSecurityGrpGridData(res.record.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
+        fillModuleStore()
         setActiveTab(0)
       })
       .catch(error => {
@@ -571,7 +579,7 @@ const Users = () => {
         const allList = resGRPFunction.list.map(x => {
           const n = {
             id: x.recordId,
-            name: x.name, 
+            name: x.name
           }
 
           return n
@@ -589,9 +597,7 @@ const Users = () => {
 
         // Remove items from allList that have the same sgId and userId as items in selectedList
         const filteredAllList = allList.filter(item => {
-          return !selectedList.some(
-            selectedItem => selectedItem.id === item.id && selectedItem.id === item.id
-          )
+          return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
         })
         setSecurityGrpALLData(filteredAllList)
       })
@@ -612,13 +618,13 @@ const Users = () => {
 
   const postSecurityGrp = () => {
     const userId = usersValidation.values.recordId
-    const selectedItems = [];
- 
+    const selectedItems = []
+
     //initialSelectedListData returns an array that contain id, where id is sgId
-   //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
+    //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
     initialSelectedListData.forEach(item => {
-      selectedItems.push({userId:userId , sgId: item.id})
-  });
+      selectedItems.push({ userId: userId, sgId: item.id })
+    })
 
     const data = {
       sgId: 0,
@@ -658,6 +664,68 @@ const Users = () => {
       .catch(error => {
         setErrorMessage(error)
       })
+  }
+
+  //Row access tab 
+
+  const rowColumns = [
+    {
+      field: 'plantId',
+      flex: 2
+    },
+    {
+      field: 'hasAccess',
+      headerName: _labels.active,
+      flex: 1
+    }
+  ]
+
+
+  const rowAccessValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({}),
+    initialValues: {
+     /* sgId: '',
+      sgName: '',
+      userId: ''*/
+    },
+    onSubmit: values => {
+      postRowAccess()
+    }
+  })
+
+  const handleRowAccessSubmit = () => {
+    if (rowAccessValidation) {
+      rowAccessValidation.handleSubmit()
+    }
+  }
+
+  const getRowAccessGridData = () => {
+  /*  setSecurityGrpGridData([])
+    const defaultParams = `_userId=${userId}&_filter=&_sgId=0`
+    var parameters = defaultParams
+
+    getRequest({
+      extension: AccessControlRepository.SecurityGroupUser.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setSecurityGrpGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })*/
+  }
+
+  const fillModuleStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.ROW_ACCESS,
+      callback: setModuleStore
+    })
+  }
+
+  const postRowAccess= () => {
   }
 
   useEffect(() => {
@@ -712,7 +780,7 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          
+
           //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
@@ -741,6 +809,13 @@ const Users = () => {
           getSecurityGrpGridData={getSecurityGrpGridData}
           delSecurityGrp={delSecurityGrp}
           addSecurityGrp={addSecurityGrp}
+
+          //Row Access
+          moduleStore={moduleStore}
+          handleRowAccessSubmit={handleRowAccessSubmit}
+          getRowAccessGridData={getRowAccessGridData}
+          rowAccessValidation={rowAccessValidation}
+          rowColumns={rowColumns}
         />
       )}
       {securityGrpWindowOpen && (

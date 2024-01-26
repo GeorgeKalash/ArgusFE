@@ -4,16 +4,22 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import UsersTab from 'src/pages/users/Tabs/UsersTab'
 import DefaultsTab from 'src/pages/users/Tabs/DefaultsTab'
 import SecurityGrpTab from 'src/pages/users/Tabs/SecurityGrpTab'
+import RowAccessTab from 'src/pages/users/Tabs/RowAccessTab'
 
 const UsersWindow = ({
+  tabs,
+  activeTab,
+  setActiveTab,
   onClose,
   width,
   height,
   onSave,
   editMode,
-  usersValidation,
   labels,
   maxAccess,
+
+  //users tab
+  usersValidation,
   notificationGrpStore,
   languageStore,
   userTypeStore,
@@ -21,9 +27,12 @@ const UsersWindow = ({
   employeeStore,
   setEmployeeStore,
   lookupEmployee, 
-  tabs,
-  activeTab,
-  setActiveTab,
+  checkFieldDirect,
+  emailPresent,
+  passwordState,
+  setPasswordState,
+
+  //defaults tab
   defaultsValidation,
   siteStore,
   plantStore,
@@ -31,16 +40,20 @@ const UsersWindow = ({
   setCashAccStore,
   cashAccStore,
   lookupCashAcc,
-  checkFieldDirect,
-  emailPresent,
-  passwordState,
-  setPasswordState,
 
+  //security group tab
   securityGrpGridData,
   getSecurityGrpGridData,
   addSecurityGrp,
   delSecurityGrp,
   popupSecurityGrp,
+
+  //Row access tab
+  rowAccessValidation,
+  moduleStore,
+  handleRowAccessSubmit,
+  rowColumns,
+  getRowAccessGridData
 }) => {
   return (
     <Window
@@ -96,6 +109,17 @@ const UsersWindow = ({
           popupSecurityGrp={popupSecurityGrp}
           labels={labels}
           maxAccess={maxAccess}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel index={3} value={activeTab}>
+        <RowAccessTab
+         labels={labels}
+         moduleStore={moduleStore}
+         handleRowAccessSubmit={handleRowAccessSubmit}
+         getRowAccessGridData={getRowAccessGridData}
+         rowAccessValidation={rowAccessValidation}
+         rowColumns={rowColumns}
+         maxAccess={maxAccess}
         />
       </CustomTabPanel>
     </Window>
