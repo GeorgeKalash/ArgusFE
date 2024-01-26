@@ -6,6 +6,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import ClientTab from '../Tabs/ClientTab'
 
 const ClientWindow = ({
+
     onClose,
     onSave,
     clientIndividualFormValidation,
@@ -19,8 +20,7 @@ const ClientWindow = ({
     setCityAddressStore,
     cityAddressWorkStore,
     setCityAddressWorkStore,
-    professionFilterStore,
-    salaryRangeStore,
+
     incomeOfSourceStore,
     smsLanguageStore,
     civilStatusStore,
@@ -41,27 +41,31 @@ const ClientWindow = ({
     lookupCityAddress,
     lookupCityAddressWork,
     fillFilterProfession,
+    setWindowWorkAddressOpen,
+    setWindowConfirmNumberOpen,
     width,
     height,
     _labels,
     editMode,
     onInfo,
     onInfoClose,
-
+    setReferenceRequired,
     maxAccess
 }) => {
 
 
-
-
 return (
-        <Window id='CountryWindow' Title={_labels.pageTitle} onClose={onClose} width={width} height={height}
-         onSave={onSave} onInfo={onInfo}  disabledInfo={!editMode && true} onInfoClose={onInfoClose} disabledSubmit={editMode && true}>
+        <Window
+        Title={_labels.pageTitle}
+        onClose={onClose} width={width}
+        height={height}
+        disabledInfo={!editMode && true}
+        onInfoClose={onInfoClose}
+        disabledSubmit={editMode && true}>
             <CustomTabPanel>
                 <ClientTab
                     clientIndividualFormValidation={clientIndividualFormValidation}
                     WorkAddressValidation={WorkAddressValidation}
-
                     types={types}
                     countryStore={countryStore}
                     cityStore={cityStore}
@@ -70,10 +74,9 @@ return (
                     cityAddressWorkStore={cityAddressWorkStore}
                     lookupCityDistrictAddress={lookupCityDistrictAddress}
                     lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
-                    professionFilterStore={professionFilterStore}
                     fillFilterProfession={fillFilterProfession}
                     requiredOptional={requiredOptional}
-                    salaryRangeStore={salaryRangeStore}
+
                     incomeOfSourceStore={incomeOfSourceStore}
                     smsLanguageStore={smsLanguageStore}
                     civilStatusStore={civilStatusStore}
@@ -94,6 +97,9 @@ return (
                     lookupCityAddressWork={lookupCityAddressWork}
                     cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
                     cityDistrictAddressStore={cityDistrictAddressStore}
+                    setReferenceRequired={setReferenceRequired}
+                    setWindowWorkAddressOpen={setWindowWorkAddressOpen}
+                    setWindowConfirmNumberOpen={setWindowConfirmNumberOpen}
                     _labels={_labels}
                     maxAccess={maxAccess}
                     editMode={editMode}
@@ -101,7 +107,7 @@ return (
             </CustomTabPanel>
         </Window>
     )
-}
 
+}
 
 export default ClientWindow

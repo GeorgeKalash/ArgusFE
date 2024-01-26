@@ -24,6 +24,8 @@ const getNewClientCorporate= () => {
  city: null,
  stateId: null,
  cityDistrictId :null,
+ cityDistrict :null,
+
  email1: null,
  email2: null,
  name1: null,
@@ -89,6 +91,8 @@ cityId: obj.addressView.cityId,
 city: obj.addressView.city,
 stateId: obj.addressView.stateId,
 cityDistrictId :obj.addressView.cityDistrictId,
+cityDistrict :obj.addressView.cityDistrict,
+
 email1: obj.addressView.email1,
 email2: obj.addressView.email2,
 name: obj.addressView.name,

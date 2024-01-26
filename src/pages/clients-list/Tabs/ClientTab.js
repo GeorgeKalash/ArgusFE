@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox, Button, DialogActions } from '@mui/material'
 
 import { useEffect, useState } from 'react'
 
@@ -13,95 +13,83 @@ import AddressTab from 'src/components/Shared/AddressTab'
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import { TextFieldReference } from 'src/components/Shared/TextFieldReference'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import UseIdType from 'src/hooks/useIdType'
+import FormShell from 'src/components/Shared/FormShell'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const ClientTab = ({
   clientIndividualFormValidation,
-  WorkAddressValidation,
   countryStore,
   cityStore,
-  requiredOptional,
   setCityStore,
-  cityAddressStore,
-  cityDistrictAddressWorkStore,
-  cityDistrictAddressStore,
-  setCityAddressStore,
-  cityAddressWorkStore,
-  setCityAddressWorkStore,
-
   lookupCity,
-  lookupCityAddress,
-  lookupCityAddressWork,
-  lookupCityDistrictAddress,
-  lookupCityDistrictAddressWork,
-  types,
-  professionFilterStore,
   fillFilterProfession,
-
-  salaryRangeStore,
   incomeOfSourceStore,
   smsLanguageStore,
   civilStatusStore,
   genderStore,
   mobileVerifiedStore,
-  fillStateStoreAddress,
-  fillStateStoreAddressWork,
-  stateAddressWorkStore,
-  stateAddressStore,
+
   educationStore,
   idTypeStore,
   titleStore,
+  setWindowConfirmNumberOpen,
+  setWindowWorkAddressOpen,
+  setReferenceRequired,
    _labels, maxAccess, editMode
  }) => {
 
-console.log(clientIndividualFormValidation)
 
 const [showAsPassword , setShowAsPassword]  = useState(false)
-const [showAsPasswordRepeat , setShowAsPasswordRepeat]  = useState(false)
 const [showAsPasswordPhone , setShowAsPasswordPhone]  = useState(false)
 const [showAsPasswordPhoneRepeat , setShowAsPasswordPhoneRepeat]  = useState(false)
 
-  const encryptDigits = (v) => {
-    const input = v?.replace(/\D/g, '')
-
-    if(input?.length > 0){
-
-    const showLength = Math.max(0, input?.length - 4);
-
-    // Check if input has at least four digits
-
-    const maskedValue =
-    '*'.repeat(showLength) + input?.substring(showLength);
-
-
-     return maskedValue;
-    }else{
-
-      return ;
-    }
-
-  };
-
+// const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
 
   const handleCopy = (event) => {
     event.preventDefault();
   };
 
+  const [getValue] = UseIdType();
 
+
+
+
+  async function checkTypes (value) {
+    if(!value){
+      clientIndividualFormValidation.setFieldValue(
+        "idtId",
+        ''
+      );
+    }
+    const idType = await getValue(value);
+    if(idType)
+    clientIndividualFormValidation.setFieldValue(
+      "idtId",
+      idType
+    );
+  };
 
 return (
-        <>
+        <FormShell>
         <Grid container spacing={2}>
         <Grid container xs={12} spacing={2} sx={{ padding: "40px" }}>
         <Grid item xs={6} sx={{ padding: "40px" }}>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <CustomTextField
+            <TextFieldReference
+                endpointId={CurrencyTradingSettingsRepository.Defaults.get}
+                param={'ct-nra-individual'}
                 name="reference"
                 label={_labels.reference}
+                editMode={editMode}
                 value={clientIndividualFormValidation.values.reference}
-
-                // required
-                readOnly={true}
+                setReferenceRequired={setReferenceRequired}
                 onChange={clientIndividualFormValidation.handleChange}
                 onClear={() =>
                   clientIndividualFormValidation.setFieldValue("reference", "")
@@ -115,6 +103,7 @@ return (
                   clientIndividualFormValidation.errors.reference
                 }
               />
+
             </Grid>
             <Grid item xs={6}>
               <FormControlLabel
@@ -130,11 +119,66 @@ return (
                 label={_labels.isResident}
               />
             </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name="birthDate"
+                label={_labels.birthDate}
+                value={clientIndividualFormValidation.values?.birthDate}
+                required={true}
+                onChange={clientIndividualFormValidation.setFieldValue}
+                onClear={() =>
+                  clientIndividualFormValidation.setFieldValue("birthDate", "")
+                }
+                disabledDate={'>='}
+                readOnly={editMode && true}
 
+                error={
+                  clientIndividualFormValidation.touched.birthDate &&
+                  Boolean(clientIndividualFormValidation.errors.birthDate)
+                }
+                helperText={
+                  clientIndividualFormValidation.touched.birthDate &&
+                  clientIndividualFormValidation.errors.birthDate
+                }
+              />
+            </Grid>
             <Grid container xs={12}></Grid>
             <Grid item xs={12}>
               <FieldSet title={_labels.id}>
-              <Grid item xs={12}>
+
+                <Grid item xs={12} >
+                  <CustomTextField
+                  sx={{color: 'white'}}
+                    name="idNo"
+                    label={_labels.number}
+                    type={ showAsPassword && "password"}
+                    value={clientIndividualFormValidation.values?.idNo}
+                    required
+                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e)}}
+                    onCopy={handleCopy}
+                    onPaste={handleCopy}
+                    onBlur={(e) =>{ checkTypes(e.target.value) , setShowAsPassword(true)}}
+                    readOnly={editMode && true}
+                    maxLength="15"
+                    onFocus={(e) =>{ setShowAsPassword(false) }}
+
+                    onClear={() =>{
+                      clientIndividualFormValidation.setFieldValue("idNo", "")
+
+                    }
+
+                    }
+                    error={
+                      clientIndividualFormValidation.touched.idNo &&
+                      Boolean(clientIndividualFormValidation.errors.idNo)
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.idNo &&
+                      clientIndividualFormValidation.errors.idNo
+                    }
+                  />
+                   </Grid>
+                <Grid item xs={12}>
                   <CustomComboBox
                     name="idtId"
                     label={_labels.type}
@@ -142,7 +186,7 @@ return (
                     displayField="name"
                     readOnly={editMode && true}
                     store={idTypeStore}
-                    value={
+                    value={ clientIndividualFormValidation.values.idtId &&
                       idTypeStore.filter(
                         (item) =>
                           item.recordId ===
@@ -164,19 +208,13 @@ return (
                         "idtId",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "typeName",
-                        newValue?.name,
-                      );}else{
+                      }else{
 
                         clientIndividualFormValidation.setFieldValue(
                           "idtId",
                           '',
                         );
-                        clientIndividualFormValidation.setFieldValue(
-                          "typeName",
-                          '',
-                        );
+
 
                       }
                     }}
@@ -190,110 +228,13 @@ return (
                     }
                   />
                 </Grid>
-                <Grid item xs={12} sx={{position: 'relative', width: '100%'}}>
-                  <CustomTextField
-                  sx={{color: 'white'}}
-                    name="idNo"
-                    label={_labels.number}
-                    type={ showAsPassword && "password"}
-                    value={clientIndividualFormValidation.values?.idNo }
-                    required
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
-                    onCopy={handleCopy}
-                    onPaste={handleCopy}
-                    readOnly={editMode && true}
-                    maxLength="15"
-                    onBlur={(e) =>{ setShowAsPassword(true) }}
-                    onFocus={(e) =>{ setShowAsPassword(false) }}
 
-                    onClear={() =>{
-                      clientIndividualFormValidation.setFieldValue("idNo", "")
 
-                    }
 
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.idNo &&
-                      Boolean(clientIndividualFormValidation.errors.idNo)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.idNo &&
-                      clientIndividualFormValidation.errors.idNo
-                    }
-                  />
-                          {/* <Grid
-
-                           sx={{
-                              // position: 'absolute',
-                              width: '88%',
-                              height: clientIndividualFormValidation.touched.idNo ? '50%': '70%',
-                              top:  '10px',
-                              letterSpacing: "3px",
-                              marginLeft:'10px',
-                              marginRight:'10px',
-                              color:'#424242',
-                              paddingTop: '5px',
-                              backgroundColor: '#fff',
-                              pointerEvents: 'none',
-                              fontFamily: 'Arial'
-                          }}
-                          >{encryptDigits(clientIndividualFormValidation.values?.idNo)}</Grid> */}
-
+                <Grid item xs={12}>
+               <Button  variant='contained' onClick={()=>setWindowConfirmNumberOpen(true)} disabled={ (!clientIndividualFormValidation?.values?.idtId || !clientIndividualFormValidation?.values?.birthDate || !clientIndividualFormValidation.values.idNo || editMode ) ? true : false}>{_labels.fetch}</Button>
                 </Grid>
-                <Grid item xs={12}
-                sx={{position: 'relative', width: '100%',}}>
-                  <CustomTextField
-                    name="idNoRepeat"
-                    label={_labels.confirmNb}
-                    value={clientIndividualFormValidation.values?.idNoRepeat}
-                    required
-                    type={ showAsPasswordRepeat && "password"}
 
-                    onChange={ (e) =>{ clientIndividualFormValidation.handleChange(e) }}
-
-                    // onBlur={clientIndividualFormValidation.handleBlur}
-                    onCopy={handleCopy}
-                    onPaste={handleCopy}
-                    readOnly={editMode && true}
-
-                    onBlur={(e) =>{ setShowAsPasswordRepeat(true) , clientIndividualFormValidation.handleBlur(e)}}
-
-                    onFocus={(e) =>{ setShowAsPasswordRepeat(false) }}
-
-                    maxLength="15"
-                    onClear={() =>{
-                      clientIndividualFormValidation.setFieldValue("idNoRepeat", "")
-                      clientIndividualFormValidation.setFieldValue("idNoRepeat", "")}
-
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.idNoRepeat &&
-                      Boolean(clientIndividualFormValidation.errors.idNoRepeat)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.idNoRepeat &&
-                      clientIndividualFormValidation.errors.idNoRepeat
-                    }
-                  />
-                  {/* <Grid
-                     sx={{
-                      position: 'absolute',
-                      width: '88%',
-                      height: clientIndividualFormValidation.touched.idNoRepeat ? '50%': '70%',
-                      top:  '10px',
-                      letterSpacing: "3px",
-                      marginLeft:'10px',
-                      marginRight:'10px',
-                      color:'#424242',
-                      paddingTop: '5px',
-                      backgroundColor: '#fff',
-                      pointerEvents: 'none',
-                      fontFamily: 'Arial'
-
-                          }}
-                          >
-                            {encryptDigits(clientIndividualFormValidation.values?.idNoRepeat)}</Grid> */}
-                </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name="expiryDate"
@@ -308,7 +249,7 @@ return (
                         "",
                       )
                     }
-                    disabledDate={'<'}
+                    disabledDate={!editMode && '<'}
                     error={
                       clientIndividualFormValidation.touched.expiryDate &&
                       Boolean(clientIndividualFormValidation.errors.expiryDate)
@@ -327,8 +268,6 @@ return (
                     value={clientIndividualFormValidation.values?.issusDate}
                     readOnly={editMode && true}
                     disabledDate={'>'}
-
-                    // required={true}
                     onChange={clientIndividualFormValidation.handleChange}
                     onClear={() =>
                       clientIndividualFormValidation.setFieldValue(
@@ -348,41 +287,30 @@ return (
                 </Grid>
 
                 <Grid item xs={12}>
-                  <CustomComboBox
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Country.qry}
                     name="idCountry"
                     label={_labels.issusCountry}
                     valueField="recordId"
                     displayField={['reference','name','flName']}
                     readOnly={editMode && true}
-                store={countryStore}
-                columnsInDropDown= {[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                  { key: 'flName', value: 'Foreign Language Name' }
-                ]}
-                    value={
-                      countryStore.filter(
-                        (item) =>
-                          item.recordId ===
-                          clientIndividualFormValidation.values.idCountry,
-                      )[0]
-                    }
+                    columnsInDropDown= {[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'flName', value: 'Foreign Language Name' }
+                    ]}
+                    values={clientIndividualFormValidation.values}
+
                     required
                     onChange={(event, newValue) => {
                       setCityStore([])
 
                       if(newValue){
-
-
                       clientIndividualFormValidation.setFieldValue(
                         "idCountry",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "country",
-                        newValue?.name,
 
-                      );
 
 
                       clientIndividualFormValidation.setFieldValue(
@@ -401,10 +329,8 @@ return (
                           "idCountry",
                           ''
                         );
-                        clientIndividualFormValidation.setFieldValue(
-                          "country",
-                          ''
-                        );
+
+
 
                         clientIndividualFormValidation.setFieldValue(
                           "idCity",
@@ -431,18 +357,22 @@ return (
 
 
                 <Grid item xs={12}>
-            <CustomLookup
+            <ResourceLookup
+                endpointId={SystemRepository.City.snapshot}
+                parameters={{
+                  _countryId: clientIndividualFormValidation.values.idCountry,
+                  _stateId:  0
+                }}
+
               name='idCity'
               label={_labels.issusPlace}
-
+              form={clientIndividualFormValidation}
               valueField='name'
               displayField='name'
-              store={cityStore}
-              setStore={setCityStore}
               onLookup={lookupCity}
               firstValue={clientIndividualFormValidation.values.cityName}
               secondDisplayField={false}
-              readOnly={(editMode || clientIndividualFormValidation.values.idCountry) && true}
+              readOnly={(editMode || !clientIndividualFormValidation.values.idCountry) && true}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -481,362 +411,15 @@ return (
               </FieldSet>
               <Grid item xs={12} sx={{marginTop:'20px'}}>
                 <FieldSet title={_labels.address}>
-               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation} countryStore={countryStore} cityStore={cityAddressStore} setCityStore={setCityAddressStore}  lookupCity={lookupCityAddress} stateStore={stateAddressStore} cityDistrictStore={cityDistrictAddressStore} lookupCityDistrict={lookupCityDistrictAddress} fillStateStore={fillStateStoreAddress} readOnly={editMode && true} />
+               <AddressTab labels={_labels} addressValidation={clientIndividualFormValidation}  readOnly={editMode && true} />
                </FieldSet>
-                {/* <Grid item xs={12}>
-                  <CustomTextField
-                    name="whatsAppNo"
-                    label={_labels.whatsapp}
-                    value={clientIndividualFormValidation.values?.whatsAppNo}
-                    required
-                    onChange={clientIndividualFormValidation.handleChange}
-                    maxLength="10"
-                    onClear={() =>
-                      clientIndividualFormValidation.setFieldValue(
-                        "whatsAppNo",
-                        "",
-                      )
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.whatsAppNo &&
-                      Boolean(clientIndividualFormValidation.errors.whatsAppNo)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.whatsAppNo &&
-                      clientIndividualFormValidation.errors.whatsAppNo
-                    }
-                  />
-                </Grid> */}
-
-<Grid container spacing={2} sx={{ marginTop: "20px" }}>
-              <Grid container xs={12} spacing={2} >
-                <Grid item xs={12}>
-                  <CustomComboBox
-                    name="salaryRangeId"
-                    label={_labels.salaryRange}
-                    valueField="recordId"
-                    displayField={["min", "->",  "max"]}
-                    columnsInDropDown={[
-                      { key: "min", value: "min" },
-                      { key: "max", value: "max" },
-                    ]}
-                    readOnly={editMode && true}
-                    store={salaryRangeStore}
-                    value={
-                      salaryRangeStore.filter(
-                        (item) =>
-                          item.recordId ===
-                          clientIndividualFormValidation.values.salaryRangeId,
-                      )[0]
-                    }
-                    onChange={(event, newValue) => {
-
-                      if(newValue){
-                      clientIndividualFormValidation.setFieldValue(
-                        "salaryRangeId",
-                        newValue?.recordId,
-                      );
-                      clientIndividualFormValidation.setFieldValue(
-                        "salaryRange",
-                        newValue?.name,
-                      );
-                    }else{
-                      clientIndividualFormValidation.setFieldValue(
-                        "salaryRangeId",
-                        '',
-                      );
-                      clientIndividualFormValidation.setFieldValue(
-                        "salaryRange",
-                        '',
-                      );
-
-                    }
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.salaryRangeId &&
-                      Boolean(
-                        clientIndividualFormValidation.errors.salaryRangeId,
-                      )
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.salaryRangeId &&
-                      clientIndividualFormValidation.errors.salaryRangeId
-                    }
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <CustomComboBox
-                    name="riskLevel"
-                    label={_labels.riskLevel}
-                    readOnly={editMode && true}
-
-                    // readOnly //disabled
-                    valueField="recordId"
-                    displayField="name"
-                    store={countryStore}
-                    value={
-                      countryStore.filter(
-                        (item) =>
-                          item.recordId ===
-                          clientIndividualFormValidation.values.riskLevel,
-                      )[0]
-                    }
-                    required
-                    onChange={(event, newValue) => {
-
-                      if(newValue){
-                      clientIndividualFormValidation.setFieldValue(
-                        "riskLevel",
-                        newValue?.recordId,
-                      );
-                     }else{
-
-                        clientIndividualFormValidation.setFieldValue(
-                          "riskLevelId",
-                          null,
-                        );
-                        clientIndividualFormValidation.setFieldValue(
-                          "riskLevel",
-                          null,
-                        );
-
-                      }
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.riskLevelId &&
-                      Boolean(clientIndividualFormValidation.errors.riskLevelId)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.riskLevelId &&
-                      clientIndividualFormValidation.errors.riskLevelId
-                    }
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <CustomComboBox
-                    name="smsLanguage"
-                    label={_labels.smsLanguage}
-                    valueField="key"
-                    displayField="value"
-                    store={smsLanguageStore}
-                    value={
-                      clientIndividualFormValidation.values.smsLanguage &&   smsLanguageStore.filter(
-                        (item) =>
-                          item.key ==
-                          clientIndividualFormValidation.values.smsLanguage,
-                      )[0]
-                    }
-                    required
-
-                    readOnly={editMode && true}
-                    onChange={(event, newValue) => {
-
-                      if(newValue){
-                      clientIndividualFormValidation.setFieldValue(
-                        "smsLanguage",
-                        newValue?.key,
-                      );
-
-                    }else{
-
-                        clientIndividualFormValidation.setFieldValue(
-                          "smsLanguage",
-                          '',
-                        );
-
-                      }
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.smsLanguage &&
-                      Boolean(
-                        clientIndividualFormValidation.errors.smsLanguage,
-                      )
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.smsLanguage &&
-                      clientIndividualFormValidation.errors.smsLanguage
-                    }
-                  />
-                </Grid>
 
 
-              </Grid>
-              <Grid container xs={12} spacing={2}  sx={{marginTop:'5px'}}>
-                <Grid item xs={12}>
-                  <CustomComboBox
-                    name="civilStatus"
-                    label={_labels.civilStatus}
-                    valueField="key"
-                    displayField="value"
-                    store={civilStatusStore}
-                    value={
-                      civilStatusStore.filter(
-                        (item) =>
-                          item.key ===
-                          clientIndividualFormValidation.values.civilStatus,
-                      )[0]
-                    }
-                    readOnly={editMode && true}
-                    onChange={(event, newValue) => {
 
-                      if(newValue){
-                        clientIndividualFormValidation.setFieldValue(
-                          "civilStatus",
-                          newValue?.key,
-                        );
-                        clientIndividualFormValidation.setFieldValue(
-                          "civilStatusName",
-                          newValue?.value,
-                        );
-                      }else{
-                      clientIndividualFormValidation.setFieldValue(
-                        "civilStatus",
-                        newValue?.key,
-                      );
-                      clientIndividualFormValidation.setFieldValue(
-                        "civilStatusName",
-                        newValue?.value,
-                      );
-
-                      }
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.civilStatus &&
-                      Boolean(
-                        clientIndividualFormValidation.errors.civilStatus,
-                      )
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.civilStatus &&
-                      clientIndividualFormValidation.errors.civilStatus
-                    }
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                <CustomTextField
-                  name="statusName"
-                  label={_labels.status}
-                  value={clientIndividualFormValidation.values?.statusName}
-                  required
-                  type="number"
-                  onChange={clientIndividualFormValidation.handleChange}
-                  maxLength="10"
-                  onClear={() =>
-                    clientIndividualFormValidation.setFieldValue("statusName", "")
-                  }
-                  readonly
-
-                  error={
-                    clientIndividualFormValidation.touched.statusName &&
-                    Boolean(clientIndividualFormValidation.errors.statusName)
-                  }
-                  helperText={
-                    clientIndividualFormValidation.touched.statusName &&
-                    clientIndividualFormValidation.errors.statusName
-                  }
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <CustomTextField
-                  name="oldReference"
-                  label={_labels.oldReference}
-                  value={clientIndividualFormValidation.values?.oldReference}
-                  readOnly={editMode && true}
-                  onChange={clientIndividualFormValidation.handleChange}
-                  maxLength="10"
-                  onClear={() =>
-                    clientIndividualFormValidation.setFieldValue(
-                      "oldReference",
-                      "",
-                    )
-                  }
-                  error={
-                    clientIndividualFormValidation.touched.oldReference &&
-                    Boolean(clientIndividualFormValidation.errors.oldReference)
-                  }
-                  helperText={
-                    clientIndividualFormValidation.touched.oldReference &&
-                    clientIndividualFormValidation.errors.oldReference
-                  }
-                />
-              </Grid>
-
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name="whatsAppNo"
-                    label={_labels.whatsapp}
-                    value={clientIndividualFormValidation.values?.whatsAppNo}
-                    readOnly={editMode && true}
-                    onChange={clientIndividualFormValidation.handleChange}
-                    maxLength="15"
-                    onClear={() =>
-                      clientIndividualFormValidation.setFieldValue(
-                        "whatsAppNo",
-                        "",
-                      )
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.whatsAppNo &&
-                      Boolean(clientIndividualFormValidation.errors.whatsAppNo)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.whatsAppNo &&
-                      clientIndividualFormValidation.errors.whatsAppNo
-                    }
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <CustomComboBox
-                    name="title"
-                    label={_labels.title}
-                    valueField="key"
-                    displayField="value"
-                    store={titleStore}
-                    readOnly={editMode && true}
-                    value={
-                      titleStore.filter(
-                        (item) =>
-                          item.key ===
-                          clientIndividualFormValidation.values.title,
-                      )[0]
-                    }
-                      onChange={(event, newValue) => {
-
-                      if(newValue){
-                      clientIndividualFormValidation.setFieldValue(
-                        "title",
-                        newValue?.key,
-                      );
-
-                      }else{
-                        clientIndividualFormValidation.setFieldValue(
-                          "title",
-                          null,
-                        );
-
-                      }
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.title &&
-                      Boolean(clientIndividualFormValidation.errors.title )
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.title &&
-                      clientIndividualFormValidation.errors.title
-                    }
-                  />
-                </Grid>
-              </Grid>
-
-            </Grid>
               </Grid>
             </Grid>
           </Grid>
+
         </Grid>
 
         <Grid item xs={6}>
@@ -876,19 +459,7 @@ return (
                     clientIndividualFormValidation.errors.cellPhone
                   }
                 />
-                 {/* <Grid
-                          sx={{
-                            position: 'absolute',
-                            top:  '15px',
 
-                            letterSpacing: "3px",
-                            marginLeft:'15px',
-                            padding: '0px',
-                            backgroundColor: '#fff',
-                            pointerEvents: 'none',
-                            fontFamily: 'Arial'
-                        }}
-                          >{encryptDigits(clientIndividualFormValidation.values?.cellPhone)}</Grid> */}
               </Grid>
               <Grid item xs={6} sx={{position: 'relative', width: '100%'}}>
                 <CustomTextField
@@ -924,18 +495,7 @@ return (
                     clientIndividualFormValidation.errors.cellPhoneRepeat
                   }
                 />
-                 {/* <Grid
-                         sx={{
-                          position: 'absolute',
-                          top:  '15px',
-                          letterSpacing: "3px",
-                          marginLeft:'15px',
-                          padding: '0px',
-                          backgroundColor: '#fff',
-                          pointerEvents: 'none',
-                          fontFamily: 'Arial'
-                      }}
-                          >{encryptDigits(clientIndividualFormValidation.values.cellPhoneRepeat)}</Grid> */}
+
               </Grid>
               <Grid container  spacing={2} sx={{paddingTop: '20px'}} >
                 <Grid item xs={3}>
@@ -1160,8 +720,6 @@ return (
                   name="nationalityId"
                   label={_labels.nationality}
                   valueField="recordId"
-
-                  // displayField="name"
                   store={countryStore}
                    displayField={['reference','name','flName']}
 
@@ -1186,18 +744,11 @@ return (
                       "nationalityId",
                       newValue?.recordId,
                     );
-                    clientIndividualFormValidation.setFieldValue(
-                      "nationalityName",
-                      newValue?.name,
-                    );}else{
+                   }else{
 
                       clientIndividualFormValidation.setFieldValue(
                         "nationalityId",
                         ''
-                      );
-                      clientIndividualFormValidation.setFieldValue(
-                        "nationalityName",
-                        '',
                       );
 
 
@@ -1214,29 +765,7 @@ return (
                 />
               </Grid>
 
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name="birthDate"
-                label={_labels.birthDate}
-                value={clientIndividualFormValidation.values?.birthDate}
-                required={true}
-                onChange={clientIndividualFormValidation.setFieldValue}
-                onClear={() =>
-                  clientIndividualFormValidation.setFieldValue("birthDate", "")
-                }
-                disabledDate={'>='}
-                readOnly={editMode && true}
 
-                error={
-                  clientIndividualFormValidation.touched.birthDate &&
-                  Boolean(clientIndividualFormValidation.errors.birthDate)
-                }
-                helperText={
-                  clientIndividualFormValidation.touched.birthDate &&
-                  clientIndividualFormValidation.errors.birthDate
-                }
-              />
-            </Grid>
             <Grid item xs={12}>
                   <CustomComboBox
                     name="gender"
@@ -1250,29 +779,33 @@ return (
                       genderStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.gender,
+                          clientIndividualFormValidation.values.gender?.toString(),
                       )[0]
-                    }                    onChange={(event, newValue) => {
-
+                    }
+                    onChange={(event, newValue) => {
+                      clientIndividualFormValidation.setFieldValue(
+                        "coveredFace", false
+                      );
                       if(newValue){
                       clientIndividualFormValidation.setFieldValue(
                         "gender",
                         newValue?.key,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "genderName",
-                        newValue?.value,
-                      );
+
+                      if(newValue.key ==='2'){
+                        clientIndividualFormValidation.setFieldValue(
+                          "coveredFace", true
+                        );
+                      }
+
                     }else{
 
-                      clientIndividualFormValidation.setFieldValue(
-                        "genderId",
-                        '',
-                      );
                       clientIndividualFormValidation.setFieldValue(
                         "gender",
                         '',
                       );
+
+
                     }
                     }}
                     error={
@@ -1302,7 +835,7 @@ return (
                       educationStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.educationLevel,
+                          clientIndividualFormValidation.values.educationLevel?.toString(),
                       )[0]
                     }
                     onChange={(event, newValue) => {
@@ -1312,19 +845,13 @@ return (
                         "educationLevel",
                         newValue?.key,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevelName",
-                        newValue?.Value,
-                      );
+
                     }else{
                       clientIndividualFormValidation.setFieldValue(
                         "educationLevel",
                         null,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevelName",
-                        null,
-                      );
+
 
                       }
                     }}
@@ -1340,38 +867,7 @@ return (
                     }
                   />
                 </Grid>
-                {/* <Grid item xs={7}>
-                  <CustomComboBox
-                    name="category"
-                    label={_labels.educationLevel}
-                    valueField="recordId"
-                    displayField="name"
-                    store={countryStore}
-                    value={
-                      clientIndividualFormValidation.values?.educationLevelId
-                    }
-                    onChange={(event, newValue) => {
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevelId",
-                        newValue?.recordId,
-                      );
-                      clientIndividualFormValidation.setFieldValue(
-                        "educationLevel",
-                        newValue?.name,
-                      );
-                    }}
-                    error={
-                      clientIndividualFormValidation.touched.educationLevelId &&
-                      Boolean(
-                        clientIndividualFormValidation.errors.educationLevelId,
-                      )
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.educationLevelId &&
-                      clientIndividualFormValidation.errors.educationLevelId
-                    }
-                  />
-                </Grid> */}
+
                 <Grid item xs={12}>
                   <CustomComboBox
                     name="incomeSourceId"
@@ -1379,7 +875,6 @@ return (
                     valueField="recordId"
                     readOnly={editMode && true}
                     displayField={['reference','name','flName']}
-
                     columnsInDropDown= {[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' },
@@ -1399,10 +894,7 @@ return (
                         "incomeSourceId",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "incomeSource",
-                        newValue?.name,
-                      );
+
                     }}
                     error={
                       clientIndividualFormValidation.touched.incomeSourceId &&
@@ -1418,29 +910,7 @@ return (
                 </Grid>
 
 
-                {/* <Grid item xs={12}>
-                  <CustomTextField
-                    name="salary"
-                    label='salary'    //{_labels.whatsapp}
-                    value={clientIndividualFormValidation.values?.salary}
 
-                    onChange={clientIndividualFormValidation.handleChange}
-                    onClear={() =>
-                      clientIndividualFormValidation.setFieldValue(
-                        "salary",
-                        "",
-                      )
-                    }
-                    error={
-                      clientIndividualFormValidation.touched.salary &&
-                      Boolean(clientIndividualFormValidation.errors.salary)
-                    }
-                    helperText={
-                      clientIndividualFormValidation.touched.salary &&
-                      clientIndividualFormValidation.errors.salary
-                    }
-                  />
-                </Grid> */}
 
                 <Grid item xs={12}>
                   <CustomTextField
@@ -1466,32 +936,10 @@ return (
                     }
                   />
                 </Grid>
-                {/* <Grid item xs={12}>
-                <CustomTextField
-                  name="cellPhone"
-                  label={_labels.cellPhone}
-                  value={clientIndividualFormValidation.values?.cellPhone}
-                  required
-                  onChange={clientIndividualFormValidation.handleChange}
-                  maxLength="10"
-                  onClear={() =>
-                    clientIndividualFormValidation.setFieldValue(
-                      "cellPhone",
-                      "",
-                    )
-                  }
-                  error={
-                    clientIndividualFormValidation.touched.cellPhone &&
-                    Boolean(clientIndividualFormValidation.errors.cellPhone)
-                  }
-                  helperText={
-                    clientIndividualFormValidation.touched.cellPhone &&
-                    clientIndividualFormValidation.errors.cellPhone
-                  }
-                />
-              </Grid> */}
+
               <Grid item xs={12} >
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={RemittanceSettingsRepository.Profession.qry}
                   name="professionId"
                   label={_labels.profession}
                   valueField="recordId"
@@ -1502,24 +950,14 @@ return (
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  store={professionFilterStore}
                   readOnly={editMode && true}
-                  value={
-                    professionFilterStore.filter(
-                      (item) =>
-                        item.recordId ===
-                        clientIndividualFormValidation.values.professionId,
-                    )[0]
-                  }
+                  values={clientIndividualFormValidation.values}
+
                   required
                   onChange={(event, newValue) => {
                     clientIndividualFormValidation.setFieldValue(
                       "professionId",
                       newValue?.recordId,
-                    );
-                    clientIndividualFormValidation.setFieldValue(
-                      "professionName",
-                      newValue?.name,
                     );
 
 
@@ -1535,16 +973,318 @@ return (
                 />
               </Grid>
               </FieldSet>
+              <Grid item xs={12}>
+              <Button variant='contained' onClick={()=>setWindowWorkAddressOpen(true)}  >{_labels.workAddress}</Button>
+              </Grid>
 
 
-               <Grid container sx={{marginTop: '20px'}}>
-              <FieldSet title={_labels.workAddress}>
-              <AddressTab labels={_labels} addressValidation={WorkAddressValidation} countryStore={countryStore} cityStore={cityAddressWorkStore} setCityStore={setCityAddressWorkStore} lookupCity={lookupCityAddressWork}  stateStore={stateAddressWorkStore}   fillStateStore={fillStateStoreAddressWork} lookupCityDistrict={lookupCityDistrictAddressWork} cityDistrictStore={cityDistrictAddressWorkStore} requiredOptional={requiredOptional} readOnly={editMode && true} />
+              <Grid container xs={12} spacing={2} sx={{p:5}} >
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={RemittanceSettingsRepository.SalaryRange.qry}
+                    name="salaryRangeId"
+                    label={_labels.salaryRange}
+                    valueField="recordId"
+                    displayField={["min", "->",  "max"]}
+                    columnsInDropDown={[
+                      { key: "min", value: "min" },
+                      { key: "max", value: "max" },
+                    ]}
+                    readOnly={editMode && true}
+                    values={clientIndividualFormValidation.values }
+                    onChange={(event, newValue) => {
 
-               </FieldSet>
-               </Grid>
+                      if(newValue){
+                      clientIndividualFormValidation.setFieldValue(
+                        "salaryRangeId",
+                        newValue?.recordId,
+                      );
 
-               <Grid container xs={6} spacing={2} sx={{ padding: "5px" }}>
+                    }else{
+                      clientIndividualFormValidation.setFieldValue(
+                        "salaryRangeId",
+                        '',
+                      );
+
+
+                    }
+                    }}
+                    error={
+                      clientIndividualFormValidation.touched.salaryRangeId &&
+                      Boolean(
+                        clientIndividualFormValidation.errors.salaryRangeId,
+                      )
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.salaryRangeId &&
+                      clientIndividualFormValidation.errors.salaryRangeId
+                    }
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={CurrencyTradingSettingsRepository.RiskLevel.qry}
+                    name="riskLevel"
+                    label={_labels.riskLevel}
+                    readOnly={editMode && true}
+                    valueField="recordId"
+                    displayField={['reference','name']}
+
+                  columnsInDropDown= {[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                  ]}
+
+                    values={clientIndividualFormValidation.values}
+                    onChange={(event, newValue) => {
+
+                      if(newValue){
+                      clientIndividualFormValidation.setFieldValue(
+                        "riskLevel",
+                        newValue?.recordId,
+                      );
+                     }else{
+
+                        clientIndividualFormValidation.setFieldValue(
+                          "riskLevel",
+                          null,
+                        );
+
+
+                      }
+                    }}
+                    error={
+                      clientIndividualFormValidation.touched.riskLevel &&
+                      Boolean(clientIndividualFormValidation.errors.riskLevel)
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.riskLevel &&
+                      clientIndividualFormValidation.errors.riskLevel
+                    }
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomComboBox
+                    name="smsLanguage"
+                    label={_labels.smsLanguage}
+                    valueField="key"
+                    displayField="value"
+                    store={smsLanguageStore}
+                    value={
+                      clientIndividualFormValidation.values.smsLanguage &&   smsLanguageStore.filter(
+                        (item) =>
+                          item.key ==
+                          clientIndividualFormValidation.values.smsLanguage,
+                      )[0]
+                    }
+                    required
+
+                    readOnly={editMode && true}
+                    onChange={(event, newValue) => {
+
+                      if(newValue){
+                      clientIndividualFormValidation.setFieldValue(
+                        "smsLanguage",
+                        newValue?.key,
+                      );
+
+                    }else{
+
+                        clientIndividualFormValidation.setFieldValue(
+                          "smsLanguage",
+                          '',
+                        );
+
+                      }
+                    }}
+                    error={
+                      clientIndividualFormValidation.touched.smsLanguage &&
+                      Boolean(
+                        clientIndividualFormValidation.errors.smsLanguage,
+                      )
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.smsLanguage &&
+                      clientIndividualFormValidation.errors.smsLanguage
+                    }
+                  />
+                </Grid>
+
+
+
+                <Grid item xs={12}>
+                  <CustomComboBox
+                    name="civilStatus"
+                    label={_labels.civilStatus}
+                    valueField="key"
+                    displayField="value"
+                    store={civilStatusStore}
+                    value={
+                      civilStatusStore.filter(
+                        (item) =>
+                          item.key ===
+                          clientIndividualFormValidation.values.civilStatus,
+                      )[0]
+                    }
+                    readOnly={editMode && true}
+                    onChange={(event, newValue) => {
+
+                      if(newValue){
+                        clientIndividualFormValidation.setFieldValue(
+                          "civilStatus",
+                          newValue?.key,
+                        );
+
+                      }else{
+                      clientIndividualFormValidation.setFieldValue(
+                        "civilStatus",
+                        newValue?.key,
+                      );
+
+
+                      }
+                    }}
+                    error={
+                      clientIndividualFormValidation.touched.civilStatus &&
+                      Boolean(
+                        clientIndividualFormValidation.errors.civilStatus,
+                      )
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.civilStatus &&
+                      clientIndividualFormValidation.errors.civilStatus
+                    }
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                <CustomTextField
+                  name="statusName"
+                  label={_labels.status}
+                  value={clientIndividualFormValidation.values?.statusName}
+                  type="number"
+                  onChange={clientIndividualFormValidation.handleChange}
+                  maxLength="10"
+                  onClear={() =>
+                    clientIndividualFormValidation.setFieldValue("statusName", "")
+                  }
+                  readonly={true}
+
+                  error={
+                    clientIndividualFormValidation.touched.statusName &&
+                    Boolean(clientIndividualFormValidation.errors.statusName)
+                  }
+                  helperText={
+                    clientIndividualFormValidation.touched.statusName &&
+                    clientIndividualFormValidation.errors.statusName
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <CustomTextField
+                  name="oldReference"
+                  label={_labels.oldReference}
+                  value={clientIndividualFormValidation.values?.oldReference}
+                  readOnly={editMode && true}
+                  onChange={clientIndividualFormValidation.handleChange}
+                  maxLength="10"
+                  onClear={() =>
+                    clientIndividualFormValidation.setFieldValue(
+                      "oldReference",
+                      "",
+                    )
+                  }
+                  error={
+                    clientIndividualFormValidation.touched.oldReference &&
+                    Boolean(clientIndividualFormValidation.errors.oldReference)
+                  }
+                  helperText={
+                    clientIndividualFormValidation.touched.oldReference &&
+                    clientIndividualFormValidation.errors.oldReference
+                  }
+                />
+              </Grid>
+
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name="whatsAppNo"
+                    label={_labels.whatsapp}
+                    value={clientIndividualFormValidation.values?.whatsAppNo}
+                    readOnly={editMode && true}
+                    onChange={clientIndividualFormValidation.handleChange}
+                    maxLength="15"
+                    onClear={() =>
+                      clientIndividualFormValidation.setFieldValue(
+                        "whatsAppNo",
+                        "",
+                      )
+                    }
+                    error={
+                      clientIndividualFormValidation.touched.whatsAppNo &&
+                      Boolean(clientIndividualFormValidation.errors.whatsAppNo)
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.whatsAppNo &&
+                      clientIndividualFormValidation.errors.whatsAppNo
+                    }
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomComboBox
+                    name="title"
+                    label={_labels.title}
+                    valueField="key"
+                    displayField="value"
+                    store={titleStore}
+                    readOnly={editMode && true}
+                    value={
+                      titleStore.filter(
+                        (item) =>
+                          item.key ===
+                          clientIndividualFormValidation.values.title?.toString(),
+                      )[0]
+                    }
+                      onChange={(event, newValue) => {
+
+                      if(newValue){
+                      clientIndividualFormValidation.setFieldValue(
+                        "title",
+                        newValue?.key,
+                      );
+
+                      }else{
+                        clientIndividualFormValidation.setFieldValue(
+                          "title",
+                          null,
+                        );
+
+                      }
+                    }}
+                    error={
+                      clientIndividualFormValidation.touched.title &&
+                      Boolean(clientIndividualFormValidation.errors.title )
+                    }
+                    helperText={
+                      clientIndividualFormValidation.touched.title &&
+                      clientIndividualFormValidation.errors.title
+                    }
+                  />
+                </Grid>
+              </Grid>
+
+            </Grid>
+
+
+
+
+          </Grid>
+        </Grid>
+        <Grid container spacing={2}  sx={{m :0}}>
+              <Grid container xs={6} spacing={2}  sx={{p:5}} >
                 <Grid item xs={12}>
                   <FormControlLabel
                     control={
@@ -1571,7 +1311,7 @@ return (
                       mobileVerifiedStore &&    mobileVerifiedStore.filter(
                         (item) =>
                           item.key ===
-                          clientIndividualFormValidation.values.mobileVerified,
+                          clientIndividualFormValidation.values.mobileVerified?.toString(),
                       )[0]
                     }
                     readOnly
@@ -1580,10 +1320,7 @@ return (
                         "mobileVerified",
                         newValue?.recordId,
                       );
-                      clientIndividualFormValidation.setFieldValue(
-                        "mobileVerifiedName",
-                        newValue?.name,
-                      );
+
                     }}
                     error={
                       clientIndividualFormValidation.touched.mobileVerified &&
@@ -1601,11 +1338,12 @@ return (
                   <FormControlLabel
                     control={
                       <Checkbox
-                        disabled={clientIndividualFormValidation.values.genderId ===2 ? editMode? true : false : true}
-                        readOnly={editMode && true}
+
+                         disabled={clientIndividualFormValidation.values.gender === "2" && !editMode ?  false :  true}
                         name="coveredFace"
-                        checked={
-                          clientIndividualFormValidation.values?.coveredFace
+                        checked={clientIndividualFormValidation.values.coveredFace
+
+                          // clientIndividualFormValidation.values.gender === "2" && !clientIndividualFormValidation.values.coveredFace  ? true :  clientIndividualFormValidation.values.coveredFace
                         }
                         onChange={clientIndividualFormValidation.handleChange}
                       />
@@ -1630,7 +1368,7 @@ return (
                 </Grid>
               </Grid>
 
-              <Grid container xs={6} spacing={2} sx={{ paddingTop: "15px" }}>
+              <Grid container xs={6} spacing={2} sx={{pt:5}} >
                 <Grid container xs={12}>
                   <FieldSet title={_labels.diplomat}>
                     <Grid item xs={12}>
@@ -1709,14 +1447,8 @@ return (
                 </Grid>
               </Grid>
 
-            </Grid>
 
-
-
-
-          </Grid>
-        </Grid>
-
+             </Grid>
         <Grid
           sx={{
             position: "fixed",
@@ -1730,7 +1462,9 @@ return (
         </Grid>
       </Grid>
             </Grid>
-        </>
+            {/* {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}        onSave={()=>handleSubmit('fetch')}
+        onClose={()=>setWindowConfirmNumberOpen(false)} width={400} height={300} />} */}
+        </FormShell>
     )
 }
 

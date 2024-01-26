@@ -1,8 +1,6 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from "@mui/material";
 
-import { useEffect, useState } from "react";
-
 // ** Custom Imports
 import CustomTextField from "src/components/Inputs/CustomTextField";
 import CustomComboBox from "src/components/Inputs/CustomComboBox";
@@ -12,7 +10,8 @@ import CustomComboBox from "src/components/Inputs/CustomComboBox";
 import AddressTab from "src/components/Shared/AddressTab";
 import FieldSet from "src/components/Shared/FieldSet";
 import CustomDatePicker from "src/components/Inputs/CustomDatePicker";
-import CustomLookup from "src/components/Inputs/CustomLookup";
+import { TextFieldReference } from "src/components/Shared/TextFieldReference";
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const ClientTab = ({props}) => {
 // alert(props)
@@ -30,13 +29,14 @@ const ClientTab = ({props}) => {
     fillStateStoreAddress,
     stateAddressStore,
     industryStore,
-
+    setReferenceRequired,
     _labels,
     maxAccess,
     editMode,
   } = props
 
   // alert(stateAddressStore)
+console.log(clientCorporateFormValidation)
 
 return (
     <>
@@ -45,15 +45,16 @@ return (
           <Grid item xs={6} sx={{ padding: "40px" }}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <CustomTextField
+                <TextFieldReference
                   name="reference"
                   label={_labels.reference}
                   value={clientCorporateFormValidation.values?.reference}
-
-                  // required
-                  readOnly={true}
+                  endpointId={CurrencyTradingSettingsRepository.Defaults.get}
+                  param={'ct-nra-corporate'}
+                  setReferenceRequired={setReferenceRequired}
                   onChange={clientCorporateFormValidation.handleChange}
                   maxLength="10"
+                  editMode={editMode}
                   onClear={() =>
                     clientCorporateFormValidation.setFieldValue("reference", "")
                   }
@@ -82,7 +83,7 @@ return (
                       ""
                     )
                   }
-                  disabledDate={"<"}
+                  disabledDate={!editMode && "<"}
                   error={
                     clientCorporateFormValidation.touched.expiryDate &&
                     Boolean(clientCorporateFormValidation.errors.expiryDate)
@@ -331,7 +332,7 @@ return (
                               (item) =>
                                 item.key ===
                                 clientCorporateFormValidation.values
-                                  .industry
+                                  .industry?.toString()
                             )[0]
                           }
                           required
@@ -352,15 +353,15 @@ return (
                           }}
                           error={
                             clientCorporateFormValidation.touched
-                              .nationalityId &&
+                              .industry &&
                             Boolean(
-                              clientCorporateFormValidation.errors.nationalityId
+                              clientCorporateFormValidation.errors.industry
                             )
                           }
                           helperText={
                             clientCorporateFormValidation.touched
-                              .nationalityId &&
-                            clientCorporateFormValidation.errors.nationalityId
+                              .industry &&
+                            clientCorporateFormValidation.errors.industry
                           }
                         />
                       </Grid>
@@ -447,6 +448,8 @@ return (
                           control={
                             <Checkbox
                               name="trading"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.trading
                               }
@@ -463,6 +466,8 @@ return (
                           control={
                             <Checkbox
                               name="inward"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.inward
                               }
@@ -479,10 +484,12 @@ return (
                           control={
                             <Checkbox
                               name="outward"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.outward
                               }
-                              onChange={clientCorporateFormValidation.outward}
+                              onChange={clientCorporateFormValidation.handleChange}
                             />
                           }
                           label={_labels?.outward}

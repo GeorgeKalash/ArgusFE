@@ -18,6 +18,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const  UpdateExchangeRates = () => {
 
@@ -25,11 +26,13 @@ const  UpdateExchangeRates = () => {
    const [currencyStore,  setCurrencyStore] = useState([])
    const [access , setAccess] = useState()
    const { getRequest, postRequest } = useContext(RequestsContext)
+
    const [exchangeTableStore, setExchangeTableStore] = useState([])
   const [CrmStore , setCrmSore] = useState([])
   const { getLabels, getAccess } = useContext(ControlContext)
   const [labels, setLabels] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const { width, height } = useWindowDimensions();
 
    const exchangeRatesValidation = useFormik({
     enableReinitialize: false,
@@ -87,7 +90,8 @@ const  UpdateExchangeRates = () => {
       header: _labels.exchangeTable,
       name: 'exchangeName',
       mandatory: true,
-      readOnly: true
+      readOnly: true,
+      width: 350
 
     },
     {
@@ -183,8 +187,6 @@ const  UpdateExchangeRates = () => {
     }
   }, [access])
 
-
-
   useEffect(() => {
     if (
       exchangeRatesValidation.values &&
@@ -201,6 +203,7 @@ const  UpdateExchangeRates = () => {
 
   const getExchangeRates = (cuId, coId) => {
     exchangeRatesGridValidation.setValues({rows: []})
+  if(cuId && coId){
     const defaultParams = `_currencyId=${cuId}&_countryId=${coId}`;
     const parameters = defaultParams;
 
@@ -219,8 +222,7 @@ const  UpdateExchangeRates = () => {
 
             // Create a mapping of commissionId to values entry for efficient lookup
               const valuesMap = values.list.reduce((acc, fee) => {
-                // console.log(acc)
-                // console.log(fee)
+
                 acc[fee.exchangeId] = fee;
 
                 return acc;
@@ -238,14 +240,13 @@ const  UpdateExchangeRates = () => {
                   exchangeName: exchange.exchangeName,
                   rateCalcMethod: exchange.rateCalcMethod,
                   rateCalcMethodName: exchange.rateCalcMethodName,
-                  rate: value.rate ? value.rate : '',
+                  rate: value?.rate ? value.rate : '',
                   minRate: value.minRate ? value.minRate : '',
                   maxRate: value.maxRate? value.maxRate : '',
                 };
               });
 
               exchangeRatesGridValidation.setValues({ rows })
-              setProductLegWindowOpen(true)
           })
           .catch(error => {
             setErrorMessage(error)
@@ -256,82 +257,16 @@ const  UpdateExchangeRates = () => {
         setErrorMessage(error)
       })
 
+}
 
-
-    //step 3: merge both
   }
 
-const getExchangeRatess = async (cuId, coId) => {
-  try {
 
-
-    exchangeRatesGridValidation.setValues({rows: []})
-    const defaultParams = `_currencyId=${cuId}&_countryId=${coId}`;
-    const parameters = defaultParams;
-
-    const res = await getRequest({
-      extension: RemittanceSettingsRepository.UpdateExchangeRates.qry,
-      parameters: parameters,
-    });
-
-    console.log(res);
-
-    // Use Promise.all to wait for all asynchronous calls to complete
-      const exchangePromises = res.list.map(async (exchangeTable) => {
-      const exchangeId = exchangeTable.exchangeId;
-      const exchangeName = exchangeTable.exchangeName;
-      const exchangeRef = exchangeTable.exchangeRef
-      const rateCalcMethod = exchangeTable.rateCalcMethod;
-
-      // const plantId = exchangeTable.plantId;
-      const defaultParams = `_exchangeId=${exchangeId}`;
-      const parameters = defaultParams;
-
-      const  exchangeResult =  getRequest({
-        extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.qry,
-        parameters: parameters,
-      });
-
-      var obj = {
-        // countryId: coId,
-        // currencyId: cuId,
-        // plantId: plantId,
-        exchangeName: exchangeName,
-        exchangeRef: exchangeRef,
-        exchangeId: exchangeId,
-        rateCalcMethod: rateCalcMethod,
-        rate: exchangeResult.rate ? exchangeResult.rate : '',
-        minRate: exchangeResult.minRate ? exchangeResult.minRate : '',
-        maxRate: exchangeResult.sellMaxRate? exchangeResult.maxRate : '',
-      };
-
-      // Modify the obj or use exchangeRes.list as needed
-
-      return obj;
-    });
-
-    const exchangeRows = await Promise.all(exchangePromises);
-
-    exchangeRatesGridValidation.setValues((prevValues) => ({
-      ...prevValues,
-      rows: [...prevValues.rows, ...exchangeRows], // Append new rows to the existing ones
-    }));
-
-
-
-    console.log(exchangeRatesGridValidation);
-
-  } catch (error) {
-    setErrorMessage(error);
-  }
-};
 
 const handleSubmit = () => {
   exchangeRatesGridValidation.handleSubmit()
 }
 
-// Usage of getExchangeRates
-// getExchangeRates(yourCuId, yourCoId);
 
 
   const fillCurrencyStore = () => {
@@ -369,19 +304,22 @@ const handleSubmit = () => {
     exchangeRatesValidation.setFieldValue('exchangeRef' , '')
     exchangeRatesValidation.setFieldValue('exchangeId' ,'')
     const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
+
     var parameters = defaultParams
+    if(currencyId && countryId)
     getRequest({
       extension: RemittanceSettingsRepository.UpdateExchangeRates.get,
       parameters: parameters
     })
       .then(res => {
-        exchangeRatesValidation.setFieldValue('exchangeRef' , res.record.exchangeRef)
-        exchangeRatesValidation.setFieldValue('exchangeId' , res.record.exchangeId)
+        if(res?.record?.exchangeId){
+        exchangeRatesValidation.setFieldValue('exchangeRef' , res.record?.exchangeRef)
+        exchangeRatesValidation.setFieldValue('exchangeId' , res.record?.exchangeId)
 
 
         const defaultParams = `_recordId=${res.record.exchangeId}`
         var parameters = defaultParams
-        getRequest({
+           getRequest({
           extension: MultiCurrencyRepository.ExchangeTable.get,
           parameters: parameters
         })
@@ -395,20 +333,20 @@ const handleSubmit = () => {
             setErrorMessage(error)
           })
 
-          const dParams = `_exchangeId=${res.record.exchangeId}`
+          const dParams = `_exchangeId=${res?.record?.exchangeId}`
           var parameters = dParams
-        getRequest({
+         getRequest({
           extension: CurrencyTradingSettingsRepository.UpdateExchangeRates.get,
           parameters: parameters
         })
           .then(res => {
-            exchangeRatesValidation.setFieldValue('rate' , res.record.rate)
+            exchangeRatesValidation.setFieldValue('rate' , res.record?.rate)
 
           })
           .catch(error => {
             setErrorMessage(error)
           })
-
+}
       })
       .catch(error => {
         setErrorMessage(error)
@@ -417,15 +355,11 @@ const handleSubmit = () => {
 
 
   return (
-    <Box>
+    <Box   sx={{
+      height: `${height-80}px`
+     }}>
     <CustomTabPanel index={0} value={0}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+      <Box >
         <Grid container>
           <Grid container xs={12} spacing={2}>
             <Grid item xs={6}>
@@ -546,25 +480,37 @@ const handleSubmit = () => {
           </Grid>
           </Grid>
           {exchangeRatesValidation.values.currencyId > 0 && exchangeRatesValidation.values.countryId > 0 && (
-            <Grid xs={12}>
-              <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+        <Grid xs={12} sx={{pt:2}}>
+        <Box>
                 <InlineEditGrid
                   gridValidation={exchangeRatesGridValidation}
                   columns={exchangeRatesInlineGridColumns}
                   allowDelete={false}
                   allowAddNewLine={false}
-                  scrollable={true}
-                  scrollHeight={560}
                   width={'1200'}
+                  scrollable={true}
+                  scrollHeight={`${height-300}px`}
                 />
               </Box>
-              <WindowToolbar onSave={handleSubmit} />
+
             </Grid>
           )}
+
         </Grid>
       </Box>
+      <Grid sx={{
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  padding: 0,
+                  textAlign: 'center',
+                }}
+                >
+              <WindowToolbar onSave={handleSubmit} smallBox={true}/>
+              </Grid>
     </CustomTabPanel>
-    <WindowToolbar />
+
     <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
 
   </Box>

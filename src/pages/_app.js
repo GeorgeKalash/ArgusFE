@@ -65,6 +65,8 @@ import 'primereact/resources/themes/saga-blue/theme.css'
 
 // ** Global css styles
 import '../../styles/globals.css'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { WindowProvider } from 'src/windows'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -90,6 +92,14 @@ const Guard = ({ children, authGuard, guestGuard }) => {
     return <AuthGuard fallback={<Spinner />}>{children}</AuthGuard>
   }
 }
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity
+    }
+  }
+})
 
 // ** Configure JSS & ClassName
 const App = props => {
@@ -125,34 +135,43 @@ const App = props => {
           <meta name='viewport' content='initial-scale=1, width=device-width' />
         </Head>
 
-        <AuthProvider>
-          <RequestsProvider>
-            <ControlProvider>
-              <CommonProvider>
-                <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
-                  <SettingsConsumer>
-                    {({ settings }) => {
-                      return (
-                        <ThemeComponent settings={settings}>
-                          <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                            <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                              <PrimeReactProvider>{getLayout(<Component {...pageProps} />)}</PrimeReactProvider>
-                            </AclGuard>
-                          </Guard>
-                          <ReactHotToast>
-                            <Toaster
-                              position={settings.toastPosition}
-                              toastOptions={{ className: 'react-hot-toast' }}
-                            />
-                          </ReactHotToast>
-                        </ThemeComponent>
-                      )
-                    }}
-                  </SettingsConsumer>
-                </SettingsProvider>
-              </CommonProvider>
-            </ControlProvider>
-          </RequestsProvider>
+        <AuthProvider>          
+
+          <QueryClientProvider client={queryClient}>
+            <RequestsProvider>
+              <ControlProvider>
+                <CommonProvider>
+                  <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
+                    <SettingsConsumer>
+                      {({ settings }) => {
+                        return (
+                          <ThemeComponent settings={settings}>
+                            <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                              <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
+                                <PrimeReactProvider>
+                                  {getLayout(
+                                    <WindowProvider>
+                                      <Component {...pageProps} />
+                                    </WindowProvider>
+                                  )}
+                                </PrimeReactProvider>
+                              </AclGuard>
+                            </Guard>
+                            <ReactHotToast>
+                              <Toaster
+                                position={settings.toastPosition}
+                                toastOptions={{ className: 'react-hot-toast' }}
+                              />
+                            </ReactHotToast>
+                          </ThemeComponent>
+                        )
+                      }}
+                    </SettingsConsumer>
+                  </SettingsProvider>
+                </CommonProvider>
+              </ControlProvider>
+            </RequestsProvider>
+          </QueryClientProvider>
         </AuthProvider>
       </CacheProvider>
     </Provider>

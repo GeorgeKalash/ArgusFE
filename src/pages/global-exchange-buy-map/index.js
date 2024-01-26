@@ -19,10 +19,12 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
+  const { width, height } = useWindowDimensions();
 
   //state
   const [currencyStore, setCurrencyStore] = useState([])
@@ -34,23 +36,26 @@ const GlobalExchangeBuyMap = () => {
   const [labels, setLabels] = useState(null)
 
 
+    // const [pageHeight, setPageHeight] = useState(window.innerHeight);
 
+    // useEffect(() => {
+    //   const handleResize = () => {
+    //     setPageHeight(window.innerHeight);
+    //   };
+
+    //   window.addEventListener('resize', handleResize);
+
+    //   // Cleanup: remove the event listener on component unmount
+    //   return () => {
+    //     window.removeEventListener('resize', handleResize);
+    //   };
+    // }, []); //
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        var parameters = `_filter=`
-        getRequest({
-          extension: SystemRepository.Currency.qry,
-          parameters: parameters
-        })
-          .then(res => {
-            setCurrencyStore(res.list)
-          })
-          .catch(error => {})
-
-          console.log(window.innerHeight)
-        fillCountryStore()
+        fillCurrencyStore()
+           fillCountryStore()
 
         // fillExchangeTableStore()
         getLabels(ResourceIds.GlobalExchangeBuyMap, setLabels)
@@ -59,6 +64,20 @@ const GlobalExchangeBuyMap = () => {
       }
     }
   }, [access])
+
+
+
+  const fillCurrencyStore=()=>{
+    var parameters = `_filter=`
+    getRequest({
+      extension: SystemRepository.Currency.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCurrencyStore(res.list)
+      })
+      .catch(error => {})
+  }
 
   const fillCountryStore = () => {
     var parameters = `_filter=`
@@ -235,17 +254,16 @@ const GlobalExchangeBuyMap = () => {
   }
 
   return (
-    <Box>
+  <Box
+  sx={{
+    height: `${height-80}px`
+   }}
+    >
       <CustomTabPanel index={0} value={0}>
         <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%'
-          }}
         >
           <Grid container>
-            <Grid container xs={12} spacing={2}>
+            <Grid container xs={12} spacing={4}>
               <Grid item xs={6}>
                 <CustomComboBox
                   name='currencyId'
@@ -279,9 +297,9 @@ const GlobalExchangeBuyMap = () => {
             </Grid>
             {currencyId > 0 && (
 
-              <Grid xs={12} spacing={5}>
-                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' ,marginRight:'5px'}}>
-                  <InlineEditGrid
+              <Grid xs={12} sx={{pt:2}}>
+                <Box>
+                      <InlineEditGrid
                     gridValidation={exchangeMapsGridValidation}
                     columns={exchangeMapsInlineGridColumns}
                     defaultRow={{
@@ -297,17 +315,30 @@ const GlobalExchangeBuyMap = () => {
                     }}
                     width={'1200'}
                     scrollable={true}
-                    scrollHeight={'70vh'}
+                    scrollHeight={`${ height - 190}px`}
                   />
                 </Box>
-                <WindowToolbar onSave={handleSubmit} />
+
               </Grid>
             )}
           </Grid>
-        </Box>
+               </Box>
+              <Box sx={{
+                  position: 'fixed',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  margin: 0,
+                }}
+                >
+              <WindowToolbar onSave={handleSubmit}  smallBox={true}/>
+              </Box>
       </CustomTabPanel>
-      <WindowToolbar />
+
+
     </Box>
+
+
   )
 }
 

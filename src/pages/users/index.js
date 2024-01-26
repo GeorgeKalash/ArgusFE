@@ -26,7 +26,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import { getNewUserInfo, populateUserInfo } from 'src/Models/System/UserInfo'
-import { getNewSecurityGroup, populateSecurityGroup } from 'src/Models/AccessControl/SecurityGroup'
 
 // ** Windows
 import UsersWindow from './Windows/UsersWindow'
@@ -97,6 +96,8 @@ const Users = () => {
     selected: labels && labels.find(item => item.key === '21').value,
     group: labels && labels.find(item => item.key === '22').value
   }
+
+  const itemSelectorLabels=[_labels.securityGrp,_labels.all,_labels.selected]
 
   const columns = [
     {
@@ -176,7 +177,6 @@ const Users = () => {
       cashAccountName: ''
     },
     onSubmit: values => {
-      console.log('values ', values)
       postDefaults(values)
     }
   })
@@ -246,7 +246,6 @@ const Users = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ res })
         getGridData({})
         toast.success('Record Deleted Successfully')
       })
@@ -256,6 +255,7 @@ const Users = () => {
   }
 
   const addUsers = () => {
+    defaultsValidation.resetForm()
     usersValidation.setValues(getNewUserInfo())
     setActiveTab(0)
     setEditMode(false)
@@ -287,7 +287,6 @@ const Users = () => {
         fillSiteStore()
         fillPlantStore()
         fillSalesPersonStore()
-        console.log('usersssssss new',res.record.recordId)
         getSecurityGrpGridData(res.record.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
@@ -444,7 +443,6 @@ const Users = () => {
       )
 
       await defaultsValidation.setValues(UserDocObject)
-      console.log('dvdvdv ', defaultsValidation.values)
     } catch (error) {
       setErrorMessage(error)
     }
@@ -535,12 +533,11 @@ const Users = () => {
 
   const getSecurityGrpGridData = userId => {
     setSecurityGrpGridData([])
-    console.log('userssssssss ',userId)
     const defaultParams = `_userId=${userId}&_filter=&_sgId=0`
     var parameters = defaultParams
 
     getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
+      extension: AccessControlRepository.SecurityGroupUser.qry,
       parameters: parameters
     })
       .then(res => {
@@ -561,21 +558,20 @@ const Users = () => {
       var parameters = defaultParams
 
       const GrpRequest = getRequest({
-        extension: AccessControlRepository.Group.qry,
+        extension: AccessControlRepository.SecurityGroup.qry,
         parameters: parameters
       })
 
       const GUSRequest = getRequest({
-        extension: AccessControlRepository.SecurityGroup.qry,
+        extension: AccessControlRepository.SecurityGroupUser.qry,
         parameters: parameters
       })
 
       Promise.all([GrpRequest, GUSRequest]).then(([resGRPFunction, resGUSTemplate]) => {
         const allList = resGRPFunction.list.map(x => {
           const n = {
-            sgId: x.recordId,
-            sgName: x.name,
-            userId: userId
+            id: x.recordId,
+            name: x.name, 
           }
 
           return n
@@ -583,9 +579,8 @@ const Users = () => {
 
         const selectedList = resGUSTemplate.list.map(x => {
           const n2 = {
-            sgId: x.sgId,
-            sgName: x.sgName,
-            userId: userId
+            id: x.sgId,
+            name: x.sgName
           }
 
           return n2
@@ -595,13 +590,12 @@ const Users = () => {
         // Remove items from allList that have the same sgId and userId as items in selectedList
         const filteredAllList = allList.filter(item => {
           return !selectedList.some(
-            selectedItem => selectedItem.sgId === item.sgId && selectedItem.userId === item.userId
+            selectedItem => selectedItem.id === item.id && selectedItem.id === item.id
           )
         })
         setSecurityGrpALLData(filteredAllList)
       })
       setSecurityGrpWindowOpen(true)
-      console.log('finallll ', setSecurityGrpALLData, ' ', setSecurityGrpSelectedData)
     } catch (error) {
       setErrorMessage(error.res)
 
@@ -618,15 +612,22 @@ const Users = () => {
 
   const postSecurityGrp = () => {
     const userId = usersValidation.values.recordId
+    const selectedItems = [];
+ 
+    //initialSelectedListData returns an array that contain id, where id is sgId
+   //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
+    initialSelectedListData.forEach(item => {
+      selectedItems.push({userId:userId , sgId: item.id})
+  });
 
     const data = {
       sgId: 0,
       userId: userId,
-      groups: initialSelectedListData
+      groups: selectedItems
     }
 
     postRequest({
-      extension: AccessControlRepository.SecurityGroup.set2,
+      extension: AccessControlRepository.SecurityGroupUser.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -647,7 +648,7 @@ const Users = () => {
     const userId = usersValidation.values.recordId
 
     postRequest({
-      extension: AccessControlRepository.SecurityGroup.del,
+      extension: AccessControlRepository.SecurityGroupUser.del,
       record: JSON.stringify(obj)
     })
       .then(res => {
@@ -711,7 +712,7 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-
+          
           //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
@@ -749,7 +750,7 @@ const Users = () => {
           initialAllListData={initialAllListData}
           initialSelectedListData={initialSelectedListData}
           handleListsDataChange={handleListsDataChange}
-          labels={_labels}
+          itemSelectorLabels={itemSelectorLabels}
           maxAccess={access}
         />
       )}

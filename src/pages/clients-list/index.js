@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -15,7 +14,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CommonContext } from 'src/providers/CommonContext'
 import { DataSets } from 'src/resources/DataSets'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateToApi, formatDateToApiFunction , formatDateDefault} from 'src/lib/date-helper'
 import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 
 // ** Resources
@@ -28,6 +27,10 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { getNewClients, populateIClients } from 'src/Models/RemittanceSettings/clients'
 import TransactionLog from 'src/components/Shared/TransactionLog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
+
+import AddressWorkWindow from './Windows/AddressWorkWindow'
+import ConfirmNumberWindow from './Windows/ConfirmNumberWindow'
+import Confirmation from 'src/components/Shared/Confirmation'
 
 const ClientsList = () => {
 
@@ -44,7 +47,10 @@ const ClientsList = () => {
   const [windowOpen, setWindowOpen] = useState(null)
   const [windowInfo, setWindowInfo] = useState(null)
   const [editMode, setEditMode] = useState(null)
-const requiredOptional = true
+
+ const [referenceRequired, setReferenceRequired] = useState(true)
+ const [requiredOptional, setRequiredOptional] = useState(true)
+
 
 
   //stores
@@ -55,8 +61,7 @@ const requiredOptional = true
   const [types, setTypes] = useState([]);
   const [countryStore, setCountryStore] = useState([]);
   const [cityStore, setCityStore] = useState([]);
-  const [cityAddressStore, setCityAddressStore] = useState([]);
-  const [cityAddressWorkStore, setCityAddressWorkStore] = useState([]);
+
   const [professionStore, setProfessionStore] = useState([]);
   const [professionFilterStore, setProfessionFilterStore] = useState([]);
 
@@ -66,15 +71,15 @@ const requiredOptional = true
   const [civilStatusStore, setCivilStatusStore] = useState([]);
   const [genderStore, setGenderStore] = useState([]);
   const [stateAddressStore, setStateAddressStore] = useState([]);
-  const [stateAddressWorkStore, setStateAddressWorkStore] = useState([]);
-const [cityDistrictAddressWorkStore , setCityDistrictAddressWorkStore] = useState([])
-const [cityDistrictAddressStore , setCityDistrictAddressStore] = useState([])
+
   const [educationStore, setEducationStore] = useState([]);
   const [idTypeStore, setIdTypeStore] = useState([]);
   const [titleStore, setTitleStore] = useState([]);
 const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
   const [errorMessage, setErrorMessage] = useState(null)
  const [showOtpVerification , setShowOtpVerification] = useState(false)
+ const [windowWorkAddressOpen , setWindowWorkAddressOpen] = useState(false)
+const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
   useEffect(() => {
     if (!access) getAccess(ResourceIds.ClientList, setAccess)
     else {
@@ -202,6 +207,7 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
      issusCountry: labels2 && labels2.find((item) => item.key === '69').value,
      issusPlace: labels2 && labels2.find((item) => item.key === '70').value,
      pageTitle: labels2 && labels2.find((item) => item.key === '71').value,
+     fetch: labels2 && labels2.find((item) => item.key === '72').value,
 
 
   };
@@ -279,7 +285,7 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
       headerName: _labels.createdDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
+      valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
 
     },
     {
@@ -288,7 +294,7 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
       headerName: _labels.expiryDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) => formatDateFromApi(row?.expiryDate)
+      valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
 
 
     },
@@ -302,28 +308,6 @@ const[mobileVerifiedStore , setMobileVerifiedStore]= useState([])
     }
   ]
 
-const getPlantId = ()=>{
-
-  const userData = window.sessionStorage.getItem('userData') ? JSON.parse( window.sessionStorage.getItem('userData')) : null
-console.log(userData)
-  var parameters = `_userId=${userData && userData.userId}&_key=plantId`
-  getRequest({
-    extension: SystemRepository.SystemPlant.get,
-    parameters: parameters
-  })
-    .then(res => {
-
-
-      clientIndividualFormValidation.setFieldValue('plantId', res.record.value)
-
-
-    })
-    .catch(error => {
-      setErrorMessage(error)
-    })
-
-}
-
 
   const search = inp => {
     console.log('inp' + inp)
@@ -332,7 +316,7 @@ console.log(userData)
      console.log({list: []})
 
      if(input){
-    var parameters = `_size=30&_startAt=0&_filter=${input}`
+    var parameters = `_size=30&_startAt=0&_filter=${input}&_category=1`
 
     getRequest({
       extension: CTCLRepository.CtClientIndividual.snapshot,
@@ -378,15 +362,16 @@ console.log(userData)
 
     },
     validationSchema: yup.object({
-      // reference: yup.string().required("This field is required"),
+      reference: referenceRequired && yup.string().required("This field is required"),
       isResident: yup.string().required("This field is required"),
       birthDate: yup.string().required("This field is required"),
       idtId: yup.string().required("This field is required"),
       idNo:  yup.string().required("This field is required"),
-      idNoRepeat : yup.string().required('Repeat Password is required')
-      .oneOf([yup.ref('idNo'), null], 'Number must match'),
 
-      expiryDate: yup.string().required("This field is required"),
+      // idNoRepeat : yup.string().required('Repeat Password is required')
+      // .oneOf([yup.ref('idNo'), null], 'Number must match'),
+
+      expiryDate: !editMode && yup.string().required("This field is required"),
       countryId: yup.string().required("This field is required"),
       cityId: yup.string().required("This field is required"),
       idCountry: yup.string().required("This field is required"),
@@ -407,9 +392,7 @@ console.log(userData)
       phone: yup.string().required('This field is required')
     }),
     onSubmit: (values) => {
-      console.log("values" + values);
-       console.log(WorkAddressValidation)
-       Object.keys(WorkAddressValidation.errors).length < 1 && postRtDefault(values);
+           Object.keys(WorkAddressValidation.errors).length < 1 && postRtDefault(values);
     },
   });
 
@@ -430,7 +413,8 @@ console.log(userData)
 
       // status: obj.status,
       addressId: null,
-      plantId: clientIndividualFormValidation.values.plantId || 3,
+
+      plantId: clientIndividualFormValidation.values.plantId ?clientIndividualFormValidation.values.plantId : 3,
       cellPhone: obj.cellPhone,
 
       createdDate:  formatDateToApi(date.toISOString()),
@@ -450,6 +434,7 @@ console.log(userData)
     //CCTD
     const obj2 = {
       idNo : obj.idNo,
+      plantId: clientIndividualFormValidation.values.plantId ?clientIndividualFormValidation.values.plantId : 3,
 
       // clientID: obj.clientID,
       idCountryId: obj.idCountry,
@@ -474,19 +459,20 @@ console.log(userData)
       fl_lastName: obj.fl_lastName,
       fl_middleName: obj.fl_middleName,
       fl_familyName: obj.fl_familyName,
-
+      professionId:obj.professionId,
       birthDate:  formatDateToApiFunction(obj.birthDate),
       isResident: obj.isResident,
-
+      incomeSourceId: obj.incomeSourceId,
+      sponsorName: obj.sponsorName,
     };
 
 
     const obj4 = {
-      incomeSourceId: obj.incomeSourceId,
+
+
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
-      sponsorName: obj.sponsorName,
       whatsAppNo: obj.whatsAppNo,
       gender: obj.gender,
       title: obj.title,
@@ -500,7 +486,6 @@ console.log(userData)
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
 
-      professionId:obj.professionId,
       idNo : obj.idNo,
       wip: 1,
       releaseStatus: 1,
@@ -587,10 +572,12 @@ console.log(userData)
   const WorkAddressValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: false,
+    validateOnBlur:true,
     validate : (values) => {
       const errors = {};
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      if (values.name || values.name || values.phone || values.countryId ||  values.street1)  {
+      if (values.name || values.cityId || values.phone || values.countryId ||  values.street1)  {
         if (!values.name ) {
           errors.name = 'This field is required';
         }
@@ -608,11 +595,11 @@ console.log(userData)
         }
 
       }
-      if (values.email1  && !emailRegex.test(values.email1) ) {
+      if (values.email1  && !emailRegex?.test(values?.email1) ) {
         errors.email1 = 'Invalid email format';
       }
 
-      if (values.email2 && !emailRegex.test(values.email2) ) {
+      if (values.email2 && !emailRegex?.test(values?.email2) ) {
         errors.email2 = 'Invalid email format';
       }
 
@@ -637,6 +624,7 @@ console.log(userData)
       addressId: null,
       postalCode:null,
       cityDistrictId: null,
+      cityDistrict: null,
       bldgNo: null,
       unitNo: null,
       subNo: null
@@ -651,19 +639,100 @@ console.log(userData)
     // }),
     onSubmit: values => {
       // console.log(values);
-
+        setWindowWorkAddressOpen(false)
     }
   })
 
+  // const fetchValidation = useFormik({
+  //   enableReinitialize: true,
+  //   validateOnChange: true,
+
+  //   initialValues: {
+  //     idtId: clientIndividualFormValidation.values?.idtId,
+  //     birthDate: clientIndividualFormValidation.values?.birthDate,
+  //     idNo: clientIndividualFormValidation.values?.idNo,
+  //     idNoRepeat: '',
+  //   },
+
+  //   validationSchema:  yup.object({
+  //     // birthDate: yup.string().required("This field is required"),
+  //     // idtId: yup.string().required("This field is required"),
+  //     // idNo:  yup.string().required("This field is required"),
+  //     // idNoRepeat : yup.string().required('Repeat Password is required')
+  //     // .oneOf([yup.ref('idNo'), null], 'Number must match'),
+
+  //   }),
+  //   onSubmit: values => {
+
+  //     postFetchDefault(values)
+
+  //   }
+  // })
+
+  // const  postFetchDefault=(obj)=>{
+  //   const defaultParams = `_number=${obj.idNo}&_dateTime=${formatDateToApiFunction(obj.birthDate)}&_type=${obj.idtId}`
+  //   var parameters = defaultParams
+  //   getMicroRequest({
+  //     extension: 'getInformation',
+  //     parameters: parameters,
+
+  //   })
+  //     .then(res => {
+
+  //     })
+  //     .catch(error => {
+  //       setErrorMessage(error)
+  //     })
+  // }
+
+  const addClient = async (obj) => {
+    clientIndividualFormValidation.setValues(getNewClients());
+    WorkAddressValidation.setValues(getNewAddress());
+
+    try {
+      const plantId = await getPlantId();
+
+      if (plantId !== '') {
+        setEditMode(false);
+        setWindowOpen(true);
+      } else {
+        setErrorMessage({ error: 'The user does not have a default plant' });
+      }
+    } catch (error) {
+      // Handle errors if needed
+      console.error(error);
+    }
+  };
+
+  const getPlantId = async () => {
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null;
+    const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.SystemPlant.get,
+        parameters: parameters,
+      });
+
+      if (res.record.value) {
+        clientIndividualFormValidation.setFieldValue('plantId', res.record.value);
+
+        return res.record.value;
+      }
+
+      return '';
+    } catch (error) {
+      // Handle errors if needed
+      setErrorMessage(error);
+
+return '';
+    }
+  };
 
 
-  const addClient= obj => {
-     setEditMode(false)
-    clientIndividualFormValidation.setValues(getNewClients())
-    WorkAddressValidation.setValues(getNewAddress())
-    getPlantId()
-    setWindowOpen(true)
-  }
+
 
   const editClient= obj => {
     setEditMode(true)
@@ -693,11 +762,16 @@ console.log(userData)
       })
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (param) => {
     // setShowOtpVerification(true)
-
-    clientIndividualFormValidation.handleSubmit();
-    WorkAddressValidation.handleSubmit();
+    if(param==='fetch'){
+      fetchValidation.handleSubmit();
+    }else if(param==='address'){
+      WorkAddressValidation.handleSubmit();
+    }else{
+      clientIndividualFormValidation.handleSubmit();
+      WorkAddressValidation.handleSubmit();
+    }
 
   };
 
@@ -963,7 +1037,15 @@ console.log(userData)
       }
 
   }
+useEffect(()=>{
+  if((WorkAddressValidation.values.name || WorkAddressValidation.values.street1 || WorkAddressValidation.values.phone || WorkAddressValidation.values.countryId ||  WorkAddressValidation.values.cityId) && requiredOptional){
+    setRequiredOptional(false)
+   }
 
+   if((!WorkAddressValidation.values.name && !WorkAddressValidation.values.street1 && !WorkAddressValidation.values.phone && !WorkAddressValidation.values.countryId &&  !WorkAddressValidation.values.cityId)){
+    setRequiredOptional(true)
+   }
+}, [WorkAddressValidation.values])
 
   return (
     <>
@@ -1013,31 +1095,29 @@ onEdit={editClient}
   educationStore={educationStore}
   idTypeStore={idTypeStore}
   titleStore={titleStore}
-  cityAddressStore={cityAddressStore}
-  cityAddressWorkStore={cityAddressWorkStore}
-  setCityAddressWorkStore={setCityAddressWorkStore}
-  setCityAddressStore={setCityAddressStore}
   lookupCity={lookupCity}
-  lookupCityAddress={lookupCityAddress}
-  lookupCityAddressWork={lookupCityAddressWork}
-  lookupCityDistrictAddress={lookupCityDistrictAddress}
-  lookupCityDistrictAddressWork={lookupCityDistrictAddressWork}
-  fillStateStoreAddress={fillStateStoreAddress}
-  fillStateStoreAddressWork={fillStateStoreAddressWork}
-  cityDistrictAddressWorkStore={cityDistrictAddressWorkStore}
-  cityDistrictAddressStore={cityDistrictAddressStore}
-  stateAddressWorkStore={stateAddressWorkStore}
   fillFilterProfession={fillFilterProfession}
+  setWindowWorkAddressOpen={setWindowWorkAddressOpen}
+  setWindowConfirmNumberOpen={setWindowConfirmNumberOpen}
   stateAddressStore={stateAddressStore}
+  setReferenceRequired={setReferenceRequired}
   _labels ={_labels2}
   maxAccess={access}
   editMode={editMode}
 
 
+
        />
-       )}
+
+       )
+
+       }
+
+       {windowConfirmNumberOpen &&  <ConfirmNumberWindow labels={_labels2} idTypeStore={idTypeStore} clientIndividualFormValidation={clientIndividualFormValidation}
+        onClose={()=>setWindowConfirmNumberOpen(false)} width={400} height={300} />}
+       {windowWorkAddressOpen && <AddressWorkWindow labels={_labels2} setShowWorkAddress={setWindowWorkAddressOpen} addressValidation={WorkAddressValidation}  onSave={()=>handleSubmit('address')}  onClose={()=>setWindowWorkAddressOpen(false)} requiredOptional={requiredOptional} readOnly={editMode && true} />}
        {showOtpVerification && <OTPPhoneVerification  formValidation={clientIndividualFormValidation} functionId={"3600"}  onClose={() => setShowOtpVerification(false)} setShowOtpVerification={setShowOtpVerification} setEditMode={setEditMode}  setErrorMessage={setErrorMessage}/>}
-       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.recordId}  onInfoClose={() => setWindowInfo(false)}
+       {windowInfo && <TransactionLog  resourceId={ResourceIds && ResourceIds.ClientList}  recordId={clientIndividualFormValidation.values.clientId}  onInfoClose={() => setWindowInfo(false)}
 />}
 
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />

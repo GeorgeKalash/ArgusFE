@@ -1,6 +1,5 @@
 import React from 'react';
 import Box from '@mui/material/Box';
-import Image from 'next/image';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -8,7 +7,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useRouter } from 'next/router';
 
-function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed, navHover }) {
+function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed }) {
 
   const router = useRouter();
 
@@ -26,7 +25,7 @@ function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed,
   return (
     <>
       <Box sx={{
-        display: navCollapsed && !navHover ? 'none' : 'flex',
+        display: navCollapsed ? 'none' : 'flex',
         flexDirection: 'row',
         justifyContent: 'left',
         alignItems: 'left',
@@ -65,7 +64,7 @@ function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed,
         {map && map.map((element, index) => (
           <MenuItem key={index} onClick={() => onClickAction(element)}>
             <div
-              style={{ display: navCollapsed && !navHover ? 'none' : 'flex' }}
+              style={{ display: navCollapsed ? 'none' : 'flex' }}
             >
               {element.name}
             </div>

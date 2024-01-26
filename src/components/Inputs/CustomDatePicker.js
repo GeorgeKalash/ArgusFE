@@ -28,27 +28,26 @@ const CustomDatePicker = ({
   editMode = false,
   ...props
 }) => {
-  const dateFormat = window.localStorage.getItem('default') && window.localStorage.getItem('default')['formatDate']
+  const dateFormat = window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
-  console.log(value +'value')
 
 
    // Function to check if a date should be disabled
     const shouldDisableDate = (dates) => {
-      console.log('dates' + dates )
       const date = new Date(dates);
-      console.log(date )
+
 
     const today = new Date();
     today.setDate(today.getDate());
     date.setDate(date.getDate());
+
   if(disabledDate === '>=' ){
-    return date   >= today  ;
+    return date  >= today  ;
   }
   if(disabledDate === '<' ){
     return date   < today  ; // Disable today and future dates
@@ -59,8 +58,8 @@ const CustomDatePicker = ({
 
   };
 
-  return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+return (
+    <LocalizationProvider dateAdapter={AdapterDayjs} >
       <DatePicker
         variant={variant}
         size={size}
@@ -68,8 +67,7 @@ const CustomDatePicker = ({
         label={label}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
-        format={dateFormat}
-
+        inputFormat={dateFormat}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}

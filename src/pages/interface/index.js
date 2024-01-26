@@ -1,12 +1,10 @@
 // ** React Importsport
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -15,40 +13,51 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { getNewInterface, populateInterface } from 'src/Models/RemittanceSettings/Interface'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { ControlContext } from 'src/providers/ControlContext'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+
 
 // ** Windows
 import InterfaceWindow from './Windows/InterfaceWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const Interface = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
 
-  //stores
-  const [gridData, setGridData] = useState(null)
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
+
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    path: labels && labels.find(item => item.key === "3").value,
-    description: labels && labels.find(item => item.key === "4").value,
-    interface: labels && labels.find(item => item.key === "5").value
+    return await getRequest({
+      extension: RemittanceSettingsRepository.Interface.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: RemittanceSettingsRepository.Interface.page,
+    datasetId: ResourceIds.Interface
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: RemittanceSettingsRepository.Interface.page
+  })
 
   const columns = [
     {
@@ -74,118 +83,34 @@ const Interface = () => {
     }
   ]
 
-  const interfaceValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      path: yup.string().required('This field is required'),
-      description: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      postInterface(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    interfaceValidation.handleSubmit()
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: RemittanceSettingsRepository.Interface.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const postInterface = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: RemittanceSettingsRepository.Interface.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delInterface = obj => {
-    postRequest({
-      extension: RemittanceSettingsRepository.Interface.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const addInterface = () => {
-    interfaceValidation.setValues(getNewInterface())
-    setEditMode(false)
+  const add = () => {
     setWindowOpen(true)
   }
 
-  const editInterface = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: RemittanceSettingsRepository.Interface.get,
-      parameters: parameters
-    })
-      .then(res => {
-        interfaceValidation.setValues(populateInterface(res.record))
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
   }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.Interface, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 50 })
-        getLabels(ResourceIds.Interface, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
+  
+  const del = async obj => {
+    await postRequest({
+      extension: RemittanceSettingsRepository.Interface.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
+  }
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addInterface} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editInterface}
-          onDelete={delInterface}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationType='client'
@@ -194,14 +119,13 @@ const Interface = () => {
       </Box>
       {windowOpen && (
         <InterfaceWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          editMode={editMode}
-          interfaceValidation={interfaceValidation}
+          onClose={() => {setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
           labels={_labels}
           maxAccess={access}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

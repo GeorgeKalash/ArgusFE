@@ -1,34 +1,34 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
-// **Tabs
-import LegalStatusTab from 'src/pages/legal-status/Tabs/legalStatusTab'
-
+import LegalStatusForm from '../forms/LegalStatusForm'
 
 const LegalStatusWindow = ({
-    onClose,
-    onSave,
-    legalStatusValidation,
-    width,
-    height,
-    editMode,
-    _labels,
-    maxAccess
+  onClose,
+  labels,
+  maxAccess,
+  recordId
 }) => {
-    return (
-      <Window id='LegalStatusWindow' Title={_labels.legalStatus} onClose={onClose} width={width} height={height} 
-      onSave={onSave} legalStatusValidation={legalStatusValidation}>
-         <CustomTabPanel>
-             <LegalStatusTab
-                 legalStatusValidation={legalStatusValidation}
-                 _labels={_labels}
-                 editMode={editMode}
-                 maxAccess={maxAccess}
-             />
-         </CustomTabPanel>
-     </Window>
-    )
+  
+  return (
+    <Window
+      id='LegalStatusWindow'
+      Title={labels.legalStatus}
+      controlled={true}
+      onClose={onClose}
+      width={500}
+      height={300}
+    >
+      <CustomTabPanel>
+        <LegalStatusForm
+          labels={labels}
+          maxAccess={maxAccess}
+          recordId={recordId}
+        />
+       
+      </CustomTabPanel>
+    </Window>
+  )
 }
 
 

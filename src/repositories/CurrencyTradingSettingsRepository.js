@@ -28,6 +28,7 @@ export const CurrencyTradingSettingsRepository = {
   },
   Defaults: {
     qry: service + 'qryDE',
+    get : service + 'getDE',
     set2: service + 'set2DE'
   },
   IdFields: {
@@ -39,5 +40,24 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getACT',
     set: service + 'setACT',
     del: service + 'delACT'
+  },
+  RiskLevel: {
+    qry: service + 'qryRSK',
+    get: service + 'getRSK',
+    set: service + 'setRSK',
+    del: service + 'delRSK',
+    page: service + 'pageRSK',
+  },
+  PurposeExchange: {
+    qry: service + 'qryPEX',
+    get: service + 'getPEX',
+    set: service + 'setPEX',
+    del: service + 'delPEX',
+    page: service + 'pagePEX'
+  },
+  ExchangeMap: {
+    qry: service + 'qryEXM',
+    get: service + 'getEXM',
+    set2: service + 'set2EXM'
   }
 }

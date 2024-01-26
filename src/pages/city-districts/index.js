@@ -103,7 +103,7 @@ const CityDistricts = () => {
       parameters: parameters
     })
       .then(res => {
-        setGridData(res)
+        setGridData({ ...res, _startAt })
         console.log(res)
       })
       .catch(error => {
@@ -258,6 +258,7 @@ const CityDistricts = () => {
        _labels ={_labels}
        maxAccess={access}
        editMode={editMode}
+       onInfo={() => setWindowInfo(true)}
        />
        )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

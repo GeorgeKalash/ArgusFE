@@ -131,6 +131,7 @@ export const SystemRepository = {
     set: service + 'setST',
     del: service + 'delST',
     page: service + 'pageST'
-  }
+  },
+
 
 }
