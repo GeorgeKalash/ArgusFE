@@ -16,7 +16,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { getNewIdTypes, populateIdTypes } from 'src/Models/CurrencyTradingSettings/IdTypes'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
@@ -27,8 +26,7 @@ import { CommonContext } from 'src/providers/CommonContext'
 import IdTypesWindow from './Windows/IdTypesWindow'
 
 // ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { defaultParams } from 'src/lib/defaults'
+
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const IdTypes = () => {
@@ -66,7 +64,9 @@ const IdTypes = () => {
     category: labels && labels.find(item => item.key === '9').value,
     clientFileExpiryType: labels && labels.find(item => item.key === '10').value,
     clientFileLifeTime: labels && labels.find(item => item.key === '11').value,
-    isDiplomat: labels && labels.find(item => item.key === '12').value
+    isDiplomat: labels && labels.find(item => item.key === '12').value,
+    type: labels && labels.find(item => item.key === '13').value
+
   }
 
   const columns = [
@@ -93,6 +93,15 @@ const IdTypes = () => {
   const idTypesValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
+    validate : (values) => {
+      const errors = {};
+      if (values.category==='1' && !values.type ) {
+        errors.type = 'This field is required';
+      }
+
+      return errors;
+
+    },
     validationSchema: yup.object({
       name: yup.string().required('This field is required'),
       format: yup.string().required('This field is required'),
@@ -159,15 +168,15 @@ const IdTypes = () => {
     const data = {
       idtId: idTypesValidation.values.recordId,
       items: obj
-      
+
     }
-    
+
 
     postRequest({
-      
+
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
       record: JSON.stringify(data)
-      
+
     })
       .then(res => {
         getGridData({})

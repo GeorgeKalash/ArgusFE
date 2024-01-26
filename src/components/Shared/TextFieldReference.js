@@ -43,7 +43,7 @@ export const TextFieldReference = ({endpointId , param = '', setReferenceRequire
    <CustomTextField
     {...{
       required : state.mandatory,
-      readOnly : state.readOnly,
+      readOnly : editMode ? editMode : state.readOnly,
         ...rest}}
     />
     </>

@@ -29,6 +29,16 @@ const RequestsProvider = ({ children }) => {
     }).then(res => res.data)
   }
 
+  const getMicroRequest = async body => {
+    const accessToken = await getAccessToken()
+
+    return axios({
+      method: 'GET',
+      url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters,
+
+    }).then(res => res.data)
+  }
+
   const getIdentityRequest = async body => {
     const accessToken = await getAccessToken()
 
@@ -151,10 +161,11 @@ const RequestsProvider = ({ children }) => {
   const values = {
     getRequest,
     postRequest,
-    getIdentityRequest
+    getIdentityRequest,
+    getMicroRequest
   }
 
   return <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
 }
 
-export { RequestsContext, RequestsProvider }
+export { RequestsContext, RequestsProvider  }
