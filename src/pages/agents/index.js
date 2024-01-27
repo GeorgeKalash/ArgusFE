@@ -57,24 +57,23 @@ const Agent = () => {
   const columns = [
     {
       field: 'name',
-      headerName: _labels[1],
+      headerName: _labels.name,
       flex: 1
     },
     {
       field: 'countryRef',
-      headerName: _labels[4],
+      headerName: _labels.countryName,
       flex: 1
     },
     {
       field: 'countryName',
-      headerName: _labels[5],
+      headerName: _labels.countryRef,
       flex: 1
     }
   ]
 
   const add = () => {
     setWindowOpen(true)
-
   }
 
   const edit = obj => {

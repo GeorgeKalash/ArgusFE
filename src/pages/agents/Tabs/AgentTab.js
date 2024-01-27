@@ -94,7 +94,7 @@ const AgentTab = ({ labels, maxAccess, recordId }) => {
         <Grid item xs={12}>
           <CustomTextField
             name='name'
-            label={labels[1]}
+            label={labels.name}
             value={formik.values.name}
             required
             maxLength='50'
@@ -109,7 +109,7 @@ const AgentTab = ({ labels, maxAccess, recordId }) => {
           <ResourceComboBox
             endpointId={SystemRepository.Country.qry}
             name='countryId'
-            label={labels[3]}
+            label={labels.country}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' }

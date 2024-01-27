@@ -12,7 +12,7 @@ const AgentWindow = ({
   return (
     <Window
       id='AgentWindow'
-      Title={labels[2]}
+      Title={labels.agents}
       onClose={onClose}
       width={600}
       height={400}
