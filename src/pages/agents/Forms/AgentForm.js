@@ -15,7 +15,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const AgentTab = ({ labels, maxAccess, recordId }) => {
+const AgentForm = ({ labels, maxAccess, recordId }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -84,11 +84,11 @@ const AgentTab = ({ labels, maxAccess, recordId }) => {
   return (
 
     <FormShell
-    resourceId={ResourceIds.CorrespondentAgents}
-    form={formik} 
-    height={300} 
-    maxAccess={maxAccess} 
-    editMode={editMode}
+      resourceId={ResourceIds.CorrespondentAgents}
+      form={formik} 
+      height={300} 
+      maxAccess={maxAccess} 
+      editMode={editMode}
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>
@@ -114,7 +114,7 @@ const AgentTab = ({ labels, maxAccess, recordId }) => {
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' }
             ]}
-            values={formik.values.countryId}
+            values={formik.values}
             valueField='recordId'
             displayField='name'
             required
@@ -131,4 +131,4 @@ const AgentTab = ({ labels, maxAccess, recordId }) => {
   )
 }
 
-export default AgentTab
+export default AgentForm

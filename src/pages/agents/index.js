@@ -61,12 +61,12 @@ const Agent = () => {
       flex: 1
     },
     {
-      field: 'countryRef',
+      field: 'countryName',
       headerName: _labels.countryName,
       flex: 1
     },
     {
-      field: 'countryName',
+      field: 'countryRef',
       headerName: _labels.countryRef,
       flex: 1
     }
