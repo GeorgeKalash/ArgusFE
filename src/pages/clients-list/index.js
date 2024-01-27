@@ -25,7 +25,6 @@ const ClientsList = () => {
   const { stack } = useWindow()
 
 
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest } = useContext(RequestsContext)
 
   //control
@@ -148,28 +147,27 @@ const ClientsList = () => {
 
     {
       field: 'statusName',
-
       headerName: _labels.status,
       flex: 1,
       editable: false,
-
-
     },
+
     {
       field: 'createdDate',
 
       headerName: _labels.createdDate,
       flex: 1,
       editable: false,
+
       valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
 
     },
     {
       field: 'expiryDate',
-
       headerName: _labels.expiryDate,
       flex: 1,
       editable: false,
+
       valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
 
 

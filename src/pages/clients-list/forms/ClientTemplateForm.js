@@ -580,15 +580,13 @@ useEffect(()=>{ fillProfessionStore(); fillType()
             idTypeStore: idTypeStore,
             formValidation: clientIndividualFormik,
             functionId: 3600,
+            clientId: res.record.clientId,
             setEditMode: setEditMode,
-
-            // labels : _labels,
-
+            setErrorMessage: setErrorMessage
           },
           width: 400,
           height: 400,
           title : 'Verify My Account'
-
         })
 
         setEditMode(true)
@@ -701,7 +699,7 @@ return (
         form={clientIndividualFormik}
         height={500}
         maxAccess={maxAccess}
-        editMode={editMode} disabledSubmit={editMode} >
+        editMode={editMode} disabledSubmit={editMode} clientRelation={true}>
         <Grid container spacing={4}>
         <Grid container xs={12} spacing={2} sx={{ padding: "20px" }}>
         <Grid item xs={6} sx={{ padding: "30px" }}>

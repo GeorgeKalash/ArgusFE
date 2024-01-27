@@ -9,10 +9,15 @@ import DeleteDialog from './DeleteDialog'
 import Icon from 'src/@core/components/icon'
 import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import SearchIcon from '@mui/icons-material/Search';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+import EventIcon from '@mui/icons-material/Event'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
 }
+const dateFormat = typeof window !== 'undefined' && window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
 
 const InlineEditGrid = ({
   columns,
@@ -28,7 +33,7 @@ const InlineEditGrid = ({
   const [write, setWrite] = useState(false);
 
   const tableWidth = width
-
+  const [openDatePicker, setOpenDatePicker] = useState(false)
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
 
   const cellRender = (row, column) => {
@@ -107,6 +112,51 @@ const InlineEditGrid = ({
             }}
           />
         )
+        case 'datePicker':
+          console.log(gridValidation.values.rows[rowIndex][fieldName])
+
+return (
+            <LocalizationProvider dateAdapter={AdapterDayjs} >
+             <DatePicker
+             id={cellId}
+             name={fieldName}
+             value={formatDateFromApi(gridValidation.values.rows[rowIndex][fieldName])}
+             required={column?.mandatory}
+             readOnly={column?.readOnly}
+             inputFormat={dateFormat}
+            onChange={newDate => {
+              gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, formatDateToApiFunction(newDate))
+            }}
+            onClose={() => setOpenDatePicker(false)}
+            open={openDatePicker}
+             clearable //bug from mui not working for now
+
+        slotProps={{
+          // replacing clearable behaviour
+          textField: {
+            InputProps: {
+              endAdornment:
+                <>
+                  {gridValidation.values.rows[rowIndex][fieldName] && (
+                    <InputAdornment>
+                      <IconButton onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  )}
+                  <InputAdornment>
+                    <IconButton onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
+                      <EventIcon />
+                    </IconButton>
+                  </InputAdornment>
+                </>
+
+            }
+          }
+        }}
+      />
+    </LocalizationProvider>
+          )
       case 'numberfield':
         return (
           <TextField
@@ -115,7 +165,7 @@ const InlineEditGrid = ({
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][fieldName]}
             required={column?.mandatory}
-            onChange={event => {
+            onChange={newDate => {
               const newValue = event.target.value
               gridValidation.setFieldValue(
                 `rows[${rowIndex}].${fieldName}`,
@@ -361,11 +411,10 @@ const InlineEditGrid = ({
             fullWidth={true}
             renderInput={params => (
               <TextField
+
                 {...params}
                 onChange={e => setWrite(e.target.value.length > 0 ,  column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
                 onBlur={() => setWrite(false)}
-
-                // onClick={e =>  column.onLookup('')}
                 required={column?.mandatory}
                 InputProps={{
 
