@@ -9,7 +9,8 @@ const ReleaseIndicatorWindow = ({
     onClose,
   labels,
   maxAccess,
-  recordId
+  recordId,
+  setWindowOpen
 }) => {
   
   return (
@@ -26,6 +27,7 @@ const ReleaseIndicatorWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
+          setWindowOpen={setWindowOpen}
         />
        
       </CustomTabPanel>

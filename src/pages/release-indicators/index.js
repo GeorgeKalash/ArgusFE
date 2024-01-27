@@ -85,6 +85,7 @@ const ReleaseIndicators =  () => {
 
   const add = () => {
     setWindowOpen(true)
+
   }
 
   const edit = obj => {
@@ -124,6 +125,7 @@ const ReleaseIndicators =  () => {
             setWindowOpen(false)
             setSelectedRecordId(null)
           }}
+          setWindowOpen={setWindowOpen}
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}

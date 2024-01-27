@@ -19,7 +19,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { DataSets } from 'src/resources/DataSets'
 import { Dataset } from '@mui/icons-material'
 
-export default function ReleaseIndicatorForm({ labels, maxAccess, recordId }) {
+export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setWindowOpen }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   
@@ -49,7 +49,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId }) {
         reference: yup.string().required('This field is required'),
 
         recordId: yup.string().required('This field is required'),
-        changeabilityName: yup.string().required('This field is required'),
+        changeability: yup.string().required('This field is required'),
       }),
       onSubmit: async obj => {
         const recordId = obj.recordId
@@ -68,7 +68,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId }) {
         }
         else toast.success('Record Edited Successfully')
         setEditMode(true)
-
+        setWindowOpen(false)
         invalidate()
       }
     })
@@ -149,13 +149,14 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId }) {
                 </Grid>
                 <Grid item xs={12}>
                 <ResourceComboBox
+
                 readOnly={false}
                 datasetId={DataSets.DR_CHANGEABILITY}
-                name='changeabilityName'
+                name='changeability'
                 label={labels.changeability}
                 valueField='key'
                 displayField= 'value'
-            
+
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
