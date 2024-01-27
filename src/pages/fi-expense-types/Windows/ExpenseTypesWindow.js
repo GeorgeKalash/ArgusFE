@@ -24,8 +24,7 @@ const ExpenseTypesWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
-        />
-       
+        />       
       </CustomTabPanel>
     </Window>
   )

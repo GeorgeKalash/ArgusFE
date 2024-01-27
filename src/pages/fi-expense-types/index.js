@@ -76,7 +76,6 @@ const ExpenseTypes = () => {
 
   const add = () => {
     setWindowOpen(true)
-    console.log(_labels)
   }
 
   const edit = obj => {
