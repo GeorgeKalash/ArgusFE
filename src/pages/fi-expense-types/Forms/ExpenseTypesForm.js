@@ -23,7 +23,8 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
     const [initialValues, setInitialData] = useState({
         recordId: null,
         name: '',
-        smsBody: '',
+        reference: '',
+        description: '',
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,7 +41,8 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
         validateOnChange: true,
         validationSchema: yup.object({
           name: yup.string().required('This field is required'),
-          smsBody: yup.string().required('This field is required'),
+          reference: yup.string().required('This field is required'),
+          description: yup.string().required('This field is required'),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
