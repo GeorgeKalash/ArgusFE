@@ -1,49 +1,133 @@
 // ** MUI Imports
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
+import { useFormik } from 'formik'
+import { useContext, useEffect, useState } from 'react'
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
+import FormShell from 'src/components/Shared/FormShell'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const AgentTab = ({ labels, agentValidation, countryStore, maxAccess }) => {
+const AgentTab = ({ labels, maxAccess, recordId }) => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [editMode, setEditMode] = useState(!!recordId)
+
+  const [initialValues, setInitialData] = useState({
+      recordId: null,
+      name: '',
+      countryId: '',
+    })
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const invalidate = useInvalidate({
+    endpointId: RemittanceSettingsRepository.CorrespondentAgents.page
+  })
+
+   const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      name: yup.string().required('This field is required'),
+      countryId: yup.string().required('This field is required')
+    }),
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: RemittanceSettingsRepository.CorrespondentAgents.set,
+        record: JSON.stringify(obj)
+      })
+      
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        setInitialData({
+          ...obj, // Spread the existing properties
+          recordId: response.recordId, // Update only the recordId field
+        });
+      }
+      else toast.success('Record Edited Successfully')
+      setEditMode(true)
+
+      invalidate()
+    }
+  })
+
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          setIsLoading(true)
+
+          const res = await getRequest({
+            extension: RemittanceSettingsRepository.CorrespondentAgents.get,
+            parameters: `_recordId=${recordId}`
+          })
+          
+          setInitialData(res.record)
+        }
+      } catch (exception) {
+        setErrorMessage(error)
+      }
+      setIsLoading(false)
+    })()
+  }, [])
+
   return (
-    <Grid container spacing={4}>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='name'
-          label={labels.name}
-          value={agentValidation.values.name}
-          required
-          maxLength='50'
-          maxAccess={maxAccess}
-          onChange={agentValidation.handleChange}
-          onClear={() => agentValidation.setFieldValue('name', '')}
-          error={agentValidation.touched.name && Boolean(agentValidation.errors.name)}
-          helperText={agentValidation.touched.name && agentValidation.errors.name}
-        />
+
+    <FormShell
+    resourceId={ResourceIds.CorrespondentAgents}
+    form={formik} 
+    height={300} 
+    maxAccess={maxAccess} 
+    editMode={editMode}
+    >
+      <Grid container spacing={4}>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='name'
+            label={labels[1]}
+            value={formik.values.name}
+            required
+            maxLength='50'
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('name', '')}
+            error={formik.touched.name && Boolean(formik.errors.name)}
+            helperText={formik.touched.name && formik.errors.name}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={SystemRepository.Country.qry}
+            name='countryId'
+            label={labels[3]}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            values={formik.values.countryId}
+            valueField='recordId'
+            displayField='name'
+            required
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('countryId', newValue?.recordId)
+            }}
+            error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+            helperText={formik.touched.countryId && formik.errors.countryId}
+          />
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <CustomComboBox
-          name='countryId'
-          label={labels.country}
-          columnsInDropDown= {[
-            { key: 'reference', value: 'Reference' },
-            { key: 'name', value: 'Name' }
-          ]}
-          valueField='recordId'
-          displayField='name'
-          store={countryStore}
-          value={countryStore.filter(item => item.recordId === agentValidation.values.countryId)[0]} // Ensure the value matches an option or set it to null
-          required
-          maxAccess={maxAccess}
-          onChange={(event, newValue) => {
-            agentValidation.setFieldValue('countryId', newValue?.recordId)
-          }}
-          error={agentValidation.touched.countryId && Boolean(agentValidation.errors.countryId)}
-          helperText={agentValidation.touched.countryId && agentValidation.errors.countryId}
-        />
-      </Grid>
-    </Grid>
+    </FormShell>
   )
 }
 

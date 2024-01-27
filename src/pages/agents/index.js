@@ -1,12 +1,10 @@
 // ** React Importsport
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button, FormControlLabel } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -15,9 +13,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { getNewAgents, populateAgents } from 'src/Models/RemittanceSettings/Agent'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
 import AgentWindow from './Windows/AgentWindow'
@@ -25,178 +21,86 @@ import AgentWindow from './Windows/AgentWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 const Agent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
-
-  //stores
-  const [gridData, setGridData] = useState(null)
-  const [countryStore, setCountryStore] = useState([])
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  const _labels = {
-    name: labels && labels.find(item => item.key === "1").value,
-    agents: labels && labels.find(item => item.key === "2").value,
-    country: labels && labels.find(item => item.key === "3").value,
-    countryRef: labels && labels.find(item => item.key === "4").value,
-    countryName: labels && labels.find(item => item.key === "5").value
+    return await getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentAgents.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: RemittanceSettingsRepository.CorrespondentAgents.page,
+    datasetId: ResourceIds.CorrespondentAgents
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: RemittanceSettingsRepository.CorrespondentAgents.page
+  })
 
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: _labels[1],
       flex: 1
     },
     {
       field: 'countryRef',
-      headerName: _labels.countryRef,
+      headerName: _labels[4],
       flex: 1
     },
     {
       field: 'countryName',
-      headerName: _labels.countryName,
+      headerName: _labels[5],
       flex: 1
     }
   ]
 
-  const agentValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      postAgent(values)
-    }
-  })
+  const add = () => {
+    setWindowOpen(true)
 
-  const handleSubmit = () => {
-    agentValidation.handleSubmit()
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentAgents.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCountryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const postAgent = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: RemittanceSettingsRepository.CorrespondentAgents.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delAgent = obj => {
-    postRequest({
-      extension: RemittanceSettingsRepository.CorrespondentAgents.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const addAgent = () => {
-    agentValidation.setValues(getNewAgents())
-    fillCountryStore()
-    setEditMode(false)
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
 
-  const editAgent = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentAgents.get,
-      parameters: parameters
+  const del = async obj => {
+    await postRequest({
+      extension: RemittanceSettingsRepository.CorrespondentAgents.del,
+      record: JSON.stringify(obj)
     })
-      .then(res => {
-        agentValidation.setValues(populateAgents(res.record))
-        fillCountryStore()
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.CorrespondentAgents, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 50 })
-        fillCountryStore()
-        getLabels(ResourceIds.CorrespondentAgents, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addAgent} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editAgent}
-          onDelete={delAgent}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationType='client'
@@ -205,14 +109,14 @@ const Agent = () => {
       </Box>
       {windowOpen && (
         <AgentWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          agentValidation={agentValidation}
-          labels={_labels}
-          countryStore={countryStore}
-          maxAccess={access}
+        onClose={() => {
+          setWindowOpen(false)
+          setSelectedRecordId(null)
+        }}
+        labels={_labels}
+        maxAccess={access}
+        recordId={selectedRecordId}
+        setSelectedRecordId={setSelectedRecordId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
