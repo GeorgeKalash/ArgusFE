@@ -60,14 +60,15 @@ const Agent = () => {
       headerName: _labels.name,
       flex: 1
     },
-    {
-      field: 'countryName',
-      headerName: _labels.countryName,
-      flex: 1
-    },
+    
     {
       field: 'countryRef',
       headerName: _labels.countryRef,
+      flex: 1
+    },
+    {
+      field: 'countryName',
+      headerName: _labels.countryName,
       flex: 1
     }
   ]
