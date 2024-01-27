@@ -12,7 +12,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import dayjs from 'dayjs'
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
@@ -115,21 +116,24 @@ const InlineEditGrid = ({
         case 'datePicker':
           console.log(gridValidation.values.rows[rowIndex][fieldName])
 
-return (
+        return (
             <LocalizationProvider dateAdapter={AdapterDayjs} >
              <DatePicker
              id={cellId}
              name={fieldName}
-             value={formatDateFromApi(gridValidation.values.rows[rowIndex][fieldName])}
+             value={dayjs(gridValidation.values.rows[rowIndex][fieldName])}
              required={column?.mandatory}
              readOnly={column?.readOnly}
              inputFormat={dateFormat}
-            onChange={newDate => {
-              gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, formatDateToApiFunction(newDate))
-            }}
+             onChange={newDate => {
+              if(newDate)
+              gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newDate.toString())
+             else
+              gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0')
+             }}
             onClose={() => setOpenDatePicker(false)}
             open={openDatePicker}
-             clearable //bug from mui not working for now
+            clearable //bug from mui not working for now
 
         slotProps={{
           // replacing clearable behaviour

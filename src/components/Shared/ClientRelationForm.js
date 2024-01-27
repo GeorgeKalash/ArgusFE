@@ -10,7 +10,7 @@ import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import dayjs from 'dayjs'
 
-// import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateDefault } from 'src/lib/date-helper'// import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
@@ -65,26 +65,26 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
       .then((res) => {
         const result = res.list
 
-        // const processedData = result.map((item) => ({
-        //   ...item,
-        //   activationDate: formatDateFromApi(item?.activationDate),
-        //   expiryDate: formatDateFromApi(item?.expiryDate)
+        const processedData = result.map((item) => ({
+          ...item,
+          activationDate: formatDateDefault(item?.activationDate),
+          expiryDate: formatDateDefault(item?.expiryDate)
 
-        // }));
-        res.list.length > 0 && formik.setValues({rows: result});
+        }));
+        res.list.length > 0 && formik.setValues({rows: processedData});
       })
       .catch((error) => {
         // setErrorMessage(error);
       });
   }
 
-  const formatDateFromApi = (apiDate) => {
-    // Assuming the API date format is "/Date(1704758400000)/"
-    const timestamp = parseInt(apiDate.match(/\d+/)[0], 10);
-    const dateObject = new Date(timestamp);
+//   const formatDateFromApi = (apiDate) => {
+//     // Assuming the API date format is "/Date(1704758400000)/"
+//     const timestamp = parseInt(apiDate.match(/\d+/)[0], 10);
+//     const dateObject = new Date(timestamp);
 
-return dayjs(dateObject).format('YYYY-MM-DD');
-  };
+// return dayjs(dateObject).format('YYYY-MM-DD');
+//   };
 
   const lookupClient = inp => {
     setGridData({count : 0, list: [] , message :"",  statusId:1})
@@ -175,7 +175,6 @@ return dayjs(dateObject).format('YYYY-MM-DD');
       name: 'expiryDate',
       mandatory: true,
 
-      valueGetter: (params) => formatDateFromApi(params.value),
 
 
     },
@@ -186,7 +185,6 @@ return dayjs(dateObject).format('YYYY-MM-DD');
       mandatory: true,
       name: 'activationDate',
 
-      // valueGetter: (params) => formatDateFromApi(params.value),
 
 
 
@@ -252,7 +250,7 @@ return dayjs(dateObject).format('YYYY-MM-DD');
   }
 
 return (
-    <FormShell height={500} form={formik}>
+    <FormShell height={500} form={formik} infoVisible={true}>
       <Grid container xs={9}  spacing={4} sx={{p:5}}>
         <Grid item xs={4}><CustomTextField value={reference} label={_labels.reference} readOnly={true}/></Grid> <Grid item xs={5}></Grid>
         <Grid item xs={6}><CustomTextField value={name} label={_labels.client}   readOnly={true} /></Grid>
