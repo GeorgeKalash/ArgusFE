@@ -54,5 +54,6 @@ export const ResourceIds = {
   PurposeOfExchange : 35103,
   RateType : 32100,
   MC_Default : 32104,
-  MultiCurrencyMapping : 32102
+  MultiCurrencyMapping : 32102,
+  Description_Template : 31110,
 }
