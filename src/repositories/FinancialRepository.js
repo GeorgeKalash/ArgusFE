@@ -5,6 +5,13 @@ export const FinancialRepository = {
   //Segment
   Segment: {
     qry: service + 'qrySEG'
+  },
+  DescriptionTemplate:{
+    qry: service + 'qryDTP',
+    page: service + 'pageDTP',
+    get: service + 'getDTP',
+    set: service + 'setDTP',
+    del: service + 'delDTP'
   }
 
 }

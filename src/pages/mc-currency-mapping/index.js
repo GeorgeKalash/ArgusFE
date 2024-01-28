@@ -1,5 +1,4 @@
 // ** React Imports
-// ** React Imports
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
@@ -13,8 +12,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+
 // ** Windows
-import ReleaseCodeWindow from './Windows/ReleaseCodeWindow'
+import MultiCurrencyWindow from './Windows/MultiCurrencyWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -22,9 +23,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-const ReleaseCodes  = () => {
+
+const MultiCurrencyMapping = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -33,11 +34,15 @@ const ReleaseCodes  = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const [selectedCurrencyId, setSelectedCurrencyId] = useState(null)
+  const [selectedRateTypeId, setSelectedRateTypeId] = useState(null)
+  
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.page,
+      extension: MultiCurrencyRepository.McExchangeMap.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -48,23 +53,28 @@ const ReleaseCodes  = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.ReleaseCode.page,
-    datasetId: ResourceIds.ReleaseCodes
+    endpointId: MultiCurrencyRepository.McExchangeMap.page,
+    datasetId: ResourceIds.MultiCurrencyMapping
   })
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.ReleaseCode.page
+    endpointId: MultiCurrencyRepository.McExchangeMap.page
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'currencyName',
+      headerName: _labels.currency,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'rateTypeName',
+      headerName: _labels.rateType,
+      flex: 1
+    },
+    {
+      field: 'exName',
+      headerName: _labels.exchange,
       flex: 1
     }
   ]
@@ -72,16 +82,23 @@ const ReleaseCodes  = () => {
 
   const add = () => {
     setWindowOpen(true)
+    setSelectedCurrencyId(null)
+    setSelectedRateTypeId(null)
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
+    // setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
+    
+    setSelectedCurrencyId(obj.currencyId)
+    setSelectedRateTypeId(obj.rateTypeId)
+   
+
   }
 
   const del = async obj => {
     await postRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.del,
+      extension: MultiCurrencyRepository.McExchangeMap.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -96,7 +113,7 @@ const ReleaseCodes  = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['currencyId','rateTypeId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
@@ -106,7 +123,7 @@ const ReleaseCodes  = () => {
         />
       </Box>
       {windowOpen && (
-        <ReleaseCodeWindow
+        <MultiCurrencyWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -115,6 +132,9 @@ const ReleaseCodes  = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
+          
+          currencyId={selectedCurrencyId}
+          rateTypeId={selectedRateTypeId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
@@ -123,4 +143,8 @@ const ReleaseCodes  = () => {
 }
 
 
-export default ReleaseCodes
+
+
+export default MultiCurrencyMapping
+
+
