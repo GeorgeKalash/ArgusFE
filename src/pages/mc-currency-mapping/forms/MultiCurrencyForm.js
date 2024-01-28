@@ -23,6 +23,7 @@ export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, cur
     const [editMode, setEditMode] = useState(!!currencyId && !!rateTypeId )
     
     const [initialValues, setInitialData] = useState({
+        recordId: null,
         currencyId: null,
         rateTypeId:null,
         exId:null,
@@ -46,23 +47,19 @@ export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, cur
             exId: yup.string().required('This field is required'),
         }),
         onSubmit: async obj => {
-          const currencyId = obj.currencyId
-          const rateTypeId = obj.rateTypeId
+          const currencyId = initialValues.currencyId
+          const rateTypeId = initialValues.rateTypeId
           
 
           const response = await postRequest({
             extension: MultiCurrencyRepository.McExchangeMap.set,
             record: JSON.stringify(obj)
           })
-          
           if (!currencyId&&!rateTypeId) {
-            
             toast.success('Record Added Successfully')
             setInitialData({
               ...obj, // Spread the existing properties
-              currencyId: response.currencyId,
-              rateTypeId : response.rateTypeId,
-              
+              recordId: obj.currencyId * 1000 + obj.rateTypeId,
             });
             setEditMode(false)
           }
@@ -84,7 +81,10 @@ export default function MultiCurrencyForm({ labels, maxAccess, defaultValue, cur
                 parameters: `_currencyId=${currencyId}&_rateTypeId=${rateTypeId}`
               })
               
-              setInitialData(res.record)
+              setInitialData({
+                ...res.record,
+                recordId: currencyId * 1000 + rateTypeId,
+              });
             }
           } catch (exception) {
             setErrorMessage(error)
