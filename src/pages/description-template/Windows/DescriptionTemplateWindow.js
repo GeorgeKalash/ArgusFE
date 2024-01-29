@@ -1,7 +1,7 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import DescriptionTemplateForm from '../Forms/DescriptionTemplateForm'
+import DescriptionTemplateForm from '../forms/DescriptionTemplateForm'
 
 const DescriptionTemplateWindow = ({
   onClose,
