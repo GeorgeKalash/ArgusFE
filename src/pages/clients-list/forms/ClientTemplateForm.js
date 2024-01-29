@@ -206,7 +206,6 @@ useEffect(()=>{ fillProfessionStore(); fillType()
       setInitialData({
         //clientIDView
         reference: obj.clientMaster.reference,
-
         clientId: obj.clientIDView.clientId,
         expiryDate: obj.clientIDView.idExpiryDate  && formatDateFromApi(obj.clientIDView.idExpiryDate),
         issusDate: obj.clientIDView.idIssusDate  && formatDateFromApi(obj.clientIDView.idIssusDate),
@@ -292,7 +291,7 @@ useEffect(()=>{ fillProfessionStore(); fillType()
 
 
         //clientRemittance
-       recordId:  obj.clientRemittance.recordId,
+       recordId:  recordId,
         OTPVerified: obj.clientRemittance.OTPVerified,
         addressId: obj.clientRemittance.addressId,
         batchId: obj.clientRemittance.batchId,
