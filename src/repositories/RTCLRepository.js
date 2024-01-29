@@ -8,5 +8,10 @@ export const RTCLRepository = {
     set2: service + 'set2KYC',
 
   },
+  ClientRelation: {
+    qry:  service + 'qryREL',
+    set2: service + 'set2REL',
+
+  },
 
 }
