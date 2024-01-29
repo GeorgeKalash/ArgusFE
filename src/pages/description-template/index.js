@@ -1,5 +1,4 @@
 // ** React Imports
-// ** React Imports
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
@@ -12,9 +11,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 // ** Windows
-import ReleaseCodeWindow from './Windows/ReleaseCodeWindow'
+import DescriptionTemplateWindow from './Windows/DescriptionTemplateWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -22,9 +22,8 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-const ReleaseCodes  = () => {
+const DescriptionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -37,7 +36,7 @@ const ReleaseCodes  = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.page,
+      extension: FinancialRepository.DescriptionTemplate.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -48,27 +47,21 @@ const ReleaseCodes  = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.ReleaseCode.page,
-    datasetId: ResourceIds.ReleaseCodes
+    endpointId: FinancialRepository.DescriptionTemplate.page,
+    datasetId: ResourceIds.Description_Template
   })
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.ReleaseCode.page
+    endpointId: FinancialRepository.DescriptionTemplate.page
   })
 
   const columns = [
-    {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
     }
   ]
-
 
   const add = () => {
     setWindowOpen(true)
@@ -81,7 +74,7 @@ const ReleaseCodes  = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.del,
+      extension: FinancialRepository.DescriptionTemplate.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -106,7 +99,7 @@ const ReleaseCodes  = () => {
         />
       </Box>
       {windowOpen && (
-        <ReleaseCodeWindow
+        <DescriptionTemplateWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -122,5 +115,4 @@ const ReleaseCodes  = () => {
   )
 }
 
-
-export default ReleaseCodes
+export default DescriptionTemplate

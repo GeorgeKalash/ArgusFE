@@ -1,31 +1,34 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import AgentForm from '../Forms/AgentForm'
+import DescriptionTemplateForm from '../Forms/DescriptionTemplateForm'
 
-const AgentWindow = ({ 
+const DescriptionTemplateWindow = ({
   onClose,
   labels,
   maxAccess,
   recordId
- }) => {
+}) => {
+  
   return (
     <Window
-      id='AgentWindow'
-      Title={labels.agents}
+      id='DescriptionTemplateWindow'
+      Title={labels.descriptionTemplate}
+      controlled={true}
       onClose={onClose}
-      width={600}
-      height={400}
+      width={500}
+      height={300}
     >
       <CustomTabPanel>
-        <AgentForm
+        <DescriptionTemplateForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
         />
+       
       </CustomTabPanel>
     </Window>
   )
 }
 
-export default AgentWindow
+export default DescriptionTemplateWindow
