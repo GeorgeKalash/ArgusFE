@@ -8,15 +8,21 @@ import { useFormik } from 'formik'
 import CustomTextField from '../Inputs/CustomTextField'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+
+import dayjs from 'dayjs'
+
+
 import { formatDateDefault } from 'src/lib/date-helper'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 
+
 export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const[clientStore , setClientStore] = useState([])
   const [RelationTypesStore, setRelationTypesStore] =useState([])
+
 
   const {
     labels: _labels,
@@ -70,13 +76,16 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}
         res.list.length > 0 && formik.setValues({rows: processedData});
       })
       .catch((error) => {
+
         setErrorMessage(error);
+
       });
   }
 
 
 
   const lookupClient = inp => {
+
      const input = inp
      console.log({list: []})
 
@@ -98,6 +107,8 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}
     }
 
   }
+
+
 
   const gridColumn = [
     {
@@ -173,6 +184,7 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}
 
     }
   ]
+
 
   const formik = useFormik({
     enableReinitialize: true,
