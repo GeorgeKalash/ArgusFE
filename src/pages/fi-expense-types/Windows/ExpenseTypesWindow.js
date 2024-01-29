@@ -13,7 +13,7 @@ const ExpenseTypesWindow = ({
   return (
     <Window
       id='ExpenseTypesWindow'
-      Title={labels.ExpenseTypes}
+      Title={labels.expenseType}
       controlled={true}
       onClose={onClose}
       width={500}

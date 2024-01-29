@@ -97,18 +97,6 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
             <Grid container spacing={4}>
                 <Grid item xs={12}>
                     <CustomTextField
-                    name='name'
-                    label={labels.name}
-                    value={formik.values.name}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='40'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
-                    />
-                    <CustomTextField
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
@@ -119,6 +107,20 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
                     helperText={formik.touched.reference && formik.errors.reference}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <CustomTextField
+                    name='name'
+                    label={labels.name}
+                    value={formik.values.name}
+                    required
+                    maxAccess={maxAccess}
+                    maxLength='40'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('name', '')}
+                    error={formik.touched.name && Boolean(formik.errors.name)}
+                    helperText={formik.touched.name && formik.errors.name}
                     />
                 </Grid>
                 <Grid item xs={12}>

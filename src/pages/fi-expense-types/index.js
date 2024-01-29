@@ -57,13 +57,13 @@ const ExpenseTypes = () => {
 
   const columns = [
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     },
     {
