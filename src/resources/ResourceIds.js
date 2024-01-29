@@ -56,4 +56,5 @@ export const ResourceIds = {
   MC_Default : 32104,
   MultiCurrencyMapping : 32102,
   Description_Template : 31110,
+  Expense_Types : 31105,
 }
