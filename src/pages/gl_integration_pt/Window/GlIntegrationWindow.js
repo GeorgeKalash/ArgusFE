@@ -1,8 +1,8 @@
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import GroupsForm from '../forms/GroupsForm'
+import GlIntegrationForm from '../forms/GlIntegrationForm'
 
-const GroupsWindow = ({
+const GlIntegrationWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -11,15 +11,15 @@ const GroupsWindow = ({
   
   return (
     <Window
-      id='Groups'
-      Title={labels.bpGroups}
+      id='GlIntegrationWindow'
+      Title={labels.postType}
       controlled={true}
       onClose={onClose}
       width={500}
       height={300}
     >
       <CustomTabPanel>
-        <GroupsForm
+        <GlIntegrationForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
@@ -30,4 +30,4 @@ const GroupsWindow = ({
   )
 }
 
-export default GroupsWindow
+export default GlIntegrationWindow

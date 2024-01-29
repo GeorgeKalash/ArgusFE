@@ -15,6 +15,8 @@ const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, editMode=fals
         Client Relation
         </Button>
       )}
+
+
        {onInfo && infoVisible && (
         <Button onClick={onInfo} variant='contained' disabled={!editMode}>
         Info
@@ -25,7 +27,6 @@ const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, editMode=fals
         Submit
         </Button>
       )}
-
 
     </DialogActions>
   )

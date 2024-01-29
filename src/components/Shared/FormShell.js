@@ -7,6 +7,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 
 export default function FormShell({ form, children, height, editMode, disabledSubmit , infoVisible=true ,resourceId, maxAccess , clientRelation=false , setErrorMessage }) {
+
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
 
@@ -24,6 +25,7 @@ export default function FormShell({ form, children, height, editMode, disabledSu
       {windowToolbarVisible && <WindowToolbar onSave={() => form.handleSubmit()} onInfo={() => stack({
           Component: TransactionLog,
           props: {
+
             recordId: form.values.recordId ??  form.values.clientId ,
             resourceId: resourceId,
             setErrorMessage:setErrorMessage
@@ -37,6 +39,7 @@ export default function FormShell({ form, children, height, editMode, disabledSu
       onClientRelation={() => stack({
           Component: ClientRelationForm,
           props: {
+
             recordId: form.values.recordId ??  form.values.clientId ,
             name :form.values.firstName ? form.values.firstName +' '+ form.values.lastName : form.values.name,
             reference : form.values.reference,
