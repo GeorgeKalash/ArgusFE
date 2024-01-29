@@ -23,7 +23,6 @@ const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   //state
-  const [exchangeTables, setExchangeTables] = useState([])
   const [errorMessage, setErrorMessage] = useState()
   const { height } = useWindowDimensions()
 
@@ -149,7 +148,6 @@ const CTExchangeRates = () => {
     const data = {
       items: obj.rows
     }
-    console.log(data)
 
     postRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeRates.set2,
@@ -188,27 +186,35 @@ const CTExchangeRates = () => {
         parameters: parameters
       })
         .then(values => {
-          // Create a mapping of exchange tables to values entry for efficient lookup
-          const valuesMap = values.list.reduce((array, exchange) => {
-            array[exchange.exchangeId] = exchange
+          // Create a set to store unique exchangeIds
+          const uniqueExchangeIds = new Set()
 
-            return array
-          }, {})
+          // Filtered list to store dictionaries with distinct exchangeIds
+          const filteredList = []
 
-          // Combine exchangeTable and values
-          const rows = exchangeTables.list.map(exchange => {
-            const value = valuesMap[exchange.recordId] || 0
+          // Iterate through each dictionary in the original list
+          values?.list.forEach(exchange => {
+            const exchangeId = exchange.exchangeId
 
-            return {
-              exchangeId: exchange.recordId,
-              exchangeRef: exchange.reference,
-              exchangeName: exchange.name,
-              rateCalcMethodName: exchange.rateCalcMethodName,
-              rate: value?.exchangeRate?.rate ? value.exchangeRate.rate : '',
-              minRate: value?.exchangeRate?.minRate ? value.exchangeRate.minRate : '',
-              maxRate: value?.exchangeRate?.maxRate ? value.exchangeRate.maxRate : ''
+            // Check if the exchangeId is not in the set (not seen before)
+            if (!uniqueExchangeIds.has(exchangeId)) {
+              // Add the exchangeId to the set to mark it as seen
+              uniqueExchangeIds.add(exchangeId)
+
+              // Add the dictionary to the filtered list
+              filteredList.push({
+                exchangeId: exchange.exchange?.recordId ? exchange.exchange.recordId : '',
+                exchangeRef: exchange.exchange?.reference ? exchange.exchange.reference : '',
+                exchangeName: exchange.exchange?.name ? exchange.exchange.name : '',
+                rateCalcMethodName: exchange.exchange?.rateCalcMethodName ? exchange.exchange.rateCalcMethodName : '',
+                rate: exchange.exchangeRate?.rate ? exchange.exchangeRate.rate : '',
+                minRate: exchange.exchangeRate?.minRate ? exchange.exchangeRate.minRate : '',
+                maxRate: exchange.exchangeRate?.maxRate ? exchange.exchangeRate.maxRate : ''
+              })
             }
           })
+
+          const rows = filteredList
 
           formik.setValues({ rows })
         })
@@ -218,24 +224,9 @@ const CTExchangeRates = () => {
     }
   }
 
-  const getExchangeTables = currencyId => {
-    const parametersEX2 = `_currencyId=${currencyId}`
-
-    getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.qry2,
-      parameters: parametersEX2
-    })
-      .then(exchangeTables => {
-        setExchangeTables(exchangeTables)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   const handleSubmit = () => {
-    puFormik.handleSubmit()
-    saFormik.handleSubmit()
+    if (formik.values.currencyId != null && formik.values.puRateTypeId != null) puFormik.handleSubmit()
+    if (formik.values.currencyId != null && formik.values.saRateTypeId != null) saFormik.handleSubmit()
   }
 
   return (
@@ -264,7 +255,6 @@ const CTExchangeRates = () => {
                   maxAccess={access}
                   onChange={(event, newValue) => {
                     formik && formik.setFieldValue('currencyId', newValue?.recordId)
-                    if (newValue) getExchangeTables(newValue?.recordId)
                   }}
                   error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   helperText={formik.touched.currencyId && formik.errors.currencyId}
