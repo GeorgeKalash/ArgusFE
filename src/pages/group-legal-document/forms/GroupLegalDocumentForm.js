@@ -49,8 +49,8 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, defaultValue
             
         }),
         onSubmit: async obj => {
-          const groupId = obj.groupId
-          const incId = obj.incId
+          const groupId = initialValues.groupId
+          const incId = initialValues.incId
           
 
           const response = await postRequest({
