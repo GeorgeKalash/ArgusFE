@@ -90,7 +90,7 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryEXB',
     set2: service + 'set2EXB'
   },
-  UpdateExchangeRates: {
+  ExchangeRates: {
     get: service + 'getEXB',
     qry: service + 'qryEXG2',
     set2: service + 'set2EXB'
@@ -106,17 +106,15 @@ export const RemittanceSettingsRepository = {
     set: service + 'setPFN',
     del: service + 'delPFN'
   },
-  ClientIndividual :{
+  ClientIndividual: {
     qry: service + 'qryCLI'
-
   },
-  SalaryRange :{
+  SalaryRange: {
     qry: service + 'qrySRA',
     page: service + 'pageSRA',
     get: service + 'getSRA',
     set: service + 'setSRA',
     del: service + 'delSRA'
-
   },
   SourceOfIncome: {
     qry: service + 'qrySI',
@@ -125,6 +123,4 @@ export const RemittanceSettingsRepository = {
     set: service + 'setSI',
     del: service + 'delSI'
   }
-
-
 }

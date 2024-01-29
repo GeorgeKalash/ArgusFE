@@ -11,7 +11,15 @@ export const FinancialRepository = {
     page: service + 'pageDTP',
     get: service + 'getDTP',
     set: service + 'setDTP',
-    del: service + 'delDTP'
-  }
+    del: service + 'delDTP',
+  },
+  ExpenseTypes:{
+    qry: service + 'qryET',
+    get: service + 'getET',
+    set: service + 'setET',
+    del: service + 'delET',
+    page: service + 'pageET',
+  },
+  
 
 }
