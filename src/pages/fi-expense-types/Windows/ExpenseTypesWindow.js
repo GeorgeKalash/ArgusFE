@@ -1,7 +1,7 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import ExpenseTypesForm from '../Forms/ExpenseTypesForm'
+import ExpenseTypesForm from '../forms/ExpenseTypesForm'
 
 const ExpenseTypesWindow = ({
   onClose,
