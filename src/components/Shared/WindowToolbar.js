@@ -2,7 +2,7 @@
 import { DialogActions, Button } from '@mui/material'
 
 
-const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, editMode=false, smallBox=false ,  infoVisible=true , clientRelation, onClientRelation=false }) => {
+const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, editMode=false, smallBox=false }) => {
   return (
     <DialogActions>
       {onClear && (
@@ -10,7 +10,7 @@ const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, editMode=fals
           Clear
         </Button>
       )}
-       {onInfo && infoVisible && (
+       {onInfo && (
         <Button onClick={onInfo} variant='contained' disabled={!editMode}>
         Info
         </Button>
@@ -20,12 +20,6 @@ const WindowToolbar = ({ onSave, onClear, onInfo , disabledSubmit, editMode=fals
         Submit
         </Button>
       )}
-       {clientRelation && (
-        <Button onClick={onClientRelation} variant='contained' sx={{mt: smallBox && 0}} disabled={!editMode}>
-        Client Relation
-        </Button>
-      )}
-
     </DialogActions>
   )
 }

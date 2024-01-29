@@ -142,8 +142,11 @@ const columns = [
 
   return (
 
-  <div onClose={onInfoClose} Title={_labels.title} >
+  <Window onClose={onInfoClose} Title={_labels.title} >
   <CustomTabPanel>
+
+
+
 
 
   <Grid container xs={12} sx={{paddingBottom:'25px'}} >
@@ -213,7 +216,7 @@ const columns = [
 
   </CustomTabPanel>
 
-  </div>
+  </Window>
   )
 }
 
