@@ -20,15 +20,14 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { formatDateFromApi } from 'src/lib/date-helper'
 import ClientWindow from './Windows/ClientWindow'
-import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import TransactionLog from 'src/components/Shared/TransactionLog'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { getNewClientCorporate, populateClientCorporate } from 'src/Models/RemittanceSettings/clientsCorporate'
+import { useWindow } from 'src/windows'
 
 const ClientsCorporateList = () => {
-
+  const { stack } = useWindow()
 
   const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
