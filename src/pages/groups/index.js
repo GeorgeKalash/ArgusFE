@@ -73,11 +73,17 @@ const Groups = () => {
       editable: false
     },
     {
-      field: 'nraName',
+      field: 'nraRef',
       headerName: _labels.numberRange,
       flex: 1,
       editable: false
     },
+    {
+      field:'nraDescription',
+      headerName:_labels.numberRange,
+      flex: 1,
+      editable: false
+    }
 
   ]
   

@@ -25,7 +25,11 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
-      nraName:''
+      nraDescription:'',
+      nraRef: '',
+      nraId: null,
+      
+     
     })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -43,7 +47,7 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
       validationSchema: yup.object({
         reference: yup.string().required('This field is required'),
         name: yup.string().required('This field is required'),
-        nraName: yup.string().required('This field is required'),
+
       }),
       onSubmit: async obj => {
         const recordId = obj.recordId
@@ -115,7 +119,7 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
                   />
               </Grid>
               <Grid item xs={12}>
-                         <CustomTextField
+                <CustomTextField
                   name='name'
                   label={labels.name}
                   value={formik.values.name}
@@ -130,34 +134,43 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
                   helperText={formik.touched.name && formik.errors.name}
                   />
               </Grid>
+              <Grid item xs={12}>
+               
               <ResourceLookup
              endpointId={SystemRepository.NumberRange.snapshot}
-             parameters={{
-              _nraName : SystemRepository.NumberRange.page
-             }}
              form={formik}
-             valueField='nraName'
-             displayField='nraName'
-             name='nraName'
-
-            //  readOnly={editMode}
+             valueField='reference'
+             displayField='description'
+             name='nraRef'
              label={labels.numberRange}
-
-             secondDisplayField={false}
-
+             secondDisplayField={true}
+             secondValue={formik.values.nraDescription}
              onChange={(event, newValue) => {
 
               if (newValue) {
-                formik.setFieldValue('nraName', newValue?.recordId)
-                formik.setFieldValue('nraName', newValue?.nraName)
+                formik.setFieldValue('nraId', newValue?.recordId)
+                formik.setFieldValue('nraRef', newValue?.reference)
+                formik.setFieldValue('nraDescription', newValue?.description)
+                
               } else {
-                formik.setFieldValue('nraName', '')
+                formik.setFieldValue('nraId', null)
+                formik.setFieldValue('nraRef', '')
+                formik.setFieldValue('nraDescription', '')
+
               }
             }}
 
-            errorCheck={'nraName'}
-            />
-
+            error={
+              formik.touched.nraId &&
+              Boolean(formik.errors.nraId)
+            }
+            helperText={
+              formik.touched.nraId &&
+              formik.errors.nraId
+            }
+            /> 
+            </Grid>
+            
           </Grid>
       </FormShell>
 )
@@ -192,5 +205,54 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
   helperText={GroupsValidation.touched.nra && GroupsValidation.errors.nra}
   maxAccess={maxAccess}
   editMode={editMode}
+/>
+</Grid> */}
+
+{/* <ResourceLookup
+endpointId={SystemRepository.City.snapshot}
+parameters={{
+  _countryId: clientIndividualFormValidation.values.idCountry,
+  _stateId:  0
+}}
+
+name='idCity'
+label={_labels.issusPlace}
+form={clientIndividualFormValidation}
+valueField='name'
+displayField='name'
+onLookup={lookupCity}
+firstValue={clientIndividualFormValidation.values.cityName}
+secondDisplayField={false}
+readOnly={(editMode || !clientIndividualFormValidation.values.idCountry) && true}
+maxAccess={maxAccess}
+onChange={(event, newValue) => {
+if (newValue) {
+  clientIndividualFormValidation.setFieldValue(
+    "idCity",
+    newValue?.recordId,
+  );
+  clientIndividualFormValidation.setFieldValue(
+    "cityName",
+    newValue?.name,
+  );
+} else {
+  clientIndividualFormValidation.setFieldValue(
+    "idCity",
+    null,
+  );
+  clientIndividualFormValidation.setFieldValue(
+    "cityName",
+    null,
+  );
+}
+}}
+error={
+clientIndividualFormValidation.touched.idCity &&
+Boolean(clientIndividualFormValidation.errors.idCity)
+}
+helperText={
+clientIndividualFormValidation.touched.idCity &&
+clientIndividualFormValidation.errors.idCity
+}
 />
 </Grid> */}
