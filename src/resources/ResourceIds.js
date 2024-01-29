@@ -55,5 +55,6 @@ export const ResourceIds = {
   RateType : 32100,
   MC_Default : 32104,
   MultiCurrencyMapping : 32102,
+  Description_Template : 31110,
   Expense_Types : 31105,
 }
