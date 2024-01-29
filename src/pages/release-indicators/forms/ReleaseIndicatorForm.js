@@ -27,7 +27,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
       recordId: null,
       name: '',
       reference: '',
-      changeabilityName:''
+      changeability:''
 
 
     })
@@ -163,8 +163,8 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
                 onChange={(event, newValue) => {
                     formik && formik.setFieldValue('changeability', newValue?.key)
                 }}
-                error={formik.touched.changeabilityName && Boolean(formik.errors.changeabilityName)}
-                helperText={formik.touched.changeabilityName && formik.errors.changeabilityName}
+                error={formik.touched.changeability && Boolean(formik.errors.changeability)}
+                helperText={formik.touched.changeability && formik.errors.changeability}
                   />
                 </Grid>
           </Grid>
