@@ -34,7 +34,7 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  //const editMode = !!recordId
+
 
   const invalidate = useInvalidate({
       endpointId: BusinessPartnerRepository.Groups.page
@@ -123,8 +123,6 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
                   value={formik.values.name}
                   required
                   maxAccess={maxAccess}
-
-                  //readOnly={editMode}
                   maxLength='30'
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('name', '')}
