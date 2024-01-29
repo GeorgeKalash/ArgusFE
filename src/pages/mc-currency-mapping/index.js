@@ -11,12 +11,11 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ReleaseIndicatorWindow from './Windows/ReleaseIndicatorWindow'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 // ** Windows
-
-
+import MultiCurrencyWindow from './Windows/MultiCurrencyWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -25,7 +24,8 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const ReleaseIndicators =  () => {
+
+const MultiCurrencyMapping = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -34,11 +34,15 @@ const ReleaseIndicators =  () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const [selectedCurrencyId, setSelectedCurrencyId] = useState(null)
+  const [selectedRateTypeId, setSelectedRateTypeId] = useState(null)
+  
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: DocumentReleaseRepository.ReleaseIndicator.page,
+      extension: MultiCurrencyRepository.McExchangeMap.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -49,53 +53,52 @@ const ReleaseIndicators =  () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.ReleaseIndicator.page,
-    datasetId: ResourceIds.ReleaseIndicators
+    endpointId: MultiCurrencyRepository.McExchangeMap.page,
+    datasetId: ResourceIds.MultiCurrencyMapping
   })
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.ReleaseIndicator.page
+    endpointId: MultiCurrencyRepository.McExchangeMap.page
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'currencyName',
+      headerName: _labels.currency,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'rateTypeName',
+      headerName: _labels.rateType,
       flex: 1
     },
     {
-      field: 'recordId',
-      headerName: _labels.id,
-      flex: 1,
-      align: 'right',
-
-      
-    },
-    {
-      field: 'changeabilityName',
-      headerName: _labels.changeability,
+      field: 'exName',
+      headerName: _labels.exchange,
       flex: 1
     }
   ]
 
+
   const add = () => {
     setWindowOpen(true)
-
+    setSelectedCurrencyId(null)
+    setSelectedRateTypeId(null)
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
+    // setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
+    
+    setSelectedCurrencyId(obj.currencyId)
+    setSelectedRateTypeId(obj.rateTypeId)
+   
+
   }
 
   const del = async obj => {
     await postRequest({
-      extension: DocumentReleaseRepository.ReleaseIndicator.del,
+      extension: MultiCurrencyRepository.McExchangeMap.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -110,7 +113,7 @@ const ReleaseIndicators =  () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['currencyId','rateTypeId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
@@ -120,16 +123,18 @@ const ReleaseIndicators =  () => {
         />
       </Box>
       {windowOpen && (
-        <ReleaseIndicatorWindow
+        <MultiCurrencyWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
           }}
-          setWindowOpen={setWindowOpen}
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
+          
+          currencyId={selectedCurrencyId}
+          rateTypeId={selectedRateTypeId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
@@ -137,4 +142,9 @@ const ReleaseIndicators =  () => {
   )
 }
 
-export default ReleaseIndicators
+
+
+
+export default MultiCurrencyMapping
+
+

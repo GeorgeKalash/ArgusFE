@@ -11,12 +11,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ReleaseIndicatorWindow from './Windows/ReleaseIndicatorWindow'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 // ** Windows
-
-
+import ExpenseTypesWindow from './Windows/ExpenseTypesWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -25,7 +23,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const ReleaseIndicators =  () => {
+const ExpenseTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -38,7 +36,7 @@ const ReleaseIndicators =  () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: DocumentReleaseRepository.ReleaseIndicator.page,
+      extension: FinancialRepository.ExpenseTypes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -49,12 +47,12 @@ const ReleaseIndicators =  () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.ReleaseIndicator.page,
-    datasetId: ResourceIds.ReleaseIndicators
+    endpointId: FinancialRepository.ExpenseTypes.page,
+    datasetId: ResourceIds.Expense_Types
   })
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.ReleaseIndicator.page
+    endpointId: FinancialRepository.ExpenseTypes.page
   })
 
   const columns = [
@@ -69,23 +67,15 @@ const ReleaseIndicators =  () => {
       flex: 1
     },
     {
-      field: 'recordId',
-      headerName: _labels.id,
-      flex: 1,
-      align: 'right',
-
-      
-    },
-    {
-      field: 'changeabilityName',
-      headerName: _labels.changeability,
+      field: 'description',
+      headerName: _labels.description,
       flex: 1
     }
   ]
 
+
   const add = () => {
     setWindowOpen(true)
-
   }
 
   const edit = obj => {
@@ -95,7 +85,7 @@ const ReleaseIndicators =  () => {
 
   const del = async obj => {
     await postRequest({
-      extension: DocumentReleaseRepository.ReleaseIndicator.del,
+      extension: FinancialRepository.ExpenseTypes.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -120,12 +110,11 @@ const ReleaseIndicators =  () => {
         />
       </Box>
       {windowOpen && (
-        <ReleaseIndicatorWindow
+        <ExpenseTypesWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
           }}
-          setWindowOpen={setWindowOpen}
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
@@ -137,4 +126,4 @@ const ReleaseIndicators =  () => {
   )
 }
 
-export default ReleaseIndicators
+export default ExpenseTypes

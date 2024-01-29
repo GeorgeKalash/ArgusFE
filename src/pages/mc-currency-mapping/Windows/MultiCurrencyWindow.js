@@ -1,31 +1,34 @@
-// ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import MultiCurrencyForm from '../forms/MultiCurrencyForm'
 
-// **Tabs
-import ReleaseCodeForm from 'src/pages/release-codes/forms/ReleaseCodeForm'
-
-const ReleaseCodeWindow = ({
-    onClose,
+const MultiCurrencyWindow = ({
+  onClose,
   labels,
   maxAccess,
-  recordId
+  recordId,
+  currencyId,
+  rateTypeId,
+
 }) => {
   
   return (
     <Window
-      id='ReleaseCodeWindow'
-      Title={labels.releaseCode}
+      id='MultiCurrencyWindow'
+      Title={labels.mc_mapping}
       controlled={true}
       onClose={onClose}
       width={500}
       height={300}
     >
       <CustomTabPanel>
-        <ReleaseCodeForm
+        <MultiCurrencyForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
+          currencyId={currencyId}
+          rateTypeId={rateTypeId}
+         
         />
        
       </CustomTabPanel>
@@ -33,4 +36,4 @@ const ReleaseCodeWindow = ({
   )
 }
 
-export default ReleaseCodeWindow
+export default MultiCurrencyWindow
