@@ -58,4 +58,6 @@ export const ResourceIds = {
   Description_Template : 31110,
   Expense_Types : 31105,
   CtExchangeRates: 35113,
+  MultiCurrencyMapping : 32102,
+  ClientRelation: 36202
 }
