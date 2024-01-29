@@ -89,7 +89,7 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, defaultValue
               
               setInitialData({
                 ...res.record,
-                recordId: groupId * 1000 + incId,
+                recordId: groupId * 10000 + incId,
               });
             }
           } catch (exception) {
