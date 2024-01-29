@@ -2,7 +2,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GlIntegrationForm from '../forms/GlIntegrationForm'
 
-const CtRiskLevelsWindow = ({
+const GlIntegrationWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -30,4 +30,4 @@ const CtRiskLevelsWindow = ({
   )
 }
 
-export default CtRiskLevelsWindow
+export default GlIntegrationWindow
