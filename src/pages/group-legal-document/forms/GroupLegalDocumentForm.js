@@ -25,6 +25,7 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, defaultValue
   const [editMode, setEditMode] = useState(!!groupId && !!incId )
   
   const [initialValues, setInitialData] = useState({
+    recordId:null,
     groupId: null,
     incId:null,
     required:false,
@@ -62,8 +63,8 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, defaultValue
             toast.success('Record Added Successfully')
             setInitialData({
               ...obj, // Spread the existing properties
-              groupId: response.groupId,
-              incId : response.incId,
+              recordId: obj.groupId * 10000 + obj.incId,
+              
               
             });
             setEditMode(false)
@@ -86,7 +87,10 @@ export default function GroupLegalDocumentForm({ labels, maxAccess, defaultValue
                 parameters: `_groupId=${groupId}&_incId=${incId}`
               })
               
-              setInitialData(res.record)
+              setInitialData({
+                ...res.record,
+                recordId: groupId * 1000 + incId,
+              });
             }
           } catch (exception) {
             setErrorMessage(error)
