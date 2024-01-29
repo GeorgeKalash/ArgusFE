@@ -14,7 +14,7 @@ export const CurrencyTradingSettingsRepository = {
     set: service + 'setRT',
     del: service + 'delRT'
   },
-  UpdateExchangeRates: {
+  ExchangeRates: {
     qry: service + 'qryEX',
     get: service + 'getEX',
     set2: service + 'set2EX'
@@ -28,7 +28,7 @@ export const CurrencyTradingSettingsRepository = {
   },
   Defaults: {
     qry: service + 'qryDE',
-    get : service + 'getDE',
+    get: service + 'getDE',
     set2: service + 'set2DE'
   },
   IdFields: {
@@ -46,7 +46,7 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getRSK',
     set: service + 'setRSK',
     del: service + 'delRSK',
-    page: service + 'pageRSK',
+    page: service + 'pageRSK'
   },
   PurposeExchange: {
     qry: service + 'qryPEX',

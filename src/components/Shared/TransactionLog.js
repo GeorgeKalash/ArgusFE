@@ -45,7 +45,6 @@ const TransactionLog = (props) =>{
     }
   }, [access, transactionType])
 
-console.log(access)
 
   const _labels = {
     trxType: labels && labels.find(item => item.key === "1").value,
@@ -75,7 +74,6 @@ const  getGridData = () =>{
     parameters: parameters
   })
     .then(res => {
-     console.log(res)
 
      setGridData(res)
 
@@ -97,7 +95,6 @@ const  showInfo = (obj) =>{
     parameters: parameters
   })
     .then(res => {
-     console.log(res)
 
      setInfo(JSON.parse(res.record.data))
 

@@ -1,39 +1,33 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import ExpenseTypesForm from '../Forms/ExpenseTypesForm'
 
-// **Tabs
-import ReleaseIndicatorForm from 'src/pages/release-indicators/forms/ReleaseIndicatorForm'
-
-const ReleaseIndicatorWindow = ({
-    onClose,
+const ExpenseTypesWindow = ({
+  onClose,
   labels,
   maxAccess,
-  recordId,
-  setWindowOpen
+  recordId
 }) => {
   
   return (
     <Window
-      id='ReleaseIndicatorWindow'
-      Title={labels.releaseIndicator}
+      id='ExpenseTypesWindow'
+      Title={labels.expenseType}
       controlled={true}
       onClose={onClose}
       width={500}
       height={300}
     >
       <CustomTabPanel>
-        <ReleaseIndicatorForm
+        <ExpenseTypesForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
-          setWindowOpen={setWindowOpen}
-        />
-       
+        />       
       </CustomTabPanel>
     </Window>
   )
 }
 
-
-export default ReleaseIndicatorWindow
+export default ExpenseTypesWindow
