@@ -88,7 +88,7 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
       
     return (
         <FormShell 
-            resourceId={ResourceIds.ExpenseTypes}
+            resourceId={ResourceIds.Expense_Types}
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
