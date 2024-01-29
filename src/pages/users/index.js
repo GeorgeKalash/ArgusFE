@@ -64,6 +64,7 @@ const Users = () => {
   const [passwordState, setPasswordState] = useState(false)
   const [securityGrpWindowOpen, setSecurityGrpWindowOpen] = useState(false)
   const [securityGrpGridData, setSecurityGrpGridData] = useState([])
+  const [rowGridData, setRowGridData] = useState([])
   const [initialAllListData, setSecurityGrpALLData] = useState([])
   const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
 
@@ -666,11 +667,12 @@ const Users = () => {
       })
   }
 
-  //Row access tab 
+  //Row access tab
 
   const rowColumns = [
     {
-      field: 'plantId',
+      field: 'name',
+      headerName: '',
       flex: 2
     },
     {
@@ -680,15 +682,14 @@ const Users = () => {
     }
   ]
 
-
   const rowAccessValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({}),
     initialValues: {
-     /* sgId: '',
-      sgName: '',
-      userId: ''*/
+       recordId: '',
+      name: '',
+      hasAccess: false
     },
     onSubmit: values => {
       postRowAccess()
@@ -701,21 +702,91 @@ const Users = () => {
     }
   }
 
-  const getRowAccessGridData = () => {
-  /*  setSecurityGrpGridData([])
-    const defaultParams = `_userId=${userId}&_filter=&_sgId=0`
-    var parameters = defaultParams
+  const getRowAccessGridData = classId => {
+    setRowGridData([])
+    const userId = usersValidation.values.recordId
 
-    getRequest({
-      extension: AccessControlRepository.SecurityGroupUser.qry,
-      parameters: parameters
+    const plantRequestPromise = getRequest({
+      extension: SystemRepository.Plant.qry,
+      parameters: '_filter='
     })
-      .then(res => {
-        setSecurityGrpGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })*/
+
+    const cashAccountRequestPromise = getRequest({
+      extension: CashBankRepository.CashAccount.qry,
+      parameters: '_filter=&_type=0'
+    })
+
+    const salesPersonRequestPromise = getRequest({
+      extension: SaleRepository.SalesPerson.qry,
+      parameters:'_filter='
+    })
+
+    const rowAccessUserPromise = getRequest({
+      extension: AccessControlRepository.RowAccessUserView.qry,
+      parameters: `_resourceId=${classId}&_userId=${userId}`
+    })
+
+    let rar = {
+      recordId: null,
+      name: null,
+      hasAccess: false
+    }
+
+    Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise,rowAccessUserPromise]).then(
+      ([cashAccountRequest, plantRequest, salesPersonRequest,rowAccessUser]) => {
+        //Plant
+        if (classId == 20110 || classId == 'undefined') {
+          // Use map to transform each item in res.list
+          rar = plantRequest.list.map(item => {
+            // Create a new object for each item
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              hasAccess: false
+            }
+          })
+        }
+
+        //Cash account
+        else if (classId == 33102) {
+          // Use map to transform each item in res.list
+          rar = cashAccountRequest.list.map(item => {
+            // Create a new object for each item
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              hasAccess: false
+            }
+          })
+        }
+
+        //Sales Person
+        else if (classId == 51201) {
+          // Use map to transform each item in res.list
+          rar = salesPersonRequest.list.map(item => {
+            // Create a new object for each item
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              hasAccess: false
+            }
+          })
+        }
+        console.log('rowAccessUser ',classId,' ',rowAccessUser.list)
+
+        for (let i = 0; i < rar.length; i++) {
+          let rowId = rar[i].recordId;
+          rowAccessUser.list.forEach(storedItem => {
+              let storedId = storedItem.recordId.toString();
+              if (storedId === rowId) {
+                rar[i].hasAccess = true;
+              }
+          });
+      }
+        setRowGridData(rar)
+        console.log('storeee ', rowGridData)
+      }
+    )
   }
 
   const fillModuleStore = () => {
@@ -725,8 +796,7 @@ const Users = () => {
     })
   }
 
-  const postRowAccess= () => {
-  }
+  const postRowAccess = () => {}
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Users, setAccess)
@@ -812,6 +882,7 @@ const Users = () => {
 
           //Row Access
           moduleStore={moduleStore}
+          rowGridData={rowGridData}
           handleRowAccessSubmit={handleRowAccessSubmit}
           getRowAccessGridData={getRowAccessGridData}
           rowAccessValidation={rowAccessValidation}

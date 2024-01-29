@@ -53,7 +53,8 @@ const UsersWindow = ({
   moduleStore,
   handleRowAccessSubmit,
   rowColumns,
-  getRowAccessGridData
+  getRowAccessGridData,
+  rowGridData
 }) => {
   return (
     <Window
@@ -118,6 +119,7 @@ const UsersWindow = ({
          handleRowAccessSubmit={handleRowAccessSubmit}
          getRowAccessGridData={getRowAccessGridData}
          rowAccessValidation={rowAccessValidation}
+         rowGridData={rowGridData}
          rowColumns={rowColumns}
          maxAccess={maxAccess}
         />

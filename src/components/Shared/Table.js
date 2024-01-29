@@ -101,7 +101,7 @@ const Table = ({ pagination = true, paginationType = 'api', height, actionColumn
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-
+  
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props.api
