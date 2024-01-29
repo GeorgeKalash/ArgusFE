@@ -6,37 +6,29 @@ const WindowContext = React.createContext(null)
 export function WindowProvider({ children }) {
   const [stack, setStack] = useState([])
 
+  function closeWindow() {
+    setStack(stack => {
+      return stack.slice(0, stack.length - 1)
+    })
+  }
+
   return (
     <WindowContext.Provider
       value={{
-        stack({ title, Component }) {
-          setStack(stack => [
-            ...stack,
-            {
-              title,
-              Component
-            }
-          ])
+        stack(options) {
+          setStack(stack => [...stack, options])
         }
       }}
     >
       {children}
-      {stack.map(({ Component, title, width = 800, height = 400 }, index) => (
-        <Window
-          key={index}
-          Title={title}
-          controlled={true}
-          onClose={() => {
-            setStack(stack => {
-              const [, ...rest] = stack
-
-              return rest
-            })
-          }}
-          width={width}
-          height={height}
-        >
-          <Component />
+      {stack.map(({ Component, title, width = 800, height = 400, props }, index) => (
+        <Window key={index} Title={title} controlled={true} onClose={closeWindow} width={width} height={height}>
+          <Component
+            {...props}
+            window={{
+              close: closeWindow
+            }}
+          />
         </Window>
       ))}
     </WindowContext.Provider>

@@ -54,6 +54,8 @@ export const ResourceIds = {
   RiskLevel : 35104,
   PurposeOfExchange : 35103,
   RateType : 32100,
+  MultiCurrencyMapping : 32102,
+  ClientRelation: 36202,
   MC_Default : 32104,
   MultiCurrencyMapping : 32102,
   Description_Template : 31110,
