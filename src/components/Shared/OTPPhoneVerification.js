@@ -86,7 +86,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
       })
       .catch(error => {
 
-        setErrorMessage(error)
+        // setErrorMessage(error)
 
       })
       formValidation.setFieldValue('OTPVerified', true )
@@ -199,7 +199,7 @@ checkSMS(enteredOtp)
   };
 
   return (
-    <Window width={500} height={300} onClose={onClose}>
+    <div width={500} height={300} onClose={onClose}>
     <Grid className={styles.phoneVerificationContainer}>
 
       <h2>Verify My Account</h2>
@@ -232,7 +232,7 @@ checkSMS(enteredOtp)
       </button>
         {error && <p   className={styles.errorMessage} >{error}</p>}
     </Grid>
-    </Window>
+    </div>
   );
 };
 
