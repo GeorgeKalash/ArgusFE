@@ -12,7 +12,7 @@ import { ResourceLookup } from 'src/components/Shared//ResourceLookup'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+
 
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -109,8 +109,6 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
                   required
                   rows={2}
 
-                  //readOnly={editMode}
-
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('reference', '')}
@@ -178,81 +176,3 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
 
 
 
-
-{/* <Grid item xs={12}>
-<CustomLookup
-  name='nraRef'
-  label={labels.nuRange}
-  valueField='reference'
-  displayField='description'
-  store={numberRangeStore}
-  setStore={setNumberRangeStore}
-  firstValue={GroupsValidation.values.nraRef}
-  secondValue={GroupsValidation.values.nraDescription}
-  onLookup={lookupNumberRange}
-  onChange={(event, newValue) => {
-    if (newValue) {
-      GroupsValidation.setFieldValue('nraId', newValue?.recordId)
-      GroupsValidation.setFieldValue('nraRef', newValue?.reference)
-      GroupsValidation.setFieldValue('nraDescription', newValue?.description)
-    } else {
-      GroupsValidation.setFieldValue('nraId', null)
-      GroupsValidation.setFieldValue('nraRef', null)
-      GroupsValidation.setFieldValue('nraDescription', null)
-    }
-  }}
-  error={GroupsValidation.touched.nra && Boolean(GroupsValidation.errors.nra)}
-  helperText={GroupsValidation.touched.nra && GroupsValidation.errors.nra}
-  maxAccess={maxAccess}
-  editMode={editMode}
-/>
-</Grid> */}
-
-{/* <ResourceLookup
-endpointId={SystemRepository.City.snapshot}
-parameters={{
-  _countryId: clientIndividualFormValidation.values.idCountry,
-  _stateId:  0
-}}
-
-name='idCity'
-label={_labels.issusPlace}
-form={clientIndividualFormValidation}
-valueField='name'
-displayField='name'
-onLookup={lookupCity}
-firstValue={clientIndividualFormValidation.values.cityName}
-secondDisplayField={false}
-readOnly={(editMode || !clientIndividualFormValidation.values.idCountry) && true}
-maxAccess={maxAccess}
-onChange={(event, newValue) => {
-if (newValue) {
-  clientIndividualFormValidation.setFieldValue(
-    "idCity",
-    newValue?.recordId,
-  );
-  clientIndividualFormValidation.setFieldValue(
-    "cityName",
-    newValue?.name,
-  );
-} else {
-  clientIndividualFormValidation.setFieldValue(
-    "idCity",
-    null,
-  );
-  clientIndividualFormValidation.setFieldValue(
-    "cityName",
-    null,
-  );
-}
-}}
-error={
-clientIndividualFormValidation.touched.idCity &&
-Boolean(clientIndividualFormValidation.errors.idCity)
-}
-helperText={
-clientIndividualFormValidation.touched.idCity &&
-clientIndividualFormValidation.errors.idCity
-}
-/>
-</Grid> */}
