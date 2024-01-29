@@ -10,7 +10,7 @@ import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import dayjs from 'dayjs'
 
-import { formatDateDefault } from 'src/lib/date-helper'// import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateDefault } from 'src/lib/date-helper'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
@@ -78,13 +78,7 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
       });
   }
 
-//   const formatDateFromApi = (apiDate) => {
-//     // Assuming the API date format is "/Date(1704758400000)/"
-//     const timestamp = parseInt(apiDate.match(/\d+/)[0], 10);
-//     const dateObject = new Date(timestamp);
 
-// return dayjs(dateObject).format('YYYY-MM-DD');
-//   };
 
   const lookupClient = inp => {
     setGridData({count : 0, list: [] , message :"",  statusId:1})
