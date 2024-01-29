@@ -31,7 +31,6 @@ export const SystemRepository = {
     get: service + 'getNRA',
     set: service + 'setNRA',
     del: service + 'delNRA'
-
   },
   GeographicRegion: {
     qry: service + 'qryRGN',
@@ -92,7 +91,7 @@ export const SystemRepository = {
   PlantGroup: {
     qry: service + 'qryPLG'
   },
-  SMSTemplate:{
+  SMSTemplate: {
     qry: service + 'qrySMT',
     get: service + 'getSMT',
     set: service + 'setSMT',
@@ -100,13 +99,13 @@ export const SystemRepository = {
     page: service + 'pageSMT',
     snapshot: service + 'snapshotSMT'
   },
-  SystemFunction:{
+  SystemFunction: {
     qry: service + 'qryFUN',
     get: service + 'getFUN',
     set: service + 'setFUN',
     set2: service + 'set2FUN'
   },
-  SMSFunctionTemplate:{
+  SMSFunctionTemplate: {
     qry: service + 'qrySFT'
   },
   Users: {
@@ -116,7 +115,7 @@ export const SystemRepository = {
     del: service + 'delUS',
     page: service + 'pageUS'
   },
-  SystemPlant:{
+  SystemPlant: {
     get: service + 'getUD'
   },
   UserDocument: {
@@ -126,14 +125,16 @@ export const SystemRepository = {
   },
   TransactionLog: {
     qry: service + 'qryTL',
-    get: service + 'getTL',
+    get: service + 'getTL'
   },
-  State:{
+  State: {
     qry: service + 'qryST',
     get: service + 'getST',
     set: service + 'setST',
     del: service + 'delST',
     page: service + 'pageST'
+  },
+  Default: {
+    get: service + 'getDE'
   }
-
 }

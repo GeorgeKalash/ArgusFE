@@ -67,6 +67,7 @@ import 'primereact/resources/themes/saga-blue/theme.css'
 import '../../styles/globals.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
+import { ErrorProvider } from 'src/error'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -149,9 +150,11 @@ const App = props => {
                               <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
                                 <PrimeReactProvider>
                                   {getLayout(
-                                    <WindowProvider>
-                                      <Component {...pageProps} />
-                                    </WindowProvider>
+                                    <ErrorProvider>
+                                      <WindowProvider>
+                                        <Component {...pageProps} />
+                                      </WindowProvider>
+                                    </ErrorProvider>
                                   )}
                                 </PrimeReactProvider>
                               </AclGuard>

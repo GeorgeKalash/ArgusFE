@@ -8,7 +8,7 @@ export default function ResourceComboBox({
   endpointId,
   datasetId,
   name,
-  valueField,
+  valueField = 'recordId',
   values,
   parameters = '_filter=',
   filter = () => true,
@@ -49,7 +49,7 @@ export default function ResourceComboBox({
   return (
     <>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      <CustomComboBox {...{ name, store: filteredStore, valueField, value, ...rest }} />
+      <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value }} />
     </>
   )
 }
