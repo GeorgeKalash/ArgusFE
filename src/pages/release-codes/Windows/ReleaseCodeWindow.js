@@ -3,32 +3,34 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // **Tabs
-import ReleaseCodeTab from 'src/pages/release-codes/Tabs/ReleaseCodeTab'
+import ReleaseCodeForm from 'src/pages/release-codes/forms/ReleaseCodeForm'
 
 const ReleaseCodeWindow = ({
     onClose,
-    onSave,
-    releaseCodeValidation,
-    width,
-    height,
-    _labels,
-    editMode,
-    maxAccess
+  labels,
+  maxAccess,
+  recordId
 }) => {
-    return (
-        <Window id='PlantWindow' Title={_labels.releaseCode} onClose={onClose} width={width} height={height} 
-         onSave={onSave}>
-            <CustomTabPanel>
-                <ReleaseCodeTab
-                    releaseCodeValidation={releaseCodeValidation}
-                    _labels={_labels}
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                />
-            </CustomTabPanel>
-        </Window>
-    )
+  
+  return (
+    <Window
+      id='ReleaseCodeWindow'
+      Title={labels.releaseCode}
+      controlled={true}
+      onClose={onClose}
+      width={500}
+      height={300}
+    >
+      <CustomTabPanel>
+        <ReleaseCodeForm
+          labels={labels}
+          maxAccess={maxAccess}
+          recordId={recordId}
+        />
+       
+      </CustomTabPanel>
+    </Window>
+  )
 }
-
 
 export default ReleaseCodeWindow

@@ -1,40 +1,33 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import GroupLegalDocumentTab from 'src/pages/group-legal-document/Tabs/GroupLegalDocumentTab'
+import GroupLegalDocumentForm from 'src/pages/group-legal-document/forms/GroupLegalDocumentForm'
 
 const GroupLegalDocumentWindow = ({
     onClose,
-    width,
-    height,
-    onSave,
-    groupLegalDocumentValidation,
-    groupStore,
-    categoryStore,
     labels,
-    editMode,
-    maxAccess
+    maxAccess,
+    recordId,
+    groupId,
+    incId,
+
 }) => {
     return (
         <Window
         id='GroupLegalDocumentWindow'
         Title={labels.groupLegalDocument}
+        controlled={true}
         onClose={onClose}
-        width={width}
-        height={height}
-        onSave={onSave}
-        groupLegalDocumentValidation={groupLegalDocumentValidation}
-        categoryStore={categoryStore}
-        groupStore={groupStore}
+        width={500}
+        height={300}
         >
           <CustomTabPanel>
-               <GroupLegalDocumentTab
-                  labels={labels}
-                  groupLegalDocumentValidation={groupLegalDocumentValidation}
-                  categoryStore={categoryStore}
-                  groupStore={groupStore}
-                  editMode={editMode}
-                  maxAccess={maxAccess}
+               <GroupLegalDocumentForm
+                    labels={labels}
+                    maxAccess={maxAccess}
+                    recordId={recordId}
+                    groupId={groupId}
+                    incId={incId}
                />
           </CustomTabPanel>
         </Window>
