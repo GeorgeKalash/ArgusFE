@@ -12,7 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateDefault } from 'src/lib/date-helper'
 import dayjs from 'dayjs'
 
 const CustomPaper = (props, widthDropDown) => {
@@ -114,27 +114,33 @@ const InlineEditGrid = ({
           />
         )
         case 'datePicker':
-          console.log(gridValidation.values.rows[rowIndex][fieldName])
 
-        return (
+return (
             <LocalizationProvider dateAdapter={AdapterDayjs} >
              <DatePicker
              id={cellId}
              name={fieldName}
-             value={dayjs(gridValidation.values.rows[rowIndex][fieldName])}
+             value={dayjs(gridValidation.values.rows[rowIndex][fieldName]).startOf('day')}
              required={column?.mandatory}
              readOnly={column?.readOnly}
              inputFormat={dateFormat}
-             onChange={newDate => {
-              if(newDate)
-              gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newDate.toString())
-             else
-              gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0')
+             onChange={(newDate ) => {
+
+              if (newDate) {
+                console.log(newDate.valueOf());
+
+                const dateWithoutTime = new Date(newDate.valueOf());
+                dateWithoutTime.setHours(0, 0, 0, 0);
+
+                gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, formatDateDefault(dateWithoutTime));
+              } else {
+                gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0');
+              }
              }}
             onClose={() => setOpenDatePicker(false)}
             open={openDatePicker}
-            clearable //bug from mui not working for now
 
+            clearable //bug from mui not working for now
         slotProps={{
           // replacing clearable behaviour
           textField: {
@@ -159,7 +165,7 @@ const InlineEditGrid = ({
           }
         }}
       />
-    </LocalizationProvider>
+           </LocalizationProvider>
           )
       case 'numberfield':
         return (
@@ -248,6 +254,29 @@ const InlineEditGrid = ({
                 else return ''
               }
             }}
+
+            // getOptionLabel={option => {
+            //   if (typeof option === 'object') {
+            //     if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
+            //       let search = ''
+            //       {
+            //         column.columnsInDropDown.map((header, i) => {
+            //           search += `${option[header.key]} `
+            //         })
+            //       }
+
+            //       return search
+            //     }
+
+            //     return `${option[column.displayField]}`
+            //   } else {
+            //     const selectedOption = column.store.find(item => {
+            //       return item[column.valueField] === option
+            //     })
+            //     if (selectedOption) return selectedOption[column?.displayField]
+            //     else return ''
+            //   }
+            // }}
             isOptionEqualToValue={(option, value) => {
 
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
@@ -321,8 +350,34 @@ const InlineEditGrid = ({
             readOnly={column?.readOnly}
             options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
-
             open={write}
+            renderOption={(props, option) => {
+              if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
+                return (
+                  <Box>
+                    {props.id.endsWith('-0') && (
+                      <li className={props.className}>
+                        {column.columnsInDropDown.map((header, i) => {
+                          return (
+                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                              {header.value.toUpperCase()}
+                            </Box>
+                          )
+                        })}
+                      </li>
+                    )}
+                    <li {...props}>
+                      {column.columnsInDropDown.map((header, i) => {
+                        return (
+                          <Box key={i} sx={{ flex: 1 }}>
+                            {option[header.key]}
+                          </Box>
+                        )
+                      })}
+                    </li>
+                  </Box>
+                )
+            }}
 
             // onFocus={() => setOpen(true)}
 
@@ -369,18 +424,19 @@ const InlineEditGrid = ({
               column.columnsInDropDown.length > 0 &&
               CustomPaper(props, column.widthDropDown)
             }
-            renderOption={(props, option) => (
-              <Box>
-                {props.id.endsWith('-0') && (
-                  <li className={props.className} >
-                   <Box sx={{ flex: 1 , fontWeight: 'bold' }}>{column.displayField.toUpperCase()}</Box>
-                  </li>
-                )}
-                <li {...props}>
-                  <Box sx={{ flex: 1 }}>{option[column.displayField]}</Box>
-                </li>
-              </Box>
-            )}
+
+            // renderOption={(props, option) => (
+            //   <Box>
+            //     {props.id.endsWith('-0') && (
+            //       <li className={props.className} >
+            //        <Box sx={{ flex: 1 , fontWeight: 'bold' }}>{column.displayField.toUpperCase()}</Box>
+            //       </li>
+            //     )}
+            //     <li {...props}>
+            //       <Box sx={{ flex: 1 }}>{option[column.displayField]}</Box>
+            //     </li>
+            //   </Box>
+            // )}
 
           //   renderOption={(props, option) => {
           //     console.log(option.columnsInDropDown + "column.store-2")
@@ -453,7 +509,7 @@ const InlineEditGrid = ({
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
                     // Handle search action if needed
-                    console.log('Search clicked');
+                    // console.log('Search clicked');
                   }}
                 />
                  </IconButton>

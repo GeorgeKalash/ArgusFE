@@ -137,6 +137,7 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
       store: clientStore,
       valueField: 'recordId',
       displayField:  'name',
+      widthDropDown: 200,
       fieldsToUpdate: [{ from: 'reference', to: 'clientRef' }, { from: 'name', to: 'clientName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'reference' },
@@ -162,6 +163,8 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
       store: RelationTypesStore ,
       valueField: 'recordId',
       displayField: 'reference',
+      widthDropDown: 200,
+
       fieldsToUpdate: [{ from: 'name', to: 'name' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Reference' },
@@ -184,6 +187,7 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
       header: _labels.activationDate,
       mandatory: true,
       name: 'activationDate',
+      cellRender: (rowData) =>{ return '666666'} // Index 6 is where 'activationDate' is in the columns array
 
 
 
@@ -250,7 +254,7 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
   }
 
 return (
-    <FormShell height={500} form={formik} infoVisible={true}>
+    <FormShell height={500} form={formik} infoVisible={false}>
       <Grid container xs={9}  spacing={4} sx={{p:5}}>
         <Grid item xs={4}><CustomTextField value={reference} label={_labels.reference} readOnly={true}/></Grid> <Grid item xs={5}></Grid>
         <Grid item xs={6}><CustomTextField value={name} label={_labels.client}   readOnly={true} /></Grid>
