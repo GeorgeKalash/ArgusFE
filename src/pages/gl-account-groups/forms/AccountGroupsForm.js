@@ -114,7 +114,6 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
                     value={formik.values.name}
                     required
                     maxLength='50'
-                    rows={2}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
