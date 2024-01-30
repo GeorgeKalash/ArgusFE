@@ -579,7 +579,6 @@ console.log(obj6)
       });
   };
 
-console.log(clientIndividualFormik)
 
   useEffect(() => {
     if(clientIndividualFormik.values.clientId && otpShow)
@@ -967,8 +966,7 @@ console.log(clientIndividualFormik)
                   >
                     <CustomTextField
                       name="cellPhone"
-
-                      type={showAsPasswordPhone &&  clientIndividualFormik.values?.cellPhone && "password"}
+                      type={showAsPasswordPhone &&  clientIndividualFormik.values?.cellPhone ? "password" : "text"}
                       phone={true}
                       label={_labels.cellPhone}
                       value={clientIndividualFormik.values?.cellPhone}
@@ -976,6 +974,7 @@ console.log(clientIndividualFormik)
                       required
                       onChange={clientIndividualFormik.handleChange}
                       maxLength="15"
+                      autoComplete="off"
                       onCopy={handleCopy}
                       onPaste={handleCopy}
                       onBlur={(e) => {
@@ -1006,14 +1005,14 @@ console.log(clientIndividualFormik)
                   >
                     <CustomTextField
                       name="cellPhoneRepeat"
-
-                      type={showAsPasswordPhoneRepeat && clientIndividualFormik.values?.cellPhoneRepeat && "password"}
+                      type={showAsPasswordPhoneRepeat && clientIndividualFormik.values?.cellPhoneRepeat ? "password" : "text"}
                       label={_labels.confirmCell}
                       value={clientIndividualFormik.values?.cellPhoneRepeat}
                       phone={true}
                       required
                       readOnly={editMode && true}
                       maxLength="15"
+                      autoComplete="off"
                       onChange={(e) => {
                         clientIndividualFormik.handleChange(e);
                       }}

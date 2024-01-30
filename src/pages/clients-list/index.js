@@ -24,7 +24,6 @@ const ClientsList = () => {
   //control
   const { getRequest } = useContext(RequestsContext)
 
-
   //stores
   const [gridData, setGridData] = useState([])
 
@@ -84,12 +83,12 @@ const ClientsList = () => {
       editable: false
     },
 
-    {
-      field: 'keyword',
-      headerName: _labels.keyword,
-      flex: 1,
-      editable: false
-    },
+    // {
+    //   field: 'keyword',
+    //   headerName: _labels.keyword,
+    //   flex: 1,
+    //   editable: false
+    // },
 
     {
       field: 'statusName',
