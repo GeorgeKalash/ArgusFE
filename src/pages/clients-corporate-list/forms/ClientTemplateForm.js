@@ -595,6 +595,7 @@ const ClientTemplateForm = ({
                           label={_labels.capital}
                           value={formik.values?.capital}
                           readOnly={editMode && true}
+                          type="number"
                           required
                           onChange={formik.handleChange}
                           onClear={() => formik.setFieldValue("capital", "")}
