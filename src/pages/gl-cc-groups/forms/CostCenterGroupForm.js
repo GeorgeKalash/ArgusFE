@@ -112,7 +112,7 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
                     name='name'
                     label={labels.name}
                     value={formik.values.name}
-                    maxLength='50'
+                    maxLength='30'
 
                     required
                     
