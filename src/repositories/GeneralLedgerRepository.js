@@ -12,21 +12,26 @@ export const GeneralLedgerRepository = {
         qry: service + 'qryCC',
     },
     IntegrationPostTypes: {
-    page:   service + 'pageIPT', 
-    qry: service + 'qryIPT',
-    get: service + 'getIPT',
-    set: service + 'setIPT',
-    del: service + 'delIPT'
-  },   CostCenter: {
-    qry: service + 'qryCC',
-},
-CostCenterGroup: {
-page:   service + 'pageCCG', 
-qry: service + 'qryCCG',
-get: service + 'getCCG',
-set: service + 'setCCG',
-del: service + 'delCCG'
-},
+      page:   service + 'pageIPT', 
+      qry: service + 'qryIPT',
+      get: service + 'getIPT',
+      set: service + 'setIPT',
+      del: service + 'delIPT'
+    },
+     GLAccountGroups :{
+      page:   service + 'pageGRP', 
+      qry: service + 'qryGRP',
+      get: service + 'getGRP',
+      set: service + 'setGRP',
+      del: service + 'delGRP'
+    }, 
+     CostCenterGroup: {
+      page:   service + 'pageCCG', 
+      qry: service + 'qryCCG',
+      get: service + 'getCCG',
+      set: service + 'setCCG',
+      del: service + 'delCCG'
+    },
 
 
 }
