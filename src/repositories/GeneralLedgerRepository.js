@@ -18,5 +18,12 @@ export const GeneralLedgerRepository = {
     set: service + 'setIPT',
     del: service + 'delIPT'
   },
+   GLAccountGroups :{
+    page:   service + 'pageGRP', 
+    qry: service + 'qryGRP',
+    get: service + 'getGRP',
+    set: service + 'setGRP',
+    del: service + 'delGRP'
+  }
 
 }
