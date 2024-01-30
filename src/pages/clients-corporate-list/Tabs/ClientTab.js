@@ -36,6 +36,7 @@ const ClientTab = ({props}) => {
   } = props
 
   // alert(stateAddressStore)
+console.log(clientCorporateFormValidation)
 
 return (
     <>
@@ -331,7 +332,7 @@ return (
                               (item) =>
                                 item.key ===
                                 clientCorporateFormValidation.values
-                                  .industry
+                                  .industry?.toString()
                             )[0]
                           }
                           required
@@ -352,15 +353,15 @@ return (
                           }}
                           error={
                             clientCorporateFormValidation.touched
-                              .nationalityId &&
+                              .industry &&
                             Boolean(
-                              clientCorporateFormValidation.errors.nationalityId
+                              clientCorporateFormValidation.errors.industry
                             )
                           }
                           helperText={
                             clientCorporateFormValidation.touched
-                              .nationalityId &&
-                            clientCorporateFormValidation.errors.nationalityId
+                              .industry &&
+                            clientCorporateFormValidation.errors.industry
                           }
                         />
                       </Grid>
@@ -447,6 +448,8 @@ return (
                           control={
                             <Checkbox
                               name="trading"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.trading
                               }
@@ -463,6 +466,8 @@ return (
                           control={
                             <Checkbox
                               name="inward"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.inward
                               }
@@ -479,10 +484,12 @@ return (
                           control={
                             <Checkbox
                               name="outward"
+                              disabled={editMode && true}
+
                               checked={
                                 clientCorporateFormValidation.values?.outward
                               }
-                              onChange={clientCorporateFormValidation.outward}
+                              onChange={clientCorporateFormValidation.handleChange}
                             />
                           }
                           label={_labels?.outward}

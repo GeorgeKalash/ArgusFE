@@ -11,7 +11,9 @@ const ErrorWindow = ({ open, onClose, message }) => {
     typeof message === 'string'
       ? message
       : !message?.response
-      ? message?.message
+      ? message?.error
+        ? message.error
+        : message?.message
       : message?.response?.data?.error
       ? message.response.data.error
       : message?.response?.data

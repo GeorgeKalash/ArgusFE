@@ -136,5 +136,10 @@ export const SystemRepository = {
   },
   Default: {
     get: service + 'getDE'
+  },
+  Defaults: {
+    qry: service + 'qryDE',
+    get: service + 'getDE',
+    set: service + 'set2DE'
   }
 }
