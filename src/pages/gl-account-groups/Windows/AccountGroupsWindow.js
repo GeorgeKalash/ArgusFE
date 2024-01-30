@@ -12,7 +12,7 @@ const AccountGroupsWindow = ({
   return (
     <Window
       id='AccountGroupsWindow'
-      Title={labels.accountGroups}
+      Title={labels.accountGroup}
       controlled={true}
       onClose={onClose}
       width={500}
