@@ -114,10 +114,10 @@ const TabsProvider = ({ children }) => {
   }
 
   const closeTab = (tabRoute) => {
-    setClosing(true)
+    setClosing(true);
     const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
     const lastValue = activeTabs.length;
-
+  
     if (lastValue === 1) {
       setLength(0);
       router.push('/default');
@@ -132,45 +132,63 @@ const TabsProvider = ({ children }) => {
       } else if (value === lastValue - 1) {
         setValue(lastValue - 2);
       }
-      
+  
       setActiveTabs((prevState) => {
-        return prevState.filter((tab) => tab.route !== tabRoute);
+        const newTabs = prevState.filter((tab) => tab.route !== tabRoute);
+  
+        // Check if there are only 2 tabs and the first one is being closed
+        if (newTabs.length === 1 && index === 0) {
+          router.push(newTabs[0].route);
+        }
+  
+        return newTabs;
       });
     }
   };
+  
 
   useEffect(() => {
-    if(length === 0){
-      setActiveTabs([])
-      setLength(1)
+    if (length === 0) {
+      setActiveTabs([]);
+      setLength(1);
     } else {
-    if (initialLoadDone && router.asPath != '/default') {
-      const isTabOpen = activeTabs.some((activeTab, index) => {
-        if (activeTab.page === children || activeTab.route === router.asPath) {
-          setValue(index);
+      if (initialLoadDone && router.asPath !== '/default') {
+        const isTabOpen = activeTabs.some((activeTab, index) => {
+          if (activeTab.page === children || activeTab.route === router.asPath) {
+            setValue(index);
+
+            return true;
+          }
           
-          return true;
-        }
-        
           return false;
-      })
-      if (isTabOpen) return
-      else {
-        const newValueState = activeTabs.length
-        setActiveTabs(prevState => {
-          return [
-            ...prevState,
-            {
-              page: children,
-              route: router.asPath,
-              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
+        });
+  
+        if (isTabOpen) return;
+        else {
+          const newValueState = activeTabs.length;
+          setActiveTabs((prevState) => {
+            const newTabs = [
+              ...prevState,
+              {
+                page: children,
+                route: router.asPath,
+                label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, '')),
+              },
+            ];
+  
+            // Check if there are only 2 tabs and the new tab is being opened
+            if (newTabs.length === 2) {
+              router.push(newTabs[1].route);
             }
-          ]
-        })
-        setValue(newValueState)
+  
+            return newTabs;
+          });
+          setValue(newValueState);
+        }
       }
-    }}
-  }, [children, router.asPath])
+    }
+  }, [children, router.asPath]);
+  
 
   useEffect(() => {
     if(closing && value){
