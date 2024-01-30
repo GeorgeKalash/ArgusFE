@@ -15,8 +15,6 @@ const RowAccessTab = ({
     maxAccess,
     labels
 }) => {
-  console.log('rowGridData ',rowGridData)
-
   return (
     <Grid container spacing={4}>
     <Grid item xs={12}>

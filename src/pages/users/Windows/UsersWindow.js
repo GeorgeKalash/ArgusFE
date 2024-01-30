@@ -56,6 +56,7 @@ const UsersWindow = ({
   getRowAccessGridData,
   rowGridData
 }) => {
+  
   return (
     <Window
       id='UsersWindow'

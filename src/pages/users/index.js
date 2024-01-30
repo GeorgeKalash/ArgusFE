@@ -220,6 +220,7 @@ const Users = () => {
     })
       .then(res => {
         setGridData(res)
+        console.log('res response ',res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -286,6 +287,7 @@ const Users = () => {
     })
       .then(res => {
         usersValidation.setValues(populateUserInfo(res.record))
+        console.log('rowAccessUser usersss ',usersValidation.values)
         setEditMode(true)
         setWindowOpen(true)
         fillActiveStatusStore()
@@ -298,6 +300,8 @@ const Users = () => {
         getSecurityGrpGridData(res.record.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
+        setRowGridData([])
+        getRowAccessGridData(20110)
         fillModuleStore()
         setActiveTab(0)
       })
@@ -704,7 +708,13 @@ const Users = () => {
 
   const getRowAccessGridData = classId => {
     setRowGridData([])
+    console.log('rowAccessUser class ',classId)
+
+    if (classId === undefined) {
+      classId = 20110; // Set a default value to plant 
+    }
     const userId = usersValidation.values.recordId
+    console.log('rowAccessUser userId ',userId)
 
     const plantRequestPromise = getRequest({
       extension: SystemRepository.Plant.qry,
@@ -721,21 +731,24 @@ const Users = () => {
       parameters:'_filter='
     })
 
-    const rowAccessUserPromise = getRequest({
-      extension: AccessControlRepository.RowAccessUserView.qry,
-      parameters: `_resourceId=${classId}&_userId=${userId}`
-    })
+    const rowAccessUserPromise  = getRequest({
+        extension: AccessControlRepository.RowAccessUserView.qry,
+        parameters: `_resourceId=${classId}&_userId=${userId}`
+      });
+    
 
     let rar = {
       recordId: null,
       name: null,
-      hasAccess: false
+      hasAccess: false,
+      classId: null
     }
+
 
     Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise,rowAccessUserPromise]).then(
       ([cashAccountRequest, plantRequest, salesPersonRequest,rowAccessUser]) => {
         //Plant
-        if (classId == 20110 || classId == 'undefined') {
+        if (classId == 20110 || classId === 'undefined') {
           // Use map to transform each item in res.list
           rar = plantRequest.list.map(item => {
             // Create a new object for each item
@@ -772,19 +785,22 @@ const Users = () => {
             }
           })
         }
-        console.log('rowAccessUser ',classId,' ',rowAccessUser.list)
-
+       
+        console.log('rowAccessUser list ',rowAccessUser.list)
+        if(classId !== 'undefined'){
         for (let i = 0; i < rar.length; i++) {
           let rowId = rar[i].recordId;
           rowAccessUser.list.forEach(storedItem => {
               let storedId = storedItem.recordId.toString();
-              if (storedId === rowId) {
+              if (storedId == rowId) {
                 rar[i].hasAccess = true;
               }
           });
       }
-        setRowGridData(rar)
-        console.log('storeee ', rowGridData)
+        
+      let resultObject = { list: rar };
+      setRowGridData(resultObject)
+    }
       }
     )
   }
@@ -808,6 +824,7 @@ const Users = () => {
         fillUserTypeStore()
         fillLanguageStore()
         fillNotificationGrpStore()
+        getRowAccessGridData(20110)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
