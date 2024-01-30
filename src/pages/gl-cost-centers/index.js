@@ -32,6 +32,7 @@ const CostCenter = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [gridData ,setGridData]=useState([]);
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -48,7 +49,7 @@ const CostCenter = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: GeneralLedgerRepository.CostCenter.page,
+    endpointId: GeneralLedgerRepository.CostCenterGroup.page,
     datasetId: ResourceIds.CostCenter
   })
 
@@ -92,8 +93,36 @@ const CostCenter = () => {
     toast.success('Record Deleted Successfully')
   }
 
-
+  const [searchValue, setSearchValue] = useState("")
   
+  const search = inp => {
+    setSearchValue(inp)
+    console.log('inp' + inp)
+    setGridData({count : 0, list: [] , message :"",  statusId:1})
+     const input = inp
+     console.log({list: []})
+
+     if(input){
+    var parameters = `_size=30&_startAt=0&_filter=${input}&_category=1`
+
+    getRequest({
+      extension: GeneralLedgerRepository.CostCenter.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+
+    }else{
+
+      setGridData({count : 0, list: [] , message :"",  statusId:1})
+    }
+
+  }
+
 
 
   
@@ -101,10 +130,10 @@ const CostCenter = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access}/>
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} labels={_labels}  inputSearch={true}/>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={searchValue.length > 0 ? gridData : data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
@@ -124,6 +153,22 @@ const CostCenter = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
+          onSubmit={() => {
+            if(searchValue !== "") {
+              var parameters = `_size=30&_startAt=0&_filter=${searchValue}&_category=1`
+
+              getRequest({
+                extension: GeneralLedgerRepository.CostCenter.snapshot,
+                parameters: parameters
+              })
+                .then(res => {
+                  setGridData(res)
+                })
+                .catch(error => {
+                  setErrorMessage(error)
+                })
+            }
+          }}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

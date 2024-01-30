@@ -17,7 +17,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 
-export default function CostCenterForm({ labels, maxAccess, recordId }) {
+export default function CostCenterForm({ labels, maxAccess, recordId,onSubmit }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
     
@@ -60,6 +60,7 @@ export default function CostCenterForm({ labels, maxAccess, recordId }) {
               ...obj, // Spread the existing properties
               recordId: response.recordId, // Update only the recordId field
             });
+            onSubmit()
           }
           else toast.success('Record Edited Successfully')
           setEditMode(true)

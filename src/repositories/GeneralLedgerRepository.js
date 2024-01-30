@@ -13,7 +13,8 @@ export const GeneralLedgerRepository = {
       qry: service + 'qryCC',
       get: service + 'getCC',
       set: service + 'setCC',
-      del: service + 'delCC'
+      del: service + 'delCC',
+      snapshot : service + "snapshotCC",
     },
     IntegrationPostTypes: {
       page:   service + 'pageIPT', 
@@ -34,7 +35,8 @@ export const GeneralLedgerRepository = {
       qry: service + 'qryCCG',
       get: service + 'getCCG',
       set: service + 'setCCG',
-      del: service + 'delCCG'
+      del: service + 'delCCG',
+      
     },
 
 

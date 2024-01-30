@@ -7,7 +7,8 @@ const CostCenterWindow = ({
   onClose,
   labels,
   maxAccess,
-  recordId
+  recordId,
+  onSubmit
 }) => {
   
   return (
@@ -24,6 +25,7 @@ const CostCenterWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
+          onSubmit={onSubmit}
         />
        
       </CustomTabPanel>
