@@ -17,6 +17,7 @@ const Confirmation=({
     labels,
     formik,
     editMode,
+    setErrorMessage,
     idTypeStore,
     maxAccess
 }) =>{
