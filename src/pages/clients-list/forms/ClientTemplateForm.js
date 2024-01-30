@@ -74,7 +74,7 @@ const ClientTemplateForm = ({
     reference: "",
     clientId: "",
     expiryDate: null,
-    issusDate: null,
+    issueDate: null,
     idCountry: "",
     idCity: "",
     idNo: "",
@@ -217,9 +217,9 @@ const ClientTemplateForm = ({
           clientId: obj.clientIDView.clientId,
           expiryDate:
             formatDateFromApi(obj.clientIDView.idExpiryDate),
-          issusDate:
-            obj.clientIDView.idIssusDate &&
-            formatDateFromApi(obj.clientIDView.idIssusDate),
+          issueDate:
+            obj.clientIDView.idIssueDate &&
+            formatDateFromApi(obj.clientIDView.idIssueDate),
           idCountry: obj.clientIDView.idCountryId,
           idCity: obj.clientIDView.idCityId,
           idNo: obj.clientIDView.idNo,
@@ -441,7 +441,7 @@ const ClientTemplateForm = ({
       cellPhone: obj.cellPhone,
       createdDate: formatDateToApiFunction(date.toISOString()),
       expiryDate: formatDateToApiFunction(obj.expiryDate),
-      issusDate: formatDateToApiFunction(obj.issusDate),// test
+      issueDate: formatDateToApiFunction(obj.issueDate),// test
 
       OTPVerified: obj.OTPVerified,
       plantName: obj.plantName,
@@ -460,7 +460,7 @@ const ClientTemplateForm = ({
       idCountryId: obj.idCountry,
       idtId: obj.idtId, //5
       idExpiryDate: formatDateToApiFunction(obj.expiryDate),
-      idIssusDate: formatDateToApiFunction(obj.issusDate),
+      idIssueDate: formatDateToApiFunction(obj.issueDate),
       idCityId: obj.idCity,
       isDiplomat: obj.isDiplomat,
     };
@@ -827,23 +827,23 @@ console.log(clientIndividualFormik)
 
                   <Grid item xs={12}>
                     <CustomDatePicker
-                      name="issusDate"
-                      label={_labels.issusDate}
-                      value={clientIndividualFormik.values?.issusDate}
+                      name="issueDate"
+                      label={_labels.issueDate}
+                      value={clientIndividualFormik.values?.issueDate}
                       readOnly={editMode && true}
                       required={true}
                       onChange={clientIndividualFormik.setFieldValue}
                       onClear={() =>
-                        clientIndividualFormik.setFieldValue("issusDate", "")
+                        clientIndividualFormik.setFieldValue("issueDate", "")
                       }
                       disabledDate={!editMode && ">"}
                       error={
-                        clientIndividualFormik.touched.issusDate &&
-                        Boolean(clientIndividualFormik.errors.issusDate)
+                        clientIndividualFormik.touched.issueDate &&
+                        Boolean(clientIndividualFormik.errors.issueDate)
                       }
                       helperText={
-                        clientIndividualFormik.touched.issusDate &&
-                        clientIndividualFormik.errors.issusDate
+                        clientIndividualFormik.touched.issueDate &&
+                        clientIndividualFormik.errors.issueDate
                       }
                       maxAccess={maxAccess}
                     />
@@ -967,7 +967,8 @@ console.log(clientIndividualFormik)
                   >
                     <CustomTextField
                       name="cellPhone"
-                      type={showAsPasswordPhone && "password"}
+
+                      type={showAsPasswordPhone &&  clientIndividualFormik.values?.cellPhone && "password"}
                       phone={true}
                       label={_labels.cellPhone}
                       value={clientIndividualFormik.values?.cellPhone}
@@ -1005,7 +1006,8 @@ console.log(clientIndividualFormik)
                   >
                     <CustomTextField
                       name="cellPhoneRepeat"
-                      type={showAsPasswordPhoneRepeat && "password"}
+
+                      type={showAsPasswordPhoneRepeat && clientIndividualFormik.values?.cellPhoneRepeat && "password"}
                       label={_labels.confirmCell}
                       value={clientIndividualFormik.values?.cellPhoneRepeat}
                       phone={true}
