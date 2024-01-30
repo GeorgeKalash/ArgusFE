@@ -117,7 +117,10 @@ const TabsProvider = ({ children }) => {
     setClosing(true);
     const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
     const lastValue = activeTabs.length;
+    
+    if(router.asPath!=tabRoute){
 
+    }
     if (lastValue === 1) {
       setLength(0);
       router.push('/default');
@@ -138,9 +141,9 @@ const TabsProvider = ({ children }) => {
 
         if (newTabs.length === 1 && index === 0) {
           router.push(newTabs[0].route);
-        }
-  
-        return newTabs;
+
+          return newTabs;
+        }else return prevState.filter((tab) => tab.route !== tabRoute);
       });
     }
   };
@@ -172,8 +175,7 @@ const TabsProvider = ({ children }) => {
                 label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, '')),
               },
             ];
-  
-            // Check if there are only 2 tabs and the new tab is being opened
+
             if (newTabs.length === 2) {
               router.push(newTabs[1].route);
             }
