@@ -100,7 +100,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
                     value={formik.values.reference}
                     required
                     maxAccess={maxAccess}
-                    maxLength='30'
+                    maxLength='10'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -113,6 +113,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
                     label={labels.name}
                     value={formik.values.name}
                     required
+                    maxLength='50'
                     rows={2}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
