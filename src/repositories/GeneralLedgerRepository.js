@@ -9,7 +9,11 @@ export const GeneralLedgerRepository = {
 
     //CostCenter
     CostCenter: {
-        qry: service + 'qryCC',
+      page:   service + 'pageCC', 
+      qry: service + 'qryCC',
+      get: service + 'getCC',
+      set: service + 'setCC',
+      del: service + 'delCC'
     },
     IntegrationPostTypes: {
       page:   service + 'pageIPT', 
