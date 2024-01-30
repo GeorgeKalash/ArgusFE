@@ -117,7 +117,7 @@ const TabsProvider = ({ children }) => {
     setClosing(true);
     const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
     const lastValue = activeTabs.length;
-  
+
     if (lastValue === 1) {
       setLength(0);
       router.push('/default');
@@ -132,11 +132,10 @@ const TabsProvider = ({ children }) => {
       } else if (value === lastValue - 1) {
         setValue(lastValue - 2);
       }
-  
+      
       setActiveTabs((prevState) => {
         const newTabs = prevState.filter((tab) => tab.route !== tabRoute);
-  
-        // Check if there are only 2 tabs and the first one is being closed
+
         if (newTabs.length === 1 && index === 0) {
           router.push(newTabs[0].route);
         }
@@ -145,12 +144,11 @@ const TabsProvider = ({ children }) => {
       });
     }
   };
-  
 
   useEffect(() => {
-    if (length === 0) {
-      setActiveTabs([]);
-      setLength(1);
+    if(length === 0){
+      setActiveTabs([])
+      setLength(1)
     } else {
       if (initialLoadDone && router.asPath !== '/default') {
         const isTabOpen = activeTabs.some((activeTab, index) => {
@@ -159,13 +157,12 @@ const TabsProvider = ({ children }) => {
 
             return true;
           }
-          
+
           return false;
-        });
-  
-        if (isTabOpen) return;
+        })
+        if (isTabOpen) return
         else {
-          const newValueState = activeTabs.length;
+          const newValueState = activeTabs.length
           setActiveTabs((prevState) => {
             const newTabs = [
               ...prevState,
