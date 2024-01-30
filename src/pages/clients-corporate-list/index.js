@@ -413,8 +413,8 @@ const ClientsCorporateList = () => {
         maxAccess: access
       },
       width: 1100,
-      height: 400,
-      title: _labels.pageTitle
+      height: 500,
+      title: _labels.clientCorporate
     })
   }
 

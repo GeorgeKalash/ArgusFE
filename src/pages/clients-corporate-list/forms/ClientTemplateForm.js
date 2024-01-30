@@ -312,7 +312,7 @@ const ClientTemplateForm = ({
   return (
     <FormShell
       form={formik}
-      height={600}
+      height={500}
       resourceId={ResourceIds.ClientCorporate}
       maxAccess={maxAccess}
       recordId={recordId}
