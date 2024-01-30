@@ -115,7 +115,7 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
                     maxLength='50'
 
                     required
-                    rows={2}
+                    
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
