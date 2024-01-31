@@ -21,6 +21,7 @@ import CostCenterWindow from './Window/CostCenterWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
+
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
@@ -56,6 +57,14 @@ const CostCenter = () => {
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.CostCenter.page
   })
+
+
+  const [searchValue, setSearchValue] = useState("")
+
+  function onSearchClear() {
+    setSearchValue('')
+
+  }
 
   const columns = [
     {
@@ -93,11 +102,10 @@ const CostCenter = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  const [searchValue, setSearchValue] = useState("")
+ 
   
   const search = inp => {
-    setSearchValue(inp)
-    
+    setSearchValue(inp)    
     setGridData({count : 0, list: [] , message :"",  statusId:1})
      const input = inp
      
@@ -120,17 +128,15 @@ const CostCenter = () => {
 
       setGridData({count : 0, list: [] , message :"",  statusId:1})
     }
-
+    
   }
-
-
 
   
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} labels={_labels}  inputSearch={true}/>
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={onSearchClear} labels={_labels}  inputSearch={true}/>
         <Table
           columns={columns}
           gridData={searchValue.length > 0 ? gridData : data}
@@ -166,8 +172,10 @@ const CostCenter = () => {
                 .catch(error => {
                   setErrorMessage(error)
                 })
+                
             }
-          }}
+          }
+        }
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
