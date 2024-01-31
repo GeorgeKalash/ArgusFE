@@ -8,7 +8,7 @@ const formatDateFromApi = (date) => {
 
     const timestamp = date && parseInt(date.match(/\d+/)[0], 10);
 
-    return dayjs(timestamp)
+    return timestamp
 }
 
 const formatDateToApi = (date) => {
