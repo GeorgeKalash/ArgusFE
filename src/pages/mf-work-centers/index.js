@@ -41,7 +41,7 @@ const WorkCenter = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: ManufacturingRepository.McExchangeMap.page,
+      extension: ManufacturingRepository.WorkCenter.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -52,28 +52,48 @@ const WorkCenter = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.McExchangeMap.page,
+    endpointId: ManufacturingRepository.WorkCenter.page,
     datasetId: ResourceIds.WorkCenters
   })
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.McExchangeMap.page
+    endpointId: ManufacturingRepository.WorkCenter.page
   })
 
   const columns = [
     {
-      field: 'currencyName',
-      headerName: _labels.currency,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'rateTypeName',
-      headerName: _labels.rateType,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'exName',
-      headerName: _labels.exchange,
+      field: 'siteName',
+      headerName: _labels.sitename,
+      flex: 1
+    },
+    {
+      field: 'siteRef',
+      headerName: _labels.siteRef,
+      flex: 1
+    },
+    {
+      field: 'plantName',
+      headerName: _labels.plantName,
+      flex: 1
+    },
+    {
+      field: 'supervisorName',
+      headerName: _labels.supervisor,
+      flex: 1
+    },
+    {
+      field: 'lineRef',
+      headerName: _labels.productionLine,
       flex: 1
     }
   ]
@@ -94,7 +114,7 @@ const WorkCenter = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.McExchangeMap.del,
+      extension: ManufacturingRepository.WorkCenter.del,
       record: JSON.stringify(obj)
     })
     invalidate()
