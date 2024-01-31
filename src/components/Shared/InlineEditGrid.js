@@ -12,8 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { formatDateFromApi, formatDateToApi, formatDateDefault } from 'src/lib/date-helper'
-import dayjs from 'dayjs'
+import { formatDateFromApi, formatDateDefault } from 'src/lib/date-helper'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const CustomPaper = (props, widthDropDown) => {
