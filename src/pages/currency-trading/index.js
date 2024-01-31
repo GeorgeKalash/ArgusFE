@@ -1,4 +1,4 @@
-import { Box, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -6,7 +6,7 @@ import TransactionForm from './forms/TransactionForm'
 import { useWindow } from 'src/windows'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-import { formatDateDefault } from 'src/lib/date-helper'
+import { formatDateFromApi } from 'src/lib/date-helper'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -57,13 +57,12 @@ export default function CurrencyTrading() {
                 flex: 1
               },
               ,
-              
-              // {
-              //   field: 'createdDate',
-              //   headerName: labels.date,
-              //   flex: 1,
-              //   valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
-              // },
+              {
+                field: 'createdDate',
+                headerName: labels.date,
+                flex: 1,
+                valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
+              },
               {
                 field: 'clientName',
                 headerName: labels.name,

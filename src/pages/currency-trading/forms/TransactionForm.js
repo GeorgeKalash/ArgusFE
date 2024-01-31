@@ -10,7 +10,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
-import { formatDateDefault, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -143,7 +143,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           reference: record.headerView.reference,
           rows: record.items,
           clientType: record.clientMaster.category,
-          date: dayjs(formatDateDefault(record.headerView.date)),
+          date: dayjs(formatDateFromApi(record.headerView.date)),
           clientId: record.clientIndividual.clientID,
           firstName: record.clientIndividual.firstName,
           lastName: record.clientIndividual.lastName,
@@ -153,7 +153,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           fl_lastName: record.clientIndividual.fl_lastName,
           fl_middleName: record.clientIndividual.fl_middleName,
           fl_familyName: record.clientIndividual.fl_familyName,
-          birth_date: dayjs(formatDateDefault(record.clientIndividual.birthDate)),
+          birth_date: dayjs(formatDateFromApi(record.clientIndividual.birthDate)),
           resident: record.clientIndividual.isResident,
           profession: record.clientIndividual.professionId,
           source_of_income: record.clientIndividual.incomeSourceId,
@@ -161,7 +161,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           id_number: record.clientIDView.idNo,
           issue_country: record.clientIDView.idCountryId,
           id_type: record.clientIDView.idtId,
-          expiry_date: dayjs(formatDateDefault(record.clientIDView.idExpiryDate)),
+          expiry_date: dayjs(formatDateFromApi(record.clientIDView.idExpiryDate)),
           remarks: record.headerView.notes,
           purpose_of_exchange: record.headerView.poeId,
           nationality: record.clientMaster.nationalityId,
@@ -220,7 +220,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     const payload = {
       header: {
         dtId,
-        reference: null,
+        reference: values.reference,
         status: values.status,
         date: formatDateToApiFunction(values.date),
         functionId,
