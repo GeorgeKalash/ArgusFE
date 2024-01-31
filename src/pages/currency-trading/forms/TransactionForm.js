@@ -2,6 +2,7 @@ import { Checkbox, FormControlLabel, Grid, Radio, RadioGroup } from '@mui/materi
 import dayjs from 'dayjs'
 import { useFormik } from 'formik'
 import React, { useContext, useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -71,10 +72,12 @@ function useLookup({ endpointId, parameters }) {
 
 export default function TransactionForm({ recordId, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const [editMode, setEditMode] = useState(!!recordId)
 
   const { stack: stackError } = useError()
 
   const [initialValues, setInitialValues] = useState({
+    recordId: null,
     reference: '',
     status: '1',
     type: -1,
@@ -100,15 +103,16 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     validateOnChange: false,
     validateOnBlur: false,
     validationSchema: yup.object({
-      // reference: yup.string(),
-      // date: yup.date().required(),
-      // status: yup.string().required(),
-      // type: yup.number().required(),
-      // birth_date: yup.date().required(),
-      // firstName: yup.string().required(),
-      // middleName: yup.string().required(),
-      // lastName: yup.string().required(),
-      // familyName: yup.string().required()
+      date: yup.date().required(),
+      id_type: yup.number().required(),
+      id_number: yup.number().required(),
+      birth_date: yup.date().required(),
+      firstName: yup.string().required(),
+      lastName: yup.string().required(),
+      expiry_date: yup.string().required(),
+      issue_country: yup.string().required(),
+      nationality: yup.string().required(),
+      cell_phone: yup.string().required()
     }),
     initialValues,
     onSubmit
@@ -140,6 +144,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
         })
 
         setInitialValues({
+          recordId: recordId,
           reference: record.headerView.reference,
           rows: record.items,
           clientType: record.clientMaster.category,
@@ -283,23 +288,32 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
       }
     }
 
-    await postRequest({
+    const response = await postRequest({
       extension: 'CTTRX.asmx/set2CIV',
       record: JSON.stringify(payload)
     })
+
+    if (!values.recordId) {
+      toast.success('Record Added Successfully')
+      setInitialValues({
+        ...values, // Spread the existing properties
+        recordId: response.recordId // Update only the recordId field
+      })
+    } else toast.success('Record Edited Successfully')
+    setEditMode(true)
   }
 
   return (
-    <FormShell form={formik} height={400}>
+    <FormShell form={formik} height={500} resourceId={35208} editMode={editMode}>
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
           <FieldSet title='Transaction'>
             <Grid container spacing={4}>
               <Grid item xs={4}>
-                <FormField name='reference' Component={CustomTextField} disabled />
+                <FormField name='reference' Component={CustomTextField} readOnly />
               </Grid>
               <Grid item xs={4}>
-                <FormField name='date' Component={CustomDatePicker} />
+                <FormField name='date' Component={CustomDatePicker} required readOnly={editMode} />
               </Grid>
               <Grid item xs={4}>
                 <FormField
@@ -308,7 +322,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   displayField='value'
                   valueField='key'
                   datasetId={7}
-                  disabled
+                  readOnly
                 />
               </Grid>
               <Grid item xs={4}>
@@ -336,109 +350,106 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   firstValue={valueOf(formik.values.clientId)}
                   secondDisplayField={false}
                   onLookup={lookup}
+                  readOnly={editMode}
                 />
               </Grid>
             </Grid>
           </FieldSet>
-          <FieldSet title='Operations'>
-            <Grid item xs={12}>
-              {type ? (
-                <>
-                  <InlineEditGrid
-                    maxAccess={maxAccess}
-                    gridValidation={formik}
-                    scrollHeight={350}
-                    width={750}
-                    columns={[
-                      {
-                        field: 'incremented',
-                        header: 'SL#',
-                        name: 'seqNo',
-                        readOnly: true,
-                        valueSetter: () => {
-                          return formik.values.rows.length + 1
-                        }
-                      },
-                      {
-                        field: 'combobox',
-                        valueField: 'recordId',
-                        displayField: 'reference',
-                        header: 'Currency',
-                        name: 'currencyId',
-                        store: currencyStore,
-                        columnsInDropDown: [{ key: 'reference', value: 'Symbol' }],
-                        async onChange(row) {
-                          const exchange = await fetchRate({
-                            currencyId: row.newValue
-                          })
+          <Grid item xs={12}>
+            <InlineEditGrid
+              maxAccess={maxAccess}
+              gridValidation={formik}
+              scrollHeight={350}
+              width={750}
+              columns={[
+                {
+                  field: 'incremented',
+                  header: 'SL#',
+                  name: 'seqNo',
+                  readOnly: true,
+                  valueSetter: () => {
+                    return formik.values.rows.length + 1
+                  }
+                },
+                {
+                  field: 'combobox',
+                  valueField: 'recordId',
+                  displayField: 'reference',
+                  header: 'Currency',
+                  name: 'currencyId',
+                  store: currencyStore,
+                  widthDropDown: '300',
+                  columnsInDropDown: [
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ],
+                  async onChange(row) {
+                    const exchange = await fetchRate({
+                      currencyId: row.newValue
+                    })
 
-                          if (!exchange?.exchangeRate?.rate) {
-                            stackError({
-                              message: `Rate not defined for ${row.value}.`
-                            })
+                    if (!exchange?.exchangeRate?.rate) {
+                      stackError({
+                        message: `Rate not defined for ${row.value}.`
+                      })
 
-                            return
-                          }
-                          formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-                          formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange.exchangeRate.rate)
-                          formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange.exchange.rateCalcMethod)
-                          row.rowData.currencyId = row.newValue
-                          row.rowData.exRate = exchange.exchangeRate.rate
-                          row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
-                        }
-                      },
-                      {
-                        field: 'numberfield',
-                        header: 'FC Amount',
-                        name: 'fcAmount',
-                        async onChange(e) {
-                          const {
-                            rowIndex,
-                            rowData: { exRate, rateCalcMethod },
-                            newValue
-                          } = e
+                      return
+                    }
+                    formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
+                    formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange.exchangeRate.rate)
+                    formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange.exchange.rateCalcMethod)
+                    row.rowData.currencyId = row.newValue
+                    row.rowData.exRate = exchange.exchangeRate.rate
+                    row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
+                  }
+                },
+                {
+                  field: 'numberfield',
+                  header: 'FC Amount',
+                  name: 'fcAmount',
+                  async onChange(e) {
+                    const {
+                      rowIndex,
+                      rowData: { exRate, rateCalcMethod },
+                      newValue
+                    } = e
 
-                          const lcAmount =
-                            rateCalcMethod === 1
-                              ? parseInt(newValue) * exRate
-                              : rateCalcMethod === 2
-                              ? newValue / exRate
-                              : 0
-                          formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
-                          e.rowData.lcAmount = lcAmount
-                        }
-                      },
-                      {
-                        field: 'textfield',
-                        header: 'Rate',
-                        name: 'exRate',
-                        readOnly: true
-                      },
-                      {
-                        field: 'numberfield',
-                        header: 'LC Amount',
-                        name: 'lcAmount',
-                        readOnly: true
-                      }
-                    ]}
-                    defaultRow={{
-                      seqNo: 0,
-                      currencyId: '',
-                      fcAmount: 0,
-                      exRate: 0,
-                      lcAmount: 0
-                    }}
-                  />
-                </>
-              ) : (
-                'Type not specified. Please choose Sale or Purchase.'
-              )}
-            </Grid>
-          </FieldSet>
+                    const lcAmount =
+                      rateCalcMethod === 1
+                        ? parseFloat(newValue.replace(/,/g, '')) * exRate
+                        : rateCalcMethod === 2
+                        ? parseFloat(newValue.replace(/,/g, '')) / exRate
+                        : 0
+                    formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
+                    e.rowData.lcAmount = lcAmount
+                  }
+                },
+                {
+                  field: 'textfield',
+                  header: 'Rate',
+                  name: 'exRate',
+                  readOnly: true
+                },
+                {
+                  field: 'numberfield',
+                  header: 'LC Amount',
+                  name: 'lcAmount',
+                  readOnly: true
+                }
+              ]}
+              defaultRow={{
+                seqNo: 0,
+                currencyId: '',
+                fcAmount: 0,
+                exRate: 0,
+                lcAmount: 0
+              }}
+            />
+          </Grid>
           <FieldSet title='Individual'>
             <Grid container spacing={4}>
               <Grid item xs={2}>
-                <FormField name='id_number' Component={CustomTextField} />
+                <FormField name='id_number' Component={CustomTextField} readOnly={editMode} required />
               </Grid>
               <Grid item xs={2}>
                 {/* <Button
@@ -466,34 +477,34 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                 </Button> */}
               </Grid>
               <Grid item xs={2}>
-                <FormField name='firstName' Component={CustomTextField} />
+                <FormField name='firstName' Component={CustomTextField} readOnly={editMode} required />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='middleName' Component={CustomTextField} />
+                <FormField name='middleName' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='lastName' Component={CustomTextField} />
+                <FormField name='lastName' Component={CustomTextField} readOnly={editMode} required />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='familyName' Component={CustomTextField} />
+                <FormField name='familyName' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='birth_date' Component={CustomDatePicker} />
+                <FormField name='birth_date' Component={CustomDatePicker} readOnly={editMode} required />
               </Grid>
               <Grid item xs={2}>
                 {/* <FormField name='birth_date' Component={CustomDatePicker} /> */}
               </Grid>
               <Grid item xs={2}>
-                <FormField name='fl_firstName' Component={CustomTextField} />
+                <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='fl_middleName' Component={CustomTextField} />
+                <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='fl_lastName' Component={CustomTextField} />
+                <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='fl_familyName' Component={CustomTextField} />
+                <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <Grid item xs={2}>
                 <FormField
@@ -502,6 +513,8 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                   valueField='recordId'
                   displayField='name'
+                  readOnly={editMode}
+                  required
                 />
               </Grid>
               <Grid item xs={2}>
@@ -510,10 +523,10 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
               </Grid>
               <Grid item xs={2} />
               <Grid item xs={6}>
-                <FormField name='sponsor' Component={CustomTextField} />
+                <FormField name='sponsor' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='expiry_date' Component={CustomDatePicker} />
+                <FormField name='expiry_date' Component={CustomDatePicker} readOnly={editMode} required />
               </Grid>
               <Grid item xs={2}>
                 {/* <FormField name='expiry_date' Component={CustomDatePicker} /> */}
@@ -525,7 +538,12 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   Component={ResourceComboBox}
                   endpointId={'CTSET.asmx/qryPEX'}
                   valueField='recordId'
-                  displayField='name'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={editMode}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -534,7 +552,14 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   Component={ResourceComboBox}
                   endpointId={SystemRepository.Country.qry}
                   valueField='recordId'
-                  displayField='name'
+                  displayField={['reference', 'name', 'flName']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
+                  ]}
+                  readOnly={editMode}
+                  required
                 />
               </Grid>
               <Grid item xs={2} />
@@ -544,7 +569,12 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   Component={ResourceComboBox}
                   endpointId={'RTSET.asmx/qrySI'}
                   valueField='recordId'
-                  displayField='name'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={editMode}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -553,7 +583,14 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   Component={ResourceComboBox}
                   endpointId={SystemRepository.Country.qry}
                   valueField='recordId'
-                  displayField='name'
+                  displayField={['reference', 'name', 'flName']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
+                  ]}
+                  readOnly={editMode}
+                  required
                 />
               </Grid>
               <Grid item xs={2} />
@@ -563,15 +600,20 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   Component={ResourceComboBox}
                   endpointId={'RTSET.asmx/qryPFN'}
                   valueField='recordId'
-                  displayField='name'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={editMode}
                 />
               </Grid>
               <Grid item xs={4}>
-                <FormField name='cell_phone' Component={CustomTextField} />
+                <FormField name='cell_phone' Component={CustomTextField} readOnly={editMode} required />
               </Grid>
               <Grid item xs={2} />
               <Grid item xs={6}>
-                <FormField name='remarks' Component={CustomTextField} />
+                <FormField name='remarks' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <Grid item xs={2}>
                 <FormControlLabel
@@ -580,6 +622,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   onChange={formik.handleChange}
                   control={<Checkbox defaultChecked />}
                   label='Resident'
+                  readOnly={editMode}
                 />
               </Grid>
             </Grid>
