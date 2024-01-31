@@ -14,6 +14,7 @@ import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { formatDateFromApi, formatDateToApi, formatDateDefault } from 'src/lib/date-helper'
 import dayjs from 'dayjs'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
@@ -116,14 +117,15 @@ const InlineEditGrid = ({
         case 'datePicker':
 
 return (
-            <LocalizationProvider dateAdapter={AdapterDayjs} >
+            <LocalizationProvider dateAdapter={AdapterDateFns} >
              <DatePicker
              id={cellId}
              name={fieldName}
-             value={dayjs(gridValidation.values.rows[rowIndex][fieldName]).startOf('day')}
+
+              value={formatDateFromApi(gridValidation.values.rows[rowIndex][fieldName])}
              required={column?.mandatory}
              readOnly={column?.readOnly}
-             inputFormat={dateFormat}
+             format={dateFormat}
              onChange={(newDate ) => {
 
               if (newDate) {
@@ -131,7 +133,7 @@ return (
 
                 const dateWithoutTime = new Date(newDate.valueOf());
                 dateWithoutTime.setHours(0, 0, 0, 0);
-
+console.log(formatDateDefault(dateWithoutTime))
                 gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, formatDateDefault(dateWithoutTime));
               } else {
                 gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0');
@@ -149,7 +151,7 @@ return (
                 <>
                   {gridValidation.values.rows[rowIndex][fieldName] && (
                     <InputAdornment>
-                      <IconButton onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
+                      <IconButton onClick={() => gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0')}>
                         <ClearIcon />
                       </IconButton>
                     </InputAdornment>
