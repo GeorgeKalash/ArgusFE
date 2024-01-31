@@ -22,7 +22,7 @@ export const ResourceIds = {
   CityDistrict: 20206,
   TransactionLog: 20100,
   Address: 20102,
-  GLAccountGroups : 30103,
+  GLAccountGroups: 30103,
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
   SourceOfIncome: 36117,
@@ -63,5 +63,6 @@ export const ResourceIds = {
   Description_Template: 31110,
   Expense_Types: 31105,
   CtExchangeRates: 35113,
+  MultiCurrencyMapping: 32102,
   ClientRelation: 36202
 }
