@@ -49,7 +49,7 @@ const CostCenter = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: GeneralLedgerRepository.CostCenterGroup.page,
+    endpointId: GeneralLedgerRepository.CostCenter.page,
     datasetId: ResourceIds.CostCenter
   })
 
@@ -152,7 +152,6 @@ const CostCenter = () => {
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
           onSubmit={() => {
             if(searchValue !== "") {
               var parameters = `_size=30&_startAt=0&_filter=${searchValue}&_category=1`
