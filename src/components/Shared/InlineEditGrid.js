@@ -19,6 +19,7 @@ import dayjs from 'dayjs'
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
 }
+
 const dateFormat =
   typeof window !== 'undefined' &&
   window.localStorage.getItem('default') &&
@@ -421,48 +422,6 @@ const InlineEditGrid = ({
               column.columnsInDropDown.length > 0 &&
               CustomPaper(props, column.widthDropDown)
             }
-            renderOption={(props, option) => (
-              <Box>
-                {props.id.endsWith('-0') && (
-                  <li className={props.className}>
-                    <Box sx={{ flex: 1, fontWeight: 'bold' }}>{column.displayField.toUpperCase()}</Box>
-                  </li>
-                )}
-                <li {...props}>
-                  <Box sx={{ flex: 1 }}>{option[column.displayField]}</Box>
-                </li>
-              </Box>
-            )}
-            //   renderOption={(props, option) => {
-            //     console.log(option.columnsInDropDown + "column.store-2")
-            //     // if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
-            //       return (
-            //         <Box>
-            //           {props.id.endsWith('-0') && (
-            //             <li className={props.className}>
-            //               {column.columnsInDropDown.map((header, i) => {
-            //                 return (
-            //                   <Box key={i} sx={{ flex: 1 }}>
-            //                     {header.value.toUpperCase()}
-            //                   </Box>
-            //                 )
-            //               })}
-            //             </li>
-            //           )}
-            //           <li {...props}>
-            //             {column.columnsInDropDown.map((header, i) => {
-            //               return (
-            //                 <Box key={i} sx={{ flex: 1 }}>
-            //                   {option[header.key]}
-            //                 </Box>
-            //               )
-            //             })}
-            //           </li>
-            //         </Box>
-            //       )
-            //   }
-
-            // }
             fullWidth={true}
             renderInput={params => (
               <TextField
