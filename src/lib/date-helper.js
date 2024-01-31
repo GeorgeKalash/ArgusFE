@@ -12,10 +12,20 @@ return timestamp
 }
 
 const formatDateFromApiInline = (date) => {
-  const currentDate = new Date(date);
-  const timestamp = currentDate.getTime();
+  const [day, month, year] = date.split('/');
+  const parsedDate = new Date(year, month - 1, day);
+  const timestamp = parsedDate.getTime();
 
 return timestamp
+}
+
+const formatDateToApiInline = (date) => {
+
+  const [day, month, year] = date.split('/');
+  const parsedDate = new Date(year, month - 1, day);
+  const timestamp = parsedDate.getTime();
+
+return `/Date(${timestamp})/`
 }
 
 const formatDateToApi = (date) => {
@@ -49,7 +59,9 @@ const   formatDateToApiFunction = (value)=>{
  }
 
  function formatDateDefault(date) {
-  const formats = JSON.parse(window.localStorage.getItem('default') &&  window.localStorage.getItem('default'))
+  const formats = JSON.parse(window.localStorage.getItem('default') &&  window.localStorage.getItem('default'))['dateFormat']
+
+  // JSON.parse(window.localStorage.getItem('default'))['dateFormat']
       const timestamp = date instanceof Date ? date.getTime() : parseInt(date.match(/\d+/)[0], 10);
       const formattedDate=  format(new Date(timestamp), formats);
 
@@ -62,5 +74,6 @@ export {
     formatDateToApi,
     formatDateToApiFunction,
     formatDateDefault,
-    formatDateFromApiInline
+    formatDateFromApiInline,
+    formatDateToApiInline
 }
