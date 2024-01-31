@@ -10,7 +10,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
-import { formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateDefault, formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -133,16 +133,42 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
         parameters: '_filter='
       })
 
-      // if (recordId) {
-      //   const res = await getRequest({
-      //     extension: 'CTTRX.asmx/get2CIV',
-      //     parameters: `_recordId=${recordId}`
-      //   })
+      if (recordId) {
+        const { record } = await getRequest({
+          extension: 'CTTRX.asmx/get2CIV',
+          parameters: `_recordId=${recordId}`
+        })
 
-      //   setInitialValues({
-
-      //   })
-      // }
+        setInitialValues({
+          reference: record.headerView.reference,
+          rows: record.items,
+          clientType: record.clientMaster.category,
+          date: dayjs(formatDateDefault(record.headerView.date)),
+          clientId: record.clientIndividual.clientID,
+          firstName: record.clientIndividual.firstName,
+          lastName: record.clientIndividual.lastName,
+          middleName: record.clientIndividual.middleName,
+          familyName: record.clientIndividual.familyName,
+          fl_firstName: record.clientIndividual.fl_firstName,
+          fl_lastName: record.clientIndividual.fl_lastName,
+          fl_middleName: record.clientIndividual.fl_middleName,
+          fl_familyName: record.clientIndividual.fl_familyName,
+          birth_date: dayjs(formatDateDefault(record.clientIndividual.birthDate)),
+          resident: record.clientIndividual.isResident,
+          profession: record.clientIndividual.professionId,
+          source_of_income: record.clientIndividual.incomeSourceId,
+          sponsor: record.clientIndividual.sponsorName,
+          id_number: record.clientIDView.idNo,
+          issue_country: record.clientIDView.idCountryId,
+          id_type: record.clientIDView.idtId,
+          expiry_date: dayjs(formatDateDefault(record.clientIDView.idExpiryDate)),
+          remarks: record.headerView.notes,
+          purpose_of_exchange: record.headerView.poeId,
+          nationality: record.clientMaster.nationalityId,
+          cell_phone: record.clientMaster.cellPhone
+        })
+        setType(1)
+      }
 
       setCurrencyStore(response.list)
     })()
@@ -286,7 +312,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                 />
               </Grid>
               <Grid item xs={4}>
-                <RadioGroup row onChange={e => setOperationType(e.target.value)}>
+                <RadioGroup row value={type} onChange={e => setOperationType(e.target.value)}>
                   <FormControlLabel value='purchase' control={<Radio />} label={labels.purchase} disabled={!!type} />
                   <FormControlLabel value='sale' control={<Radio />} label={labels.sale} disabled={!!type} />
                 </RadioGroup>
@@ -350,7 +376,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                             stackError({
                               message: `Rate not defined for ${row.value}.`
                             })
-                            
+
                             return
                           }
                           formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
