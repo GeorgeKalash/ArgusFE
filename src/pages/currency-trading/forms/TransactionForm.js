@@ -69,10 +69,31 @@ function useLookup({ endpointId, parameters }) {
   }
 }
 
-export default function TransactionForm({ labels, maxAccess }) {
+export default function TransactionForm({ recordId, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack: stackError } = useError()
+
+  const [initialValues, setInitialValues] = useState({
+    reference: '',
+    status: '1',
+    type: -1,
+    clientType: 1,
+    clientId: null,
+    wip: 1,
+    rows: [
+      {
+        seqNo: 1,
+        currencyId: '',
+        fcAmount: 0,
+        exRate: 0,
+        lcAmount: 0
+      }
+    ],
+    birth_date: null,
+    expiry_date: null,
+    resident: false
+  })
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -89,26 +110,7 @@ export default function TransactionForm({ labels, maxAccess }) {
       // lastName: yup.string().required(),
       // familyName: yup.string().required()
     }),
-    initialValues: {
-      reference: '',
-      status: '1',
-      type: -1,
-      clientType: 'individual',
-      clientId: '',
-      wip: 1,
-      rows: [
-        {
-          seqNo: 1,
-          currencyId: '',
-          fcAmount: 0,
-          exRate: 0,
-          lcAmount: 0
-        }
-      ],
-      birth_date: null,
-      expiry_date: null,
-      resident: false
-    },
+    initialValues,
     onSubmit
   })
 
@@ -130,6 +132,17 @@ export default function TransactionForm({ labels, maxAccess }) {
         extension: SystemRepository.Currency.qry,
         parameters: '_filter='
       })
+
+      // if (recordId) {
+      //   const res = await getRequest({
+      //     extension: 'CTTRX.asmx/get2CIV',
+      //     parameters: `_recordId=${recordId}`
+      //   })
+
+      //   setInitialValues({
+
+      //   })
+      // }
 
       setCurrencyStore(response.list)
     })()
@@ -174,7 +187,7 @@ export default function TransactionForm({ labels, maxAccess }) {
       parameters: `_userId=${userId}&_key=cashAccountId`
     })
 
-    const clientId = values.clientId ?? null
+    const clientId = values.clientId ?? 0
 
     const payload = {
       header: {
@@ -200,6 +213,7 @@ export default function TransactionForm({ labels, maxAccess }) {
         lcAmount: parseFloat(lcAmount)
       })),
       clientMaster: {
+        category: values.clientType,
         reference: null,
         name: null,
         flName: null,
@@ -277,8 +291,8 @@ export default function TransactionForm({ labels, maxAccess }) {
               </Grid>
               <Grid item xs={4}>
                 <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
-                  <FormControlLabel value='individual' control={<Radio />} label={labels.individual} />
-                  <FormControlLabel value='corporate' control={<Radio />} label={labels.corporate} disabled />
+                  <FormControlLabel value={1} control={<Radio />} label={labels.individual} />
+                  <FormControlLabel value={2} control={<Radio />} label={labels.corporate} disabled />
                 </RadioGroup>
               </Grid>
               <Grid item xs={4}>

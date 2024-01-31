@@ -1,16 +1,30 @@
 import { Box, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Typography } from '@mui/material'
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import TransactionForm from './forms/TransactionForm'
 import { useWindow } from 'src/windows'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
+
+  function openFormWindow(recordId) {
+    stack({
+      Component: TransactionForm,
+      props: {
+        labels,
+        maxAccess: access,
+        recordId
+      },
+      width: 1200,
+      title: 'Cash Invoice'
+    })
+  }
 
   const {
     access,
@@ -34,20 +48,7 @@ export default function CurrencyTrading() {
     <Box>
       {!isLoading && labels && access && (
         <>
-          <GridToolbar
-            onAdd={() =>
-              stack({
-                Component: TransactionForm,
-                props: {
-                  labels,
-                  maxAccess: access
-                },
-                width: 1200,
-                title: 'Cash Invoice'
-              })
-            }
-            maxAccess={access}
-          />
+          <GridToolbar onAdd={() => openFormWindow()} maxAccess={access} />
           <Table
             columns={[
               {
@@ -55,14 +56,15 @@ export default function CurrencyTrading() {
                 headerName: labels.reference,
                 flex: 1
               },
-              {
-                field: 'createdDate',
-                headerName: labels.date,
-                flex: 1
-              },
               ,
+              // {
+              //   field: 'createdDate',
+              //   headerName: labels.date,
+              //   flex: 1,
+              //   valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
+              // },
               {
-                field: 'name',
+                field: 'clientName',
                 headerName: labels.name,
                 flex: 1
               },
@@ -87,6 +89,9 @@ export default function CurrencyTrading() {
                 flex: 1
               }
             ]}
+            onEdit={obj => {
+              openFormWindow(obj.recordId)
+            }}
             gridData={data}
             rowId={['recordId']}
             isLoading={false}
