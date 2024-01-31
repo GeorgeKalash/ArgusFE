@@ -43,7 +43,6 @@ export default function CurrencyTrading() {
                   maxAccess: access
                 },
                 width: 1200,
-                height: 200,
                 title: 'Cash Invoice'
               })
             }

@@ -1,15 +1,16 @@
-import { Button } from '@mui/material'
 import { Checkbox, FormControlLabel, Grid, Radio, RadioGroup } from '@mui/material'
+import dayjs from 'dayjs'
 import { useFormik } from 'formik'
 import React, { useContext, useEffect, useState } from 'react'
-import CustomCheckbox from 'src/@core/components/custom-checkbox/basic'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FieldSet from 'src/components/Shared/FieldSet'
 import FormShell from 'src/components/Shared/FormShell'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
+import { formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -23,11 +24,19 @@ function FormField({ name, Component, valueField, ...rest }) {
 
   return (
     <Component
-      {...rest}
-      {...{ name, label: labels[name], values: formik.values, value: formik.values[name], error: formik.errors[name] }}
+      {...{
+        ...rest,
+        name,
+        label: labels[name],
+        values: formik.values,
+        value: formik.values[name],
+        error: formik.errors[name],
+        errors: formik.errors
+      }}
       onChange={(e, v) => {
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
       }}
+      form={formik}
     />
   )
 }
@@ -36,80 +45,71 @@ function FormProvider({ formik, maxAccess, labels, children }) {
   return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
 }
 
-export default function TransactionForm({ labels, maxAccess }) {
+function useLookup({ endpointId, parameters }) {
+  const [store, setStore] = useState([])
+
   const { getRequest } = useContext(RequestsContext)
 
-  const { stack } = useError()
+  return {
+    store,
+    lookup(searchQry) {
+      getRequest({
+        extension: endpointId,
+        parameters: new URLSearchParams({ ...parameters, _filter: searchQry })
+      }).then(res => {
+        setStore(res.list)
+      })
+    },
+    valueOf(id) {
+      return store.find(({ recordId }) => recordId === id)
+    },
+    clear() {
+      setStore([])
+    }
+  }
+}
+
+export default function TransactionForm({ labels, maxAccess }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { stack: stackError } = useError()
 
   const formik = useFormik({
     enableReinitialize: true,
-    validateOnChange: true,
+    validateOnChange: false,
+    validateOnBlur: false,
     validationSchema: yup.object({
-      reference: yup.string(),
-      date: yup.date().required(),
-      status: yup.number().required(),
-      type: yup.string().required()
+      // reference: yup.string(),
+      // date: yup.date().required(),
+      // status: yup.string().required(),
+      // type: yup.number().required(),
+      // birth_date: yup.date().required(),
+      // firstName: yup.string().required(),
+      // middleName: yup.string().required(),
+      // lastName: yup.string().required(),
+      // familyName: yup.string().required()
     }),
     initialValues: {
       reference: '',
-      status: 1,
-      date: '',
-      type: '',
+      status: '1',
+      type: -1,
+      clientType: 'individual',
+      clientId: '',
+      wip: 1,
       rows: [
         {
-          sl: 1,
+          seqNo: 1,
           currencyId: '',
           fcAmount: 0,
           exRate: 0,
           lcAmount: 0
         }
-      ]
+      ],
+      birth_date: null,
+      expiry_date: null,
+      resident: false
     },
-    onSubmit(values) {
-      const payload = {
-        header: {
-          dtId: 0,
-          reference: '',
-          status: '',
-          date: new Date(),
-          functionId: 0,
-          plantId: 0,
-          clientId: 0,
-          cashAccountId: 0,
-          poeId: 0,
-          wip: 0,
-          amount: 381.323,
-          notes: values.notes
-        },
-        items: [
-          {
-            cashInvoiceId: 12345,
-            seqNo: 1,
-            type: 2,
-            currencyId: 567,
-            fcAmount: 100.0,
-            exRate: 1.5,
-            rateCalcMethod: 1,
-            lcAmount: 150.0
-          }
-        ],
-        clientIndividual: {
-          idtName: 'Passport',
-          idCityName: 'New York',
-          idCountryName: 'USA'
-        },
-        clientID: {
-          idNo: 'ABCD1234',
-          clientId: 9876,
-          idCountryId: 1,
-          idtId: 123,
-          idExpiryDate: '2024-12-31T00:00:00',
-          idIssueDate: '2020-01-15T00:00:00',
-          idCityId: null,
-          isDiplomat: false
-        }
-      }
-    }
+    onSubmit
   })
 
   const [type, setType] = useState(null)
@@ -135,20 +135,120 @@ export default function TransactionForm({ labels, maxAccess }) {
     })()
   }, [])
 
-  const PLANT_ID = 3
+  const [plantId, setPlantId] = useState(null)
+
+  const { userId } = JSON.parse(window.localStorage.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
+    const { record } = await getRequest({
+      extension: `SY.asmx/getUD`,
+      parameters: `_userId=${userId}&_key=plantId`
+    })
+    setPlantId(record.value)
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeRate.get,
-      parameters: `_plantId=${PLANT_ID}&_currencyId=${currencyId}&_rateTypeId=${type}`
+      parameters: `_plantId=${record.value}&_currencyId=${currencyId}&_rateTypeId=${type}`
     })
     return response.record
   }
 
   const total = formik.values.rows.reduce((acc, { lcAmount }) => acc + lcAmount, 0)
 
+  const { lookup, store, valueOf, clear } = useLookup({
+    endpointId: CurrencyTradingClientRepository.Client.snapshot,
+    parameters: { _category: 1 }
+  })
+
+  async function onSubmit(values) {
+    const functionId = values.type === 1 ? 3502 : 3503
+
+    const { record: recordFunctionId } = await getRequest({
+      extension: `SY.asmx/getUFU`,
+      parameters: `_userId=${userId}&_functionId=${functionId}`
+    })
+
+    const { dtId } = recordFunctionId
+
+    const { record: cashAccountRecord } = await getRequest({
+      extension: `SY.asmx/getUD`,
+      parameters: `_userId=${userId}&_key=cashAccountId`
+    })
+
+    const clientId = values.clientId ?? null
+
+    const payload = {
+      header: {
+        dtId,
+        reference: null,
+        status: values.status,
+        date: formatDateToApiFunction(values.date),
+        functionId,
+        plantId: plantId,
+        clientId,
+        cashAccountId: cashAccountRecord.value,
+        poeId: values.purpose_of_exchange,
+        wip: values.wip,
+        amount: total,
+        notes: values.remarks
+      },
+      items: values.rows.map(({ seqNo, currencyId, exRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
+        seqNo,
+        currencyId,
+        exRate,
+        rateCalcMethod,
+        fcAmount: parseFloat(fcAmount),
+        lcAmount: parseFloat(lcAmount)
+      })),
+      clientMaster: {
+        reference: null,
+        name: null,
+        flName: null,
+        keyword: null,
+        nationalityId: values.nationality,
+        status: 1,
+        addressId: null,
+        cellPhone: values.cell_phone,
+        oldReference: null,
+        otp: null,
+        createdDate: dayjs(),
+        expiryDate: null
+      },
+      clientIndividual: {
+        clientId,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        middleName: values.middleName,
+        familyName: values.familyName,
+        fl_firstName: values.fl_firstName,
+        fl_lastName: values.fl_lastName,
+        fl_middleName: values.fl_middleName,
+        fl_familyName: values.fl_familyName,
+        birthDate: formatDateToApiFunction(values.birth_date),
+        isResident: values.resident,
+        professionId: values.profession,
+        incomeSourceId: values.source_of_income,
+        sponsorName: values.sponsor
+      },
+      clientID: {
+        idNo: values.id_number,
+        clientId,
+        idCountryId: values.issue_country,
+        idtId: values.id_type,
+        idExpiryDate: formatDateToApiFunction(values.expiry_date),
+        idIssueDate: null,
+        idCityId: null,
+        isDiplomat: false
+      }
+    }
+
+    await postRequest({
+      extension: 'CTTRX.asmx/set2CIV',
+      record: JSON.stringify(payload)
+    })
+  }
+
   return (
-    <FormShell form={formik}>
+    <FormShell form={formik} height={400}>
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
           <FieldSet title='Transaction'>
@@ -160,7 +260,14 @@ export default function TransactionForm({ labels, maxAccess }) {
                 <FormField name='date' Component={CustomDatePicker} />
               </Grid>
               <Grid item xs={4}>
-                <FormField name='status' Component={ResourceComboBox} valueField='key' datasetId={7} disabled />
+                <FormField
+                  name='status'
+                  Component={ResourceComboBox}
+                  displayField='value'
+                  valueField='key'
+                  datasetId={7}
+                  disabled
+                />
               </Grid>
               <Grid item xs={4}>
                 <RadioGroup row onChange={e => setOperationType(e.target.value)}>
@@ -169,17 +276,24 @@ export default function TransactionForm({ labels, maxAccess }) {
                 </RadioGroup>
               </Grid>
               <Grid item xs={4}>
-                <RadioGroup row>
+                <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
                   <FormControlLabel value='individual' control={<Radio />} label={labels.individual} />
                   <FormControlLabel value='corporate' control={<Radio />} label={labels.corporate} disabled />
                 </RadioGroup>
               </Grid>
               <Grid item xs={4}>
-                <FormField
-                  name='clientId'
-                  Component={ResourceComboBox}
-                  endpointId={CurrencyTradingClientRepository.Client.snapshot}
-                  parameters='_filter=1&_category=1'
+                <CustomLookup
+                  onChange={(e, v) => {
+                    const client = valueOf(v.recordId)
+                    formik.setFieldValue('clientId', client.recordId)
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  setStore={clear}
+                  store={store}
+                  firstValue={valueOf(formik.values.clientId)}
+                  secondDisplayField={false}
+                  onLookup={lookup}
                 />
               </Grid>
             </Grid>
@@ -197,7 +311,7 @@ export default function TransactionForm({ labels, maxAccess }) {
                       {
                         field: 'incremented',
                         header: 'SL#',
-                        name: 'sl',
+                        name: 'seqNo',
                         readOnly: true,
                         valueSetter: () => {
                           return formik.values.rows.length + 1
@@ -217,16 +331,17 @@ export default function TransactionForm({ labels, maxAccess }) {
                           })
 
                           if (!exchange?.exchangeRate?.rate) {
-                            stack({
+                            stackError({
                               message: `Rate not defined for ${row.value}.`
                             })
                             return
                           }
-
+                          formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
                           formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange.exchangeRate.rate)
-                          formik.setFieldValue(`rows[${row.rowIndex}].method`, exchange.exchange.rateCalcMethod)
+                          formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange.exchange.rateCalcMethod)
+                          row.rowData.currencyId = row.newValue
                           row.rowData.exRate = exchange.exchangeRate.rate
-                          row.rowData.method = exchange.exchange.rateCalcMethod
+                          row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
                         }
                       },
                       {
@@ -236,11 +351,16 @@ export default function TransactionForm({ labels, maxAccess }) {
                         async onChange(e) {
                           const {
                             rowIndex,
-                            rowData: { exRate, method },
+                            rowData: { exRate, rateCalcMethod },
                             newValue
                           } = e
 
-                          const lcAmount = method === 1 ? newValue * exRate : method === 2 ? newValue / exRate : 0
+                          const lcAmount =
+                            rateCalcMethod === 1
+                              ? parseInt(newValue) * exRate
+                              : rateCalcMethod === 2
+                              ? newValue / exRate
+                              : 0
                           formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
                           e.rowData.lcAmount = lcAmount
                         }
@@ -252,14 +372,14 @@ export default function TransactionForm({ labels, maxAccess }) {
                         readOnly: true
                       },
                       {
-                        field: 'textfield',
+                        field: 'numberfield',
                         header: 'LC Amount',
                         name: 'lcAmount',
                         readOnly: true
                       }
                     ]}
                     defaultRow={{
-                      sl: 0,
+                      seqNo: 0,
                       currencyId: '',
                       fcAmount: 0,
                       exRate: 0,
@@ -278,7 +398,29 @@ export default function TransactionForm({ labels, maxAccess }) {
                 <FormField name='id_number' Component={CustomTextField} />
               </Grid>
               <Grid item xs={2}>
-                <Button>Fetch</Button>
+                {/* <Button
+                  variant='contained'
+                  onClick={() =>
+                    stackWindow({
+                      Component: Confirmation,
+                      props: {
+                        // idTypeStore: idTypeStore,
+                        formik,
+                        labels
+                      },
+                      width: 400,
+                      height: 400,
+                      title: 'Confirmation'
+                    })
+                  }
+                  // disabled={
+                  //   !formik?.values?.idtId || !formik?.values?.birthDate || !formik.values.idNo || editMode
+                  //     ? true
+                  //     : false
+                  // }
+                >
+                  Fetch
+                </Button> */}
               </Grid>
               <Grid item xs={2}>
                 <FormField name='firstName' Component={CustomTextField} />
@@ -296,7 +438,7 @@ export default function TransactionForm({ labels, maxAccess }) {
                 <FormField name='birth_date' Component={CustomDatePicker} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='birth_date' Component={CustomDatePicker} />
+                {/* <FormField name='birth_date' Component={CustomDatePicker} /> */}
               </Grid>
               <Grid item xs={2}>
                 <FormField name='fl_firstName' Component={CustomTextField} />
@@ -311,7 +453,13 @@ export default function TransactionForm({ labels, maxAccess }) {
                 <FormField name='fl_familyName' Component={CustomTextField} />
               </Grid>
               <Grid item xs={2}>
-                <CustomTextField label='ID Type' />
+                <FormField
+                  name='id_type'
+                  Component={ResourceComboBox}
+                  endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
+                  valueField='recordId'
+                  displayField='name'
+                />
               </Grid>
               <Grid item xs={2}>
                 {/* <Button>Visa</Button>
@@ -325,11 +473,17 @@ export default function TransactionForm({ labels, maxAccess }) {
                 <FormField name='expiry_date' Component={CustomDatePicker} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='expiry_date' Component={CustomDatePicker} />
+                {/* <FormField name='expiry_date' Component={CustomDatePicker} /> */}
               </Grid>
               <Grid item xs={2} />
               <Grid item xs={6}>
-                <FormField name='purpose_of_exchange' Component={CustomTextField} />
+                <FormField
+                  name='purpose_of_exchange'
+                  Component={ResourceComboBox}
+                  endpointId={'CTSET.asmx/qryPEX'}
+                  valueField='recordId'
+                  displayField='name'
+                />
               </Grid>
               <Grid item xs={4}>
                 <FormField
@@ -342,14 +496,32 @@ export default function TransactionForm({ labels, maxAccess }) {
               </Grid>
               <Grid item xs={2} />
               <Grid item xs={6}>
-                <CustomTextField label='Source of Income' />
+                <FormField
+                  name='source_of_income'
+                  Component={ResourceComboBox}
+                  endpointId={'RTSET.asmx/qrySI'}
+                  valueField='recordId'
+                  displayField='name'
+                />
               </Grid>
               <Grid item xs={4}>
-                <FormField name='source_of_income' Component={CustomTextField} />
+                <FormField
+                  name='nationality'
+                  Component={ResourceComboBox}
+                  endpointId={SystemRepository.Country.qry}
+                  valueField='recordId'
+                  displayField='name'
+                />
               </Grid>
               <Grid item xs={2} />
               <Grid item xs={6}>
-                <FormField name='profession' Component={CustomTextField} />
+                <FormField
+                  name='profession'
+                  Component={ResourceComboBox}
+                  endpointId={'RTSET.asmx/qryPFN'}
+                  valueField='recordId'
+                  displayField='name'
+                />
               </Grid>
               <Grid item xs={4}>
                 <FormField name='cell_phone' Component={CustomTextField} />
@@ -359,7 +531,13 @@ export default function TransactionForm({ labels, maxAccess }) {
                 <FormField name='remarks' Component={CustomTextField} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='resident' Component={CustomCheckbox} control={<Checkbox />} />
+                <FormControlLabel
+                  name='resident'
+                  checked={formik.values.resident}
+                  onChange={formik.handleChange}
+                  control={<Checkbox defaultChecked />}
+                  label='Resident'
+                />
               </Grid>
             </Grid>
           </FieldSet>
