@@ -29,7 +29,8 @@ const CustomDatePicker = ({
   editMode = false,
   ...props
 }) => {
-  const dateFormat = window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
+  var dateFormat = window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
+  dateFormat = dateFormat ??  "dd/MM/yyyy"
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
 

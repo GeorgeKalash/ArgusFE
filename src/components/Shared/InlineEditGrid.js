@@ -18,7 +18,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
 }
-const dateFormat = typeof window !== 'undefined' && window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
+var dateFormat = typeof window !== 'undefined' && window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
+dateFormat = dateFormat ??  "dd/MM/yyyy"
 
 const InlineEditGrid = ({
   columns,
