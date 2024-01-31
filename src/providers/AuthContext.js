@@ -125,7 +125,7 @@ const AuthProvider = ({ children }) => {
       console.log(defaultSettings)
 
       const defaultSet = {
-        dateFormat: defaultSettings.data.record && defaultSettings.data.record.value
+        dateFormat: defaultSettings.data.record ? defaultSettings.data.record.value : "dd/MM/yyyy"
       }
 
       window.localStorage.setItem('default', JSON.stringify(defaultSet))

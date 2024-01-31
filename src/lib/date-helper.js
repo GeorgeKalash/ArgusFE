@@ -7,7 +7,7 @@ import { compareAsc, format } from "date-fns";
 const formatDateFromApi = (date) => {
 
     const timestamp = date && parseInt(date.match(/\d+/)[0], 10);
-    
+
 return timestamp
 }
 
@@ -49,8 +49,7 @@ const   formatDateToApiFunction = (value)=>{
  }
 
  function formatDateDefault(date) {
-  var formats = JSON.parse(window.localStorage.getItem('default') &&  window.localStorage.getItem('default'))
-      formats = formats['dateFormat'] ?? "dd/MM/yyyy"
+  const formats = JSON.parse(window.localStorage.getItem('default') &&  window.localStorage.getItem('default'))
       const timestamp = date instanceof Date ? date.getTime() : parseInt(date.match(/\d+/)[0], 10);
       const formattedDate=  format(new Date(timestamp), formats);
 
