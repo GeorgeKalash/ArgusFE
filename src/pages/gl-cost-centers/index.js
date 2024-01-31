@@ -97,13 +97,13 @@ const CostCenter = () => {
   
   const search = inp => {
     setSearchValue(inp)
-    console.log('inp' + inp)
+    
     setGridData({count : 0, list: [] , message :"",  statusId:1})
      const input = inp
-     console.log({list: []})
+     
 
      if(input){
-    var parameters = `_size=30&_startAt=0&_filter=${input}&_category=1`
+    var parameters = `_filter=${input}`
 
     getRequest({
       extension: GeneralLedgerRepository.CostCenter.snapshot,
@@ -154,7 +154,7 @@ const CostCenter = () => {
           recordId={selectedRecordId}
           onSubmit={() => {
             if(searchValue !== "") {
-              var parameters = `_size=30&_startAt=0&_filter=${searchValue}&_category=1`
+              var parameters = `_filter=${searchValue}`
 
               getRequest({
                 extension: GeneralLedgerRepository.CostCenter.snapshot,
