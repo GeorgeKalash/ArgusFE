@@ -35,13 +35,13 @@ const ClientTemplateForm = ({
   maxAccess,
   setErrorMessage,
 }) => {
-  // alert(props)
 
   const { stack } = useWindow();
   const { getRequest, postRequest } = useContext(RequestsContext);
   const [referenceRequired, setReferenceRequired] = useState(true);
   const [editMode, setEditMode] = useState(!!recordId);
-  const [otpShow, setOtpShow] = useState(false);
+
+  // const [otpShow, setOtpShow] = useState(false);
 
   const [initialValues, setInitialData] = useState({
     //ClientCorporate
@@ -205,7 +205,10 @@ const ClientTemplateForm = ({
     })
       .then((res) => {
         toast.success("Record Successfully");
-        setOtpShow(true);
+
+
+        // setOtpShow(true);
+
         setEditMode(true);
         getClient(res.recordId);
       })
@@ -214,21 +217,23 @@ const ClientTemplateForm = ({
       });
   };
 
-  useEffect(() => {
-    if (formik.values.clientId && otpShow)
-      stack({
-        Component: OTPPhoneVerification,
-        props: {
-          formValidation: formik,
-          functionId: 3600,
-          setEditMode: setEditMode,
-          setErrorMessage: setErrorMessage,
-        },
-        width: 400,
-        height: 400,
-        title: "Verify My Account",
-      });
-  }, [formik.values.clientId]);
+
+  // useEffect(() => {
+  //   if (formik.values.clientId && otpShow)
+  //     stack({
+  //       Component: OTPPhoneVerification,
+  //       props: {
+  //         formValidation: formik,
+  //         functionId: 3600,
+  //         setEditMode: setEditMode,
+  //         setErrorMessage: setErrorMessage,
+  //       },
+  //       width: 400,
+  //       height: 400,
+  //       title: "Verify My Account",
+  //     });
+  // }, [formik.values.clientId]);
+
 
 
  async  function getClient(recordId) {
@@ -310,7 +315,7 @@ const ClientTemplateForm = ({
   return (
     <FormShell
       form={formik}
-      height={600}
+      height={500}
       resourceId={ResourceIds.ClientCorporate}
       maxAccess={maxAccess}
       recordId={recordId}
@@ -591,6 +596,7 @@ const ClientTemplateForm = ({
                           label={_labels.capital}
                           value={formik.values?.capital}
                           readOnly={editMode && true}
+                          type="number"
                           required
                           onChange={formik.handleChange}
                           onClear={() => formik.setFieldValue("capital", "")}

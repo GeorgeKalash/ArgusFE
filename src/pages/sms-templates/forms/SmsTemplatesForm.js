@@ -19,7 +19,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
-    
+
     const [initialValues, setInitialData] = useState({
         recordId: null,
         name: '',
@@ -33,7 +33,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
     const invalidate = useInvalidate({
         endpointId: SystemRepository.SMSTemplate.page
       })
-  
+
     const formik = useFormik({
         initialValues,
         enableReinitialize: true,
@@ -49,7 +49,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
             extension: SystemRepository.SMSTemplate.set,
             record: JSON.stringify(obj)
           })
-          
+
           if (!recordId) {
             toast.success('Record Added Successfully')
             setInitialData({
@@ -63,18 +63,18 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
           invalidate()
         }
       })
-    
+
       useEffect(() => {
         ;(async function () {
           try {
             if (recordId) {
               setIsLoading(true)
-    
+
               const res = await getRequest({
                 extension: SystemRepository.SMSTemplate.get,
                 parameters: `_recordId=${recordId}`
               })
-              
+
               setInitialData(res.record)
             }
           } catch (exception) {
@@ -83,13 +83,13 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
           setIsLoading(false)
         })()
       }, [])
-      
+
     return (
-        <FormShell 
+        <FormShell
             resourceId={ResourceIds.SmsTemplates}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
+            form={formik}
+            height={300}
+            maxAccess={maxAccess}
             editMode={editMode}
         >
             <Grid container spacing={4}>
