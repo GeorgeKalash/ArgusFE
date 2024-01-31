@@ -158,10 +158,12 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
       parameters: `_userId=${userId}&_key=plantId`
     })
     setPlantId(record.value)
+
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeRate.get,
       parameters: `_plantId=${record.value}&_currencyId=${currencyId}&_rateTypeId=${type}`
     })
+
     return response.record
   }
 
@@ -348,6 +350,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                             stackError({
                               message: `Rate not defined for ${row.value}.`
                             })
+                            
                             return
                           }
                           formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)

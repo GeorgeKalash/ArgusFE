@@ -57,6 +57,7 @@ export default function CurrencyTrading() {
                 flex: 1
               },
               ,
+              
               // {
               //   field: 'createdDate',
               //   headerName: labels.date,
