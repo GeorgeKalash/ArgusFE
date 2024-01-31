@@ -28,5 +28,11 @@ export const ManufacturingRepository = {
     set: service + 'setRTN',
     get: service + 'getRTN',
     del: service + 'delRTN'
-  }
+  },WorkCenter: {
+    snapshot : service + "snapshotWCT",
+    page : service + "pageWCT",
+    set: service + 'setWCT',
+    get: service + 'getWCT',
+    del: service + 'delWCT',
+  },
 }
