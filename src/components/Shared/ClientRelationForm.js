@@ -10,7 +10,7 @@ import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import dayjs from 'dayjs'
 
-import { formatDateDefault } from 'src/lib/date-helper'
+import { formatDateDefault, formatDateFromApiInline } from 'src/lib/date-helper'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'

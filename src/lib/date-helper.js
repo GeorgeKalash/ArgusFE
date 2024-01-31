@@ -5,9 +5,16 @@ import dayjs from 'dayjs'
 import { compareAsc, format } from "date-fns";
 
 const formatDateFromApi = (date) => {
+
+    const timestamp = date && parseInt(date.match(/\d+/)[0], 10);
+    
+return timestamp
+}
+
+const formatDateFromApiInline = (date) => {
   const currentDate = new Date(date);
   const timestamp = currentDate.getTime();
-    
+
 return timestamp
 }
 
@@ -55,5 +62,6 @@ export {
     formatDateFromApi,
     formatDateToApi,
     formatDateToApiFunction,
-    formatDateDefault
+    formatDateDefault,
+    formatDateFromApiInline
 }

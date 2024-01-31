@@ -12,7 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { formatDateFromApi, formatDateToApi, formatDateDefault } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateFromApiInline, formatDateDefault } from 'src/lib/date-helper'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const CustomPaper = (props, widthDropDown) => {
@@ -121,7 +121,7 @@ return (
              id={cellId}
              name={fieldName}
 
-              value={formatDateFromApi(gridValidation.values.rows[rowIndex][fieldName])}
+              value={formatDateFromApiInline(gridValidation.values.rows[rowIndex][fieldName])}
              required={column?.mandatory}
              readOnly={column?.readOnly}
              format={dateFormat}
