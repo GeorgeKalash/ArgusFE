@@ -35,12 +35,9 @@ const ClientTemplateForm = ({
   maxAccess,
   setErrorMessage,
 }) => {
-  // alert(props)
 
   const { stack } = useWindow();
-
   const { getRequest, postRequest } = useContext(RequestsContext);
-
   const [referenceRequired, setReferenceRequired] = useState(true);
   const [editMode, setEditMode] = useState(!!recordId);
 
@@ -209,7 +206,9 @@ const ClientTemplateForm = ({
       .then((res) => {
         toast.success("Record Successfully");
 
+
         // setOtpShow(true);
+
         setEditMode(true);
         getClient(res.recordId);
       })
@@ -217,6 +216,7 @@ const ClientTemplateForm = ({
         setErrorMessage(error);
       });
   };
+
 
   // useEffect(() => {
   //   if (formik.values.clientId && otpShow)
@@ -233,6 +233,7 @@ const ClientTemplateForm = ({
   //       title: "Verify My Account",
   //     });
   // }, [formik.values.clientId]);
+
 
 
  async  function getClient(recordId) {
