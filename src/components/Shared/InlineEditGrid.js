@@ -12,7 +12,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { formatDateFromApi, formatDateDefault } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateDefault } from 'src/lib/date-helper'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const CustomPaper = (props, widthDropDown) => {
@@ -128,11 +128,9 @@ return (
              onChange={(newDate ) => {
 
               if (newDate) {
-                console.log(newDate.valueOf());
 
                 const dateWithoutTime = new Date(newDate.valueOf());
                 dateWithoutTime.setHours(0, 0, 0, 0);
-console.log(formatDateDefault(dateWithoutTime))
                 gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, formatDateDefault(dateWithoutTime));
               } else {
                 gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0');
