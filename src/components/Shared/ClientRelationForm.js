@@ -8,19 +8,17 @@ import { useFormik } from 'formik'
 import CustomTextField from '../Inputs/CustomTextField'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import dayjs from 'dayjs'
-
-import { formatDateDefault, formatDateFromApiInline } from 'src/lib/date-helper'
+import { formatDateDefault } from 'src/lib/date-helper'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 
-export const ClientRelationForm = ({recordId, name , reference}) => {
+
+export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const[gridData , setGridData] = useState([])
   const[clientStore , setClientStore] = useState([])
   const [RelationTypesStore, setRelationTypesStore] =useState([])
-  const [errorMessage, setErrorMessage] =useState([])
+
 
   const {
     labels: _labels,
@@ -74,14 +72,16 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
         res.list.length > 0 && formik.setValues({rows: processedData});
       })
       .catch((error) => {
-        // setErrorMessage(error);
+
+        setErrorMessage(error);
+
       });
   }
 
 
 
   const lookupClient = inp => {
-    setGridData({count : 0, list: [] , message :"",  statusId:1})
+
      const input = inp
      console.log({list: []})
 
@@ -100,13 +100,9 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
         setErrorMessage(error)
       })
 
-    }else{
-
-      setGridData({count : 0, list: [] , message :"",  statusId:1})
     }
 
   }
-
 
 
 
@@ -181,10 +177,6 @@ export const ClientRelationForm = ({recordId, name , reference}) => {
       header: _labels.activationDate,
       mandatory: true,
       name: 'activationDate',
-      cellRender: (rowData) =>{ return '666666'} // Index 6 is where 'activationDate' is in the columns array
-
-
-
 
     }
   ]

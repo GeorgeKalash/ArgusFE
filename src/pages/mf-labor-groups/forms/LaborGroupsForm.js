@@ -11,19 +11,18 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ManufacuringRepository } from 'src/repositories/ManufacuringRepository'
 
 
-export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
+export default function LaborGroupsForms({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
 
     const [initialValues, setInitialData] = useState({
         recordId: null,
+        reference: '',
         name: '',
-        smsBody: '',
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,7 +30,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
     //const editMode = !!recordId
 
     const invalidate = useInvalidate({
-        endpointId: SystemRepository.SMSTemplate.page
+        endpointId: ManufacuringRepository.LaborGroup.page
       })
 
     const formik = useFormik({
@@ -39,14 +38,14 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
+          reference: yup.string().required('This field is required'),
           name: yup.string().required('This field is required'),
-          smsBody: yup.string().required('This field is required'),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
 
           const response = await postRequest({
-            extension: SystemRepository.SMSTemplate.set,
+            extension: ManufacuringRepository.LaborGroup.set,
             record: JSON.stringify(obj)
           })
 
@@ -71,7 +70,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
               setIsLoading(true)
 
               const res = await getRequest({
-                extension: SystemRepository.SMSTemplate.get,
+                extension: ManufacuringRepository.LaborGroup.get,
                 parameters: `_recordId=${recordId}`
               })
 
@@ -86,7 +85,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
 
     return (
         <FormShell
-            resourceId={ResourceIds.SmsTemplates}
+            resourceId={ResourceIds.LaborGroups}
             form={formik}
             height={300}
             maxAccess={maxAccess}
@@ -95,30 +94,30 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
             <Grid container spacing={4}>
                 <Grid item xs={12}>
                     <CustomTextField
+                    name='reference'
+                    label={labels.reference}
+                    value={formik.values.reference}
+                    required
+                    maxAccess={maxAccess}
+                    maxLength='6'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('reference', '')}
+                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    helperText={formik.touched.reference && formik.errors.reference}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <CustomTextField
                     name='name'
                     label={labels.name}
                     value={formik.values.name}
                     required
-                    maxAccess={maxAccess}
                     maxLength='30'
+                    maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
                     error={formik.touched.name && Boolean(formik.errors.name)}
                     helperText={formik.touched.name && formik.errors.name}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CustomTextArea
-                    name='smsBody'
-                    label={labels.smsBody}
-                    value={formik.values.smsBody}
-                    required
-                    rows={2}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('smsBody', '')}
-                    error={formik.touched.smsBody && Boolean(formik.errors.smsBody)}
-                    helperText={formik.touched.smsBody && formik.errors.smsBody}
                     />
                 </Grid>
             </Grid>

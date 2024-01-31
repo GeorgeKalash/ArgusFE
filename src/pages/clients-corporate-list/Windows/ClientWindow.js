@@ -3,7 +3,8 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // **Tabs
-import ClientTab from '../Tabs/ClientTab'
+import ClientTab from '../forms/ClientTemplateForm'
+import ClientTemplateForm from '../forms/ClientTemplateForm'
 
 const ClientWindow = (props) => {
 
@@ -47,7 +48,7 @@ return (
         <Window id='clientCorporateWindow' Title={_labels.title} onClose={onClose} width={width} height={height}
          onSave={onSave} onInfo={editMode && onInfo} onInfoClose={onInfoClose} disabledSubmit={editMode && true}>
             <CustomTabPanel>
-                <ClientTab
+                <ClientTemplateForm
                  props={props}
 
                     // clientCorporateFormValidation={clientCorporateFormValidation}
