@@ -66,5 +66,6 @@ export const ResourceIds = {
   MF_Settings: 42118,
   MultiCurrencyMapping: 32102,
   ClientRelation: 36202,
-  LaborGroups: 42114
+  LaborGroups: 42114,
+  ProductionLines: 42107
 }

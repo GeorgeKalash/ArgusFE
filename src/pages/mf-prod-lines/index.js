@@ -11,10 +11,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 // ** Windows
-import LaborGroupsWindow from './Windows/LaborGroupsWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -22,8 +22,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import ProductionLineWindow from './Windows/ProductionLineWindow'
 
-const LaborGroups = () => {
+const MfProductionLines = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -36,7 +37,7 @@ const LaborGroups = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: ManufacturingRepository.LaborGroup.page,
+      extension: ManufacturingRepository.ProductionLine.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -47,24 +48,32 @@ const LaborGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.LaborGroup.page,
-    datasetId: ResourceIds.LaborGroups
+    endpointId: ManufacturingRepository.ProductionLine.page,
+    datasetId: ResourceIds.ProductionLines
   })
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.LaborGroup.page
+    endpointId: ManufacturingRepository.ProductionLine.page
   })
 
   const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1
+      flex: 1,
+      editable: false
     },
     {
       field: 'name',
       headerName: _labels.name,
-      flex: 1
+      flex: 1,
+      editable: false
+    },
+    {
+      field: 'routingName',
+      headerName: _labels.routing,
+      flex: 1,
+      editable: false
     }
   ]
 
@@ -79,7 +88,7 @@ const LaborGroups = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.LaborGroup.del,
+      extension: ManufacturingRepository.ProductionLine.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -102,8 +111,9 @@ const LaborGroups = () => {
           maxAccess={access}
         />
       </Box>
+
       {windowOpen && (
-        <LaborGroupsWindow
+        <ProductionLineWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -119,4 +129,4 @@ const LaborGroups = () => {
   )
 }
 
-export default LaborGroups
+export default MfProductionLines
