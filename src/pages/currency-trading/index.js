@@ -21,6 +21,7 @@ export default function CurrencyTrading() {
         maxAccess: access,
         recordId
       },
+      height: 500,
       width: 1200,
       title: 'Cash Invoice'
     })
