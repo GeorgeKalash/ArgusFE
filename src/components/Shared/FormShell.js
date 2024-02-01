@@ -21,7 +21,7 @@ export default function FormShell({ form, children, height, editMode, disabledSu
 
   return (
     <>
-      <DialogContent sx={{ height: false ? `calc(100vh - 48px - 180px)` : height, p: 1 }}>{children}</DialogContent>
+      <DialogContent >{children}</DialogContent>
       {windowToolbarVisible && <WindowToolbar onSave={() => form.handleSubmit()} onInfo={() => stack({
           Component: TransactionLog,
           props: {

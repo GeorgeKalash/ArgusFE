@@ -159,7 +159,7 @@ const ClientsList = () => {
         maxAccess: access
       },
       width: 1100,
-      height: 400,
+      height: 600,
       title: _labels.pageTitle
     })
   }
