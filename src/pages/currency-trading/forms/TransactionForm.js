@@ -109,13 +109,10 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     validateOnChange: false,
     validateOnBlur: false,
     validationSchema: yup.object({
-      date: yup.date().required(),
       id_type: yup.number().required(),
       id_number: yup.number().required(),
-      birth_date: yup.date().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
-      expiry_date: yup.string().required(),
       issue_country: yup.string().required(),
       nationality: yup.string().required(),
       cell_phone: yup.string().required()
