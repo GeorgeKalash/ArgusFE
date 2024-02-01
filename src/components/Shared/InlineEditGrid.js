@@ -77,6 +77,15 @@ const InlineEditGrid = ({
           </Button>
         )
 
+      case 'combobox':
+        return row[column.name]
+          ? typeof row[column.name] === 'string'
+            ? row[column.name]
+            : column.store.length > 0
+            ? column.store.find(item => item[column.valueField] === row[column.name])[column.displayField]
+            : ''
+          : ''
+
       default:
         return row[column.name]
     }
@@ -187,7 +196,7 @@ const InlineEditGrid = ({
                   column?.max
                 )
               )
-              row.editorCallback(newValue)
+              if (newValue) row.editorCallback(newValue)
             }}
             onClear={() => {
               const updatedRows = [...gridValidation.values.rows]
@@ -256,7 +265,6 @@ const InlineEditGrid = ({
                 else return ''
               }
             }}
-
             // getOptionLabel={option => {
             //   if (typeof option === 'object') {
             //     if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
@@ -302,7 +310,7 @@ const InlineEditGrid = ({
                   )
                 }
               }
-              row.editorCallback(newValue[column.valueField])
+              if (newValue) row.editorCallback(newValue[column.valueField])
             }}
             PaperComponent={props =>
               column.columnsInDropDown &&
@@ -418,7 +426,7 @@ const InlineEditGrid = ({
                 }
               }
             }}
-            
+
             // noOptionsText=""
             PaperComponent={props =>
               column.columnsInDropDown &&

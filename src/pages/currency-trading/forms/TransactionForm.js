@@ -82,7 +82,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     status: '1',
     type: -1,
     clientType: 1,
-    clientId: null,
+    clientId: '',
     wip: 1,
     rows: [
       {
@@ -95,7 +95,9 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     ],
     birth_date: null,
     expiry_date: null,
-    resident: false
+    resident: false,
+    functionId: '',
+    clientId: ''
   })
 
   const formik = useFormik({
@@ -150,7 +152,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           rows: record.items,
           clientType: record.clientMaster.category,
           date: dayjs(formatDateFromApi(record.headerView.date)),
-          clientId: record.clientIndividual.clientID,
+          clientId: record.clientIndividual.clientId,
           firstName: record.clientIndividual.firstName,
           lastName: record.clientIndividual.lastName,
           middleName: record.clientIndividual.middleName,
@@ -173,7 +175,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           nationality: record.clientMaster.nationalityId,
           cell_phone: record.clientMaster.cellPhone
         })
-        setRateType(record.headerView.functionId.toString())
+        setOperationType(record.headerView.functionId.toString())
       }
 
       setCurrencyStore(response.list)
@@ -295,15 +297,15 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     if (!values.recordId) {
       toast.success('Record Added Successfully')
       setInitialValues({
-        ...values, // Spread the existing properties
-        recordId: response.recordId // Update only the recordId field
+        ...values,
+        recordId: response.recordId
       })
     } else toast.success('Record Edited Successfully')
     setEditMode(true)
   }
 
   return (
-    <FormShell form={formik} height={500} resourceId={35208} editMode={editMode}>
+    <FormShell height={400} form={formik} resourceId={35208} editMode={editMode}>
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
           <FieldSet title='Transaction'>
@@ -354,98 +356,101 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
               </Grid>
             </Grid>
           </FieldSet>
-          <Grid item xs={12}>
-            <InlineEditGrid
-              maxAccess={maxAccess}
-              gridValidation={formik}
-              scrollHeight={350}
-              width={750}
-              columns={[
-                {
-                  field: 'incremented',
-                  header: 'SL#',
-                  name: 'seqNo',
-                  readOnly: true,
-                  valueSetter: () => {
-                    return formik.values.rows.length + 1
-                  }
-                },
-                {
-                  field: 'combobox',
-                  valueField: 'recordId',
-                  displayField: 'reference',
-                  header: 'Currency',
-                  name: 'currencyId',
-                  store: currencyStore,
-                  widthDropDown: '300',
-                  columnsInDropDown: [
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ],
-                  async onChange(row) {
-                    const exchange = await fetchRate({
-                      currencyId: row.newValue
-                    })
-
-                    if (!exchange?.exchangeRate?.rate) {
-                      stackError({
-                        message: `Rate not defined for ${row.value}.`
+          <FieldSet title='Operations'>
+            <Grid item xs={12}>
+              <InlineEditGrid
+                maxAccess={maxAccess}
+                gridValidation={formik}
+                scrollHeight={350}
+                width={750}
+                columns={[
+                  {
+                    field: 'incremented',
+                    header: 'SL#',
+                    name: 'seqNo',
+                    readOnly: true,
+                    valueSetter: () => {
+                      return formik.values.rows.length + 1
+                    }
+                  },
+                  {
+                    field: 'combobox',
+                    valueField: 'recordId',
+                    displayField: 'reference',
+                    header: 'Currency',
+                    name: 'currencyId',
+                    store: currencyStore,
+                    widthDropDown: '300',
+                    columnsInDropDown: [
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ],
+                    async onChange(row) {
+                      if (!row.newValue) return
+                      const exchange = await fetchRate({
+                        currencyId: row.newValue
                       })
 
-                      return
-                    }
-                    formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-                    formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange.exchangeRate.rate)
-                    formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange.exchange.rateCalcMethod)
-                    row.rowData.currencyId = row.newValue
-                    row.rowData.exRate = exchange.exchangeRate.rate
-                    row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
-                  }
-                },
-                {
-                  field: 'numberfield',
-                  header: 'FC Amount',
-                  name: 'fcAmount',
-                  async onChange(e) {
-                    const {
-                      rowIndex,
-                      rowData: { exRate, rateCalcMethod },
-                      newValue
-                    } = e
-                    if (!newValue) return
+                      if (!exchange?.exchangeRate?.rate) {
+                        stackError({
+                          message: `Rate not defined for ${row.value}.`
+                        })
 
-                    const lcAmount =
-                      rateCalcMethod === 1
-                        ? parseFloat(newValue.toString().replace(/,/g, '')) * exRate
-                        : rateCalcMethod === 2
-                        ? parseFloat(newValue.toString().replace(/,/g, '')) / exRate
-                        : 0
-                    formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
-                    e.rowData.lcAmount = lcAmount
+                        return
+                      }
+                      formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
+                      formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange.exchangeRate.rate)
+                      formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange.exchange.rateCalcMethod)
+                      row.rowData.currencyId = row.newValue
+                      row.rowData.exRate = exchange.exchangeRate.rate
+                      row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
+                    }
+                  },
+                  {
+                    field: 'numberfield',
+                    header: 'FC Amount',
+                    name: 'fcAmount',
+                    async onChange(e) {
+                      const {
+                        rowIndex,
+                        rowData: { exRate, rateCalcMethod },
+                        newValue
+                      } = e
+                      if (!newValue) return
+
+                      const lcAmount =
+                        rateCalcMethod === 1
+                          ? parseFloat(newValue.toString().replace(/,/g, '')) * exRate
+                          : rateCalcMethod === 2
+                          ? parseFloat(newValue.toString().replace(/,/g, '')) / exRate
+                          : 0
+                      formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
+                      e.rowData.lcAmount = lcAmount
+                    }
+                  },
+                  {
+                    field: 'textfield',
+                    header: 'Rate',
+                    name: 'exRate',
+                    readOnly: true
+                  },
+                  {
+                    field: 'numberfield',
+                    header: 'LC Amount',
+                    name: 'lcAmount',
+                    readOnly: true
                   }
-                },
-                {
-                  field: 'textfield',
-                  header: 'Rate',
-                  name: 'exRate',
-                  readOnly: true
-                },
-                {
-                  field: 'numberfield',
-                  header: 'LC Amount',
-                  name: 'lcAmount',
-                  readOnly: true
-                }
-              ]}
-              defaultRow={{
-                seqNo: 0,
-                currencyId: '',
-                fcAmount: 0,
-                exRate: 0,
-                lcAmount: 0
-              }}
-            />
-          </Grid>
+                ]}
+                defaultRow={{
+                  seqNo: 0,
+                  currencyId: '',
+                  fcAmount: 0,
+                  exRate: 0,
+                  lcAmount: 0
+                }}
+              />
+            </Grid>
+          </FieldSet>
           <FieldSet title='Individual'>
             <Grid container spacing={4}>
               <Grid item xs={2}>
