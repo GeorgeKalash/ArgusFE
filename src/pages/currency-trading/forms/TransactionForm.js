@@ -53,6 +53,8 @@ function useLookup({ endpointId, parameters }) {
 
   const { getRequest } = useContext(RequestsContext)
 
+  console.log('store', store)
+
   return {
     store,
     lookup(searchQry) {
@@ -225,7 +227,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
       parameters: `_userId=${userId}&_key=cashAccountId`
     })
 
-    const clientId = values.clientId ?? 0
+    const clientId = values.clientId || 0
 
     const payload = {
       header: {
@@ -380,14 +382,17 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                 <CustomLookup
                   onChange={(e, v) => {
                     const client = valueOf(v.recordId)
-                    formik.setFieldValue('clientId', client.recordId)
-                    fetchClientInfo({ clientId: client.recordId })
+                    if (client) {
+                      formik.setFieldValue('clientId', client.recordId)
+                      fetchClientInfo({ clientId: client.recordId })
+                    }
                   }}
                   valueField='name'
                   displayField='name'
                   setStore={clear}
                   store={store}
-                  firstValue={valueOf(formik.values.clientId)}
+                  value={formik.values.clientId}
+                  firstValue={'somevalue'}
                   secondDisplayField={false}
                   onLookup={lookup}
                   readOnly={editMode || idInfoAutoFilled}
@@ -426,7 +431,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                     ],
                     async onChange(row) {
                       if (!row.newValue) return
-                      
+
                       const exchange = await fetchRate({
                         currencyId: row.newValue
                       })
