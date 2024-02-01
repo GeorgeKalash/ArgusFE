@@ -19,6 +19,7 @@ import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -26,95 +27,11 @@ import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { height } = useWindowDimensions()
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
   const [templateStore, setTemplateStore] = useState([])
-
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-
-  const _labels = {
-    functionId: labels && labels.find(item => item.key === '1').value,
-    name: labels && labels.find(item => item.key === '2').value,
-    templateName: labels && labels.find(item => item.key === '3').value
-  }
-
-  const lookupTemplate = searchQry => {
-    setTemplateStore([])
-
-    if (searchQry) {
-      var parameters = `_filter=${searchQry}`
-      getRequest({
-        extension: SystemRepository.SMSTemplate.snapshot,
-        parameters: parameters
-      })
-        .then(res => {
-          setTemplateStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  }
-
-  const columns = [
-    {
-      field: 'textfield',
-      header: _labels.functionId,
-      name: 'functionId',
-      mandatory: true,
-      readOnly: true,
-      width: 150
-    },
-    {
-      field: 'textfield',
-      header: _labels.name,
-      name: 'functionName',
-      mandatory: true,
-      readOnly: true,
-      width: 300
-    },
-    {
-      field: 'lookup',
-      header: _labels.templateName,
-      nameId: 'templateId',
-      name: 'templateName',
-      mandatory: false,
-      store: templateStore,
-      valueField: 'recordId',
-      displayField: 'name',
-      fieldsToUpdate: [
-        { from: 'recordId', to: 'templateId' },
-        { from: 'name', to: 'templateName' }
-      ],
-      columnsInDropDown: [{ key: 'name', value: 'name' }],
-      onLookup: lookupTemplate
-    }
-  ]
-
-  const smsFunctionTemplatesValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    validate: values => {},
-    initialValues: {
-      rows: [
-        {
-          functionId: ''
-        }
-      ]
-    },
-    onSubmit: values => {
-      postSmsFunctionTemplates()
-    }
-  })
-
-  const handleSubmit = () => {
-    smsFunctionTemplatesValidation.handleSubmit()
-  }
 
   const getGridData = () => {
     try {
@@ -163,6 +80,92 @@ const SmsFunctionTemplate = () => {
     }
   }
 
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: getGridData,
+    datasetId: ResourceIds.SmsFunctionTemplates
+  })
+
+  console.log('labels ',_labels)
+
+  const lookupTemplate = searchQry => {
+    setTemplateStore([])
+
+    if (searchQry) {
+      var parameters = `_filter=${searchQry}`
+      getRequest({
+        extension: SystemRepository.SMSTemplate.snapshot,
+        parameters: parameters
+      })
+        .then(res => {
+          setTemplateStore(res.list)
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
+    }
+  }
+
+  const columns = [
+    {
+      field: 'textfield',
+      header: _labels[1],
+      name: 'functionId',
+      mandatory: true,
+      readOnly: true,
+      width: 150
+    },
+    {
+      field: 'textfield',
+      header: _labels[2],
+      name: 'functionName',
+      mandatory: true,
+      readOnly: true,
+      width: 300
+    },
+    {
+      field: 'lookup',
+      header: _labels[3],
+      nameId: 'templateId',
+      name: 'templateName',
+      mandatory: false,
+      store: templateStore,
+      valueField: 'recordId',
+      displayField: 'name',
+      fieldsToUpdate: [
+        { from: 'recordId', to: 'templateId' },
+        { from: 'name', to: 'templateName' }
+      ],
+      columnsInDropDown: [{ key: 'name', value: 'name' }],
+      onLookup: lookupTemplate
+    }
+  ]
+
+  const smsFunctionTemplatesValidation = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validate: values => {},
+    initialValues: {
+      rows: [
+        {
+          functionId: ''
+        }
+      ]
+    },
+    onSubmit: values => {
+      postSmsFunctionTemplates()
+    }
+  })
+
+  const handleSubmit = () => {
+    smsFunctionTemplatesValidation.handleSubmit()
+  }
+
+
   const postSmsFunctionTemplates = () => {
     //After filtering the objects where templateId is not null, then map operation transforms the filtered array, extracting only the functionId and templateId properties from each object and creating a new object with these properties.
     const obj = {
@@ -176,26 +179,12 @@ const SmsFunctionTemplate = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData({})
         toast.success('Record Updated Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.SmsFunctionTemplates, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData()
-        getLabels(ResourceIds.SmsFunctionTemplates, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [access])
 
   return (
     <>
