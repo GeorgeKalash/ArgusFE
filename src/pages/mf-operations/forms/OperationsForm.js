@@ -42,9 +42,9 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
-          reference: yup.string().required('This field is required'),
-          name: yup.string().required('This field is required'),
-          workCenterId: yup.string().required('This field is required'),
+          reference: yup.string().required(),
+          name: yup.string().required(),
+          workCenterId: yup.string().required(),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
@@ -108,7 +108,8 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    helperText={formik.touched.reference && formik.errors.reference}
+
+                    // helperText={formik.touched.reference && formik.errors.reference}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -122,7 +123,8 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
                     error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
+
+                    // helperText={formik.touched.name && formik.errors.name}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -135,7 +137,8 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('maxLossPct', '')}
                     error={formik.touched.maxLossPct && Boolean(formik.errors.maxLossPct)}
-                    helperText={formik.touched.maxLossPct && formik.errors.maxLossPct}
+
+                    // helperText={formik.touched.maxLossPct && formik.errors.maxLossPct}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -161,7 +164,8 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
 
                     }}
                     error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
-                    helperText={formik.touched.workCenterId && formik.errors.workCenterId}
+
+                    // helperText={formik.touched.workCenterId && formik.errors.workCenterId}
                   />
                 </Grid>                
             </Grid>
