@@ -42,7 +42,7 @@ const WorkCenter = () => {
 
     return await getRequest({
       extension: ManufacturingRepository.WorkCenter.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
     })
   }
 
@@ -105,7 +105,7 @@ const WorkCenter = () => {
   }
 
   const edit = obj => {
-    // setSelectedRecordId(obj.recordId)
+    setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
  
    
@@ -147,6 +147,7 @@ const WorkCenter = () => {
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
       
           
         
