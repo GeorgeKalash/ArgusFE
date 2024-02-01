@@ -86,17 +86,13 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose , setShowOtp
       })
       .catch(error => {
 
-        // setErrorMessage(error)
+        setErrorMessage(error)
 
       })
       formValidation.setFieldValue('OTPVerified', true )
       }else{
         setError('All Fields Required')
       }
-
-      // setShowOtpVerification(false)
-
-      // setEditMode(true)
 
   }
 

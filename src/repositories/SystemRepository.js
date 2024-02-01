@@ -115,7 +115,7 @@ export const SystemRepository = {
     del: service + 'delUS',
     page: service + 'pageUS'
   },
-  UserDocument: {
+  UserDefaults: {
     qry: service + 'qryUD',
     get: service + 'getUD',
     set: service + 'setUD'
