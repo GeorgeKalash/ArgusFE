@@ -617,7 +617,6 @@ console.log(obj6)
     <FormShell
       resourceId={ResourceIds.ClientList}
       form={clientIndividualFormik}
-      height={500}
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={editMode}
