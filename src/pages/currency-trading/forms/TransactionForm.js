@@ -51,8 +51,6 @@ function useLookup({ endpointId, parameters }) {
 
   const { getRequest } = useContext(RequestsContext)
 
-  console.log('store', store)
-
   return {
     store,
     lookup(searchQry) {
@@ -149,9 +147,12 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
         })
 
         setInitialValues({
+          ...initialValues,
           recordId: recordId,
+          status: record.headerView.status,
           reference: record.headerView.reference,
           rows: record.items,
+          plantId: record.headerView.plantId,
           clientType: record.clientMaster.category,
           date: dayjs(formatDateFromApi(record.headerView.date)),
           clientId: record.clientIndividual.clientId,
@@ -184,7 +185,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     })()
   }, [])
 
-  const [plantId, setPlantId] = useState(null)
+  const [currentPlantId, setPlantId] = useState(null)
 
   const { userId } = JSON.parse(window.localStorage.getItem('userData'))
 
@@ -216,9 +217,9 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
       parameters: `_userId=${userId}&_functionId=${values.functionId}`
     })
 
-    const { dtId } = recordFunctionId
+    const { dtId: userDtId } = recordFunctionId
 
-    const { record: cashAccountRecord } = await getRequest({
+    const { record: currentCashAccountRecord } = await getRequest({
       extension: `SY.asmx/getUD`,
       parameters: `_userId=${userId}&_key=cashAccountId`
     })
@@ -227,14 +228,14 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
 
     const payload = {
       header: {
-        dtId,
+        dtId: values.dtId || userDtId,
         reference: values.reference,
         status: values.status,
         date: formatDateToApiFunction(values.date),
         functionId: values.functionId,
-        plantId: plantId,
+        plantId: values.plantId || currentPlantId,
         clientId,
-        cashAccountId: cashAccountRecord.value,
+        cashAccountId: values.cashAccountId || currentCashAccountRecord.value,
         poeId: values.purpose_of_exchange,
         wip: values.wip,
         amount: total,
@@ -245,8 +246,8 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
         currencyId,
         exRate,
         rateCalcMethod,
-        fcAmount: parseFloat(fcAmount),
-        lcAmount: parseFloat(lcAmount)
+        fcAmount: parseFloat(fcAmount.toString().replace(/,/g, '')),
+        lcAmount: parseFloat(lcAmount.toString().replace(/,/g, ''))
       })),
       clientMaster: {
         category: values.clientType,
