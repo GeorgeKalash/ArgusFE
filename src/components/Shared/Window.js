@@ -85,14 +85,27 @@ const Window = ({
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
+                 sx={{
+                  ...(controlled
+                    ? {
+                         height: expanded ? containerHeight : height // Expand height to 100% when expanded
+                      }
+                    : {
+                        minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
+                      }),
+                  width: expanded ? containerWidth : width // Expand width to 100% when expanded
+                  // ... (other styles)
+                }}
+                style={
+                  controlled
+                    ? {
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }
+                    : {}
+                }
+              >
 
-            //onKeyDown={handleKeyDown}
-            sx={{
-              width: expanded ? containerWidth : width, // Expand width to 100% when expanded
-              minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
-              // ... (other styles)
-            }}
-          >
             <DialogTitle
               id='draggable-dialog-title'
               sx={{

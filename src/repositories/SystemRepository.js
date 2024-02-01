@@ -106,7 +106,8 @@ export const SystemRepository = {
     set2: service + 'set2FUN'
   },
   SMSFunctionTemplate: {
-    qry: service + 'qrySFT'
+    qry: service + 'qrySFT',
+    set: service + 'set2SFT'
   },
   Users: {
     qry: service + 'qryUS',

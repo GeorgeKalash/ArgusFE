@@ -13,8 +13,10 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import * as yup from 'yup'
 
@@ -73,6 +75,8 @@ function useLookup({ endpointId, parameters }) {
 export default function TransactionForm({ recordId, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
+  const [infoAutoFilled, setInfoAutoFilled] = useState(false)
+  const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
 
   const { stack: stackError } = useError()
 
@@ -154,8 +158,9 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           rows: record.items,
           plantId: record.headerView.plantId,
           clientType: record.clientMaster.category,
-          date: dayjs(formatDateFromApi(record.headerView.date)),
+          date: formatDateFromApi(record.headerView.date),
           clientId: record.clientIndividual.clientId,
+          clientName: record.headerView.clientName,
           firstName: record.clientIndividual.firstName,
           lastName: record.clientIndividual.lastName,
           middleName: record.clientIndividual.middleName,
@@ -164,7 +169,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           fl_lastName: record.clientIndividual.fl_lastName,
           fl_middleName: record.clientIndividual.fl_middleName,
           fl_familyName: record.clientIndividual.fl_familyName,
-          birth_date: dayjs(formatDateFromApi(record.clientIndividual.birthDate)),
+          birth_date: formatDateFromApi(record.clientIndividual.birthDate),
           resident: record.clientIndividual.isResident,
           profession: record.clientIndividual.professionId,
           source_of_income: record.clientIndividual.incomeSourceId,
@@ -172,7 +177,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           id_number: record.clientIDView.idNo,
           issue_country: record.clientIDView.idCountryId,
           id_type: record.clientIDView.idtId,
-          expiry_date: dayjs(formatDateFromApi(record.clientIDView.idExpiryDate)),
+          expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
           remarks: record.headerView.notes,
           purpose_of_exchange: record.headerView.poeId,
           nationality: record.clientMaster.nationalityId,
@@ -261,7 +266,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
         cellPhone: values.cell_phone,
         oldReference: null,
         otp: null,
-        createdDate: dayjs(),
+        createdDate: formatDateToApiFunction(values.date),
         expiryDate: null
       },
       clientIndividual: {
@@ -307,6 +312,40 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     setEditMode(true)
   }
 
+  async function fetchClientInfo({ clientId }) {
+    const response = await getRequest({
+      extension: RTCLRepository.Client.get,
+      parameters: `_clientId=${clientId}`
+    })
+
+    var clientInfo = response.record
+    if (!!clientInfo) {
+      formik.setFieldValue('firstName', clientInfo.firstName)
+      formik.setFieldValue('middleName', clientInfo.middleName)
+      formik.setFieldValue('lastName', clientInfo.lastName)
+      formik.setFieldValue('familyName', clientInfo.familyName)
+      formik.setFieldValue('fl_firstName', clientInfo.fl_firstName)
+      formik.setFieldValue('fl_lastName', clientInfo.fl_lastName)
+      formik.setFieldValue('fl_middleName', clientInfo.fl_middleName)
+      formik.setFieldValue('fl_familyName', clientInfo.fl_familyName)
+      formik.setFieldValue('birth_date', formatDateFromApi(clientInfo.birthDate))
+      formik.setFieldValue('resident', clientInfo.isResident)
+      formik.setFieldValue('profession', clientInfo.professionId)
+      formik.setFieldValue('sponsor', clientInfo.sponsorName)
+      formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
+      setInfoAutoFilled(true)
+    }
+  }
+
+  async function fetchIDInfo({ idNumber }) {
+    const response = await getRequest({
+      extension: CTCLRepository.IDNumber.get,
+      parameters: `_idNo=${idNumber}`
+    })
+
+    return response.record
+  }
+
   return (
     <FormShell height={400} form={formik} resourceId={35208} editMode={editMode}>
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
@@ -344,18 +383,21 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
               <Grid item xs={4}>
                 <CustomLookup
                   onChange={(e, v) => {
-                    const client = valueOf(v?.recordId)
-                    if (client) formik.setFieldValue('clientId', client.recordId)
+                    const client = valueOf(v.recordId)
+                    if (client) {
+                      formik.setFieldValue('clientId', client.recordId)
+                      fetchClientInfo({ clientId: client.recordId })
+                    }
                   }}
                   valueField='name'
                   displayField='name'
                   setStore={clear}
                   store={store}
                   value={formik.values.clientId}
-                  firstValue={'somevalue'}
+                  firstValue={formik.values.clientName}
                   secondDisplayField={false}
                   onLookup={lookup}
-                  readOnly={editMode}
+                  readOnly={editMode || idInfoAutoFilled}
                 />
               </Grid>
             </Grid>
@@ -459,7 +501,29 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           <FieldSet title='Individual'>
             <Grid container spacing={4}>
               <Grid item xs={2}>
-                <FormField name='id_number' Component={CustomTextField} readOnly={editMode} required />
+                <FormField
+                  name='id_number'
+                  Component={CustomTextField}
+                  onBlur={e => {
+                    fetchIDInfo({ idNumber: e.target.value })
+                      .then(IDInfo => {
+                        if (!!IDInfo) {
+                          formik.setFieldValue('issue_country', IDInfo.idCountryId)
+                          formik.setFieldValue('id_type', IDInfo.idtId)
+                          formik.setFieldValue('expiry_date', formatDateFromApi(IDInfo.idExpiryDate))
+                          if (IDInfo.clientId != null) {
+                            fetchClientInfo({ clientId: IDInfo.clientId })
+                          }
+                          setIDInfoAutoFilled(true)
+                        }
+                      })
+                      .catch(error => {
+                        console.error('Error fetching ID info:', error)
+                      })
+                  }}
+                  readOnly={editMode}
+                  required
+                />
               </Grid>
               <Grid item xs={2}>
                 {/* <Button
@@ -487,34 +551,44 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                 </Button> */}
               </Grid>
               <Grid item xs={2}>
-                <FormField name='firstName' Component={CustomTextField} readOnly={editMode} required />
+                <FormField
+                  name='firstName'
+                  Component={CustomTextField}
+                  readOnly={editMode || infoAutoFilled}
+                  required
+                />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='middleName' Component={CustomTextField} readOnly={editMode} />
+                <FormField name='middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='lastName' Component={CustomTextField} readOnly={editMode} required />
+                <FormField name='lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} required />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='familyName' Component={CustomTextField} readOnly={editMode} />
+                <FormField name='familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='birth_date' Component={CustomDatePicker} readOnly={editMode} required />
+                <FormField
+                  name='birth_date'
+                  Component={CustomDatePicker}
+                  readOnly={editMode || infoAutoFilled}
+                  required
+                />
               </Grid>
               <Grid item xs={2}>
                 {/* <FormField name='birth_date' Component={CustomDatePicker} /> */}
               </Grid>
               <Grid item xs={2}>
-                <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode} />
+                <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode} />
+                <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode} />
+                <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode} />
+                <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
               </Grid>
               <Grid item xs={2}>
                 <FormField
@@ -523,7 +597,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                   valueField='recordId'
                   displayField='name'
-                  readOnly={editMode}
+                  readOnly={editMode || idInfoAutoFilled}
                   required
                 />
               </Grid>
@@ -533,10 +607,15 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
               </Grid>
               <Grid item xs={2} />
               <Grid item xs={6}>
-                <FormField name='sponsor' Component={CustomTextField} readOnly={editMode} />
+                <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
               </Grid>
               <Grid item xs={2}>
-                <FormField name='expiry_date' Component={CustomDatePicker} readOnly={editMode} required />
+                <FormField
+                  name='expiry_date'
+                  Component={CustomDatePicker}
+                  readOnly={editMode || idInfoAutoFilled}
+                  required
+                />
               </Grid>
               <Grid item xs={2}>
                 {/* <FormField name='expiry_date' Component={CustomDatePicker} /> */}
@@ -568,7 +647,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  readOnly={editMode}
+                  readOnly={editMode || idInfoAutoFilled}
                   required
                 />
               </Grid>
@@ -584,7 +663,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  readOnly={editMode}
+                  readOnly={editMode || infoAutoFilled}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -615,7 +694,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  readOnly={editMode}
+                  readOnly={editMode || infoAutoFilled}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -632,7 +711,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   onChange={formik.handleChange}
                   control={<Checkbox defaultChecked />}
                   label='Resident'
-                  readOnly={editMode}
+                  readOnly={editMode || infoAutoFilled}
                 />
               </Grid>
             </Grid>

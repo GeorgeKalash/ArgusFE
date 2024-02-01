@@ -10,7 +10,7 @@ const ProductionLineWindow = ({ onClose, labels, maxAccess, recordId }) => {
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
+      height={400}
     >
       <CustomTabPanel>
         <ProductionLineForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
