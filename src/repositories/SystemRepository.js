@@ -116,10 +116,7 @@ export const SystemRepository = {
     del: service + 'delUS',
     page: service + 'pageUS'
   },
-  SystemPlant: {
-    get: service + 'getUD'
-  },
-  UserDocument: {
+  UserDefaults: {
     qry: service + 'qryUD',
     get: service + 'getUD',
     set: service + 'setUD'
@@ -134,5 +131,10 @@ export const SystemRepository = {
     set: service + 'setST',
     del: service + 'delST',
     page: service + 'pageST'
+  },
+  Defaults:{
+    qry: service + 'qryDE',
+    get: service + 'getDE',
+    set: service + 'set2DE',
   }
 }
