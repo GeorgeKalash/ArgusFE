@@ -118,14 +118,15 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
     onSubmit
   })
 
-  const [type, setType] = useState(null)
+  const [rateType, setRateType] = useState(null)
 
   async function setOperationType(type) {
     const res = await getRequest({
       extension: 'SY.asmx/getDE',
-      parameters: type === 'purchase' ? '_key=mc_defaultRTPU' : type === 'sale' ? '_key=mc_defaultRTSA' : ''
+      parameters: type === '3502' ? '_key=mc_defaultRTPU' : type === '3503' ? '_key=mc_defaultRTSA' : ''
     })
-    setType(res.record.value)
+    setRateType(res.record.value)
+    formik.setFieldValue('functionId', type)
   }
 
   const [currencyStore, setCurrencyStore] = useState([])
@@ -172,7 +173,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           nationality: record.clientMaster.nationalityId,
           cell_phone: record.clientMaster.cellPhone
         })
-        setType(1)
+        setRateType(record.headerView.functionId.toString())
       }
 
       setCurrencyStore(response.list)
@@ -192,7 +193,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
 
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeRate.get,
-      parameters: `_plantId=${record.value}&_currencyId=${currencyId}&_rateTypeId=${type}`
+      parameters: `_plantId=${record.value}&_currencyId=${currencyId}&_rateTypeId=${rateType}`
     })
 
     return response.record
@@ -206,11 +207,9 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
   })
 
   async function onSubmit(values) {
-    const functionId = values.type === 1 ? 3502 : 3503
-
     const { record: recordFunctionId } = await getRequest({
       extension: `SY.asmx/getUFU`,
-      parameters: `_userId=${userId}&_functionId=${functionId}`
+      parameters: `_userId=${userId}&_functionId=${values.functionId}`
     })
 
     const { dtId } = recordFunctionId
@@ -228,7 +227,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
         reference: values.reference,
         status: values.status,
         date: formatDateToApiFunction(values.date),
-        functionId,
+        functionId: values.functionId,
         plantId: plantId,
         clientId,
         cashAccountId: cashAccountRecord.value,
@@ -326,9 +325,9 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                 />
               </Grid>
               <Grid item xs={4}>
-                <RadioGroup row value={type} onChange={e => setOperationType(e.target.value)}>
-                  <FormControlLabel value='purchase' control={<Radio />} label={labels.purchase} disabled={!!type} />
-                  <FormControlLabel value='sale' control={<Radio />} label={labels.sale} disabled={!!type} />
+                <RadioGroup row value={formik.values.functionId} onChange={e => setOperationType(e.target.value)}>
+                  <FormControlLabel value={'3502'} control={<Radio />} label={labels.purchase} disabled={!!rateType} />
+                  <FormControlLabel value={'3503'} control={<Radio />} label={labels.sale} disabled={!!rateType} />
                 </RadioGroup>
               </Grid>
               <Grid item xs={4}>
@@ -413,12 +412,13 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                       rowData: { exRate, rateCalcMethod },
                       newValue
                     } = e
+                    if (!newValue) return
 
                     const lcAmount =
                       rateCalcMethod === 1
-                        ? parseFloat(newValue.replace(/,/g, '')) * exRate
+                        ? parseFloat(newValue.toString().replace(/,/g, '')) * exRate
                         : rateCalcMethod === 2
-                        ? parseFloat(newValue.replace(/,/g, '')) / exRate
+                        ? parseFloat(newValue.toString().replace(/,/g, '')) / exRate
                         : 0
                     formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
                     e.rowData.lcAmount = lcAmount
