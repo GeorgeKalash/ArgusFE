@@ -387,6 +387,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                     ],
                     async onChange(row) {
                       if (!row.newValue) return
+                      
                       const exchange = await fetchRate({
                         currencyId: row.newValue
                       })

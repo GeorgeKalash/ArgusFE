@@ -265,6 +265,7 @@ const InlineEditGrid = ({
                 else return ''
               }
             }}
+            
             // getOptionLabel={option => {
             //   if (typeof option === 'object') {
             //     if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
@@ -387,7 +388,7 @@ const InlineEditGrid = ({
                   </Box>
                 )
             }}
-            
+
             // onFocus={() => setOpen(true)}
 
             // getOptionLabel={option => {
