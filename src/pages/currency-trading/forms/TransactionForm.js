@@ -157,7 +157,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           reference: record.headerView.reference,
           rows: record.items,
           clientType: record.clientMaster.category,
-          date: dayjs(formatDateFromApi(record.headerView.date)),
+          date: formatDateFromApi(record.headerView.date),
           clientId: record.clientIndividual.clientId,
           clientName: record.headerView.clientName,
           firstName: record.clientIndividual.firstName,
@@ -168,7 +168,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           fl_lastName: record.clientIndividual.fl_lastName,
           fl_middleName: record.clientIndividual.fl_middleName,
           fl_familyName: record.clientIndividual.fl_familyName,
-          birth_date: dayjs(formatDateFromApi(record.clientIndividual.birthDate)),
+          birth_date: formatDateFromApi(record.clientIndividual.birthDate),
           resident: record.clientIndividual.isResident,
           profession: record.clientIndividual.professionId,
           source_of_income: record.clientIndividual.incomeSourceId,
@@ -176,7 +176,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           id_number: record.clientIDView.idNo,
           issue_country: record.clientIDView.idCountryId,
           id_type: record.clientIDView.idtId,
-          expiry_date: dayjs(formatDateFromApi(record.clientIDView.idExpiryDate)),
+          expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
           remarks: record.headerView.notes,
           purpose_of_exchange: record.headerView.poeId,
           nationality: record.clientMaster.nationalityId,
@@ -265,7 +265,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
         cellPhone: values.cell_phone,
         oldReference: null,
         otp: null,
-        createdDate: dayjs(),
+        createdDate: formatDateToApiFunction(values.date),
         expiryDate: null
       },
       clientIndividual: {
@@ -327,7 +327,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
       formik.setFieldValue('fl_lastName', clientInfo.fl_lastName)
       formik.setFieldValue('fl_middleName', clientInfo.fl_middleName)
       formik.setFieldValue('fl_familyName', clientInfo.fl_familyName)
-      formik.setFieldValue('birth_date', dayjs(formatDateFromApi(clientInfo.birthDate)))
+      formik.setFieldValue('birth_date', formatDateFromApi(clientInfo.birthDate))
       formik.setFieldValue('resident', clientInfo.isResident)
       formik.setFieldValue('profession', clientInfo.professionId)
       formik.setFieldValue('sponsor', clientInfo.sponsorName)
@@ -509,7 +509,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                         if (!!IDInfo) {
                           formik.setFieldValue('issue_country', IDInfo.idCountryId)
                           formik.setFieldValue('id_type', IDInfo.idtId)
-                          formik.setFieldValue('expiry_date', dayjs(formatDateFromApi(IDInfo.idExpiryDate)))
+                          formik.setFieldValue('expiry_date', formatDateFromApi(IDInfo.idExpiryDate))
                           if (IDInfo.clientId != null) {
                             fetchClientInfo({ clientId: IDInfo.clientId })
                           }
