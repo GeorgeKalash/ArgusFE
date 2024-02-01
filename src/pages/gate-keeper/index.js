@@ -33,6 +33,7 @@ const GateKeeper = () => {
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
+  const [selectedRows, setSelectedRows] = useState({})
 
   async function getGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -82,7 +83,19 @@ const GateKeeper = () => {
     {
       field: 'date',
       headerName: _labels[6],
-      flex: 1
+      flex: 1,
+      valueFormatter: (params) => {
+        const dateString = params.value;
+        const timestamp = parseInt(dateString.match(/\d+/)[0], 10);
+        
+        if (!isNaN(timestamp)) {
+            const formattedDate = new Date(timestamp).toLocaleDateString('en-GB');
+          
+            return formattedDate;
+        } else {
+            return "Invalid Date";
+        }
+    }
     }
   ]
 console.log('labels ',_labels)
@@ -92,10 +105,11 @@ console.log('labels ',_labels)
     validateOnChange: true,
     validate: values => {},
     initialValues: {
-      rows: [{}]
+      rows: [{
+      }]
     },
     onSubmit: values => {
-      generateLean(values.rows)
+      generateLean()
     }
   })
 
@@ -104,14 +118,18 @@ console.log('labels ',_labels)
   }
 
   const handleCheckedRows = checkedRows => {
-    console.log('hanle checked rows ',checkedRows)
+     // Filter the rows to include only those with checked: true
+  const updatedRowsArray = checkedRows
+  
+  //.filter(row => row.checked);
+    setSelectedRows(updatedRowsArray)
+    console.log('selected ',selectedRows)
   }
 
-  const generateLean = obj => {
-    /* const recordId = obj.recordId
+  const generateLean = () => {
        postRequest({
-         extension: SystemRepository.SMSTemplate.set,
-         record: JSON.stringify(obj)
+         extension: ManufacturingRepository.LeanProductionPlanning.generate,
+         record: JSON.stringify(selectedRows)
        })
          .then(res => {
            getGridData({})
@@ -121,8 +139,11 @@ console.log('labels ',_labels)
          })
          .catch(error => {
            setErrorMessage(error)
-         })*/
+         })
   }
+  useEffect(() => {
+    setSelectedRows([])
+  },[])
 
   return (
     <Box
