@@ -11,92 +11,100 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
 import { getNewLean, populateLean } from 'src/Models/Manufacturing/Lean'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
+  const { height } = useWindowDimensions()
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  async function getGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  const _labels = {
-    sku: labels && labels.find(item => item.key === "1").value,
-    qty: labels && labels.find(item => item.key === "2").value,
-    lean: labels && labels.find(item => item.key === "3").value,
-    item: labels && labels.find(item => item.key === "4").value,
-    reference: labels && labels.find(item => item.key === "5").value,
-    date: labels && labels.find(item => item.key === "6").value,
-    generateLean: labels && labels.find(item => item.key === "7").value,
+    return await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.preview,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_status=2`
+    })
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: getGridData,
+    endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
+    datasetId: ResourceIds.GateKeeper
+  })
 
   const columns = [
     {
-        field: 'sku',
-        headerName: _labels.sku,
-        flex: 1
-      },
-      {
-        field: 'qty',
-        headerName: _labels.qty,
-        flex: 1
-      },
-      {
-        field: 'status',
-        headerName: _labels.lean,
-        flex: 1
-      },
-      {
-        field: 'itemName',
-        headerName: _labels.item,
-        flex: 1
-      },
-      {
-        field: 'reference',
-        headerName: _labels.reference,
-        flex: 1
-      },
-      {
-        field: 'date',
-        headerName: _labels.date,
-        flex: 1
-      }
+      field: 'sku',
+      headerName: _labels[1],
+      flex: 1
+    },
+    {
+      field: 'qty',
+      headerName: _labels[2],
+      flex: 1
+    },
+    {
+      field: 'leanStatusName',
+      headerName: _labels[3],
+      flex: 1
+    },
+    {
+      field: 'itemName',
+      headerName: _labels[4],
+      flex: 1
+    },
+    {
+      field: 'reference',
+      headerName: _labels[5],
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: _labels[6],
+      flex: 1
+    }
   ]
+console.log('labels ',_labels)
 
   const gateKeeperValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     validate: values => {},
     initialValues: {
-      rows: [
-        {
-          
-        }
-      ]
+      rows: [{}]
     },
     onSubmit: values => {
-     generateLean(values.rows)
+      generateLean(values.rows)
     }
   })
 
-  const getGridData = () => {
-    
+  const handleSubmit = () => {
+    gateKeeperValidation.handleSubmit()
+  }
+
+  const handleCheckedRows = checkedRows => {
+    console.log('hanle checked rows ',checkedRows)
   }
 
   const generateLean = obj => {
@@ -116,31 +124,40 @@ const GateKeeper = () => {
          })*/
   }
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.GateKeeper, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData()
-        getLabels(ResourceIds.GateKeeper, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [access])
-
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-      </Box>
+    <Box
+      sx={{
+        height: `${height - 80}px`
+      }}
+    >
+      <CustomTabPanel index={0} value={0}>
+        <Box sx={{ width: '100%' }}>
+          <Table
+            columns={columns}
+            gridData={data}
+            rowId={['recordId']}
+            isLoading={false}
+            maxAccess={access}
+            showCheckboxColumn={true}
+            handleCheckedRows={handleCheckedRows}
+            pagination={false}
+          />
+        </Box>
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: -20,
+            left: 0,
+            width: '100%',
+            margin: 0
+          }}
+        >
+          <WindowToolbar onSave={handleSubmit}  smallBox={true}/>
+        </Box>
+      </CustomTabPanel>
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </Box>
   )
 }
 

@@ -260,6 +260,7 @@ const Table = ({ pagination = true, paginationType = 'api',handleCheckedRows,hei
   const columns = props.columns
 
   const handleCheckboxChange = (row) => {
+    console.log('hanle 2 ',row)
     setCheckedRows((prevCheckedRows) => {
       const newCheckedRows = { ...prevCheckedRows, [row.recordId]: !prevCheckedRows[row.recordId] };
       handleCheckedRows(newCheckedRows); // Use the updated state to prevent delays
