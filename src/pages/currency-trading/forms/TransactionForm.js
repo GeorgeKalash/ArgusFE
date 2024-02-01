@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid, Radio, RadioGroup } from '@mui/material'
+import { Button, Checkbox, FormControlLabel, Grid, Radio, RadioGroup } from '@mui/material'
 import dayjs from 'dayjs'
 import { useFormik } from 'formik'
 import React, { useContext, useEffect, useState } from 'react'
@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Confirmation from 'src/components/Shared/Confirmation'
 import FieldSet from 'src/components/Shared/FieldSet'
 import FormShell from 'src/components/Shared/FormShell'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
@@ -18,6 +19,7 @@ import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradin
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useWindow } from 'src/windows'
 import * as yup from 'yup'
 
 const FormContext = React.createContext(null)
@@ -77,8 +79,9 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
-
   const { stack: stackError } = useError()
+  const { stack } = useWindow();
+  const [idTypeStore, setIdTypeStore] = useState([]);
 
   const [initialValues, setInitialValues] = useState({
     recordId: null,
@@ -115,7 +118,9 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
       lastName: yup.string().required(),
       issue_country: yup.string().required(),
       nationality: yup.string().required(),
-      cell_phone: yup.string().required()
+      cell_phone: yup.string().required(),
+      profession: yup.string().required()
+
     }),
     initialValues,
     onSubmit
@@ -134,7 +139,27 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
 
   const [currencyStore, setCurrencyStore] = useState([])
 
+  const fillType = () => {
+    var parameters = `_filter=`;
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.IdTypes.qry,
+      parameters: parameters,
+    })
+      .then((res) => {
+        setIdTypeStore(res.list);
+      })
+      .catch((error) => {
+        // setErrorMessage(error);
+      });
+  };
   useEffect(() => {
+    const date = new Date();
+
+   !editMode && formik.setFieldValue( 'date' , date)
+
+   fillType()
+
+
     ;(async function () {
       const response = await getRequest({
         extension: SystemRepository.Currency.qry,
@@ -350,10 +375,10 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           <FieldSet title='Transaction'>
             <Grid container spacing={4}>
               <Grid item xs={4}>
-                <FormField name='reference' Component={CustomTextField} readOnly />
+                <FormField name='reference' Component={CustomTextField} readOnly  />
               </Grid>
               <Grid item xs={4}>
-                <FormField name='date' Component={CustomDatePicker} required readOnly={editMode} />
+                <FormField name='date'  Component={CustomDatePicker} required readOnly={editMode}  />
               </Grid>
               <Grid item xs={4}>
                 <FormField
@@ -522,7 +547,9 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   required
                 />
               </Grid>
+
               <Grid item xs={2}>
+
                 {/* <Button
                   variant='contained'
                   onClick={() =>
@@ -547,6 +574,37 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   Fetch
                 </Button> */}
               </Grid>
+              {/* <Grid item xs={2}>
+                    <Button
+                      variant="contained"
+                      onClick={() =>
+                        stack({
+                          Component: Confirmation,
+                          props: {
+                            idTypeStore: idTypeStore,
+                            formik: formik,
+
+                            // setErrorMessage: setErrorMessage,
+                            labels: labels,
+                          },
+
+                          // title: _labels.fetch,
+                          width: 400,
+                          height: 400,
+                        })
+                      }
+                      disabled={
+                        (!formik?.values?.id_type ||
+                        !formik?.values?.birth_date ||
+                        !formik.values.id_number ||
+                        editMode)
+                          ? true
+                          : false
+                      }
+                    >
+                      {"fetch"}
+                    </Button>
+                  </Grid> */}
               <Grid item xs={2}>
                 <FormField
                   name='firstName'
@@ -685,6 +743,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   name='profession'
                   Component={ResourceComboBox}
                   endpointId={'RTSET.asmx/qryPFN'}
+                  required
                   valueField='recordId'
                   displayField={['reference', 'name']}
                   columnsInDropDown={[

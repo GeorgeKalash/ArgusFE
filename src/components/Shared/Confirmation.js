@@ -34,9 +34,9 @@ const Confirmation=({
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
-      idtId: formik.values.idtId,
-      birthDate: formik.values.birthDate,
-      idNo: formik.values.idNo,
+      idtId: formik.values?.idtId ? formik.values.idtId : formik.values?.id_type,
+      birthDate: formik.values?.birthDate ? formik.values.birthDate : formik.values?.birth_date,
+      idNo: formik.values?.idNo ? formik.values.idNo : formik.values?.id_number,
       idNoRepeat: '',
     },
 
@@ -79,7 +79,7 @@ return (
             editMode={editMode}
         >
           <Grid container spacing={4}>
-           <Grid item xs={12}>
+           <Grid item xs={12}>{}
                   <CustomComboBox
                     name="idtId"
                     label={labels.type}
@@ -87,11 +87,12 @@ return (
                     displayField="name"
                     readOnly={ true}
                     store={idTypeStore}
-                    value={ fetchFormik.values.idtId &&
+
+                    value={ (fetchFormik.values?.idtId || fetchFormik.values?.id_type) &&
                       idTypeStore.filter(
                         (item) =>
                           item.recordId ===
-                          fetchFormik.values.idtId,
+                          (fetchFormik.values.idtId || fetchFormik.values.id_type),
                       )[0]
                     }
                     required
@@ -102,7 +103,8 @@ return (
               <CustomDatePicker
                 name="birthDate"
                 label={labels.birthDate}
-                value={fetchFormik.values?.birthDate}
+
+                value={fetchFormik.values?.birthDate ? fetchFormik.values?.birthDate  : fetchFormik.values?.birth_date}
                 required={true}
                 onChange={fetchFormik.setFieldValue}
                 onClear={() =>
@@ -128,7 +130,8 @@ return (
                     name="idNo"
                     label={labels.number}
                     type={showAsPassword && 'password'}
-                    value={fetchFormik.values?.idNo }
+
+                    value={fetchFormik.values?.idNo? fetchFormik.values?.idNo : fetchFormik.values?.id_number }
                     required
                     onChange={ (e) =>{ fetchFormik.handleChange(e) }}
                     onCopy={handleCopy}
@@ -162,6 +165,7 @@ return (
                   <CustomTextField
                     name="idNoRepeat"
                     label={labels.confirmNb}
+
                     value={fetchFormik.values?.idNoRepeat}
                     required
                     type={ showAsPasswordRepeat && "password"}
