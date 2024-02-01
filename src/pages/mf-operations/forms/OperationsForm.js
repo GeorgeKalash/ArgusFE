@@ -23,6 +23,7 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
     const [initialValues, setInitialData] = useState({
         recordId: null,
         reference: '',
+        name:'',
         workCenterId: '',
         workCenterName: '',
         maxLossPct: '',
@@ -43,6 +44,7 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
         validationSchema: yup.object({
           reference: yup.string().required('This field is required'),
           name: yup.string().required('This field is required'),
+          workCenterId: yup.string().required('This field is required'),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
@@ -96,7 +98,7 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
         >
             <Grid container spacing={4}>
                 <Grid item xs={12}>
-                    <CustomTextField
+                  <CustomTextField
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
@@ -107,60 +109,60 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
                     helperText={formik.touched.reference && formik.errors.reference}
-                    />
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                    <CustomTextField
+                  <CustomTextField
                     name='name'
                     label={labels.name}
                     value={formik.values.name}
                     required
-                    maxLength='40'
                     maxAccess={maxAccess}
+                    maxLength='40'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
                     error={formik.touched.name && Boolean(formik.errors.name)}
                     helperText={formik.touched.name && formik.errors.name}
-                    />
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                    <CustomTextField
-                      name='maxLossPct'
-                      label={labels.maxLossPct}
-                      value={formik.values.maxLossPct}
-                      type='numeric'
-                      numberField={true}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('maxLossPct', '')}
-                      error={formik.touched.maxLossPct && Boolean(formik.errors.maxLossPct)}
-                      helperText={formik.touched.maxLossPct && formik.errors.maxLossPct}
-                    />
+                  <CustomTextField
+                    name='maxLossPct'
+                    label={labels.maxLossPct}
+                    value={formik.values.maxLossPct}
+                    type='numeric'
+                    numberField={true}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('maxLossPct', '')}
+                    error={formik.touched.maxLossPct && Boolean(formik.errors.maxLossPct)}
+                    helperText={formik.touched.maxLossPct && formik.errors.maxLossPct}
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                    <ResourceComboBox
-                      endpointId={ManufacturingRepository.WorkCenter.qry}
-                      name='workCenterId'
-                      label={labels.workCenterId}
-                      required
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]}
-                      valueField='recordId'
-                      displayField='name'
-                      values={formik.values}
-                      onChange={(event, newValue) => {
-                        if (newValue) {
-                          formik.setFieldValue('workCenterId', newValue?.recordId)
-                        } else {
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.WorkCenter.qry}
+                    name='workCenterId'
+                    label={labels.workCenterId}
+                    required
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue('workCenterId', newValue?.recordId)
+                      } else {
 
-                          formik.setFieldValue('workCenterId', '')
-                        }
+                        formik.setFieldValue('workCenterId', '')
+                      }
 
-                      }}
-                      error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
-                      helperText={formik.touched.workCenterId && formik.errors.workCenterId}
-                    />
+                    }}
+                    error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+                    helperText={formik.touched.workCenterId && formik.errors.workCenterId}
+                  />
                 </Grid>                
             </Grid>
         </FormShell>
