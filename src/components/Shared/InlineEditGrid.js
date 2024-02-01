@@ -19,6 +19,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
 }
+
 const dateFormat =
   typeof window !== 'undefined' &&
   window.localStorage.getItem('default') &&
@@ -263,6 +264,7 @@ const InlineEditGrid = ({
                 else return ''
               }
             }}
+            
             // getOptionLabel={option => {
             //   if (typeof option === 'object') {
             //     if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
@@ -385,6 +387,7 @@ const InlineEditGrid = ({
                   </Box>
                 )
             }}
+
             // onFocus={() => setOpen(true)}
 
             // getOptionLabel={option => {
@@ -423,7 +426,6 @@ const InlineEditGrid = ({
                 }
               }
             }}
-            // noOptionsText=""
             PaperComponent={props =>
               column.columnsInDropDown &&
               column.columnsInDropDown.length > 0 &&

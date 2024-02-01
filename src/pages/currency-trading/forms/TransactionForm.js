@@ -159,6 +159,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           clientType: record.clientMaster.category,
           date: dayjs(formatDateFromApi(record.headerView.date)),
           clientId: record.clientIndividual.clientId,
+          clientName: record.headerView.clientName,
           firstName: record.clientIndividual.firstName,
           lastName: record.clientIndividual.lastName,
           middleName: record.clientIndividual.middleName,
@@ -392,7 +393,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   setStore={clear}
                   store={store}
                   value={formik.values.clientId}
-                  firstValue={'somevalue'}
+                  firstValue={formik.values.clientName}
                   secondDisplayField={false}
                   onLookup={lookup}
                   readOnly={editMode || idInfoAutoFilled}
