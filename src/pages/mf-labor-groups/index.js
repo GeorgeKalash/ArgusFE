@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -11,11 +11,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 // ** Windows
-import GroupsWindow from './Windows/GroupsWindow'
+import LaborGroupsWindow from './Windows/LaborGroupsWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -24,22 +23,20 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const Groups = () => {
+const LaborGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: BusinessPartnerRepository.Groups.page,
+      extension: ManufacturingRepository.LaborGroup.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -50,45 +47,28 @@ const Groups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.Groups.page,
-    datasetId: ResourceIds.Groups
+    endpointId: ManufacturingRepository.LaborGroup.page,
+    datasetId: ResourceIds.LaborGroups
   })
 
   const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.Groups.page
+    endpointId: ManufacturingRepository.LaborGroup.page
   })
-
 
   const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1,
-      editable: false
+      flex: 1
     },
     {
       field: 'name',
       headerName: _labels.name,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'nraRef',
-      headerName: _labels.numberRange,
-      flex: 1,
-      editable: false
-    },
-    {
-      field:'nraDescription',
-      headerName:_labels.numberRange,
-      flex: 1,
-      editable: false
+      flex: 1
     }
-
   ]
-  
-  const add = () => {
 
+  const add = () => {
     setWindowOpen(true)
   }
 
@@ -96,10 +76,10 @@ const Groups = () => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
-  
+
   const del = async obj => {
     await postRequest({
-      extension: BusinessPartnerRepository.Groups.del,
+      extension: ManufacturingRepository.LaborGroup.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -122,26 +102,21 @@ const Groups = () => {
           maxAccess={access}
         />
       </Box>
-
       {windowOpen && (
-        <GroupsWindow
-        onClose={() => {
-          setWindowOpen(false)
-          setSelectedRecordId(null)
-        }}
-        labels={_labels}
-        maxAccess={access}
-        recordId={selectedRecordId}
-        setSelectedRecordId={setSelectedRecordId}
-        
-   
-      />
-    )}
-    <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-  </>
-)
+        <LaborGroupsWindow
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
+          labels={_labels}
+          maxAccess={access}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
+        />
+      )}
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+    </>
+  )
 }
 
-export default Groups
-
-
+export default LaborGroups

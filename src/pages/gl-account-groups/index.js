@@ -1,3 +1,5 @@
+
+
 // ** React Imports
 import { useState, useContext } from 'react'
 
@@ -12,10 +14,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 // ** Windows
-import GroupsWindow from './Windows/GroupsWindow'
+import AccountGroupsWindow from './Windows/AccountGroupsWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -24,7 +26,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const Groups = () => {
+const AccountGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -33,13 +35,11 @@ const Groups = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: BusinessPartnerRepository.Groups.page,
+      extension: GeneralLedgerRepository.GLAccountGroups.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -50,45 +50,29 @@ const Groups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.Groups.page,
-    datasetId: ResourceIds.Groups
+    endpointId: GeneralLedgerRepository.GLAccountGroups.page,
+    datasetId: ResourceIds.GLAccountGroups
   })
 
   const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.Groups.page
+    endpointId: GeneralLedgerRepository.GLAccountGroups.page
   })
-
 
   const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1,
-      editable: false
+      flex: 1
     },
     {
       field: 'name',
       headerName: _labels.name,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'nraRef',
-      headerName: _labels.numberRange,
-      flex: 1,
-      editable: false
-    },
-    {
-      field:'nraDescription',
-      headerName:_labels.numberRange,
-      flex: 1,
-      editable: false
+      flex: 1
     }
-
   ]
-  
-  const add = () => {
 
+
+  const add = () => {
     setWindowOpen(true)
   }
 
@@ -96,15 +80,16 @@ const Groups = () => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
-  
+
   const del = async obj => {
     await postRequest({
-      extension: BusinessPartnerRepository.Groups.del,
+      extension: GeneralLedgerRepository.GLAccountGroups.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
+  
 
   return (
     <>
@@ -122,26 +107,21 @@ const Groups = () => {
           maxAccess={access}
         />
       </Box>
-
       {windowOpen && (
-        <GroupsWindow
-        onClose={() => {
-          setWindowOpen(false)
-          setSelectedRecordId(null)
-        }}
-        labels={_labels}
-        maxAccess={access}
-        recordId={selectedRecordId}
-        setSelectedRecordId={setSelectedRecordId}
-        
-   
-      />
-    )}
-    <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-  </>
-)
+        <AccountGroupsWindow
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
+          labels={_labels}
+          maxAccess={access}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
+        />
+      )}
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+    </>
+  )
 }
 
-export default Groups
-
-
+export default AccountGroups

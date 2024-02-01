@@ -1,8 +1,9 @@
+// ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import GroupsForm from '../forms/GroupsForm'
+import LaborGroupsForm from '../forms/LaborGroupsForm'
 
-const GroupsWindow = ({
+const LaborGroupsWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -11,15 +12,15 @@ const GroupsWindow = ({
   
   return (
     <Window
-      id='Groups'
-      Title={labels.bpGroups}
+      id='LaborGroupsWindow'
+      Title={labels.LaborGroups}
       controlled={true}
       onClose={onClose}
       width={500}
       height={300}
     >
       <CustomTabPanel>
-        <GroupsForm
+        <LaborGroupsForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
@@ -30,4 +31,4 @@ const GroupsWindow = ({
   )
 }
 
-export default GroupsWindow
+export default LaborGroupsWindow

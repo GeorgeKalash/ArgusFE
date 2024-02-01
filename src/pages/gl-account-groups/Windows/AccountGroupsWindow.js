@@ -1,8 +1,8 @@
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import GroupsForm from '../forms/GroupsForm'
+import AccountGroupsForm from '../forms/AccountGroupsForm'
 
-const GroupsWindow = ({
+const AccountGroupsWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -11,15 +11,15 @@ const GroupsWindow = ({
   
   return (
     <Window
-      id='Groups'
-      Title={labels.bpGroups}
+      id='AccountGroupsWindow'
+      Title={labels.accountGroup}
       controlled={true}
       onClose={onClose}
       width={500}
       height={300}
     >
       <CustomTabPanel>
-        <GroupsForm
+        <AccountGroupsForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
@@ -30,4 +30,4 @@ const GroupsWindow = ({
   )
 }
 
-export default GroupsWindow
+export default AccountGroupsWindow
