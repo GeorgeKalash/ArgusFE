@@ -20,7 +20,6 @@ export function useResourceQuery({ endpointId, datasetId, queryFn }) {
 }
 
 export function useInvalidate({ endpointId }) {
-  console.log('use invalidate')
   const queryClient = useQueryClient()
 
   return function () {
