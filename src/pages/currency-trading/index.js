@@ -6,7 +6,7 @@ import TransactionForm from './forms/TransactionForm'
 import { useWindow } from 'src/windows'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -22,6 +22,7 @@ export default function CurrencyTrading() {
         recordId
       },
       width: 1200,
+      height:600,
       title: 'Cash Invoice'
     })
   }
@@ -60,7 +61,7 @@ export default function CurrencyTrading() {
                 field: 'createdDate',
                 headerName: labels.date,
                 flex: 1,
-                valueGetter: ({ row }) => formatDateFromApi(row?.createdDate)
+                valueGetter: ({ row }) => formatDateDefault(row?.date)
               },
               {
                 field: 'clientName',
