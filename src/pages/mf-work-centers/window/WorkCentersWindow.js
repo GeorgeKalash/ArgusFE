@@ -17,8 +17,8 @@ const WorkCentersWindow = ({
       Title={labels.workCenter}
       controlled={true}
       onClose={onClose}
-      width={700}
-      height={400}
+      width={600}
+      height={450}
     >
       <CustomTabPanel>
         <WorkCentersForm

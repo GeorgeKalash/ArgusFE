@@ -51,10 +51,10 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
-          reference: yup.string().required('This field is required'),
-          name: yup.string().required('This field is required'),
-          siteId: yup.string().required('This field is required'),
-          plantId: yup.string().required('This field is required'),
+          reference: yup.string().required(),
+          name: yup.string().required(),
+          siteId: yup.string().required(),
+          plantId: yup.string().required(),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
@@ -103,7 +103,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
         <FormShell 
             resourceId={ResourceIds.WorkCenters}
             form={formik} 
-            height={300} 
+            height={450} 
             maxAccess={maxAccess} 
             editMode={editMode}
         >
@@ -119,7 +119,8 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    helperText={formik.touched.reference && formik.errors.reference}
+
+                    // helperText={formik.touched.reference && formik.errors.reference}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -135,7 +136,8 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
                     error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
+
+                    // helperText={formik.touched.name && formik.errors.name}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -174,7 +176,8 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
                 formik && formik.setFieldValue('siteId', newValue?.recordId)
               }}
               error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-              helperText={formik.touched.siteId && formik.errors.siteId}
+
+              // helperText={formik.touched.siteId && formik.errors.siteId}
             />
           </Grid>
           <Grid item xs={12}>
@@ -192,7 +195,8 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
                 formik && formik.setFieldValue('plantId', newValue?.recordId)
               }}
               error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-              helperText={formik.touched.plantId && formik.errors.plantId}
+
+              // helperText={formik.touched.plantId && formik.errors.plantId}
             />
             </Grid>
               <Grid item xs={12}>
