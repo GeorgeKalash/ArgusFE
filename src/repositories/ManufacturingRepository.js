@@ -28,5 +28,11 @@ export const ManufacturingRepository = {
     set: service + 'setRTN',
     get: service + 'getRTN',
     del: service + 'delRTN'
+  }, Labor: {
+    page: service + 'pageLBR',
+    qry: service + 'qryLBR',
+    set: service + 'setLBR',
+    get: service + 'getLBR',
+    del: service + 'delLBR'
   }
 }
