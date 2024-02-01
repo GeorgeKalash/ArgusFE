@@ -88,7 +88,7 @@ const Window = ({
                  sx={{
                   ...(controlled
                     ? {
-                        height: expanded ? containerHeight : height // Expand height to 100% when expanded
+                         height: expanded ? containerHeight : height // Expand height to 100% when expanded
                       }
                     : {
                         minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
@@ -100,7 +100,7 @@ const Window = ({
                   controlled
                     ? {
                         display: 'flex',
-                        flexDirection: 'column'
+                        flexDirection: 'column',
                       }
                     : {}
                 }

@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Box } from '@mui/material'
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -11,32 +11,35 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 // ** Windows
-import LaborGroupsWindow from './Windows/LaborGroupsWindow'
+import CostCenterWindow from './Window/CostCenterWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
+
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const LaborGroups = () => {
+const CostCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+ 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [gridData ,setGridData]=useState([]);
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: ManufacturingRepository.LaborGroup.page,
+      extension: GeneralLedgerRepository.CostCenter.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -47,13 +50,21 @@ const LaborGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.LaborGroup.page,
-    datasetId: ResourceIds.LaborGroups
+    endpointId: GeneralLedgerRepository.CostCenter.page,
+    datasetId: ResourceIds.CostCenter
   })
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.LaborGroup.page
+    endpointId: GeneralLedgerRepository.CostCenter.page
   })
+
+
+  const [searchValue, setSearchValue] = useState("")
+
+  function onSearchClear() {
+    setSearchValue('')
+
+  }
 
   const columns = [
     {
@@ -65,8 +76,13 @@ const LaborGroups = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    }
+    },  {
+        field: 'ccgName',
+        headerName: _labels.costCenterGroup,
+        flex: 1
+      }
   ]
+
 
   const add = () => {
     setWindowOpen(true)
@@ -79,20 +95,51 @@ const LaborGroups = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.LaborGroup.del,
+      extension: GeneralLedgerRepository.CostCenter.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
 
+ 
+  
+  const search = inp => {
+    setSearchValue(inp)    
+    setGridData({count : 0, list: [] , message :"",  statusId:1})
+     const input = inp
+     
+
+     if(input){
+    var parameters = `_filter=${input}`
+
+    getRequest({
+      extension: GeneralLedgerRepository.CostCenter.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+
+    }else{
+
+      setGridData({count : 0, list: [] , message :"",  statusId:1})
+    }
+    
+  }
+
+  
+
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={onSearchClear} labels={_labels}  inputSearch={true}/>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={searchValue.length > 0 ? gridData : data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
@@ -103,7 +150,7 @@ const LaborGroups = () => {
         />
       </Box>
       {windowOpen && (
-        <LaborGroupsWindow
+        <CostCenterWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -111,7 +158,24 @@ const LaborGroups = () => {
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
+          onSubmit={() => {
+            if(searchValue !== "") {
+              var parameters = `_filter=${searchValue}`
+
+              getRequest({
+                extension: GeneralLedgerRepository.CostCenter.snapshot,
+                parameters: parameters
+              })
+                .then(res => {
+                  setGridData(res)
+                })
+                .catch(error => {
+                  setErrorMessage(error)
+                })
+                
+            }
+          }
+        }
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
@@ -119,4 +183,4 @@ const LaborGroups = () => {
   )
 }
 
-export default LaborGroups
+export default CostCenter

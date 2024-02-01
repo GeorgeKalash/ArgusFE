@@ -12,24 +12,27 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
-export default function LaborGroupsForms({ labels, maxAccess, recordId }) {
+export default function ProductionLineForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
     reference: '',
-    name: ''
+    name: '',
+    headWCId: '',
+    routingId: '',
+    spfId: '',
+    ltId: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  //const editMode = !!recordId
-
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.LaborGroup.page
+    endpointId: ManufacturingRepository.ProductionLine.page
   })
 
   const formik = useFormik({
@@ -44,7 +47,7 @@ export default function LaborGroupsForms({ labels, maxAccess, recordId }) {
       const recordId = obj.recordId
 
       const response = await postRequest({
-        extension: ManufacturingRepository.LaborGroup.set,
+        extension: ManufacturingRepository.ProductionLine.set,
         record: JSON.stringify(obj)
       })
 
@@ -68,7 +71,7 @@ export default function LaborGroupsForms({ labels, maxAccess, recordId }) {
           setIsLoading(true)
 
           const res = await getRequest({
-            extension: ManufacturingRepository.LaborGroup.get,
+            extension: ManufacturingRepository.ProductionLine.get,
             parameters: `_recordId=${recordId}`
           })
 
@@ -83,7 +86,7 @@ export default function LaborGroupsForms({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.LaborGroups}
+      resourceId={ResourceIds.ProductionLines}
       form={formik}
       height={300}
       maxAccess={maxAccess}
@@ -96,8 +99,8 @@ export default function LaborGroupsForms({ labels, maxAccess, recordId }) {
             label={labels.reference}
             value={formik.values.reference}
             required
+            rows={2}
             maxAccess={maxAccess}
-            maxLength='6'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -110,12 +113,51 @@ export default function LaborGroupsForms({ labels, maxAccess, recordId }) {
             label={labels.name}
             value={formik.values.name}
             required
-            maxLength='30'
             maxAccess={maxAccess}
+            maxLength='30'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
             helperText={formik.touched.name && formik.errors.name}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={ManufacturingRepository.WorkCenter.qry}
+            name='headWCId'
+            label={labels.headWorkCenter}
+            valueField='recordId'
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            readOnly={editMode}
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('headWCId', newValue?.recordId)
+            }}
+            error={formik.touched.headWCId && Boolean(formik.errors.headWCId)}
+            helperText={formik.touched.headWCId && formik.errors.headWCId}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={ManufacturingRepository.Routing.qry}
+            name='routingId'
+            label={labels.routing}
+            valueField='recordId'
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('routingId', newValue?.recordId)
+            }}
+            error={formik.touched.routingId && Boolean(formik.errors.routingId)}
+            helperText={formik.touched.routingId && formik.errors.routingId}
           />
         </Grid>
       </Grid>

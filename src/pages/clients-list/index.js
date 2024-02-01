@@ -185,7 +185,7 @@ const ClientsList = () => {
 
     try {
       const res = await getRequest({
-        extension: SystemRepository.SystemPlant.get,
+        extension: SystemRepository.UserDefaults.get,
         parameters: parameters,
       });
 
