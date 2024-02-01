@@ -28,5 +28,12 @@ export const ManufacturingRepository = {
     set: service + 'setRTN',
     get: service + 'getRTN',
     del: service + 'delRTN'
-  }
+  },
+  Operation: {
+    snapshot : service + "snapshotOPR",
+    page : service + "pageOPR",
+    set: service + 'setOPR',
+    get: service + 'getOPR',
+    del: service + 'delOPR',
+  },
 }
