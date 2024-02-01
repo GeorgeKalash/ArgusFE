@@ -29,4 +29,9 @@ export const ManufacturingRepository = {
     get: service + 'getRTN',
     del: service + 'delRTN'
   }
+  ,
+  LeanProductionPlanning: {
+    preview: service + 'previewLEAN',
+    generate: service + 'generateLEAN'
+  }
 }
