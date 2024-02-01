@@ -57,6 +57,7 @@ const Users = () => {
 
   //states
   const [activeTab, setActiveTab] = useState(0)
+  const [currentRecord, setCurrentRecord] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -277,20 +278,23 @@ const Users = () => {
     setSecurityGrpGridData([])
   }
 
-  const editUsers = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.Users.get,
-      parameters: parameters
-    })
-      .then(res => {
-        usersValidation.setValues(populateUserInfo(res.record))
-        console.log('rowAccessUser usersss ',usersValidation.values)
-        setEditMode(true)
-        setWindowOpen(true)
-        fillActiveStatusStore()
+  const editUsers = async (obj) => {
+    try {
+      const _recordId = obj.recordId;
+      const defaultParams = `_recordId=${_recordId}`;
+      var parameters = defaultParams;
+  
+      const res = await getRequest({
+        extension: SystemRepository.Users.get,
+        parameters: parameters
+      });
+
+      setCurrentRecord(res.record.recordId)
+      usersValidation.setValues(populateUserInfo(res.record));
+
+      setEditMode(true);
+      setWindowOpen(true);
+      fillActiveStatusStore();
         fillUserTypeStore()
         fillLanguageStore()
         fillNotificationGrpStore()
@@ -304,10 +308,10 @@ const Users = () => {
         getRowAccessGridData(20110)
         fillModuleStore()
         setActiveTab(0)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      
+    } catch (error) {
+      setErrorMessage(error);
+    }
   }
 
   const fillActiveStatusStore = () => {
@@ -678,11 +682,6 @@ const Users = () => {
       field: 'name',
       headerName: '',
       flex: 2
-    },
-    {
-      field: 'hasAccess',
-      headerName: _labels.active,
-      flex: 1
     }
   ]
 
@@ -706,14 +705,17 @@ const Users = () => {
     }
   }
 
+  const handleCheckedRows = checkedRows => {
+    console.log('hanle checked rows ',checkedRows)
+  }
+
   const getRowAccessGridData = classId => {
     setRowGridData([])
     console.log('rowAccessUser class ',classId)
 
-    if (classId === undefined) {
-      classId = 20110; // Set a default value to plant 
-    }
-    const userId = usersValidation.values.recordId
+    classId = classId || 20110
+    const userId = currentRecord
+
     console.log('rowAccessUser userId ',userId)
 
     const plantRequestPromise = getRequest({
@@ -904,6 +906,7 @@ const Users = () => {
           getRowAccessGridData={getRowAccessGridData}
           rowAccessValidation={rowAccessValidation}
           rowColumns={rowColumns}
+          handleCheckedRows={handleCheckedRows}
         />
       )}
       {securityGrpWindowOpen && (

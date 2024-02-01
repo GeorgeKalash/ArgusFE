@@ -54,7 +54,8 @@ const UsersWindow = ({
   handleRowAccessSubmit,
   rowColumns,
   getRowAccessGridData,
-  rowGridData
+  rowGridData,
+  handleCheckedRows
 }) => {
   
   return (
@@ -123,6 +124,7 @@ const UsersWindow = ({
          rowGridData={rowGridData}
          rowColumns={rowColumns}
          maxAccess={maxAccess}
+         handleCheckedRows={handleCheckedRows}
         />
       </CustomTabPanel>
     </Window>

@@ -8,7 +8,7 @@ import {Grid,Box,Button } from '@mui/material'
 const RowAccessTab = ({
     moduleStore,
     rowAccessValidation,
-    handleRowAccessSubmit,
+    handleCheckedRows,
     rowGridData,
     getRowAccessGridData,
     rowColumns,
@@ -53,6 +53,9 @@ const RowAccessTab = ({
           maxAccess={maxAccess}
           pagination={false}
           height={300}
+          handleCheckedRows={handleCheckedRows}
+          checkTitle={labels.active}
+          showCheckboxColumn={true}
         />
       </Box>
     </Grid>
