@@ -87,13 +87,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
   const [idTypeStore, setIdTypeStore] = useState([]);
 
   const [initialValues, setInitialValues] = useState({
-    recordId: null,
-    reference: '',
-    status: '1',
-    type: -1,
-    clientType: 1,
-    clientId: '',
-    wip: 1,
+    recordId:  null,
+    reference: null,
+    rows: null,
     rows: [
       {
         seqNo: 1,
@@ -103,11 +99,34 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
         lcAmount: 0
       }
     ],
+    date: null,
+    clientId: null,
+    clientName:null,
+    firstName: null,
+    middleName: null,
+    familyName: null,
+    fl_firstName: null,
+    fl_lastName: null,
+    fl_middleName: null,
+    fl_familyName: null,
     birth_date: null,
-    expiry_date: null,
     resident: false,
+    profession: null,
+    source_of_income: null,
+    sponsor: null,
+    id_number: null,
+    issue_country: null,
+    id_type: null,
+    expiry_date: null,
+    remarks: null,
+    purpose_of_exchange: null,
+    nationality:null,
+    cell_phone: null,
+    status: '1',
+    type: -1,
+    wip: 1,
     functionId: '',
-    clientId: ''
+
   })
 
   const formik = useFormik({
@@ -236,10 +255,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
 
   const total = formik.values.rows.reduce((acc, { lcAmount }) => acc + lcAmount, 0)
 
-  const { lookup, store, valueOf, clear } = useLookup({
-    endpointId: CurrencyTradingClientRepository.Client.snapshot,
-    parameters: { _category: 1 }
-  })
+  // const { lookup, store, valueOf, clear } = useLookup({
+  //   endpointId: CurrencyTradingClientRepository.Client.snapshot,
+  //   parameters: { _category: 1 }
+  // })
 
   async function onSubmit(values) {
     const { record: recordFunctionId } = await getRequest({
@@ -428,12 +447,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
               <Grid item xs={4}>
 
 <ResourceLookup
-     endpointId={ CurrencyTradingClientRepository.Client.snapshot}
-
+endpointId={ CurrencyTradingClientRepository.Client.snapshot}
  parameters={{
   _category: 1,
  }}
-
  valueField='name'
  displayField='name'
  name='clientId'
@@ -465,6 +482,7 @@ errorCheck={'clientId'}
                 gridValidation={formik}
                 scrollHeight={350}
                 width={750}
+                background={formik.values.functionId ==='3503' ?  'rgb(245, 194, 193)' : '#C1F4F5'}
                 columns={[
                   {
                     field: 'incremented',

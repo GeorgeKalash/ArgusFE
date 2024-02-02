@@ -30,6 +30,7 @@ const InlineEditGrid = ({
   defaultRow,
   gridValidation,
   width,
+  background,
   scrollHeight,
   scrollable = true,
   allowDelete = true,
@@ -264,7 +265,7 @@ const InlineEditGrid = ({
                 else return ''
               }
             }}
-            
+
             // getOptionLabel={option => {
             //   if (typeof option === 'object') {
             //     if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
@@ -664,7 +665,8 @@ const InlineEditGrid = ({
               header={column.header}
               hidden={column.hidden}
               style={{
-                width: column.width || tableWidth / columns.length
+                width: column.width || tableWidth / columns.length,
+                background:  background,
               }}
               body={row => {
                 return (
@@ -710,7 +712,7 @@ const InlineEditGrid = ({
                 </div>
               )
             }}
-            style={{ maxWidth: '60px' }}
+            style={{ maxWidth: '60px' , background: background }}
           />
         )}
       </DataTable>
