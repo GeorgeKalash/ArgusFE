@@ -72,4 +72,5 @@ export const ResourceIds = {
   ProductionLines: 42107,
   WorkCenters: 42101,
   Operations: 42102,
+  MaterialsAdjustment: 41204,
 }

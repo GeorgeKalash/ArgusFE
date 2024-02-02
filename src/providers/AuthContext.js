@@ -68,7 +68,7 @@ const AuthProvider = ({ children }) => {
       try {
         const response = await axios({
           method: 'GET',
-          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
+          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=CIL2`
         })
 
         // Set companyName from the API response
