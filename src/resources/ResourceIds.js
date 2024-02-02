@@ -69,5 +69,7 @@ export const ResourceIds = {
   MultiCurrencyMapping: 32102,
   ClientRelation: 36202,
   LaborGroups: 42114,
-  ProductionLines: 42107
+  ProductionLines: 42107,
+  WorkCenters: 42101,
+  Operations: 42102,
 }
