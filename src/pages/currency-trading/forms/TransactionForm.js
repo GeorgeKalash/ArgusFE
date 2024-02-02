@@ -186,12 +186,16 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
 
 
     ;(async function () {
+      setEditMode(false)
+
       const response = await getRequest({
         extension: SystemRepository.Currency.qry,
         parameters: '_filter='
       })
 
       if (recordId) {
+        setEditMode(true)
+
         const { record } = await getRequest({
           extension: 'CTTRX.asmx/get2CIV',
           parameters: `_recordId=${recordId}`
@@ -353,7 +357,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
         recordId: response.recordId
       })
     } else toast.success('Record Edited Successfully')
-    setEditMode(true)
+
+    // setEditMode(true)
   }
 
   async function fetchClientInfo({ clientId }) {
@@ -482,7 +487,7 @@ errorCheck={'clientId'}
                 gridValidation={formik}
                 scrollHeight={350}
                 width={750}
-                background={formik.values.functionId ==='3503' ?  'rgb(245, 194, 193)' : '#C1F4F5'}
+                background={formik.values.functionId ==='3503' ?  'rgb(245, 194, 193)' : '#90EEBF'}
                 columns={[
                   {
                     field: 'incremented',
