@@ -524,7 +524,17 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
           </FieldSet>
           <FieldSet title='Individual'>
             <Grid container spacing={4}>
-              <Grid item xs={2}>
+            <Grid container rowGap={3} xs={4} sx={{ px: 2 }}>
+
+            <Grid item xs={7}>
+                <FormField
+                  name='birth_date'
+                  Component={CustomDatePicker}
+                  readOnly={editMode || infoAutoFilled}
+                  required
+                />
+              </Grid>
+              <Grid item xs={7}>
                 <FormField
                   name='id_number'
                   Component={CustomTextField}
@@ -550,33 +560,21 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                 />
               </Grid>
 
-              <Grid item xs={2}>
 
-                {/* <Button
-                  variant='contained'
-                  onClick={() =>
-                    stackWindow({
-                      Component: Confirmation,
-                      props: {
-                        // idTypeStore: idTypeStore,
-                        formik,
-                        labels
-                      },
-                      width: 400,
-                      height: 400,
-                      title: 'Confirmation'
-                    })
-                  }
-                  // disabled={
-                  //   !formik?.values?.idtId || !formik?.values?.birthDate || !formik.values.idNo || editMode
-                  //     ? true
-                  //     : false
-                  // }
-                >
-                  Fetch
-                </Button> */}
-              </Grid>
-              {/* <Grid item xs={2}>
+              <Grid container xs={12}>
+              <Grid item xs={7}>
+
+                <FormField
+                  name='id_type'
+                  Component={ResourceComboBox}
+                  endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
+                  valueField='recordId'
+                  displayField='name'
+                  readOnly={editMode || idInfoAutoFilled}
+                  required
+                />
+                </Grid>
+                <Grid item xs={5}>
                     <Button
                       variant="contained"
                       onClick={() =>
@@ -589,84 +587,30 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                             // setErrorMessage: setErrorMessage,
                             labels: labels,
                           },
-
-                          // title: _labels.fetch,
+                          title: labels.fetch,
                           width: 400,
                           height: 400,
                         })
                       }
+
                       disabled={
                         (!formik?.values?.id_type ||
                         !formik?.values?.birth_date ||
-                        !formik.values.id_number ||
+                        !formik.values?.id_number ||
                         editMode)
                           ? true
                           : false
                       }
                     >
-                      {"fetch"}
+                  {labels.fetch} {formik?.values?.birth_Date}
                     </Button>
-                  </Grid> */}
-              <Grid item xs={2}>
-                <FormField
-                  name='firstName'
-                  Component={CustomTextField}
-                  readOnly={editMode || infoAutoFilled}
-                  required
-                />
+                  </Grid>
+
+
               </Grid>
-              <Grid item xs={2}>
-                <FormField name='middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={2}>
-                <FormField name='lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} required />
-              </Grid>
-              <Grid item xs={2}>
-                <FormField name='familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={2}>
-                <FormField
-                  name='birth_date'
-                  Component={CustomDatePicker}
-                  readOnly={editMode || infoAutoFilled}
-                  required
-                />
-              </Grid>
-              <Grid item xs={2}>
-                {/* <FormField name='birth_date' Component={CustomDatePicker} /> */}
-              </Grid>
-              <Grid item xs={2}>
-                <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={2}>
-                <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={2}>
-                <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={2}>
-                <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={2}>
-                <FormField
-                  name='id_type'
-                  Component={ResourceComboBox}
-                  endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
-                  valueField='recordId'
-                  displayField='name'
-                  readOnly={editMode || idInfoAutoFilled}
-                  required
-                />
-              </Grid>
-              <Grid item xs={2}>
-                {/* <Button>Visa</Button>
-                <Button>Scan ID</Button> */}
-              </Grid>
-              <Grid item xs={2} />
-              <Grid item xs={6}>
-                <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={2}>
+
+
+              <Grid item xs={7}>
                 <FormField
                   name='expiry_date'
                   Component={CustomDatePicker}
@@ -674,25 +618,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   required
                 />
               </Grid>
-              <Grid item xs={2}>
-                {/* <FormField name='expiry_date' Component={CustomDatePicker} /> */}
-              </Grid>
-              <Grid item xs={2} />
-              <Grid item xs={6}>
-                <FormField
-                  name='purpose_of_exchange'
-                  Component={ResourceComboBox}
-                  endpointId={'CTSET.asmx/qryPEX'}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={editMode}
-                />
-              </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12}>
                 <FormField
                   name='issue_country'
                   Component={ResourceComboBox}
@@ -708,22 +634,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   required
                 />
               </Grid>
-              <Grid item xs={2} />
-              <Grid item xs={6}>
-                <FormField
-                  name='source_of_income'
-                  Component={ResourceComboBox}
-                  endpointId={'RTSET.asmx/qrySI'}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={editMode || infoAutoFilled}
-                />
-              </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12}>
                 <FormField
                   name='nationality'
                   Component={ResourceComboBox}
@@ -739,8 +650,109 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   required
                 />
               </Grid>
-              <Grid item xs={2} />
-              <Grid item xs={6}>
+
+              <Grid item xs={12}>
+                <FormField name='cell_phone' Component={CustomTextField} readOnly={editMode} required />
+              </Grid>
+              <Grid item xs={2}>
+                <FormControlLabel
+                  name='resident'
+                  checked={formik.values.resident}
+                  onChange={formik.handleChange}
+                  control={<Checkbox defaultChecked />}
+                  label='Resident'
+                  readOnly={editMode || infoAutoFilled}
+                />
+              </Grid>
+
+             </Grid>
+
+             <Grid container rowGap={3} xs={8} sx={{ px: 2, alignContent: 'start' }}>
+              <Grid xs={12}
+                    container
+                    spacing={2}
+
+                  >
+              <Grid item xs={3}>
+                <FormField
+                  name='firstName'
+                  Component={CustomTextField}
+                  readOnly={editMode || infoAutoFilled}
+                  required
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <FormField name='middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+              </Grid>
+              <Grid item xs={3}>
+                <FormField name='lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} required />
+              </Grid>
+              <Grid item xs={3}>
+                <FormField name='familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+              </Grid>
+              </Grid>
+              <Grid xs={12}
+                    container
+                    spacing={2}
+                    sx={{ flexDirection: "row-reverse" }}
+                  >
+              <Grid item xs={3}>
+                <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+              </Grid>
+              <Grid item xs={3}>
+                <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+              </Grid>
+              <Grid item xs={3}>
+                <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+              </Grid>
+              <Grid item xs={3}>
+                <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+              </Grid>
+
+              </Grid>
+              <Grid container rowGap={3} xs={4}>
+              </Grid>
+
+
+              <Grid container rowGap={3} xs={8}>
+
+              <Grid item xs={12}>
+                <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+              </Grid>
+
+
+              <Grid item xs={12}>
+                <FormField
+                  name='purpose_of_exchange'
+                  Component={ResourceComboBox}
+                  endpointId={'CTSET.asmx/qryPEX'}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={editMode}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormField
+                  name='source_of_income'
+                  Component={ResourceComboBox}
+                  endpointId={'RTSET.asmx/qrySI'}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly={editMode || infoAutoFilled}
+                />
+              </Grid>
+
+
+              <Grid item xs={12}>
                 <FormField
                   name='profession'
                   Component={ResourceComboBox}
@@ -755,23 +767,14 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   readOnly={editMode || infoAutoFilled}
                 />
               </Grid>
-              <Grid item xs={4}>
-                <FormField name='cell_phone' Component={CustomTextField} readOnly={editMode} required />
-              </Grid>
-              <Grid item xs={2} />
-              <Grid item xs={6}>
+
+
+              <Grid item xs={12}>
                 <FormField name='remarks' Component={CustomTextField} readOnly={editMode} />
               </Grid>
-              <Grid item xs={2}>
-                <FormControlLabel
-                  name='resident'
-                  checked={formik.values.resident}
-                  onChange={formik.handleChange}
-                  control={<Checkbox defaultChecked />}
-                  label='Resident'
-                  readOnly={editMode || infoAutoFilled}
-                />
-              </Grid>
+
+            </Grid>
+            </Grid>
             </Grid>
           </FieldSet>
           <FieldSet title='Amount'>

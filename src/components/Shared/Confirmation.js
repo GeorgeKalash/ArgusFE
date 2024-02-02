@@ -82,7 +82,7 @@ return (
            <Grid item xs={12}>{}
                   <CustomComboBox
                     name="idtId"
-                    label={labels.type}
+                    label={labels.id_type}
                     valueField="recordId"
                     displayField="name"
                     readOnly={ true}
@@ -128,7 +128,7 @@ return (
                   <CustomTextField
                   sx={{color: 'white'}}
                     name="idNo"
-                    label={labels.number}
+                    label={labels.id_number}
                     type={showAsPassword && 'password'}
 
                     value={fetchFormik.values?.idNo? fetchFormik.values?.idNo : fetchFormik.values?.id_number }
@@ -164,7 +164,7 @@ return (
                 sx={{position: 'relative', width: '100%',}}>
                   <CustomTextField
                     name="idNoRepeat"
-                    label={labels.confirmNb}
+                    label={labels.confirmIdNumber}
 
                     value={fetchFormik.values?.idNoRepeat}
                     required

@@ -693,7 +693,7 @@ console.log(obj6)
                     <CustomTextField
                       sx={{ color: "white" }}
                       name="idNo"
-                      label={_labels.number}
+                      label={_labels.id_number}
                       type={showAsPassword && "password"}
                       value={clientIndividualFormik.values?.idNo}
                       required
@@ -727,7 +727,7 @@ console.log(obj6)
                   <Grid item xs={12}>
                     <CustomComboBox
                       name="idtId"
-                      label={_labels.type}
+                      label={_labels.id_type}
                       valueField="recordId"
                       displayField="name"
                       readOnly={editMode && true}
