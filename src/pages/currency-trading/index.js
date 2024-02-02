@@ -7,11 +7,15 @@ import { useWindow } from 'src/windows'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
+
+ //error
+ const [errorMessage, setErrorMessage] = useState(null)
 
   function openFormWindow(recordId) {
     stack({
@@ -101,6 +105,8 @@ export default function CurrencyTrading() {
           />
         </>
       )}
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
+
     </Box>
   )
 }

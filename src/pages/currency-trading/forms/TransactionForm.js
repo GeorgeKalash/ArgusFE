@@ -11,6 +11,7 @@ import FieldSet from 'src/components/Shared/FieldSet'
 import FormShell from 'src/components/Shared/FormShell'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -76,7 +77,7 @@ function useLookup({ endpointId, parameters }) {
   }
 }
 
-export default function TransactionForm({ recordId, labels, maxAccess }) {
+export default function TransactionForm({ recordId, labels, maxAccess, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
@@ -154,7 +155,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
         setIdTypeStore(res.list);
       })
       .catch((error) => {
-        // setErrorMessage(error);
+        setErrorMessage(error);
       });
   };
   useEffect(() => {
@@ -404,7 +405,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   <FormControlLabel value={2} control={<Radio />} label={labels.corporate} disabled />
                 </RadioGroup>
               </Grid>
-              <Grid item xs={4}>
+              {/* <Grid item xs={4}>{formik.values.clientId}
                 <CustomLookup
                   onChange={(e, v) => {
                     const client = valueOf(v.recordId)
@@ -415,7 +416,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   }}
                   valueField='name'
                   displayField='name'
-                  setStore={clear}
+                  setStore={setStore}
                   store={store}
                   value={formik.values.clientId}
                   firstValue={formik.values.clientName}
@@ -423,7 +424,38 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                   onLookup={lookup}
                   readOnly={editMode || idInfoAutoFilled}
                 />
-              </Grid>
+              </Grid> */}
+              <Grid item xs={4}>
+
+<ResourceLookup
+     endpointId={ CurrencyTradingClientRepository.Client.snapshot}
+
+ parameters={{
+  _category: 1,
+ }}
+
+ valueField='name'
+ displayField='name'
+ name='clientId'
+ valueShow="clientName"
+ label={labels.city}
+ form={formik}
+ secondDisplayField={false}
+ onChange={(event, newValue) => {
+  if (newValue) {
+    formik.setFieldValue('clientId', newValue?.recordId)
+    formik.setFieldValue('clientName', newValue?.name)
+  } else {
+    formik.setFieldValue('clientId', '')
+    formik.setFieldValue('clientName', '')
+  }
+
+
+}}
+errorCheck={'clientId'}
+
+/>
+</Grid>
             </Grid>
           </FieldSet>
           <FieldSet title='Operations'>
@@ -523,8 +555,8 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
             </Grid>
           </FieldSet>
           <FieldSet title='Individual'>
-            <Grid container spacing={4}>
-            <Grid container rowGap={3} xs={4} sx={{ px: 2 }}>
+            <Grid container spacing={4} sx={{  pt:5 }}>
+            <Grid container rowGap={3} xs={4} sx={{ px: 2  }}>
 
             <Grid item xs={7}>
                 <FormField
@@ -583,8 +615,7 @@ export default function TransactionForm({ recordId, labels, maxAccess }) {
                           props: {
                             idTypeStore: idTypeStore,
                             formik: formik,
-
-                            // setErrorMessage: setErrorMessage,
+                            setErrorMessage: setErrorMessage,
                             labels: labels,
                           },
                           title: labels.fetch,
