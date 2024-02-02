@@ -157,9 +157,17 @@ const LoginPage = () => {
               </Grid>
             </Grid>
             <Box
-              sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
+              sx={{
+                mb: 4,
+                mt: 4,
+                ml: 1,
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between'
+              }}
             >
-              <FormControlLabel
+              {/* <FormControlLabel
                 label='Remember Me'
                 control={
                   <Checkbox
@@ -168,7 +176,7 @@ const LoginPage = () => {
                     onChange={validation.handleChange}
                   />
                 }
-              />
+              /> */}
               <LinkStyled href='/pages/auth/forgot-password-v1'>Forgot Password?</LinkStyled>
             </Box>
             <Button
