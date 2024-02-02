@@ -77,7 +77,7 @@ function useLookup({ endpointId, parameters }) {
   }
 }
 
-export default function TransactionForm({ recordId, labels, maxAccess, setErrorMessage }) {
+export default function TransactionForm({ recordId, labels, maxAccess , plantId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
@@ -125,7 +125,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
     status: '1',
     type: -1,
     wip: 1,
-    functionId: '',
+    functionId: '3502',
 
   })
 
@@ -238,20 +238,20 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
     })()
   }, [])
 
-  const [plantId, setPlantId] = useState(null)
+  // const [plantId, setPlantId] = useState(null)
 
-  const { userId } = JSON.parse(window.localStorage.getItem('userData'))
+  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
-    const { record } = await getRequest({
-      extension: `SY.asmx/getUD`,
-      parameters: `_userId=${userId}&_key=plantId`
-    })
-    setPlantId(record.value)
+    // const { record } = await getRequest({
+    //   extension: `SY.asmx/getUD`,
+    //   parameters: `_userId=${userId}&_key=plantId`
+    // })
+    // setPlantId(record.value)
 
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeRate.get,
-      parameters: `_plantId=${record.value}&_currencyId=${currencyId}&_rateTypeId=${rateType}`
+      parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateType}`
     })
 
     return response.record
@@ -417,10 +417,15 @@ export default function TransactionForm({ recordId, labels, maxAccess, setErrorM
                   readOnly
                 />
               </Grid>
+              {/* seqNo: 1,
+        currencyId: '',
+        fcAmount: 0,
+        exRate: 0,
+        lcAmount: 0 */}
               <Grid item xs={4}>
                 <RadioGroup row value={formik.values.functionId} onChange={e => setOperationType(e.target.value)}>
-                  <FormControlLabel value={'3502'} control={<Radio />} label={labels.purchase} disabled={!!rateType} />
-                  <FormControlLabel value={'3503'} control={<Radio />} label={labels.sale} disabled={!!rateType} />
+                  <FormControlLabel value={'3502'} control={<Radio />} label={labels.purchase} disabled={formik?.values?.rows[0]?.currencyId !='' ? true : false} />
+                  <FormControlLabel value={'3503'} control={<Radio />} label={labels.sale} disabled={formik?.values?.rows[0]?.currencyId != '' ? true : false} />
                 </RadioGroup>
               </Grid>
               <Grid item xs={4}>
@@ -511,26 +516,38 @@ errorCheck={'clientId'}
                       { key: 'name', value: 'Name' }
                     ],
                     async onChange(row) {
-                      if (!row.newValue) return
-
-                      const exchange = await fetchRate({
-                        currencyId: row.newValue
-                      })
-
-                      if (!exchange?.exchangeRate?.rate) {
-                        stackError({
-                          message: `Rate not defined for ${row.value}.`
+                      console.log(row)
+                      if (row.newValue > 0 ){
+                        const exchange = await fetchRate({
+                          currencyId: row.newValue
                         })
 
+                        if (!exchange?.exchangeRate?.rate) {
+                          stackError({
+                            message: `Rate not defined for ${row.value}.`
+                          })
+
+                          return
+                        }
+                        formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
+                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange.exchangeRate.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange.exchange.rateCalcMethod)
+
+
+                      }else{
+
+                        formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
+                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, 0)
+                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
+
+
                         return
-                      }
-                      formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-                      formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange.exchangeRate.rate)
-                      formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange.exchange.rateCalcMethod)
-                      row.rowData.currencyId = row.newValue
-                      row.rowData.exRate = exchange.exchangeRate.rate
-                      row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
+
+                      // row.rowData.currencyId = row.newValue
+                      // row.rowData.exRate = exchange.exchangeRate.rate
+                      // row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
                     }
+                  }
                   },
                   {
                     field: 'numberfield',
