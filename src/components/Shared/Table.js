@@ -110,6 +110,7 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
+  const [filteredRows, setFilteredRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   const pageSize = props.pageSize ? props.pageSize : 50
@@ -119,7 +120,10 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const getRowId = row => {
-    return props.rowId.map(field => row[field]).join('-')
+    const recordId = row.recordId || ''
+    const seqNo = row.seqNo || ''
+
+    return `${recordId}-${seqNo}`
   }
 
   const CustomPagination = () => {
@@ -273,16 +277,20 @@ const Table = ({
       // Create a new object with all the previous checked rows
       const newCheckedRows = { ...prevCheckedRows }
 
-      newCheckedRows[row.recordId] = row
+      // Create the key based on the presence of seqNo
+      const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
 
-      // Convert the newCheckedRows object to an array of rows
-      const rowsArray = Object.values(newCheckedRows)
+      // Update the newCheckedRows object with the current row
+      newCheckedRows[key] = row
 
-      // Filter the rows to include only those with checked: true
-      const filteredRows = rowsArray.filter(row => row.checked === true);
+      // Check if newCheckedRows[key] is defined and has checked property
+      const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
 
-      // Handle the checked rows (pass the entire updated rows)
+      // Pass the entire updated rows in the callback
       handleCheckedRows(filteredRows)
+
+      // Log the updated checkedRows after the state has been updated
+      console.log('checkedRows 4 ', newCheckedRows)
 
       // Return the updated state for the next render
       return filteredRows
@@ -335,18 +343,19 @@ const Table = ({
       setPage(1)
     }
     setCheckedRows([])
-    
-      //reset all the selected
-      if (gridData && gridData.list) {
-        const updatedGridData = {
-          ...gridData,
-          list: gridData.list.map((rowData) => ({
-            ...rowData,
-            checked: false,
-          })),
-        };
-        setGridData(updatedGridData);
+
+    //reset all the selected to unchecked
+    if (gridData && gridData.list) {
+      const updatedGridData = {
+        ...gridData,
+        list: gridData.list.map(rowData => ({
+          ...rowData,
+          checked: false
+        }))
       }
+      setGridData(updatedGridData)
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.gridData])
 
@@ -401,7 +410,7 @@ const Table = ({
                               checked={params.row.checked || false}
                               onChange={() => {
                                 handleCheckboxChange(params.row)
-                                params.row.checked = !params.row.checked 
+                                params.row.checked = !params.row.checked
                               }}
                             />
                           </TableCell>

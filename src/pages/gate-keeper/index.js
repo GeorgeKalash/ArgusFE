@@ -84,29 +84,27 @@ const GateKeeper = () => {
       field: 'date',
       headerName: _labels[6],
       flex: 1,
-      valueFormatter: (params) => {
-        const dateString = params.value;
-        const timestamp = parseInt(dateString.match(/\d+/)[0], 10);
-        
+      valueFormatter: params => {
+        const dateString = params.value
+        const timestamp = parseInt(dateString.match(/\d+/)[0], 10)
+
         if (!isNaN(timestamp)) {
-            const formattedDate = new Date(timestamp).toLocaleDateString('en-GB');
-          
-            return formattedDate;
+          const formattedDate = new Date(timestamp).toLocaleDateString('en-GB')
+
+          return formattedDate
         } else {
-            return "Invalid Date";
+          return 'Invalid Date'
         }
-    }
+      }
     }
   ]
-console.log('labels ',_labels)
 
   const gateKeeperValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     validate: values => {},
     initialValues: {
-      rows: [{
-      }]
+      rows: [{}]
     },
     onSubmit: values => {
       generateLean()
@@ -118,32 +116,34 @@ console.log('labels ',_labels)
   }
 
   const handleCheckedRows = checkedRows => {
-     // Filter the rows to include only those with checked: true
-  const updatedRowsArray = checkedRows
-  
-  //.filter(row => row.checked);
-    setSelectedRows(updatedRowsArray)
-    console.log('selected ',selectedRows)
+    setSelectedRows(prevSelectedRows => [...prevSelectedRows, ...checkedRows])
   }
 
+  useEffect(() => {}, [selectedRows])
+
   const generateLean = () => {
-       postRequest({
-         extension: ManufacturingRepository.LeanProductionPlanning.generate,
-         record: JSON.stringify(selectedRows)
-       })
-         .then(res => {
-           getGridData({})
-           setWindowOpen(false)
-           if (!recordId) toast.success('Record Added Successfully')
-           else toast.success('Record Edited Successfully')
-         })
-         .catch(error => {
-           setErrorMessage(error)
-         })
+    // Filter out objects where checked is truthy
+    const checkedObjects = selectedRows.filter(obj => obj.checked)
+
+    const resultObject = {
+      leanProductions: checkedObjects
+    }
+
+    postRequest({
+      extension: ManufacturingRepository.MaterialsAdjustment.generate,
+      record: JSON.stringify(resultObject)
+    })
+      .then(res => {
+        getGridData()
+        toast.success('Record Generated Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
   useEffect(() => {
     setSelectedRows([])
-  },[])
+  }, [])
 
   return (
     <Box
@@ -173,7 +173,7 @@ console.log('labels ',_labels)
             margin: 0
           }}
         >
-          <WindowToolbar onSave={handleSubmit}  smallBox={true}/>
+          <WindowToolbar onSave={handleSubmit} smallBox={true} />
         </Box>
       </CustomTabPanel>
 

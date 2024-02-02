@@ -28,10 +28,11 @@ export const ManufacturingRepository = {
     set: service + 'setRTN',
     get: service + 'getRTN',
     del: service + 'delRTN'
-  }
-  ,
+  },
   LeanProductionPlanning: {
-    preview: service + 'previewLEAN',
-    generate: service + 'generateLEAN'
+    preview: service + 'previewLEAN'
+  },
+  MaterialsAdjustment: {
+    generate: service + 'generateADJ'
   }
 }
