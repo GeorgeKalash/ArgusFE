@@ -35,7 +35,7 @@ export default function DescriptionTemplateForms({ labels, maxAccess, recordId }
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
-          name: yup.string().required('This field is required'),
+          name: yup.string().required(' '),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
@@ -99,7 +99,8 @@ export default function DescriptionTemplateForms({ labels, maxAccess, recordId }
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
                     error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
+
+                    // helperText={formik.touched.name && formik.errors.name}
                     />
                 </Grid>
             </Grid>

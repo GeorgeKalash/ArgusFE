@@ -121,7 +121,8 @@ const MCDefault = () => {
                             formik && formik.setFieldValue('mc_defaultRTSA', newValue?.recordId)
                         }}
                         error={formik.touched.mc_defaultRTSA && Boolean(formik.errors.mc_defaultRTSA)}
-                        helperText={formik.touched.mc_defaultRTSA && formik.errors.mc_defaultRTSA}
+
+                        // helperText={formik.touched.mc_defaultRTSA && formik.errors.mc_defaultRTSA}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -136,7 +137,8 @@ const MCDefault = () => {
                             formik && formik.setFieldValue('mc_defaultRTPU', newValue?.recordId)
                         }}
                         error={formik.touched.mc_defaultRTPU && Boolean(formik.errors.mc_defaultRTPU)}
-                        helperText={formik.touched.mc_defaultRTPU && formik.errors.mc_defaultRTPU}
+
+                        // helperText={formik.touched.mc_defaultRTPU && formik.errors.mc_defaultRTPU}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -155,7 +157,8 @@ const MCDefault = () => {
                               }
                         }}
                         error={formik.touched.mc_defaultRTMF && Boolean(formik.errors.mc_defaultRTMF)}
-                        helperText={formik.touched.mc_defaultRTMF && formik.errors.mc_defaultRTMF}
+
+                        // helperText={formik.touched.mc_defaultRTMF && formik.errors.mc_defaultRTMF}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -170,7 +173,8 @@ const MCDefault = () => {
                             formik && formik.setFieldValue('mc_defaultRTFI', newValue?.recordId)
                         }}
                         error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
-                        helperText={formik.touched.mc_defaultRTFI && formik.errors.mc_defaultRTFI}
+
+                        // helperText={formik.touched.mc_defaultRTFI && formik.errors.mc_defaultRTFI}
                         />
                     </Grid>  
                     <Grid sx={{
