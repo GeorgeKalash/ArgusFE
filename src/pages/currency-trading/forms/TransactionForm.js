@@ -192,51 +192,92 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         extension: SystemRepository.Currency.qry,
         parameters: '_filter='
       })
+      setOperationType(formik?.values?.functionId)
 
       if (recordId) {
         setEditMode(true)
+        getData(recordId)
 
-        const { record } = await getRequest({
-          extension: 'CTTRX.asmx/get2CIV',
-          parameters: `_recordId=${recordId}`
-        })
+        // const { record } = await getRequest({
+        //   extension: 'CTTRX.asmx/get2CIV',
+        //   parameters: `_recordId=${recordId}`
+        // })
 
-        setInitialValues({
-          recordId: recordId,
-          reference: record.headerView.reference,
-          rows: record.items,
-          clientType: record.clientMaster.category,
-          date: formatDateFromApi(record.headerView.date),
-          clientId: record.clientIndividual.clientId,
-          clientName: record.headerView.clientName,
-          firstName: record.clientIndividual.firstName,
-          lastName: record.clientIndividual.lastName,
-          middleName: record.clientIndividual.middleName,
-          familyName: record.clientIndividual.familyName,
-          fl_firstName: record.clientIndividual.fl_firstName,
-          fl_lastName: record.clientIndividual.fl_lastName,
-          fl_middleName: record.clientIndividual.fl_middleName,
-          fl_familyName: record.clientIndividual.fl_familyName,
-          birth_date: formatDateFromApi(record.clientIndividual.birthDate),
-          resident: record.clientIndividual.isResident,
-          profession: record.clientIndividual.professionId,
-          source_of_income: record.clientIndividual.incomeSourceId,
-          sponsor: record.clientIndividual.sponsorName,
-          id_number: record.clientIDView.idNo,
-          issue_country: record.clientIDView.idCountryId,
-          id_type: record.clientIDView.idtId,
-          expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
-          remarks: record.headerView.notes,
-          purpose_of_exchange: record.headerView.poeId,
-          nationality: record.clientMaster.nationalityId,
-          cell_phone: record.clientMaster.cellPhone
-        })
-        setOperationType(record.headerView.functionId.toString())
+        // setInitialValues({
+        //   recordId: recordId,
+        //   reference: record.headerView.reference,
+        //   rows: record.items,
+        //   clientType: record.clientMaster.category,
+        //   date: formatDateFromApi(record.headerView.date),
+        //   clientId: record.clientIndividual.clientId,
+        //   clientName: record.headerView.clientName,
+        //   firstName: record.clientIndividual.firstName,
+        //   lastName: record.clientIndividual.lastName,
+        //   middleName: record.clientIndividual.middleName,
+        //   familyName: record.clientIndividual.familyName,
+        //   fl_firstName: record.clientIndividual.fl_firstName,
+        //   fl_lastName: record.clientIndividual.fl_lastName,
+        //   fl_middleName: record.clientIndividual.fl_middleName,
+        //   fl_familyName: record.clientIndividual.fl_familyName,
+        //   birth_date: formatDateFromApi(record.clientIndividual.birthDate),
+        //   resident: record.clientIndividual.isResident,
+        //   profession: record.clientIndividual.professionId,
+        //   source_of_income: record.clientIndividual.incomeSourceId,
+        //   sponsor: record.clientIndividual.sponsorName,
+        //   id_number: record.clientIDView.idNo,
+        //   issue_country: record.clientIDView.idCountryId,
+        //   id_type: record.clientIDView.idtId,
+        //   expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
+        //   remarks: record.headerView.notes,
+        //   purpose_of_exchange: record.headerView.poeId,
+        //   nationality: record.clientMaster.nationalityId,
+        //   cell_phone: record.clientMaster.cellPhone
+        // })
+        // setOperationType(record.headerView.functionId.toString())
       }
 
       setCurrencyStore(response.list)
     })()
   }, [])
+
+
+  async function getData(){
+    const { record } = await getRequest({
+      extension: 'CTTRX.asmx/get2CIV',
+      parameters: `_recordId=${recordId}`
+    })
+
+    setInitialValues({
+      recordId: recordId,
+      reference: record.headerView.reference,
+      rows: record.items,
+      clientType: record.clientMaster.category,
+      date: formatDateFromApi(record.headerView.date),
+      clientId: record.clientIndividual.clientId,
+      clientName: record.headerView.clientName,
+      firstName: record.clientIndividual.firstName,
+      lastName: record.clientIndividual.lastName,
+      middleName: record.clientIndividual.middleName,
+      familyName: record.clientIndividual.familyName,
+      fl_firstName: record.clientIndividual.fl_firstName,
+      fl_lastName: record.clientIndividual.fl_lastName,
+      fl_middleName: record.clientIndividual.fl_middleName,
+      fl_familyName: record.clientIndividual.fl_familyName,
+      birth_date: formatDateFromApi(record.clientIndividual.birthDate),
+      resident: record.clientIndividual.isResident,
+      profession: record.clientIndividual.professionId,
+      source_of_income: record.clientIndividual.incomeSourceId,
+      sponsor: record.clientIndividual.sponsorName,
+      id_number: record.clientIDView.idNo,
+      issue_country: record.clientIDView.idCountryId,
+      id_type: record.clientIDView.idtId,
+      expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
+      remarks: record.headerView.notes,
+      purpose_of_exchange: record.headerView.poeId,
+      nationality: record.clientMaster.nationalityId,
+      cell_phone: record.clientMaster.cellPhone
+    })
+  }
 
   // const [plantId, setPlantId] = useState(null)
 
@@ -356,6 +397,8 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         ...values,
         recordId: response.recordId
       })
+
+
     } else toast.success('Record Edited Successfully')
 
     // setEditMode(true)
@@ -516,7 +559,6 @@ errorCheck={'clientId'}
                       { key: 'name', value: 'Name' }
                     ],
                     async onChange(row) {
-                      console.log(row)
                       if (row.newValue > 0 ){
                         const exchange = await fetchRate({
                           currencyId: row.newValue
@@ -527,12 +569,15 @@ errorCheck={'clientId'}
                             message: `Rate not defined for ${row.value}.`
                           })
 
-                          return
+                          // return
                         }
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange.exchangeRate.rate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange.exchange.rateCalcMethod)
+                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.exchangeRate?.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.exchange?.rateCalcMethod)
 
+//  row.rowData.currencyId = row.newValue
+//                       row.rowData.exRate = exchange.exchangeRate.rate
+//                       row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
 
                       }else{
 
@@ -543,9 +588,7 @@ errorCheck={'clientId'}
 
                         return
 
-                      // row.rowData.currencyId = row.newValue
-                      // row.rowData.exRate = exchange.exchangeRate.rate
-                      // row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
+
                     }
                   }
                   },

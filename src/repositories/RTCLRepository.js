@@ -10,6 +10,6 @@ export const RTCLRepository = {
     set2: service + 'set2REL'
   },
   Client: {
-    get: service + 'getCLI'
+    get: service + 'get2CLI'
   }
 }
