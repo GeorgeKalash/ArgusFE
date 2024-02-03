@@ -80,7 +80,7 @@ function useLookup({ endpointId, parameters }) {
   }
 }
 
-export default function TransactionForm({ recordId, labels, maxAccess , plantId, setErrorMessage }) {
+export default function TransactionForm({ recordId, labels, maxAccess, plantId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -88,13 +88,13 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
   const { stack: stackError } = useError()
-  const { stack } = useWindow();
-  const [idTypeStore, setIdTypeStore] = useState([]);
-  const [typeStore, setTypeStore] = useState([]);
-  const [creditCardStore, setCreditCardStore] = useState([]);
+  const { stack } = useWindow()
+  const [idTypeStore, setIdTypeStore] = useState([])
+  const [typeStore, setTypeStore] = useState([])
+  const [creditCardStore, setCreditCardStore] = useState([])
 
   const [initialValues, setInitialValues] = useState({
-    recordId:  null,
+    recordId: null,
     reference: null,
     rows: null,
     rows: [
@@ -106,21 +106,23 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         lcAmount: 0
       }
     ],
-     rows2: [{
-      seqNo: 1,
-      cashAccountId: '',
-      cashInvoiceId: null,
-      type : '',
-      typeName : '',
-      ccName: '',
-      amount: '',
-      ccId: '',
-      bankFees: 0,
-      receiptRef: 0
-    }],
+    rows2: [
+      {
+        seqNo: 1,
+        cashAccountId: '',
+        cashInvoiceId: null,
+        type: '',
+        typeName: '',
+        ccName: '',
+        amount: '',
+        ccId: '',
+        bankFees: 0,
+        receiptRef: ''
+      }
+    ],
     date: null,
     clientId: null,
-    clientName:null,
+    clientName: null,
     clientType: '1',
     firstName: null,
     middleName: null,
@@ -140,13 +142,12 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
     expiry_date: null,
     remarks: null,
     purpose_of_exchange: null,
-    nationality:null,
+    nationality: null,
     cell_phone: null,
     status: '1',
     type: -1,
     wip: 1,
-    functionId: '3502',
-
+    functionId: '3502'
   })
 
   const formik = useFormik({
@@ -179,7 +180,6 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
       nationality: yup.string().required(),
       cell_phone: yup.string().required(),
       profession: yup.string().required()
-
     }),
     initialValues,
     onSubmit
@@ -199,32 +199,32 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
   const [currencyStore, setCurrencyStore] = useState([])
 
   const fillType = () => {
-    var parameters = `_filter=`;
+    var parameters = `_filter=`
     getRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.qry,
-      parameters: parameters,
+      parameters: parameters
     })
-      .then((res) => {
-        setIdTypeStore(res.list);
+      .then(res => {
+        setIdTypeStore(res.list)
       })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const fillCreditCard = () => {
-    var parameters = `_filter=`;
+    var parameters = `_filter=`
     getRequest({
       extension: CashBankRepository.CreditCard.qry,
-      parameters: parameters,
+      parameters: parameters
     })
-      .then((res) => {
-        setCreditCardStore(res.list);
+      .then(res => {
+        setCreditCardStore(res.list)
       })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const fillCATypeStore = () => {
     getAllKvsByDataset({
@@ -234,13 +234,13 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
   }
 
   useEffect(() => {
-    const date = new Date();
+    const date = new Date()
 
-   !editMode && formik.setFieldValue( 'date' , date)
+    !editMode && formik.setFieldValue('date', date)
 
-   fillType()
-   fillCATypeStore()
-   fillCreditCard()
+    fillType()
+    fillCATypeStore()
+    fillCreditCard()
     ;(async function () {
       setEditMode(false)
 
@@ -265,21 +265,21 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         //   rows: record.items,
         //   clientType: record.clientMaster.category,
         //   date: formatDateFromApi(record.headerView.date),
-        //   clientId: record.clientIndividual.clientId,
+        //   clientId: record?.clientIndividual?.clientId,
         //   clientName: record.headerView.clientName,
-        //   firstName: record.clientIndividual.firstName,
-        //   lastName: record.clientIndividual.lastName,
-        //   middleName: record.clientIndividual.middleName,
-        //   familyName: record.clientIndividual.familyName,
-        //   fl_firstName: record.clientIndividual.fl_firstName,
-        //   fl_lastName: record.clientIndividual.fl_lastName,
-        //   fl_middleName: record.clientIndividual.fl_middleName,
-        //   fl_familyName: record.clientIndividual.fl_familyName,
-        //   birth_date: formatDateFromApi(record.clientIndividual.birthDate),
-        //   resident: record.clientIndividual.isResident,
-        //   profession: record.clientIndividual.professionId,
-        //   source_of_income: record.clientIndividual.incomeSourceId,
-        //   sponsor: record.clientIndividual.sponsorName,
+        //   firstName: record?.clientIndividual?.firstName,
+        //   lastName: record?.clientIndividual?.lastName,
+        //   middleName: record?.clientIndividual?.middleName,
+        //   familyName: record?.clientIndividual?.familyName,
+        //   fl_firstName: record?.clientIndividual?.fl_firstName,
+        //   fl_lastName: record?.clientIndividual?.fl_lastName,
+        //   fl_middleName: record?.clientIndividual?.fl_middleName,
+        //   fl_familyName: record?.clientIndividual?.fl_familyName,
+        //   birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
+        //   resident: record?.clientIndividual?.isResident,
+        //   profession: record?.clientIndividual?.professionId,
+        //   source_of_income: record?.clientIndividual?.incomeSourceId,
+        //   sponsor: record?.clientIndividual?.sponsorName,
         //   id_number: record.clientIDView.idNo,
         //   issue_country: record.clientIDView.idCountryId,
         //   id_type: record.clientIDView.idtId,
@@ -296,8 +296,7 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
     })()
   }, [])
 
-
-  async function getData(){
+  async function getData() {
     const { record } = await getRequest({
       extension: 'CTTRX.asmx/get2CIV',
       parameters: `_recordId=${recordId}`
@@ -310,21 +309,22 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
       rows2: record.cash,
       clientType: record.clientMaster.category,
       date: formatDateFromApi(record.headerView.date),
-      clientId: record.clientIndividual.clientId,
+      clientId: record?.clientIndividual?.clientId,
       clientName: record.headerView.clientName,
-      firstName: record.clientIndividual.firstName,
-      lastName: record.clientIndividual.lastName,
-      middleName: record.clientIndividual.middleName,
-      familyName: record.clientIndividual.familyName,
-      fl_firstName: record.clientIndividual.fl_firstName,
-      fl_lastName: record.clientIndividual.fl_lastName,
-      fl_middleName: record.clientIndividual.fl_middleName,
-      fl_familyName: record.clientIndividual.fl_familyName,
-      birth_date: formatDateFromApi(record.clientIndividual.birthDate),
-      resident: record.clientIndividual.isResident,
-      profession: record.clientIndividual.professionId,
-      source_of_income: record.clientIndividual.incomeSourceId,
-      sponsor: record.clientIndividual.sponsorName,
+      functionId: record.headerView.functionId,
+      firstName: record?.clientIndividual?.firstName,
+      lastName: record?.clientIndividual?.lastName,
+      middleName: record?.clientIndividual?.middleName,
+      familyName: record?.clientIndividual?.familyName,
+      fl_firstName: record?.clientIndividual?.fl_firstName,
+      fl_lastName: record?.clientIndividual?.fl_lastName,
+      fl_middleName: record?.clientIndividual?.fl_middleName,
+      fl_familyName: record?.clientIndividual?.fl_familyName,
+      birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
+      resident: record?.clientIndividual?.isResident,
+      profession: record?.clientIndividual?.professionId,
+      source_of_income: record?.clientIndividual?.incomeSourceId,
+      sponsor: record?.clientIndividual?.sponsorName,
       id_number: record.clientIDView.idNo,
       issue_country: record.clientIDView.idCountryId,
       id_type: record.clientIDView.idtId,
@@ -335,7 +335,7 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
       cell_phone: record.clientMaster.cellPhone
     })
 
-    CashFormik.setValues({rows: record.cash })
+    CashFormik.setValues({ rows: record.cash })
   }
 
   // const [plantId, setPlantId] = useState(null)
@@ -369,35 +369,34 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
       const type = values.rows && values.rows.every(row => !!row.type)
       const amount = values.rows && values.rows.every(row => !!row.amount)
 
-
       return type && amount
         ? {}
         : {
             rows: Array(values.rows && values.rows.length).fill({
               amount: 'field is required',
-              type: 'field is required',
+              type: 'field is required'
             })
           }
     },
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
-      rows: [{
-        seqNo: 1,
-        cashAccountId: '',
-        cashInvoiceId: null,
-        type : '',
-        typeName : '',
-        ccName: '',
-        amount: '',
-        ccId: '',
-        bankFees: 0,
-        receiptRef: 0
-      }]
+      rows: [
+        {
+          seqNo: 1,
+          cashAccountId: '',
+          cashInvoiceId: null,
+          type: '',
+          typeName: '',
+          ccName: '',
+          amount: '',
+          ccId: '',
+          bankFees: 0,
+          receiptRef: ''
+        }
+      ]
     },
-    onSubmit: values => {
-
-    }
+    onSubmit: values => {}
   })
   async function onSubmit(values) {
     const { record: recordFunctionId } = await getRequest({
@@ -413,6 +412,7 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
     })
 
     const clientId = values.clientId || 0
+    console.log(values)
 
     const payload = {
       header: {
@@ -479,7 +479,17 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         isDiplomat: false
       },
 
-      cash: CashFormik.values.rows.length > 0 && CashFormik.values.rows.map(({ seqNo, type, ccId, bankFees,amount, receiptRef, cashAccountId ,...rest }) => ({ seqNo, type, ccId, bankFees, amount: amount?.replaceAll(",", "") , receiptRef, cashAccountId: cashAccountRecord.value}))
+      cash:
+        CashFormik.values.rows.length > 0 &&
+        CashFormik.values.rows.map(({ seqNo, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
+          seqNo,
+          type,
+          ccId,
+          bankFees,
+          amount: amount?.replaceAll(',', ''),
+          receiptRef,
+          cashAccountId: cashAccountRecord.value
+        }))
     }
 
     const response = await postRequest({
@@ -493,20 +503,21 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         ...values,
         recordId: response.recordId
       })
+    } else toast.success('Record Edited Successfully')
 
 
     } else{ toast.success('Record Edited Successfully')
 
      setEditMode(true)}
+    setEditMode(true)
   }
 console.log(formik)
   async function fetchClientInfo({ clientId }) {
-
     try {
       const response = await getRequest({
         extension: RTCLRepository.Client.get,
         parameters: `_clientId=${clientId}`
-      });
+      })
 
       // Check if the response status is OK (200)
 
@@ -527,9 +538,9 @@ console.log(formik)
         formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
         setInfoAutoFilled(true)
       }
-  }catch (error) {
+    } catch (error) {
       // Handle other errors, such as network issues or exceptions
-      console.error("An error occurred:", error.message);
+      console.error('An error occurred:', error.message)
     }
   }
 
@@ -549,10 +560,10 @@ console.log(formik)
           <FieldSet title='Transaction'>
             <Grid container spacing={4}>
               <Grid item xs={4}>
-                <FormField name='reference' Component={CustomTextField} readOnly  />
+                <FormField name='reference' Component={CustomTextField} readOnly />
               </Grid>
               <Grid item xs={4}>
-                <FormField name='date'  Component={CustomDatePicker} required readOnly={editMode}  />
+                <FormField name='date' Component={CustomDatePicker} required readOnly={editMode} />
               </Grid>
               <Grid item xs={4}>
                 <FormField
@@ -564,21 +575,26 @@ console.log(formik)
                   readOnly
                 />
               </Grid>
-              {/* seqNo: 1,
-        currencyId: '',
-        fcAmount: 0,
-        exRate: 0,
-        lcAmount: 0 */}
               <Grid item xs={4}>
                 <RadioGroup row value={formik.values.functionId} onChange={e => setOperationType(e.target.value)}>
-                  <FormControlLabel value={'3502'} control={<Radio />} label={labels.purchase} disabled={formik?.values?.rows[0]?.currencyId !='' ? true : false} />
-                  <FormControlLabel value={'3503'} control={<Radio />} label={labels.sale} disabled={formik?.values?.rows[0]?.currencyId != '' ? true : false} />
+                  <FormControlLabel
+                    value={'3502'}
+                    control={<Radio />}
+                    label={labels.purchase}
+                    disabled={formik?.values?.rows[0]?.currencyId != '' ? true : false}
+                  />
+                  <FormControlLabel
+                    value={'3503'}
+                    control={<Radio />}
+                    label={labels.sale}
+                    disabled={formik?.values?.rows[0]?.currencyId != '' ? true : false}
+                  />
                 </RadioGroup>
               </Grid>
               <Grid item xs={4}>
                 <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
-                  <FormControlLabel value={"1"} control={<Radio />} label={labels.individual} />
-                  <FormControlLabel value={"2"} control={<Radio />} label={labels.corporate} disabled />
+                  <FormControlLabel value={'1'} control={<Radio />} label={labels.individual} />
+                  <FormControlLabel value={'2'} control={<Radio />} label={labels.corporate} disabled />
                 </RadioGroup>
               </Grid>
               {/* <Grid item xs={4}>{formik.values.clientId}
@@ -602,34 +618,32 @@ console.log(formik)
                 />
               </Grid> */}
               <Grid item xs={4}>
-
-<ResourceLookup
-endpointId={ CurrencyTradingClientRepository.Client.snapshot}
- parameters={{
-  _category: 1,
- }}
- valueField='name'
- displayField='name'
- name='clientId'
- valueShow="clientName"
- label={labels.city}
- form={formik}
- secondDisplayField={false}
- onChange={(event, newValue) => {
-  if (newValue) {
-    formik.setFieldValue('clientId', newValue?.recordId)
-    formik.setFieldValue('clientName', newValue?.name)
-  } else {
-    formik.setFieldValue('clientId', '')
-    formik.setFieldValue('clientName', '')
-  }
-
-
-}}
-errorCheck={'clientId'}
-
-/>
-</Grid>
+                <ResourceLookup
+                  endpointId={CurrencyTradingClientRepository.Client.snapshot}
+                  parameters={{
+                    _category: 1
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  name='clientId'
+                  valueShow='clientName'
+                  label={labels.client}
+                  form={formik}
+                  readOnly={editMode || idInfoAutoFilled}
+                  secondDisplayField={false}
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      formik.setFieldValue('clientId', newValue?.recordId)
+                      formik.setFieldValue('clientName', newValue?.name)
+                      fetchClientInfo({ clientId: newValue?.recordId })
+                    } else {
+                      formik.setFieldValue('clientId', '')
+                      formik.setFieldValue('clientName', '')
+                    }
+                  }}
+                  errorCheck={'clientId'}
+                />
+              </Grid>
             </Grid>
           </FieldSet>
           <FieldSet title='Operations'>
@@ -639,13 +653,16 @@ errorCheck={'clientId'}
                 gridValidation={formik}
                 scrollHeight={350}
                 width={750}
-                background={formik.values.functionId && (formik.values.functionId ==='3503' ?  'rgb(245, 194, 193)' : '#C7F6C7')}
+                background={
+                  formik.values.functionId && (formik.values.functionId === '3503' ? 'rgb(245, 194, 193)' : '#C7F6C7')
+                }
                 columns={[
                   {
                     field: 'incremented',
                     header: 'SL#',
                     name: 'seqNo',
                     readOnly: true,
+                    hidden: true,
                     valueSetter: () => {
                       return formik.values.rows.length + 1
                     }
@@ -658,12 +675,13 @@ errorCheck={'clientId'}
                     name: 'currencyId',
                     store: currencyStore,
                     widthDropDown: '300',
+                    mandatory: true,
                     columnsInDropDown: [
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ],
                     async onChange(row) {
-                      if (row.newValue > 0 ){
+                      if (row.newValue > 0) {
                         const exchange = await fetchRate({
                           currencyId: row.newValue
                         })
@@ -679,22 +697,17 @@ errorCheck={'clientId'}
                         formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.exchangeRate?.rate)
                         formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.exchange?.rateCalcMethod)
 
-//  row.rowData.currencyId = row.newValue
-//                       row.rowData.exRate = exchange.exchangeRate.rate
-//                       row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
-
-                      }else{
-
+                        //  row.rowData.currencyId = row.newValue
+                        //                       row.rowData.exRate = exchange.exchangeRate.rate
+                        //                       row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
+                      } else {
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
                         formik.setFieldValue(`rows[${row.rowIndex}].exRate`, 0)
                         formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
 
-
                         return
-
-
+                      }
                     }
-                  }
                   },
                   {
                     field: 'numberfield',
@@ -742,60 +755,57 @@ errorCheck={'clientId'}
             </Grid>
           </FieldSet>
           <FieldSet title='Individual'>
-            <Grid container spacing={4} sx={{  pt:5 }}>
-            <Grid container rowGap={3} xs={4} sx={{ px: 2  }}>
-
-            <Grid item xs={7}>
-                <FormField
-                  name='birth_date'
-                  Component={CustomDatePicker}
-                  readOnly={editMode || infoAutoFilled}
-                  required
-                />
-              </Grid>
-              <Grid item xs={7}>
-                <FormField
-                  name='id_number'
-                  Component={CustomTextField}
-                  onBlur={e => {
-                    fetchIDInfo({ idNumber: e.target.value })
-                      .then(IDInfo => {
-                        if (!!IDInfo) {
-                          formik.setFieldValue('issue_country', IDInfo.idCountryId)
-                          formik.setFieldValue('id_type', IDInfo.idtId)
-                          formik.setFieldValue('expiry_date', formatDateFromApi(IDInfo.idExpiryDate))
-                          if (IDInfo.clientId != null) {
-                            fetchClientInfo({ clientId: IDInfo.clientId })
+            <Grid container spacing={4} sx={{ pt: 5 }}>
+              <Grid container rowGap={3} xs={4} sx={{ px: 2 }}>
+                <Grid item xs={7}>
+                  <FormField
+                    name='id_number'
+                    Component={CustomTextField}
+                    onBlur={e => {
+                      fetchIDInfo({ idNumber: e.target.value })
+                        .then(IDInfo => {
+                          if (!!IDInfo) {
+                            formik.setFieldValue('issue_country', IDInfo.idCountryId)
+                            formik.setFieldValue('id_type', IDInfo.idtId)
+                            formik.setFieldValue('expiry_date', formatDateFromApi(IDInfo.idExpiryDate))
+                            if (IDInfo.clientId != null) {
+                              fetchClientInfo({ clientId: IDInfo.clientId })
+                            }
+                            setIDInfoAutoFilled(true)
                           }
-                          setIDInfoAutoFilled(true)
-                        }
-                      })
-                      .catch(error => {
-                        console.error('Error fetching ID info:', error)
-                      })
-                  }}
-                  readOnly={editMode}
-                  required
-                />
-              </Grid>
-
-
-              <Grid container xs={12}>
-              <Grid item xs={7}>
-
-                <FormField
-                  name='id_type'
-                  Component={ResourceComboBox}
-                  endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
-                  valueField='recordId'
-                  displayField='name'
-                  readOnly={editMode || idInfoAutoFilled}
-                  required
-                />
+                        })
+                        .catch(error => {
+                          console.error('Error fetching ID info:', error)
+                        })
+                    }}
+                    readOnly={editMode}
+                    required
+                  />
                 </Grid>
-                <Grid item xs={5}>
+                <Grid item xs={7}>
+                  <FormField
+                    name='birth_date'
+                    Component={CustomDatePicker}
+                    readOnly={editMode || infoAutoFilled}
+                    required
+                  />
+                </Grid>
+
+                <Grid container xs={12}>
+                  <Grid item xs={7}>
+                    <FormField
+                      name='id_type'
+                      Component={ResourceComboBox}
+                      endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
+                      valueField='recordId'
+                      displayField='name'
+                      readOnly={editMode || idInfoAutoFilled}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={5}>
                     <Button
-                      variant="contained"
+                      variant='contained'
                       onClick={() =>
                         stack({
                           Component: Confirmation,
@@ -803,296 +813,273 @@ errorCheck={'clientId'}
                             idTypeStore: idTypeStore,
                             formik: formik,
                             setErrorMessage: setErrorMessage,
-                            labels: labels,
+                            labels: labels
                           },
                           title: labels.fetch,
                           width: 400,
-                          height: 400,
+                          height: 400
                         })
                       }
-
                       disabled={
-                        (!formik?.values?.id_type ||
-                        !formik?.values?.birth_date ||
-                        !formik.values?.id_number ||
-                        editMode)
+                        !formik?.values?.id_type || !formik?.values?.birth_date || !formik.values?.id_number || editMode
                           ? true
                           : false
                       }
                     >
-                  {labels.fetch} {formik?.values?.birth_Date}
+                      {labels.fetch} {formik?.values?.birth_Date}
                     </Button>
                   </Grid>
+                </Grid>
 
+                <Grid item xs={7}>
+                  <FormField
+                    name='expiry_date'
+                    Component={CustomDatePicker}
+                    readOnly={editMode || idInfoAutoFilled}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormField
+                    name='issue_country'
+                    Component={ResourceComboBox}
+                    endpointId={SystemRepository.Country.qry}
+                    valueField='recordId'
+                    displayField={['reference', 'name', 'flName']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'flName', value: 'Foreign Language Name' }
+                    ]}
+                    readOnly={editMode || idInfoAutoFilled}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormField
+                    name='nationality'
+                    Component={ResourceComboBox}
+                    endpointId={SystemRepository.Country.qry}
+                    valueField='recordId'
+                    displayField={['reference', 'name', 'flName']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'flName', value: 'Foreign Language Name' }
+                    ]}
+                    readOnly={editMode}
+                    required
+                  />
+                </Grid>
 
-              </Grid>
-
-
-              <Grid item xs={7}>
-                <FormField
-                  name='expiry_date'
-                  Component={CustomDatePicker}
-                  readOnly={editMode || idInfoAutoFilled}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormField
-                  name='issue_country'
-                  Component={ResourceComboBox}
-                  endpointId={SystemRepository.Country.qry}
-                  valueField='recordId'
-                  displayField={['reference', 'name', 'flName']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'flName', value: 'Foreign Language Name' }
-                  ]}
-                  readOnly={editMode || idInfoAutoFilled}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormField
-                  name='nationality'
-                  Component={ResourceComboBox}
-                  endpointId={SystemRepository.Country.qry}
-                  valueField='recordId'
-                  displayField={['reference', 'name', 'flName']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'flName', value: 'Foreign Language Name' }
-                  ]}
-                  readOnly={editMode}
-                  required
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormField name='cell_phone' Component={CustomTextField} readOnly={editMode} required />
-              </Grid>
-              <Grid item xs={2}>
-                <FormControlLabel
-                  name='resident'
-                  checked={formik.values.resident}
-                  onChange={formik.handleChange}
-                  control={<Checkbox defaultChecked />}
-                  label='Resident'
-                  readOnly={editMode || infoAutoFilled}
-                />
+                <Grid item xs={12}>
+                  <FormField name='cell_phone' Component={CustomTextField} readOnly={editMode} required />
+                </Grid>
+                <Grid item xs={2}>
+                  <FormControlLabel
+                    name='resident'
+                    checked={formik.values.resident}
+                    onChange={formik.handleChange}
+                    control={<Checkbox defaultChecked />}
+                    label='Resident'
+                    readOnly={editMode || infoAutoFilled}
+                  />
+                </Grid>
               </Grid>
 
-             </Grid>
+              <Grid container rowGap={3} xs={8} sx={{ px: 2, alignContent: 'start' }}>
+                <Grid xs={12} container spacing={2}>
+                  <Grid item xs={3}>
+                    <FormField
+                      name='firstName'
+                      Component={CustomTextField}
+                      readOnly={editMode || infoAutoFilled}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <FormField name='middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <FormField
+                      name='lastName'
+                      Component={CustomTextField}
+                      readOnly={editMode || infoAutoFilled}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <FormField name='familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                  </Grid>
+                </Grid>
+                <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                  <Grid item xs={3}>
+                    <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                  </Grid>
+                </Grid>
+                <Grid container rowGap={3} xs={4}></Grid>
 
-             <Grid container rowGap={3} xs={8} sx={{ px: 2, alignContent: 'start' }}>
-              <Grid xs={12}
-                    container
-                    spacing={2}
+                <Grid container rowGap={3} xs={8}>
+                  <Grid item xs={12}>
+                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                  </Grid>
 
-                  >
-              <Grid item xs={3}>
-                <FormField
-                  name='firstName'
-                  Component={CustomTextField}
-                  readOnly={editMode || infoAutoFilled}
-                  required
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <FormField name='middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={3}>
-                <FormField name='lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} required />
-              </Grid>
-              <Grid item xs={3}>
-                <FormField name='familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              </Grid>
-              <Grid xs={12}
-                    container
-                    spacing={2}
-                    sx={{ flexDirection: "row-reverse" }}
-                  >
-              <Grid item xs={3}>
-                <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={3}>
-                <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={3}>
-                <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-              <Grid item xs={3}>
-                <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
+                  <Grid item xs={12}>
+                    <FormField
+                      name='purpose_of_exchange'
+                      Component={ResourceComboBox}
+                      endpointId={'CTSET.asmx/qryPEX'}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      readOnly={editMode}
+                    />
+                  </Grid>
 
+                  <Grid item xs={12}>
+                    <FormField
+                      name='source_of_income'
+                      Component={ResourceComboBox}
+                      endpointId={'RTSET.asmx/qrySI'}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      readOnly={editMode || infoAutoFilled}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <FormField
+                      name='profession'
+                      Component={ResourceComboBox}
+                      endpointId={'RTSET.asmx/qryPFN'}
+                      required
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      readOnly={editMode || infoAutoFilled}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <FormField name='remarks' Component={CustomTextField} readOnly={editMode} />
+                  </Grid>
+                </Grid>
               </Grid>
-              <Grid container rowGap={3} xs={4}>
-              </Grid>
-
-
-              <Grid container rowGap={3} xs={8}>
-
-              <Grid item xs={12}>
-                <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
-              </Grid>
-
-
-              <Grid item xs={12}>
-                <FormField
-                  name='purpose_of_exchange'
-                  Component={ResourceComboBox}
-                  endpointId={'CTSET.asmx/qryPEX'}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={editMode}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormField
-                  name='source_of_income'
-                  Component={ResourceComboBox}
-                  endpointId={'RTSET.asmx/qrySI'}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={editMode || infoAutoFilled}
-                />
-              </Grid>
-
-
-              <Grid item xs={12}>
-                <FormField
-                  name='profession'
-                  Component={ResourceComboBox}
-                  endpointId={'RTSET.asmx/qryPFN'}
-                  required
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  readOnly={editMode || infoAutoFilled}
-                />
-              </Grid>
-
-
-              <Grid item xs={12}>
-                <FormField name='remarks' Component={CustomTextField} readOnly={editMode} />
-              </Grid>
-
-            </Grid>
-            </Grid>
             </Grid>
           </FieldSet>
           <FieldSet title='Amount'>
-          <Grid container  xs={12} spacing={4}>
-          <Grid item  xs={9} spacing={4}>
-          <InlineEditGrid
-                maxAccess={maxAccess}
-                gridValidation={CashFormik}
-                scrollHeight={350}
+            <Grid container xs={12} spacing={4}>
+              <Grid item xs={9} spacing={4}>
+                <InlineEditGrid
+                  maxAccess={maxAccess}
+                  gridValidation={CashFormik}
+                  scrollHeight={350}
+                  width={750}
+                  columns={[
+                    {
+                      field: 'incremented',
+                      header: 'SL#',
+                      name: 'seqNo',
+                      hidden: true,
+                      readOnly: true,
+                      valueSetter: () => {
+                        return CashFormik.values.rows.length + 1
+                      }
+                    },
+                    {
+                      field: 'combobox',
+                      valueField: 'key',
+                      displayField: 'value',
+                      header: labels.type,
+                      nameId: 'type',
+                      name: 'typeName',
+                      store: typeStore,
+                      mandatory: true,
+                      widthDropDown: '300',
+                      columnsInDropDown: [{ key: 'value', value: 'Value' }]
+                    },
+                    {
+                      field: 'numberfield',
+                      header: 'Amount',
+                      name: 'amount',
+                      mandatory: true,
+                      required: true,
+                      readOnly: false
+                    },
 
-                width={750}
-                columns={[
-                  {
-                    field: 'incremented',
-                    header: 'SL#',
-                    name: 'seqNo',
-                    hidden: true,
-                    readOnly: true,
-                    valueSetter: () => {
-                      return CashFormik.values.rows.length + 1
+                    {
+                      field: 'combobox',
+                      valueField: 'recordId',
+                      displayField: 'name',
+                      header: labels.creditCard,
+                      nameId: 'ccId',
+                      name: 'ccName',
+                      store: creditCardStore,
+                      widthDropDown: '300',
+                      columnsInDropDown: [
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'name' }
+                      ]
+                    },
+                    {
+                      field: 'numberfield',
+                      header: labels.BanKFees,
+                      name: 'bankFees'
+                    },
+                    {
+                      field: 'textfield',
+                      header: labels.receiptRef,
+                      name: 'receiptRef'
                     }
-                  },
-                  {
-                    field: 'combobox',
-                    valueField: 'key',
-                    displayField: 'value',
-                    header: labels.type,
-                    nameId: 'type',
-                    name: 'typeName',
-                    store: typeStore,
-                    mandatory: true,
-                    widthDropDown: '300',
-                    columnsInDropDown: [
-                      { key: 'value', value: 'Value' },
-                    ]
-
-                  },{
-                    field: 'numberfield',
-                    header: 'Amount',
-                    name: 'amount',
-                    mandatory: true,
-                    required: true,
-                    readOnly: false
-                  },
-
-                  {
-                    field: 'combobox',
-                    valueField: 'recordId',
-                    displayField: 'name',
-                    header: labels.creditCard,
-                    nameId: 'ccId',
-                    name: 'ccName',
-                    store: creditCardStore,
-                    widthDropDown: '300',
-                    columnsInDropDown: [
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'name' },
-                    ]
-
-                  },
-                  {
-                    field: 'numberfield',
-                    header: labels.BanKFees,
-                    name: 'bankFees',
-                  },
-                  {
-                    field: 'textfield',
-                    header: labels.receiptRef,
-                    name: 'receiptRef',
-                  },
-                ]}
-                defaultRow={{
-                  seqNo: 0,
-                  cashAccountId: '',
-                  cashInvoiceId: null,
-                  type : '',
-                  typeName : '',
-                  ccName: '',
-                  amount: 0,
-                  ccId: '',
-                  bankFees: 0,
-                  receiptRef: 0
-                }}
-              />
-          </Grid>
-
-            <Grid container  xs={3} spacing={2} sx={{p:4}}>
-              <Grid item xs={12}>
-                <CustomTextField label='Net Amount' value={total} disabled />
+                  ]}
+                  defaultRow={{
+                    seqNo: 0,
+                    cashAccountId: '',
+                    cashInvoiceId: null,
+                    type: '',
+                    typeName: '',
+                    ccName: '',
+                    amount: 0,
+                    ccId: '',
+                    bankFees: 0,
+                    receiptRef: ''
+                  }}
+                />
               </Grid>
-              <Grid item xs={12}>
-                <CustomTextField label='Amount Recieved' disabled />
+
+              <Grid container xs={3} spacing={2} sx={{ p: 4 }}>
+                <Grid item xs={12}>
+                  <CustomTextField label='Net Amount' value={total} readOnly />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField label='Amount Recieved' readOnly />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField label='Mode of Pay' readOnly />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField label='Balance To Pay' readOnly />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <CustomTextField label='Mode of Pay' disabled />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField label='Balance To Pay' disabled />
-              </Grid>
-            </Grid>
             </Grid>
           </FieldSet>
         </Grid>
