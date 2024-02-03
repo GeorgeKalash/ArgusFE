@@ -10,7 +10,7 @@ import { AuthContext } from 'src/providers/AuthContext'
 const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
-  const { user, setUser } = useContext(AuthContext)
+  const { user, setUser, apiUrl } = useContext(AuthContext)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -20,7 +20,7 @@ const RequestsProvider = ({ children }) => {
 
     return axios({
       method: 'GET',
-      url: process.env.NEXT_PUBLIC_BASE_URL + body.extension + '?' + body.parameters,
+      url: apiUrl + body.extension + '?' + body.parameters,
       headers: {
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'multipart/form-data',
@@ -34,8 +34,7 @@ const RequestsProvider = ({ children }) => {
 
     return axios({
       method: 'GET',
-      url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters,
-
+      url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
     }).then(res => res.data)
   }
 
@@ -44,7 +43,7 @@ const RequestsProvider = ({ children }) => {
 
     return axios({
       method: 'GET',
-      url: process.env.NEXT_PUBLIC_AuthURL  + body.extension + '?' + body.parameters,
+      url: process.env.NEXT_PUBLIC_AuthURL + body.extension + '?' + body.parameters,
       headers: {
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'multipart/form-data',
@@ -55,7 +54,7 @@ const RequestsProvider = ({ children }) => {
 
   const postRequest = async body => {
     const accessToken = await getAccessToken()
-    const url = body.url ? body.url : process.env.NEXT_PUBLIC_BASE_URL
+    const url = body.url ? body.url : apiUrl
 
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
@@ -168,4 +167,4 @@ const RequestsProvider = ({ children }) => {
   return <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
 }
 
-export { RequestsContext, RequestsProvider  }
+export { RequestsContext, RequestsProvider }
