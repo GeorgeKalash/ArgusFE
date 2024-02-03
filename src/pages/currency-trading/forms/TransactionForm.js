@@ -503,13 +503,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         ...values,
         recordId: response.recordId
       })
-    } else toast.success('Record Edited Successfully')
-
 
     } else{ toast.success('Record Edited Successfully')
 
      setEditMode(true)}
-    setEditMode(true)
   }
 console.log(formik)
   async function fetchClientInfo({ clientId }) {
