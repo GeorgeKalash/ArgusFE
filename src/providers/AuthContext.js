@@ -45,6 +45,7 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(defaultProvider.loading)
   const [companyName, setCompanyName] = useState('')
   const [getAC, setGetAC] = useState({})
+  const [apiUrl, setApiUrl] = useState('')
 
   // ** Hooks
   const router = useRouter()
@@ -54,6 +55,12 @@ const AuthProvider = ({ children }) => {
       const userData = window.localStorage.getItem('userData')
         ? window.localStorage.getItem('userData')
         : window.sessionStorage.getItem('userData')
+
+      const apiUrl = window.localStorage.getItem('apiUrl')
+        ? window.localStorage.getItem('apiUrl')
+        : window.sessionStorage.getItem('apiUrl')
+
+      setApiUrl(apiUrl)
 
       if (userData) {
         setUser(JSON.parse(userData))
@@ -78,6 +85,8 @@ const AuthProvider = ({ children }) => {
         // Set companyName from the API response
         setCompanyName(response.data.record.companyName)
         setGetAC(response)
+        setApiUrl(response.data.record.api)
+        window.localStorage.setItem('apiUrl', response.data.record.api)
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -90,7 +99,7 @@ const AuthProvider = ({ children }) => {
     try {
       const getUS2 = await axios({
         method: 'GET',
-        url: `${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`,
+        url: `${apiUrl}/SY.asmx/getUS2?_email=${params.username}`,
         headers: {
           accountId: JSON.parse(getAC.data.record.accountId),
           dbe: JSON.parse(getAC.data.record.dbe),
@@ -118,7 +127,7 @@ const AuthProvider = ({ children }) => {
 
       const defaultSettings = await axios({
         method: 'GET',
-        url: `${getAC.data.record.api}/SY.asmx/getDE?_key=dateFormat`,
+        url: `${apiUrl}/SY.asmx/getDE?_key=dateFormat`,
         headers: {
           Authorization: 'Bearer ' + signIn3.data.record.accessToken,
           'Content-Type': 'multipart/form-data'
@@ -224,10 +233,8 @@ const AuthProvider = ({ children }) => {
     login: handleLogin,
     logout: handleLogout,
     getAccessToken,
-    apiUrl: `${getAC?.data?.record?.api}/` || ''
+    apiUrl: `${apiUrl}/` || ''
   }
-
-  console.log('vals', values)
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>
 }
