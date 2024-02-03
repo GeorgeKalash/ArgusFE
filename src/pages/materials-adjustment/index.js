@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -79,30 +79,30 @@ const MaterialsAdjustment = () => {
       }
     },
     {
-        field: 'siteRef',
-        headerName: _labels[10],
-        flex: 1
-      },
-      {
-        field: 'siteName',
-        headerName: _labels[11],
-        flex: 1
-      },
-      {
-        field: 'description',
-        headerName: _labels[13],
-        flex: 1
-      },
-      {
-        field: 'statusName',
-        headerName: _labels[14],
-        flex: 1
-      },
-      {
-        field: 'qty',
-        headerName: _labels[15],
-        flex: 1
-      }
+      field: 'siteRef',
+      headerName: _labels[10],
+      flex: 1
+    },
+    {
+      field: 'siteName',
+      headerName: _labels[11],
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: _labels[13],
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels[14],
+      flex: 1
+    },
+    {
+      field: 'qty',
+      headerName: _labels[15],
+      flex: 1
+    }
   ]
 
   const add = () => {
@@ -122,7 +122,6 @@ const MaterialsAdjustment = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>
@@ -146,6 +145,7 @@ const MaterialsAdjustment = () => {
             setWindowOpen(false)
             setSelectedRecordId(null)
           }}
+          setErrorMessage={setErrorMessage}
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}

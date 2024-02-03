@@ -30,5 +30,8 @@ export const InventoryRepository = {
     post: service + 'postADJ',
     unpost: service + 'unpostADJ',
     del: service + 'delADJ'
+  },
+  MaterialsAdjustmentDetail: {
+    qry: service + 'qryADI'
   }
 }
