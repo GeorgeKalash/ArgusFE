@@ -14,6 +14,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { CommonContext } from 'src/providers/CommonContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
@@ -22,6 +23,8 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import * as yup from 'yup'
+import { DataSets } from 'src/resources/DataSets'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
 const FormContext = React.createContext(null)
 
@@ -79,12 +82,16 @@ function useLookup({ endpointId, parameters }) {
 
 export default function TransactionForm({ recordId, labels, maxAccess , plantId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
+
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
   const { stack: stackError } = useError()
   const { stack } = useWindow();
   const [idTypeStore, setIdTypeStore] = useState([]);
+  const [typeStore, setTypeStore] = useState([]);
+  const [creditCardStore, setCreditCardStore] = useState([]);
 
   const [initialValues, setInitialValues] = useState({
     recordId:  null,
@@ -99,9 +106,22 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         lcAmount: 0
       }
     ],
+     rows2: [{
+      seqNo: 1,
+      cashAccountId: '',
+      cashInvoiceId: null,
+      type : '',
+      typeName : '',
+      ccName: '',
+      amount: '',
+      ccId: '',
+      bankFees: 0,
+      receiptRef: 0
+    }],
     date: null,
     clientId: null,
     clientName:null,
+    clientType: '1',
     firstName: null,
     middleName: null,
     familyName: null,
@@ -177,14 +197,36 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         setErrorMessage(error);
       });
   };
+
+  const fillCreditCard = () => {
+    var parameters = `_filter=`;
+    getRequest({
+      extension: CashBankRepository.CreditCard.qry,
+      parameters: parameters,
+    })
+      .then((res) => {
+        setCreditCardStore(res.list);
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  };
+
+  const fillCATypeStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.CA_CASH_ACCOUNT_TYPE,
+      callback: setTypeStore
+    })
+  }
+
   useEffect(() => {
     const date = new Date();
 
    !editMode && formik.setFieldValue( 'date' , date)
 
    fillType()
-
-
+   fillCATypeStore()
+   fillCreditCard()
     ;(async function () {
       setEditMode(false)
 
@@ -251,6 +293,7 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
       recordId: recordId,
       reference: record.headerView.reference,
       rows: record.items,
+      rows2: record.cash,
       clientType: record.clientMaster.category,
       date: formatDateFromApi(record.headerView.date),
       clientId: record.clientIndividual.clientId,
@@ -277,6 +320,8 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
       nationality: record.clientMaster.nationalityId,
       cell_phone: record.clientMaster.cellPhone
     })
+
+    CashFormik.setValues({rows: record.cash })
   }
 
   // const [plantId, setPlantId] = useState(null)
@@ -305,6 +350,41 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
   //   parameters: { _category: 1 }
   // })
 
+  const CashFormik = useFormik({
+    validate: values => {
+      const type = values.rows && values.rows.every(row => !!row.type)
+      const amount = values.rows && values.rows.every(row => !!row.amount)
+
+
+      return type && amount
+        ? {}
+        : {
+            rows: Array(values.rows && values.rows.length).fill({
+              amount: 'field is required',
+              type: 'field is required',
+            })
+          }
+    },
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      rows: [{
+        seqNo: 1,
+        cashAccountId: '',
+        cashInvoiceId: null,
+        type : '',
+        typeName : '',
+        ccName: '',
+        amount: '',
+        ccId: '',
+        bankFees: 0,
+        receiptRef: 0
+      }]
+    },
+    onSubmit: values => {
+
+    }
+  })
   async function onSubmit(values) {
     const { record: recordFunctionId } = await getRequest({
       extension: `SY.asmx/getUFU`,
@@ -319,6 +399,7 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
     })
 
     const clientId = values.clientId || 0
+console.log(values)
 
     const payload = {
       header: {
@@ -332,7 +413,7 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         cashAccountId: cashAccountRecord.value,
         poeId: values.purpose_of_exchange,
         wip: values.wip,
-        amount: total,
+        amount: total || 1,
         notes: values.remarks
       },
       items: values.rows.map(({ seqNo, currencyId, exRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
@@ -383,7 +464,9 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
         idIssueDate: null,
         idCityId: null,
         isDiplomat: false
-      }
+      },
+
+      cash: CashFormik.values.rows.length > 0 && CashFormik.values.rows.map(({ seqNo, type, ccId, bankFees,amount, receiptRef, cashAccountId ,...rest }) => ({ seqNo, type, ccId, bankFees, amount: amount?.replaceAll(",", "") , receiptRef, cashAccountId: cashAccountRecord.value}))
     }
 
     const response = await postRequest({
@@ -405,27 +488,35 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
   }
 
   async function fetchClientInfo({ clientId }) {
-    const response = await getRequest({
-      extension: RTCLRepository.Client.get,
-      parameters: `_clientId=${clientId}`
-    })
 
-    var clientInfo = response.record
-    if (!!clientInfo) {
-      formik.setFieldValue('firstName', clientInfo.firstName)
-      formik.setFieldValue('middleName', clientInfo.middleName)
-      formik.setFieldValue('lastName', clientInfo.lastName)
-      formik.setFieldValue('familyName', clientInfo.familyName)
-      formik.setFieldValue('fl_firstName', clientInfo.fl_firstName)
-      formik.setFieldValue('fl_lastName', clientInfo.fl_lastName)
-      formik.setFieldValue('fl_middleName', clientInfo.fl_middleName)
-      formik.setFieldValue('fl_familyName', clientInfo.fl_familyName)
-      formik.setFieldValue('birth_date', formatDateFromApi(clientInfo.birthDate))
-      formik.setFieldValue('resident', clientInfo.isResident)
-      formik.setFieldValue('profession', clientInfo.professionId)
-      formik.setFieldValue('sponsor', clientInfo.sponsorName)
-      formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
-      setInfoAutoFilled(true)
+    try {
+      const response = await getRequest({
+        extension: RTCLRepository.Client.get,
+        parameters: `_clientId=${clientId}`
+      });
+
+      // Check if the response status is OK (200)
+
+      const clientInfo = response && response.record
+      if (!!clientInfo) {
+        formik.setFieldValue('firstName', clientInfo.firstName)
+        formik.setFieldValue('middleName', clientInfo.middleName)
+        formik.setFieldValue('lastName', clientInfo.lastName)
+        formik.setFieldValue('familyName', clientInfo.familyName)
+        formik.setFieldValue('fl_firstName', clientInfo.fl_firstName)
+        formik.setFieldValue('fl_lastName', clientInfo.fl_lastName)
+        formik.setFieldValue('fl_middleName', clientInfo.fl_middleName)
+        formik.setFieldValue('fl_familyName', clientInfo.fl_familyName)
+        formik.setFieldValue('birth_date', formatDateFromApi(clientInfo.birthDate))
+        formik.setFieldValue('resident', clientInfo.isResident)
+        formik.setFieldValue('profession', clientInfo.professionId)
+        formik.setFieldValue('sponsor', clientInfo.sponsorName)
+        formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
+        setInfoAutoFilled(true)
+      }
+  }catch (error) {
+      // Handle other errors, such as network issues or exceptions
+      console.error("An error occurred:", error.message);
     }
   }
 
@@ -473,8 +564,8 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
               </Grid>
               <Grid item xs={4}>
                 <RadioGroup row value={formik.values.clientType} onChange={formik.onChange}>
-                  <FormControlLabel value={1} control={<Radio />} label={labels.individual} />
-                  <FormControlLabel value={2} control={<Radio />} label={labels.corporate} disabled />
+                  <FormControlLabel value={"1"} control={<Radio />} label={labels.individual} />
+                  <FormControlLabel value={"2"} control={<Radio />} label={labels.corporate} disabled />
                 </RadioGroup>
               </Grid>
               {/* <Grid item xs={4}>{formik.values.clientId}
@@ -628,7 +719,7 @@ errorCheck={'clientId'}
                   }
                 ]}
                 defaultRow={{
-                  seqNo: 0,
+                  seqNo: 1,
                   currencyId: '',
                   fcAmount: 0,
                   exRate: 0,
@@ -892,19 +983,103 @@ errorCheck={'clientId'}
             </Grid>
           </FieldSet>
           <FieldSet title='Amount'>
-            <Grid container spacing={4}>
-              <Grid item xs={3}>
+          <Grid container  xs={12} spacing={4}>
+          <Grid item  xs={9} spacing={4}>
+          <InlineEditGrid
+                maxAccess={maxAccess}
+                gridValidation={CashFormik}
+                scrollHeight={350}
+
+                width={750}
+                columns={[
+                  {
+                    field: 'incremented',
+                    header: 'SL#',
+                    name: 'seqNo',
+                    hidden: true,
+                    readOnly: true,
+                    valueSetter: () => {
+                      return CashFormik.values.rows.length + 1
+                    }
+                  },
+                  {
+                    field: 'combobox',
+                    valueField: 'key',
+                    displayField: 'value',
+                    header: labels.type,
+                    nameId: 'type',
+                    name: 'typeName',
+                    store: typeStore,
+                    mandatory: true,
+                    widthDropDown: '300',
+                    columnsInDropDown: [
+                      { key: 'value', value: 'Value' },
+                    ]
+
+                  },{
+                    field: 'numberfield',
+                    header: 'Amount',
+                    name: 'amount',
+                    mandatory: true,
+                    required: true,
+                    readOnly: false
+                  },
+
+                  {
+                    field: 'combobox',
+                    valueField: 'recordId',
+                    displayField: 'name',
+                    header: labels.creditCard,
+                    nameId: 'ccId',
+                    name: 'ccName',
+                    store: creditCardStore,
+                    widthDropDown: '300',
+                    columnsInDropDown: [
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'name' },
+                    ]
+
+                  },
+                  {
+                    field: 'numberfield',
+                    header: labels.BanKFees,
+                    name: 'bankFees',
+                  },
+                  {
+                    field: 'textfield',
+                    header: labels.receiptRef,
+                    name: 'receiptRef',
+                  },
+                ]}
+                defaultRow={{
+                  seqNo: 0,
+                  cashAccountId: '',
+                  cashInvoiceId: null,
+                  type : '',
+                  typeName : '',
+                  ccName: '',
+                  amount: 0,
+                  ccId: '',
+                  bankFees: 0,
+                  receiptRef: 0
+                }}
+              />
+          </Grid>
+
+            <Grid container  xs={3} spacing={2} sx={{p:4}}>
+              <Grid item xs={12}>
                 <CustomTextField label='Net Amount' value={total} disabled />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12}>
                 <CustomTextField label='Amount Recieved' disabled />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12}>
                 <CustomTextField label='Mode of Pay' disabled />
               </Grid>
-              <Grid item xs={3}>
+              <Grid item xs={12}>
                 <CustomTextField label='Balance To Pay' disabled />
               </Grid>
+            </Grid>
             </Grid>
           </FieldSet>
         </Grid>

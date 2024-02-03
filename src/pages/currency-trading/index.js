@@ -24,7 +24,7 @@ export default function CurrencyTrading() {
     : null;
 
     console.log(userData)
-  const parameters = `_userId=${userData && userData.userId}&_key=cashAccountId`;
+  const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
 
   try {
     const res = await getRequest({
@@ -83,7 +83,7 @@ function openForm(recordId,plantId ){
     datasetId: 35208,
     endpointId: 'CTTRX.asmx/pageCIV',
     async queryFn(options = {}) {
-      const { _startAt = 0, _pageSize = 50 } = options
+      const { _startAt = 0, _pageSize = 100 } = options
 
       return await getRequest({
         extension: 'CTTRX.asmx/pageCIV',
