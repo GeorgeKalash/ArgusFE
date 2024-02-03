@@ -153,6 +153,20 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
     enableReinitialize: true,
     validateOnChange: false,
     validateOnBlur: false,
+    validate: values => {
+      const type = values.row2 && values.rows2.every(row => !!row.type)
+      const amount = values.rows2 && values.rows2.every(row => !!row.amount)
+
+
+      return type && amount
+        ? {}
+        : {
+            rows2: Array(values.rows2 && values.rows2.length).fill({
+              amount: 'field is required',
+              type: 'field is required',
+            })
+          }
+    },
     validationSchema: yup.object({
       date: yup.date().required(),
       id_type: yup.number().required(),
