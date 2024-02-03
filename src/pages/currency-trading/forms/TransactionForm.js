@@ -171,7 +171,7 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
       date: yup.date().required(),
       id_type: yup.number().required(),
       id_number: yup.number().required(),
-      birth_date: yup.date().required(),
+      birth_date: yup.string().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
       expiry_date: yup.string().required(),
@@ -413,7 +413,6 @@ export default function TransactionForm({ recordId, labels, maxAccess , plantId,
     })
 
     const clientId = values.clientId || 0
-console.log(values)
 
     const payload = {
       header: {
@@ -496,11 +495,11 @@ console.log(values)
       })
 
 
-    } else toast.success('Record Edited Successfully')
+    } else{ toast.success('Record Edited Successfully')
 
-    // setEditMode(true)
+     setEditMode(true)}
   }
-
+console.log(formik)
   async function fetchClientInfo({ clientId }) {
 
     try {
