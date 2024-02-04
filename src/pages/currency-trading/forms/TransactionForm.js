@@ -154,25 +154,25 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     enableReinitialize: true,
     validateOnChange: false,
     validateOnBlur: false,
-    validate: values => {
-      const type = values.row2 && values.rows2.every(row => !!row.type)
-      const amount = values.rows2 && values.rows2.every(row => !!row.amount)
 
+    // validate: values => {
+    //   const type = values.row2 && values.rows2.every(row => !!row.type)
+    //   const amount = values.rows2 && values.rows2.every(row => !!row.amount)
 
-      return type && amount
-        ? {}
-        : {
-            rows2: Array(values.rows2 && values.rows2.length).fill({
-              amount: 'field is required',
-              type: 'field is required',
-            })
-          }
-    },
+    //   return type && amount
+    //     ? {}
+    //     : {
+    //         rows2: Array(values.rows2 && values.rows2.length).fill({
+    //           amount: 'field is required',
+    //           type: 'field is required',
+    //         })
+    //       }
+    // },
     validationSchema: yup.object({
       date: yup.date().required(),
       id_type: yup.number().required(),
       id_number: yup.number().required(),
-      birth_date: yup.string().required(),
+      birth_date: yup.date().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
       expiry_date: yup.string().required(),
@@ -503,12 +503,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         ...values,
         recordId: response.recordId
       })
-
-    } else{ toast.success('Record Edited Successfully')
-
-     setEditMode(true)}
+      setEditMode(true)
+    } else {
+      toast.success('Record Edited Successfully')
+    }
   }
-console.log(formik)
   async function fetchClientInfo({ clientId }) {
     try {
       const response = await getRequest({
