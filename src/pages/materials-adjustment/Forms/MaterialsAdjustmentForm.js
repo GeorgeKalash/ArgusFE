@@ -29,6 +29,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
   const { height } = useWindowDimensions()
 
   const [isLoading, setIsLoading] = useState(false)
+  const [isPosted, setIsPosted] = useState(false)
   const [dtStore, setDtStore] = useState([])
   const [plantStore, setPlantStore] = useState([])
   const [siteStore, setSiteStore] = useState([])
@@ -42,7 +43,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     plantId: '',
     siteId: '',
     description: '',
-    date: null
+    date: null,
+    isOnPostClicked: false
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,18 +61,22 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       siteId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      postItemsGrid()
-
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj,
-          recordId: response.recordId
-        })
+      console.log('formik.values.isOnPostClicked ', formik.values.isOnPostClicked)
+      if (formik.values.isOnPostClicked) {
+        handlePost(obj)
+        formik.setFieldValue('isOnPostClicked', false)
       } else {
-        toast.success('Record Edited Successfully')
+        postItemsGrid()
+        if (!recordId) {
+          toast.success('Record Added Successfully')
+          setInitialData({
+            ...obj,
+            recordId: response.recordId
+          })
+        } else {
+          toast.success('Record Edited Successfully')
+        }
       }
-
       setEditMode(true)
     }
   })
@@ -98,9 +104,22 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     })
   })
 
-  const postItemsGrid = () => {
-    console.log('detailsFormik ', formik.values.rows)
+  const handlePost = obj => {
+    postRequest({
+      extension: InventoryRepository.MaterialsAdjustment.post,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        console.log({ res })
+        getGridData({})
+        toast.success('Record Deleted Successfully')
+      })
+      .catch(error => {
+        //setErrorMessage(error)
+      })
+  }
 
+  const postItemsGrid = () => {
     const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
       const seqNo = index + 1 // Adding 1 to make it 1-based index
       if (adjDetail.muQty === null) {
@@ -119,7 +138,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
         }
       }
     })
-    console.log('updatedRows ', updatedRows)
 
     const resultObject = {
       header: formik.values.rows,
@@ -137,7 +155,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
-        setErrorMessage(error)
+        //setErrorMessage(error)
       })
   }
 
@@ -301,7 +319,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
             extension: InventoryRepository.MaterialsAdjustment.get,
             parameters: `_recordId=${recordId}`
           })
-
+          setIsPosted(res.record.status === 3 ? true : false)
           setInitialData(res.record)
           formik.setValues({
             ...formik.values,
@@ -325,6 +343,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       height={450}
       maxAccess={maxAccess}
       editMode={editMode}
+      isPosted={isPosted}
     >
       <Box>
         <Grid container>

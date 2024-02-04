@@ -15,6 +15,7 @@ export default function FormShell({
   infoVisible = true,
   resourceId,
   maxAccess,
+  isPosted = false,
   clientRelation = false,
   setErrorMessage
 }) {
@@ -35,6 +36,11 @@ export default function FormShell({
       {windowToolbarVisible && (
         <WindowToolbar
           onSave={() => form.handleSubmit()}
+          onPost={() => {
+            // Set a flag in the Formik state before calling handleSubmit
+            form.setFieldValue('isOnPostClicked', true)
+            form.handleSubmit()
+          }}
           onInfo={() =>
             stack({
               Component: TransactionLog,
@@ -66,6 +72,7 @@ export default function FormShell({
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
           clientRelation={clientRelation}
+          isPosted={isPosted}
         />
       )}
       {windowInfo && (
