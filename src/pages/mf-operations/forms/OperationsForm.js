@@ -11,20 +11,22 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 
-export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
+export default function OperationsForms({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
-    
+
     const [initialValues, setInitialData] = useState({
         recordId: null,
-        name: '',
         reference: '',
-        description: '',
+        name:'',
+        workCenterId: '',
+        workCenterName: '',
+        maxLossPct: '',
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,26 +34,31 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
     //const editMode = !!recordId
 
     const invalidate = useInvalidate({
-        endpointId: FinancialRepository.ExpenseTypes.page
+        endpointId: ManufacturingRepository.Operation.page
       })
-  
+
     const formik = useFormik({
         initialValues,
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
-          name: yup.string().required(' '),
-          reference: yup.string().required(' '),
-          description: yup.string().required(' '),
+          reference: yup.string().required(),
+          name: yup.string().required(),
+          workCenterId: yup.string().required(),
+          maxLossPct: yup
+            .number()
+            .min(0, 'min')
+            .max(100, 'max')
+            .required(),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
 
           const response = await postRequest({
-            extension: FinancialRepository.ExpenseTypes.set,
+            extension: ManufacturingRepository.Operation.set,
             record: JSON.stringify(obj)
           })
-          
+
           if (!recordId) {
             toast.success('Record Added Successfully')
             setInitialData({
@@ -65,18 +72,18 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
           invalidate()
         }
       })
-    
+
       useEffect(() => {
         ;(async function () {
           try {
             if (recordId) {
               setIsLoading(true)
-    
+
               const res = await getRequest({
-                extension: FinancialRepository.ExpenseTypes.get,
+                extension: ManufacturingRepository.Operation.get,
                 parameters: `_recordId=${recordId}`
               })
-              
+
               setInitialData(res.record)
             }
           } catch (exception) {
@@ -85,18 +92,18 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
           setIsLoading(false)
         })()
       }, [])
-      
+
     return (
-        <FormShell 
-            resourceId={ResourceIds.Expense_Types}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
+        <FormShell
+            resourceId={ResourceIds.Operations}
+            form={formik}
+            height={300}
+            maxAccess={maxAccess}
             editMode={editMode}
         >
             <Grid container spacing={4}>
                 <Grid item xs={12}>
-                    <CustomTextField
+                  <CustomTextField
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
@@ -108,10 +115,10 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
 
                     // helperText={formik.touched.reference && formik.errors.reference}
-                    />
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                    <CustomTextField
+                  <CustomTextField
                     name='name'
                     label={labels.name}
                     value={formik.values.name}
@@ -123,24 +130,49 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
                     error={formik.touched.name && Boolean(formik.errors.name)}
 
                     // helperText={formik.touched.name && formik.errors.name}
-                    />
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                    <CustomTextArea
-                    name='description'
-                    label={labels.description}
-                    value={formik.values.description}
-                    required
-                    maxLength='100'
-                    rows={2}
-                    maxAccess={maxAccess}
+                  <CustomTextField
+                    name='maxLossPct'
+                    label={labels.maxLossPct}
+                    value={formik.values.maxLossPct}
+                    type='numeric'
+                    numberField={true}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('description', '')}
-                    error={formik.touched.description && Boolean(formik.errors.description)}
+                    onClear={() => formik.setFieldValue('maxLossPct', '')}
+                    error={formik.touched.maxLossPct && Boolean(formik.errors.maxLossPct)}
 
-                    // helperText={formik.touched.description && formik.errors.description}
-                    />
+                    // helperText={formik.touched.maxLossPct && formik.errors.maxLossPct}
+                  />
                 </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.WorkCenter.qry}
+                    name='workCenterId'
+                    label={labels.workCenterId}
+                    required
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue('workCenterId', newValue?.recordId)
+                      } else {
+
+                        formik.setFieldValue('workCenterId', '')
+                      }
+
+                    }}
+                    error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+
+                    // helperText={formik.touched.workCenterId && formik.errors.workCenterId}
+                  />
+                </Grid>                
             </Grid>
         </FormShell>
   )
