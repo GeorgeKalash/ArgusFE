@@ -167,7 +167,7 @@ const LoginPage = () => {
                 justifyContent: 'space-between'
               }}
             >
-              {/* <FormControlLabel
+              <FormControlLabel
                 label='Remember Me'
                 control={
                   <Checkbox
@@ -176,7 +176,7 @@ const LoginPage = () => {
                     onChange={validation.handleChange}
                   />
                 }
-              /> */}
+              />
               <LinkStyled href='/pages/auth/forgot-password-v1'>Forgot Password?</LinkStyled>
             </Box>
             <Button
