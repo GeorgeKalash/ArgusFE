@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 // ** MUI Imports
-import { Box, Stack, IconButton, LinearProgress,Checkbox,TableCell } from '@mui/material'
+import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell } from '@mui/material'
 import { DataGrid, gridClasses } from '@mui/x-data-grid'
 import { alpha, styled } from '@mui/material/styles'
 
@@ -96,13 +96,22 @@ const PaginationContainer = styled(Box)({
   borderTop: '1px solid #ccc'
 })
 
-const Table = ({ pagination = true, paginationType = 'api',handleCheckedRows,height, actionColumnHeader = null, showCheckboxColumn=false, checkTitle='', ...props }) => {
+const Table = ({
+  pagination = true,
+  paginationType = 'api',
+  handleCheckedRows,
+  height,
+  actionColumnHeader = null,
+  showCheckboxColumn = false,
+  checkTitle = '',
+  ...props
+}) => {
   const [gridData, setGridData] = useState(props.gridData)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
-  const [checkedRows, setCheckedRows] = useState({});
+  const [checkedRows, setCheckedRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-  
+
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props.api
@@ -259,15 +268,14 @@ const Table = ({ pagination = true, paginationType = 'api',handleCheckedRows,hei
 
   const columns = props.columns
 
-  const handleCheckboxChange = (row) => {
-    setCheckedRows((prevCheckedRows) => {
-      const newCheckedRows = { ...prevCheckedRows, [row.recordId]: !prevCheckedRows[row.recordId] };
-      handleCheckedRows(newCheckedRows); // Use the updated state to prevent delays
+  const handleCheckboxChange = row => {
+    setCheckedRows(prevCheckedRows => {
+      const newCheckedRows = { ...prevCheckedRows, [row.recordId]: !prevCheckedRows[row.recordId] }
+      handleCheckedRows(newCheckedRows) // Use the updated state to prevent delays
 
-      return newCheckedRows; // Return the updated state for the next render
-    });
-  };
-  
+      return newCheckedRows // Return the updated state for the next render
+    })
+  }
 
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
@@ -286,6 +294,9 @@ const Table = ({ pagination = true, paginationType = 'api',handleCheckedRows,hei
       width: 100,
       sortable: false,
       renderCell: params => {
+        const { row } = params
+        const isStatus3 = row.status === 3
+
         return (
           <>
             {props.onEdit && (
@@ -293,7 +304,7 @@ const Table = ({ pagination = true, paginationType = 'api',handleCheckedRows,hei
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
               </IconButton>
             )}
-            {deleteBtnVisible && (
+            {!isStatus3 && deleteBtnVisible && (
               <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
@@ -307,97 +318,96 @@ const Table = ({ pagination = true, paginationType = 'api',handleCheckedRows,hei
   const paginationHeight = pagination ? '41px' : '10px'
   const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
-useEffect(() => {
-  console.log('enter useEffect')
-  if (props.gridData && props.gridData.list) setGridData(props.gridData)
-  if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
-    console.log('enter if')
-    setPage(1)
-  }
-  setCheckedRows({})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [props.gridData])
+  useEffect(() => {
+    console.log('enter useEffect')
+    if (props.gridData && props.gridData.list) setGridData(props.gridData)
+    if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
+      console.log('enter if')
+      setPage(1)
+    }
+    setCheckedRows({})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.gridData])
 
   return (
     <>
-{
-  maxAccess && maxAccess > TrxType.NOACCESS ? (
-    <>
-      <TableContainer
-        sx={
-          props.style
-            ? props.style
-            : {
-                zIndex: 0
-                
-                // marginBottom: 0,
-                // pb: 0,
-                // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
-              }
-        }
-      >
-        {/* <ScrollableTable> */}
-        <StripedDataGrid
-          rows={gridData?.list || []}
-          sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
-          density='compact'
-          components={{
-            LoadingOverlay: LinearProgress,
-             
-            // Pagination: pagination ? CustomPagination : null,
-            Footer: CustomPagination,
-            NoRowsOverlay: () => (
-              <Stack height='100%' alignItems='center' justifyContent='center'>
-                This Screen Has No Data
-              </Stack>
-            )
-          }}
-          loading={props.isLoading}
-          getRowId={getRowId}
-          disableRowSelectionOnClick
-          disableColumnMenu
-          getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
-          {...props}
-          columns={[
-            ...(showCheckboxColumn
-              ? [
-                  {
-                    field: 'checkbox',
-                    headerName: checkTitle,
-                    renderCell: params => (
-                      <TableCell padding='checkbox'>
-                        <Checkbox
-                          checked={params.row.checked || false}
-                          onChange={() => {
-                           handleCheckboxChange(params.row)
-                           params.row.checked = !params.row.checked;
-                          }}
-                        />
-                      </TableCell>
-                    )
+      {maxAccess && maxAccess > TrxType.NOACCESS ? (
+        <>
+          <TableContainer
+            sx={
+              props.style
+                ? props.style
+                : {
+                    zIndex: 0
+
+                    // marginBottom: 0,
+                    // pb: 0,
+                    // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
                   }
-                ]
-              : []),
-            ...filteredColumns 
-          ]}
-        />
-        {/* </ScrollableTable> */}
+            }
+          >
+            {/* <ScrollableTable> */}
+            <StripedDataGrid
+              rows={gridData?.list || []}
+              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
+              density='compact'
+              components={{
+                LoadingOverlay: LinearProgress,
+
+                // Pagination: pagination ? CustomPagination : null,
+                Footer: CustomPagination,
+                NoRowsOverlay: () => (
+                  <Stack height='100%' alignItems='center' justifyContent='center'>
+                    This Screen Has No Data
+                  </Stack>
+                )
+              }}
+              loading={props.isLoading}
+              getRowId={getRowId}
+              disableRowSelectionOnClick
+              disableColumnMenu
+              getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
+              {...props}
+              columns={[
+                ...(showCheckboxColumn
+                  ? [
+                      {
+                        field: 'checkbox',
+                        headerName: checkTitle,
+                        renderCell: params => (
+                          <TableCell padding='checkbox'>
+                            <Checkbox
+                              checked={params.row.checked || false}
+                              onChange={() => {
+                                handleCheckboxChange(params.row)
+                                params.row.checked = !params.row.checked
+                              }}
+                            />
+                          </TableCell>
+                        )
+                      }
+                    ]
+                  : []),
+                ...filteredColumns
+              ]}
+            />
+            {/* </ScrollableTable> */}
             {/* <PaginationContainer>
                     <CustomPagination />
                 </PaginationContainer> */}
-      </TableContainer>
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen([false, {}])}
-        onConfirm={obj => {
-          setDeleteDialogOpen([false, {}])
-          props.onDelete(obj)
-        }}
-      />
-    </>
-  ) : (
-    'NO ACCESS'
-  )}
+          </TableContainer>
+          <DeleteDialog
+            open={deleteDialogOpen}
+            onClose={() => setDeleteDialogOpen([false, {}])}
+            onConfirm={obj => {
+              setDeleteDialogOpen([false, {}])
+              props.onDelete(obj)
+            }}
+          />
+        </>
+      ) : (
+        'NO ACCESS'
+      )}
     </>
   )
 }

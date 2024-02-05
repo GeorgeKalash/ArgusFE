@@ -15,19 +15,19 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { EnumSystemFunction } from 'src/resources/EnumSystemFunction'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
 import { TrendingUp } from '@mui/icons-material'
 
 export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage }) {
   const { height } = useWindowDimensions()
-
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
   const [dtStore, setDtStore] = useState([])
@@ -77,6 +77,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
         }
       }
       setEditMode(true)
+      invalidate()
     }
   })
 
@@ -220,7 +221,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       field: 'textfield',
       header: labels[16],
       name: 'totalCost',
-      mandatory: true,
       readOnly: true,
       width: 100
     },
@@ -231,53 +231,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       width: 300
     }
   ]
-
-  const fillDtStore = () => {
-    console.log('ressss 1 ', res.list)
-
-    /*const dg = EnumSystemFunction.SystemFunction.MaterialAdjustment
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + `&_dgId=${dg}`
-    getRequest({
-      extension: SystemRepository.DocumentType.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setDtStore(res.list)
-        console.log('ressss 2 ', res.list)
-      })
-      .catch(error => {
-        // setErrorMessage(error.response.data)
-      })*/
-  }
-
-  const fillSiteStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: InventoryRepository.Site.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setSiteStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillPlantStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Plant.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setPlantStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   const fillDetailsGrid = adjId => {
     var parameters = `_filter=&_adjustmentId=${adjId}`
@@ -310,10 +263,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       try {
         if (recordId) {
           setIsLoading(true)
-          fillSiteStore()
-          fillPlantStore()
-
-          // fillDtStore()
           fillDetailsGrid(recordId)
 
           const res = await getRequest({
@@ -352,16 +301,21 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
           {/* First Column */}
           <Grid container rowGap={1} xs={6}>
             <Grid item xs={12}>
-              <CustomComboBox
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialAdjustment}`}
+                name='dtId'
                 label={labels[2]}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 valueField='recordId'
                 displayField='name'
-                store={dtStore}
-                name='dtId'
-                value={dtStore.filter(item => item.recordId === formik.values?.dtId)[0]}
+                values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
+                  formik && formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 helperText={formik.touched.dtId && formik.errors.dtId}
@@ -393,38 +347,45 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomComboBox
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
                 label={labels[4]}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 valueField='recordId'
                 displayField='name'
-                store={plantStore}
-                name='plantId'
-                value={dtStore.filter(item => item.recordId === formik.values?.plantId)[0]}
+                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-                helperText={formik.touched.plantId && formik.errors.plantId}
               />
             </Grid>
           </Grid>
           <Grid container rowGap={1} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
-              <CustomComboBox
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='siteId'
                 label={labels[5]}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
                 valueField='recordId'
                 displayField='name'
-                store={siteStore}
-                name='siteId'
                 required
-                value={dtStore.filter(item => item.recordId === formik.values?.siteId)[0]}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('siteId', newValue?.recordId)
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-                helperText={formik.touched.siteId && formik.errors.siteId}
               />
             </Grid>
             <Grid item xs={12} sx={{ pb: 6 }}>
