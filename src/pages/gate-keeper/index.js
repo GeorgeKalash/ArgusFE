@@ -20,7 +20,7 @@ import { getNewLean, populateLean } from 'src/Models/Manufacturing/Lean'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -52,6 +52,10 @@ const GateKeeper = () => {
     queryFn: getGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.GateKeeper
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: ManufacturingRepository.LeanProductionPlanning.preview
   })
 
   const columns = [
@@ -134,7 +138,7 @@ const GateKeeper = () => {
       record: JSON.stringify(resultObject)
     })
       .then(res => {
-        getGridData()
+        invalidate()
         toast.success('Record Generated Successfully')
       })
       .catch(error => {
