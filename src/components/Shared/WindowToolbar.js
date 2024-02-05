@@ -10,6 +10,7 @@ const WindowToolbar = ({
   editMode = false,
   smallBox = false,
   infoVisible = true,
+  postVisible = false,
   clientRelation,
   onClientRelation = false,
   isPosted = false
@@ -32,8 +33,8 @@ const WindowToolbar = ({
           Info
         </Button>
       )}
-      {onPost && (
-        <Button onClick={onPost} variant='contained' sx={{ mt: smallBox && 0 }} disabled={isPosted}>
+      {onPost && postVisible && (
+        <Button onClick={onPost} variant='contained' sx={{ mt: smallBox && 0 }} disabled={isPosted || !editMode}>
           Post
         </Button>
       )}

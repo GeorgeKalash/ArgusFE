@@ -61,12 +61,11 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       siteId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      console.log('formik.values.isOnPostClicked ', formik.values.isOnPostClicked)
       if (formik.values.isOnPostClicked) {
         handlePost(obj)
         formik.setFieldValue('isOnPostClicked', false)
       } else {
-        postItemsGrid()
+        postADJ(obj)
         if (!recordId) {
           toast.success('Record Added Successfully')
           setInitialData({
@@ -119,7 +118,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       })
   }
 
-  const postItemsGrid = () => {
+  const postADJ = obj => {
     const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
       const seqNo = index + 1 // Adding 1 to make it 1-based index
       if (adjDetail.muQty === null) {
@@ -139,8 +138,10 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       }
     })
 
+    console.log('formik.values.rows ', JSON.stringify(obj))
+
     const resultObject = {
-      header: formik.values.rows,
+      header: obj,
       items: updatedRows,
       serials: [],
       lots: []
@@ -344,6 +345,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       maxAccess={maxAccess}
       editMode={editMode}
       isPosted={isPosted}
+      postVisible={true}
     >
       <Box>
         <Grid container>

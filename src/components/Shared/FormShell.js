@@ -13,6 +13,7 @@ export default function FormShell({
   editMode,
   disabledSubmit,
   infoVisible = true,
+  postVisible = false,
   resourceId,
   maxAccess,
   isPosted = false,
@@ -71,6 +72,7 @@ export default function FormShell({
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
+          postVisible={postVisible}
           clientRelation={clientRelation}
           isPosted={isPosted}
         />
