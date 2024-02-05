@@ -39,7 +39,7 @@ const WindowToolbar = ({
         </Button>
       )}
       {onSave && (
-        <Button onClick={onSave} variant='contained' sx={{ mt: smallBox && 0 }} disabled={disabledSubmit}>
+        <Button onClick={onSave} variant='contained' sx={{ mt: smallBox && 0 }} disabled={disabledSubmit || isPosted}>
           Submit
         </Button>
       )}

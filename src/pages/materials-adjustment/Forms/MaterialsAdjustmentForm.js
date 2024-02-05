@@ -107,8 +107,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ res })
-        getGridData({})
+        invalidate()
+        setIsPosted(true)
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
@@ -117,7 +117,9 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
   }
 
   const postADJ = obj => {
-    const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
+    console.log('obj view ', obj)
+
+    /* const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
       const seqNo = index + 1 // Adding 1 to make it 1-based index
       if (adjDetail.muQty === null) {
         // If muQty is null, set qtyInBase to 0
@@ -136,6 +138,12 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       }
     })
 
+    if (updatedRows.length == 1 && updatedRows[0].itemId == '') {
+      setErrorMessage('You have to fill the grid before saving.')
+
+      return
+    }
+
     const resultObject = {
       header: obj,
       items: updatedRows,
@@ -153,6 +161,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       .catch(error => {
         setErrorMessage(error)
       })
+      */
   }
 
   const lookupSKU = searchQry => {
@@ -375,7 +384,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                 ]}
                 values={formik.values}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
