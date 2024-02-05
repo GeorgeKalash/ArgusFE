@@ -3,7 +3,7 @@ import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import ErrorWindow from './ErrorWindow'
 
-export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck,  ...rest}) => {
+export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck, valueShow,  ...rest}) => {
 
   const { getRequest } = useContext(RequestsContext)
   const [errorMessage, setErrorMessage]= useState()
@@ -27,7 +27,7 @@ export const ResourceLookup = ({endpointId, name, form, parameters,  errorCheck,
       })
   }
   const check = errorCheck ? errorCheck : name
-  const firstValue = form.values[name]
+  const firstValue = valueShow ?  form.values[valueShow] : form.values[name]
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
   const helperText= form?.touched && form.touched[check] && form.errors[check]
 

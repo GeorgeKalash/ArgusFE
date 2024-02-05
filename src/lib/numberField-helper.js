@@ -1,27 +1,17 @@
-export function handleChangeNumber(
-  inputValue,
-  digitsBeforePoint,
-  digitsAfterPoint,
-  validation,
-  setPosition,
-  param
-
-) {
-  const formattedValue = inputValue.value ?  getFormattedNumberMax(inputValue.value, digitsBeforePoint, digitsAfterPoint): inputValue.value;
+export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoint, validation, setPosition, param) {
+  const formattedValue = inputValue.value
+    ? getFormattedNumberMax(inputValue.value, digitsBeforePoint, digitsAfterPoint)
+    : inputValue.value
 
   // Save current cursor position
-  const currentPosition = inputValue.selectionStart;
+  const currentPosition = inputValue.selectionStart
 
   // Update field value
-  validation.setFieldValue(param, formattedValue);
+  validation.setFieldValue(param, formattedValue)
 
-  const newCursorPosition =
-   currentPosition +
-  (formattedValue && formattedValue.length - inputValue.value.length);
+  const newCursorPosition = currentPosition + (formattedValue && formattedValue.length - inputValue.value.length)
 
-  setPosition(newCursorPosition);
-
-
+  setPosition(newCursorPosition)
 }
 
 const getFormattedNumber = (value, decimal) => {
@@ -54,22 +44,19 @@ const getFormattedNumber = (value, decimal) => {
   return formattedValue
 }
 
-
-
 function getFormattedNumberMax(number, digitsBeforePoint, digitsAfterPoint) {
   if (!number) return
   const value = number.toString().replace(/[^0-9.]/g, '')
-  var parts = value.split('.');
+  var parts = value.split('.')
 
-  var beforePoint = parts[0].slice(0, digitsBeforePoint);
-  var afterPoint = (parts[1] || '').slice(0, digitsAfterPoint);
-   beforePoint = new Intl.NumberFormat('en-US').format(beforePoint)
+  var beforePoint = parts[0].slice(0, digitsBeforePoint)
+  var afterPoint = (parts[1] || '').slice(0, digitsAfterPoint)
+  beforePoint = new Intl.NumberFormat('en-US').format(beforePoint)
 
-  if(value?.indexOf(".") > -1){
-    return beforePoint + '.'+ afterPoint;
-  }else{
-    return beforePoint ;
-
+  if (value?.indexOf('.') > -1) {
+    return beforePoint + '.' + afterPoint
+  } else {
+    return beforePoint
   }
 }
 
@@ -89,10 +76,10 @@ const validateNumberField = (value, originalValue) => {
   return value
 }
 
-const getNumberWithoutCommas = (value) => {
-    // Remove commas from the value string
-    value && console.log(value.toString())
-    const sanitizedValue = value && value.toString().replace(/,/g, '')
+const getNumberWithoutCommas = value => {
+  // Remove commas from the value string
+  value
+  const sanitizedValue = value && value.toString().replace(/,/g, '')
 
   return sanitizedValue
 }

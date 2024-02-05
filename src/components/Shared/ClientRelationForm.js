@@ -8,11 +8,7 @@ import { useFormik } from 'formik'
 import CustomTextField from '../Inputs/CustomTextField'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-
-import dayjs from 'dayjs'
-
-
-import { formatDateDefault } from 'src/lib/date-helper'
+import { formatDateDefault, formatDateToApiInline } from 'src/lib/date-helper'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
@@ -225,9 +221,16 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}
   }
 
   const post = obj => {
+    const res = obj.rows.map((item) => ({
+      ...item,
+      activationDate: formatDateToApiInline(item?.activationDate),
+      expiryDate: formatDateToApiInline(item?.expiryDate)
+
+    }));
+
     const data = {
       parentId: recordId,
-      items: obj.rows
+      items: res
     }
 
     console.log(data)

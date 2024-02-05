@@ -29,6 +29,20 @@ export const ManufacturingRepository = {
     get: service + 'getRTN',
     del: service + 'delRTN'
   },
+  Operation: {
+    snapshot: service + 'snapshotOPR',
+    page: service + 'pageOPR',
+    set: service + 'setOPR',
+    get: service + 'getOPR',
+    del: service + 'delOPR'
+  },
+  Labor: {
+    page: service + 'pageLBR',
+    qry: service + 'qryLBR',
+    set: service + 'setLBR',
+    get: service + 'getLBR',
+    del: service + 'delLBR'
+  },
   LeanProductionPlanning: {
     preview: service + 'previewLEAN'
   },
