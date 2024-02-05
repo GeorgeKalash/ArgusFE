@@ -25,7 +25,7 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 export default function LaborsForm({ labels, maxAccess, recordId}) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
-    const [required, setRequired] = useState(false)
+    
     
     const [initialValues, setInitialData] = useState({
         recordId: null,
@@ -72,6 +72,7 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
              },
           
            }),
+
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
@@ -89,10 +90,12 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
               recordId: response.recordId, // Update only the recordId field
             });
            
-          }
-          else toast.success('Record Edited Successfully')
-          setEditMode(true)
+          } else 
+            toast.success('Record Edited Successfully')
           
+          
+          
+          setEditMode(true)
           invalidate()
         }
       })
@@ -116,6 +119,8 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
           setIsLoading(false)
         })()
       }, [])
+      
+      console.log(formik.values.hourRateCurrencyId)
 
       return (
         <FormShell 
@@ -136,6 +141,7 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
                     maxLength='6'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
+
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
 
                     // helperText={formik.touched.reference && formik.errors.reference}
@@ -233,15 +239,16 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
               ]}
               valueField='recordId'
               displayField={['reference','name']}
-              values={formik.values}
+              values={!!formik.values.hourRate ? formik.values : ''}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 formik && formik.setFieldValue('hourRateCurrencyId', newValue?.recordId)
               }}
-              required={formik.values.hourRate}
-              error={formik.touched.hourRateCurrencyId && Boolean(formik.errors.hourRateCurrencyId)}
+              required={!!formik.values.hourRate}
+              error={!!formik.values.hourRate && !formik.values.hourRateCurrencyId && Boolean(formik.errors.hourRateCurrencyId)}
 
-            //   helperText={formik.touched.hourRateCurrencyId && formik.errors.hourRateCurrencyId}
+              // helperText={formik.touched.hourRateCurrencyId && formik.errors.hourRateCurrencyId}
+
             />
             
           </Grid>
