@@ -139,6 +139,7 @@ const GateKeeper = () => {
     })
       .then(res => {
         invalidate()
+        setSelectedRows([])
         toast.success('Record Generated Successfully')
       })
       .catch(error => {

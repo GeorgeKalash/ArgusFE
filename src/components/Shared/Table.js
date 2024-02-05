@@ -343,19 +343,6 @@ const Table = ({
       setPage(1)
     }
     setCheckedRows([])
-
-    //reset all the selected to unchecked
-    if (gridData && gridData.list) {
-      const updatedGridData = {
-        ...gridData,
-        list: gridData.list.map(rowData => ({
-          ...rowData,
-          checked: false
-        }))
-      }
-      setGridData(updatedGridData)
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.gridData])
 
