@@ -19,7 +19,7 @@ const LaborsWindow = ({
       controlled={true}
       onClose={onClose}
       width={600}
-      height={450}
+      height={650}
     >
       <CustomTabPanel>
         <LaborsForm

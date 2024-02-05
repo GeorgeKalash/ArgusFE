@@ -22,9 +22,10 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 
-export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookupEmployee,employeeStore,setEmployeeStore }) {
+export default function LaborsForm({ labels, maxAccess, recordId}) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
+    const [required, setRequired] = useState(false)
     
     const [initialValues, setInitialData] = useState({
         recordId: null,
@@ -37,12 +38,10 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
         userId:'',
         hourRate:'',
         groupId:'',
-        employeeId:'',
         employeeName:'',
-        
+        employeeRef:'',
+        employeeId:null,
 
-        
-        
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -61,25 +60,26 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
           reference: yup.string().required(),
           name: yup.string().required(),
           
-          hourRate: yup.number(),
+          
 
-          //hourRateCurrencyId:yup.string().required(),
+          // hourRateCurrencyId:yup.string().required(),
 
-          hourRateCurrencyId: yup.string().test({
-            test: function(value) {
-              const { hourRate } = this.parent;
+           hourRateCurrencyId: yup.string().test({
+             test: function(value) {
+               const { hourRate } = this.parent;
 
-              return (hourRate != null && hourRate !== '') ? (value !== undefined && value !== null && value !== '') : true;
-            },
-           
-          }),
+               return (hourRate != null && hourRate !== '' ) ? (value !== undefined && value !== null && value !== '') : true;
+             },
+          
+           }),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
-
+          
           const response = await postRequest({
             extension: ManufacturingRepository.Labor.set,
             record: JSON.stringify(obj)
+            
           })
           
           if (!recordId) {
@@ -92,7 +92,7 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
           }
           else toast.success('Record Edited Successfully')
           setEditMode(true)
-
+          
           invalidate()
         }
       })
@@ -121,7 +121,7 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
         <FormShell 
             resourceId={ResourceIds.Labor}
             form={formik} 
-            height={450} 
+            height={750} 
             maxAccess={maxAccess} 
             editMode={editMode}
         >
@@ -208,10 +208,11 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
                     name='hourRate'
                     label={labels.hourRate}
                     value={formik.values.hourRate}
+                    
                     type='number'
                     numberField={true}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('hourRate', '')}
+                    onClear={() => formik.setFieldValue('hourRate','')}
                     error={formik.touched.hourRate && Boolean(formik.errors.hourRate)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -223,8 +224,9 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
               parameters={`_startAt=0&_pageSize=100&_filter=`}
               name='hourRateCurrencyId'
               label={labels.hourRateCurrency}
+              
               readOnly={!(!!formik.values.hourRate)}
-              required={!!formik.values.hourRate} 
+              
               columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
@@ -236,6 +238,7 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
               onChange={(event, newValue) => {
                 formik && formik.setFieldValue('hourRateCurrencyId', newValue?.recordId)
               }}
+              required={formik.values.hourRate}
               error={formik.touched.hourRateCurrencyId && Boolean(formik.errors.hourRateCurrencyId)}
 
             //   helperText={formik.touched.hourRateCurrencyId && formik.errors.hourRateCurrencyId}
@@ -300,7 +303,7 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
             />
             
           </Grid>
-          {/* <Grid item xs={12}>
+          <Grid item xs={12}>
                
                <ResourceLookup
               endpointId={EmployeeRepository.Employee.snapshot}
@@ -309,37 +312,38 @@ export default function LaborsForm({ labels, maxAccess, recordId,onSubmit,lookup
                 
               }}
               form={formik}
-              valueField='employeeName'
-              displayField='name'
-              name='employeeId'
+              valueField='reference'
+              displayField='fullName'
+              name='employeeRef'
+              
               label={labels.employee}
               secondDisplayField={true}
-              secondValue={formik.values.employeeId}
+              secondValue={formik.values.employeeName}
               onChange={(event, newValue) => {
  
                if (newValue) {
                  formik.setFieldValue('employeeId', newValue?.recordId)
-
-                 formik.setFieldValue('employeeName', newValue?.employeeName)
+                 formik.setFieldValue('employeeRef', newValue?.reference)
+                 formik.setFieldValue('employeeName', newValue?.fullName)
                  
                } else {
                  formik.setFieldValue('employeeId', null)
-                 
+                 formik.setFieldValue('employeeRef','')
                  formik.setFieldValue('employeeName', '')
  
                }
              }}
  
-            //  error={
-            //    formik.touched.nraId &&
-            //    Boolean(formik.errors.nraId)
-            //  }
-            //  helperText={
-            //    formik.touched.nraId &&
-            //    formik.errors.nraId
-            //  }
+             error={
+               formik.touched.employeeId &&
+               Boolean(formik.errors.employeeId)
+             }
+             helperText={
+               formik.touched.employeeId &&
+               formik.errors.employeeId
+             }
              /> 
-             </Grid> */}
+             </Grid>
          
           </Grid>
           
