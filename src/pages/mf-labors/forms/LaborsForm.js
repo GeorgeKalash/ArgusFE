@@ -120,7 +120,6 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
         })()
       }, [])
       
-      console.log(formik.values.hourRateCurrencyId)
 
       return (
         <FormShell 
