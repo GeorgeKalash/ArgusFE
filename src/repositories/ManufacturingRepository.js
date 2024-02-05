@@ -35,6 +35,7 @@ export const ManufacturingRepository = {
     set: service + 'setOPR',
     get: service + 'getOPR',
     del: service + 'delOPR',
+    qry: service + 'qryOPR',
   },
   Labor: {
     page: service + 'pageLBR',
@@ -42,5 +43,12 @@ export const ManufacturingRepository = {
     set: service + 'setLBR',
     get: service + 'getLBR',
     del: service + 'delLBR'
+  },
+  Machine: {
+    page: service + 'pageMAC',
+    qry: service + 'qryMAC',
+    set: service + 'setMAC',
+    get: service + 'getMAC',
+    del: service + 'delMAC'
   }
 }
