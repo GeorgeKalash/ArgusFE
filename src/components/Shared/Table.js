@@ -110,6 +110,7 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
+  const [filteredRows, setFilteredRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   const pageSize = props.pageSize ? props.pageSize : 50
@@ -119,7 +120,10 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const getRowId = row => {
-    return props.rowId.map(field => row[field]).join('-')
+    const recordId = row.recordId || ''
+    const seqNo = row.seqNo || ''
+
+    return `${recordId}-${seqNo}`
   }
 
   const CustomPagination = () => {
@@ -270,10 +274,26 @@ const Table = ({
 
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
-      const newCheckedRows = { ...prevCheckedRows, [row.recordId]: !prevCheckedRows[row.recordId] }
-      handleCheckedRows(newCheckedRows) // Use the updated state to prevent delays
+      // Create a new object with all the previous checked rows
+      const newCheckedRows = { ...prevCheckedRows }
 
-      return newCheckedRows // Return the updated state for the next render
+      // Create the key based on the presence of seqNo
+      const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
+
+      // Update the newCheckedRows object with the current row
+      newCheckedRows[key] = row
+
+      // Check if newCheckedRows[key] is defined and has checked property
+      const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
+
+      // Pass the entire updated rows in the callback
+      handleCheckedRows(filteredRows)
+
+      // Log the updated checkedRows after the state has been updated
+      console.log('checkedRows 4 ', newCheckedRows)
+
+      // Return the updated state for the next render
+      return filteredRows
     })
   }
 
@@ -325,7 +345,7 @@ const Table = ({
       console.log('enter if')
       setPage(1)
     }
-    setCheckedRows({})
+    setCheckedRows([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.gridData])
 
