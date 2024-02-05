@@ -26,13 +26,10 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { TrendingUp } from '@mui/icons-material'
 
-export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage }) {
+export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
-  const [dtStore, setDtStore] = useState([])
-  const [plantStore, setPlantStore] = useState([])
-  const [siteStore, setSiteStore] = useState([])
   const [itemStore, setItemStore] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -115,7 +112,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
-        //setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 
@@ -157,7 +154,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
-        //setErrorMessage(error)
+        setErrorMessage(error)
       })
   }
 
@@ -190,6 +187,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       store: itemStore,
       valueField: 'recordId',
       displayField: 'sku',
+      widthDropDown: 400,
       fieldsToUpdate: [
         { from: 'recordId', to: 'itemId' },
         { from: 'sku', to: 'sku' },
@@ -200,14 +198,14 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
         { key: 'name', value: 'Item Name' }
       ],
       onLookup: lookupSKU,
-      width: 100
+      width: 150
     },
     {
       field: 'textfield',
       header: labels[8],
       name: 'itemName',
       readOnly: true,
-      width: 300
+      width: 350
     },
     {
       field: 'textfield',
@@ -222,6 +220,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       header: labels[16],
       name: 'totalCost',
       readOnly: true,
+      hidden: true,
       width: 100
     },
     {
@@ -338,7 +337,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               <CustomDatePicker
                 name='date'
                 label={labels[3]}
-                value={formik?.values?.date}
+                value={formik?.values?.date ? new Date(parseInt(formik.values.date.substr(6))) : null} //The parseInt(formik.values.date.substr(6)) extracts the timestamp and converts it to a number, and then new Date() creates a Date object from that timestamp.
                 onChange={formik.handleChange}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}

@@ -78,7 +78,7 @@ const AuthProvider = ({ children }) => {
         // Set companyName from the API response
         setCompanyName(response.data.record.companyName)
         setGetAC(response)
-        window.localStorage.setItem('apiUrl' + '/', response.data.record.api)
+        window.localStorage.setItem('apiUrl', response.data.record.api)
       } catch (error) {
         console.error('Error fetching data:', error)
       }
