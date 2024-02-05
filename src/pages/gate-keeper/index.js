@@ -20,6 +20,7 @@ import { getNewLean, populateLean } from 'src/Models/Manufacturing/Lean'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import MaterialsAdjustmentWindow from 'src/pages/materials-adjustment/Windows/MaterialsAdjustmentWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
@@ -70,18 +71,8 @@ const GateKeeper = () => {
       flex: 1
     },
     {
-      field: 'leanStatusName',
-      headerName: _labels[3],
-      flex: 1
-    },
-    {
       field: 'itemName',
       headerName: _labels[4],
-      flex: 1
-    },
-    {
-      field: 'reference',
-      headerName: _labels[5],
       flex: 1
     },
     {
@@ -140,12 +131,29 @@ const GateKeeper = () => {
       .then(res => {
         invalidate()
         setSelectedRows([])
+
+        // Call MaterialsAdjustmentWindow component here
+        //MaterialsAdjustmentWindow(res.recordId)
+
         toast.success('Record Generated Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
+
+  /* const MaterialsAdjustmentWindow = recId => {
+    return (
+      <MaterialsAdjustmentWindow
+        onClose={() => {}}
+        labels={_labels}
+        maxAccess={access}
+        recordId={recId}
+        setErrorMessage={setErrorMessage}
+      />
+    )
+  }*/
+
   useEffect(() => {
     setSelectedRows([])
   }, [])

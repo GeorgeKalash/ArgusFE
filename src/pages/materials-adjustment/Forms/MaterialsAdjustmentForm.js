@@ -4,6 +4,13 @@ import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import {
+  formatDateDefault,
+  formatDateFromApi,
+  formatDateFromApiInline,
+  formatDateToApi,
+  formatDateToApiInline
+} from 'src/lib/date-helper'
 
 // ** MUI Imports
 import { Grid, Box, Button } from '@mui/material'
@@ -58,23 +65,26 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       siteId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
+      obj.date = formatDateToApi(obj.date)
       if (formik.values.isOnPostClicked) {
         handlePost(obj)
         formik.setFieldValue('isOnPostClicked', false)
       } else {
-        postADJ(obj)
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-          setInitialData({
-            ...obj,
-            recordId: response.recordId
-          })
-        } else {
-          toast.success('Record Edited Successfully')
+        const index = postADJ(obj)
+        if (index != -1) {
+          if (!recordId) {
+            toast.success('Record Added Successfully')
+            setInitialData({
+              ...obj,
+              recordId: response.recordId
+            })
+          } else {
+            toast.success('Record Edited Successfully')
+          }
         }
+        setEditMode(true)
+        invalidate()
       }
-      setEditMode(true)
-      invalidate()
     }
   })
 
@@ -139,7 +149,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     if (updatedRows.length == 1 && updatedRows[0].itemId == '') {
       setErrorMessage('You have to fill the grid before saving.')
 
-      return
+      return -1
     }
 
     const resultObject = {
@@ -155,9 +165,13 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     })
       .then(res => {
         invalidate()
+
+        return 1
       })
       .catch(error => {
         setErrorMessage(error)
+
+        return -1
       })
   }
 
@@ -272,14 +286,11 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
             parameters: `_recordId=${recordId}`
           })
           setIsPosted(res.record.status === 3 ? true : false)
+          res.record.date = formatDateFromApi(res.record.date)
+          console.log('debug date ', res.record.date)
           setInitialData(res.record)
-          formik.setValues({
-            ...formik.values,
-            rows: res.record
-          })
-          console.log('check ', formik.values)
         }
-      } catch (exception) {
+      } catch (error) {
         setErrorMessage(error)
       } finally {
         setIsLoading(false)
@@ -340,7 +351,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               <CustomDatePicker
                 name='date'
                 label={labels[3]}
-                value={formik?.values?.date ? new Date(parseInt(formik.values.date.substr(6))) : null} //The parseInt(formik.values.date.substr(6)) extracts the timestamp and converts it to a number, and then new Date() creates a Date object from that timestamp.
+                value={formik?.values?.date}
                 onChange={formik.handleChange}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}

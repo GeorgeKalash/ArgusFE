@@ -4,6 +4,8 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import MaterialsAdjustmentForm from '../Forms/MaterialsAdjustmentForm'
 
 const MaterialsAdjustmentWindow = ({ onClose, labels, maxAccess, recordId, setErrorMessage }) => {
+  console.log('pass window')
+
   return (
     <Window
       id='MaterialsAdjustmentWindow'
@@ -13,14 +15,12 @@ const MaterialsAdjustmentWindow = ({ onClose, labels, maxAccess, recordId, setEr
       width={900}
       height={600}
     >
-      <CustomTabPanel>
-        <MaterialsAdjustmentForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-          setErrorMessage={setErrorMessage}
-        />
-      </CustomTabPanel>
+      <MaterialsAdjustmentForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+        setErrorMessage={setErrorMessage}
+      />
     </Window>
   )
 }
