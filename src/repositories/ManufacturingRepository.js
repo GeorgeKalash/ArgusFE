@@ -4,6 +4,7 @@ export const ManufacturingRepository = {
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',
+    qry: service + 'qryLBG',
     set: service + 'setLBG',
     get: service + 'getLBG',
     del: service + 'delLGB'
@@ -31,6 +32,7 @@ export const ManufacturingRepository = {
   },
   Operation: {
     snapshot : service + "snapshotOPR",
+    qry: service + 'qryOPR',
     page : service + "pageOPR",
     set: service + 'setOPR',
     get: service + 'getOPR',
