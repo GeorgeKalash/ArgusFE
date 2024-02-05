@@ -54,6 +54,11 @@ const CustomTextField = ({
       e.target.value = truncatedValue;
       props?.onChange(e);
     }
+    if (phone) {
+      const truncatedValue = inputValue.slice(0, maxLength);
+      e.target.value = truncatedValue?.replace(/\D/g, '');
+      props?.onChange(e);
+    }
   };
 
 
@@ -62,12 +67,11 @@ const CustomTextField = ({
     <div style={{ display: hidden ? 'none' : 'block' }}>
 
       <TextField
-
         key={value}
         inputRef={inputRef}
         type={type}
         variant={variant}
-        defaultValue={phone ? value?.replace(/\D/g, '') : value}
+        defaultValue={value}
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}

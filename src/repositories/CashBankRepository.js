@@ -7,5 +7,7 @@ export const CashBankRepository = {
     get : service + 'getACC',
     snapshot : service + 'snapshotACC',
   },
-
+  CreditCard :{
+    qry: service + 'qryCC',
+  }
 }

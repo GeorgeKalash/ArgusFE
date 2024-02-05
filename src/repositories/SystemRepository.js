@@ -132,9 +132,12 @@ export const SystemRepository = {
     del: service + 'delST',
     page: service + 'pageST'
   },
-  Defaults:{
+  Default: {
+    get: service + 'getDE'
+  },
+  Defaults: {
     qry: service + 'qryDE',
     get: service + 'getDE',
-    set: service + 'set2DE',
+    set: service + 'set2DE'
   }
 }
