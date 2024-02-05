@@ -26,7 +26,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { TrendingUp } from '@mui/icons-material'
 
-export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId }) {
+export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -136,22 +136,19 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId })
       }
     })
 
-    console.log('formik.values.rows ', JSON.stringify(obj))
-
     const resultObject = {
       header: obj,
       items: updatedRows,
       serials: [],
       lots: []
     }
+
     postRequest({
       extension: InventoryRepository.MaterialsAdjustment.set2,
       record: JSON.stringify(resultObject)
     })
       .then(res => {
-        console.log({ res })
-        getGridData({})
-        toast.success('Record Deleted Successfully')
+        invalidate()
       })
       .catch(error => {
         setErrorMessage(error)
@@ -277,7 +274,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId })
           console.log('check ', formik.values)
         }
       } catch (exception) {
-        setErrorMessage(exception.message)
+        setErrorMessage(error)
       } finally {
         setIsLoading(false)
       }
@@ -410,6 +407,17 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId })
               <InlineEditGrid
                 gridValidation={detailsFormik}
                 columns={columns}
+                defaultRow={{
+                  itemId: '',
+                  sku: '',
+                  itemName: '',
+                  qty: '',
+                  totalCost: '',
+                  muQty: '',
+                  qtyInBase: '',
+                  notes: '',
+                  seqNo: ''
+                }}
                 allowDelete={true}
                 allowAddNewLine={TrendingUp}
                 scrollable={true}

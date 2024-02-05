@@ -12,10 +12,14 @@ const MaterialsAdjustmentWindow = ({ onClose, labels, maxAccess, recordId, setEr
       onClose={onClose}
       width={900}
       height={600}
-      setErrorMessage={setErrorMessage}
     >
       <CustomTabPanel>
-        <MaterialsAdjustmentForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
+        <MaterialsAdjustmentForm
+          labels={labels}
+          maxAccess={maxAccess}
+          recordId={recordId}
+          setErrorMessage={setErrorMessage}
+        />
       </CustomTabPanel>
     </Window>
   )
