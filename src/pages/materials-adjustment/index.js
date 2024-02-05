@@ -126,7 +126,6 @@ const MaterialsAdjustment = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
           gridData={data}
@@ -135,6 +134,7 @@ const MaterialsAdjustment = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          height={670}
           paginationType='client'
           maxAccess={access}
         />

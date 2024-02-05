@@ -117,9 +117,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
   }
 
   const postADJ = obj => {
-    console.log('obj view ', obj)
-
-    /* const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
+    const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
       const seqNo = index + 1 // Adding 1 to make it 1-based index
       if (adjDetail.muQty === null) {
         // If muQty is null, set qtyInBase to 0
@@ -161,7 +159,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       .catch(error => {
         setErrorMessage(error)
       })
-      */
   }
 
   const lookupSKU = searchQry => {
