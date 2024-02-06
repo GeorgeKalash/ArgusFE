@@ -25,7 +25,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { TrendingUp } from '@mui/icons-material'
 
-export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage }) {
+export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage, expanded }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -73,6 +73,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       }
     }
   })
+  console.log(expanded)
 
   const detailsFormik = useFormik({
     enableReinitialize: true,
@@ -295,12 +296,12 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     <FormShell
       resourceId={ResourceIds.MaterialsAdjustment}
       form={formik}
-      height={450}
       maxAccess={maxAccess}
       editMode={editMode}
       isPosted={isPosted}
       postVisible={true}
     >
+
       <Grid container>
         <Grid container xs={12} style={{ overflow: 'hidden' }}>
           {/* First Column */}
@@ -427,7 +428,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               allowDelete={true}
               allowAddNewLine={TrendingUp}
               scrollable={true}
-              scrollHeight={`${height - 530}px`}
+              scrollHeight={`${ expanded ? height-350  : height - 630}px`}
             />
           </Box>
         </Grid>
