@@ -65,15 +65,20 @@ const AuthProvider = ({ children }) => {
     initAuth()
 
     const fetchData = async () => {
+      const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
+
+      const accountName = matchHostname ? matchHostname[1] : 'byc'
+
       try {
         const response = await axios({
           method: 'GET',
-          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=byc`
+          url: `${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`
         })
 
         // Set companyName from the API response
         setCompanyName(response.data.record.companyName)
         setGetAC(response)
+        window.localStorage.setItem('apiUrl', response.data.record.api)
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -86,7 +91,7 @@ const AuthProvider = ({ children }) => {
     try {
       const getUS2 = await axios({
         method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/SY.asmx/getUS2?_email=${params.username}`,
+        url: `${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`,
         headers: {
           accountId: JSON.parse(getAC.data.record.accountId),
           dbe: JSON.parse(getAC.data.record.dbe),
@@ -114,7 +119,7 @@ const AuthProvider = ({ children }) => {
 
       const defaultSettings = await axios({
         method: 'GET',
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}SY.asmx/getDE?_key=dateFormat`,
+        url: `${getAC.data.record.api}/SY.asmx/getDE?_key=dateFormat`,
         headers: {
           Authorization: 'Bearer ' + signIn3.data.record.accessToken,
           'Content-Type': 'multipart/form-data'
@@ -125,7 +130,7 @@ const AuthProvider = ({ children }) => {
       console.log(defaultSettings)
 
       const defaultSet = {
-        dateFormat: defaultSettings.data.record && defaultSettings.data.record.value
+        dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
       }
 
       window.localStorage.setItem('default', JSON.stringify(defaultSet))
@@ -219,7 +224,8 @@ const AuthProvider = ({ children }) => {
     setLoading,
     login: handleLogin,
     logout: handleLogout,
-    getAccessToken
+    getAccessToken,
+    apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>

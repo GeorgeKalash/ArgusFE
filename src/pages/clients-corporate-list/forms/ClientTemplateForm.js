@@ -322,6 +322,7 @@ const ClientTemplateForm = ({
       disabledSubmit={editMode}
       clientRelation={true}
       editMode={editMode}
+      setErrorMessage={setErrorMessage}
     >
       <Grid container>
         <Grid container xs={12} spacing={2} sx={{ padding: "30px" }}>

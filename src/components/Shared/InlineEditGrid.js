@@ -8,30 +8,36 @@ import CustomTextField from '../Inputs/CustomTextField'
 import DeleteDialog from './DeleteDialog'
 import Icon from 'src/@core/components/icon'
 import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/Search'
+import { options } from '@fullcalendar/core/preact'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { formatDateFromApi, formatDateToApi, formatDateDefault } from 'src/lib/date-helper'
-import dayjs from 'dayjs'
+import { formatDateFromApi, formatDateFromApiInline, formatDateDefault } from 'src/lib/date-helper'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
 }
-const dateFormat = typeof window !== 'undefined' && window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
+
+const dateFormat =
+  typeof window !== 'undefined' &&
+  window.localStorage.getItem('default') &&
+  JSON.parse(window.localStorage.getItem('default'))['dateFormat']
 
 const InlineEditGrid = ({
   columns,
   defaultRow,
   gridValidation,
   width,
+  background,
   scrollHeight,
   scrollable = true,
   allowDelete = true,
   allowAddNewLine = true,
   onDelete
 }) => {
-  const [write, setWrite] = useState(false);
+  const [write, setWrite] = useState(false)
 
   const tableWidth = width
   const [openDatePicker, setOpenDatePicker] = useState(false)
@@ -72,6 +78,15 @@ const InlineEditGrid = ({
           </Button>
         )
 
+      case 'combobox':
+        return row[column.name]
+          ? typeof row[column.name] === 'string'
+            ? row[column.name]
+            : column.store.length > 0
+            ? column.store.find(item => item[column.valueField] === row[column.name])[column.displayField]
+            : ''
+          : ''
+
       default:
         return row[column.name]
     }
@@ -81,7 +96,6 @@ const InlineEditGrid = ({
     if (!row.rowData) return
     const fieldName = row.field
     const cellId = `table-cell-${rowIndex}-${column.id}` // Unique identifier for the cell
-
 
     switch (field) {
       case 'incremented':
@@ -113,60 +127,56 @@ const InlineEditGrid = ({
             }}
           />
         )
-        case 'datePicker':
-
-return (
-            <LocalizationProvider dateAdapter={AdapterDayjs} >
-             <DatePicker
-             id={cellId}
-             name={fieldName}
-             value={dayjs(gridValidation.values.rows[rowIndex][fieldName]).startOf('day')}
-             required={column?.mandatory}
-             readOnly={column?.readOnly}
-             inputFormat={dateFormat}
-             onChange={(newDate ) => {
-
-              if (newDate) {
-                console.log(newDate.valueOf());
-
-                const dateWithoutTime = new Date(newDate.valueOf());
-                dateWithoutTime.setHours(0, 0, 0, 0);
-
-                gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, formatDateDefault(dateWithoutTime));
-              } else {
-                gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0');
-              }
-             }}
-            onClose={() => setOpenDatePicker(false)}
-            open={openDatePicker}
-
-            clearable //bug from mui not working for now
-        slotProps={{
-          // replacing clearable behaviour
-          textField: {
-            InputProps: {
-              endAdornment:
-                <>
-                  {gridValidation.values.rows[rowIndex][fieldName] && (
-                    <InputAdornment>
-                      <IconButton onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  )}
-                  <InputAdornment>
-                    <IconButton onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                      <EventIcon />
-                    </IconButton>
-                  </InputAdornment>
-                </>
-
-            }
-          }
-        }}
-      />
-           </LocalizationProvider>
-          )
+      case 'datePicker':
+        return (
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              id={cellId}
+              name={fieldName}
+              value={formatDateFromApiInline(gridValidation.values.rows[rowIndex][fieldName])}
+              required={column?.mandatory}
+              readOnly={column?.readOnly}
+              format={dateFormat}
+              onChange={newDate => {
+                if (newDate) {
+                  const dateWithoutTime = new Date(newDate.valueOf())
+                  dateWithoutTime.setHours(0, 0, 0, 0)
+                  gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, formatDateDefault(dateWithoutTime))
+                } else {
+                  gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0')
+                }
+              }}
+              onClose={() => setOpenDatePicker(false)}
+              open={openDatePicker}
+              clearable //bug from mui not working for now
+              slotProps={{
+                // replacing clearable behaviour
+                textField: {
+                  InputProps: {
+                    endAdornment: (
+                      <>
+                        {gridValidation.values.rows[rowIndex][fieldName] && (
+                          <InputAdornment>
+                            <IconButton
+                              onClick={() => gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, '0')}
+                            >
+                              <ClearIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        )}
+                        <InputAdornment>
+                          <IconButton onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
+                            <EventIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      </>
+                    )
+                  }
+                }
+              }}
+            />
+          </LocalizationProvider>
+        )
       case 'numberfield':
         return (
           <TextField
@@ -186,6 +196,7 @@ return (
                   column?.max
                 )
               )
+              if (newValue) row.editorCallback(newValue)
             }}
             onClear={() => {
               const updatedRows = [...gridValidation.values.rows]
@@ -278,7 +289,6 @@ return (
             //   }
             // }}
             isOptionEqualToValue={(option, value) => {
-
               return option[column.valueField] == gridValidation.values.rows[rowIndex][`${column.nameId}`]
             }}
             onChange={(event, newValue) => {
@@ -301,6 +311,7 @@ return (
                   )
                 }
               }
+              if (newValue) row.editorCallback(newValue[column.valueField])
             }}
             PaperComponent={props =>
               column.columnsInDropDown &&
@@ -340,7 +351,6 @@ return (
           />
         )
       case 'lookup':
-
         return (
           <Autocomplete
             id={cellId}
@@ -417,111 +427,98 @@ return (
                 }
               }
             }}
-
-            // noOptionsText=""
             PaperComponent={props =>
               column.columnsInDropDown &&
               column.columnsInDropDown.length > 0 &&
               CustomPaper(props, column.widthDropDown)
             }
-
-            // renderOption={(props, option) => (
-            //   <Box>
-            //     {props.id.endsWith('-0') && (
-            //       <li className={props.className} >
-            //        <Box sx={{ flex: 1 , fontWeight: 'bold' }}>{column.displayField.toUpperCase()}</Box>
-            //       </li>
-            //     )}
-            //     <li {...props}>
-            //       <Box sx={{ flex: 1 }}>{option[column.displayField]}</Box>
-            //     </li>
-            //   </Box>
-            // )}
-
-          //   renderOption={(props, option) => {
-          //     console.log(option.columnsInDropDown + "column.store-2")
-          //     // if (column.columnsInDropDown && column.columnsInDropDown.length > 0)
-          //       return (
-          //         <Box>
-          //           {props.id.endsWith('-0') && (
-          //             <li className={props.className}>
-          //               {column.columnsInDropDown.map((header, i) => {
-          //                 return (
-          //                   <Box key={i} sx={{ flex: 1 }}>
-          //                     {header.value.toUpperCase()}
-          //                   </Box>
-          //                 )
-          //               })}
-          //             </li>
-          //           )}
-          //           <li {...props}>
-          //             {column.columnsInDropDown.map((header, i) => {
-          //               return (
-          //                 <Box key={i} sx={{ flex: 1 }}>
-          //                   {option[header.key]}
-          //                 </Box>
-          //               )
-          //             })}
-          //           </li>
-          //         </Box>
-          //       )
-          //   }
-
-          // }
             fullWidth={true}
             renderInput={params => (
               <TextField
-
                 {...params}
-                onChange={e => setWrite(e.target.value.length > 0 ,  column.onLookup('') , e.target.value ? column && (column.onLookup(e.target.value) ): column.onClear && ( column.onLookup('')  && column.onClear()))}
+                onChange={e =>
+                  setWrite(
+                    e.target.value.length > 0,
+                    column.onLookup(''),
+                    e.target.value
+                      ? column && column.onLookup(e.target.value)
+                      : column.onClear && column.onLookup('') && column.onClear()
+                  )
+                }
                 onBlur={() => setWrite(false)}
                 required={column?.mandatory}
                 InputProps={{
-
                   ...params.InputProps,
                   endAdornment: (
-                    <div  style={{
-                      position: 'absolute',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      right: 15,
-                      display: 'flex',
-                    }}>
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        right: 15,
+                        display: 'flex'
+                      }}
+                    >
+                      {gridValidation.values.rows[rowIndex][`${column.nameId}`] && (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            tabIndex={-1}
+                            edge='end'
+                            onClick={() => {
+                              gridValidation.setFieldValue(`rows[${rowIndex}].${column.nameId}`, null)
+                              gridValidation.setFieldValue(`rows[${rowIndex}].${column.name}`, null)
+                            }}
+                            aria-label='clear input'
+                          >
+                            <ClearIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )}
+                      <InputAdornment position='end'>
+                        <IconButton tabIndex={-1} edge='end' aria-label='clear input'>
+                          <SearchIcon
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => {
+                              // Handle search action if needed
+                              console.log('Search clicked')
+                            }}
+                          />
+                        </IconButton>
+                      </InputAdornment>
 
-                {gridValidation.values.rows[rowIndex][`${column.nameId}`] && (
-                  <InputAdornment position='end'>
-                  <IconButton tabIndex={-1} edge='end' onClick={()=>{
-                     gridValidation.setFieldValue( `rows[${rowIndex}].${column.nameId}`, null )
-                    gridValidation.setFieldValue( `rows[${rowIndex}].${column.name}`, null)
+                      {gridValidation.values.rows[rowIndex][`${column.nameId}`] && (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            tabIndex={-1}
+                            edge='end'
+                            onClick={() => {
+                              gridValidation.setFieldValue(`rows[${rowIndex}].${column.nameId}`, null)
+                              gridValidation.setFieldValue(`rows[${rowIndex}].${column.name}`, null)
+                            }}
+                            aria-label='clear input'
+                          >
+                            <ClearIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )}
+                      <InputAdornment position='end'>
+                        <IconButton tabIndex={-1} edge='end' aria-label='clear input'>
+                          <SearchIcon
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => {
+                              // Handle search action if needed
+                              // console.log('Search clicked');
+                            }}
+                          />
+                        </IconButton>
+                      </InputAdornment>
 
-                  }
-
-                  }  aria-label='clear input'>
-                    <ClearIcon />
-                  </IconButton>
-                 </InputAdornment>
-                )
-                }
-                 <InputAdornment position='end'>
-                  <IconButton tabIndex={-1} edge='end'   aria-label='clear input'>
-
-                  <SearchIcon
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    // Handle search action if needed
-                    // console.log('Search clicked');
-                  }}
-                />
-                 </IconButton>
-                 </InputAdornment>
-
-                       {/* Adjust color as needed */}
+                      {/* Adjust color as needed */}
                       {/* {params.InputProps.startAdornment} */}
                     </div>
-                  ),
+                  )
                 }}
                 sx={{ ...params.sx, flex: 1 }}
-
               />
             )}
 
@@ -668,7 +665,8 @@ return (
               header={column.header}
               hidden={column.hidden}
               style={{
-                width: column.width || tableWidth / columns.length
+                width: column.width || tableWidth / columns.length,
+                background:  background,
               }}
               body={row => {
                 return (
@@ -695,6 +693,9 @@ return (
                   </Box>
                 )
               }}
+              onCellEditComplete={e => {
+                if (column.onChange) column.onChange(e)
+              }}
             />
           )
         })}
@@ -711,7 +712,7 @@ return (
                 </div>
               )
             }}
-            style={{ maxWidth: '60px' }}
+            style={{ maxWidth: '60px' , background: background }}
           />
         )}
       </DataTable>
