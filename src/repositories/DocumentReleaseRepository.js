@@ -72,7 +72,7 @@ export const DocumentReleaseRepository = {
     del: service + 'delSTG'
   },
   DocumentsOnHold :{
-    
+    snapshot: service + 'snapshotTRX',
     qry: service + 'qryTRX',
     get: service + 'getTRX',
     set: service + 'setTRX',

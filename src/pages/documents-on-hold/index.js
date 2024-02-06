@@ -32,15 +32,15 @@ const DocumentsOnHold = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [gridData ,setGridData]=useState([]);
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-    
-
+    const { _startAt = 0, _pageSize = 50, _reference = '' } = options;
+  
     return await getRequest({
-      extension: DocumentReleaseRepository.DocumentsOnHold.qry,
-      parameters: `_startAt=0&_functionId=0&_reference=&_sortBy=reference&_response=0&_status=1&_pageSize=${_pageSize}&filter=`
-    })
+      extension: 'DR.asmx/qryTRX', // Updated API endpoint
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=0&_response=0&_status=1&_reference=${_reference}&_sortBy=reference desc`
+    });
   }
 
   const {
@@ -56,6 +56,12 @@ const DocumentsOnHold = () => {
   const invalidate = useInvalidate({
     endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
   })
+  const [searchValue, setSearchValue] = useState("")
+
+  function onSearchClear() {
+    setSearchValue('')
+
+  }
 
   const columns = [
     {
@@ -79,8 +85,26 @@ const DocumentsOnHold = () => {
 
   ]
 
-
-
+  const search = inp => {
+    setSearchValue(inp);
+    const input = inp.trim().toLowerCase(); 
+  
+    if (Array.isArray(data.list)) {
+      if (input) {
+        const filteredList = data.list.filter(item =>
+          Object.values(item).some(value =>
+            typeof value === "string" && value.toLowerCase().includes(input)
+          )
+        );
+        setGridData({ list: filteredList });
+      } else {
+        // If input is empty, show all data
+        setGridData(data);
+      }
+    } else {
+      console.error("Data list is not an array:", data.list);
+    }
+  };
 
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
@@ -100,10 +124,10 @@ const DocumentsOnHold = () => {
   return (
     <>
       <Box>
-        <GridToolbar  maxAccess={access} />
+        <GridToolbar  maxAccess={access} onSearch={search} onSearchClear={onSearchClear} labels={_labels}  inputSearch={true} />
         <Table
           columns={columns}
-          gridData={data}
+          gridData={searchValue.length > 0 ? gridData : data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
