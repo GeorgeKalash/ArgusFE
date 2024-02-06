@@ -130,6 +130,7 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
             editMode={editMode}
         >
             <Grid container spacing={4}>
+            <Grid container rowGap={2} xs={6}  sx={{ px: 2 }}>
                 <Grid item xs={12}>
                     <CustomTextField
                     name='reference'
@@ -249,8 +250,9 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
               // helperText={formik.touched.hourRateCurrencyId && formik.errors.hourRateCurrencyId}
 
             />
-            
+            </Grid>
           </Grid>
+          <Grid container rowGap={2} xs={6}  sx={{alignContent:'start'}}>
           <Grid item xs={12}>
             <FormControlLabel
               control={
@@ -350,7 +352,8 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
              }
              /> 
              </Grid>
-         
+             </Grid>
+             
           </Grid>
           
            
