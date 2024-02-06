@@ -44,6 +44,7 @@ import { useWindow } from "src/windows";
 import Confirmation from "src/components/Shared/Confirmation";
 import { AddressFormShell } from "src/components/Shared/AddressFormShell";
 
+
 const ClientTemplateForm = ({
   setErrorMessage,
   recordId,
@@ -172,6 +173,9 @@ const ClientTemplateForm = ({
     professionId: "",
   });
 
+
+
+
   const handleCopy = (event) => {
     event.preventDefault();
   };
@@ -183,8 +187,29 @@ const ClientTemplateForm = ({
       clientIndividualFormik.setFieldValue("idtId", "");
     }
     const idType = await getValue(value);
-    if (idType) clientIndividualFormik.setFieldValue("idtId", idType);
+    if (idType){
+      clientIndividualFormik.setFieldValue("idtId", idType);
+      console.log(idType)
+      if( idType &&  (idType===1 || idType===2)){
+        getCountry()
+       }
+
+    }
+
   }
+
+  async function  getCountry(){
+    var parameters = `_filter=&_key=countryId`
+console.log(parameters)
+
+    const res=   await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: parameters
+      })
+      const countryId=  res.record.value
+
+      clientIndividualFormik.setFieldValue('idCountry' , parseInt(countryId))
+    }
 
   useEffect(() => {
     fillProfessionStore();
@@ -746,6 +771,11 @@ console.log(obj6)
                       onChange={(event, newValue) => {
                         if (newValue) {
                           fillFilterProfession(newValue.isDiplomat);
+
+                          if( newValue['type'] &&  (newValue['type']===1 || newValue['type']===2)){
+                            getCountry()
+                           }
+
                         } else {
                           fillFilterProfession("");
                         }
