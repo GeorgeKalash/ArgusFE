@@ -3,6 +3,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import MachinesForm from '../forms/MachinesForm'
 
+
 const MachinesWindow = ({
   onClose,
   labels,
