@@ -157,7 +157,15 @@ const LoginPage = () => {
               </Grid>
             </Grid>
             <Box
-              sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
+              sx={{
+                mb: 4,
+                mt: 4,
+                ml: 1,
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between'
+              }}
             >
               <FormControlLabel
                 label='Remember Me'

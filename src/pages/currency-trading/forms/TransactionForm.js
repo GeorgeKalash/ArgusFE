@@ -218,7 +218,7 @@ return type && amount
       date: yup.string().required(),
       id_type: yup.number().required(),
       id_number: yup.number().required(),
-      birth_date: yup.string().required(),
+      birth_date: yup.date().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
       expiry_date: yup.string().required(),
@@ -592,10 +592,10 @@ return type && amount
         ...values,
         recordId: response.recordId
       })
-
-    } else{ toast.success('Record Edited Successfully')
-
-     setEditMode(true)}
+      setEditMode(true)
+    } else {
+      toast.success('Record Edited Successfully')
+    }
   }
   async function fetchClientInfo({ clientId }) {
     try {

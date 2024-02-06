@@ -36,8 +36,8 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required')
+      name: yup.string().required(' '),
+      countryId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -102,7 +102,8 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
+            
+            // helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
@@ -123,7 +124,8 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
               formik.setFieldValue('countryId', newValue?.recordId)
             }}
             error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-            helperText={formik.touched.countryId && formik.errors.countryId}
+
+            // helperText={formik.touched.countryId && formik.errors.countryId}
           />
         </Grid>
       </Grid>

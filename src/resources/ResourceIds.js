@@ -2,6 +2,7 @@ export const ResourceIds = {
   DocumentTypes: 20104,
   DocumentTypeMaps: 20201,
   GeographicRegions: 20133,
+  WorkCenters : 42101,
   Cities: 20125,
   Currencies: 20106,
   GroupLegalDocument: 21109,
@@ -68,5 +69,7 @@ export const ResourceIds = {
   MultiCurrencyMapping: 32102,
   ClientRelation: 36202,
   LaborGroups: 42114,
-  ProductionLines: 42107
+  ProductionLines: 42107,
+  WorkCenters: 42101,
+  Operations: 42102,
 }
