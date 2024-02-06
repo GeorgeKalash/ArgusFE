@@ -1631,17 +1631,25 @@ console.log(obj6)
                   </Grid>
 
                   <Grid item xs={12}>
-                    <CustomTextField
+                    <ResourceComboBox
                       name="statusName"
                       label={_labels.status}
-                      value={clientIndividualFormik.values?.statusName}
-                      type="text"
-                      onChange={clientIndividualFormik.handleChange}
-                      maxLength="10"
-                      onClear={() =>
-                        clientIndividualFormik.setFieldValue("statusName", "")
-                      }
-                      readOnly={true}
+                      datasetId={DataSets.ACTIVE_STATUS}
+                      values={clientIndividualFormik.values}
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          clientIndividualFormik.setFieldValue(
+                            "statusName",
+                            newValue?.key
+                          );
+                        } else {
+                          clientIndividualFormik.setFieldValue(
+                            "statusName",
+                            newValue?.key
+                          );
+                        }
+                      }}
+
                       error={
                         clientIndividualFormik.touched.statusName &&
                         Boolean(clientIndividualFormik.errors.statusName)
