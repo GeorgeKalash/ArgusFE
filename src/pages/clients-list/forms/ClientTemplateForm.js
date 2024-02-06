@@ -141,7 +141,7 @@ const ClientTemplateForm = ({
 
     //clientRemittance
 
-    OTPVerified: false,
+    otpVerified: false,
     addressId: "",
     batchId: "",
     civilStatus: "",
@@ -302,7 +302,7 @@ const ClientTemplateForm = ({
 
           //clientRemittance
           recordId: recordId,
-          OTPVerified: obj.clientRemittance.OTPVerified,
+          otpVerified: obj.clientRemittance.otpVerified,
           addressId: obj.clientRemittance.addressId,
           batchId: obj.clientRemittance.batchId,
           civilStatus: obj.clientRemittance.civilStatus,
@@ -443,7 +443,7 @@ const ClientTemplateForm = ({
       expiryDate: formatDateToApiFunction(obj.expiryDate),
       issueDate: formatDateToApiFunction(obj.issueDate),// test
 
-      OTPVerified: obj.OTPVerified,
+      otpVerified: obj.otpVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
       status: 1,
@@ -496,7 +496,7 @@ const ClientTemplateForm = ({
       isDiplomat: obj.isDiplomat,
       isRelativeDiplomat: obj.isRelativeDiplomat,
       relativeDiplomatInfo: obj.relativeDiplomatInfo,
-      OTPVerified: obj.OTPVerified,
+      otpVerified: obj.otpVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
       idNo: obj.idNo,
@@ -1736,10 +1736,10 @@ console.log(obj6)
                 <FormControlLabel
                   control={
                     <Checkbox
-                      name="OTPVerified"
+                      name="otpVerified"
                       disabled={true}
                       readOnly={editMode && true}
-                      checked={clientIndividualFormik.values?.OTPVerified}
+                      checked={clientIndividualFormik.values?.otpVerified}
                       onChange={clientIndividualFormik.handleChange}
                     />
                   }
