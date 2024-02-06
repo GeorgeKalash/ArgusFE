@@ -7,7 +7,6 @@ const getNewMaterialsAdjustmentDetail = () => {
     muQty: null,
     unitCost: null,
     totalCost: null,
-    notes: null,
     qtyInBase: null,
     seqNo: null
   }

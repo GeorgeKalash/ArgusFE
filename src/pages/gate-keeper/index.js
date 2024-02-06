@@ -27,6 +27,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
+import { useWindow } from 'src/windows'
+import MaterialsAdjustmentForm from '../materials-adjustment/Forms/MaterialsAdjustmentForm'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,6 +56,10 @@ const GateKeeper = () => {
     queryFn: getGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.GateKeeper
+  })
+
+  const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
+    datasetId: ResourceIds.MaterialsAdjustment
   })
 
   const invalidate = useInvalidate({
@@ -116,6 +123,8 @@ const GateKeeper = () => {
 
   useEffect(() => {}, [selectedRows])
 
+  const { stack } = useWindow()
+
   const generateLean = () => {
     // Filter out objects where checked is truthy
     const checkedObjects = selectedRows.filter(obj => obj.checked)
@@ -132,8 +141,18 @@ const GateKeeper = () => {
         invalidate()
         setSelectedRows([])
 
-        // Call MaterialsAdjustmentWindow component here
-        //MaterialsAdjustmentWindow(res.recordId)
+        // Call MaterialsAdjustmentForm component here
+        stack({
+          Component: MaterialsAdjustmentForm,
+          props: {
+            recordId: res.recordId,
+            labels: _labelsADJ,
+            maxAccess: accessADJ
+          },
+          width: 900,
+          height: 600,
+          title: _labelsADJ[1]
+        })
 
         toast.success('Record Generated Successfully')
       })
@@ -141,18 +160,6 @@ const GateKeeper = () => {
         setErrorMessage(error)
       })
   }
-
-  /* const MaterialsAdjustmentWindow = recId => {
-    return (
-      <MaterialsAdjustmentWindow
-        onClose={() => {}}
-        labels={_labels}
-        maxAccess={access}
-        recordId={recId}
-        setErrorMessage={setErrorMessage}
-      />
-    )
-  }*/
 
   useEffect(() => {
     setSelectedRows([])

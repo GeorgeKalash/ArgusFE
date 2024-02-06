@@ -1,19 +1,11 @@
 // ** MUI Imports
-import Table from 'src/components/Shared/Table'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import {
-  formatDateDefault,
-  formatDateFromApi,
-  formatDateFromApiInline,
-  formatDateToApi,
-  formatDateToApiInline
-} from 'src/lib/date-helper'
+import { useError } from 'src/error'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 // ** MUI Imports
-import { Grid, Box, Button } from '@mui/material'
+import { Grid, Box } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -50,7 +42,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
     date: null,
     isOnPostClicked: false
   })
-
+  const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -65,25 +57,19 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       siteId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      obj.date = formatDateToApi(obj.date)
-      if (formik.values.isOnPostClicked) {
-        handlePost(obj)
-        formik.setFieldValue('isOnPostClicked', false)
-      } else {
-        const index = postADJ(obj)
-        if (index != -1) {
-          if (!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj,
-              recordId: response.recordId
-            })
-          } else {
-            toast.success('Record Edited Successfully')
-          }
+      try {
+        const copy = { ...obj }
+        copy.date = formatDateToApi(copy.date)
+        if (formik.values.isOnPostClicked) {
+          handlePost(copy)
+          formik.setFieldValue('isOnPostClicked', false)
+        } else {
+          await postADJ(copy)
+          setEditMode(true)
+          invalidate()
         }
-        setEditMode(true)
-        invalidate()
+      } catch (error) {
+        setErrorMessage(error)
       }
     }
   })
@@ -99,6 +85,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
           itemName: '',
           qty: '',
           totalCost: '',
+          totalQty: '',
           muQty: '',
           qtyInBase: '',
           notes: '',
@@ -110,6 +97,13 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       itemId: yup.string().required('This field is required')
     })
   })
+
+  const totalQty = detailsFormik.values.rows.reduce((qtySum, row) => {
+    // Parse qty as a number, assuming it's a numeric value
+    const qtyValue = parseFloat(row.qty) || 0
+
+    return qtySum + qtyValue
+  }, 0)
 
   const handlePost = obj => {
     postRequest({
@@ -126,53 +120,48 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       })
   }
 
-  const postADJ = obj => {
-    const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
-      const seqNo = index + 1 // Adding 1 to make it 1-based index
-      if (adjDetail.muQty === null) {
-        // If muQty is null, set qtyInBase to 0
-        return {
-          ...adjDetail,
-          qtyInBase: 0,
-          seqNo: seqNo
+  const postADJ = async obj => {
+    try {
+      const updatedRows = detailsFormik.values.rows.map((adjDetail, index) => {
+        const seqNo = index + 1 // Adding 1 to make it 1-based index
+        if (adjDetail.muQty === null) {
+          // If muQty is null, set qtyInBase to 0
+          return {
+            ...adjDetail,
+            qtyInBase: 0,
+            seqNo: seqNo
+          }
+        } else {
+          // If muQty is not null, calculate qtyInBase
+          return {
+            ...adjDetail,
+            qtyInBase: adjDetail.muQty * adjDetail.qty,
+            seqNo: seqNo
+          }
         }
-      } else {
-        // If muQty is not null, calculate qtyInBase
-        return {
-          ...adjDetail,
-          qtyInBase: adjDetail.muQty * adjDetail.qty,
-          seqNo: seqNo
-        }
+      })
+
+      if (updatedRows.length == 1 && updatedRows[0].itemId == '') {
+        throw new Error('Grid not filled. Please fill the grid before saving.')
       }
-    })
 
-    if (updatedRows.length == 1 && updatedRows[0].itemId == '') {
-      setErrorMessage('You have to fill the grid before saving.')
+      const resultObject = {
+        header: obj,
+        items: updatedRows,
+        serials: [],
+        lots: []
+      }
 
-      return -1
-    }
-
-    const resultObject = {
-      header: obj,
-      items: updatedRows,
-      serials: [],
-      lots: []
-    }
-
-    postRequest({
-      extension: InventoryRepository.MaterialsAdjustment.set2,
-      record: JSON.stringify(resultObject)
-    })
-      .then(res => {
-        invalidate()
-
-        return 1
+      const res = await postRequest({
+        extension: InventoryRepository.MaterialsAdjustment.set2,
+        record: JSON.stringify(resultObject)
       })
-      .catch(error => {
-        setErrorMessage(error)
-
-        return -1
-      })
+      toast.success('Record Updated Successfully')
+      invalidate()
+      formik.setFieldValue('recordId', res.recordId)
+    } catch (error) {
+      setErrorMessage(error)
+    }
   }
 
   const lookupSKU = searchQry => {
@@ -273,6 +262,9 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
         setErrorMessage(error)
       })
   }
+  useEffect(() => {
+    console.log('heightttt ', height)
+  }, [height])
 
   useEffect(() => {
     ;(async function () {
@@ -309,10 +301,10 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       isPosted={isPosted}
       postVisible={true}
     >
-      <Box>
-        <Grid container>
+      <Grid container>
+        <Grid container xs={12} style={{ overflow: 'hidden' }}>
           {/* First Column */}
-          <Grid container rowGap={1} xs={6}>
+          <Grid container rowGap={1} xs={6} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -324,7 +316,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                   { key: 'name', value: 'Name' }
                 ]}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -370,7 +362,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                 ]}
                 values={formik.values}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name']}
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -380,7 +372,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               />
             </Grid>
           </Grid>
-          <Grid container rowGap={1} xs={6} sx={{ px: 2 }}>
+          <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
@@ -416,34 +408,43 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
             </Grid>
           </Grid>
         </Grid>
-      </Box>
-      <Box sx={{ pt: 2 }}>
-        <Grid container>
-          <Grid xs={12}>
-            <Box sx={{ width: '100%', height: `${height - 530}px`, overflowY: 'hidden' }}>
-              <InlineEditGrid
-                gridValidation={detailsFormik}
-                columns={columns}
-                defaultRow={{
-                  itemId: '',
-                  sku: '',
-                  itemName: '',
-                  qty: '',
-                  totalCost: '',
-                  muQty: '',
-                  qtyInBase: '',
-                  notes: '',
-                  seqNo: ''
-                }}
-                allowDelete={true}
-                allowAddNewLine={TrendingUp}
-                scrollable={true}
-                scrollHeight={`${height - 530}px`}
-              />
-            </Box>
-          </Grid>
+        <Grid container sx={{ pt: 2 }} xs={12}>
+          <Box sx={{ width: '100%' }}>
+            <InlineEditGrid
+              gridValidation={detailsFormik}
+              columns={columns}
+              defaultRow={{
+                itemId: '',
+                sku: '',
+                itemName: '',
+                qty: '',
+                totalCost: '',
+                muQty: '',
+                qtyInBase: '',
+                notes: '',
+                seqNo: ''
+              }}
+              allowDelete={true}
+              allowAddNewLine={TrendingUp}
+              scrollable={true}
+              scrollHeight={`${height - 530}px`}
+            />
+          </Box>
         </Grid>
-      </Box>
+
+        <Grid container rowGap={1} xs={6} style={{ marginTop: '5px' }}>
+          <CustomTextField
+            name='reference'
+            label={labels[15]}
+            maxAccess={maxAccess}
+            value={totalQty}
+            maxLength='30'
+            readOnly={true}
+            error={formik.touched.reference && Boolean(formik.errors.reference)}
+            helperText={formik.touched.reference && formik.errors.reference}
+          />
+        </Grid>
+      </Grid>
     </FormShell>
   )
 }
