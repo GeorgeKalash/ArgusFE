@@ -134,7 +134,7 @@ const ClientTemplateForm = ({
     flName: "",
     keyword: "",
     otp: "",
-    status: "",
+    status: "-1",
     plantId: "",
     name: "",
     oldReference: "",
@@ -161,7 +161,8 @@ const ClientTemplateForm = ({
     salary: "",
     salaryRange: "",
     smsLanguage: "",
-    status: "",
+
+    // status: "",
     whatsAppNo: "",
     wip: "",
     workAddressId: "",
@@ -295,7 +296,8 @@ const ClientTemplateForm = ({
           flName: obj.clientMaster.flName,
           keyword: obj.clientMaster.keyword,
           otp: obj.clientMaster.otp,
-          status: obj.clientMaster.status,
+
+          // status: obj.clientMaster.status,
           plantId: obj.clientMaster.plantId,
           name: obj.clientMaster.name,
           oldReference: obj.clientMaster.oldReference,
@@ -446,7 +448,7 @@ const ClientTemplateForm = ({
       OTPVerified: obj.OTPVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
-      status: 1,
+      status: obj.status,
       categoryName: obj.categoryName,
       oldReference: obj.oldReference,
     };
@@ -503,7 +505,7 @@ const ClientTemplateForm = ({
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
-      statusName: obj.statusName,
+      status: obj.status,
     };
 
     const obj5 = {
@@ -1632,31 +1634,33 @@ console.log(obj6)
 
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      name="statusName"
+                      name="status"
                       label={_labels.status}
                       datasetId={DataSets.ACTIVE_STATUS}
                       values={clientIndividualFormik.values}
+                      valueField="key"
+                      displayField="value"
                       onChange={(event, newValue) => {
                         if (newValue) {
                           clientIndividualFormik.setFieldValue(
-                            "statusName",
+                            "status",
                             newValue?.key
                           );
                         } else {
                           clientIndividualFormik.setFieldValue(
-                            "statusName",
+                            "status",
                             newValue?.key
                           );
                         }
                       }}
 
                       error={
-                        clientIndividualFormik.touched.statusName &&
-                        Boolean(clientIndividualFormik.errors.statusName)
+                        clientIndividualFormik.touched.status &&
+                        Boolean(clientIndividualFormik.errors.status)
                       }
                       helperText={
-                        clientIndividualFormik.touched.statusName &&
-                        clientIndividualFormik.errors.statusName
+                        clientIndividualFormik.touched.status &&
+                        clientIndividualFormik.errors.status
                       }
                     />
                   </Grid>
