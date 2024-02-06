@@ -13,7 +13,7 @@ import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
-import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApiFunction ,  } from 'src/lib/date-helper'
 import { CommonContext } from 'src/providers/CommonContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -25,11 +25,31 @@ import { useWindow } from 'src/windows'
 import * as yup from 'yup'
 import { DataSets } from 'src/resources/DataSets'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
+import useIdType from 'src/hooks/useIdType'
 
 const FormContext = React.createContext(null)
 
+export async function Country(getRequest) {
+    var parameters = `_filter=&_key=countryId`
+
+ const res=   await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: parameters
+    })
+
+        return res.record.value;
+
+}
+
 function FormField({ name, Component, valueField, ...rest }) {
   const { formik, labels } = useContext(FormContext)
+  const { getRequest } = useContext(RequestsContext)
+
+  const getCountry  = async ()=>{
+    const countryId=  await Country(getRequest)
+    formik.setFieldValue('issue_country' , parseInt(countryId))
+  }
 
   return (
     <Component
@@ -40,10 +60,16 @@ function FormField({ name, Component, valueField, ...rest }) {
         values: formik.values,
         value: formik.values[name],
         error: formik.errors[name],
-        errors: formik.errors
+        errors: formik.errors,
+        valueField: valueField
       }}
       onChange={(e, v) => {
+        if(name === 'id_type' && v &&  v['type'] &&  (v['type']===1 || v['type']===2)){
+         getCountry()
+        }
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
+
+
       }}
       form={formik}
     />
@@ -58,8 +84,6 @@ function useLookup({ endpointId, parameters }) {
   const [store, setStore] = useState([])
 
   const { getRequest } = useContext(RequestsContext)
-
-  console.log('store', store)
 
   return {
     store,
@@ -92,11 +116,33 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [idTypeStore, setIdTypeStore] = useState([])
   const [typeStore, setTypeStore] = useState([])
   const [creditCardStore, setCreditCardStore] = useState([])
+  const [getValue] = useIdType();
+
+  async function checkTypes(value) {
+    if (!value) {
+      formik.setFieldValue("id_type", "");
+    }
+    const idType = await getValue(value);
+    if (idType){
+      formik.setFieldValue("id_type", idType)
+      if(idType){
+        const res =  idTypeStore.filter((item)=> item.recordId===idType)[0]
+        if(res.type===1 || res.type===2 ){
+             const countryId=  await Country(getRequest)
+             formik.setFieldValue('issue_country' , parseInt(countryId))
+
+
+        }
+      }
+
+    };
+  }
+
+
 
   const [initialValues, setInitialValues] = useState({
     recordId: null,
     reference: null,
-    rows: null,
     rows: [
       {
         seqNo: 1,
@@ -144,7 +190,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     purpose_of_exchange: null,
     nationality: null,
     cell_phone: null,
-    status: '1',
+    status: "1",
     type: -1,
     wip: 1,
     functionId: '3502'
@@ -155,11 +201,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     validateOnChange: false,
     validateOnBlur: false,
     validate: values => {
-      const type = values.row2 && values.rows2.every(row => !!row.type)
+      const type = values.rows2 && values.rows2.every(row => !!row.type)
       const amount = values.rows2 && values.rows2.every(row => !!row.amount)
 
 
-      return type && amount
+return type && amount
         ? {}
         : {
             rows2: Array(values.rows2 && values.rows2.length).fill({
@@ -169,7 +215,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           }
     },
     validationSchema: yup.object({
-      date: yup.date().required(),
+      date: yup.string().required(),
       id_type: yup.number().required(),
       id_number: yup.number().required(),
       birth_date: yup.string().required(),
@@ -186,14 +232,16 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   })
 
   const [rateType, setRateType] = useState(null)
+  const [blur, setBlur] = useState(null)
 
   async function setOperationType(type) {
+    if(type === '3502' ||  type === '3503' ){
     const res = await getRequest({
       extension: 'SY.asmx/getDE',
       parameters: type === '3502' ? '_key=mc_defaultRTPU' : type === '3503' ? '_key=mc_defaultRTSA' : ''
     })
     setRateType(res.record.value)
-    formik.setFieldValue('functionId', type)
+    formik.setFieldValue('functionId', type)}
   }
 
   const [currencyStore, setCurrencyStore] = useState([])
@@ -232,6 +280,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       callback: setTypeStore
     })
   }
+
+
 
   useEffect(() => {
     const date = new Date()
@@ -312,6 +362,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       clientId: record?.clientIndividual?.clientId,
       clientName: record.headerView.clientName,
       functionId: record.headerView.functionId,
+      plantId: record.headerView.plantId,
+      wip: record.headerView.wip,
       firstName: record?.clientIndividual?.firstName,
       lastName: record?.clientIndividual?.lastName,
       middleName: record?.clientIndividual?.middleName,
@@ -332,7 +384,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       remarks: record.headerView.notes,
       purpose_of_exchange: record.headerView.poeId,
       nationality: record.clientMaster.nationalityId,
-      cell_phone: record.clientMaster.cellPhone
+      cell_phone: record.clientMaster.cellPhone,
+      status: record.clientMaster.status
+
     })
 
     CashFormik.setValues({ rows: record.cash })
@@ -357,27 +411,45 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     return response.record
   }
 
-  const total = formik.values.rows.reduce((acc, { lcAmount }) => acc + lcAmount, 0)
+  const total = formik.values.rows.reduce((acc, { lcAmount }) => {
+    // Convert lcAmount to string and replace commas
+    const amountString = String(lcAmount || '').replaceAll(',', '');
+
+    // Parse the amount and add to accumulator
+    return acc + parseFloat(amountString) || 0;
+  }, 0);
+
+  const receivedTotal = formik.values.rows2.reduce((acc, { amount }) => {
+    // Convert lcAmount to string and replace commas
+    const amountString = String(amount || '').replaceAll(',', '');
+
+    // Parse the amount and add to accumulator
+    return  acc + parseFloat(amountString) || 0;
+  }, 0);
+
+  const Balance = total - receivedTotal
 
   // const { lookup, store, valueOf, clear } = useLookup({
   //   endpointId: CurrencyTradingClientRepository.Client.snapshot,
   //   parameters: { _category: 1 }
   // })
 
-  const CashFormik = useFormik({
-    validate: values => {
-      const type = values.rows && values.rows.every(row => !!row.type)
-      const amount = values.rows && values.rows.every(row => !!row.amount)
 
-      return type && amount
-        ? {}
-        : {
-            rows: Array(values.rows && values.rows.length).fill({
-              amount: 'field is required',
-              type: 'field is required'
-            })
-          }
-    },
+
+  const CashFormik = useFormik({
+    // validate: values => {
+    //   const type = values.rows && values.rows.every(row => !!row.type)
+    //   const amount = values.rows && values.rows.every(row => !!row.amount)
+
+    //   return type && amount
+    //     ? {}
+    //     : {
+    //         rows: Array(values.rows && values.rows.length).fill({
+    //           amount: 'field is required',
+    //           type: 'field is required'
+    //         })
+    //       }
+    // },
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
@@ -398,6 +470,22 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     },
     onSubmit: values => {}
   })
+  useEffect(()=>{
+
+   initialValues.rows2 =  CashFormik.values.rows.map(({ seqNo, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
+      seqNo,
+      type,
+      ccId,
+      bankFees,
+      amount,
+      receiptRef,
+      cashAccountId
+    }))
+
+    formik.setFieldValue('rows2' , initialValues.rows2 )
+
+  },[CashFormik.values] )
+
   async function onSubmit(values) {
     const { record: recordFunctionId } = await getRequest({
       extension: `SY.asmx/getUFU`,
@@ -412,21 +500,22 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     })
 
     const clientId = values.clientId || 0
-    console.log(values)
+
 
     const payload = {
       header: {
+        recordId: values.recordId,
         dtId,
         reference: values.reference,
         status: values.status,
         date: formatDateToApiFunction(values.date),
         functionId: values.functionId,
-        plantId: plantId,
+        plantId: plantId ? plantId : values.plantId ,
         clientId,
         cashAccountId: cashAccountRecord.value,
         poeId: values.purpose_of_exchange,
         wip: values.wip,
-        amount: total || 1,
+        amount:  String(total || '').replaceAll(',', ''),
         notes: values.remarks
       },
       items: values.rows.map(({ seqNo, currencyId, exRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
@@ -434,8 +523,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         currencyId,
         exRate,
         rateCalcMethod,
-        fcAmount: parseFloat(fcAmount),
-        lcAmount: parseFloat(lcAmount)
+        fcAmount: String(fcAmount || '').replaceAll(',', ''),
+        lcAmount: lcAmount
       })),
       clientMaster: {
         category: values.clientType,
@@ -486,7 +575,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           type,
           ccId,
           bankFees,
-          amount: amount?.replaceAll(',', ''),
+          amount: String(amount || '').replaceAll(',', ''),
           receiptRef,
           cashAccountId: cashAccountRecord.value
         }))
@@ -508,7 +597,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
      setEditMode(true)}
   }
-console.log(formik)
   async function fetchClientInfo({ clientId }) {
     try {
       const response = await getRequest({
@@ -551,7 +639,7 @@ console.log(formik)
   }
 
   return (
-    <FormShell height={400} form={formik} resourceId={35208} editMode={editMode}>
+    <FormShell height={400} form={formik} resourceId={35208} editMode={editMode} disabledSubmit={ Balance  && true} >
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
           <FieldSet title='Transaction'>
@@ -569,6 +657,7 @@ console.log(formik)
                   displayField='value'
                   valueField='key'
                   datasetId={7}
+
                   readOnly
                 />
               </Grid>
@@ -759,6 +848,8 @@ console.log(formik)
                     name='id_number'
                     Component={CustomTextField}
                     onBlur={e => {
+                      checkTypes(e.target.value)
+
                       fetchIDInfo({ idNumber: e.target.value })
                         .then(IDInfo => {
                           if (!!IDInfo) {
@@ -774,7 +865,9 @@ console.log(formik)
                         .catch(error => {
                           console.error('Error fetching ID info:', error)
                         })
+
                     }}
+
                     readOnly={editMode}
                     required
                   />
@@ -790,7 +883,7 @@ console.log(formik)
 
                 <Grid container xs={12}>
                   <Grid item xs={7}>
-                    <FormField
+                  <FormField
                       name='id_type'
                       Component={ResourceComboBox}
                       endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
@@ -1060,21 +1153,22 @@ console.log(formik)
                     bankFees: 0,
                     receiptRef: ''
                   }}
+
                 />
               </Grid>
 
               <Grid container xs={3} spacing={2} sx={{ p: 4 }}>
                 <Grid item xs={12}>
-                  <CustomTextField label='Net Amount' value={total} readOnly />
+                  <CustomTextField label='Net Amount' value={getFormattedNumber(total)} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField label='Amount Recieved' readOnly />
+                  <CustomTextField label='Amount Recieved'  value={getFormattedNumber(receivedTotal)} readOnly />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField label='Mode of Pay' readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField label='Balance To Pay' readOnly />
+                  <CustomTextField label='Balance To Pay' value={getFormattedNumber(Balance) ?? '0'} readOnly />
                 </Grid>
               </Grid>
             </Grid>
