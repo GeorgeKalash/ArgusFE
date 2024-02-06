@@ -65,9 +65,9 @@ const AuthProvider = ({ children }) => {
     initAuth()
 
     const fetchData = async () => {
-      const matchHostname = window.location.hostname.match(/^([a-z0-9]+)\.softmachine\.co$/)
+      const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-      const accountName = matchHostname ? matchHostname[1] : 'byc'
+      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
       try {
         const response = await axios({
@@ -78,7 +78,7 @@ const AuthProvider = ({ children }) => {
         // Set companyName from the API response
         setCompanyName(response.data.record.companyName)
         setGetAC(response)
-        window.localStorage.setItem('apiUrl' + '/', response.data.record.api)
+        window.localStorage.setItem('apiUrl', response.data.record.api)
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -225,11 +225,7 @@ const AuthProvider = ({ children }) => {
     login: handleLogin,
     logout: handleLogout,
     getAccessToken,
-    apiUrl: getAC?.data?.record.api
-      ? `${getAC?.data?.record.api}/`
-      : typeof window !== 'undefined'
-      ? window.localStorage.getItem('apiUrl')
-      : ''
+    apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>
