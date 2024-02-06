@@ -43,6 +43,7 @@ import { RTCLRepository } from "src/repositories/RTCLRepository";
 import { useWindow } from "src/windows";
 import Confirmation from "src/components/Shared/Confirmation";
 import { AddressFormShell } from "src/components/Shared/AddressFormShell";
+import { CTCLRepository } from "src/repositories/CTCLRepository";
 
 
 const ClientTemplateForm = ({
@@ -190,7 +191,9 @@ const ClientTemplateForm = ({
     if (idType){
       clientIndividualFormik.setFieldValue("idtId", idType);
       console.log(idType)
-      if( idType &&  (idType===1 || idType===2)){
+      const res =  idTypeStore.filter((item)=> item.recordId===idType)[0]
+
+      if( res['type'] &&  (res['type']===1 || res['type']===2)){
         getCountry()
        }
 
@@ -380,6 +383,24 @@ console.log(parameters)
         setErrorMessage(error);
       });
   };
+
+  const checkIdNumber = (id) => {
+
+    var parameters = `_idNo=`+ id;
+    if(id) getRequest({
+      extension: CTCLRepository.IDNumber.get,
+      parameters: parameters,
+    })
+      .then((res) => {
+        if(res.record){
+        setErrorMessage(' the ID number exists.')
+
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  }
 
   const fillType = () => {
     var parameters = `_filter=`;
@@ -718,7 +739,6 @@ console.log(obj6)
                 <FieldSet title={_labels.id}>
                   <Grid item xs={12}>
                     <CustomTextField
-                      sx={{ color: "white" }}
                       name="idNo"
                       label={_labels.id_number}
                       type={showAsPassword && "password"}
@@ -731,6 +751,7 @@ console.log(obj6)
                       onPaste={handleCopy}
                       onBlur={(e) => {
                         checkTypes(e.target.value), setShowAsPassword(true);
+                        checkIdNumber(e.target.value)
                       }}
                       readOnly={editMode && true}
                       maxLength="15"
@@ -1333,12 +1354,12 @@ console.log(obj6)
                             newValue?.key
                           );
 
-                          if (newValue.key === "2") {
-                            clientIndividualFormik.setFieldValue(
-                              "coveredFace",
-                              true
-                            );
-                          }
+                          // if (newValue.key === "2") {
+                          //   clientIndividualFormik.setFieldValue(
+                          //     "coveredFace",
+                          //     true
+                          //   );
+                          // }
                         } else {
                           clientIndividualFormik.setFieldValue("gender", "");
                         }
@@ -1824,11 +1845,7 @@ console.log(obj6)
                           : true
                       }
                       name="coveredFace"
-                      checked={
-                        clientIndividualFormik.values.coveredFace
-
-                        // clientIndividualFormik.values.gender === "2" && !clientIndividualFormik.values.coveredFace  ? true :  clientIndividualFormik.values.coveredFace
-                      }
+                      checked={ clientIndividualFormik.values.coveredFace}
                       onChange={clientIndividualFormik.handleChange}
                     />
                   }
