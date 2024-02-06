@@ -32,7 +32,7 @@ const DocumentsOnHold = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [gridData ,setGridData]=useState([]);
+  const [gridData, setGridData] = useState([]);
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -40,7 +40,7 @@ const DocumentsOnHold = () => {
 
     return await getRequest({
       extension: DocumentReleaseRepository.DocumentsOnHold.qry,
-      parameters: `_startAt=0&_functionId=0&_reference=&_sortBy=reference&_response=0&_status=1&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_functionId=1&_reference=&_sortBy=reference desc&_response=0&_status=1&_pageSize=${_pageSize}&filter=`
     })
   }
 
@@ -61,7 +61,7 @@ const DocumentsOnHold = () => {
 
   function onSearchClear() {
     setSearchValue('')
-
+  
   }
 
   const columns = [
@@ -86,32 +86,6 @@ const DocumentsOnHold = () => {
 
   ]
 
-  const search = inp => {
-    setSearchValue(inp)    
-    setGridData({count : 0, list: [] , message :"",  statusId:1})
-     const input = inp
-     
-
-     if(input){
-    var parameters =  `_startAt=0&_functionId=0&_reference=${input}&_sortBy=reference desc&_response=0&_status=1&_pageSize=50&filter=`
-
-    getRequest({
-      extension:DocumentReleaseRepository.DocumentsOnHold.qry ,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-
-    }else{
-
-      setGridData({count : 0, list: [] , message :"",  statusId:1})
-    }
-    
-  }
 
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
@@ -126,7 +100,35 @@ const DocumentsOnHold = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
+
+  const search = inp => {
+    setSearchValue(inp)    
+    setGridData({count : 0, list: [] , message :"",  statusId:1})
+     const input = inp
+     
+
+     if(input){
+    var parameters =  `_startAt=0&_functionId=0&_reference=${input}&_sortBy=reference desc&_response=0&_status=1&_pageSize=50`
+
+    getRequest({
+      extension:DocumentReleaseRepository.DocumentsOnHold.qry ,
+      parameters: parameters
+    })
+
+      .then(res => {
+        setGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+
+    }else{
+
+      setGridData({count : 0, list: [] , message :"",  statusId:1})
+    }
+    
+  }
+
 
   return (
     <>
