@@ -164,6 +164,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={InventoryRepository.Site.qry}
+              
               parameters={`_startAt=0&_pageSize=100&_filter=`}
               name='siteId'
               label={labels.site}
@@ -171,6 +172,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
+              
               valueField='recordId'
               displayField={['reference','name']}
               values={formik.values}
@@ -178,6 +180,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
               onChange={(event, newValue) => {
                 formik && formik.setFieldValue('siteId', newValue?.recordId)
               }}
+              required
               error={formik.touched.siteId && Boolean(formik.errors.siteId)}
 
               // helperText={formik.touched.siteId && formik.errors.siteId}
@@ -186,6 +189,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Plant.qry}
+              
               parameters={`_startAt=0&_pageSize=100&_filter=`}
               name='plantId'
               label={labels.plantName}
@@ -193,6 +197,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
+              
               valueField='recordId'
               displayField={['reference','name']}
               values={formik.values}
@@ -200,6 +205,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
               onChange={(event, newValue) => {
                 formik && formik.setFieldValue('plantId', newValue?.recordId)
               }}
+              required
               error={formik.touched.plantId && Boolean(formik.errors.plantId)}
 
               // helperText={formik.touched.plantId && formik.errors.plantId}
@@ -218,7 +224,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId,onSubmit }
               valueField='recordId'
               displayField={['reference','name']}
               values={formik.values}
-              required
+              
               readOnly={editMode}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
