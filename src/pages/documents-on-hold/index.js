@@ -35,12 +35,13 @@ const DocumentsOnHold = () => {
   const [gridData ,setGridData]=useState([]);
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, _reference = '' } = options;
-  
+    const { _startAt = 0, _pageSize = 50 } = options
+    
+
     return await getRequest({
-      extension: 'DR.asmx/qryTRX', // Updated API endpoint
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=0&_response=0&_status=1&_reference=${_reference}&_sortBy=reference desc`
-    });
+      extension: DocumentReleaseRepository.DocumentsOnHold.qry,
+      parameters: `_startAt=0&_functionId=0&_reference=&_sortBy=reference&_response=0&_status=1&_pageSize=${_pageSize}&filter=`
+    })
   }
 
   const {
@@ -86,25 +87,31 @@ const DocumentsOnHold = () => {
   ]
 
   const search = inp => {
-    setSearchValue(inp);
-    const input = inp.trim().toLowerCase(); 
-  
-    if (Array.isArray(data.list)) {
-      if (input) {
-        const filteredList = data.list.filter(item =>
-          Object.values(item).some(value =>
-            typeof value === "string" && value.toLowerCase().includes(input)
-          )
-        );
-        setGridData({ list: filteredList });
-      } else {
-        // If input is empty, show all data
-        setGridData(data);
-      }
-    } else {
-      console.error("Data list is not an array:", data.list);
+    setSearchValue(inp)    
+    setGridData({count : 0, list: [] , message :"",  statusId:1})
+     const input = inp
+     
+
+     if(input){
+    var parameters =  `_startAt=0&_functionId=0&_reference=${input}&_sortBy=reference desc&_response=0&_status=1&_pageSize=50&filter=`
+
+    getRequest({
+      extension:DocumentReleaseRepository.DocumentsOnHold.qry ,
+      parameters: parameters
+    })
+      .then(res => {
+        setGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+
+    }else{
+
+      setGridData({count : 0, list: [] , message :"",  statusId:1})
     }
-  };
+    
+  }
 
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
