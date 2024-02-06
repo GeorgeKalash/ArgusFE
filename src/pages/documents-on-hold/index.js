@@ -80,9 +80,7 @@ const DocumentsOnHold = () => {
   ]
 
 
-  const add = () => {
-    setWindowOpen(true)
-  }
+
 
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
@@ -102,7 +100,7 @@ const DocumentsOnHold = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar  maxAccess={access} />
         <Table
           columns={columns}
           gridData={data}
