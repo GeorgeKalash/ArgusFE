@@ -708,28 +708,25 @@ const Users = () => {
   }
 
   const handleCheckedRows = rowData => {
-    console.log('rowData ', rowData.length);
+    console.log('rowData ', rowData);
   
-    if (!rowData[0]?.isCheckAll) {
-      // Uncheck all
-      setCheckedRows([]);
-    }
-     else if (rowData[0]?.isCheckAll) {
-      // Check all
-      // Filter out rows with isCheckAll equal to isCheckAll,to remove the flag 
-      const filteredRowData = rowData.filter(row => row.isCheckAll != 'true');
-      console.log('filteredRowData ', filteredRowData);
-      
-      // Set the state with the filtered data
-      setCheckedRows(filteredRowData)
-
-      // Create a new array with the filtered data and set the state
-      setRowGridData(filteredRowData)
-    } else {
-      // Regular case
-      setCheckedRows(prevCheckedRows => [...prevCheckedRows, rowData]);
-    }
-  }
+    if (Array.isArray(rowData) && rowData.length > 0) {
+      const allChecked = rowData.every(item => item && item.checked === true);
+  
+      if (!allChecked) {
+        console.log('not All items checked');
+  
+        // Reset the whole data to add them again without duplicates
+        setCheckedRows([]);
+      } else if(allChecked ) {
+        console.log('all items checked');
+        setCheckedRows(rowData);
+      }
+      else{
+        setCheckedRows(prevCheckedRows => [...prevCheckedRows, rowData]);
+      }
+    } 
+  };
   
   const getRowAccessGridData = classId => {
     setRowGridData([])
@@ -843,8 +840,6 @@ const Users = () => {
   const postRowAccess = () => {
     const userId=usersValidation.values.recordId
     const resourceId=classValue
-
-    console.log('checkedRows ',checkedRows)
 
     const items = checkedRows.map((item) => {
       // Check if the 'checked' property is true
