@@ -43,6 +43,8 @@ import { RTCLRepository } from "src/repositories/RTCLRepository";
 import { useWindow } from "src/windows";
 import Confirmation from "src/components/Shared/Confirmation";
 import { AddressFormShell } from "src/components/Shared/AddressFormShell";
+import { CTCLRepository } from "src/repositories/CTCLRepository";
+
 
 const ClientTemplateForm = ({
   setErrorMessage,
@@ -134,7 +136,7 @@ const ClientTemplateForm = ({
     flName: "",
     keyword: "",
     otp: "",
-    status: "",
+    status: "-1",
     plantId: "",
     name: "",
     oldReference: "",
@@ -161,7 +163,8 @@ const ClientTemplateForm = ({
     salary: "",
     salaryRange: "",
     smsLanguage: "",
-    status: "",
+
+    // status: "",
     whatsAppNo: "",
     wip: "",
     workAddressId: "",
@@ -170,6 +173,9 @@ const ClientTemplateForm = ({
     isRelativeDiplomat: false,
     professionId: "",
   });
+
+
+
 
   const handleCopy = (event) => {
     event.preventDefault();
@@ -182,8 +188,31 @@ const ClientTemplateForm = ({
       clientIndividualFormik.setFieldValue("idtId", "");
     }
     const idType = await getValue(value);
-    if (idType) clientIndividualFormik.setFieldValue("idtId", idType);
+    if (idType){
+      clientIndividualFormik.setFieldValue("idtId", idType);
+      console.log(idType)
+      const res =  idTypeStore.filter((item)=> item.recordId===idType)[0]
+
+      if( res['type'] &&  (res['type']===1 || res['type']===2)){
+        getCountry()
+       }
+
+    }
+
   }
+
+  async function  getCountry(){
+    var parameters = `_filter=&_key=countryId`
+console.log(parameters)
+
+    const res=   await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: parameters
+      })
+      const countryId=  res.record.value
+
+      clientIndividualFormik.setFieldValue('idCountry' , parseInt(countryId))
+    }
 
   useEffect(() => {
     fillProfessionStore();
@@ -295,7 +324,8 @@ const ClientTemplateForm = ({
           flName: obj.clientMaster.flName,
           keyword: obj.clientMaster.keyword,
           otp: obj.clientMaster.otp,
-          status: obj.clientMaster.status,
+
+          // status: obj.clientMaster.status,
           plantId: obj.clientMaster.plantId,
           name: obj.clientMaster.name,
           oldReference: obj.clientMaster.oldReference,
@@ -353,6 +383,24 @@ const ClientTemplateForm = ({
         setErrorMessage(error);
       });
   };
+
+  const checkIdNumber = (id) => {
+
+    var parameters = `_idNo=`+ id;
+    if(id) getRequest({
+      extension: CTCLRepository.IDNumber.get,
+      parameters: parameters,
+    })
+      .then((res) => {
+        if(res.record){
+        setErrorMessage(' the ID number exists.')
+
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(error);
+      });
+  }
 
   const fillType = () => {
     var parameters = `_filter=`;
@@ -446,7 +494,7 @@ const ClientTemplateForm = ({
       otpVerified: obj.otpVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
-      status: 1,
+      status: obj.status,
       categoryName: obj.categoryName,
       oldReference: obj.oldReference,
     };
@@ -503,7 +551,7 @@ const ClientTemplateForm = ({
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
-      statusName: obj.statusName,
+      status: obj.status,
     };
 
     const obj5 = {
@@ -691,7 +739,6 @@ console.log(obj6)
                 <FieldSet title={_labels.id}>
                   <Grid item xs={12}>
                     <CustomTextField
-                      sx={{ color: "white" }}
                       name="idNo"
                       label={_labels.id_number}
                       type={showAsPassword && "password"}
@@ -704,6 +751,7 @@ console.log(obj6)
                       onPaste={handleCopy}
                       onBlur={(e) => {
                         checkTypes(e.target.value), setShowAsPassword(true);
+                        checkIdNumber(e.target.value)
                       }}
                       readOnly={editMode && true}
                       maxLength="15"
@@ -744,6 +792,11 @@ console.log(obj6)
                       onChange={(event, newValue) => {
                         if (newValue) {
                           fillFilterProfession(newValue.isDiplomat);
+
+                          if( newValue['type'] &&  (newValue['type']===1 || newValue['type']===2)){
+                            getCountry()
+                           }
+
                         } else {
                           fillFilterProfession("");
                         }
@@ -1301,12 +1354,12 @@ console.log(obj6)
                             newValue?.key
                           );
 
-                          if (newValue.key === "2") {
-                            clientIndividualFormik.setFieldValue(
-                              "coveredFace",
-                              true
-                            );
-                          }
+                          // if (newValue.key === "2") {
+                          //   clientIndividualFormik.setFieldValue(
+                          //     "coveredFace",
+                          //     true
+                          //   );
+                          // }
                         } else {
                           clientIndividualFormik.setFieldValue("gender", "");
                         }
@@ -1631,24 +1684,34 @@ console.log(obj6)
                   </Grid>
 
                   <Grid item xs={12}>
-                    <CustomTextField
-                      name="statusName"
+                    <ResourceComboBox
+                      name="status"
                       label={_labels.status}
-                      value={clientIndividualFormik.values?.statusName}
-                      type="text"
-                      onChange={clientIndividualFormik.handleChange}
-                      maxLength="10"
-                      onClear={() =>
-                        clientIndividualFormik.setFieldValue("statusName", "")
-                      }
-                      readOnly={true}
+                      datasetId={DataSets.ACTIVE_STATUS}
+                      values={clientIndividualFormik.values}
+                      valueField="key"
+                      displayField="value"
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          clientIndividualFormik.setFieldValue(
+                            "status",
+                            newValue?.key
+                          );
+                        } else {
+                          clientIndividualFormik.setFieldValue(
+                            "status",
+                            newValue?.key
+                          );
+                        }
+                      }}
+
                       error={
-                        clientIndividualFormik.touched.statusName &&
-                        Boolean(clientIndividualFormik.errors.statusName)
+                        clientIndividualFormik.touched.status &&
+                        Boolean(clientIndividualFormik.errors.status)
                       }
                       helperText={
-                        clientIndividualFormik.touched.statusName &&
-                        clientIndividualFormik.errors.statusName
+                        clientIndividualFormik.touched.status &&
+                        clientIndividualFormik.errors.status
                       }
                     />
                   </Grid>
@@ -1782,11 +1845,7 @@ console.log(obj6)
                           : true
                       }
                       name="coveredFace"
-                      checked={
-                        clientIndividualFormik.values.coveredFace
-
-                        // clientIndividualFormik.values.gender === "2" && !clientIndividualFormik.values.coveredFace  ? true :  clientIndividualFormik.values.coveredFace
-                      }
+                      checked={ clientIndividualFormik.values.coveredFace}
                       onChange={clientIndividualFormik.handleChange}
                     />
                   }
