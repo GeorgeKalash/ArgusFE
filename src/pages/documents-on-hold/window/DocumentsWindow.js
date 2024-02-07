@@ -22,6 +22,7 @@ const DocumentsWindow = ({
     >
       <CustomTabPanel>
         <DocumentsForm
+        onClose={onClose}
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}

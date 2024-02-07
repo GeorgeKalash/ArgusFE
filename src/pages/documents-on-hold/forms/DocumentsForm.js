@@ -14,10 +14,11 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import FormShellDocument from 'src/components/Shared/formShellDocument'
 
 
 
-export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recordId }) {
+export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recordId, onClose }) {
     const [isLoading, setIsLoading] = useState(false)
 
 
@@ -29,7 +30,8 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
         thirdParty:'',
         functionName:'',
         date:'',
-        notes:''
+        notes:'',
+        responseDate:''
         
 
       })
@@ -48,10 +50,10 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
-          reference: yup.string().required('This field is required'),
-          name: yup.string().required('This field is required'),
+          reference: yup.string().required('This field is required')
         }),
         onSubmit: async obj => {
+          console.log(obj)
           
           const functionId = initialValues.functionId
           const seqNo = initialValues.seqNo
@@ -62,7 +64,7 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
             record: JSON.stringify(obj)
           })
           
-          if (!functionId&&!seqNo) {
+          if (!functionId&&!seqNo&&!recordId) {
             toast.success('Record Added Successfully')
             setInitialData({
               ...obj, // Spread the existing properties
@@ -95,12 +97,12 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
       }, [])
       
     return (
-        <FormShell 
+        <FormShellDocument
             resourceId={ResourceIds.DocumentsOnHold}
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
-        
+            onClose={onClose}
         >
             <Grid container spacing={4}>
                 <Grid item xs={12}>
@@ -136,7 +138,6 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
                     name='notes'
                     label={labels.notes}
                     value={formik.values.notes}
-                    required
                     maxLength='100'
                     rows={2}
                     maxAccess={maxAccess}
@@ -148,6 +149,6 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
                 </Grid>
 
             </Grid>
-        </FormShell>
+        </FormShellDocument>
   )
 }
