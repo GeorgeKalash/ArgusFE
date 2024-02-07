@@ -190,7 +190,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     purpose_of_exchange: null,
     nationality: null,
     cell_phone: null,
-    status: "1",
+    status: editMode? null :  "1",
     type: -1,
     wip: 1,
     functionId: '3502'
