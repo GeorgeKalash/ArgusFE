@@ -88,7 +88,6 @@ const CustomTextField = ({
 
           }
         }}
-
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
         onInput={handleInput}

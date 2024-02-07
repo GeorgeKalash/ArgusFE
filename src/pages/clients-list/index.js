@@ -147,7 +147,6 @@ const ClientsList = () => {
 
   }
 
-
   function openForm (recordId){
     stack({
       Component: ClientTemplateForm,

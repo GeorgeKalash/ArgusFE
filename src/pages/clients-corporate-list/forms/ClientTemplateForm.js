@@ -91,7 +91,7 @@ const ClientTemplateForm = ({
     addressId: null,
     category: null,
     createdDate: null,
-    status: null,
+    status: -1,
     addressId: null,
     plantId: null,
     cellPhone: null,
@@ -163,7 +163,7 @@ const ClientTemplateForm = ({
       name: obj.name1,
       flName: obj.flName,
       nationalityId: obj.nationalityId,
-      status: 1,
+      status: obj.status,
       plantId: formik.values.plantId,
       cellPhone: obj.cellPhone,
       oldReference: obj.oldReference,
@@ -471,6 +471,39 @@ const ClientTemplateForm = ({
                           }
                         />
                       </Grid>
+
+                      <Grid item xs={12}>
+                    <ResourceComboBox
+                      name="status"
+                      label={_labels.status}
+                      datasetId={DataSets.ACTIVE_STATUS}
+                      values={formik.values}
+                      valueField="key"
+                      displayField="value"
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          formik.setFieldValue(
+                            "status",
+                            newValue?.key
+                          );
+                        } else {
+                          formik.setFieldValue(
+                            "status",
+                            newValue?.key
+                          );
+                        }
+                      }}
+
+                      error={
+                        formik.touched.status &&
+                        Boolean(formik.errors.status)
+                      }
+                      helperText={
+                        formik.touched.status &&
+                        formik.errors.status
+                      }
+                    />
+                  </Grid>
 
                       <Grid item xs={12}>
                         <CustomTextField

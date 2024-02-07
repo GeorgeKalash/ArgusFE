@@ -87,20 +87,18 @@ return (
             helperText: helperText,
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
-                <>
+                <InputAdornment position='end'>
                   {value && (
-                    <InputAdornment>
-                      <IconButton onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
+                      <IconButton tabIndex={-1}  edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
                         <ClearIcon />
                       </IconButton>
-                    </InputAdornment>
+
                   )}
-                  <InputAdornment>
-                    <IconButton onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
+                    <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
                       <EventIcon />
                     </IconButton>
                   </InputAdornment>
-                </>
+
               )
             }
           }

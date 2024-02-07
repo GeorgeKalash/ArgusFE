@@ -350,6 +350,8 @@ const Table = ({
       width: 100,
       sortable: false,
       renderCell: params => {
+        const { row } = params
+        const isStatus3 = row.status === 3
 
         return (
           <>
@@ -358,7 +360,7 @@ const Table = ({
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
               </IconButton>
             )}
-            {deleteBtnVisible && (
+            {!isStatus3 && deleteBtnVisible && (
               <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
@@ -378,7 +380,6 @@ const Table = ({
     if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
       console.log('enter if')
       setPage(1)
-
     }
     setCheckedRows([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
