@@ -50,5 +50,12 @@ export const ManufacturingRepository = {
     set: service + 'setMAC',
     get: service + 'getMAC',
     del: service + 'delMAC'
+  },
+  MachineSpecification: {
+    page: service + 'pageMAS',
+    qry: service + 'qryMAS',
+    set: service + 'setMAS',
+    get: service + 'getMAS',
+    del: service + 'delMAS'
   }
 }

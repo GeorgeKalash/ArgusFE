@@ -119,7 +119,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
             editMode={editMode}
         >
             <Grid container spacing={4}>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomTextField
                     name='reference'
                     label={labels.reference}
@@ -134,7 +134,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.reference && formik.errors.reference}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomTextField
                     name='name'
                     label={labels.name}
@@ -149,7 +149,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.name && formik.errors.name}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.WorkCenter.qry}
                     name='workCenterId'
@@ -176,7 +176,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.workCenterId && formik.errors.workCenterId}
                   />
                 </Grid>  
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.Operation.qry}
 
@@ -205,7 +205,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.OperationId && formik.errors.OperationId}
                   />
                 </Grid>     
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.Labor.qry}
                     parameters= {`_startAt=0&_pageSize=200`}
@@ -233,7 +233,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.laborId && formik.errors.OperationId}
                   />
                 </Grid>             
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomTextField
                     name='minLoadQty'
                     label={labels.minLoadQty}
@@ -247,7 +247,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.minLoadQty && formik.errors.minLoadQty}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomTextField
                     name='maxLoadQty'
                     label={labels.maxLoadQty}
@@ -261,7 +261,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.maxLoadQty && formik.errors.maxLoadQty}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomTextField
                     name='defaultLoadQty'
                     label={labels.defaultLoadQty}
@@ -275,7 +275,7 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.defaultLoadQty && formik.errors.defaultLoadQty}
                   />
                 </Grid> 
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
                     name='lineId'
