@@ -73,7 +73,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       }
     }
   })
-  console.log(expanded)
 
   const detailsFormik = useFormik({
     enableReinitialize: true,
@@ -428,7 +427,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               allowDelete={true}
               allowAddNewLine={TrendingUp}
               scrollable={true}
-              scrollHeight={`${ expanded ? height-430  : height - 620}px`}
+              scrollHeight={`${ expanded ? height-430  : 200}px`}
             />
           </Box>
         </Grid>
