@@ -409,7 +409,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
           </Grid>
         </Grid>
         <Grid container sx={{ pt: 2 }} xs={12}>
-          <Box sx={{ width: '100%'}}>
+          <Box sx={{ width: '100%' }}>
             <InlineEditGrid
               gridValidation={detailsFormik}
               columns={columns}
