@@ -12,7 +12,7 @@ const DocumentsWindow = ({
   return (
     <Window
       id='DocumentsWindow'
-        Title={'DocumentsWindow'}
+        Title={labels.documentOnHold}
       controlled={true}
       onClose={onClose}
       width={500}

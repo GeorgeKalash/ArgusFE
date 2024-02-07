@@ -36,11 +36,12 @@ const DocumentsOnHold = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
+    console.log('request')
     
 
     return await getRequest({
       extension: DocumentReleaseRepository.DocumentsOnHold.qry,
-      parameters: `_startAt=${_startAt}&_functionId=1&_reference=&_sortBy=reference desc&_response=0&_status=1&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_functionId=0&_reference=&_sortBy=reference desc&_response=0&_status=1&_pageSize=${_pageSize}&filter=`
     })
   }
 
