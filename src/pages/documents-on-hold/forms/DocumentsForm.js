@@ -16,14 +16,20 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
 
-export default function DocumentsForm({ labels, maxAccess, recordId }) {
+
+export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recordId }) {
     const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
-    
+
+
     const [initialValues, setInitialData] = useState({
         recordId: null,
         reference: '',
-        functionId: '',
+        functionId: "",
+        seqNo:'',
+        thirdParty:'',
+        functionName:'',
+        date:'',
+        notes:''
         
 
       })
@@ -35,7 +41,8 @@ export default function DocumentsForm({ labels, maxAccess, recordId }) {
     const invalidate = useInvalidate({
         endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
       })
-  
+    
+
     const formik = useFormik({
         initialValues,
         enableReinitialize: true,
@@ -45,15 +52,17 @@ export default function DocumentsForm({ labels, maxAccess, recordId }) {
           name: yup.string().required('This field is required'),
         }),
         onSubmit: async obj => {
-          const recordId = obj.recordId
-         
+          
+          const functionId = initialValues.functionId
+          const seqNo = initialValues.seqNo
+          const recordId = initialValues.recordId
 
           const response = await postRequest({
             extension: DocumentReleaseRepository.DocumentsOnHold.set,
             record: JSON.stringify(obj)
           })
           
-          if (!recordId) {
+          if (!functionId&&!seqNo) {
             toast.success('Record Added Successfully')
             setInitialData({
               ...obj, // Spread the existing properties
@@ -61,7 +70,6 @@ export default function DocumentsForm({ labels, maxAccess, recordId }) {
             });
           }
           else toast.success('Record Edited Successfully')
-          setEditMode(true)
 
           invalidate()
         }
@@ -70,16 +78,15 @@ export default function DocumentsForm({ labels, maxAccess, recordId }) {
       useEffect(() => {
         ;(async function () {
           try {
-            if (recordId) {
               setIsLoading(true)
     
               const res = await getRequest({
                 extension: DocumentReleaseRepository.DocumentsOnHold.get,
-                parameters: `_recordId=${recordId}&_functionId=0&_seqNo=1`
+                parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
               })
-              
-              setInitialData(res.record)
-            }
+           
+              setInitialData(...res.record)
+            
           } catch (exception) {
             setErrorMessage(error)
           }
@@ -93,7 +100,7 @@ export default function DocumentsForm({ labels, maxAccess, recordId }) {
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
-            editMode={editMode}
+        
         >
             <Grid container spacing={4}>
                 <Grid item xs={12}>
@@ -101,29 +108,45 @@ export default function DocumentsForm({ labels, maxAccess, recordId }) {
                     name='reference'
                     label={labels.reference}
                     value={formik.values.reference}
-                    readOnly={editMode}
+                    readOnly={true}
                     maxAccess={maxAccess}
                     maxLength='30'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    helperText={formik.touched.reference && formik.errors.reference}
                     />
                 </Grid>
                 <Grid item xs={12}>
                     <CustomTextField
-                    name='name'
-                    label={labels.name}
-                    value={formik.values.name}
+                    name='thirdParty'
+                    label={labels.thirdParty}
+                    value={formik.values.thirdParty}
+                    readOnly={true}
+                    maxAccess={maxAccess}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <CustomTextField
+                    name='date'
+                    label={labels.date}
+                    value={formik.values.date}
+                    readOnly={true}
+                    maxAccess={maxAccess}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <CustomTextArea
+                    name='notes'
+                    label={labels.notes}
+                    value={formik.values.notes}
                     required
+                    maxLength='100'
                     rows={2}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+
                     />
                 </Grid>
+
             </Grid>
         </FormShell>
   )

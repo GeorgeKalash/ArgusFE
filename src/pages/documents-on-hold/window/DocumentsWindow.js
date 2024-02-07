@@ -6,7 +6,9 @@ const DocumentsWindow = ({
   onClose,
   labels,
   maxAccess,
-  recordId
+  recordId,
+  functionId,
+  seqNo
 }) => {
   
   return (
@@ -23,6 +25,8 @@ const DocumentsWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
+          functionId={functionId}
+          seqNo={seqNo}
         />
        
       </CustomTabPanel>

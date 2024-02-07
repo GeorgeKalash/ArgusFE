@@ -28,11 +28,15 @@ const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
+  const [selectedFunctioId, setSelectedFunctioId] = useState(null)
+  const [selectedSeqNo, setSelectedSeqNo] = useState(null)
+
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [gridData, setGridData] = useState([]);
+
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -89,7 +93,10 @@ const DocumentsOnHold = () => {
 
 
   const edit = obj => {
+   
+    setSelectedSeqNo(obj.seqNo)
     setSelectedRecordId(obj.recordId)
+    setSelectedFunctioId(obj.functionId)
     setWindowOpen(true)
   }
 
@@ -138,7 +145,7 @@ const DocumentsOnHold = () => {
         <Table
           columns={columns}
           gridData={searchValue.length > 0 ? gridData : data}
-          rowId={['recordId']}
+          rowId={['functionId',"seqNo","recordId"]}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
@@ -157,6 +164,8 @@ const DocumentsOnHold = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
+          functionId={selectedFunctioId}
+          seqNo={selectedSeqNo}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
