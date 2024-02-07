@@ -708,16 +708,29 @@ const Users = () => {
   }
 
   const handleCheckedRows = rowData => {
-
-    if(rowData[0].recordId == -1){
-      setCheckedRows([])
-    }
-    else{
-    setCheckedRows(prevCheckedRows => [...prevCheckedRows, ...rowData])
-    }
-  };
+    console.log('rowData ', rowData.length);
   
+    if (!rowData[0]?.isCheckAll) {
+      // Uncheck all
+      setCheckedRows([]);
+    }
+     else if (rowData[0]?.isCheckAll) {
+      // Check all
+      // Filter out rows with isCheckAll equal to isCheckAll,to remove the flag 
+      const filteredRowData = rowData.filter(row => row.isCheckAll != 'true');
+      console.log('filteredRowData ', filteredRowData);
+      
+      // Set the state with the filtered data
+      setCheckedRows(filteredRowData)
 
+      // Create a new array with the filtered data and set the state
+      setRowGridData(filteredRowData)
+    } else {
+      // Regular case
+      setCheckedRows(prevCheckedRows => [...prevCheckedRows, rowData]);
+    }
+  }
+  
   const getRowAccessGridData = classId => {
     setRowGridData([])
     console.log('rowAccessUser class ', classId)
@@ -751,7 +764,8 @@ const Users = () => {
       recordId: null,
       name: null,
       hasAccess: false,
-      classId: null
+      classId: null,
+      checked: false
     }
 
     Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise, rowAccessUserPromise]).then(
@@ -795,7 +809,11 @@ const Users = () => {
           })
         }
 
-        console.log('rowAccessUser list ', rowAccessUser.list)
+         const checkedList = rowAccessUser.list.map(obj => ({ ...obj, checked: true }));
+
+        // Now, checkedList contains the same objects with checked property set to true
+        setCheckedRows(checkedList);
+
         if (classId !== 'undefined') {
           for (let i = 0; i < rar.length; i++) {
             let rowId = rar[i].recordId
@@ -803,6 +821,7 @@ const Users = () => {
               let storedId = storedItem.recordId.toString()
               if (storedId == rowId) {
                 rar[i].hasAccess = true
+                rar[i].checked = true
               }
             })
           }
@@ -825,6 +844,8 @@ const Users = () => {
     const userId=usersValidation.values.recordId
     const resourceId=classValue
 
+    console.log('checkedRows ',checkedRows)
+
     const items = checkedRows.map((item) => {
       // Check if the 'checked' property is true
       if (item.checked) {
@@ -844,7 +865,7 @@ const Users = () => {
       items:items
     }
 
-    postRequest({
+   /* postRequest({
       extension: AccessControlRepository.RowAccessUserView.set2,
       record: JSON.stringify(data)
     })
@@ -853,7 +874,7 @@ const Users = () => {
       })
       .catch(error => {
         setErrorMessage(error)
-      })
+      })*/
   }
 
   useEffect(() => {

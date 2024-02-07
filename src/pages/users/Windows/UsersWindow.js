@@ -124,7 +124,7 @@ const UsersWindow = ({
          rowAccessValidation={rowAccessValidation}
          rowGridData={rowGridData}
          rowColumns={rowColumns}
-         setClassValue={setClassValue}s
+         setClassValue={setClassValue}
          maxAccess={maxAccess}
          handleCheckedRows={handleCheckedRows}
         />

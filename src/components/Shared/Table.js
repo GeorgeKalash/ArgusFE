@@ -113,6 +113,7 @@ const Table = ({
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
   const [filteredRows, setFilteredRows] = useState({})
+  const [checkAllAdded, setCheckAllAdded] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   const pageSize = props.pageSize ? props.pageSize : 50
@@ -292,30 +293,27 @@ const Table = ({
       // Pass the entire updated rows in the callback
       handleCheckedRows(filteredRows)
 
-      // Log the updated checkedRows after the state has been updated
-      console.log('checkedRows 4 ', newCheckedRows)
-
       // Return the updated state for the next render
       return filteredRows
     })
   }
 
   const handleCheckAll = () => {
-    const updatedRowGridData = gridData.list.map(row => ({
-      ...row,
-      checked: true
-    }))
-
-    // Assuming handleCheckedRows is a function to update the state
-    handleCheckedRows(updatedRowGridData)
-    console.log('updatedRowGridData ', updatedRowGridData)
-
-    // Update StripedDataGrid rows prop to trigger a re-render
-    setGridData(prevGridData => ({
-      ...prevGridData,
-      list: updatedRowGridData
-    }))
-  }
+      // Check if Check All has already been added
+      const updatedRowGridData = gridData.list.map(row => ({
+        ...row,
+        checked: true
+      }));
+  
+      handleCheckedRows(updatedRowGridData);
+  
+      // Update StripedDataGrid rows prop to trigger a re-render
+      setGridData(prevGridData => ({
+        ...prevGridData,
+        list: updatedRowGridData
+      }));
+    
+  };
 
   const handleUncheckAll = () => {
     // Logic to uncheck all rows
@@ -324,8 +322,8 @@ const Table = ({
       checked: false
     }))
 
-    //sending -1 as flag to know that all items unchecked
-    handleCheckedRows([{recordId:-1}])
+    // Add a new item at the beginning with a boolean flag
+    handleCheckedRows(updatedRowGridData)
 
     // Update StripedDataGrid rows prop to trigger a re-render
     setGridData(prevGridData => ({
@@ -333,6 +331,7 @@ const Table = ({
       list: updatedRowGridData
     }))
   }
+  const isCheckedAll=gridData?.list?.every(({checked}) => checked)
 
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
@@ -351,6 +350,7 @@ const Table = ({
       width: 100,
       sortable: false,
       renderCell: params => {
+
         return (
           <>
             {props.onEdit && (
@@ -389,7 +389,7 @@ const Table = ({
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
           <Stack direction='row' spacing={2} marginBottom={2}>
-            <Button variant='contained' color='primary' onClick={handleCheckAll} style={{ display: shouldViewButtons }}>
+            <Button variant='contained' color='primary' onClick={handleCheckAll} disabled={isCheckedAll} style={{ display: shouldViewButtons }}>
               Check All
             </Button>
             <Button
@@ -443,6 +443,7 @@ const Table = ({
                         field: 'checkbox',
                         headerName: checkTitle,
                         renderCell: params => (
+                          
                           <TableCell padding='checkbox'>
                             <Checkbox
                               checked={params.row.checked || false}
