@@ -194,6 +194,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       valueField: 'recordId',
       displayField: 'sku',
       widthDropDown: 400,
+      readOnly:{isPosted},
       fieldsToUpdate: [
         { from: 'recordId', to: 'itemId' },
         { from: 'sku', to: 'sku' },
@@ -218,7 +219,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       header: labels[9],
       name: 'qty',
       mandatory: true,
-      readOnly: false,
+      readOnly:{isPosted},
       width: 100
     },
     {
@@ -233,6 +234,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       field: 'textfield',
       header: labels[6],
       name: 'notes',
+      readOnly:{isPosted},
       width: 300
     }
   ]
@@ -315,6 +317,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                readOnly={isPosted}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
@@ -333,6 +336,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                 value={formik?.values?.reference}
                 maxAccess={maxAccess}
                 maxLength='30'
+                readOnly={isPosted}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -343,6 +347,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               <CustomDatePicker
                 name='date'
                 label={labels[3]}
+                readOnly={isPosted}
                 value={formik?.values?.date}
                 onChange={formik.handleChange}
                 maxAccess={maxAccess}
@@ -356,6 +361,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels[4]}
+                readOnly={isPosted}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -363,7 +369,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
-                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId)
@@ -377,6 +382,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
+                readOnly={isPosted}
                 label={labels[5]}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -399,6 +405,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                 label={labels[13]}
                 value={formik?.values?.description}
                 rows={4}
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('description', '')}
@@ -424,7 +431,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
                 notes: '',
                 seqNo: ''
               }}
-              allowDelete={true}
+              allowDelete={!isPosted}
               allowAddNewLine={TrendingUp}
               scrollable={true}
               scrollHeight={`${ expanded ? height-430  : 200}px`}
