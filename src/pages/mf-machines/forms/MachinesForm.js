@@ -136,6 +136,20 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                 </Grid>
                 <Grid item xs={6}>
                   <CustomTextField
+                    name='minLoadQty'
+                    label={labels.minLoadQty}
+                    value={formik.values.minLoadQty}
+                    type='numeric'
+                    numberField={true}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('minLoadQty', '')}
+                    error={formik.touched.minLoadQty && Boolean(formik.errors.minLoadQty)}
+
+                    // helperText={formik.touched.minLoadQty && formik.errors.minLoadQty}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
                     name='name'
                     label={labels.name}
                     value={formik.values.name}
@@ -147,6 +161,20 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     error={formik.touched.name && Boolean(formik.errors.name)}
 
                     // helperText={formik.touched.name && formik.errors.name}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='maxLoadQty'
+                    label={labels.maxLoadQty}
+                    value={formik.values.maxLoadQty}
+                    type='numeric'
+                    numberField={true}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('maxLoadQty', '')}
+                    error={formik.touched.maxLoadQty && Boolean(formik.errors.maxLoadQty)}
+
+                    // helperText={formik.touched.maxLoadQty && formik.errors.maxLoadQty}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -175,7 +203,21 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
 
                     // helperText={formik.touched.workCenterId && formik.errors.workCenterId}
                   />
-                </Grid>  
+                </Grid>               
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='defaultLoadQty'
+                    label={labels.defaultLoadQty}
+                    value={formik.values.defaultLoadQty}
+                    type='numeric'
+                    numberField={true}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('defaultLoadQty', '')}
+                    error={formik.touched.defaultLoadQty && Boolean(formik.errors.defaultLoadQty)}
+
+                    // helperText={formik.touched.defaultLoadQty && formik.errors.defaultLoadQty}
+                  />
+                </Grid> 
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.Operation.qry}
@@ -207,76 +249,6 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                 </Grid>     
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.Labor.qry}
-                    parameters= {`_startAt=0&_pageSize=200`}
-                    name='laborId'
-                    label={labels.laborId}
-                    required
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('laborId', newValue?.recordId)
-                      } else {
-
-                        formik.setFieldValue('laborId', '')
-                      }
-
-                    }}
-                    error={formik.touched.laborId && Boolean(formik.errors.laborId)}
-
-                    // helperText={formik.touched.laborId && formik.errors.OperationId}
-                  />
-                </Grid>             
-                <Grid item xs={6}>
-                  <CustomTextField
-                    name='minLoadQty'
-                    label={labels.minLoadQty}
-                    value={formik.values.minLoadQty}
-                    type='numeric'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('minLoadQty', '')}
-                    error={formik.touched.minLoadQty && Boolean(formik.errors.minLoadQty)}
-
-                    // helperText={formik.touched.minLoadQty && formik.errors.minLoadQty}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <CustomTextField
-                    name='maxLoadQty'
-                    label={labels.maxLoadQty}
-                    value={formik.values.maxLoadQty}
-                    type='numeric'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('maxLoadQty', '')}
-                    error={formik.touched.maxLoadQty && Boolean(formik.errors.maxLoadQty)}
-
-                    // helperText={formik.touched.maxLoadQty && formik.errors.maxLoadQty}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <CustomTextField
-                    name='defaultLoadQty'
-                    label={labels.defaultLoadQty}
-                    value={formik.values.defaultLoadQty}
-                    type='numeric'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('defaultLoadQty', '')}
-                    error={formik.touched.defaultLoadQty && Boolean(formik.errors.defaultLoadQty)}
-
-                    // helperText={formik.touched.defaultLoadQty && formik.errors.defaultLoadQty}
-                  />
-                </Grid> 
-                <Grid item xs={6}>
-                  <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
                     name='lineId'
                     label={labels.lineId}
@@ -302,6 +274,34 @@ export default function MachinesForms({ labels, maxAccess, recordId }) {
                     // helperText={formik.touched.lineId && formik.errors.lineId}
                   />
                 </Grid> 
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.Labor.qry}
+                    parameters= {`_startAt=0&_pageSize=200`}
+                    name='laborId'
+                    label={labels.laborId}
+                    required
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue('laborId', newValue?.recordId)
+                      } else {
+
+                        formik.setFieldValue('laborId', '')
+                      }
+
+                    }}
+                    error={formik.touched.laborId && Boolean(formik.errors.laborId)}
+
+                    // helperText={formik.touched.laborId && formik.errors.OperationId}
+                  />
+                </Grid>
             </Grid>
         </FormShell>
   )

@@ -19,7 +19,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
     const [editMode, setEditMode] = useState(!!recordId)
 
     const [initialValues, setInitialData] = useState({
-      machineId: recordId,
+        machineId: recordId,
         serialNo: null,
         brand: null,
         activationDate: null,
@@ -40,7 +40,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
           serialNo: yup.string().required(),
         }),
         onSubmit: async obj => {
-          const machineId = obj.machineId
+          const machineId = obj.recordId
 
           const response = await postRequest({
             extension: ManufacturingRepository.MachineSpecification.set,

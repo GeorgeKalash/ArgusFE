@@ -93,15 +93,22 @@ const Machiness = () => {
     setWindowOpen(true)
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: ManufacturingRepository.Machine.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+  const del = async (obj) => {
+    try {
+      await postRequest({
+          extension: ManufacturingRepository.MachineSpecification.del,
+          record: JSON.stringify({ machineId: obj.recordId })
+      })
+      await postRequest({
+          extension: ManufacturingRepository.Machine.del,
+          record: JSON.stringify(obj)
+      })
+      toast.success('Record Deleted Successfully')
+      invalidate();
+    } catch (error) {
+        setErrorMessage(error);
+    }
   }
-  
 
   return (
     <>
