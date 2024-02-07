@@ -428,7 +428,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               allowDelete={true}
               allowAddNewLine={TrendingUp}
               scrollable={true}
-              scrollHeight={`${ expanded ? height-350  : height - 630}px`}
+              scrollHeight={`${ expanded ? height-430  : height - 6020}px`}
             />
           </Box>
         </Grid>
