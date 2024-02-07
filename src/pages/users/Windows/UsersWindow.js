@@ -55,7 +55,8 @@ const UsersWindow = ({
   rowColumns,
   getRowAccessGridData,
   rowGridData,
-  handleCheckedRows
+  handleCheckedRows,
+  setClassValue
 }) => {
   
   return (
@@ -123,6 +124,7 @@ const UsersWindow = ({
          rowAccessValidation={rowAccessValidation}
          rowGridData={rowGridData}
          rowColumns={rowColumns}
+         setClassValue={setClassValue}s
          maxAccess={maxAccess}
          handleCheckedRows={handleCheckedRows}
         />

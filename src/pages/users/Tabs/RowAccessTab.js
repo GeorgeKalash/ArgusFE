@@ -14,7 +14,8 @@ const RowAccessTab = ({
   getRowAccessGridData,
   rowColumns,
   maxAccess,
-  labels
+  labels,
+  setClassValue
 }) => {
   useEffect(() => {
     ;(async function () {
@@ -47,6 +48,7 @@ const RowAccessTab = ({
               onChange={(event, newValue) => {
                 rowAccessValidation.setFieldValue('classId', newValue?.key)
                 getRowAccessGridData(newValue?.key)
+                setClassValue(newValue?.key)
               }}
               error={rowAccessValidation.touched.classId && Boolean(rowAccessValidation.errors.classId)}
               helperText={rowAccessValidation.touched.classId && rowAccessValidation.errors.classId}

@@ -27,6 +27,7 @@ export const AccessControlRepository = {
     snapshotGRP: service + 'snapshotGRP'
   },
   RowAccessUserView: {
-    qry: service + 'qryROU'
+    qry: service + 'qryROU',
+    set2: service +'set2ROU'
   }
 }

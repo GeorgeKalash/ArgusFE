@@ -58,6 +58,7 @@ const Users = () => {
 
   //states
   const [activeTab, setActiveTab] = useState(0)
+  const [classValue, setClassValue] = useState(20110)
   const [currentRecord, setCurrentRecord] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
@@ -690,6 +691,7 @@ const Users = () => {
     validateOnChange: true,
     validationSchema: yup.object({}),
     initialValues: {
+      classId: '',
       recordId: '',
       name: '',
       hasAccess: false
@@ -705,15 +707,16 @@ const Users = () => {
     }
   }
 
-  const handleCheckedRows = RowsData => {
-    console.log('hanle checked rows ', RowsData)
+  const handleCheckedRows = rowData => {
 
-    /*const updatedCheckedRows = [...checkedRows, RowsData];
-
-    // Update the state with the new checkedRows
-    setCheckedRows(updatedCheckedRows)
-    console.log('hanle checked rows2 ', updatedCheckedRows)*/
-  }
+    if(rowData[0].recordId == -1){
+      setCheckedRows([])
+    }
+    else{
+    setCheckedRows(prevCheckedRows => [...prevCheckedRows, ...rowData])
+    }
+  };
+  
 
   const getRowAccessGridData = classId => {
     setRowGridData([])
@@ -818,7 +821,40 @@ const Users = () => {
     })
   }
 
-  const postRowAccess = () => {}
+  const postRowAccess = () => {
+    const userId=usersValidation.values.recordId
+    const resourceId=classValue
+
+    const items = checkedRows.map((item) => {
+      // Check if the 'checked' property is true
+      if (item.checked) {
+        // Create a new object for each item
+        return {
+          recordId: item.recordId,
+          userId: userId,
+          resourceId: resourceId,
+        };
+      }
+    }).filter(Boolean) // Use filter boolean to remove null or undefined entries
+    console.log('itemssss ',items)
+
+    const data = {
+      userId: userId,
+      resourceId: resourceId,
+      items:items
+    }
+
+    postRequest({
+      extension: AccessControlRepository.RowAccessUserView.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        toast.success('Record Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Users, setAccess)
@@ -873,7 +909,7 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          
+
           //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
@@ -896,19 +932,20 @@ const Users = () => {
           setCashAccStore={setCashAccStore}
           cashAccStore={cashAccStore}
           lookupCashAcc={lookupCashAcc}
-          
+
           //Security Grp
           securityGrpGridData={securityGrpGridData}
           getSecurityGrpGridData={getSecurityGrpGridData}
           delSecurityGrp={delSecurityGrp}
           addSecurityGrp={addSecurityGrp}
-          
+
           //Row Access
           moduleStore={moduleStore}
           rowGridData={rowGridData}
           handleRowAccessSubmit={handleRowAccessSubmit}
           getRowAccessGridData={getRowAccessGridData}
           rowAccessValidation={rowAccessValidation}
+          setClassValue={setClassValue}
           rowColumns={rowColumns}
           handleCheckedRows={handleCheckedRows}
         />
