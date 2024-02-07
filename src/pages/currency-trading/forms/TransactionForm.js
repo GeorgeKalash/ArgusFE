@@ -218,7 +218,7 @@ return type && amount
       date: yup.string().required(),
       id_type: yup.number().required(),
       id_number: yup.number().required(),
-      birth_date: yup.date().required(),
+      birth_date: yup.string().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
       expiry_date: yup.string().required(),
@@ -346,10 +346,12 @@ return type && amount
     })()
   }, [])
 
-  async function getData() {
+  async function getData(id) {
+    const _recordId = recordId ?  recordId : id
+
     const { record } = await getRequest({
       extension: 'CTTRX.asmx/get2CIV',
-      parameters: `_recordId=${recordId}`
+      parameters: `_recordId=${_recordId}`
     })
 
     setInitialValues({
@@ -592,9 +594,12 @@ return type && amount
         ...values,
         recordId: response.recordId
       })
+      getData(response.recordId)
+
       setEditMode(true)
     } else {
       toast.success('Record Edited Successfully')
+
     }
   }
   async function fetchClientInfo({ clientId }) {
