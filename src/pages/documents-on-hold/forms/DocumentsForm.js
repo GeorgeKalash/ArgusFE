@@ -85,7 +85,7 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
                 parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
               })
            
-              setInitialData(...res.record)
+              setInitialData(res.record)
             
           } catch (exception) {
             setErrorMessage(error)
