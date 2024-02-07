@@ -27,6 +27,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
+import { useInvalidate } from 'src/hooks/resource'
 
 const FormContext = React.createContext(null)
 
@@ -118,6 +119,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [creditCardStore, setCreditCardStore] = useState([])
   const [getValue] = useIdType();
 
+
   async function checkTypes(value) {
     if (!value) {
       formik.setFieldValue("id_type", "");
@@ -139,6 +141,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
 
+       const invalidate = useInvalidate({
+        endpointId: 'CTTRX.asmx/pageCIV'
+      })
 
   const [initialValues, setInitialValues] = useState({
     recordId: null,
@@ -601,6 +606,7 @@ return type && amount
       toast.success('Record Edited Successfully')
 
     }
+    invalidate()
   }
   async function fetchClientInfo({ clientId }) {
     try {
