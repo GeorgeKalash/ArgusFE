@@ -66,9 +66,9 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
 
            hourRateCurrencyId: yup.string().test({
              test: function(value) {
-               const { hourRate } = this.parent;
+               const  hourRate  = this.parent.hourRate;
 
-               return (hourRate != null && hourRate !== '' ) ? (value !== undefined && value !== null && value !== '') : true;
+               return (hourRate != null && hourRate !== ''&&hourRate!==undefined ) ? (value !== undefined && value !== null && value !== '') : true;
              },
           
            }),
@@ -76,7 +76,7 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
-          
+
           const response = await postRequest({
             extension: ManufacturingRepository.Labor.set,
             record: JSON.stringify(obj)
@@ -119,7 +119,14 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
           setIsLoading(false)
         })()
       }, [])
-      
+
+      useEffect(() => {
+        console.log(formik)
+        const {canSignIn} = formik.values
+        if(canSignIn==false) {
+          formik.setValues({...formik.values, userId: ""})
+        }
+      }, [formik.values.canSignIn])
 
       return (
         <FormShell 
@@ -218,7 +225,7 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
                     type='number'
                     numberField={true}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('hourRate','')}
+                    onClear={() => {formik.setFieldValue('hourRate',''); formik.setFieldValue("hourRateCurrencyId", "");}}
                     error={formik.touched.hourRate && Boolean(formik.errors.hourRate)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -239,7 +246,7 @@ export default function LaborsForm({ labels, maxAccess, recordId}) {
               ]}
               valueField='recordId'
               displayField={['reference','name']}
-              values={!!formik.values.hourRate ? formik.values : ''}
+              values={formik.values}
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 formik && formik.setFieldValue('hourRateCurrencyId', newValue?.recordId)
