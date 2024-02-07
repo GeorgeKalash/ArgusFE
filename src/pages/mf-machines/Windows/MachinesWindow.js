@@ -5,6 +5,7 @@ import MachinesForm from '../forms/MachinesForm'
 import MachineSpecificationForm from '../forms/MachineSpecificationForm'
 import { useState } from 'react'
 
+
 const MachinesWindow = ({
   onClose,
   labels,
