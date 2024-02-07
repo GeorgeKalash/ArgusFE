@@ -707,11 +707,12 @@ const Users = () => {
 
   const handleCheckedRows = RowsData => {
     console.log('hanle checked rows ', RowsData)
-    const updatedCheckedRows = [...RowsData, ...setCheckedRows]
+
+    /*const updatedCheckedRows = [...checkedRows, RowsData];
 
     // Update the state with the new checkedRows
     setCheckedRows(updatedCheckedRows)
-    console.log('hanle checked rows ', checkedRows)
+    console.log('hanle checked rows2 ', updatedCheckedRows)*/
   }
 
   const getRowAccessGridData = classId => {

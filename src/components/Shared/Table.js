@@ -272,13 +272,13 @@ const Table = ({
   const shouldViewButtons = !viewButtons ? 'none' : ''
 
   const handleCheckboxChange = row => {
-    // setCheckedRows(prevCheckedRows => {
-    //const newCheckedRows = { ...prevCheckedRows, [row.recordId]: !prevCheckedRows[row.recordId] }
-    console.log('newCheckedRows ', row)
-    handleCheckedRows(row) // Use the updated state to prevent delays
+    setCheckedRows(prevCheckedRows => {
+      const newCheckedRows = { ...prevCheckedRows, [row.recordId]: !prevCheckedRows[row.recordId] }
+      console.log('newCheckedRows ', row)
+      handleCheckedRows(row) // Use the updated state to prevent delays
 
-    // return newCheckedRows // Return the updated state for the next render
-    //})
+      return newCheckedRows // Return the updated state for the next render
+    })
   }
 
   const handleCheckAll = () => {
