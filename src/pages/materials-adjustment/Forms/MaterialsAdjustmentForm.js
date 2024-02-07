@@ -432,7 +432,6 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
             />
           </Box>
         </Grid>
-
         <Grid container rowGap={1} xs={6} style={{ marginTop: '5px' }}>
           <CustomTextField
             name='reference'
