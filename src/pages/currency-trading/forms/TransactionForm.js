@@ -385,7 +385,7 @@ return type && amount
       purpose_of_exchange: record.headerView.poeId,
       nationality: record.clientMaster.nationalityId,
       cell_phone: record.clientMaster.cellPhone,
-      status: record.clientMaster.status
+      status: record.headerView.status
 
     })
 
@@ -413,7 +413,7 @@ return type && amount
 
   const total = formik.values.rows.reduce((acc, { lcAmount }) => {
     // Convert lcAmount to string and replace commas
-    const amountString = String(lcAmount || '').replaceAll(',', '');
+    const amountString = String(lcAmount || 0).replaceAll(',', '');
 
     // Parse the amount and add to accumulator
     return acc + parseFloat(amountString) || 0;
@@ -421,7 +421,7 @@ return type && amount
 
   const receivedTotal = formik.values.rows2.reduce((acc, { amount }) => {
     // Convert lcAmount to string and replace commas
-    const amountString = String(amount || '').replaceAll(',', '');
+    const amountString = String(amount || 0).replaceAll(',', '');
 
     // Parse the amount and add to accumulator
     return  acc + parseFloat(amountString) || 0;
@@ -657,7 +657,6 @@ return type && amount
                   displayField='value'
                   valueField='key'
                   datasetId={7}
-
                   readOnly
                 />
               </Grid>
