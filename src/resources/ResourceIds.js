@@ -4,6 +4,7 @@ export const ResourceIds = {
   GeographicRegions: 20133,
   WorkCenters: 42101,
   Cities: 20125,
+  Labor : 42103,
   Currencies: 20106,
   GroupLegalDocument: 21109,
   ProductMaster: 36103,
