@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 // ** MUI Imports
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
@@ -151,7 +151,9 @@ const Window = ({
                 )}
               </>
             ) : (
-              children
+              React.Children.map(children, child => {
+                return React.cloneElement(child, { expanded: expanded, height : height }); // Pass containerHeight as prop to children
+              })
             )}
           </Paper>
         </Box>

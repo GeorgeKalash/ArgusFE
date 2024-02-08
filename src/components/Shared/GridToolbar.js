@@ -19,8 +19,8 @@ const GridToolbar = ({ initialLoad, onAdd, openRPB, disableRPB = false, onGo, pa
   }
   function clear(){
     setSearchValue('');
-    onSearchClear()
-    
+    onSearch('')
+
   }
 
   return (
