@@ -726,7 +726,7 @@ return type && amount
                   label={labels.client}
                   form={formik}
                   readOnly={editMode || idInfoAutoFilled}
-                  secondDisplayField={false}
+
                   onChange={(event, newValue) => {
                     if (newValue) {
                       formik.setFieldValue('clientId', newValue?.recordId)
