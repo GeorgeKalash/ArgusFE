@@ -14,6 +14,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 export default function ScheduleForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -141,22 +143,75 @@ export default function ScheduleForm({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-        <ResourceComboBox
-              datasetId={DataSets.TYPE}
-              name='type'
+          <CustomTextField
+              name='commissionPct'
               label={labels[3]}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              required
-              readOnly={editMode}
+              value={formik.values.commissionPct}
               maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('type', newValue?.key)
-              }}
-              error={formik.touched.type && Boolean(formik.errors.type)}
-              helperText={formik.touched.type && formik.errors.type}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('commissionPct', '')}
+              error={formik.touched.commissionPct && Boolean(formik.errors.commissionPct)}
+              helperText={formik.touched.commissionPct && formik.errors.commissionPct}
             />
+        </Grid>
+        <Grid item xs={12}>
+        <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='plantId'
+                label={labels[4]}
+                readOnly={isPosted}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('plantId', newValue?.recordId)
+                }}
+                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+              />
+        </Grid>
+        <Grid item xs={12}>
+        <ResourceComboBox
+                endpointId={FinancialRepository.Segment.qry}
+                name='segmentRef'
+                label={labels[4]}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('segmentRef', newValue?.recordId)
+                }}
+                error={formik.touched.segmentRef && Boolean(formik.errors.segmentRef)}
+              />
+            </Grid>
+        <Grid item xs={12}>
+        <ResourceComboBox
+                endpointId={SaleRepository.SalesTeam.qry}
+                name='sptId'
+                label={labels[4]}
+                readOnly={isPosted}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('sptId', newValue?.recordId)
+                }}
+                error={formik.touched.sptId && Boolean(formik.errors.sptId)}
+              />
         </Grid>
       </Grid>
     </FormShell>

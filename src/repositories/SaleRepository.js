@@ -12,5 +12,8 @@ export const SaleRepository = {
     get: service + 'getSP',
     set: service + 'setSP',
     del: service + 'delSP'
+  },
+  SalesTeam:{
+    qry: service + 'qrySPT'
   }
 }
