@@ -2,6 +2,7 @@ import { Box } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useEffect, useState ,useContext} from 'react'
+import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
@@ -12,7 +13,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage}) => {
+const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage,setSelectedRecordIds}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
     const [isLoading, setIsLoading] = useState(false)
@@ -35,9 +36,12 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage}) => {
           initialValues:{
             rows: [
               {
+                commissionScheduleId: recordId || '',
                 seqNo: '',
                 minAmount: '',
-                maxAmount:''}]
+                maxAmount:'',
+                pct:''
+              }]
           },
         onSubmit: async obj => {
 
@@ -46,6 +50,7 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage}) => {
             
               return {
                 ...adjDetail,
+                commissionScheduleId:recordId,
                 seqNo: seqNo
             }
           })
@@ -58,7 +63,7 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage}) => {
           console.log('updated rows ',resultObject)
     
           const response = await postRequest({
-            extension: SaleRepository.CommissionScheduleBracket.set,
+            extension: SaleRepository.CommissionSchedule.set2,
             record: JSON.stringify(resultObject)
           })
     
@@ -69,7 +74,6 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage}) => {
               recordId: response.recordId // Update only the recordId field
             })
           } else toast.success('Record Edited Successfully')
-          setEditMode(true)
     
           invalidate()
         }
@@ -88,6 +92,12 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage}) => {
           name: 'maxAmount',
           mandatory: true
         },
+        {
+          field: 'numberfield',
+          header: labels[6],
+          name: 'pct',
+          mandatory: true
+        },
       ]
 
       useEffect(() => {
@@ -95,17 +105,34 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage}) => {
           try {
             if (recordId) {
               setIsLoading(true)
-    
+
               const res = await getRequest({
                 extension: SaleRepository.CommissionScheduleBracket.qry,
                 parameters: `_commissionScheduleId=${recordId}`
               })
+
+              if (res.list.length > 0) {
+                formik.setValues({ rows: res.list })
+              } else {
+                formik.setValues({
+                  rows: [
+                    {
+                      commissionScheduleId: recordId || '',
+                      seqNo: '',
+                      minAmount: '',
+                      maxAmount:'',
+                      pct:''
+                    }
+                  ]
+                })
+              }
             }
           } catch (error) {
             setErrorMessage(error)
           }
           setIsLoading(false)
         })()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [])
       
   return (
@@ -117,17 +144,19 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage}) => {
       editMode={true}
       maxAccess={maxAccess}
     >
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center',marginTop: -5}}>
         <InlineEditGrid
           gridValidation={formik}
           maxAccess={maxAccess}
           columns={columns}
           defaultRow={{
+            commissionScheduleId: recordId || '',
             seqNo: '',
             minAmount: '',
-            maxAmount:''
+            maxAmount:'',
+            pct:''
           }}
-          scrollHeight={320}
+          scrollHeight={250}
           width={500}
         />
       </Box>

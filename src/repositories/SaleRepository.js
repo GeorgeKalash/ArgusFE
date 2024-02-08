@@ -17,10 +17,10 @@ export const SaleRepository = {
     qry: service + 'qryCSC',
     get: service + 'getCSC',
     set: service + 'setCSC',
-    del: service + 'delCSC'
+    del: service + 'delCSC',
+    set2: service + 'set2CSC',
   },
   CommissionScheduleBracket: {
     qry: service + 'qryCSB',
-    set: service + 'set2CSB',
   }
 }

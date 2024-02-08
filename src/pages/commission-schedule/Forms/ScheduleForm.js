@@ -17,9 +17,8 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function ScheduleForm({ labels, maxAccess, recordId }) {
+export default function ScheduleForm({ labels, maxAccess, recordId ,editMode ,setEditMode,setSelectedRecordId}) {
   const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -56,6 +55,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId }) {
           ...obj, // Spread the existing properties
           recordId: response.recordId // Update only the recordId field
         })
+        setSelectedRecordId(response.recordId)
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
 
@@ -81,6 +81,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId }) {
       }
       setIsLoading(false)
     })()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

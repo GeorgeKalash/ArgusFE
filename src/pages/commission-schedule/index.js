@@ -57,15 +57,11 @@ const CommissionSchedule = () => {
       flex: 1
     },
     {
-      field: 'type',
+      field: 'typeName',
       headerName: _labels[2],
       flex: 1
     }
   ]
-
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
 
   const tabs = [{ label: _labels[7] }, { label: _labels[8], disabled: !editMode }]
   
@@ -129,10 +125,11 @@ const CommissionSchedule = () => {
             setSelectedRecordId(null)
           }}
           labels={_labels}
-          onSave={handleSubmit}
           maxAccess={access}
           activeTab={activeTab}
           tabs={tabs}
+          editMode={editMode}
+          setEditMode={setEditMode}
           setErrorMessage={setErrorMessage}
           setActiveTab={setActiveTab}
           recordId={selectedRecordId}

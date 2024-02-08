@@ -13,6 +13,9 @@ const CommissionScheduleWindow = ({
     tabs,
     activeTab,
     setActiveTab,
+    editMode,
+    setEditMode,
+    setSelectedRecordId
 }) => {
 
   return (
@@ -34,6 +37,9 @@ const CommissionScheduleWindow = ({
            maxAccess={maxAccess}
            setErrorMessage={setErrorMessage}
            recordId={recordId}
+           editMode={editMode}
+           setEditMode={setEditMode}
+           setSelectedRecordId={setSelectedRecordId}
           />
         </CustomTabPanel>
 
@@ -43,6 +49,7 @@ const CommissionScheduleWindow = ({
              setErrorMessage={setErrorMessage}
              maxAccess={maxAccess}
              recordId={recordId}
+             setSelectedRecordId={setSelectedRecordId}
           />
         </CustomTabPanel>
       </Window>    
