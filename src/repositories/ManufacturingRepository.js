@@ -4,6 +4,7 @@ export const ManufacturingRepository = {
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
     page: service + 'pageLBG',
+    qry: service + 'qryLBG',
     set: service + 'setLBG',
     get: service + 'getLBG',
     del: service + 'delLGB'
@@ -30,11 +31,13 @@ export const ManufacturingRepository = {
     del: service + 'delRTN'
   },
   Operation: {
-    snapshot: service + 'snapshotOPR',
-    page: service + 'pageOPR',
+    snapshot : service + "snapshotOPR",
+    qry: service + 'qryOPR',
+    page : service + "pageOPR",
     set: service + 'setOPR',
     get: service + 'getOPR',
-    del: service + 'delOPR'
+    del: service + 'delOPR',
+    qry: service + 'qryOPR',
   },
   Labor: {
     page: service + 'pageLBR',
@@ -42,6 +45,20 @@ export const ManufacturingRepository = {
     set: service + 'setLBR',
     get: service + 'getLBR',
     del: service + 'delLBR'
+  },
+  Machine: {
+    page: service + 'pageMAC',
+    qry: service + 'qryMAC',
+    set: service + 'setMAC',
+    get: service + 'getMAC',
+    del: service + 'delMAC'
+  },
+  MachineSpecification: {
+    page: service + 'pageMAS',
+    qry: service + 'qryMAS',
+    set: service + 'setMAS',
+    get: service + 'getMAS',
+    del: service + 'delMAS'
   },
   LeanProductionPlanning: {
     preview: service + 'previewLEAN'
