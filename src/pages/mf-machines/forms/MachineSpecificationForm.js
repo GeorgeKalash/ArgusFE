@@ -12,6 +12,8 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 
 export default function MachineSpecificationForm({ labels, maxAccess, recordId }) {
@@ -38,10 +40,21 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
         validateOnChange: true,
         validationSchema: yup.object({
           serialNo: yup.string().required(),
+          lifeTimeHours:yup
+          .number()
+          .min(0, 'min')
+          .max(9999, 'max'),
+          productionYear:yup
+          .number()
+          .min(0, 'min')
+          .max(9999, 'max'),
         }),
         onSubmit: async obj => {
+          if (obj.activationDate){
+           obj.activationDate = formatDateToApi(obj.activationDate);
+          }
           const machineId = obj.recordId
-
+        
           const response = await postRequest({
             extension: ManufacturingRepository.MachineSpecification.set,
             record: JSON.stringify(obj)
@@ -49,9 +62,11 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
 
           if (!machineId) {
             toast.success('Record Added Successfully')
+
             setInitialData({
               ...obj, // Spread the existing properties
               machineId: response.machineId, // Update only the recordId field
+              activationDate:formatDateFromApi(obj.activationDate),
             });
           }
           else toast.success('Record Edited Successfully')
@@ -70,6 +85,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
                 parameters: `_recordId=${recordId}`
               })
               if(res.record){
+                res.record.activationDate=formatDateFromApi(res.record.activationDate),
                 setInitialData(res.record)
               }
             }
@@ -87,6 +103,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
             height={600}
             maxAccess={maxAccess}
             editMode={editMode}
+            infoVisible={false}
         >
             <Grid container spacing={4}>
                 <Grid item xs={12}>
@@ -121,20 +138,21 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
-                    name='activationDate'
-                    label={labels.activationDate}
-                    value={formik.values.activationDate}
-                    maxAccess={maxAccess}
-                    maxLength='9'
-                    type='integer'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('activationDate', '')}
-                    error={formik.touched.activationDate && Boolean(formik.errors.activationDate)}
-
-                    // helperText={formik.touched.activationDate && formik.errors.activationDate}
-                  />
-                </Grid>
+                <CustomDatePicker
+                  name="activationDate"
+                  label={labels.activationDate}
+                  value={formik.values?.activationDate}
+                  onChange={formik.setFieldValue}
+                  onClear={() =>
+                    formik.setFieldValue("activationDate", "")
+                  }
+                  error={
+                    formik.touched.activationDate &&
+                    Boolean(formik.errors.activationDate)
+                  }
+                  maxAccess={maxAccess}
+                />
+              </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='description'
@@ -156,7 +174,8 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
                     label={labels.lifeTimeHours}
                     value={formik.values.lifeTimeHours}
                     maxAccess={maxAccess}
-                    maxLength='30'
+                    maxLength='5'
+                    type='numeric'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('lifeTimeHours', '')}
                     error={formik.touched.lifeTimeHours && Boolean(formik.errors.lifeTimeHours)}
@@ -170,7 +189,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
                     label={labels.productionYear}
                     value={formik.values.productionYear}
                     maxAccess={maxAccess}
-                    type='integer'
+                    type='numeric'
                     maxLength='4'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('productionYear', '')}

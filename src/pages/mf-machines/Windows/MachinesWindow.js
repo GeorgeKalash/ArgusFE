@@ -25,7 +25,7 @@ const MachinesWindow = ({
       controlled={true}
       onClose={onClose}
       width={600}
-      height={600}
+      height={550}
       tabs={[
         { label: labels.Machines },
         { label: labels.MachineSpecification, disabled: !editMode },
