@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 import { useState } from 'react'
-import { FormDataGrid } from 'src/components/Shared/DataGrid'
+import { FormDataGrid } from 'src/components/Shared/FormDataGrid'
 
 async function getRate() {
   return new Promise((resolve, reject) => {
@@ -13,9 +13,7 @@ async function getRate() {
 export default function Page() {
   const [rows, setRows] = useState([
     {
-      id: 2,
-      firstname: 'Hadi',
-      lastname: 'Chahine'
+      id: 1
     }
   ])
 
@@ -28,8 +26,7 @@ export default function Page() {
           setRows([
             ...rows,
             {
-              id: 1,
-              name: 'Chahine'
+              id: 2
             }
           ])
         }}
@@ -41,26 +38,32 @@ export default function Page() {
         value={rows}
         columns={[
           {
-            component: 'textfield',
-            name: 'firstname',
-            onChange({ row: { update, values } }) {
+            component: 'resourcecombobox',
+            name: 'currencyId',
+            async onChange({ row: { update, values } }) {
+              const rate = await getRate()
+              console.log(rate)
               update({
-                fullname: values.firstname
+                rate
               })
             }
           },
           {
             component: 'textfield',
-            name: 'lastname',
-            onChange({ row: { update, values } }) {
+            name: 'rate'
+          },
+          {
+            component: 'textfield',
+            name: 'fcAmount',
+            async onChange({ row: { update, values } }) {
               update({
-                fullname: values.lastname
+                lcAmount: parseFloat(values.rate) * parseFloat(values.fcAmount)
               })
             }
           },
           {
             component: 'textfield',
-            name: 'fullname'
+            name: 'lcAmount'
           }
         ]}
       />

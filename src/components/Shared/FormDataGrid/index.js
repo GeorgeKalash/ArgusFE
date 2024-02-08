@@ -2,14 +2,14 @@ import { DataGrid as MUIDataGrid } from '@mui/x-data-grid'
 import components from './components'
 
 export function FormDataGrid({ columns, value, onChange }) {
-  function processDependencies(newRow, oldRow) {
+  async function processDependencies(newRow, oldRow) {
     const changed = columns.filter(({ name }) => newRow[name] !== oldRow[name])
 
     let updatedRow = { ...newRow }
 
     for (const change of changed)
       if (change.onChange)
-        change.onChange({
+        await change.onChange({
           row: {
             values: newRow,
             update(updates) {
@@ -32,8 +32,8 @@ export function FormDataGrid({ columns, value, onChange }) {
   return (
     <>
       <MUIDataGrid
-        processRowUpdate={(newRow, oldRow) => {
-          const updated = processDependencies(newRow, oldRow)
+        processRowUpdate={async (newRow, oldRow) => {
+          const updated = await processDependencies(newRow, oldRow)
           return handleChange(updated, oldRow)
         }}
         rows={value}
