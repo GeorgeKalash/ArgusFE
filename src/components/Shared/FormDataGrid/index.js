@@ -26,6 +26,7 @@ export function FormDataGrid({ columns, value, onChange }) {
     const index = newRows.findIndex(({ id }) => id === row.id)
     newRows[index] = row
     onChange(newRows)
+
     return row
   }
 
@@ -34,6 +35,7 @@ export function FormDataGrid({ columns, value, onChange }) {
       <MUIDataGrid
         processRowUpdate={async (newRow, oldRow) => {
           const updated = await processDependencies(newRow, oldRow)
+
           return handleChange(updated, oldRow)
         }}
         rows={value}
@@ -45,11 +47,13 @@ export function FormDataGrid({ columns, value, onChange }) {
           renderCell(params) {
             const Component =
               typeof column.component === 'string' ? components[column.component].view : column.component.view
+
             return <Component {...params} column={column} />
           },
           renderEditCell(params) {
             const Component =
               typeof column.component === 'string' ? components[column.component].edit : column.component.edit
+
             return <Component {...params} column={column} />
           }
         }))}
