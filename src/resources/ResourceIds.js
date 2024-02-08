@@ -2,7 +2,7 @@ export const ResourceIds = {
   DocumentTypes: 20104,
   DocumentTypeMaps: 20201,
   GeographicRegions: 20133,
-  WorkCenters : 42101,
+  WorkCenters: 42101,
   Cities: 20125,
   Labor : 42103,
   Currencies: 20106,
@@ -10,7 +10,7 @@ export const ResourceIds = {
   ProductMaster: 36103,
   CommissionType: 35102,
   CurrencyRateExchangeMap: 35112,
-  CostCenter : 30107,
+  CostCenter: 30107,
   CostCenterGroup: 30111,
   Interface: 36108,
   Countries: 20101,
@@ -73,4 +73,6 @@ export const ResourceIds = {
   ProductionLines: 42107,
   WorkCenters: 42101,
   Operations: 42102,
+  GateKeeper: 42322,
+  MaterialsAdjustment: 41204
 }

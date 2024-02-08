@@ -26,6 +26,7 @@ import { getNewClientCorporate, populateClientCorporate } from 'src/Models/Remit
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
 import useResourceParams from 'src/hooks/useResourceParams'
+import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 const ClientsCorporateList = () => {
   const { stack } = useWindow()
@@ -460,7 +461,6 @@ return (
       >
 
 
-
 <GridToolbar onAdd={addClient} maxAccess={access}    onSearch={search} labels={_labels}  inputSearch={true}  />
 
 {gridData &&
@@ -472,8 +472,6 @@ return (
           maxAccess={access}
           onEdit={editClient}
         />}
-
-
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
 
       </Box>
