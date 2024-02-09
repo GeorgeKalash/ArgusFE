@@ -5,6 +5,5 @@ export const CTTRXrepository = {
   CurrencyTrading: {
     snapshot: service + 'snapshotCIV',
 
-  },
-  snapshot: service + 'snapshotCIV',
+  }
 }

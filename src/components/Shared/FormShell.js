@@ -5,6 +5,7 @@ import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
+import { useRouter } from 'next/router';
 
 export default function FormShell({
   form,
@@ -20,6 +21,7 @@ export default function FormShell({
   clientRelation = false,
   setErrorMessage
 }) {
+  const router = useRouter()
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
 
@@ -33,10 +35,14 @@ export default function FormShell({
 
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%' }}>{children}</DialogContent>
+      <DialogContent sx={{ flex: 1, height: '100%' , zIndex: 0 }}>{children}</DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           onSave={() => form.handleSubmit()}
+          onClear={() =>      router.push(window.location.href)
+
+         // form.resetForm()
+        }
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)

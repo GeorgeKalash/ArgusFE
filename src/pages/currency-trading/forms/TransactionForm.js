@@ -28,6 +28,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
+import { ConfirmationOnSubmit } from './ConfirmationOnSubmit'
 
 const FormContext = React.createContext(null)
 
@@ -69,9 +70,8 @@ function FormField({ name, Component, valueField, ...rest }) {
          getCountry()
         }
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
-
-
       }}
+      onClear={()=>{formik.setFieldValue(name, '')}}
       form={formik}
     />
   )
@@ -152,9 +152,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       {
         seqNo: 1,
         currencyId: '',
-        fcAmount: 0,
-        exRate: 0,
-        lcAmount: 0
+        fcAmount: '',
+        defaultExRate: 0,
+        exRate: '',
+        lcAmount: '',
+         minRate: 0,
+         maxRate: 0
       }
     ],
     rows2: [
@@ -171,7 +174,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         receiptRef: ''
       }
     ],
-    date: null,
+    date: new Date(),
     clientId: null,
     clientName: null,
     clientType: '1',
@@ -198,7 +201,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     status: editMode? null :  "1",
     type: -1,
     wip: 1,
-    functionId: '3502'
+    functionId: '3502',
+    idNoConfirm: '',
+    cellPhoneConfirm: '',
+    otp:false
   })
 
   const formik = useFormik({
@@ -208,9 +214,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     validate: values => {
       const type = values.rows2 && values.rows2.every(row => !!row.type)
       const amount = values.rows2 && values.rows2.every(row => !!row.amount)
+      const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
+      const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
+      const exRate = values.rows && values.rows.every(row => !!row.exRate)
 
 
-return type && amount
+      return type && amount && exRate && lcAmount && fcAmount
         ? {}
         : {
             rows2: Array(values.rows2 && values.rows2.length).fill({
@@ -234,7 +243,13 @@ return type && amount
     }),
     initialValues,
     onSubmit
+
   })
+
+
+
+
+
 
   const [rateType, setRateType] = useState(null)
   const [blur, setBlur] = useState(null)
@@ -289,9 +304,7 @@ return type && amount
 
 
   useEffect(() => {
-    const date = new Date()
 
-    !editMode && formik.setFieldValue('date', date)
 
     fillType()
     fillCATypeStore()
@@ -358,8 +371,10 @@ return type && amount
       extension: 'CTTRX.asmx/get2CIV',
       parameters: `_recordId=${_recordId}`
     })
-
-    setInitialValues({
+    if(id){
+      formik.setFieldValue('reference' , record.headerView.reference)
+    }else{
+    formik.setValues({
       recordId: recordId,
       reference: record.headerView.reference,
       rows: record.items,
@@ -396,7 +411,7 @@ return type && amount
 
     })
 
-    CashFormik.setValues({ rows: record.cash })
+    CashFormik.setValues({ rows: record.cash })}
   }
 
   // const [plantId, setPlantId] = useState(null)
@@ -494,6 +509,23 @@ return type && amount
   },[CashFormik.values] )
 
   async function onSubmit(values) {
+    if((!values.idNoConfirm  && values.clientId ) || (!values.confirmIdNo && !values.clientId && !values.cellPhoneConfirm )  ){
+      stack({
+      Component: ConfirmationOnSubmit,
+      props: {
+        formik: formik,
+        setErrorMessage: setErrorMessage,
+        labels: labels
+      },
+      title: labels.fetch,
+      width: 400,
+      height: 400,
+
+
+    })
+
+}else{
+
     const { record: recordFunctionId } = await getRequest({
       extension: `SY.asmx/getUFU`,
       parameters: `_userId=${userId}&_functionId=${values.functionId}`
@@ -525,10 +557,11 @@ return type && amount
         amount:  String(total || '').replaceAll(',', ''),
         notes: values.remarks
       },
-      items: values.rows.map(({ seqNo, currencyId, exRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
+      items: values.rows.map(({ seqNo, currencyId, exRate, defaultExRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
         seqNo,
         currencyId,
         exRate,
+        defaultExRate,
         rateCalcMethod,
         fcAmount: String(fcAmount || '').replaceAll(',', ''),
         lcAmount: lcAmount
@@ -544,7 +577,7 @@ return type && amount
         addressId: null,
         cellPhone: values.cell_phone,
         oldReference: null,
-        otp: null,
+        otp: false,
         createdDate: formatDateToApiFunction(values.date),
         expiryDate: null
       },
@@ -608,6 +641,7 @@ return type && amount
     }
     invalidate()
   }
+  }
   async function fetchClientInfo({ clientId }) {
     try {
       const response = await getRequest({
@@ -648,6 +682,14 @@ return type && amount
 
     return response.record
   }
+  async function fetchInfoByKey({ key }) {
+    const response = await getRequest({
+      extension: RTCLRepository.CtClientIndividual.get3,
+      parameters: `_key=${key}`
+    })
+
+    return response.record
+  }
 
   return (
     <FormShell height={400} form={formik} resourceId={35208} editMode={editMode} disabledSubmit={ Balance  && true} >
@@ -659,7 +701,27 @@ return type && amount
                 <FormField name='reference' Component={CustomTextField} readOnly />
               </Grid>
               <Grid item xs={4}>
-                <FormField name='date' Component={CustomDatePicker} required readOnly={editMode} />
+              <CustomDatePicker
+                  name="date"
+                  label={labels.date}
+                  value={formik.values?.date}
+                  required={true}
+                  onChange={formik.setFieldValue}
+                  onClear={() =>
+                    formik.setFieldValue("date", "")
+                  }
+                  readOnly={editMode}
+                  error={
+                    formik.touched.date &&
+                    Boolean(formik.errors.date)
+                  }
+                  helperText={
+                    formik.touched.date &&
+                    formik.errors.date
+                  }
+                  maxAccess={maxAccess}
+                />
+                {/* <FormField name='date' Component={CustomDatePicker}  required readOnly={editMode} /> */}
               </Grid>
               <Grid item xs={4}>
                 <FormField
@@ -714,7 +776,7 @@ return type && amount
                 />
               </Grid> */}
               <Grid item xs={4}>
-                <ResourceLookup
+                {/* <ResourceLookup
                   endpointId={CurrencyTradingClientRepository.Client.snapshot}
                   parameters={{
                     _category: 1
@@ -726,7 +788,7 @@ return type && amount
                   label={labels.client}
                   form={formik}
                   readOnly={editMode || idInfoAutoFilled}
-
+                 secondDisplayField={false}
                   onChange={(event, newValue) => {
                     if (newValue) {
                       formik.setFieldValue('clientId', newValue?.recordId)
@@ -738,7 +800,50 @@ return type && amount
                     }
                   }}
                   errorCheck={'clientId'}
-                />
+                /> */}
+
+                   <FormField
+                    name='search'
+                    Component={CustomTextField}
+                    onBlur={e => {
+                      e.target.value &&  fetchInfoByKey({ key: e.target.value })
+                        .then(info => {
+                          if (info) {
+                            formik.setFieldValue('id_number', info.clientIDView.idNo)
+                            formik.setFieldValue('firstName', info.clientIndividual.firstName)
+                            formik.setFieldValue('clientId', info.clientId)
+
+                            formik.setFieldValue('middleName', info.clientIndividual.middleName)
+                            formik.setFieldValue('lastName', info.clientIndividual.lastName)
+                            formik.setFieldValue('familyName', info.clientIndividual.familyName)
+                            formik.setFieldValue('fl_firstName', info.clientIndividual.fl_firstName)
+                            formik.setFieldValue('fl_lastName', info.clientIndividual.fl_lastName)
+                            formik.setFieldValue('fl_middleName', info.clientIndividual.fl_middleName)
+                            formik.setFieldValue('fl_familyName', info.clientIndividual.fl_familyName)
+                            formik.setFieldValue('birth_date', formatDateFromApi(info.clientIndividual.birthDate))
+                            formik.setFieldValue('resident', info.clientIndividual.isResident)
+                            formik.setFieldValue('profession', info.clientIndividual.professionId)
+                            formik.setFieldValue('sponsor', info.clientIndividual.sponsorName)
+                            formik.setFieldValue('source_of_income', info.clientIndividual.incomeSourceId)
+                            formik.setFieldValue('issue_country', info.clientIDView.idCountryId)
+                            formik.setFieldValue('id_type', info.clientIDView.idtId)
+                            formik.setFieldValue('nationality', info.clientMaster.nationalityId)
+                            formik.setFieldValue('cell_phone', info.clientMaster.cellPhone)
+                            formik.setFieldValue('expiry_date', formatDateFromApi(info.clientIDView.idExpiryDate))
+
+
+                            setIDInfoAutoFilled(true)
+                          }
+                        })
+                        .catch(error => {
+                          console.error('Error fetching ID info:', error)
+                        })
+
+                    }}
+
+                    readOnly={editMode}
+                    required
+                  />
               </Grid>
             </Grid>
           </FieldSet>
@@ -748,7 +853,7 @@ return type && amount
                 maxAccess={maxAccess}
                 gridValidation={formik}
                 scrollHeight={350}
-                width={750}
+                width={1500}
                 background={
                   formik.values.functionId && (formik.values.functionId === '3503' ? 'rgb(245, 194, 193)' : '#C7F6C7')
                 }
@@ -791,7 +896,10 @@ return type && amount
                         }
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
                         formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.exchangeRate?.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, exchange?.exchangeRate?.rate)
                         formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.exchange?.rateCalcMethod)
+                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.exchangeRate?.minRate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.exchangeRate?.maxRate)
 
                         //  row.rowData.currencyId = row.newValue
                         //                       row.rowData.exRate = exchange.exchangeRate.rate
@@ -799,7 +907,10 @@ return type && amount
                       } else {
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
                         formik.setFieldValue(`rows[${row.rowIndex}].exRate`, 0)
+                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, 0)
                         formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
+                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, 0)
+                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`,0)
 
                         return
                       }
@@ -808,6 +919,7 @@ return type && amount
                   {
                     field: 'numberfield',
                     header: 'FC Amount',
+                    mandatory:true,
                     name: 'fcAmount',
                     async onChange(e) {
                       const {
@@ -827,17 +939,74 @@ return type && amount
                       e.rowData.lcAmount = lcAmount
                     }
                   },
+
                   {
                     field: 'textfield',
+                    name: 'defaultExRate',
+                    readOnly: false,
+                    hidden:true
+                  },
+                  {
+                    field: 'numberfield',
                     header: 'Rate',
                     name: 'exRate',
-                    readOnly: true
+                    readOnly: false,
+                    mandatory:true,
+                    async onChange(e) {
+                      const {
+                        rowIndex,
+                        rowData: { minRate, maxRate , lcAmount, fcAmount },
+                        newValue
+                      } = e
+
+                    const nv =  parseFloat(newValue?.toString().replace(/,/g, ''))
+                    const lc =  parseFloat(lcAmount?.toString().replace(/,/g, ''))
+                    const fc =  parseFloat(fcAmount?.toString().replace(/,/g, ''))
+
+                    if(nv >= minRate && nv <= maxRate){
+                       formik.setFieldValue(`rows[${e.rowIndex}].exRate`, e.value)
+
+                      if(fc){
+                        formik.setFieldValue(`rows[${rowIndex}].lcAmount`,   fc*nv)
+                        }else if(lc){
+                          formik.setFieldValue(`rows[${e.rowIndex}].fcAmount` , lc/nv )
+                        }
+                      }else{
+                      formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')}
+                      }
+                  },
+
+                  {
+                    field: 'numberfield',
+                    name: 'minRate',
+                    readOnly: false,
+                    hidden:true
+                  },
+                  {
+                    field: 'numberfield',
+                    name: 'maxRate',
+                    readOnly: false,
+                    hidden:true
                   },
                   {
                     field: 'numberfield',
                     header: 'LC Amount',
                     name: 'lcAmount',
-                    readOnly: true
+                    mandatory:true,
+                    readOnly: false,
+                    async onChange(e) {
+                      const {
+                        rowIndex,
+                        rowData: { exRate },
+                        newValue
+                      } = e
+                      if(newValue && exRate){
+                        var fcAmount = String( newValue || 0).replaceAll(',', '');
+                            fcAmount = parseFloat(fcAmount) || 0;
+                            fcAmount = fcAmount/exRate;
+                            formik.setFieldValue(`rows[${rowIndex}].fcAmount`, fcAmount)
+                      }
+                    }
                   }
                 ]}
                 defaultRow={{
@@ -845,7 +1014,9 @@ return type && amount
                   currencyId: '',
                   fcAmount: 0,
                   exRate: 0,
-                  lcAmount: 0
+                  lcAmount: 0,
+                  minRate: 0,
+                  maxRate: 0
                 }}
               />
             </Grid>
@@ -883,12 +1054,34 @@ return type && amount
                   />
                 </Grid>
                 <Grid item xs={7}>
-                  <FormField
+                  {/* <FormField
                     name='birth_date'
                     Component={CustomDatePicker}
                     readOnly={editMode || infoAutoFilled}
                     required
-                  />
+                  /> */}
+
+                 <CustomDatePicker
+                  name="birth_date"
+                  label={labels.birth_date}
+                  value={formik.values?.birth_date}
+                  required={true}
+                  onChange={formik.setFieldValue}
+                  onClear={() =>
+                    formik.setFieldValue("birth_date", "")
+                  }
+                  error={
+                    formik.touched.birth_date &&
+                    Boolean(formik.errors.birth_date)
+                  }
+                  readOnly={editMode || infoAutoFilled}
+
+                  helperText={
+                    formik.touched.birth_date &&
+                    formik.errors.birth_date
+                  }
+                  maxAccess={maxAccess}
+                />
                 </Grid>
 
                 <Grid container xs={12}>
@@ -932,12 +1125,33 @@ return type && amount
                 </Grid>
 
                 <Grid item xs={7}>
-                  <FormField
+                  {/* <FormField
                     name='expiry_date'
                     Component={CustomDatePicker}
                     readOnly={editMode || idInfoAutoFilled}
                     required
-                  />
+                  /> */}
+                   <CustomDatePicker
+                  name="expiry_date"
+                  label={labels.expiry_date}
+                  value={formik.values?.expiry_date}
+                  required={true}
+                  onChange={formik.setFieldValue}
+                  onClear={() =>
+                    formik.setFieldValue("expiry_date", "")
+                  }
+                  error={
+                    formik.touched.expiry_date &&
+                    Boolean(formik.errors.expiry_date)
+                  }
+                  helperText={
+                    formik.touched.expiry_date &&
+                    formik.errors.expiry_date
+                  }
+                  readOnly={editMode || idInfoAutoFilled}
+
+                  maxAccess={maxAccess}
+                />
                 </Grid>
                 <Grid item xs={12}>
                   <FormField
@@ -975,7 +1189,7 @@ return type && amount
                 <Grid item xs={12}>
                   <FormField name='cell_phone' Component={CustomTextField} readOnly={editMode} required />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={7}>
                   <FormControlLabel
                     name='resident'
                     checked={formik.values.resident}
@@ -983,6 +1197,16 @@ return type && amount
                     control={<Checkbox defaultChecked />}
                     label='Resident'
                     readOnly={editMode || infoAutoFilled}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <FormControlLabel
+                    name='otp'
+                    checked={formik.values.otp}
+                    onChange={formik.handleChange}
+                    control={<Checkbox defaultChecked />}
+                    label='Otp'
+                    disabled={true}
                   />
                 </Grid>
               </Grid>
@@ -1093,7 +1317,7 @@ return type && amount
                   maxAccess={maxAccess}
                   gridValidation={CashFormik}
                   scrollHeight={350}
-                  width={750}
+                  width={850}
                   columns={[
                     {
                       field: 'incremented',
@@ -1165,6 +1389,7 @@ return type && amount
                   }}
 
                 />
+
               </Grid>
 
               <Grid container xs={3} spacing={2} sx={{ p: 4 }}>

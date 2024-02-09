@@ -1,11 +1,7 @@
 import { Box } from '@mui/material'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useWindow } from 'src/windows'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import Table from 'src/components/Shared/Table'
-import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import useResourceParams from 'src/hooks/useResourceParams'
@@ -13,10 +9,14 @@ import useResourceParams from 'src/hooks/useResourceParams'
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
 
-  const { stack } = useWindow()
 
  //error
  const [errorMessage, setErrorMessage] = useState(null)
+ const [plantId, setPlantId] = useState(null)
+
+ const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
+  datasetId: 35208
+})
 
  const getPlantId = async () => {
   const userData = window.sessionStorage.getItem('userData')
@@ -43,46 +43,28 @@ export default function CurrencyTrading() {
      return '';
   }
 };
- async function openFormWindow(recordId) {
-    if(!recordId){
+ async function openForm() {
     try {
       const plantId = await getPlantId();
       if (plantId !== '') {
-        openForm('' , plantId)
+        setPlantId(plantId)
       } else {
         setErrorMessage({ error: 'The user does not have a default plant' });
       }
     } catch (error) {
       console.error(error);
-    }}else{
-      openForm(recordId)
     }
 
   }
-function openForm(recordId,plantId ){
-  stack({
-    Component: TransactionForm,
-    props: {
-      labels,
-      maxAccess: access,
-      plantId: plantId,
-      recordId
-    },
-    width: 1200,
-    height:600,
-    title: 'Cash Invoice'
-  })
-}
 
 
-
-  const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
-    datasetId: 35208
-  })
+  useEffect(()=>{
+    openForm()
+   },[accessADJ])
 
   return (
-    <Box sx={{background: 'white'}}>
-    <TransactionForm labels={_labelsADJ} access={accessADJ} />
+    <Box sx={{height: `calc(100vh - 48px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
+   {plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} access={accessADJ}  plantId={plantId} />}
     </Box>
   )
 }

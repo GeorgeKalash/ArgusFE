@@ -46,10 +46,8 @@ const GridToolbar = ({ initialLoad, onAdd, openRPB, disableRPB = false, onGo, pa
             <CustomTextField
               name='search'
               value={searchValue}
-
-              // label={labels.search}
+             label={labels.search}
               onClear={clear}
-
               onChange={(e)=>setSearchValue(e.target.value)}
               onSearch={onSearch}
               search={true}
