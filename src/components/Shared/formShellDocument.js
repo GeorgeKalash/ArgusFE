@@ -7,7 +7,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import WindowToolbarDocuments from './windowToolBarDocuments'
 
-export default function FormShellDocument({ onClose, form, children, height, editMode, disabledSubmit , infoVisible=true ,resourceId, maxAccess , clientRelation=false , setErrorMessage }) {
+export default function FormShellDocument({ onApprove, onReject, form, children, height, editMode, disabledSubmit , infoVisible=true ,resourceId, maxAccess , clientRelation=false , setErrorMessage }) {
 
   const { stack } = useWindow()
 
@@ -19,12 +19,12 @@ export default function FormShellDocument({ onClose, form, children, height, edi
     ? false
     : true
 
+
   return (
 <>
 
       <DialogContent sx={{ flex: 1, height: '100%' }}>{children}</DialogContent>
-      {windowToolbarVisible && <WindowToolbarDocuments onSave={() => form.handleSubmit()} 
-      onReject={onClose}
+      {windowToolbarVisible && <WindowToolbarDocuments onSave={onApprove} onReject={onReject}
       onClientRelation={() => stack({
           Component: ClientRelationForm,
           props: {

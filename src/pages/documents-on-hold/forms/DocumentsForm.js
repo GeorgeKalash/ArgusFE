@@ -15,11 +15,16 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import FormShellDocument from 'src/components/Shared/formShellDocument'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+
 
 
 
 export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recordId, onClose }) {
     const [isLoading, setIsLoading] = useState(false)
+
+    const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false);
+    const [responseValue, setResponseValue] = useState(null);
 
 
     const [initialValues, setInitialData] = useState({
@@ -53,27 +58,31 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
           reference: yup.string().required('This field is required')
         }),
         onSubmit: async obj => {
-          console.log(obj)
           
           const functionId = initialValues.functionId
           const seqNo = initialValues.seqNo
           const recordId = initialValues.recordId
-
-          const response = await postRequest({
-            extension: DocumentReleaseRepository.DocumentsOnHold.set,
-            record: JSON.stringify(obj)
-          })
-          
-          if (!functionId&&!seqNo&&!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
-            });
+          obj.response = responseValue
+          try {
+            const response = await postRequest({
+              extension: DocumentReleaseRepository.DocumentsOnHold.set,
+              record: JSON.stringify(obj),
+            })
+            
+            if (!functionId&&!seqNo&&!recordId && responseValue !== null) {
+              toast.success('Record Added Successfully')
+              setInitialData({
+                ...obj, // Spread the existing properties
+                recordId: response.recordId, // Update only the recordId field
+                response: responseValue,
+              });
+            }
+            else toast.success('Record Edited Successfully')
+  
+            invalidate()
+          } catch (error) {
+            toast("Something went wrong");
           }
-          else toast.success('Record Edited Successfully')
-
-          invalidate()
         }
       })
     
@@ -97,12 +106,26 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
       }, [])
       
     return (
+      <>
+        <ConfirmationDialog
+          DialogText={`Are you sure you want to ${responseValue === 2 ? "approve" : "reject"} this document`}
+          cancelButtonAction={() => setConfirmationWindowOpen(false)}
+          openCondition={confirmationWindowOpen}
+          okButtonAction={() => {formik.submitForm();setConfirmationWindowOpen(false)}}
+        />
         <FormShellDocument
             resourceId={ResourceIds.DocumentsOnHold}
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
-            onClose={onClose}
+            onReject={() => {
+              setConfirmationWindowOpen(true)
+              setResponseValue(-1)
+            }}
+            onApprove={() => {
+              setConfirmationWindowOpen(true)
+              setResponseValue(2)
+            }}
         >
             <Grid container spacing={4}>
                 <Grid item xs={12}>
@@ -150,5 +173,6 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
 
             </Grid>
         </FormShellDocument>
+      </>
   )
 }

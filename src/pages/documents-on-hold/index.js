@@ -39,7 +39,7 @@ const DocumentsOnHold = () => {
 
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 100 } = options
     console.log('request')
     
 
@@ -66,7 +66,7 @@ const DocumentsOnHold = () => {
 
   function onSearchClear() {
     setSearchValue('')
-  
+    setGridData({count : 0, list: [] , message :"",  statusId:1})
   }
 
   const columns = [
@@ -100,14 +100,6 @@ const DocumentsOnHold = () => {
     setWindowOpen(true)
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: DocumentReleaseRepository.DocumentsOnHold.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
-  }
 
   const search = inp => {
     setSearchValue(inp)    
@@ -147,7 +139,7 @@ const DocumentsOnHold = () => {
           gridData={searchValue.length > 0 ? gridData : data}
           rowId={['functionId',"seqNo","recordId"]}
           onEdit={edit}
-          onDelete={del}
+
           isLoading={false}
           pageSize={50}
           paginationType='client'
