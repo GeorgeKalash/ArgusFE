@@ -204,6 +204,22 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
             error={formik.touched.sptId && Boolean(formik.errors.sptId)}
           />
         </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={SaleRepository.CommissionSchedule.qry}
+            name='commissionScheduleId'
+            label={labels[11]}
+            columnsInDropDown={[{ key: 'name', value: 'Name' }]}
+            values={formik.values}
+            valueField='recordId'
+            displayField='name'
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('commissionScheduleId', newValue?.recordId)
+            }}
+            error={formik.touched.commissionScheduleId && Boolean(formik.errors.commissionScheduleId)}
+          />
+        </Grid>
       </Grid>
     </FormShell>
   )
