@@ -2,10 +2,12 @@ import { Button } from '@mui/material'
 import { useState } from 'react'
 import { FormDataGrid } from 'src/components/Shared/FormDataGrid'
 
-async function getRate() {
+async function getRate({ currencyId }) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve(14.2)
+      if (currencyId === 2) resolve(14.2)
+      else if (currencyId == 162) resolve(2)
+      else reject()
     }, 1000)
   })
 }
@@ -41,7 +43,7 @@ export default function Page() {
             component: 'resourcecombobox',
             name: 'currencyId',
             async onChange({ row: { update, values } }) {
-              const rate = await getRate()
+              const rate = await getRate({ currencyId: values.currencyId })
               console.log(rate)
               update({
                 rate
@@ -50,7 +52,8 @@ export default function Page() {
           },
           {
             component: 'textfield',
-            name: 'rate'
+            name: 'rate',
+            editable: false
           },
           {
             component: 'textfield',
@@ -63,7 +66,8 @@ export default function Page() {
           },
           {
             component: 'textfield',
-            name: 'lcAmount'
+            name: 'lcAmount',
+            editable: false
           }
         ]}
       />

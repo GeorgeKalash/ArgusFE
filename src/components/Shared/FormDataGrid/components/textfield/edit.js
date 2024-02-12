@@ -9,6 +9,7 @@ export default function TextFieldEdit({ id, field, value }) {
       value={value}
       label={field}
       readOnly={false}
+      autoFocus
       onChange={e => {
         api.current.setEditCellValue({
           id,

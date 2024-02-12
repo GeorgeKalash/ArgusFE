@@ -16,6 +16,7 @@ export default function ResourceComboBoxEdit({ id, field, value, readOnly }) {
       values={{
         [field]: value
       }}
+      autoFocus
       label={field}
       readOnly={readOnly}
       onChange={(e, v) => {
