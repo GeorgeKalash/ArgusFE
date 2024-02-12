@@ -36,6 +36,7 @@ export function FormDataGrid({ columns, value, onChange }) {
   const handleCellKeyDown = (params, event) => {
     if (event.key === 'Enter') {
       event.stopPropagation()
+
       return
     }
 
@@ -99,6 +100,16 @@ export function FormDataGrid({ columns, value, onChange }) {
     apiRef.current.setCellFocus(id, field)
   }
 
+  function addRow() {
+    console.log(value)
+    onChange([
+      ...value,
+      {
+        id: 2
+      }
+    ])
+  }
+
   const actionsColumn = {
     field: 'actions',
     editable: false,
@@ -106,7 +117,7 @@ export function FormDataGrid({ columns, value, onChange }) {
     renderCell() {
       return (
         <>
-          <Button>Add</Button>
+          <Button onClick={addRow}>Add</Button>
           <Button>Delete</Button>
         </>
       )
@@ -130,6 +141,7 @@ export function FormDataGrid({ columns, value, onChange }) {
             field: column.name,
             editable: column.editable ?? true,
             width: column.width || 200,
+            sortable: false,
             renderCell(params) {
               const Component =
                 typeof column.component === 'string' ? components[column.component].view : column.component.view

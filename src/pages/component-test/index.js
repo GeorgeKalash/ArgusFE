@@ -23,18 +23,6 @@ export default function Page() {
 
   return (
     <>
-      <Button
-        onClick={() => {
-          setRows([
-            ...rows,
-            {
-              id: 2
-            }
-          ])
-        }}
-      >
-        Change
-      </Button>
       <FormDataGrid
         onChange={setRows}
         value={rows}
