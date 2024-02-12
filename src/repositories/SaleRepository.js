@@ -13,7 +13,11 @@ export const SaleRepository = {
     set: service + 'setSP',
     del: service + 'delSP'
   },
-  SalesTeam:{
+  SalesTeam: {
     qry: service + 'qrySPT'
+  },
+  Target: {
+    qry: service + 'qryTGT',
+    set2: service + 'set2TGT'
   }
 }

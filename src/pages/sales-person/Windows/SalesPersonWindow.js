@@ -4,6 +4,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GeneralForm from 'src/pages/sales-person/Forms/GeneralForm'
 import TargetForm from 'src/pages/sales-person/Forms/TargetForm'
 
+
 const SalesPersonWindow = ({
     onClose,
     labels,
@@ -11,6 +12,9 @@ const SalesPersonWindow = ({
     recordId,
     setErrorMessage,
     tabs,
+    editMode,
+    setEditMode,
+    setSelectedRecordId,
     activeTab,
     setActiveTab,
 }) => {
@@ -20,16 +24,18 @@ const SalesPersonWindow = ({
       <Window
           id='SalesPerson'
           Title={labels[1]}
-          controlled={true}
           onClose={onClose}
-          width={600}
-          height={450}
+          width={700}
+          height={600}
           tabs={tabs}
+          controlled={true}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
       >
         <CustomTabPanel index={0} value={activeTab}>
           <GeneralForm
+           editMode={editMode}
+           setEditMode={setEditMode}
            labels={labels}
            maxAccess={maxAccess}
            setErrorMessage={setErrorMessage}

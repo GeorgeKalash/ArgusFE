@@ -74,5 +74,6 @@ export const ResourceIds = {
   Operations: 42102,
   GateKeeper: 42322,
   MaterialsAdjustment: 41204,
-  SalesPerson: 51201
+  SalesPerson: 51201,
+  SalesTarget: 51209
 }

@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Box  } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
 import toast from 'react-hot-toast'
@@ -14,7 +14,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { getNewSalesPerson, populateSalesPerson} from 'src/Models/Sales/SalesPerson'
+import { getNewSalesPerson, populateSalesPerson } from 'src/Models/Sales/SalesPerson'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CommonContext } from 'src/providers/CommonContext'
 
@@ -76,7 +76,6 @@ const SalesPerson = () => {
       headerName: _labels[6],
       flex: 1
     }
-    
   ]
 
   const tabs = [{ label: _labels[8] }, { label: _labels[9], disabled: !editMode }]
@@ -86,15 +85,13 @@ const SalesPerson = () => {
 
     return await getRequest({
       extension: SaleRepository.SalesPerson.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
   }
-
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.SalesPerson.qry
   })
-
 
   const add = () => {
     setWindowOpen(true)
@@ -141,10 +138,11 @@ const SalesPerson = () => {
             setSelectedRecordId(null)
           }}
           labels={_labels}
-          onSave={handleSubmit}
           maxAccess={access}
           activeTab={activeTab}
           tabs={tabs}
+          editMode={editMode}
+          setEditMode={setEditMode}
           setErrorMessage={setErrorMessage}
           setActiveTab={setActiveTab}
           recordId={selectedRecordId}
