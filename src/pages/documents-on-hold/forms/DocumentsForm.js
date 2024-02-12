@@ -16,8 +16,11 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import FormShellDocument from 'src/components/Shared/formShellDocument'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
-
-
+import {
+  formatDateToApi,
+  formatDateToApiFunction,
+  formatDateFromApi,formatDateDefault
+} from "src/lib/date-helper";
 
 
 export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recordId, onClose }) {
@@ -75,6 +78,7 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
                 ...obj, // Spread the existing properties
                 recordId: response.recordId, // Update only the recordId field
                 response: responseValue,
+                date:formatDateDefault(obj.date)
               });
             }
             else toast.success('Record Edited Successfully')
@@ -85,7 +89,9 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
           }
         }
       })
-    
+
+
+
       useEffect(() => {
         ;(async function () {
           try {
@@ -96,8 +102,10 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
                 parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
               })
            
-              setInitialData(res.record)
-            
+              setInitialData({
+                ...res.record,
+                date: formatDateDefault(res.record.date) 
+              });
           } catch (exception) {
             setErrorMessage(error)
           }

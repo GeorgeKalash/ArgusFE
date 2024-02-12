@@ -24,6 +24,8 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
+import { formatDateDefault } from 'src/lib/date-helper';
+
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
@@ -86,7 +88,9 @@ const DocumentsOnHold = () => {
       },  {
         field: 'date',
         headerName: _labels.date,
-        flex: 1
+        flex: 1,
+        valueGetter: ({ row }) => formatDateDefault(row?.date)
+
       }
 
   ]
