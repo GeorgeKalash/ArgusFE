@@ -29,7 +29,7 @@ export const ConfirmationOnSubmit = ({formik ,labels}) => {
      if(!formik.values.clientId && !values.idNoRepeat){
       errors.idNoRepeat = 'Id number Confirm is required'
      }else if(!formik.values.clientId && values.idNo.toString() != values.idNoRepeat.toString()){
-       errors.idNoRepeat = 'id number Phone must match'
+       errors.idNoRepeat = 'Id Number  must match'
      }
 
 return errors

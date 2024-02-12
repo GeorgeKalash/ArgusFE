@@ -11,6 +11,7 @@ export default function FormShell({
   children,
   height,
   editMode,
+  setEditMode,
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
@@ -34,10 +35,12 @@ export default function FormShell({
 
     function handleReset(){
       console.log(initialValues)
-       form.setValues(initialValues)
+      initialValues &&  form.setValues(initialValues)
        if(form1){
         form1.setValues(initialValues1)
        }
+
+     setEditMode(false)
     }
 
   return (
@@ -46,7 +49,7 @@ export default function FormShell({
       {windowToolbarVisible && (
         <WindowToolbar
           onSave={() => form.handleSubmit()}
-          onClear={() => handleReset()
+          onClear={() => initialValues ?  handleReset() : false
         }
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit

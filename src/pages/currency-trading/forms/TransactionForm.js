@@ -44,7 +44,7 @@ export async function Country(getRequest) {
 
 }
 
-function FormField({ name, Component, valueField, ...rest }) {
+function FormField({ name, Component, valueField, onFocus, ...rest }) {
   const { formik, labels } = useContext(FormContext)
   const { getRequest } = useContext(RequestsContext)
 
@@ -70,6 +70,12 @@ function FormField({ name, Component, valueField, ...rest }) {
          getCountry()
         }
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
+      }}
+      onFocus={(e) => {
+        console.log(e)
+        if (onFocus && name=="id_number") {
+          onFocus(e.target.value);
+        }
       }}
       onClear={()=>{formik.setFieldValue(name, '')}}
       form={formik}
@@ -119,7 +125,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [creditCardStore, setCreditCardStore] = useState([])
   const [getValue] = useIdType();
   const [rateType, setRateType] = useState(null)
-  const [blur, setBlur] = useState(null)
+  const [idNumber, setIdNumber] = useState(null)
 
   async function checkTypes(value) {
     if (!value) {
@@ -199,7 +205,7 @@ const initial = {
   purpose_of_exchange: null,
   nationality: null,
   cell_phone: null,
-  status: editMode? null :  "1",
+  status:  "1",
   type: -1,
   wip: 1,
   functionId: '3502',
@@ -801,7 +807,7 @@ return;
   }
 
   return (
-    <FormShell height={400} form={formik} initialValues={initial} initialValues1={initial1} form1={CashFormik} resourceId={35208} editMode={editMode} disabledSubmit={ Balance  && true} >
+    <FormShell height={400} form={formik} initialValues={initial} initialValues1={initial1} form1={CashFormik} setEditMode={setEditMode} resourceId={35208} editMode={editMode} disabledSubmit={ Balance  && true} >
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
           <FieldSet title='Transaction'>
@@ -992,18 +998,34 @@ return;
                       { key: 'name', value: 'Name' }
                     ],
                     async onChange(row) {
-                      if (row.newValue > 0) {
+
+console.log(row)
+
+                      if (row?.newValue > 0) {
                         const exchange = await fetchRate({
                           currencyId: row.newValue
                         })
 
-                        if (!exchange?.exchangeRate?.rate) {
+                        if (!exchange?.exchangeRate?.rate)
                           stackError({
                             message: `Rate not defined for ${row.value}.`
                           })
 
-                          // return
-                        }
+                          if(exchange){
+                            const exRate = exchange.exchangeRate.rate
+                            const  rateCalcMethod = exchange.exchange.rateCalcMethod
+
+                            const lcAmount =
+                            rateCalcMethod === 1
+                              ? parseFloat(row.newRowData.fcAmount.toString().replace(/,/g, '')) * exRate
+                              : rateCalcMethod === 2
+                              ? parseFloat(row.newRowData.fcAmount.toString().replace(/,/g, '')) / exRate
+                              : 0
+                             formik.setFieldValue(`rows[${row.rowIndex}].lcAmount`, lcAmount)}
+
+
+
+
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
                         formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.exchangeRate?.rate)
                         formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, exchange?.exchangeRate?.rate)
@@ -1024,6 +1046,24 @@ return;
 
                         return
                       }
+
+
+
+//                       if(row.newValue !== formik.values.rows[row.rowIndex].currencyId && formik.values.rows[row.rowIndex].fcAmount){
+
+//                         const exRate = formik.values?.rows[row.rowIndex]?.exRate
+//                         const  rateCalcMethod = formik.values?.rows[row?.rowIndex]?.rateCalcMethod
+
+//                         const lcAmount =
+//                         rateCalcMethod === 1
+//                           ? parseFloat(newValue.toString().replace(/,/g, '')) * exRate
+//                           : rateCalcMethod === 2
+//                           ? parseFloat(newValue.toString().replace(/,/g, '')) / exRate
+//                           : 0
+//                       formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
+
+// return
+//                       }
                     }
                   },
                   {
@@ -1139,6 +1179,9 @@ return;
                     name='id_number'
                     Component={CustomTextField}
                     onBlur={e => {
+                      console.log(e.target.value )
+                      console.log(idNumber)
+                      if( e.target.value != idNumber){
                       checkTypes(e.target.value)
 
                       fetchIDInfo({ idNumber: e.target.value })
@@ -1155,8 +1198,12 @@ return;
                         })
                         .catch(error => {
                           console.error('Error fetching ID info:', error)
-                        })
+                        })}
 
+                    }}
+                    onFocus={(value) => {
+                      setIdNumber(value)
+                      console.log('Field value on focus:', value);
                     }}
 
                     readOnly={editMode}
