@@ -75,8 +75,8 @@ export function FormDataGrid({ columns, value, onChange }) {
         field: visibleColumns[nextCell.columnIndex].field
       })
 
-    if (nextCell.columnIndex === visibleColumns.length - 2) {
-      addRowAt(nextCell.rowIndex + 1)
+    if (nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
+      addRow()
     }
 
     if (
@@ -128,18 +128,15 @@ export function FormDataGrid({ columns, value, onChange }) {
     })
   }
 
-  function addRowAt(addId) {
+  function addRow() {
     const highestIndex = value.reduce((max, current) => (max.id > current.id ? max : current))?.id + 1
 
-    const indexOfId = value.findIndex(({ id }) => id === addId)
-
-    const newRows = [...value]
-
-    newRows.splice(indexOfId + 1, 0, {
-      id: highestIndex
-    })
-
-    onChange(newRows)
+    onChange([
+      ...value,
+      {
+        id: highestIndex
+      }
+    ])
   }
 
   function deleteRow(deleteId) {
@@ -164,6 +161,7 @@ export function FormDataGrid({ columns, value, onChange }) {
   return (
     <>
       <MUIDataGrid
+        hideFooter
         processRowUpdate={async (newRow, oldRow) => {
           setUpdate(true)
           const updated = await processDependencies(newRow, oldRow)
