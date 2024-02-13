@@ -54,7 +54,6 @@ const Users = () => {
   const [cashAccStore, setCashAccStore] = useState([])
   const [salesPersonStore, setSalesPersonStore] = useState([])
   const [moduleStore, setModuleStore] = useState([])
-  const [checkedRows, setCheckedRows] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -223,7 +222,6 @@ const Users = () => {
     })
       .then(res => {
         setGridData(res)
-        console.log('res response ', res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -346,7 +344,7 @@ const Users = () => {
         setNotificationGrpStore(res.list)
       })
       .catch(error => {
-        setErrorMessage(error.response.data)
+        setErrorMessage(error)
       })
   }
 
@@ -708,34 +706,31 @@ const Users = () => {
   }
 
   const handleCheckedRows = rowData => {
-    console.log('rowData ', rowData);
-  
-    if (Array.isArray(rowData) && rowData.length > 0) {
-      const allChecked = rowData.every(item => item && item.checked === true);
-  
-      if (!allChecked) {
-        console.log('not All items checked');
-  
-        // Reset the whole data to add them again without duplicates
-        setCheckedRows([]);
-      } else if(allChecked ) {
-        console.log('all items checked');
-        setCheckedRows(rowData);
+    let allChecked=false;
+    let allUnChecked =false; 
+
+    if(rowData.length>1){
+       allChecked = rowData.every(item => item && item.checked === true)
+       allUnChecked = rowData.every(item => item && item.checked === false)
+    }
+
+      if (allUnChecked && (rowData.length == 0 || rowData.length == rowGridData.list.length)) {
+        rowGridData.list = rowGridData.list.map(item => {
+          return { ...item, checked: false }
+        })
+      } else if (allChecked) {
+        rowGridData.list = rowGridData.list.map(item => {
+          return { ...item, checked: true }
+        })
       }
-      else{
-        setCheckedRows(prevCheckedRows => [...prevCheckedRows, rowData]);
-      }
-    } 
-  };
-  
+    console.log('rowGridData ',rowGridData)
+  }
+
   const getRowAccessGridData = classId => {
     setRowGridData([])
-    console.log('rowAccessUser class ', classId)
 
     classId = classId || 20110
     const userId = currentRecord
-
-    console.log('rowAccessUser userId ', userId)
 
     const plantRequestPromise = getRequest({
       extension: SystemRepository.Plant.qry,
@@ -806,10 +801,7 @@ const Users = () => {
           })
         }
 
-         const checkedList = rowAccessUser.list.map(obj => ({ ...obj, checked: true }));
-
-        // Now, checkedList contains the same objects with checked property set to true
-        setCheckedRows(checkedList);
+        const checkedList = rowAccessUser.list.map(obj => ({ ...obj, checked: true }))
 
         if (classId !== 'undefined') {
           for (let i = 0; i < rar.length; i++) {
@@ -838,29 +830,32 @@ const Users = () => {
   }
 
   const postRowAccess = () => {
-    const userId=usersValidation.values.recordId
-    const resourceId=classValue
+    const userId = usersValidation.values.recordId
+    const resourceId = classValue
 
-    const items = checkedRows.map((item) => {
-      // Check if the 'checked' property is true
-      if (item.checked) {
-        // Create a new object for each item
-        return {
-          recordId: item.recordId,
-          userId: userId,
-          resourceId: resourceId,
-        };
-      }
-    }).filter(Boolean) // Use filter boolean to remove null or undefined entries
-    console.log('itemssss ',items)
+    const items = rowGridData.list
+      .map(item => {
+        // Check if the 'checked' property is true
+        if (item.checked) {
+          // Create a new object for each item
+          return {
+            recordId: item.recordId,
+            userId: userId,
+            resourceId: resourceId
+          }
+        }
+      })
+      .filter(Boolean) // Use filter boolean to remove null or undefined entries
+
+      console.log('itemss ',items)
 
     const data = {
       userId: userId,
       resourceId: resourceId,
-      items:items
+      items: items
     }
 
-   /* postRequest({
+    /* postRequest({
       extension: AccessControlRepository.RowAccessUserView.set2,
       record: JSON.stringify(data)
     })

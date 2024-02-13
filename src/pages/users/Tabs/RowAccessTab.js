@@ -26,6 +26,7 @@ const RowAccessTab = ({
         rowAccessValidation.setFieldValue('classId', 20110)
       }, 0)
     })()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleStore, rowAccessValidation.values?.classId])
 
   return (
