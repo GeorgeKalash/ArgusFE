@@ -45,10 +45,10 @@ const Defaults = () => {
 
 
   useEffect(() => {
-    if (!access) getAccess(ResourceIds.SystemDefaults, setAccess)
+    if (!access) getAccess(ResourceIds.CtDefaults, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        getLabels(ResourceIds.SystemDefaults, setLabels)
+        getLabels(ResourceIds.CtDefaults, setLabels)
 
         getDataResult()
 
