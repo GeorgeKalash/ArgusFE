@@ -1,6 +1,6 @@
-import { Button } from '@mui/material'
 import { useState } from 'react'
 import { FormDataGrid } from 'src/components/Shared/FormDataGrid'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 async function getRate({ currencyId }) {
   return new Promise((resolve, reject) => {
@@ -29,10 +29,16 @@ export default function Page() {
         columns={[
           {
             component: 'resourcecombobox',
-            name: 'currencyId',
+            name: 'currency',
+            props: {
+              endpointId: SystemRepository.Currency.page,
+              parameters: `_startAt=0&_pageSize=10000&filter=`,
+              valueFiel: 'recordId',
+              displayField: 'reference'
+            },
             async onChange({ row: { update, values } }) {
-              const rate = await getRate({ currencyId: values.currencyId })
-              console.log(rate)
+              const rate = await getRate({ currencyId: values.currency.recordId })
+
               update({
                 rate
               })
@@ -41,7 +47,9 @@ export default function Page() {
           {
             component: 'textfield',
             name: 'rate',
-            editable: false
+            props: {
+              readOnly: true
+            }
           },
           {
             component: 'textfield',
@@ -55,7 +63,9 @@ export default function Page() {
           {
             component: 'textfield',
             name: 'lcAmount',
-            editable: false
+            props: {
+              readOnly: true
+            }
           }
         ]}
       />

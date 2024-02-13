@@ -1,6 +1,7 @@
 import { DataGrid as MUIDataGrid, gridExpandedSortedRowIdsSelector, useGridApiRef } from '@mui/x-data-grid'
 import components from './components'
 import { Button } from '@mui/material'
+import { useEffect, useState } from 'react'
 
 export function FormDataGrid({ columns, value, onChange }) {
   async function processDependencies(newRow, oldRow) {
@@ -33,6 +34,18 @@ export function FormDataGrid({ columns, value, onChange }) {
 
   const apiRef = useGridApiRef()
 
+  const [updating, setUpdate] = useState(false)
+
+  const [nextEdit, setNextEdit] = useState(null)
+
+  useEffect(() => {
+    if (!updating && nextEdit) {
+      const { id, field } = nextEdit
+      apiRef.current.startCellEditMode({ id, field })
+      setNextEdit(null)
+    }
+  }, [updating, nextEdit])
+
   const handleCellKeyDown = (params, event) => {
     if (event.key === 'Enter') {
       event.stopPropagation()
@@ -62,6 +75,10 @@ export function FormDataGrid({ columns, value, onChange }) {
         field: visibleColumns[nextCell.columnIndex].field
       })
 
+    if (nextCell.columnIndex === visibleColumns.length - 2) {
+      addRowAt(nextCell.rowIndex + 1)
+    }
+
     if (
       nextCell.columnIndex === visibleColumns.length - 1 &&
       nextCell.rowIndex === rowIds.length - 1 &&
@@ -77,48 +94,68 @@ export function FormDataGrid({ columns, value, onChange }) {
     event.preventDefault()
     event.defaultMuiPrevented = true
 
-    if (!event.shiftKey) {
-      if (nextCell.columnIndex < visibleColumns.length - 1) {
-        nextCell.columnIndex += 1
+    process.nextTick(() => {
+      const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
+      const visibleColumns = apiRef.current.getVisibleColumns()
+
+      if (!event.shiftKey) {
+        if (nextCell.columnIndex < visibleColumns.length - 2) {
+          nextCell.columnIndex += 1
+        } else {
+          nextCell.rowIndex += 1
+          nextCell.columnIndex = 0
+        }
+      } else if (nextCell.columnIndex > 0) {
+        nextCell.columnIndex -= 1
       } else {
-        nextCell.rowIndex += 1
-        nextCell.columnIndex = 0
+        nextCell.rowIndex -= 1
+        nextCell.columnIndex = visibleColumns.length - 1
       }
-    } else if (nextCell.columnIndex > 0) {
-      nextCell.columnIndex -= 1
-    } else {
-      nextCell.rowIndex -= 1
-      nextCell.columnIndex = visibleColumns.length - 1
-    }
 
-    const field = visibleColumns[nextCell.columnIndex].field
-    const id = rowIds[nextCell.rowIndex]
+      const field = visibleColumns[nextCell.columnIndex].field
+      const id = rowIds[nextCell.rowIndex]
 
-    if (apiRef.current.getColumn(field).editable) apiRef.current.startCellEditMode({ id, field })
-    else apiRef.current.scrollToIndexes({ colIndex: nextCell.columnIndex, rowIndex: nextCell.columnIndex })
+      apiRef.current.scrollToIndexes({ colIndex: nextCell.columnIndex, rowIndex: nextCell.columnIndex })
 
-    apiRef.current.setCellFocus(id, field)
+      if (apiRef.current.getColumn(field).editable) {
+        setNextEdit({
+          id,
+          field
+        })
+      }
+
+      apiRef.current.setCellFocus(id, field)
+    })
   }
 
-  function addRow() {
-    console.log(value)
-    onChange([
-      ...value,
-      {
-        id: 2
-      }
-    ])
+  function addRowAt(addId) {
+    const highestIndex = value.reduce((max, current) => (max.id > current.id ? max : current))?.id + 1
+
+    const indexOfId = value.findIndex(({ id }) => id === addId)
+
+    const newRows = [...value]
+
+    newRows.splice(indexOfId + 1, 0, {
+      id: highestIndex
+    })
+
+    onChange(newRows)
+  }
+
+  function deleteRow(deleteId) {
+    const newRows = value.filter(({ id }) => id !== deleteId)
+
+    onChange(newRows)
   }
 
   const actionsColumn = {
     field: 'actions',
     editable: false,
     width: '400',
-    renderCell() {
+    renderCell({ id }) {
       return (
         <>
-          <Button onClick={addRow}>Add</Button>
-          <Button>Delete</Button>
+          <Button onClick={() => deleteRow(id)}>Delete</Button>
         </>
       )
     }
@@ -128,9 +165,14 @@ export function FormDataGrid({ columns, value, onChange }) {
     <>
       <MUIDataGrid
         processRowUpdate={async (newRow, oldRow) => {
+          setUpdate(true)
           const updated = await processDependencies(newRow, oldRow)
 
-          return handleChange(updated, oldRow)
+          const change = handleChange(updated, oldRow)
+
+          setUpdate(false)
+
+          return change
         }}
         onCellKeyDown={handleCellKeyDown}
         rows={value}
