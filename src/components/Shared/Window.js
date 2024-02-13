@@ -147,8 +147,10 @@ const Window = ({
                     onSave={onSave}
                     onClear={onClear}
                     onInfo={onInfo}
+                    onApply={onApply}
                     disabledSubmit={disabledSubmit}
                     disabledInfo={disabledInfo}
+                    disabledApply={disabledApply}
                   />
                 )}
               </>
