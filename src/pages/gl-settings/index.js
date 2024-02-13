@@ -78,50 +78,91 @@ const GLSettings = () => {
         initialValues,
         enableReinitialize: true,
         validateOnChange: true,
-        initialValues,
+       
         validationSchema: yup.object({
             GLACSegments: yup.number().nullable(),
-            GLACSeg0: yup.string().when('GLACSegments', {
-                is: (val) => val >= 1,
-                then: yup.string().required('GLACSeg0 is required'),
+            GLACSeg0: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments >= 1 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSeg0 is required',
             }),
-            GLACSegName0: yup.string().when('GLACSegments', {
-                is: (val) => val >= 1,
-                then: yup.string().required('GLACSegName0 is required'),
+            GLACSegName0: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments >= 1 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSegName0 is required',
             }),
-            GLACSeg1: yup.string().when('GLACSegments', {
-                is: (val) => val >= 2,
-                then: yup.string().required('GLACSeg1 is required'),
+            GLACSeg1: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments >= 2 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSeg1 is required',
             }),
-            GLACSegName1: yup.string().when('GLACSegments', {
-                is: (val) => val >= 2,
-                then: yup.string().required('GLACSegName1 is required'),
+            GLACSegName1: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments >= 2 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSegName1 is required',
             }),
-            GLACSeg2: yup.string().when('GLACSegments', {
-                is: (val) => val >= 3,
-                then: yup.string().required('GLACSeg2 is required'),
+            GLACSeg2: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments >= 3 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSeg2 is required',
             }),
-            GLACSegName2: yup.string().when('GLACSegments', {
-                is: (val) => val >= 3,
-                then: yup.string().required('GLACSegName2 is required'),
-            }), GLACSeg3: yup.string().when('GLACSegments', {
-                is: (val) => val >= 4,
-                then: yup.string().required('GLACSeg3 is required'),
+            GLACSegName2: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments >= 3 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSegName2 is required',
             }),
-            GLACSegName3: yup.string().when('GLACSegments', {
-                is: (val) => val >= 4,
-                then: yup.string().required('GLACSegName3 is required'),
-            }), GLACSeg4: yup.string().when('GLACSegments', {
-                is: (val) => val = 5,
-                then: yup.string().required('GLACSeg4 is required'),
+            GLACSeg3: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+                    
+                    return GLACSegments >= 4 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSeg3 is required',
             }),
-            GLACSegName4: yup.string().when('GLACSegments', {
-                is: (val) => val = 5,
-                then: yup.string().required('GLACSegName4 is required'),
-            })
-            
-   
+            GLACSegName3: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments >= 4 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSegName3 is required',
+            }),
+            GLACSeg4: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments == 5 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSeg4 is required',
+            }),
+            GLACSegName4: yup.string().test({
+                test: function(value) {
+                    const GLACSegments = this.parent.GLACSegments;
+
+                    return GLACSegments == 5 ? value != null && value.trim() !== '' : true;
+                },
+                message: 'GLACSegName4 is required',
+            }),
         }),
+        
         onSubmit: values => {
             postGLSettings(values);
         },
@@ -170,13 +211,10 @@ const GLSettings = () => {
                     name='GLACSegments'
                     label={_labels.segments}
                     value={formik.values.GLACSegments}
-                    
+                    onChange={formik.handleChange}
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSegments', newValue?.recordId)
-                    }}onClear={() => {formik.setFieldValue('GLACSegments','')}}
-                    
+                    onClear={() => formik.setFieldValue('GLACSegments', '')}
                     error={formik.touched.GLACSegments && Boolean(formik.errors.GLACSegments)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -187,13 +225,10 @@ const GLSettings = () => {
                     name='GLACSeg0'
                     label={_labels.segment0}
                     value={formik.values.GLACSeg0}
-                    
+                    onClear={() => formik.setFieldValue('GLACSeg0', '')}
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSeg0', newValue?.recordId)
-                    }}                    onClear={() => {formik.setFieldValue('GLACSeg0','')}}
-                    
+                    onChange={formik.handleChange}
                     error={formik.touched.GLACSeg0 && Boolean(formik.errors.GLACSeg0)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -204,14 +239,11 @@ const GLSettings = () => {
                     name='GLACSeg1'
                     label={_labels.segment1}
                     value={formik.values.GLACSeg1}
-                    
+                    onClear={() => formik.setFieldValue('GLACSeg1', '')}
+
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSeg1', newValue?.recordId)
-                    }}                    
-                    onClear={() => {formik.setFieldValue('GLACSeg1','')}}
-                    
+                    onChange={formik.handleChange}
                     error={formik.touched.GLACSeg1 && Boolean(formik.errors.GLACSeg1)}
 
                     // helperText={formik.touched.GLACSeg0 && formik.errors.GLACSeg0}
@@ -222,12 +254,11 @@ const GLSettings = () => {
                     name='GLACSeg2'
                     label={_labels.segment2}
                     value={formik.values.GLACSeg2}
-                    
+                    onClear={() => formik.setFieldValue('GLACSeg2', '')}
+
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSeg2', newValue?.recordId)
-                    }}                    onClear={() => {formik.setFieldValue('GLACSeg2','')}}
+                    onChange={formik.handleChange}
                     
                     error={formik.touched.GLACSeg2 && Boolean(formik.errors.GLACSeg2)}
 
@@ -239,13 +270,11 @@ const GLSettings = () => {
                     name='GLACSeg3'
                     label={_labels.segment3}
                     value={formik.values.GLACSeg3}
-                    
+                    onClear={() => formik.setFieldValue('GLACSeg3', '')}
+
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSeg3', newValue?.recordId)
-                    }}onClear={() => {formik.setFieldValue('GLACSeg3','')}}
-                    
+                    onChange={formik.handleChange}
                     error={formik.touched.GLACSeg3 && Boolean(formik.errors.GLACSeg3)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -256,17 +285,14 @@ const GLSettings = () => {
                     name='GLACSeg4'
                     label={_labels.segment4}
                     value={formik.values.GLACSeg4}
-                    
+                    onClear={() => formik.setFieldValue('GLACSeg4', '')}
+
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSeg4', newValue?.recordId)
-                    }}
-                    onClear={() => formik.setFieldValue('GLACSeg4', '')}
-                    
-                    error={formik.touched.hourRate && Boolean(formik.errors.hourRate)}
+                    onChange={formik.handleChange}
+                    error={formik.touched.GLACSeg4 && Boolean(formik.errors.GLACSeg4)}
 
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
+                    // helperText={formik.touched.GLACSeg4 && formik.errors.GLACSeg4}
                   />
                     </Grid>  
                    
@@ -275,14 +301,11 @@ const GLSettings = () => {
                     name='GLACSegName0'
                     label={"GLACSegName1"}
                     value={formik.values.GLACSegName0}
-                    
+                    onClear={() => formik.setFieldValue('GLACSegName0', '')}
+
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSegName0', newValue?.recordId)
-                    }}
-                    onClear={() => formik.setFieldValue('GLACSegName0', '')}
-                    
+                    onChange={formik.handleChange}
                     error={formik.touched.GLACSegName0 && Boolean(formik.errors.GLACSegName0)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -293,14 +316,10 @@ const GLSettings = () => {
                     name='GLACSegName1'
                     label={"GLACSegName2"}
                     value={formik.values.GLACSegName1}
-                    
+                    onClear={() => formik.setFieldValue('GLACSegName1', '')}
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSegName1', newValue?.recordId)
-                    }}
-                    onClear={() => formik.setFieldValue('GLACSegName1', '')}
-                    
+                    onChange={formik.handleChange}
                     error={formik.touched.GLACSegName1 && Boolean(formik.errors.GLACSegName1)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -311,14 +330,10 @@ const GLSettings = () => {
                     name='GLACSegName2'
                     label={"GLACSegName3"}
                     value={formik.values.GLACSegName2}
-                    
+                    onClear={() => formik.setFieldValue('GLACSegName2', '')}
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSegName2', newValue?.recordId)
-                    }}
-                    onClear={() => formik.setFieldValue('GLACSegName2', '')}
-                    
+                    onChange={formik.handleChange}
                     error={formik.touched.GLACSegName2 && Boolean(formik.errors.GLACSegName2)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -329,14 +344,10 @@ const GLSettings = () => {
                     name='GLACSegName3'
                     label={"GLACSegName4"}
                     value={formik.values.GLACSegName3}
-                    
+                    onClear={() => formik.setFieldValue('GLACSegName3', '')}
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSegName3', newValue?.recordId)
-                    }}
-                    onClear={() => formik.setFieldValue('GLACSegName3', '')}
-                    
+                    onChange={formik.handleChange}
                     error={formik.touched.hourRate && Boolean(formik.errors.hourRate)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
@@ -347,13 +358,11 @@ const GLSettings = () => {
                     name='GLACSegName4'
                     label={'GLACSegName5'}
                     value={formik.values.GLACSegName4}
-                    
+                    onClear={() => formik.setFieldValue('GLACSegName4', '')}
                     type='number'
                     numberField={true}
-                    onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('GLACSegName4', newValue?.recordId)
-                    }}
-                    onClear={() => formik.setFieldValue('GLACSegName4', '')}
+                    onChange={formik.handleChange}
+                    
                     
                     error={formik.touched.hourRate && Boolean(formik.errors.hourRate)}
 
