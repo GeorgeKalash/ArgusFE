@@ -167,7 +167,7 @@ const DocumentTypeMaps = () => {
       extension: RemittanceSettingsRepository.RtDefault.set2,
       record:   JSON.stringify({  sysDefaults  : data })
     })
-    .then(res => {
+    .then(res => { console.log(res)
         if (res) toast.success('Record Successfully')
     })
       .catch(error => {
