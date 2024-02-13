@@ -2,15 +2,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import WorkCentersForm from '../forms/WorkCentersForm'
 
-const WorkCentersWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId,
-
-
-}) => {
-  
+const WorkCentersWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
     <Window
       id='WorkCentersWindow'
@@ -18,16 +10,10 @@ const WorkCentersWindow = ({
       controlled={true}
       onClose={onClose}
       width={600}
-      height={450}
+      height={600}
     >
       <CustomTabPanel>
-        <WorkCentersForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-          
-        />
-       
+        <WorkCentersForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
       </CustomTabPanel>
     </Window>
   )

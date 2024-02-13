@@ -73,7 +73,7 @@ function FormField({ name, Component, valueField, onFocus, ...rest }) {
       }}
       onFocus={(e) => {
         console.log(e)
-        if (onFocus && name=="id_number") {
+        if (onFocus && (name=="id_number" || name=="search")) {
           onFocus(e.target.value);
         }
       }}
@@ -126,6 +126,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [getValue] = useIdType();
   const [rateType, setRateType] = useState(null)
   const [idNumber, setIdNumber] = useState(null)
+  const [search, setSearch] = useState(null)
 
   async function checkTypes(value) {
     if (!value) {
@@ -211,7 +212,9 @@ const initial = {
   functionId: '3502',
   idNoConfirm: '',
   cellPhoneConfirm: '',
-  otp:false
+  otp:false,
+  search: ''
+
 }
 
 const initial1 = {
@@ -290,7 +293,8 @@ const initial1 = {
     functionId: '3502',
     idNoConfirm: '',
     cellPhoneConfirm: '',
-    otp:false
+    otp:false,
+    search: ''
   })
 
   const formik = useFormik({
@@ -482,7 +486,7 @@ const initial1 = {
     const amountString = String(lcAmount || 0).replaceAll(',', '');
 
     // Parse the amount and add to accumulator
-    return acc + parseFloat(amountString) || 0;
+    return   acc + parseFloat(amountString) || 0;
   }, 0);
 
   const receivedTotal = formik.values.rows2.reduce((acc, { amount }) => {
@@ -916,12 +920,11 @@ return;
                   }}
                   errorCheck={'clientId'}
                 /> */}
-
                    <FormField
                     name='search'
                     Component={CustomTextField}
                     onBlur={e => {
-                      e.target.value &&  fetchInfoByKey({ key: e.target.value })
+                      e.target.value  && (search !== e.target.value || !search ) && fetchInfoByKey({ key: e.target.value })
                         .then(info => {
                           if (info) {
                             setIDInfoAutoFilled(false)
@@ -944,7 +947,7 @@ return;
                             formik.setFieldValue('issue_country', info.clientIDView.idCountryId)
                             formik.setFieldValue('id_type', info.clientIDView.idtId)
                             formik.setFieldValue('nationality', info.clientMaster.nationalityId)
-                            formik.setFieldValue('cell_phone', info.clientMaster.cellPhone)
+                            formik.setFieldValue('cell_phone', parseInt(info.clientMaster.cellPhone))
                             formik.setFieldValue('expiry_date', formatDateFromApi(info.clientIDView.idExpiryDate))
 
 
@@ -958,6 +961,9 @@ return;
                     }}
 
                     readOnly={editMode}
+                    onFocus={(value) => {
+                      setSearch(value)
+                    }}
                     required
                   />
               </Grid>
@@ -1203,10 +1209,9 @@ console.log(row)
                     }}
                     onFocus={(value) => {
                       setIdNumber(value)
-                      console.log('Field value on focus:', value);
                     }}
 
-                    readOnly={editMode}
+                    readOnly={editMode || infoAutoFilled || idInfoAutoFilled}
                     required
                   />
                 </Grid>
@@ -1231,7 +1236,7 @@ console.log(row)
                     formik.touched.birth_date &&
                     Boolean(formik.errors.birth_date)
                   }
-                  readOnly={editMode || infoAutoFilled}
+                  readOnly={editMode || infoAutoFilled || idInfoAutoFilled}
 
                   helperText={
                     formik.touched.birth_date &&
@@ -1338,13 +1343,15 @@ console.log(row)
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    readOnly={editMode}
+                    readOnly={editMode || idInfoAutoFilled}
+
+
                     required
                   />
                 </Grid>
 
                 <Grid item xs={12}>
-                  <FormField name='cell_phone' Component={CustomTextField} readOnly={editMode} required />
+                  <FormField name='cell_phone' Component={CustomTextField} required readOnly={editMode || idInfoAutoFilled}/>
                 </Grid>
                 <Grid item xs={7}>
                   <FormControlLabel
@@ -1441,7 +1448,8 @@ console.log(row)
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode || infoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled}
+
                     />
                   </Grid>
 
@@ -1457,7 +1465,7 @@ console.log(row)
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode || infoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled}
                     />
                   </Grid>
 
