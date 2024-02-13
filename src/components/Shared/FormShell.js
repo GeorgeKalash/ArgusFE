@@ -31,9 +31,10 @@ export default function FormShell({
     ? false
     : true
 
+
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%' }}>{children}</DialogContent>
+      <DialogContent sx={{ flex: 1, height: height?? '100%' }}>{children}</DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           onSave={() => form.handleSubmit()}

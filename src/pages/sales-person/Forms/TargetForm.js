@@ -14,7 +14,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function TargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
-  console.log('enter target')
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [isLoading, setIsLoading] = useState(false)
@@ -27,6 +26,7 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
+      recordId: recordId,
       rows: [
         {
           spId: recordId,
@@ -49,10 +49,6 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
-        })
       } else toast.success('Record Edited Successfully')
 
       invalidate()
@@ -75,7 +71,7 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
   ]
 
   useEffect(() => {
-    console.log('enter target2')
+    console.log('enter target2 ',recordId)
     ;(async function () {
       try {
         if (recordId) {
@@ -102,7 +98,7 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
               }
             })
 
-            formik.setValues({ rows: newRows })
+            formik.setValues({recordId: recordId , rows: newRows })
           }
         }
       } catch (error) {
