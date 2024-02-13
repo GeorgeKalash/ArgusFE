@@ -1,10 +1,11 @@
-import { DialogContent } from '@mui/material'
+import { DialogContent, Box } from '@mui/material'
 import { useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
+import PreviewReport from './PreviewReport'
 
 export default function FormShell({
   form,
@@ -18,9 +19,12 @@ export default function FormShell({
   maxAccess,
   isPosted = false,
   clientRelation = false,
-  setErrorMessage
+  setErrorMessage,
+  print
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
+  const [pdfURL, setPdfUrl] = useState(null)
+  const [isPrinted, setisPrinted] = useState(false)
   const { stack } = useWindow()
 
   const windowToolbarVisible = editMode
@@ -36,6 +40,7 @@ export default function FormShell({
       <DialogContent sx={{ flex: 1, height: '100%' }}>{children}</DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
+          print={print}
           onSave={() => form.handleSubmit()}
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
@@ -69,12 +74,27 @@ export default function FormShell({
               title: 'Client Relation'
             })
           }
+          onPreview={() =>
+            stack({
+              Component: PreviewReport,
+              props: {
+                pdfURL: pdfURL
+              },
+              width: 1000,
+              height: 500,
+              title: 'Preview Report'
+            })
+          }
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
           isPosted={isPosted}
           clientRelation={clientRelation}
+          resourceId={resourceId}
+          recordId={form.values.recordId}
+          setPdfUrl={setPdfUrl}
+          pdfURL={pdfURL}
         />
       )}
       {windowInfo && (
