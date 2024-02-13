@@ -3,6 +3,7 @@ import { DialogActions, Button } from '@mui/material'
 
 const WindowToolbar = ({
   onSave,
+  onCalculate,
   onPost,
   onClear,
   onInfo,
@@ -41,6 +42,11 @@ const WindowToolbar = ({
       {onSave && (
         <Button onClick={onSave} variant='contained' sx={{ mt: smallBox && 0 }} disabled={disabledSubmit || isPosted}>
           Submit
+        </Button>
+      )}
+      {onCalculate && (
+        <Button onClick={onCalculate} variant='contained' sx={{ mt: smallBox && 0 }} disabled={disabledSubmit}>
+          Calculate
         </Button>
       )}
     </DialogActions>
