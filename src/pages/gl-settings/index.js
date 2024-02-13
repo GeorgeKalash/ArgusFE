@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box } from '@mui/material'
+import { Grid, Box, TextField } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -25,6 +25,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
 
 const GLSettings = () => {
     const [errorMessage, setErrorMessage] = useState(null)
@@ -32,17 +33,17 @@ const GLSettings = () => {
 
     const [initialValues, setInitialValues] = useState({
         
-        GLACSegments:null,
-        GLACSeg0:null,
-        GLACSeg1:null,
-        GLACSeg2:null,
-        GLACSeg3:null,
-        GLACSeg4:null,
-        GLACSegName0:null,
-        GLACSegName1:null,
-        GLACSegName2:null,
-        GLACSegName3:null,
-        GLACSegName4:null
+        GLACSegments: null,
+        GLACSeg0: null,
+        GLACSeg1: null,
+        GLACSeg2: null,
+        GLACSeg3: null,
+        GLACSeg4: null,
+        GLACSegName0: null,
+        GLACSegName1: null,
+        GLACSegName2: null,
+        GLACSegName3: null,
+        GLACSegName4: null
       })
 
     useEffect(() => {
@@ -58,7 +59,7 @@ const GLSettings = () => {
         })
         .then(res => {
            res.list.map(obj => (
-           myObject[obj.key] = obj.value? parseInt(obj.value): null
+            myObject[obj.key] = obj.value ? parseInt(obj.value): null
             )); 
             setInitialValues(myObject)
         })
@@ -81,11 +82,11 @@ const GLSettings = () => {
        
         validationSchema: yup.object({
             GLACSegments: yup.number().nullable(),
-            GLACSeg0: yup.string().test({
+            GLACSeg0: yup.number().test({
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 1 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 1 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSeg0 is required',
             }),
@@ -93,15 +94,15 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 1 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 1 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSegName0 is required',
             }),
-            GLACSeg1: yup.string().test({
+            GLACSeg1: yup.number().test({
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 2 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 2 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSeg1 is required',
             }),
@@ -109,15 +110,15 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 2 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 2 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSegName1 is required',
             }),
-            GLACSeg2: yup.string().test({
+            GLACSeg2: yup.number().test({
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 3 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 3 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSeg2 is required',
             }),
@@ -125,15 +126,15 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 3 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 3 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSegName2 is required',
             }),
-            GLACSeg3: yup.string().test({
+            GLACSeg3: yup.number().test({
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
                     
-                    return GLACSegments >= 4 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 4 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSeg3 is required',
             }),
@@ -141,15 +142,15 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 4 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 4 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSegName3 is required',
             }),
-            GLACSeg4: yup.string().test({
+            GLACSeg4: yup.number().test({
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments == 5 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 5 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSeg4 is required',
             }),
@@ -157,7 +158,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments == 5 ? value != null && value.trim() !== '' : true;
+                    return GLACSegments >= 5 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSegName4 is required',
             }),
@@ -165,7 +166,9 @@ const GLSettings = () => {
         
         onSubmit: values => {
             postGLSettings(values);
+            
         },
+
     });
 
     const postGLSettings = obj => {
@@ -180,7 +183,7 @@ const GLSettings = () => {
         })
         postRequest({
             extension: SystemRepository.GLSettings.set,
-            record:   JSON.stringify({  sysDefaults  : data }),
+            record:   JSON.stringify({  sysGLSettings  : data }),
         })
 
         .then(res => {
@@ -195,32 +198,108 @@ const GLSettings = () => {
         formik.handleSubmit()
       }
 
+      const segNumb = [
+        "GLACSeg0",
+        "GLACSeg1",
+        "GLACSeg2",
+        "GLACSeg3",
+        "GLACSeg4",
+      ];
+
+      const segName = [
+        "GLACSegName0",
+        "GLACSegName1",
+        "GLACSegName2",
+        "GLACSegName3",
+        "GLACSegName4",
+      ]
+
       return(
         <>
-            <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-                marginTop: '10px'
-            }}
-            >
-                <Grid container spacing={5} sx={{pl:'10px'}} lg={4} md={7} sm={7} xs={12} >
+        <FormShell
+        resourceId={ResourceIds.GLSettings}
+        maxAccess={access}
+        form={formik}
+        >
+         
+                <Grid container spacing={2} >
                     <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSegments'
-                    label={_labels.segments}
-                    value={formik.values.GLACSegments}
-                    onChange={formik.handleChange}
-                    type='number'
-                    numberField={true}
-                    onClear={() => formik.setFieldValue('GLACSegments', '')}
-                    error={formik.touched.GLACSegments && Boolean(formik.errors.GLACSegments)}
+                        <CustomTextField
+                            name='GLACSegments'
+                            label={_labels.segments}
+                            value={formik.values.GLACSegments}
+                            onChange={formik.handleChange}
+                            type='number'
+                            numberField={true}
+                            onClear={() => formik.setFieldValue('GLACSegments', '')}
+                            error={formik.touched.GLACSegments && Boolean(formik.errors.GLACSegments)}
 
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                </Grid>
-                    <Grid item xs={12}>
+                            // helperText={formik.touched.hourRate && formik.errors.hourRate}
+                        />
+                    </Grid>
+                    
+                        <Grid item xs={12} lg={6}>
+                            {segNumb.map((name, idx) => <Grid key={name} item xs={12} sx={{marginTop:'7px'}}>
+                                <CustomTextField
+                                    name={name}
+                                    label={_labels["segment" + idx]}
+                                    value={formik.values[name]}
+                                    onClear={() => formik.setFieldValue(name, '')}
+                                    type='number'
+                                    
+                                    numberField={true}
+                                    onChange={formik.handleChange}
+                                    error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
+
+                                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
+                                />
+                            </Grid>)}
+                        </Grid>
+                        <Grid item xs={12} lg={6}>
+                            {segName.map((name, idx) => <Grid key={name} item xs={12} sx={{marginTop:'7px'}}>
+                                <CustomTextField
+                                    name={name}
+                                    label={"GLACSegName" + (idx + 1)}
+                                    value={formik.values[name]}
+                                    onClear={() => formik.setFieldValue(name, '')}
+                                    maxLength='20'
+                                    numberField={true}
+                                    onChange={formik.handleChange}
+                                    error={formik.values.GLACSegments > idx  && Boolean(formik.errors[name])}
+
+                                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
+                                />
+                            </Grid>)}
+                        </Grid>
+                    </Grid>
+                   
+                    <Grid sx={{
+                        position: 'fixed',
+                        bottom: 0,
+                        left: 0,
+                        width: '100%',
+                        padding: 3,
+                        textAlign: 'center',
+                    }}>
+                        <WindowToolbar onSave={handleSubmit}  />
+                    </Grid>
+                    
+                
+                <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+            </FormShell>
+        </>
+    )
+  }
+
+  export default GLSettings
+
+
+
+
+/**
+ * 
+ * 
+ *  <Grid item xs={12}>
                     <CustomTextField
                     name='GLACSeg0'
                     label={_labels.segment0}
@@ -260,7 +339,7 @@ const GLSettings = () => {
                     numberField={true}
                     onChange={formik.handleChange}
                     
-                    error={formik.touched.GLACSeg2 && Boolean(formik.errors.GLACSeg2)}
+                    error={formik.values.GLACSegments >= 3 && Boolean(formik.errors.GLACSeg2)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
                   />
@@ -275,7 +354,7 @@ const GLSettings = () => {
                     type='number'
                     numberField={true}
                     onChange={formik.handleChange}
-                    error={formik.touched.GLACSeg3 && Boolean(formik.errors.GLACSeg3)}
+                    error={formik.values.GLACSegments >= 4 && Boolean(formik.errors.GLACSeg3)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
                   />
@@ -348,8 +427,8 @@ const GLSettings = () => {
                     type='number'
                     numberField={true}
                     onChange={formik.handleChange}
-                    error={formik.touched.hourRate && Boolean(formik.errors.hourRate)}
-
+                    error={formik.touched.GLACSegName3 && Boolean(formik.errors.GLACSegName3)}
+                    
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
                   />
                     </Grid> 
@@ -362,31 +441,10 @@ const GLSettings = () => {
                     type='number'
                     numberField={true}
                     onChange={formik.handleChange}
-                    
-                    
-                    error={formik.touched.hourRate && Boolean(formik.errors.hourRate)}
+                    error={formik.touched.GLACSegName4 && Boolean(formik.errors.GLACSegName4)}
 
                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
                   />
                     </Grid> 
-                    <Grid sx={{
-                        position: 'fixed',
-                        bottom: 0,
-                        left: 0,
-                        width: '100%',
-                        padding: 3,
-                        textAlign: 'center',
-                    }}>
-                        <WindowToolbar onSave={handleSubmit}  />
-                    </Grid>
-                    
-                </Grid>
-                
-                <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-
-            </Box>
-        </>
-    )
-  }
-
-  export default GLSettings
+ * 
+ */
