@@ -6,11 +6,13 @@ import axios from 'axios'
 import jwt from 'jwt-decode'
 
 import { AuthContext } from 'src/providers/AuthContext'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
-  const { user, setUser } = useContext(AuthContext)
+  const { user, setUser, apiUrl } = useContext(AuthContext)
+  const [error, setError] = useState(null);
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -20,13 +22,28 @@ const RequestsProvider = ({ children }) => {
 
     return axios({
       method: 'GET',
-      url: process.env.NEXT_PUBLIC_BASE_URL + body.extension + '?' + body.parameters,
+      url: apiUrl + body.extension + '?' + body.parameters,
       headers: {
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'multipart/form-data',
         LanguageId: user.languageId
       }
-    }).then(res => res.data)
+    }).then(res => res.data).catch(error => {
+      setError(error); // Set the error state
+      throw error;
+    })
+  }
+
+  const getMicroRequest = async body => {
+    const accessToken = await getAccessToken()
+
+    return axios({
+      method: 'GET',
+      url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
+    }).then(res => res.data).catch(error => {
+      setError(error); // Set the error state
+      throw error;
+    })
   }
 
   const getIdentityRequest = async body => {
@@ -34,18 +51,22 @@ const RequestsProvider = ({ children }) => {
 
     return axios({
       method: 'GET',
-      url: process.env.NEXT_PUBLIC_AuthURL  + body.extension + '?' + body.parameters,
+      url: process.env.NEXT_PUBLIC_AuthURL + body.extension + '?' + body.parameters,
       headers: {
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'multipart/form-data',
         LanguageId: user.languageId
       }
-    }).then(res => res.data)
+    }).then(res => res.data).catch(error => {
+
+      setError(error); // Set the error state
+      throw error;
+    })
   }
 
   const postRequest = async body => {
     const accessToken = await getAccessToken()
-    const url = body.url ? body.url : process.env.NEXT_PUBLIC_BASE_URL
+    const url = body.url ? body.url : apiUrl
 
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
@@ -59,7 +80,10 @@ const RequestsProvider = ({ children }) => {
         LanguageId: user.languageId
       },
       data: bodyFormData
-    }).then(res => res.data)
+    }).then(res => res.data).catch(error => {
+      setError(error); // Set the error state
+      throw error;
+    })
   }
 
   const getAccessToken = async () => {
@@ -151,10 +175,15 @@ const RequestsProvider = ({ children }) => {
   const values = {
     getRequest,
     postRequest,
-    getIdentityRequest
+    getIdentityRequest,
+    getMicroRequest
   }
 
-  return <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
+  return <RequestsContext.Provider value={values}>{children}
+  {error && (
+    <ErrorWindow open={true} onClose={()=>setError(false)}message={error} />
+  )}
+</RequestsContext.Provider>
 }
 
 export { RequestsContext, RequestsProvider }

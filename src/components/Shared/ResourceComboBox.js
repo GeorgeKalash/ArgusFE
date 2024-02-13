@@ -8,7 +8,7 @@ export default function ResourceComboBox({
   endpointId,
   datasetId,
   name,
-  valueField,
+  valueField = 'recordId',
   values,
   parameters = '_filter=',
   filter = () => true,
@@ -44,12 +44,12 @@ export default function ResourceComboBox({
 
   const filteredStore = store.filter(filter)
 
-  const value = filteredStore.find(item => item[valueField] === values[name]) ?? ''
+  const value = (datasetId ? filteredStore.find(item => item[valueField] === values[name]?.toString()) :  filteredStore.find(item => item[valueField] === values[name])) ?? ''
 
   return (
     <>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      <CustomComboBox {...{ name, store: filteredStore, valueField, value, ...rest }} />
+      <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value }} />
     </>
   )
 }

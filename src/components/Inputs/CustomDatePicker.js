@@ -8,6 +8,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const CustomDatePicker = ({
   name,
@@ -28,14 +29,13 @@ const CustomDatePicker = ({
   editMode = false,
   ...props
 }) => {
-  const dateFormat = window.localStorage.getItem('default') && window.localStorage.getItem('default')['formatDate']
+  const dateFormat = window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
 
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
-  console.log(value +'value')
 
 
    // Function to check if a date should be disabled
@@ -59,8 +59,8 @@ const CustomDatePicker = ({
 
   };
 
-  return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+return (
+    <LocalizationProvider dateAdapter={AdapterDateFns} >
       <DatePicker
         variant={variant}
         size={size}
@@ -69,7 +69,6 @@ const CustomDatePicker = ({
         fullWidth={fullWidth}
         autoFocus={autoFocus}
         format={dateFormat}
-
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
@@ -88,20 +87,18 @@ const CustomDatePicker = ({
             helperText: helperText,
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
-                <>
+                <InputAdornment position='end'>
                   {value && (
-                    <InputAdornment>
-                      <IconButton onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
+                      <IconButton tabIndex={-1}  edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
                         <ClearIcon />
                       </IconButton>
-                    </InputAdornment>
+
                   )}
-                  <InputAdornment>
-                    <IconButton onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
+                    <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
                       <EventIcon />
                     </IconButton>
                   </InputAdornment>
-                </>
+
               )
             }
           }

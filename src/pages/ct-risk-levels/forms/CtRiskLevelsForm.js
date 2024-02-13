@@ -108,7 +108,7 @@ export default function CtRiskLevelsForm({ labels, maxAccess, recordId }) {
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <CustomTextArea
+                    <CustomTextField
                     name='name'
                     label={labels.name}
                     value={formik.values.name}

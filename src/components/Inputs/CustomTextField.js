@@ -32,9 +32,6 @@ const CustomTextField = ({
   const inputRef = useRef(null)
   const [focus, setFocus] = useState(false);
 
-  // useEffect(() => {
-  //   setForceRerender((prev) => prev + 1);
-  // }, [value]); // Include value in dependencies
 
   useEffect(() => {
     if(inputRef.current.selectionStart !== undefined && focus  ){
@@ -44,7 +41,6 @@ const CustomTextField = ({
 
 
   useEffect(() => {
-    // Save the cursor position before the value changes
     if (typeof inputRef.current.selectionStart !== undefined && position && value) {
       inputRef.current.setSelectionRange(position, position)
     }
@@ -54,11 +50,13 @@ const CustomTextField = ({
   const handleInput = (e) => {
     const inputValue = e.target.value;
     if (type=== 'number' && props && e.target.value && inputValue.length > maxLength) {
-      // Truncate the input value if it exceeds the maxLength
       const truncatedValue = inputValue.slice(0, maxLength);
       e.target.value = truncatedValue;
-
-      // You can also choose to update the state or trigger a callback here
+      props?.onChange(e);
+    }
+    if (phone) {
+      const truncatedValue = inputValue.slice(0, maxLength);
+      e.target.value = truncatedValue?.replace(/\D/g, '');
       props?.onChange(e);
     }
   };
@@ -69,12 +67,11 @@ const CustomTextField = ({
     <div style={{ display: hidden ? 'none' : 'block' }}>
 
       <TextField
-
         key={value}
         inputRef={inputRef}
         type={type}
         variant={variant}
-        defaultValue={phone ? value?.replace(/\D/g, '') : value}
+        defaultValue={value}
         size={size}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
@@ -91,7 +88,6 @@ const CustomTextField = ({
 
           }
         }}
-
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
         onInput={handleInput}

@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 // ** MUI Imports
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
@@ -52,11 +52,11 @@ const Window = ({
     ? false
     : true
 
-  const handleKeyDown = event => {
-    if (event.key === 'Enter') {
-      onSave()
-    }
-  }
+  // const handleKeyDown = event => {
+  //   if (event.key === 'Enter') {
+  //     onSave()
+  //   }
+  // }
 
   const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
   const containerHeight = `calc(100vh - 48px)`
@@ -87,13 +87,27 @@ const Window = ({
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
-            onKeyDown={handleKeyDown}
-            sx={{
-              width: expanded ? containerWidth : width, // Expand width to 100% when expanded
-              minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
-              // ... (other styles)
-            }}
-          >
+                 sx={{
+                  ...(controlled
+                    ? {
+                         height: expanded ? containerHeight : height // Expand height to 100% when expanded
+                      }
+                    : {
+                        minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
+                      }),
+                  width: expanded ? containerWidth : width // Expand width to 100% when expanded
+                  // ... (other styles)
+                }}
+                style={
+                  controlled
+                    ? {
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }
+                    : {}
+                }
+              >
+
             <DialogTitle
               id='draggable-dialog-title'
               sx={{
@@ -139,7 +153,9 @@ const Window = ({
                 )}
               </>
             ) : (
-              children
+              React.Children.map(children, child => {
+                return React.cloneElement(child, { expanded: expanded, height : height }); // Pass containerHeight as prop to children
+              })
             )}
           </Paper>
         </Box>

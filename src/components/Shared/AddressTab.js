@@ -3,23 +3,17 @@ import { Grid } from '@mui/material'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import ResourceComboBox from './ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { useContext, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { ResourceLookup } from './ResourceLookup'
 
 const AddressTab = ({
   labels,
   addressValidation,
   maxAccess,
   readOnly = false,
-  requiredOptional = false,
-  editMode // not used since all fields are editable in edit mode
+  requiredOptional = false, // work address
 }) => {
-  const { getRequest } = useContext(RequestsContext)
-  const [cityStore, setCityStore] = useState([])
-  const [cityDistrictStore, setCityDistrictStore] = useState([])
 
   return (
     <>
@@ -31,7 +25,7 @@ const AddressTab = ({
               name='name'
               label={labels.name}
               value={addressValidation.values.name}
-              required={requiredOptional ? false : true}
+              required={!requiredOptional}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
@@ -46,7 +40,7 @@ const AddressTab = ({
               name='street1'
               label={labels.street1}
               value={addressValidation.values.street1}
-              required={requiredOptional ? false : true}
+              required={!requiredOptional}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
@@ -162,20 +156,20 @@ const AddressTab = ({
                 { key: 'flName', value: 'Foreign Language Name' }
               ]}
               values={addressValidation.values}
-              required={requiredOptional ? false : true}
+              required={!requiredOptional}
               onChange={(event, newValue) => {
-                setCityStore([])
                 addressValidation.setFieldValue('stateId', null)
-
-                addressValidation.setFieldValue('city', null)
-                addressValidation.setFieldValue('cityDistrictId', null)
-
-
+                addressValidation.setFieldValue('cityId', '')
+                addressValidation.setFieldValue('city', '')
+                addressValidation.setFieldValue('cityDistrictId', '')
+                addressValidation.setFieldValue('cityDistrict', '')
                 if (newValue) {
                   addressValidation.setFieldValue('countryId', newValue?.recordId)
                 } else {
+
                   addressValidation.setFieldValue('countryId', '')
                 }
+
               }}
               error={addressValidation.touched.countryId && Boolean(addressValidation.errors.countryId)}
               helperText={addressValidation.touched.countryId && addressValidation.errors.countryId}
@@ -194,10 +188,10 @@ const AddressTab = ({
               values={addressValidation.values}
               onChange={(event, newValue) => {
                 addressValidation.setFieldValue('stateId', newValue?.recordId)
-                addressValidation.setFieldValue('cityId', null)
-                addressValidation.setFieldValue('cityDistrictId', null)
-                addressValidation.setFieldValue('city', null)
-                addressValidation.setFieldValue('cityDistrict', null)
+                addressValidation.setFieldValue('cityId', '')
+                addressValidation.setFieldValue('cityDistrictId', '')
+                addressValidation.setFieldValue('city', '')
+                addressValidation.setFieldValue('cityDistrict', '')
               }}
               error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
               helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
@@ -207,98 +201,69 @@ const AddressTab = ({
           </Grid>
 
           <Grid item xs={12}>
-            <CustomLookup
-              name='city'
-              label={labels.city}
-              required={requiredOptional ? false : true}
-              readOnly={(readOnly || !addressValidation.values.countryId) && true}
-              valueField='name'
-              displayField='name'
-              store={cityStore}
-              setStore={setCityStore}
-              onLookup={searchQry => {
-                setCityStore([])
-                if (!addressValidation.values.countryId) {
-                  console.log('false')
 
-                  return false
-                }
-                getRequest({
-                  extension: SystemRepository.City.snapshot,
-                  parameters: `${new URLSearchParams({
-                    _size: 30,
-                    _startAt: 0,
-                    _filter: searchQry,
-                    _countryId: addressValidation.values.countryId,
-                    _stateId: addressValidation.values.stateId ?? 0
-                  }).toString()}`
-                })
-                  .then(res => {
-                    console.log(res.list)
-                    setCityStore(res.list)
-                  })
-                  .catch(error => {
-                    setErrorMessage(error)
-                  })
-              }}
-              firstValue={addressValidation.values.city}
-              secondDisplayField={false}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  addressValidation.setFieldValue('cityId', newValue?.recordId)
-                  addressValidation.setFieldValue('city', newValue?.name)
-                } else {
-                  addressValidation.setFieldValue('cityId', null)
-                  addressValidation.setFieldValue('city', null)
-                }
-                addressValidation.setFieldValue('cityDistrictId', null)
-                addressValidation.setFieldValue('cityDistrict', null)
-              }}
-              error={addressValidation.touched.cityId && Boolean(addressValidation.errors.cityId)}
-              helperText={addressValidation.touched.cityId && addressValidation.errors.cityId}
-              maxAccess={maxAccess}
+            <ResourceLookup
+             endpointId={SystemRepository.City.snapshot}
+             parameters={{
+              _countryId: addressValidation.values.countryId,
+              _stateId: addressValidation.values.stateId ?? 0
+             }}
+
+             valueField='name'
+             displayField='name'
+             name='city'
+             label={labels.city}
+             required={!requiredOptional}
+             readOnly={(readOnly || !addressValidation.values.countryId) && true}
+             form={addressValidation}
+             secondDisplayField={false}
+             onChange={(event, newValue) => {
+              if (newValue) {
+                addressValidation.setFieldValue('cityId', newValue?.recordId)
+                addressValidation.setFieldValue('city', newValue?.name)
+              } else {
+                addressValidation.setFieldValue('cityId', '')
+                addressValidation.setFieldValue('city', '')
+              }
+              addressValidation.setFieldValue('cityDistrictId', '')
+              addressValidation.setFieldValue('cityDistrict', '')
+
+
+            }}
+            errorCheck={'cityId'}
+
             />
           </Grid>
 
-          <Grid item xs={12}>
-            <CustomLookup
-              name='cityDistrict'
-              label={labels.cityDistrict}
-              valueField='name'
-              displayField='name'
-              readOnly={(readOnly || !addressValidation.values.cityId) && true}
-              store={cityDistrictStore}
-              setStore={setCityDistrictStore}
-              onLookup={searchQry => {
-                setCityDistrictStore([])
-                var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${addressValidation.values.cityId}`
+           <Grid item xs={12}>
 
-                getRequest({
-                  extension: SystemRepository.CityDistrict.snapshot,
-                  parameters: parameters
-                })
-                  .then(res => {
-                    console.log(res.list)
-                    setCityDistrictStore(res.list)
-                  })
-                  .catch(error => {
-                    setErrorMessage(error)
-                  })
-              }}
-              firstValue={addressValidation.values.cityDistrict}
-              secondDisplayField={false}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)
-                  addressValidation.setFieldValue('cityDistrict', newValue?.name)
-                } else {
-                  addressValidation.setFieldValue('cityDistrictId', null)
-                  addressValidation.setFieldValue('cityDistrict', null)
-                }
-              }}
-              error={addressValidation.touched.cityDistrictId && Boolean(addressValidation.errors.cityDistrictId)}
-              helperText={addressValidation.touched.cityDistrictId && addressValidation.errors.cityDistrictId}
-              maxAccess={maxAccess}
+           <ResourceLookup
+             endpointId={SystemRepository.CityDistrict.snapshot}
+             parameters={{
+              _cityId: addressValidation.values.cityId
+             }}
+             valueField='name'
+             displayField='name'
+             name='cityDistrict'
+             label={labels.cityDistrict}
+
+             readOnly={(readOnly || !addressValidation.values.cityId) && true}
+
+             form={addressValidation}
+             secondDisplayField={false}
+
+             onChange={(event, newValue) => {
+
+              if (newValue) {
+                addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)
+                addressValidation.setFieldValue('cityDistrict', newValue?.name)
+              } else {
+                addressValidation.setFieldValue('cityDistrictId', '')
+                addressValidation.setFieldValue('cityDistrict', '')
+              }
+            }}
+
+            errorCheck={'cityDistrictId'}
             />
           </Grid>
 
@@ -325,7 +290,7 @@ const AddressTab = ({
               maxLength='15'
               type='text'
               phone={true}
-              required={requiredOptional ? false : true}
+              required={!requiredOptional}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}

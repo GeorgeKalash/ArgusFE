@@ -1,53 +1,60 @@
 // ** React Imports
-import { useEffect, useState, useContext } from 'react'
+// ** React Imports
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ControlContext } from 'src/providers/ControlContext'
-import { getNewReleaseCode, populateReleaseCode } from 'src/Models/DocumentRelease/ReleaseCode'
-
-
-// ** Resources
-import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows
 import ReleaseCodeWindow from './Windows/ReleaseCodeWindow'
+
+// ** Helpers
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-const ReleaseCodes = () => {
+const ReleaseCodes  = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
-
-  //controls
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-
-  //stores
-  const [gridData, setGridData] = useState([])
+ 
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false) 
   const [errorMessage, setErrorMessage] = useState(null)
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    releaseCode: labels && labels.find(item => item.key === "3").value
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: DocumentReleaseRepository.ReleaseCode.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.ReleaseCode.page,
+    datasetId: ResourceIds.ReleaseCodes
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.ReleaseCode.page
+  })
 
   const columns = [
     {
@@ -62,149 +69,58 @@ const ReleaseCodes = () => {
     }
   ]
 
-  const releaseCodeValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log(values)
-      postReleaseCode(values)
-    }
-  })
 
-  const handleSubmit = () => {
-    releaseCodeValidation.handleSubmit()
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-        console.log(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const postReleaseCode = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delReleaseCode = obj => {
-    postRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        console.log({ res })
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const addReleaseCode = () => {
-    releaseCodeValidation.setValues(getNewReleaseCode)
-    setEditMode(false)
+  const add = () => {
     setWindowOpen(true)
   }
 
-  const editReleaseCode = obj => {
-    console.log(obj)
-    getReleaseCodeById(obj)
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
   }
 
-  const getReleaseCodeById = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.ReleaseCode.get,
-      parameters: parameters
+  const del = async obj => {
+    await postRequest({
+      extension: DocumentReleaseRepository.ReleaseCode.del,
+      record: JSON.stringify(obj)
     })
-      .then(res => {      
-        releaseCodeValidation.setValues(populateReleaseCode(res.record))
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
+  
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.ReleaseCodes, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
-        getLabels(ResourceIds.ReleaseCodes,setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
- 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addReleaseCode} maxAccess={access} />
+      <Box>
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editReleaseCode}
-          onDelete={delReleaseCode}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
+          paginationType='client'
           maxAccess={access}
         />
       </Box>
       {windowOpen && (
-       <ReleaseCodeWindow
-       onClose={() => setWindowOpen(false)}
-       width={600}
-       height={400}
-       onSave={handleSubmit}
-       releaseCodeValidation={releaseCodeValidation}
-       _labels ={_labels}
-       maxAccess={access}
-       editMode={editMode}
-       />
-       )}
+        <ReleaseCodeWindow
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
+          labels={_labels}
+          maxAccess={access}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
+        />
+      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
+
 
 export default ReleaseCodes

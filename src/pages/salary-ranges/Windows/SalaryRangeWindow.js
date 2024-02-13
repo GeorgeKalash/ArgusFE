@@ -1,56 +1,33 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import SalaryRangeTab from 'src/pages/salary-ranges/Tabs/SalaryRangeTab'
-import TransactionLog from 'src/components/Shared/TransactionLog'
-import { useState } from 'react'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import SalaryRangeForm from 'src/pages/salary-ranges/Tabs/SalaryRangeForm'
 
 const SalaryRangeWindow = ({
   onClose,
-  width,
-  height,
-  onSave,
-  editMode,
-  typeStore,
-  salaryRangeValidation,
   labels,
-  maxAccess
+  maxAccess,
+  recordId
 }) => {
-  const [windowInfo, setWindowInfo] = useState(null)
 
   return (
     <>
       <Window
         id='SalaryRangeWindow'
-        Title={labels.SalaryRange}
+        Title={labels[1]}
+        controlled={true}
         onClose={onClose}
-        width={width}
-        height={height}
-        onSave={onSave}
-        salaryRangeValidation={salaryRangeValidation}
-        typeStore={typeStore}
-        onInfo={() => setWindowInfo(true)}
-        disabledInfo={!editMode && true}
-        onInfoClose={() => setWindowInfo(false)}
+        width={500}
+        height={300}
       >
         <CustomTabPanel>
-          <SalaryRangeTab
+          <SalaryRangeForm
             labels={labels}
-            salaryRangeValidation={salaryRangeValidation}
-            typeStore={typeStore}
             maxAccess={maxAccess}
-            editMode={editMode}
+            recordId={recordId}
           />
         </CustomTabPanel>
       </Window>
-      {windowInfo && (
-        <TransactionLog
-          resourceId={ResourceIds && ResourceIds.SalaryRange}
-          recordId={salaryRangeValidation.values.recordId}
-          onInfoClose={() => setWindowInfo(false)}
-        />
-      )}
     </>
   )
 }
