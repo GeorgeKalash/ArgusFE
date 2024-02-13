@@ -12,6 +12,7 @@ const WindowToolbar = ({
   onPost,
   onClear,
   onInfo,
+  onGenerateReport,
   disabledSubmit,
   editMode = false,
   smallBox = false,
@@ -21,17 +22,17 @@ const WindowToolbar = ({
   onClientRelation = false,
   isPosted = false,
   resourceId,
-  recordId,
-  setPdfUrl,
-  pdfURL
+  setSelectedReport,
+  selectedReport,
+  previewReport
 }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
 
-  //states
+  // //states
   const [reportStore, setReportStore] = useState([])
-  const [selectedReport, setSelectedReport] = useState(null)
 
   const getReportLayout = () => {
+    setReportStore([])
     var parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportLayout,
@@ -58,31 +59,12 @@ const WindowToolbar = ({
     getReportLayout()
   }, [])
 
-  const generateReport = () => {
-    const obj = {
-      api_url: selectedReport.api_url + `?_recordId=${recordId}`,
-      assembly: selectedReport.assembly,
-      format: 1,
-      reportClass: selectedReport.reportClass
-    }
-    postRequest({
-      url: process.env.NEXT_PUBLIC_REPORT_URL,
-      extension: DevExpressRepository.generate,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        console.log(res)
-        setPdfUrl(res.recordId)
-        console.log(pdfURL)
-        onPreview()
-      })
-      .catch(error => {
-        console.log({ generateReportERROR: error })
-      })
-  }
 
   return (
     <DialogActions>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+   { previewReport ? <Box sx={{ display: 'flex', alignItems: 'center' }}>
+
       <Autocomplete
         size='small'
         options={reportStore}
@@ -97,38 +79,41 @@ const WindowToolbar = ({
         sx={{ ml: 2 }}
         variant='contained'
         disabled={!selectedReport}
-        onClick={() => generateReport()}
+        onClick={onGenerateReport}
         size='small'
       >
         Preview
       </Button>
+      </Box> : <Box></Box>}
+      <Box sx={{ display: 'flex', alignItems: 'center'}}>
 
       {onClear && (
-        <Button onClick={onClear} variant='contained'>
+        <Button onClick={onClear} sx={{ mr: 1}} variant='contained'>
           Clear
         </Button>
       )}
       {clientRelation && (
-        <Button onClick={onClientRelation} variant='contained' sx={{ mt: smallBox && 0 }} disabled={!editMode}>
+        <Button onClick={onClientRelation} variant='contained' sx={{ mr: 1, mt: smallBox && 0 }} disabled={!editMode}>
           Client Relation
         </Button>
       )}
 
       {onInfo && infoVisible && (
-        <Button onClick={onInfo} variant='contained' disabled={!editMode}>
+        <Button onClick={onInfo} variant='contained' sx={{ mr: 1 }} disabled={!editMode}>
           Info
         </Button>
       )}
       {onPost && postVisible && (
-        <Button onClick={onPost} variant='contained' sx={{ mt: smallBox && 0 }} disabled={isPosted || !editMode}>
+        <Button onClick={onPost} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 }} disabled={isPosted || !editMode}>
           Post
         </Button>
       )}
       {onSave && (
-        <Button onClick={onSave} variant='contained' sx={{ mt: smallBox && 0 }} disabled={disabledSubmit || isPosted}>
+        <Button onClick={onSave} variant='contained' sx={{ mr: 2 , mt: smallBox && 0 }} disabled={disabledSubmit || isPosted}>
           Submit
         </Button>
       )}
+        </Box>  </Box>
     </DialogActions>
   )
 }

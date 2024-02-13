@@ -20,12 +20,11 @@ export default function FormShell({
   isPosted = false,
   clientRelation = false,
   setErrorMessage,
-  print
+  previewReport=false
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
-  const [pdfURL, setPdfUrl] = useState(null)
-  const [isPrinted, setisPrinted] = useState(false)
   const { stack } = useWindow()
+  const [selectedReport, setSelectedReport] = useState(null)
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -74,11 +73,12 @@ export default function FormShell({
               title: 'Client Relation'
             })
           }
-          onPreview={() =>
+          onGenerateReport={() =>
             stack({
               Component: PreviewReport,
               props: {
-                pdfURL: pdfURL
+                selectedReport: selectedReport,
+                recordId: form.values.recordId
               },
               width: 1000,
               height: 500,
@@ -93,8 +93,9 @@ export default function FormShell({
           clientRelation={clientRelation}
           resourceId={resourceId}
           recordId={form.values.recordId}
-          setPdfUrl={setPdfUrl}
-          pdfURL={pdfURL}
+          selectedReport={selectedReport}
+          setSelectedReport={setSelectedReport}
+          previewReport={previewReport}
         />
       )}
       {windowInfo && (

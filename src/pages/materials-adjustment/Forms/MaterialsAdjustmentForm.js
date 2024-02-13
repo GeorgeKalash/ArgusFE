@@ -23,7 +23,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { TrendingUp } from '@mui/icons-material'
 
 export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage, expanded }) {
   const { height } = useWindowDimensions()
@@ -301,7 +300,8 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       editMode={editMode}
       isPosted={isPosted}
       postVisible={true}
-      onPrint={true}
+      previewReport={editMode}
+
     >
       <Grid container>
         <Grid container xs={12} style={{ overflow: 'hidden' }}>
