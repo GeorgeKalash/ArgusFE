@@ -120,7 +120,15 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const getRowId = row => {
-    const recordId = row.recordId || ''
+    console.log(props.rowId)
+    console.log('row')
+    console.log(row)
+    const key = Object.keys(row).find(x => x.toString() === props.rowId.toString())
+    console.log(key)
+    const val = row[key]
+    console.log(val)
+
+    const recordId = val || ''
     const seqNo = row.seqNo || ''
 
     return `${recordId}-${seqNo}`
