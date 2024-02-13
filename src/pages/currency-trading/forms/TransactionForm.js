@@ -213,7 +213,7 @@ const initial = {
   idNoConfirm: '',
   cellPhoneConfirm: '',
   otp:false,
-  search: ''
+  search:null
 
 }
 
@@ -294,7 +294,7 @@ const initial1 = {
     idNoConfirm: '',
     cellPhoneConfirm: '',
     otp:false,
-    search: ''
+    search: null
   })
 
   const formik = useFormik({
@@ -924,7 +924,7 @@ return;
                     name='search'
                     Component={CustomTextField}
                     onBlur={e => {
-                      e.target.value  && (search !== e.target.value || !search ) && fetchInfoByKey({ key: e.target.value })
+                      e.target.value  &&   (search != e.target.value ) && fetchInfoByKey({ key: e.target.value })
                         .then(info => {
                           if (info) {
                             setIDInfoAutoFilled(false)
@@ -962,7 +962,8 @@ return;
 
                     readOnly={editMode}
                     onFocus={(value) => {
-                      setSearch(value)
+
+                         setSearch(value)
                     }}
                     required
                   />
