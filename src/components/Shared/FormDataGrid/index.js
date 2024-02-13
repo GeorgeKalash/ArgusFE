@@ -41,7 +41,10 @@ export function FormDataGrid({ columns, value, onChange }) {
   useEffect(() => {
     if (!updating && nextEdit) {
       const { id, field } = nextEdit
-      apiRef.current.startCellEditMode({ id, field })
+
+      if (apiRef.current.getCellMode(id, field) === 'view') apiRef.current.startCellEditMode({ id, field })
+      apiRef.current.setCellFocus(id, field)
+
       setNextEdit(null)
     }
   }, [updating, nextEdit])
@@ -115,16 +118,10 @@ export function FormDataGrid({ columns, value, onChange }) {
       const field = visibleColumns[nextCell.columnIndex].field
       const id = rowIds[nextCell.rowIndex]
 
-      apiRef.current.scrollToIndexes({ colIndex: nextCell.columnIndex, rowIndex: nextCell.columnIndex })
-
-      if (apiRef.current.getColumn(field).editable) {
-        setNextEdit({
-          id,
-          field
-        })
-      }
-
-      apiRef.current.setCellFocus(id, field)
+      setNextEdit({
+        id,
+        field
+      })
     })
   }
 
