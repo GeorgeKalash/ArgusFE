@@ -37,6 +37,7 @@ const SalesPersonWindow = ({
             labels={labels}
             maxAccess={maxAccess}
             setErrorMessage={setErrorMessage}
+            setSelectedRecordId={setSelectedRecordId}
             recordId={recordId}
           />
         </CustomTabPanel>

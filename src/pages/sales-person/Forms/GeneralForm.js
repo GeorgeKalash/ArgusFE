@@ -16,7 +16,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
-export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode }) {
+export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode,setSelectedRecordId }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [initialValues, setInitialData] = useState({
@@ -41,15 +41,14 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: SaleRepository.SalesPerson.set,
         record: JSON.stringify(obj)
       })
-
-      if (!recordId) {
+      
+      if (response.recordId) {
         toast.success('Record Added Successfully')
+        setSelectedRecordId(response.recordId)
         setInitialData({
           ...obj, // Spread the existing properties
           recordId: response.recordId // Update only the recordId field

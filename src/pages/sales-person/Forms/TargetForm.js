@@ -14,6 +14,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function TargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
+
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [isLoading, setIsLoading] = useState(false)
@@ -71,7 +72,6 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
   ]
 
   useEffect(() => {
-    console.log('enter target2 ',recordId)
     ;(async function () {
       try {
         if (recordId) {
@@ -107,7 +107,7 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
       setIsLoading(false)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [recordId])
 
   return (
     <FormShell resourceId={ResourceIds.SalesPerson} form={formik} height={300} editMode={true} maxAccess={maxAccess}>
