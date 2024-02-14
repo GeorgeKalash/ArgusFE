@@ -65,7 +65,13 @@ const Defaults = () => {
 
   const _labels = {
     nri: labels && labels.find(item => item.key === "1").value,
-    nrc: labels && labels.find(item => item.key ==="2").value
+    nrc: labels && labels.find(item => item.key ==="2").value,
+    cash_sales_ratetype
+: labels && labels.find(item => item.key === "cash_sales_ratetype").value,
+cash_purchase_ratetype: labels && labels.find(item => item.key ==="cash_purchase_ratetype").value,
+credit_purchase_ratetype
+: labels && labels.find(item => item.key === "credit_purchase_ratetype").value,
+credit_sales_ratetype: labels && labels.find(item => item.key ==="credit_sales_ratetype").value
 
   }
 
