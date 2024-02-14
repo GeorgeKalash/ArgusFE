@@ -65,12 +65,12 @@ const CTExchangeRates = () => {
       valueField: 'key',
       displayField: 'value',
       header: labels.rcm,
-      nameId: 'rcm',
+      nameId: 'rateCalcMethod',
       name: 'rateCalcMethodName',
       store: rcmStore,
       mandatory: true,
-      widthDropDown: '300',
-      columnsInDropDown: [{ key: 'value', value: 'Value' }]
+      widthDropDown: '150',
+      columnsInDropDown: [{ key: 'value', value: 'rateCalcMethodName' }]
     },
     {
       field: 'textfield',
@@ -115,7 +115,7 @@ const CTExchangeRates = () => {
           }
     },
     onSubmit: values => {
-      postExchangeMaps(values)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.puRateTypeId)
     }
   })
 
@@ -139,17 +139,19 @@ const CTExchangeRates = () => {
           }
     },
     onSubmit: values => {
-      postExchangeMaps(values)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.saRateTypeId)
     }
   })
 
-  const postExchangeMaps = obj => {
+  const postExchangeMaps = (obj, currencyId, rateTypeId) => {
     const data = {
-      items: obj.rows
+      currencyId: currencyId,
+      rateTypeId: rateTypeId,
+      exchangeMaps: obj.rows
     }
 
     postRequest({
-      extension: CurrencyTradingSettingsRepository.ExchangeRates.set2,
+      extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -215,10 +217,11 @@ const CTExchangeRates = () => {
 
             return {
               currencyId: cuId,
-              rateType: rateTypeId,
+              rateTypeId: rateTypeId,
               plantId: plant.recordId,
               plantName: plant.name,
               rateCalcMethod: value.rateCalcMethod,
+              rateCalcMethodName: value.rateCalcMethodName,
               rate: value.rate,
               minRate: value.minRate,
               maxRate: value.maxRate
