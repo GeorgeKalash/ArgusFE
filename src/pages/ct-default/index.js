@@ -40,6 +40,8 @@ const Defaults = () => {
   const[store, setStore] = useState([])
 
 const [ initialValues, setInitialValues] = useState({
+  'ct-nra-individual' : null,
+  'ct-nra-corporate': null,
   nraId: null, nraRef: null, nraDescription: null, // ct-nra-individual
   nraId2: null, nraRef2: null, nraDescription2: null,  //ct-nra-corporate
   ct_cash_sales_ratetype_id : null,
@@ -121,11 +123,10 @@ console.log(rtDefaultFormValidation)
       parameters: parameters
      })
       .then(res => {
-console.log(  res.list)
         const myObject = { ...initialValues }; // Clone the current state
         res.list.forEach(obj => {
           if (obj.key in myObject) {
-            // myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
+             myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
             rtDefaultFormValidation.setFieldValue(obj.key,parseInt(obj.value) )
             rtDefaultValidation.setFieldValue(obj.key, parseInt(obj.value) )
 
@@ -133,7 +134,7 @@ console.log(  res.list)
         });
 
 
-
+console.log(myObject['ct-nra-individual'])
         if(myObject && myObject['ct-nra-individual']){
           getNumberRange(myObject['ct-nra-individual'] , 'ct-nra-individual')
         }
@@ -160,7 +161,6 @@ console.log(  res.list)
         // console.log(res)
         if(key==='ct-nra-individual'){
         rtDefaultValidation.setFieldValue('ct-nra-individual' , res.record.recordId)
-
         rtDefaultFormValidation.setFieldValue('nraId' , res.record.recordId)
         rtDefaultFormValidation.setFieldValue('nraRef' , res.record.reference)
         rtDefaultFormValidation.setFieldValue('nraDescription' , res.record.description)
