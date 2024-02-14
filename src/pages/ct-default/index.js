@@ -335,9 +335,15 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultValidation.values.ct_cash_sales_ratetype_id && store.filter(item => item.recordId === rtDefaultValidation.values.ct_cash_sales_ratetype_id)[0]}
+                        value={rtDefaultValidation.values.ct_cash_sales_ratetype_id ? store.filter(item => item.recordId === rtDefaultValidation.values.ct_cash_sales_ratetype_id)[0] : ''}
                         onChange={(event, newValue) => {
+                          if(newValue)
                             rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_cash_sales_ratetype_id', newValue?.recordId)
+
+                            else
+                            rtDefaultValidation.setFieldValue('ct_cash_sales_ratetype_id', null)
+
+
                         }}
                         error={rtDefaultValidation.touched.ct_cash_sales_ratetype_id && Boolean(rtDefaultValidation.errors.ct_cash_sales_ratetype_id)}
                         helperText={rtDefaultValidation.touched.ct_cash_sales_ratetype_id && rtDefaultValidation.errors.ct_cash_sales_ratetype_id}
@@ -351,9 +357,13 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultValidation.values.ct_cash_purchase_ratetype_id && store.filter(item => item.recordId === rtDefaultValidation.values.ct_cash_purchase_ratetype_id)[0]}
+                        value={rtDefaultValidation.values.ct_cash_purchase_ratetype_id ? store.filter(item => item.recordId === rtDefaultValidation.values.ct_cash_purchase_ratetype_id)[0] : ''}
                         onChange={(event, newValue) => {
-                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId)
+                          if(newValue)
+                          rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId)
+                          else
+                            rtDefaultValidation.setFieldValue('ct_cash_purchase_ratetype_id', null)
+
                         }}
                         error={rtDefaultValidation.touched.ct_cash_purchase_ratetype_id && Boolean(rtDefaultValidation.errors.ct_cash_purchase_ratetype_id)}
                         helperText={rtDefaultValidation.touched.ct_cash_purchase_ratetype_id && rtDefaultValidation.errors.ct_cash_purchase_ratetype_id}
@@ -367,9 +377,14 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultValidation.values.ct_credit_sales_ratetype_id && store.filter(item => item.recordId === rtDefaultValidation.values.ct_credit_sales_ratetype_id)[0]}
+                        value={rtDefaultValidation.values.ct_credit_sales_ratetype_id ? store.filter(item => item.recordId === rtDefaultValidation.values.ct_credit_sales_ratetype_id)[0] : ''}
                         onChange={(event, newValue) => {
+                          if(newValue)
+
                             rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId)
+                            else
+                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_sales_ratetype_id', '')
+
                         }}
                         error={rtDefaultValidation.touched.ct_credit_sales_ratetype_id && Boolean(rtDefaultValidation.errors.ct_credit_sales_ratetype_id)}
                         helperText={rtDefaultValidation.touched.ct_credit_sales_ratetype_id && rtDefaultValidation.errors.ct_credit_sales_ratetype_id}
@@ -383,9 +398,13 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultValidation.values.ct_credit_purchase_ratetype_id && store.filter(item => item.recordId === rtDefaultValidation.values.ct_credit_purchase_ratetype_id)[0]}
+                        value={rtDefaultValidation.values.ct_credit_purchase_ratetype_id ? store.filter(item => item.recordId === rtDefaultValidation.values.ct_credit_purchase_ratetype_id)[0] : ''}
                         onChange={(event, newValue) => {
+                          if(newValue)
                             rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId)
+                          else
+                           rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_purchase_ratetype_id', '')
+
                         }}
                         error={rtDefaultValidation.touched.ct_credit_purchase_ratetype_id && Boolean(rtDefaultValidation.errors.ct_credit_purchase_ratetype_id)}
                         helperText={rtDefaultValidation.touched.ct_credit_purchase_ratetype_id && rtDefaultValidation.errors.ct_credit_purchase_ratetype_id}
