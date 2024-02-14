@@ -28,7 +28,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
-import { ConfirmationOnSubmit } from './ConfirmationOnSubmit'
+import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
 
 const FormContext = React.createContext(null)
 
