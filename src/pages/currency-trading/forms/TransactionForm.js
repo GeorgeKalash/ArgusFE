@@ -989,15 +989,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           currencyId: row.newValue
                         })
 
-                        console.log(exchange)
-                        if (!exchange?.exchangeRate?.rate)
+                        if (!exchange?.rate)
                           stackError({
                             message: `Rate not defined for ${row.value}.`
                           })
 
                         if (exchange) {
-                          const exRate = exchange.exchangeRate.rate
-                          const rateCalcMethod = exchange.exchange.rateCalcMethod
+                          const exRate = exchange.rate
+                          const rateCalcMethod = exchange.rateCalcMethod
 
                           const lcAmount =
                             rateCalcMethod === 1
@@ -1009,11 +1008,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         }
 
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.exchangeRate?.rate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, exchange?.exchangeRate?.rate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.exchange?.rateCalcMethod)
-                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.exchangeRate?.minRate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.exchangeRate?.maxRate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, exchange?.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.rateCalcMethod)
+                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
 
                         //  row.rowData.currencyId = row.newValue
                         //  row.rowData.exRate = exchange.exchangeRate.rate
