@@ -28,7 +28,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
-import { ConfirmationOnSubmit } from './ConfirmationOnSubmit'
+import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
 
 const FormContext = React.createContext(null)
 
@@ -71,7 +71,6 @@ function FormField({ name, Component, valueField, onFocus, ...rest }) {
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
       }}
       onFocus={e => {
-        console.log(e)
         if (onFocus && (name == 'id_number' || name=="search")) {
           onFocus(e.target.value)
         }
@@ -996,15 +995,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           currencyId: row.newValue
                         })
 
-                        console.log(exchange)
-                        if (!exchange?.exchangeRate?.rate)
+                        if (!exchange?.rate)
                           stackError({
                             message: `Rate not defined for ${row.value}.`
                           })
 
                         if (exchange) {
-                          const exRate = exchange.exchangeRate.rate
-                          const rateCalcMethod = exchange.exchange.rateCalcMethod
+                          const exRate = exchange.rate
+                          const rateCalcMethod = exchange.rateCalcMethod
 
                           const lcAmount =
                             rateCalcMethod === 1
@@ -1016,11 +1014,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         }
 
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.exchangeRate?.rate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, exchange?.exchangeRate?.rate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.exchange?.rateCalcMethod)
-                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.exchangeRate?.minRate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.exchangeRate?.maxRate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, exchange?.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.rateCalcMethod)
+                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
 
                         //  row.rowData.currencyId = row.newValue
                         //  row.rowData.exRate = exchange.exchangeRate.rate
@@ -1167,8 +1165,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     name='id_number'
                     Component={CustomTextField}
                     onBlur={e => {
-                      console.log(e.target.value)
-                      console.log(idNumber)
                       if (e.target.value != idNumber) {
                         checkTypes(e.target.value)
 
@@ -1191,7 +1187,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     }}
                     onFocus={value => {
                       setIdNumber(value)
-                      console.log('Field value on focus:', value)
                     }}
                     readOnly={editMode || infoAutoFilled || idInfoAutoFilled}
                     required

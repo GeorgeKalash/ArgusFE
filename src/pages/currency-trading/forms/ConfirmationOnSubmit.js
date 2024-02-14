@@ -5,8 +5,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import * as yup from 'yup'
 
-export const ConfirmationOnSubmit = ({formik ,labels , window}) => {
-
+export default function ConfirmationOnSubmit({ formik, labels , window }) {
   const fetchFormik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
@@ -18,24 +17,23 @@ export const ConfirmationOnSubmit = ({formik ,labels , window}) => {
     },
     validate: values => {
       console.log(values)
-      const errors={}
+      const errors = {}
 
-      if(!formik.values.clientId && !values.cellPhoneRepeat){
-         errors.cellPhoneRepeat = 'Cell Phone Confirm is required'
-      }else if(!formik.values.clientId && values.cellPhone !== values.cellPhoneRepeat){
-         errors.cellPhoneRepeat = 'Cell Phone must match'
-     }
+      if (!formik.values.clientId && !values.cellPhoneRepeat) {
+        errors.cellPhoneRepeat = 'Cell Phone Confirm is required'
+      } else if (!formik.values.clientId && values.cellPhone !== values.cellPhoneRepeat) {
+        errors.cellPhoneRepeat = 'Cell Phone must match'
+      }
 
-     if(!formik.values.clientId && !values.idNoRepeat){
-      errors.idNoRepeat = 'Id number Confirm is required'
-     }else if(!formik.values.clientId && values.idNo.toString() != values.idNoRepeat.toString()){
-       errors.idNoRepeat = 'Id Number  must match'
-     }
+      if (!formik.values.clientId && !values.idNoRepeat) {
+        errors.idNoRepeat = 'Id number Confirm is required'
+      } else if (!formik.values.clientId && values.idNo.toString() != values.idNoRepeat.toString()) {
+        errors.idNoRepeat = 'Id Number  must match'
+      }
 
-return errors
+      return errors
     },
     onSubmit: values => {
-
       formik.setFieldValue('cellPhoneConfirm', values.cellPhoneRepeat)
       formik.setFieldValue('idNoConfirm', values.idNoRepeat)
 
@@ -47,45 +45,43 @@ return errors
 
   return (
     <>
- <FormShell form={fetchFormik} height={320} infoVisible={false}>
- <Grid container spacing={4}>
+      <FormShell form={fetchFormik} height={320} infoVisible={false}>
+        <Grid container spacing={4}>
+          <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+            <CustomTextField
+              name='idNoRepeat'
+              label={labels.confirmIdNumber}
+              value={fetchFormik.values?.idNoRepeat}
+              required
+              onChange={fetchFormik.handleChange}
+              maxLength='15'
+              onClear={() => {
+                fetchFormik.setFieldValue('idNoRepeat', '')
+              }}
+              error={fetchFormik.touched.idNoRepeat && Boolean(fetchFormik.errors.idNoRepeat)}
+              helperText={fetchFormik.touched.idNoRepeat && fetchFormik.errors.idNoRepeat}
+            />
+          </Grid>
 
-      <Grid item xs={12} sx={{ position: 'relative', width: '100%'}}>
-
-      <CustomTextField
-        name='idNoRepeat'
-        label={labels.confirmIdNumber}
-        value={fetchFormik.values?.idNoRepeat}
-        required
-        onChange={fetchFormik.handleChange}
-        maxLength='15'
-        onClear={() => {
-          fetchFormik.setFieldValue('idNoRepeat', '')
-        }}
-        error={fetchFormik.touched.idNoRepeat && Boolean(fetchFormik.errors.idNoRepeat)}
-        helperText={fetchFormik.touched.idNoRepeat && fetchFormik.errors.idNoRepeat}
-      />
-      </Grid>
-
-      {!formik.values.clientId && <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
-          <CustomTextField
-            name='cellPhoneRepeat'
-            label={labels.cellPhoneConfirm}
-            value={fetchFormik.values?.cellPhoneRepeat}
-            required
-            onChange={fetchFormik.handleChange}
-            maxLength='15'
-            onClear={() => {
-              fetchFormik.setFieldValue('cellphoneRepeat', '')
-            }}
-            error={fetchFormik.touched.cellPhoneRepeat && Boolean(fetchFormik.errors.cellPhoneRepeat)}
-            helperText={fetchFormik.touched.cellPhoneRepeat && fetchFormik.errors.cellPhoneRepeat}
-          />
-        </Grid>}
-
-      </Grid>
-    </FormShell>
-
+          {!formik.values.clientId && (
+            <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+              <CustomTextField
+                name='cellPhoneRepeat'
+                label={labels.cellPhoneConfirm}
+                value={fetchFormik.values?.cellPhoneRepeat}
+                required
+                onChange={fetchFormik.handleChange}
+                maxLength='15'
+                onClear={() => {
+                  fetchFormik.setFieldValue('cellphoneRepeat', '')
+                }}
+                error={fetchFormik.touched.cellPhoneRepeat && Boolean(fetchFormik.errors.cellPhoneRepeat)}
+                helperText={fetchFormik.touched.cellPhoneRepeat && fetchFormik.errors.cellPhoneRepeat}
+              />
+            </Grid>
+          )}
+        </Grid>
+      </FormShell>
     </>
   )
 }
