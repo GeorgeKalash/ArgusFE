@@ -3,7 +3,7 @@ import components from './components'
 import { Box, Button } from '@mui/material'
 import { useEffect, useState } from 'react'
 
-export function DataGrid({ columns, value, onChange }) {
+export function DataGrid({ columns, value, error, onChange }) {
   async function processDependencies(newRow, oldRow) {
     const changed = columns.filter(({ name }) => newRow[name] !== oldRow[name])
 
@@ -34,7 +34,7 @@ export function DataGrid({ columns, value, onChange }) {
 
   const apiRef = useGridApiRef()
 
-  const [updating, setUpdate] = useState(false)
+  const [updating, setIsUpdating] = useState(false)
 
   const [nextEdit, setNextEdit] = useState(null)
 
@@ -163,12 +163,12 @@ export function DataGrid({ columns, value, onChange }) {
       disableColumnMenu
       disableColumnSelector
       processRowUpdate={async (newRow, oldRow) => {
-        setUpdate(true)
+        setIsUpdating(true)
         const updated = await processDependencies(newRow, oldRow)
 
         const change = handleChange(updated, oldRow)
 
-        setUpdate(false)
+        setIsUpdating(false)
 
         return change
       }}
@@ -176,9 +176,15 @@ export function DataGrid({ columns, value, onChange }) {
       rows={value}
       apiRef={apiRef}
       editMode='cell'
+      sx={{
+        '& .MuiDataGrid-cell': {
+          padding: '0 !important'
+        }
+      }}
       columns={[
         ...columns.map(column => ({
           field: column.name,
+          headerName: column.label || column.name,
           editable: column.editable ?? true,
           width: column.width || 170,
           sortable: false,
@@ -186,13 +192,39 @@ export function DataGrid({ columns, value, onChange }) {
             const Component =
               typeof column.component === 'string' ? components[column.component].view : column.component.view
 
-            return <Component {...params} column={column} />
+            return (
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  padding: '0 20px',
+                  backgroundColor: error?.[params.id - 1]?.[params.field] ? '#ff000050' : 'none',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Component {...params} column={column} />
+              </Box>
+            )
           },
           renderEditCell(params) {
             const Component =
               typeof column.component === 'string' ? components[column.component].edit : column.component.edit
 
-            return <Component {...params} column={column} />
+            return (
+              <Box
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  padding: '0 20px',
+                  backgroundColor: error?.[params.id - 1]?.[params.field] ? '#ff000050' : 'none',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Component {...params} column={column} />
+              </Box>
+            )
           }
         })),
         actionsColumn
