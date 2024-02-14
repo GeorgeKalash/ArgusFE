@@ -27,6 +27,7 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { position } from 'stylis'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 const Defaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -36,6 +37,7 @@ const Defaults = () => {
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
   const [numberRangeStore, setNumberRangeStore] = useState([])
+  const[store, setStore] = useState([])
 
   //stores
 
@@ -51,6 +53,7 @@ const Defaults = () => {
         getLabels(ResourceIds.SystemDefaults, setLabels)
 
         getDataResult()
+        getData()
 
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
@@ -139,8 +142,11 @@ const Defaults = () => {
     validateOnChange: true,
      initialValues: {
      nraId: null, nraRef: null, nraDescription: null, // ct-nra-individual
-     nraId2: null, nraRef2: null, nraDescription2: null  //ct-nra-corporate
-
+     nraId2: null, nraRef2: null, nraDescription2: null,  //ct-nra-corporate
+     ct_cash_sales_ratetype_id : null,
+     ct_cash_purchase_ratetype_id : null,
+     ct_credit_sales_ratetype_id : null,
+     ct_credit_purchase_ratetype_id : null
 
     },
     onSubmit: values => {
@@ -193,6 +199,21 @@ const Defaults = () => {
     rtDefaultValidation.handleSubmit()
   }
 
+  const getData = () => {
+    // Clone the current state
+
+        var parameters = `_filter=`
+        getRequest({
+          extension:  MultiCurrencyRepository.RateType.qry,
+          parameters: parameters
+        })
+        .then(res => {
+          setStore(res.list);
+        })
+        .catch(error => {
+            setErrorMessage(error)
+        })
+      }
 
   const lookupNumberRange = searchQry => {
     var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
@@ -287,6 +308,71 @@ return (
                   maxAccess={access}
                 />
               </Grid>
+
+              <Grid item xs={12}>
+                        <CustomComboBox
+                        name='ct_cash_sales_ratetype_id'
+                        label={_labels.cash_sales_ratetype}
+                        valueField='recordId'
+                        displayField='name'
+                        store={store}
+
+                        value={rtDefaultFormValidation.values.ct_cash_sales_ratetype_id && store.filter(item => item.recordId === rtDefaultFormValidation.values.ct_cash_sales_ratetype_id)[0]}
+                        onChange={(event, newValue) => {
+                            rtDefaultFormValidation && rtDefaultFormValidation.setFieldValue('ct_cash_sales_ratetype_id', newValue?.recordId)
+                        }}
+                        error={rtDefaultFormValidation.touched.ct_cash_sales_ratetype_id && Boolean(rtDefaultFormValidation.errors.ct_cash_sales_ratetype_id)}
+                        helperText={rtDefaultFormValidation.touched.ct_cash_sales_ratetype_id && rtDefaultFormValidation.errors.ct_cash_sales_ratetype_id}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <CustomComboBox
+                        name='ct_cash_purchase_ratetype_id'
+                        label={_labels.cash_purchase_ratetype}
+                        valueField='recordId'
+                        displayField='name'
+                        store={store}
+
+                        value={rtDefaultFormValidation.values.ct_cash_purchase_ratetype_id && store.filter(item => item.recordId === rtDefaultFormValidation.values.ct_cash_purchase_ratetype_id)[0]}
+                        onChange={(event, newValue) => {
+                            rtDefaultFormValidation && rtDefaultFormValidation.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId)
+                        }}
+                        error={rtDefaultFormValidation.touched.ct_cash_purchase_ratetype_id && Boolean(rtDefaultFormValidation.errors.ct_cash_purchase_ratetype_id)}
+                        helperText={rtDefaultFormValidation.touched.ct_cash_purchase_ratetype_id && rtDefaultFormValidation.errors.ct_cash_purchase_ratetype_id}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <CustomComboBox
+                        name='ct_credit_sales_ratetype_id'
+                        label={_labels.credit_sales_ratetype}
+                        valueField='recordId'
+                        displayField='name'
+                        store={store}
+
+                        value={rtDefaultFormValidation.values.ct_credit_sales_ratetype_id && store.filter(item => item.recordId === rtDefaultFormValidation.values.ct_credit_sales_ratetype_id)[0]}
+                        onChange={(event, newValue) => {
+                            rtDefaultFormValidation && rtDefaultFormValidation.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId)
+                        }}
+                        error={rtDefaultFormValidation.touched.ct_credit_sales_ratetype_id && Boolean(rtDefaultFormValidation.errors.ct_credit_sales_ratetype_id)}
+                        helperText={rtDefaultFormValidation.touched.ct_credit_sales_ratetype_id && rtDefaultFormValidation.errors.ct_credit_sales_ratetype_id}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <CustomComboBox
+                        name='ct_credit_purchase_ratetype_id'
+                        label={_labels.credit_purchase_ratetype}
+                        valueField='recordId'
+                        displayField='name'
+                        store={store}
+
+                        value={rtDefaultFormValidation.values.ct_credit_purchase_ratetype_id && store.filter(item => item.recordId === rtDefaultFormValidation.values.ct_credit_purchase_ratetype_id)[0]}
+                        onChange={(event, newValue) => {
+                            rtDefaultFormValidation && rtDefaultFormValidation.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId)
+                        }}
+                        error={rtDefaultFormValidation.touched.ct_credit_purchase_ratetype_id && Boolean(rtDefaultFormValidation.errors.ct_credit_purchase_ratetype_id)}
+                        helperText={rtDefaultFormValidation.touched.ct_credit_purchase_ratetype_id && rtDefaultFormValidation.errors.ct_credit_purchase_ratetype_id}
+                        />
+                    </Grid>
 
               </Grid>
               <Grid sx={{
