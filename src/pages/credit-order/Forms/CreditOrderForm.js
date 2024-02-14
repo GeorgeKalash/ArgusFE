@@ -4,7 +4,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 // ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid, Box, FormControlLabel, Checkbox, RadioGroup, Radio } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -261,12 +261,29 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         setErrorMessage(error)
       })
   }
+  async function setOperationType(type) {
+    console.log('typeValue ', type)
+    if (type === '3504' || type === '3505') {
+      const res = await getRequest({
+        extension: 'SY.asmx/getDE',
+        parameters:
+          type === '3504'
+            ? '_key=ct_credit_purchase_ratetype_id'
+            : type === '3505'
+            ? '_key=ct_credit_sales_ratetype_id'
+            : ''
+      })
+      setRateType(res.record.value)
+      formik.setFieldValue('functionId', type)
+    }
+  }
   useEffect(() => {}, [height])
 
   useEffect(() => {
     ;(async function () {
       try {
         fillCurrencyStore()
+        setOperationType(formik.values?.functionId)
         if (recordId) {
           setIsLoading(true)
           fillItemsGrid(recordId)
@@ -393,46 +410,10 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
           </Grid>
         </Grid>
         <Grid container xs={12}>
-          {/* First Column */}
-          <Grid container rowGap={1} xs={2} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='purchase'
-                    valueField='recordId'
-                    maxAccess={maxAccess}
-                    checked={formik.values.purchase}
-                    onChange={event => {
-                      formik && formik.setFieldValue('purchase', event.target.purchase)
-                      setRateType('ct_credit_purchase_ratetype_id')
-                    }}
-                  />
-                }
-                label={labels[6]}
-              />
-            </Grid>
-          </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={1} xs={2} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='sale'
-                    valueField='recordId'
-                    maxAccess={maxAccess}
-                    checked={formik.values.sale}
-                    onChange={event => {
-                      formik && formik.setFieldValue('sale', event.target.checked)
-                      setRateType('ct_credit_sales_ratetype_id')
-                    }}
-                  />
-                }
-                label={labels[7]}
-              />
-            </Grid>
-          </Grid>
+          <RadioGroup row value={formik.values.functionId} onChange={e => setOperationType(e.target.value)}>
+            <FormControlLabel value={'3504'} control={<Radio />} label={labels[6]} />
+            <FormControlLabel value={'3505'} control={<Radio />} label={labels[7]} />
+          </RadioGroup>
         </Grid>
         <Grid container sx={{ pt: 2 }} xs={12}>
           <Box sx={{ width: '100%' }}>
