@@ -71,7 +71,6 @@ function FormField({ name, Component, valueField, onFocus, ...rest }) {
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
       }}
       onFocus={e => {
-        console.log(e)
         if (onFocus && name == 'id_number') {
           onFocus(e.target.value)
         }
@@ -1159,8 +1158,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     name='id_number'
                     Component={CustomTextField}
                     onBlur={e => {
-                      console.log(e.target.value)
-                      console.log(idNumber)
                       if (e.target.value != idNumber) {
                         checkTypes(e.target.value)
 
@@ -1183,7 +1180,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     }}
                     onFocus={value => {
                       setIdNumber(value)
-                      console.log('Field value on focus:', value)
                     }}
                     readOnly={editMode}
                     required
