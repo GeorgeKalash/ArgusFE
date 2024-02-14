@@ -20,14 +20,14 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 const LoDefault = () => {
     const [errorMessage, setErrorMessage] = useState(null)
     const { getRequest, postRequest } = useContext(RequestsContext)
 
     const [initialValues, setInitialValues] = useState({
-        sysDefaults: {}
+        carrierSite:null,
     });
 
     useEffect(() => {
@@ -44,7 +44,7 @@ const LoDefault = () => {
         .then(res => {
             const filteredList = res.list.filter(obj => {
                 return (
-                    obj.key === 'sysDefaults'
+                    obj.key === 'carrierSite'
                 );
             });
             filteredList.forEach(obj => (
@@ -83,7 +83,7 @@ const LoDefault = () => {
         })
         postRequest({
             extension: SystemRepository.Defaults.set,
-            record:   JSON.stringify({  sysDefaults  : data }),
+            record:   JSON.stringify({  carrierSite  : data }),
         })
 
         .then(res => {
@@ -111,9 +111,9 @@ const LoDefault = () => {
                 <Grid container spacing={5} sx={{pl:'10px'}} lg={4} md={7} sm={7} xs={12} >
                     <Grid item xs={12}>
                         <ResourceComboBox
-                            endpointId={SystemRepository.Country.qry}
-                            name='sysDefaults'
-                            label={_labels.sysDefaults}
+                            endpointId={InventoryRepository.Site.qry}
+                            name='carrierSite'
+                            label={_labels.carrierSite}
                             columnsInDropDown={[
                             { key: 'reference', value: 'Reference' },
                             { key: 'name', value: 'Name' }
@@ -123,11 +123,11 @@ const LoDefault = () => {
                             displayField='name'
                             maxAccess={access}
                             onChange={(event, newValue) => {
-                            formik.setFieldValue('sysDefaults', newValue?.recordId)
+                            formik.setFieldValue('carrierSite', newValue?.recordId)
                             }}
-                            error={formik.touched.sysDefaults && Boolean(formik.errors.sysDefaults)}
+                            error={formik.touched.carrierSite && Boolean(formik.errors.carrierSite)}
 
-                            // helperText={formik.touched.sysDefaults && formik.errors.sysDefaults}
+                            // helperText={formik.touched.carrierSite && formik.errors.carrierSite}
                         />
                     </Grid>
                     <Grid sx={{
