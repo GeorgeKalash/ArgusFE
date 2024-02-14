@@ -1202,12 +1202,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   />
                 </Grid>
                 <Grid item xs={7}>
-                  {/* <FormField
-                    name='birth_date'
-                    Component={CustomDatePicker}
-                    readOnly={editMode || infoAutoFilled}
-                    required
-                  /> */}
+
 
                   <CustomDatePicker
                     name='birth_date'
