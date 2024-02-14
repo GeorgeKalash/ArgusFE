@@ -76,7 +76,7 @@ function FormField({ name, Component, valueField, onFocus, ...rest }) {
         }
       }}
       onClear={() => {
-        formik.setFieldValue(name, '')
+        formik.setFieldValue(name ,  '' )
       }}
       form={formik}
     />
