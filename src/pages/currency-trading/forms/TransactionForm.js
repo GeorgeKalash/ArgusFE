@@ -71,7 +71,7 @@ function FormField({ name, Component, valueField, onFocus, ...rest }) {
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
       }}
       onFocus={e => {
-        if (onFocus && (name == 'id_number' || name=="search")) {
+        if (onFocus && (name == 'id_number' || name == 'search')) {
           onFocus(e.target.value)
         }
       }}
@@ -209,8 +209,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     idNoConfirm: '',
     cellPhoneConfirm: '',
     otp: false,
-  search:null
-
+    search: null
   }
 
   const initial1 = {
@@ -336,7 +335,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     if (type === '3502' || type === '3503') {
       const res = await getRequest({
         extension: 'SY.asmx/getDE',
-        parameters: type === '3502' ? '_key=mc_defaultRTPU' : type === '3503' ? '_key=mc_defaultRTSA' : ''
+        parameters:
+          type === '3502'
+            ? '_key=ct_cash_purchase_ratetype_id'
+            : type === '3503'
+            ? '_key=ct_cash_sales_ratetype_id'
+            : ''
       })
       setRateType(res.record.value)
       formik.setFieldValue('functionId', type)
@@ -476,7 +480,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     const amountString = String(lcAmount || 0).replaceAll(',', '')
 
     // Parse the amount and add to accumulator
-    return   acc + parseFloat(amountString) || 0
+    return acc + parseFloat(amountString) || 0
   }, 0)
 
   const receivedTotal = formik.values.rows2.reduce((acc, { amount }) => {
@@ -911,7 +915,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   name='search'
                   Component={CustomTextField}
                   onBlur={e => {
-                    e.target.value  && (search != e.target.value ) && fetchInfoByKey({ key: e.target.value })
+                    e.target.value &&
+                      search != e.target.value &&
+                      fetchInfoByKey({ key: e.target.value })
                         .then(info => {
                           if (!!info) {
                             setIDInfoAutoFilled(false)
@@ -945,10 +951,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         })
                   }}
                   readOnly={editMode}
-                    onFocus={(value) => {
-
-                         setSearch(value)
-                    }}
+                  onFocus={value => {
+                    setSearch(value)
+                  }}
                   required
                 />
               </Grid>
@@ -1302,14 +1307,17 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
                     readOnly={editMode || idInfoAutoFilled}
-
-
                     required
                   />
                 </Grid>
 
                 <Grid item xs={12}>
-                  <FormField name='cell_phone' Component={CustomTextField} required readOnly={editMode || idInfoAutoFilled}/>
+                  <FormField
+                    name='cell_phone'
+                    Component={CustomTextField}
+                    required
+                    readOnly={editMode || idInfoAutoFilled}
+                  />
                 </Grid>
                 <Grid item xs={7}>
                   <FormControlLabel
@@ -1360,16 +1368,28 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 </Grid>
                 <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
                   <Grid item xs={3}>
-                    <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+                    <FormField
+                      name='fl_firstName'
+                      Component={CustomTextField}
+                      readOnly={editMode || idInfoAutoFilled}
+                    />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+                    <FormField
+                      name='fl_middleName'
+                      Component={CustomTextField}
+                      readOnly={editMode || idInfoAutoFilled}
+                    />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+                    <FormField
+                      name='fl_familyName'
+                      Component={CustomTextField}
+                      readOnly={editMode || idInfoAutoFilled}
+                    />
                   </Grid>
                 </Grid>
                 <Grid container rowGap={3} xs={4}></Grid>
@@ -1406,7 +1426,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         { key: 'name', value: 'Name' }
                       ]}
                       readOnly={editMode || idInfoAutoFilled}
-
                     />
                   </Grid>
 
