@@ -137,6 +137,14 @@ credit_sales_ratetype: labels && labels.find(item => item.key ==="credit_sales_r
         rtDefaultFormValidation.setFieldValue('nraRef2' , res.record.reference)
         rtDefaultFormValidation.setFieldValue('nraDescription2' , res.record.description)
       }
+
+      const myObject = { ...initialValues }; // Clone the current state
+res.list.forEach(obj => {
+  if (obj.key in myObject) {
+    myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
+  }
+});
+setInitialValues(myObject);
       })
       .catch(error => {
         setErrorMessage(error)
