@@ -138,20 +138,20 @@ export default function MachineSpecificationForm({ labels, maxAccess, recordId }
                   />
                 </Grid>
                 <Grid item xs={12}>
-                <CustomDatePicker
-                  name="activationDate"
-                  label={labels.activationDate}
-                  value={formik.values?.activationDate}
-                  onChange={formik.setFieldValue}
-                  onClear={() =>
-                    formik.setFieldValue("activationDate", "")
-                  }
-                  error={
-                    formik.touched.activationDate &&
-                    Boolean(formik.errors.activationDate)
-                  }
-                  maxAccess={maxAccess}
-                />
+                  <CustomDatePicker
+                    name="activationDate"
+                    label={labels.activationDate}
+                    value={formik.values?.activationDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() =>
+                      formik.setFieldValue("activationDate", "")
+                    }
+                    error={
+                      formik.touched.activationDate &&
+                      Boolean(formik.errors.activationDate)
+                    }
+                    maxAccess={maxAccess}
+                  />
               </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
