@@ -1197,7 +1197,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onFocus={value => {
                       value &&   setIdNumber(value)
                     }}
-                    readOnly={editMode || infoAutoFilled || idInfoAutoFilled}
+                    readOnly={editMode  || idInfoAutoFilled}
                     required
                   />
                 </Grid>
@@ -1217,7 +1217,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('birth_date', '')}
                     error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
-                    readOnly={editMode || infoAutoFilled || idInfoAutoFilled}
+                    readOnly={editMode || idInfoAutoFilled}
                     helperText={formik.touched.birth_date && formik.errors.birth_date}
                     maxAccess={maxAccess}
                   />

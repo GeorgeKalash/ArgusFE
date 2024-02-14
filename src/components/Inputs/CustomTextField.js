@@ -67,7 +67,7 @@ const CustomTextField = ({
     <div style={{ display: hidden ? 'none' : 'block' }}>
 
       <TextField
-        key={(value?.length < 1 || readOnly ) && value }
+        key={(value?.length < 1 || readOnly  || value === null) && value }
         inputRef={inputRef}
         type={type}
         variant={variant}
