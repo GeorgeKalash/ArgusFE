@@ -28,6 +28,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
+import { ConfirmationOnSubmit } from './ConfirmationOnSubmit'
 
 const FormContext = React.createContext(null)
 
@@ -42,7 +43,7 @@ export async function Country(getRequest) {
   return res.record.value
 }
 
-function FormField({ name, Component, valueField, ...rest }) {
+function FormField({ name, Component, valueField, onFocus, ...rest }) {
   const { formik, labels } = useContext(FormContext)
   const { getRequest } = useContext(RequestsContext)
 
@@ -68,6 +69,14 @@ function FormField({ name, Component, valueField, ...rest }) {
           getCountry()
         }
         formik.setFieldValue(name, v ? v[valueField] ?? v : e.target.value)
+      }}
+      onFocus={e => {
+        if (onFocus && name == 'id_number') {
+          onFocus(e.target.value)
+        }
+      }}
+      onClear={() => {
+        formik.setFieldValue(name, '')
       }}
       form={formik}
     />
@@ -115,6 +124,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [typeStore, setTypeStore] = useState([])
   const [creditCardStore, setCreditCardStore] = useState([])
   const [getValue] = useIdType()
+  const [rateType, setRateType] = useState(null)
+  const [idNumber, setIdNumber] = useState(null)
 
   async function checkTypes(value) {
     if (!value) {
@@ -137,16 +148,19 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     endpointId: 'CTTRX.asmx/pageCIV'
   })
 
-  const [initialValues, setInitialValues] = useState({
+  const initial = {
     recordId: null,
     reference: null,
     rows: [
       {
         seqNo: 1,
         currencyId: '',
-        fcAmount: 0,
-        exRate: 0,
-        lcAmount: 0
+        fcAmount: '',
+        defaultExRate: 0,
+        exRate: '',
+        lcAmount: '',
+        minRate: 0,
+        maxRate: 0
       }
     ],
     rows2: [
@@ -163,7 +177,86 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         receiptRef: ''
       }
     ],
-    date: null,
+    date: new Date(),
+    clientId: null,
+    clientName: null,
+    clientType: '1',
+    firstName: null,
+    middleName: null,
+    familyName: null,
+    fl_firstName: null,
+    fl_lastName: null,
+    fl_middleName: null,
+    fl_familyName: null,
+    birth_date: null,
+    resident: false,
+    profession: null,
+    source_of_income: null,
+    sponsor: null,
+    id_number: null,
+    issue_country: null,
+    id_type: null,
+    expiry_date: null,
+    remarks: null,
+    purpose_of_exchange: null,
+    nationality: null,
+    cell_phone: null,
+    status: '1',
+    type: -1,
+    wip: 1,
+    functionId: '3502',
+    idNoConfirm: '',
+    cellPhoneConfirm: '',
+    otp: false
+  }
+
+  const initial1 = {
+    rows: [
+      {
+        seqNo: 1,
+        cashAccountId: '',
+        cashInvoiceId: null,
+        type: '',
+        typeName: '',
+        ccName: '',
+        amount: '',
+        ccId: '',
+        bankFees: 0,
+        receiptRef: ''
+      }
+    ]
+  }
+
+  const [initialValues, setInitialValues] = useState({
+    recordId: null,
+    reference: null,
+    rows: [
+      {
+        seqNo: 1,
+        currencyId: '',
+        fcAmount: '',
+        defaultExRate: 0,
+        exRate: '',
+        lcAmount: '',
+        minRate: 0,
+        maxRate: 0
+      }
+    ],
+    rows2: [
+      {
+        seqNo: 1,
+        cashAccountId: '',
+        cashInvoiceId: null,
+        type: '',
+        typeName: '',
+        ccName: '',
+        amount: '',
+        ccId: '',
+        bankFees: 0,
+        receiptRef: ''
+      }
+    ],
+    date: new Date(),
     clientId: null,
     clientName: null,
     clientType: '1',
@@ -190,7 +283,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     status: editMode ? null : '1',
     type: -1,
     wip: 1,
-    functionId: '3502'
+    functionId: '3502',
+    idNoConfirm: '',
+    cellPhoneConfirm: '',
+    otp: false
   })
 
   const formik = useFormik({
@@ -200,8 +296,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     validate: values => {
       const type = values.rows2 && values.rows2.every(row => !!row.type)
       const amount = values.rows2 && values.rows2.every(row => !!row.amount)
+      const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
+      const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
+      const exRate = values.rows && values.rows.every(row => !!row.exRate)
 
-      return type && amount
+      return type && amount && exRate && lcAmount && fcAmount
         ? {}
         : {
             rows2: Array(values.rows2 && values.rows2.length).fill({
@@ -224,11 +323,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       profession: yup.string().required()
     }),
     initialValues,
+
+    // onReset,
     onSubmit
   })
-
-  const [rateType, setRateType] = useState(null)
-  const [blur, setBlur] = useState(null)
 
   async function setOperationType(type) {
     if (type === '3502' || type === '3503') {
@@ -279,10 +377,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   useEffect(() => {
-    const date = new Date()
-
-    !editMode && formik.setFieldValue('date', date)
-
     fillType()
     fillCATypeStore()
     fillCreditCard()
@@ -298,43 +392,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       if (recordId) {
         setEditMode(true)
         getData(recordId)
-
-        // const { record } = await getRequest({
-        //   extension: 'CTTRX.asmx/get2CIV',
-        //   parameters: `_recordId=${recordId}`
-        // })
-
-        // setInitialValues({
-        //   recordId: recordId,
-        //   reference: record.headerView.reference,
-        //   rows: record.items,
-        //   clientType: record.clientMaster.category,
-        //   date: formatDateFromApi(record.headerView.date),
-        //   clientId: record?.clientIndividual?.clientId,
-        //   clientName: record.headerView.clientName,
-        //   firstName: record?.clientIndividual?.firstName,
-        //   lastName: record?.clientIndividual?.lastName,
-        //   middleName: record?.clientIndividual?.middleName,
-        //   familyName: record?.clientIndividual?.familyName,
-        //   fl_firstName: record?.clientIndividual?.fl_firstName,
-        //   fl_lastName: record?.clientIndividual?.fl_lastName,
-        //   fl_middleName: record?.clientIndividual?.fl_middleName,
-        //   fl_familyName: record?.clientIndividual?.fl_familyName,
-        //   birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
-        //   resident: record?.clientIndividual?.isResident,
-        //   profession: record?.clientIndividual?.professionId,
-        //   source_of_income: record?.clientIndividual?.incomeSourceId,
-        //   sponsor: record?.clientIndividual?.sponsorName,
-        //   id_number: record.clientIDView.idNo,
-        //   issue_country: record.clientIDView.idCountryId,
-        //   id_type: record.clientIDView.idtId,
-        //   expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
-        //   remarks: record.headerView.notes,
-        //   purpose_of_exchange: record.headerView.poeId,
-        //   nationality: record.clientMaster.nationalityId,
-        //   cell_phone: record.clientMaster.cellPhone
-        // })
-        // setOperationType(record.headerView.functionId.toString())
       }
 
       setCurrencyStore(response.list)
@@ -348,44 +405,47 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       extension: 'CTTRX.asmx/get2CIV',
       parameters: `_recordId=${_recordId}`
     })
+    if (!recordId) {
+      formik.setFieldValue('reference', record.headerView.reference)
+    } else {
+      formik.setValues({
+        recordId: recordId,
+        reference: record.headerView.reference,
+        rows: record.items,
+        rows2: record.cash,
+        clientType: record.clientMaster.category,
+        date: formatDateFromApi(record.headerView.date),
+        clientId: record?.clientIndividual?.clientId,
+        clientName: record.headerView.clientName,
+        functionId: record.headerView.functionId,
+        plantId: record.headerView.plantId,
+        wip: record.headerView.wip,
+        firstName: record?.clientIndividual?.firstName,
+        lastName: record?.clientIndividual?.lastName,
+        middleName: record?.clientIndividual?.middleName,
+        familyName: record?.clientIndividual?.familyName,
+        fl_firstName: record?.clientIndividual?.fl_firstName,
+        fl_lastName: record?.clientIndividual?.fl_lastName,
+        fl_middleName: record?.clientIndividual?.fl_middleName,
+        fl_familyName: record?.clientIndividual?.fl_familyName,
+        birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
+        resident: record?.clientIndividual?.isResident,
+        profession: record?.clientIndividual?.professionId,
+        source_of_income: record?.clientIndividual?.incomeSourceId,
+        sponsor: record?.clientIndividual?.sponsorName,
+        id_number: record.clientIDView.idNo,
+        issue_country: record.clientIDView.idCountryId,
+        id_type: record.clientIDView.idtId,
+        expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
+        remarks: record.headerView.notes,
+        purpose_of_exchange: record.headerView.poeId,
+        nationality: record.clientMaster.nationalityId,
+        cell_phone: record.clientMaster.cellPhone,
+        status: record.headerView.status
+      })
 
-    setInitialValues({
-      recordId: recordId,
-      reference: record.headerView.reference,
-      rows: record.items,
-      rows2: record.cash,
-      clientType: record.clientMaster.category,
-      date: formatDateFromApi(record.headerView.date),
-      clientId: record?.clientIndividual?.clientId,
-      clientName: record.headerView.clientName,
-      functionId: record.headerView.functionId,
-      plantId: record.headerView.plantId,
-      wip: record.headerView.wip,
-      firstName: record?.clientIndividual?.firstName,
-      lastName: record?.clientIndividual?.lastName,
-      middleName: record?.clientIndividual?.middleName,
-      familyName: record?.clientIndividual?.familyName,
-      fl_firstName: record?.clientIndividual?.fl_firstName,
-      fl_lastName: record?.clientIndividual?.fl_lastName,
-      fl_middleName: record?.clientIndividual?.fl_middleName,
-      fl_familyName: record?.clientIndividual?.fl_familyName,
-      birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
-      resident: record?.clientIndividual?.isResident,
-      profession: record?.clientIndividual?.professionId,
-      source_of_income: record?.clientIndividual?.incomeSourceId,
-      sponsor: record?.clientIndividual?.sponsorName,
-      id_number: record.clientIDView.idNo,
-      issue_country: record.clientIDView.idCountryId,
-      id_type: record.clientIDView.idtId,
-      expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
-      remarks: record.headerView.notes,
-      purpose_of_exchange: record.headerView.poeId,
-      nationality: record.clientMaster.nationalityId,
-      cell_phone: record.clientMaster.cellPhone,
-      status: record.headerView.status
-    })
-
-    CashFormik.setValues({ rows: record.cash })
+      CashFormik.setValues({ rows: record.cash })
+    }
   }
 
   // const [plantId, setPlantId] = useState(null)
@@ -400,7 +460,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     // setPlantId(record.value)
 
     const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.ExchangeRate.get,
+      extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
       parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateType}`
     })
 
@@ -480,118 +540,207 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     formik.setFieldValue('rows2', initialValues.rows2)
   }, [CashFormik.values])
 
+  function onReset(e) {
+    setInitialValues({
+      recordId: null,
+      reference: null,
+      rows: [
+        {
+          seqNo: 1,
+          currencyId: '',
+          fcAmount: '',
+          defaultExRate: 0,
+          exRate: '',
+          lcAmount: '',
+          minRate: 0,
+          maxRate: 0
+        }
+      ],
+      rows2: [
+        {
+          seqNo: 1,
+          cashAccountId: '',
+          cashInvoiceId: null,
+          type: '',
+          typeName: '',
+          ccName: '',
+          amount: '',
+          ccId: '',
+          bankFees: 0,
+          receiptRef: ''
+        }
+      ],
+      date: new Date(),
+      clientId: null,
+      clientName: null,
+      clientType: '1',
+      firstName: null,
+      middleName: null,
+      familyName: null,
+      fl_firstName: null,
+      fl_lastName: null,
+      fl_middleName: null,
+      fl_familyName: null,
+      birth_date: null,
+      resident: false,
+      profession: null,
+      source_of_income: null,
+      sponsor: null,
+      id_number: null,
+      issue_country: null,
+      id_type: null,
+      expiry_date: null,
+      remarks: null,
+      purpose_of_exchange: null,
+      nationality: null,
+      cell_phone: null,
+      status: editMode ? null : '1',
+      type: -1,
+      wip: 1,
+      functionId: '3502',
+      idNoConfirm: '',
+      cellPhoneConfirm: '',
+      otp: false
+    })
+
+    // CashFormik.setValues()
+
+    return
+  }
   async function onSubmit(values) {
-    const { record: recordFunctionId } = await getRequest({
-      extension: `SY.asmx/getUFU`,
-      parameters: `_userId=${userId}&_functionId=${values.functionId}`
-    })
-
-    const { dtId } = recordFunctionId
-
-    const { record: cashAccountRecord } = await getRequest({
-      extension: `SY.asmx/getUD`,
-      parameters: `_userId=${userId}&_key=cashAccountId`
-    })
-
-    const clientId = values.clientId || 0
-
-    const payload = {
-      header: {
-        recordId: values.recordId,
-        dtId,
-        reference: values.reference,
-        status: values.status,
-        date: formatDateToApiFunction(values.date),
-        functionId: values.functionId,
-        plantId: plantId ? plantId : values.plantId,
-        clientId,
-        cashAccountId: cashAccountRecord.value,
-        poeId: values.purpose_of_exchange,
-        wip: values.wip,
-        amount: String(total || '').replaceAll(',', ''),
-        notes: values.remarks
-      },
-      items: values.rows.map(({ seqNo, currencyId, exRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
-        seqNo,
-        currencyId,
-        exRate,
-        rateCalcMethod,
-        fcAmount: String(fcAmount || '').replaceAll(',', ''),
-        lcAmount: lcAmount
-      })),
-      clientMaster: {
-        category: values.clientType,
-        reference: null,
-        name: null,
-        flName: null,
-        keyword: null,
-        nationalityId: values.nationality,
-        status: 1,
-        addressId: null,
-        cellPhone: values.cell_phone,
-        oldReference: null,
-        otp: null,
-        createdDate: formatDateToApiFunction(values.date),
-        expiryDate: null
-      },
-      clientIndividual: {
-        clientId,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        middleName: values.middleName,
-        familyName: values.familyName,
-        fl_firstName: values.fl_firstName,
-        fl_lastName: values.fl_lastName,
-        fl_middleName: values.fl_middleName,
-        fl_familyName: values.fl_familyName,
-        birthDate: formatDateToApiFunction(values.birth_date),
-        isResident: values.resident,
-        professionId: values.profession,
-        incomeSourceId: values.source_of_income,
-        sponsorName: values.sponsor
-      },
-      clientID: {
-        idNo: values.id_number,
-        clientId,
-        idCountryId: values.issue_country,
-        idtId: values.id_type,
-        idExpiryDate: formatDateToApiFunction(values.expiry_date),
-        idIssueDate: null,
-        idCityId: null,
-        isDiplomat: false
-      },
-
-      cash:
-        CashFormik.values.rows.length > 0 &&
-        CashFormik.values.rows.map(({ seqNo, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
-          seqNo,
-          type,
-          ccId,
-          bankFees,
-          amount: String(amount || '').replaceAll(',', ''),
-          receiptRef,
-          cashAccountId: cashAccountRecord.value
-        }))
-    }
-
-    const response = await postRequest({
-      extension: 'CTTRX.asmx/set2CIV',
-      record: JSON.stringify(payload)
-    })
-
-    if (!values.recordId) {
-      toast.success('Record Added Successfully')
-      setInitialValues({
-        ...values,
-        recordId: response.recordId
+    if (
+      (!values.idNoConfirm && values.clientId) ||
+      (!values.confirmIdNo && !values.clientId && !values.cellPhoneConfirm)
+    ) {
+      stack({
+        Component: ConfirmationOnSubmit,
+        props: {
+          formik: formik,
+          setErrorMessage: setErrorMessage,
+          labels: labels
+        },
+        title: labels.fetch,
+        width: 400,
+        height: 400
       })
-      getData(response.recordId)
-
-      setEditMode(true)
     } else {
-      toast.success('Record Edited Successfully')
+      const { record: recordFunctionId } = await getRequest({
+        extension: `SY.asmx/getUFU`,
+        parameters: `_userId=${userId}&_functionId=${values.functionId}`
+      })
+
+      const { dtId } = recordFunctionId
+
+      const { record: cashAccountRecord } = await getRequest({
+        extension: `SY.asmx/getUD`,
+        parameters: `_userId=${userId}&_key=cashAccountId`
+      })
+
+      const clientId = values.clientId || 0
+
+      const payload = {
+        header: {
+          recordId: values.recordId,
+          dtId,
+          reference: values.reference,
+          status: values.status,
+          date: formatDateToApiFunction(values.date),
+          functionId: values.functionId,
+          plantId: plantId ? plantId : values.plantId,
+          clientId,
+          cashAccountId: cashAccountRecord.value,
+          poeId: values.purpose_of_exchange,
+          wip: values.wip,
+          amount: String(total || '').replaceAll(',', ''),
+          notes: values.remarks
+        },
+        items: values.rows.map(
+          ({ seqNo, currencyId, exRate, defaultExRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
+            seqNo,
+            currencyId,
+            exRate,
+            defaultExRate,
+            rateCalcMethod,
+            fcAmount: String(fcAmount || '').replaceAll(',', ''),
+            lcAmount: lcAmount
+          })
+        ),
+        clientMaster: {
+          category: values.clientType,
+          reference: null,
+          name: null,
+          flName: null,
+          keyword: null,
+          nationalityId: values.nationality,
+          status: 1,
+          addressId: null,
+          cellPhone: values.cell_phone,
+          oldReference: null,
+          otp: false,
+          createdDate: formatDateToApiFunction(values.date),
+          expiryDate: null
+        },
+        clientIndividual: {
+          clientId,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          middleName: values.middleName,
+          familyName: values.familyName,
+          fl_firstName: values.fl_firstName,
+          fl_lastName: values.fl_lastName,
+          fl_middleName: values.fl_middleName,
+          fl_familyName: values.fl_familyName,
+          birthDate: formatDateToApiFunction(values.birth_date),
+          isResident: values.resident,
+          professionId: values.profession,
+          incomeSourceId: values.source_of_income,
+          sponsorName: values.sponsor
+        },
+        clientID: {
+          idNo: values.id_number,
+          clientId,
+          idCountryId: values.issue_country,
+          idtId: values.id_type,
+          idExpiryDate: formatDateToApiFunction(values.expiry_date),
+          idIssueDate: null,
+          idCityId: null,
+          isDiplomat: false
+        },
+
+        cash:
+          CashFormik.values.rows.length > 0 &&
+          CashFormik.values.rows.map(({ seqNo, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
+            seqNo,
+            type,
+            ccId,
+            bankFees,
+            amount: String(amount || '').replaceAll(',', ''),
+            receiptRef,
+            cashAccountId: cashAccountRecord.value
+          }))
+      }
+
+      const response = await postRequest({
+        extension: 'CTTRX.asmx/set2CIV',
+        record: JSON.stringify(payload)
+      })
+
+      if (!values.recordId) {
+        toast.success('Record Added Successfully')
+        setInitialValues({
+          ...values,
+          recordId: response.recordId
+        })
+        getData(response.recordId)
+
+        setEditMode(true)
+      } else {
+        toast.success('Record Edited Successfully')
+      }
+      invalidate()
     }
-    invalidate()
+
+    return
   }
   async function fetchClientInfo({ clientId }) {
     try {
@@ -633,9 +782,27 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
     return response.record
   }
+  async function fetchInfoByKey({ key }) {
+    const response = await getRequest({
+      extension: RTCLRepository.CtClientIndividual.get3,
+      parameters: `_key=${key}`
+    })
+
+    return response.record
+  }
 
   return (
-    <FormShell height={400} form={formik} resourceId={35208} editMode={editMode} disabledSubmit={Balance && true}>
+    <FormShell
+      height={400}
+      form={formik}
+      initialValues={initial}
+      initialValues1={initial1}
+      form1={CashFormik}
+      setEditMode={setEditMode}
+      resourceId={35208}
+      editMode={editMode}
+      disabledSubmit={Balance && true}
+    >
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
           <FieldSet title='Transaction'>
@@ -644,7 +811,19 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 <FormField name='reference' Component={CustomTextField} readOnly />
               </Grid>
               <Grid item xs={4}>
-                <FormField name='date' Component={CustomDatePicker} required readOnly={editMode} />
+                <CustomDatePicker
+                  name='date'
+                  label={labels.date}
+                  value={formik.values?.date}
+                  required={true}
+                  onChange={formik.setFieldValue}
+                  onClear={() => formik.setFieldValue('date', '')}
+                  readOnly={editMode}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                  helperText={formik.touched.date && formik.errors.date}
+                  maxAccess={maxAccess}
+                />
+                {/* <FormField name='date' Component={CustomDatePicker}  required readOnly={editMode} /> */}
               </Grid>
               <Grid item xs={4}>
                 <FormField
@@ -699,7 +878,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 />
               </Grid> */}
               <Grid item xs={4}>
-                <ResourceLookup
+                {/* <ResourceLookup
                   endpointId={CurrencyTradingClientRepository.Client.snapshot}
                   parameters={{
                     _category: 1
@@ -711,7 +890,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   label={labels.client}
                   form={formik}
                   readOnly={editMode || idInfoAutoFilled}
-                  secondDisplayField={false}
+                 secondDisplayField={false}
                   onChange={(event, newValue) => {
                     if (newValue) {
                       formik.setFieldValue('clientId', newValue?.recordId)
@@ -723,6 +902,48 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     }
                   }}
                   errorCheck={'clientId'}
+                /> */}
+
+                <FormField
+                  name='search'
+                  Component={CustomTextField}
+                  onBlur={e => {
+                    e.target.value &&
+                      fetchInfoByKey({ key: e.target.value })
+                        .then(info => {
+                          if (info) {
+                            setIDInfoAutoFilled(false)
+
+                            formik.setFieldValue('id_number', info.clientIDView.idNo)
+                            formik.setFieldValue('firstName', info.clientIndividual.firstName)
+                            formik.setFieldValue('clientId', info.clientId)
+                            formik.setFieldValue('middleName', info.clientIndividual.middleName)
+                            formik.setFieldValue('lastName', info.clientIndividual.lastName)
+                            formik.setFieldValue('familyName', info.clientIndividual.familyName)
+                            formik.setFieldValue('fl_firstName', info.clientIndividual.fl_firstName)
+                            formik.setFieldValue('fl_lastName', info.clientIndividual.fl_lastName)
+                            formik.setFieldValue('fl_middleName', info.clientIndividual.fl_middleName)
+                            formik.setFieldValue('fl_familyName', info.clientIndividual.fl_familyName)
+                            formik.setFieldValue('birth_date', formatDateFromApi(info.clientIndividual.birthDate))
+                            formik.setFieldValue('resident', info.clientIndividual.isResident)
+                            formik.setFieldValue('profession', info.clientIndividual.professionId)
+                            formik.setFieldValue('sponsor', info.clientIndividual.sponsorName)
+                            formik.setFieldValue('source_of_income', info.clientIndividual.incomeSourceId)
+                            formik.setFieldValue('issue_country', info.clientIDView.idCountryId)
+                            formik.setFieldValue('id_type', info.clientIDView.idtId)
+                            formik.setFieldValue('nationality', info.clientMaster.nationalityId)
+                            formik.setFieldValue('cell_phone', info.clientMaster.cellPhone)
+                            formik.setFieldValue('expiry_date', formatDateFromApi(info.clientIDView.idExpiryDate))
+
+                            setIDInfoAutoFilled(true)
+                          }
+                        })
+                        .catch(error => {
+                          console.error('Error fetching ID info:', error)
+                        })
+                  }}
+                  readOnly={editMode}
+                  required
                 />
               </Grid>
             </Grid>
@@ -733,9 +954,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 maxAccess={maxAccess}
                 gridValidation={formik}
                 scrollHeight={350}
-                width={750}
+                width={1500}
                 background={
-                  formik.values.functionId && (formik.values.functionId === '3503' ? 'rgb(245, 194, 193)' : '#C7F6C7')
+                  formik.values.functionId && (formik.values.functionId === '3503' ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
                 columns={[
                   {
@@ -762,37 +983,71 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'name', value: 'Name' }
                     ],
                     async onChange(row) {
-                      if (row.newValue > 0) {
+                      if (row?.newValue > 0) {
                         const exchange = await fetchRate({
                           currencyId: row.newValue
                         })
 
-                        if (!exchange?.exchangeRate?.rate) {
+                        if (!exchange?.rate)
                           stackError({
                             message: `Rate not defined for ${row.value}.`
                           })
 
-                          // return
+                        if (exchange) {
+                          const exRate = exchange.rate
+                          const rateCalcMethod = exchange.rateCalcMethod
+
+                          const lcAmount =
+                            rateCalcMethod === 1
+                              ? parseFloat(row.newRowData.fcAmount.toString().replace(/,/g, '')) * exRate
+                              : rateCalcMethod === 2
+                              ? parseFloat(row.newRowData.fcAmount.toString().replace(/,/g, '')) / exRate
+                              : 0
+                          formik.setFieldValue(`rows[${row.rowIndex}].lcAmount`, lcAmount)
                         }
+
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.exchangeRate?.rate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.exchange?.rateCalcMethod)
+                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, exchange?.rate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.rateCalcMethod)
+                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
+                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
 
                         //  row.rowData.currencyId = row.newValue
-                        //                       row.rowData.exRate = exchange.exchangeRate.rate
-                        //                       row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
+                        //  row.rowData.exRate = exchange.exchangeRate.rate
+                        //  row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
                       } else {
                         formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
                         formik.setFieldValue(`rows[${row.rowIndex}].exRate`, 0)
+                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, 0)
                         formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
+                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, 0)
+                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, 0)
 
                         return
                       }
+
+                      //                       if(row.newValue !== formik.values.rows[row.rowIndex].currencyId && formik.values.rows[row.rowIndex].fcAmount){
+
+                      //                         const exRate = formik.values?.rows[row.rowIndex]?.exRate
+                      //                         const  rateCalcMethod = formik.values?.rows[row?.rowIndex]?.rateCalcMethod
+
+                      //                         const lcAmount =
+                      //                         rateCalcMethod === 1
+                      //                           ? parseFloat(newValue.toString().replace(/,/g, '')) * exRate
+                      //                           : rateCalcMethod === 2
+                      //                           ? parseFloat(newValue.toString().replace(/,/g, '')) / exRate
+                      //                           : 0
+                      //                       formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
+
+                      // return
+                      //                       }
                     }
                   },
                   {
                     field: 'numberfield',
                     header: 'FC Amount',
+                    mandatory: true,
                     name: 'fcAmount',
                     async onChange(e) {
                       const {
@@ -812,17 +1067,75 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       e.rowData.lcAmount = lcAmount
                     }
                   },
+
                   {
                     field: 'textfield',
+                    name: 'defaultExRate',
+                    readOnly: false,
+                    hidden: true
+                  },
+                  {
+                    field: 'numberfield',
                     header: 'Rate',
                     name: 'exRate',
-                    readOnly: true
+                    readOnly: false,
+                    mandatory: true,
+                    async onChange(e) {
+                      const {
+                        rowIndex,
+                        rowData: { minRate, maxRate, lcAmount, fcAmount },
+                        newValue
+                      } = e
+
+                      const nv = parseFloat(newValue?.toString().replace(/,/g, ''))
+                      const lc = parseFloat(lcAmount?.toString().replace(/,/g, ''))
+                      const fc = parseFloat(fcAmount?.toString().replace(/,/g, ''))
+
+                      if (nv >= minRate && nv <= maxRate) {
+                        formik.setFieldValue(`rows[${e.rowIndex}].exRate`, e.value)
+
+                        if (fc) {
+                          formik.setFieldValue(`rows[${rowIndex}].lcAmount`, fc * nv)
+                        } else if (lc) {
+                          formik.setFieldValue(`rows[${e.rowIndex}].fcAmount`, lc / nv)
+                        }
+                      } else {
+                        formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                      }
+                    }
+                  },
+
+                  {
+                    field: 'numberfield',
+                    name: 'minRate',
+                    readOnly: false,
+                    hidden: true
+                  },
+                  {
+                    field: 'numberfield',
+                    name: 'maxRate',
+                    readOnly: false,
+                    hidden: true
                   },
                   {
                     field: 'numberfield',
                     header: 'LC Amount',
                     name: 'lcAmount',
-                    readOnly: true
+                    mandatory: true,
+                    readOnly: false,
+                    async onChange(e) {
+                      const {
+                        rowIndex,
+                        rowData: { exRate },
+                        newValue
+                      } = e
+                      if (newValue && exRate) {
+                        var fcAmount = String(newValue || 0).replaceAll(',', '')
+                        fcAmount = parseFloat(fcAmount) || 0
+                        fcAmount = fcAmount / exRate
+                        formik.setFieldValue(`rows[${rowIndex}].fcAmount`, fcAmount)
+                      }
+                    }
                   }
                 ]}
                 defaultRow={{
@@ -830,7 +1143,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   currencyId: '',
                   fcAmount: 0,
                   exRate: 0,
-                  lcAmount: 0
+                  lcAmount: 0,
+                  minRate: 0,
+                  maxRate: 0
                 }}
               />
             </Grid>
@@ -843,34 +1158,52 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     name='id_number'
                     Component={CustomTextField}
                     onBlur={e => {
-                      checkTypes(e.target.value)
+                      if (e.target.value != idNumber) {
+                        checkTypes(e.target.value)
 
-                      fetchIDInfo({ idNumber: e.target.value })
-                        .then(IDInfo => {
-                          if (!!IDInfo) {
-                            formik.setFieldValue('issue_country', IDInfo.idCountryId)
-                            formik.setFieldValue('id_type', IDInfo.idtId)
-                            formik.setFieldValue('expiry_date', formatDateFromApi(IDInfo.idExpiryDate))
-                            if (IDInfo.clientId != null) {
-                              fetchClientInfo({ clientId: IDInfo.clientId })
+                        fetchIDInfo({ idNumber: e.target.value })
+                          .then(IDInfo => {
+                            if (!!IDInfo) {
+                              formik.setFieldValue('issue_country', IDInfo.idCountryId)
+                              formik.setFieldValue('id_type', IDInfo.idtId)
+                              formik.setFieldValue('expiry_date', formatDateFromApi(IDInfo.idExpiryDate))
+                              if (IDInfo.clientId != null) {
+                                fetchClientInfo({ clientId: IDInfo.clientId })
+                              }
+                              setIDInfoAutoFilled(true)
                             }
-                            setIDInfoAutoFilled(true)
-                          }
-                        })
-                        .catch(error => {
-                          console.error('Error fetching ID info:', error)
-                        })
+                          })
+                          .catch(error => {
+                            console.error('Error fetching ID info:', error)
+                          })
+                      }
+                    }}
+                    onFocus={value => {
+                      setIdNumber(value)
                     }}
                     readOnly={editMode}
                     required
                   />
                 </Grid>
                 <Grid item xs={7}>
-                  <FormField
+                  {/* <FormField
                     name='birth_date'
                     Component={CustomDatePicker}
                     readOnly={editMode || infoAutoFilled}
                     required
+                  /> */}
+
+                  <CustomDatePicker
+                    name='birth_date'
+                    label={labels.birth_date}
+                    value={formik.values?.birth_date}
+                    required={true}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('birth_date', '')}
+                    error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
+                    readOnly={editMode || infoAutoFilled}
+                    helperText={formik.touched.birth_date && formik.errors.birth_date}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
 
@@ -915,11 +1248,23 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 </Grid>
 
                 <Grid item xs={7}>
-                  <FormField
+                  {/* <FormField
                     name='expiry_date'
                     Component={CustomDatePicker}
                     readOnly={editMode || idInfoAutoFilled}
                     required
+                  /> */}
+                  <CustomDatePicker
+                    name='expiry_date'
+                    label={labels.expiry_date}
+                    value={formik.values?.expiry_date}
+                    required={true}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('expiry_date', '')}
+                    error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
+                    helperText={formik.touched.expiry_date && formik.errors.expiry_date}
+                    readOnly={editMode || idInfoAutoFilled}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -958,7 +1303,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 <Grid item xs={12}>
                   <FormField name='cell_phone' Component={CustomTextField} readOnly={editMode} required />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={7}>
                   <FormControlLabel
                     name='resident'
                     checked={formik.values.resident}
@@ -966,6 +1311,16 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     control={<Checkbox defaultChecked />}
                     label='Resident'
                     readOnly={editMode || infoAutoFilled}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <FormControlLabel
+                    name='otp'
+                    checked={formik.values.otp}
+                    onChange={formik.handleChange}
+                    control={<Checkbox defaultChecked />}
+                    label='Otp'
+                    disabled={true}
                   />
                 </Grid>
               </Grid>
@@ -1003,10 +1358,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
                   </Grid>
                 </Grid>
                 <Grid container rowGap={3} xs={4}></Grid>
@@ -1076,7 +1431,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   maxAccess={maxAccess}
                   gridValidation={CashFormik}
                   scrollHeight={350}
-                  width={750}
+                  width={850}
                   columns={[
                     {
                       field: 'incremented',
