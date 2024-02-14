@@ -76,7 +76,7 @@ function FormField({ name, Component, valueField, onFocus, ...rest }) {
         }
       }}
       onClear={() => {
-        formik.setFieldValue(name, '')
+        formik.setFieldValue(name ,  '' )
       }}
       form={formik}
     />
@@ -1396,7 +1396,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
                 <Grid container rowGap={3} xs={8}>
                   <Grid item xs={12}>
-                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode} />
                   </Grid>
 
                   <Grid item xs={12}>
