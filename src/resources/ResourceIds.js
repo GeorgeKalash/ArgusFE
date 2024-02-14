@@ -78,5 +78,5 @@ export const ResourceIds = {
   MaterialsAdjustment: 41204,
   CommissionSchedule : 51118,
   SystemDefaults: 20108,
-  Carrier: 40203,
+  carrierSite: 40203,
 }
