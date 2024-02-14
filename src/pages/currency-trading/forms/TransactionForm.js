@@ -1340,44 +1340,44 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='firstName'
                       Component={CustomTextField}
-                      readOnly={editMode || infoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled}
                       required
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='middleName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
                       name='lastName'
                       Component={CustomTextField}
-                      readOnly={editMode || infoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled}
                       required
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='familyName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                 </Grid>
                 <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
                   <Grid item xs={3}>
-                    <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='fl_firstName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='fl_middleName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='fl_familyName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                 </Grid>
                 <Grid container rowGap={3} xs={4}></Grid>
 
                 <Grid container rowGap={3} xs={8}>
                   <Grid item xs={12}>
-                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || infoAutoFilled} />
+                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
 
                   <Grid item xs={12}>
