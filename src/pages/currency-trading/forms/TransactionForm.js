@@ -755,11 +755,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         extension: RTCLRepository.Client.get,
         parameters: `_clientId=${clientId}`
       })
+      setIDInfoAutoFilled(false)
 
       // Check if the response status is OK (200)
       const clientInfo = response && response.record
       if (!!clientInfo) {
-        setInfoAutoFilled(true)
 
         formik.setFieldValue('firstName', clientInfo.firstName)
         formik.setFieldValue('middleName', clientInfo.middleName)
@@ -774,6 +774,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         formik.setFieldValue('profession', clientInfo.professionId)
         formik.setFieldValue('sponsor', clientInfo.sponsorName)
         formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
+        setIDInfoAutoFilled(true)
       }
     } catch (error) {
       // Handle other errors, such as network issues or exceptions
@@ -1310,7 +1311,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    readOnly={editMode || idInfoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled }
                     required
                   />
                 </Grid>
@@ -1330,7 +1331,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.handleChange}
                     control={<Checkbox defaultChecked />}
                     label='Resident'
-                    readOnly={editMode || infoAutoFilled}
+                    readOnly={editMode || idInfoAutoFilled}
                   />
                 </Grid>
                 <Grid item xs={2}>
