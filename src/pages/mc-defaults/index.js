@@ -47,7 +47,7 @@ const MCDefault = () => {
         .then(res => {
            res.list.map(obj => (
            myObject[obj.key] = obj.value? parseInt(obj.value): null
-            )); 
+            ));
             setInitialValues(myObject)
         })
         .catch(error => {
@@ -61,7 +61,7 @@ const MCDefault = () => {
       } = useResourceQuery({
         datasetId: ResourceIds.MC_Default,
       })
-    
+
     const formik = useFormik({
         enableReinitialize: true,
         validateOnChange: true,
@@ -76,10 +76,10 @@ const MCDefault = () => {
         var data = []
         Object.entries(obj).forEach(([key, value]) => {
            const newObj = { key: key  , value : value };
-     
+
            // Push the new object into the array
            data.push(newObj);
-     
+
         })
         postRequest({
             extension: SystemRepository.Defaults.set,
@@ -97,7 +97,7 @@ const MCDefault = () => {
        const handleSubmit = () => {
         formik.handleSubmit()
       }
-      
+
     return(
         <>
             <Box
@@ -176,7 +176,7 @@ const MCDefault = () => {
 
                         // helperText={formik.touched.mc_defaultRTFI && formik.errors.mc_defaultRTFI}
                         />
-                    </Grid>  
+                    </Grid>
                     <Grid sx={{
                         position: 'fixed',
                         bottom: 0,
@@ -194,5 +194,5 @@ const MCDefault = () => {
         </>
     )
   }
-  
+
   export default MCDefault

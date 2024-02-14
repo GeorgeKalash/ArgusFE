@@ -39,6 +39,16 @@ const Defaults = () => {
   const [numberRangeStore, setNumberRangeStore] = useState([])
   const[store, setStore] = useState([])
 
+const [ initialValues, setInitialValues] = useState({
+  nraId: null, nraRef: null, nraDescription: null, // ct-nra-individual
+  nraId2: null, nraRef2: null, nraDescription2: null,  //ct-nra-corporate
+  ct_cash_sales_ratetype_id : null,
+  ct_cash_purchase_ratetype_id : null,
+  ct_credit_sales_ratetype_id : null,
+  ct_credit_purchase_ratetype_id : null
+
+ })
+
   //stores
 
   const [errorMessage, setErrorMessage] = useState(null)
@@ -75,8 +85,17 @@ credit_sales_ratetype: labels && labels.find(item => item.key ==="credit_sales_r
 
   }
 
+  const rtDefaultFormValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues,
+    onSubmit: values => {
+      // postRtDefault(values)
+    }
+  })
+console.log(rtDefaultFormValidation)
+
    const getDataResult = () => {
-    const myObject = {};
 
 
     var parameters = `_filter=`
@@ -86,12 +105,14 @@ credit_sales_ratetype: labels && labels.find(item => item.key ==="credit_sales_r
      })
       .then(res => {
 
+        const myObject = { ...initialValues }; // Clone the current state
+        res.list.forEach(obj => {
+          if (obj.key in myObject) {
+            myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
+          }
+        });
+        setInitialValues(myObject);
 
-       res.list.map(obj => (
-       myObject[obj.key] = obj.value
-
-
-        ));
         myObject['nraRef'] = null
 
         rtDefaultFormValidation.setValues(myObject)
@@ -138,35 +159,22 @@ credit_sales_ratetype: labels && labels.find(item => item.key ==="credit_sales_r
         rtDefaultFormValidation.setFieldValue('nraDescription2' , res.record.description)
       }
 
-      const myObject = { ...initialValues }; // Clone the current state
+      const myObject = { ...rtDefaultFormValidation.values }; // Clone the current state
 res.list.forEach(obj => {
   if (obj.key in myObject) {
     myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
   }
 });
-setInitialValues(myObject);
+rtDefaultFormValidation.set(myObject);
+
+
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
 
-  const rtDefaultFormValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-     initialValues: {
-     nraId: null, nraRef: null, nraDescription: null, // ct-nra-individual
-     nraId2: null, nraRef2: null, nraDescription2: null,  //ct-nra-corporate
-     ct_cash_sales_ratetype_id : null,
-     ct_cash_purchase_ratetype_id : null,
-     ct_credit_sales_ratetype_id : null,
-     ct_credit_purchase_ratetype_id : null
 
-    },
-    onSubmit: values => {
-      // postRtDefault(values)
-    }
-  })
 
 
 
