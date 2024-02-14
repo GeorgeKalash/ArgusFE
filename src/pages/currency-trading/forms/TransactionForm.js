@@ -911,10 +911,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   name='search'
                   Component={CustomTextField}
                   onBlur={e => {
-                    e.target.value  &&
-                       (search != e.target.value ) && fetchInfoByKey({ key: e.target.value })
+                    e.target.value  && (search != e.target.value ) && fetchInfoByKey({ key: e.target.value })
                         .then(info => {
-                          if (info) {
+                          if (!!info) {
                             setIDInfoAutoFilled(false)
 
                             formik.setFieldValue('id_number', info.clientIDView.idNo)
