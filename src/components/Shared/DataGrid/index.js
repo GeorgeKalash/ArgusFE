@@ -1,9 +1,9 @@
 import { DataGrid as MUIDataGrid, gridExpandedSortedRowIdsSelector, useGridApiRef } from '@mui/x-data-grid'
 import components from './components'
-import { Button } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { useEffect, useState } from 'react'
 
-export function FormDataGrid({ columns, value, onChange }) {
+export function DataGrid({ columns, value, onChange }) {
   async function processDependencies(newRow, oldRow) {
     const changed = columns.filter(({ name }) => newRow[name] !== oldRow[name])
 
@@ -145,7 +145,7 @@ export function FormDataGrid({ columns, value, onChange }) {
   const actionsColumn = {
     field: 'actions',
     editable: false,
-    width: '400',
+    width: '100',
     renderCell({ id }) {
       return (
         <>
@@ -156,45 +156,47 @@ export function FormDataGrid({ columns, value, onChange }) {
   }
 
   return (
-    <>
-      <MUIDataGrid
-        hideFooter
-        processRowUpdate={async (newRow, oldRow) => {
-          setUpdate(true)
-          const updated = await processDependencies(newRow, oldRow)
+    <MUIDataGrid
+      hideFooter
+      autoHeight
+      disableColumnFilter
+      disableColumnMenu
+      disableColumnSelector
+      processRowUpdate={async (newRow, oldRow) => {
+        setUpdate(true)
+        const updated = await processDependencies(newRow, oldRow)
 
-          const change = handleChange(updated, oldRow)
+        const change = handleChange(updated, oldRow)
 
-          setUpdate(false)
+        setUpdate(false)
 
-          return change
-        }}
-        onCellKeyDown={handleCellKeyDown}
-        rows={value}
-        apiRef={apiRef}
-        editMode='cell'
-        columns={[
-          ...columns.map(column => ({
-            field: column.name,
-            editable: column.editable ?? true,
-            width: column.width || 200,
-            sortable: false,
-            renderCell(params) {
-              const Component =
-                typeof column.component === 'string' ? components[column.component].view : column.component.view
+        return change
+      }}
+      onCellKeyDown={handleCellKeyDown}
+      rows={value}
+      apiRef={apiRef}
+      editMode='cell'
+      columns={[
+        ...columns.map(column => ({
+          field: column.name,
+          editable: column.editable ?? true,
+          width: column.width || 170,
+          sortable: false,
+          renderCell(params) {
+            const Component =
+              typeof column.component === 'string' ? components[column.component].view : column.component.view
 
-              return <Component {...params} column={column} />
-            },
-            renderEditCell(params) {
-              const Component =
-                typeof column.component === 'string' ? components[column.component].edit : column.component.edit
+            return <Component {...params} column={column} />
+          },
+          renderEditCell(params) {
+            const Component =
+              typeof column.component === 'string' ? components[column.component].edit : column.component.edit
 
-              return <Component {...params} column={column} />
-            }
-          })),
-          actionsColumn
-        ]}
-      />
-    </>
+            return <Component {...params} column={column} />
+          }
+        })),
+        actionsColumn
+      ]}
+    />
   )
 }
