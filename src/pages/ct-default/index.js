@@ -85,6 +85,23 @@ credit_sales_ratetype: labels && labels.find(item => item.key ==="credit_sales_r
 
   }
 
+  const rtDefaultValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      'ct-nra-individual': null,
+      "ct_cash_sales_ratetype_id" : null,
+      'ct_cash_purchase_ratetype_id' : null,
+      "ct_credit_sales_ratetype_id" : null,
+      "ct_credit_purchase_ratetype_id" : null
+
+      },
+    onSubmit: values => {
+
+      postRtDefault(values)
+    }
+  })
+
   const rtDefaultFormValidation = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
@@ -104,18 +121,18 @@ console.log(rtDefaultFormValidation)
       parameters: parameters
      })
       .then(res => {
-
+console.log(  res.list)
         const myObject = { ...initialValues }; // Clone the current state
         res.list.forEach(obj => {
           if (obj.key in myObject) {
-            myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
+            // myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
+            rtDefaultFormValidation.setFieldValue(obj.key,parseInt(obj.value) )
+            rtDefaultValidation.setFieldValue(obj.key, parseInt(obj.value) )
+
           }
         });
-        setInitialValues(myObject);
 
-        myObject['nraRef'] = null
 
-        rtDefaultFormValidation.setValues(myObject)
 
         if(myObject && myObject['ct-nra-individual']){
           getNumberRange(myObject['ct-nra-individual'] , 'ct-nra-individual')
@@ -132,8 +149,6 @@ console.log(rtDefaultFormValidation)
         setErrorMessage(error)
       })
   }
-
-
 
   const getNumberRange = (nraId , key) => {
     var parameters = `_filter=` + '&_recordId=' + nraId
@@ -159,13 +174,7 @@ console.log(rtDefaultFormValidation)
         rtDefaultFormValidation.setFieldValue('nraDescription2' , res.record.description)
       }
 
-      const myObject = { ...rtDefaultFormValidation.values }; // Clone the current state
-res.list.forEach(obj => {
-  if (obj.key in myObject) {
-    myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
-  }
-});
-rtDefaultFormValidation.set(myObject);
+
 
 
       })
@@ -178,18 +187,7 @@ rtDefaultFormValidation.set(myObject);
 
 
 
-  const rtDefaultValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      'ct-nra-individual': null
 
-      },
-    onSubmit: values => {
-
-      postRtDefault(values)
-    }
-  })
 
 
 
@@ -339,12 +337,12 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultFormValidation.values.ct_cash_sales_ratetype_id && store.filter(item => item.recordId === rtDefaultFormValidation.values.ct_cash_sales_ratetype_id)[0]}
+                        value={rtDefaultValidation.values.ct_cash_sales_ratetype_id && store.filter(item => item.recordId === rtDefaultValidation.values.ct_cash_sales_ratetype_id)[0]}
                         onChange={(event, newValue) => {
-                            rtDefaultFormValidation && rtDefaultFormValidation.setFieldValue('ct_cash_sales_ratetype_id', newValue?.recordId)
+                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_cash_sales_ratetype_id', newValue?.recordId)
                         }}
-                        error={rtDefaultFormValidation.touched.ct_cash_sales_ratetype_id && Boolean(rtDefaultFormValidation.errors.ct_cash_sales_ratetype_id)}
-                        helperText={rtDefaultFormValidation.touched.ct_cash_sales_ratetype_id && rtDefaultFormValidation.errors.ct_cash_sales_ratetype_id}
+                        error={rtDefaultValidation.touched.ct_cash_sales_ratetype_id && Boolean(rtDefaultValidation.errors.ct_cash_sales_ratetype_id)}
+                        helperText={rtDefaultValidation.touched.ct_cash_sales_ratetype_id && rtDefaultValidation.errors.ct_cash_sales_ratetype_id}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -355,12 +353,12 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultFormValidation.values.ct_cash_purchase_ratetype_id && store.filter(item => item.recordId === rtDefaultFormValidation.values.ct_cash_purchase_ratetype_id)[0]}
+                        value={rtDefaultValidation.values.ct_cash_purchase_ratetype_id && store.filter(item => item.recordId === rtDefaultValidation.values.ct_cash_purchase_ratetype_id)[0]}
                         onChange={(event, newValue) => {
-                            rtDefaultFormValidation && rtDefaultFormValidation.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId)
+                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId)
                         }}
-                        error={rtDefaultFormValidation.touched.ct_cash_purchase_ratetype_id && Boolean(rtDefaultFormValidation.errors.ct_cash_purchase_ratetype_id)}
-                        helperText={rtDefaultFormValidation.touched.ct_cash_purchase_ratetype_id && rtDefaultFormValidation.errors.ct_cash_purchase_ratetype_id}
+                        error={rtDefaultValidation.touched.ct_cash_purchase_ratetype_id && Boolean(rtDefaultValidation.errors.ct_cash_purchase_ratetype_id)}
+                        helperText={rtDefaultValidation.touched.ct_cash_purchase_ratetype_id && rtDefaultValidation.errors.ct_cash_purchase_ratetype_id}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -371,12 +369,12 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultFormValidation.values.ct_credit_sales_ratetype_id && store.filter(item => item.recordId === rtDefaultFormValidation.values.ct_credit_sales_ratetype_id)[0]}
+                        value={rtDefaultValidation.values.ct_credit_sales_ratetype_id && store.filter(item => item.recordId === rtDefaultValidation.values.ct_credit_sales_ratetype_id)[0]}
                         onChange={(event, newValue) => {
-                            rtDefaultFormValidation && rtDefaultFormValidation.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId)
+                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId)
                         }}
-                        error={rtDefaultFormValidation.touched.ct_credit_sales_ratetype_id && Boolean(rtDefaultFormValidation.errors.ct_credit_sales_ratetype_id)}
-                        helperText={rtDefaultFormValidation.touched.ct_credit_sales_ratetype_id && rtDefaultFormValidation.errors.ct_credit_sales_ratetype_id}
+                        error={rtDefaultValidation.touched.ct_credit_sales_ratetype_id && Boolean(rtDefaultValidation.errors.ct_credit_sales_ratetype_id)}
+                        helperText={rtDefaultValidation.touched.ct_credit_sales_ratetype_id && rtDefaultValidation.errors.ct_credit_sales_ratetype_id}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -387,12 +385,12 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultFormValidation.values.ct_credit_purchase_ratetype_id && store.filter(item => item.recordId === rtDefaultFormValidation.values.ct_credit_purchase_ratetype_id)[0]}
+                        value={rtDefaultValidation.values.ct_credit_purchase_ratetype_id && store.filter(item => item.recordId === rtDefaultValidation.values.ct_credit_purchase_ratetype_id)[0]}
                         onChange={(event, newValue) => {
-                            rtDefaultFormValidation && rtDefaultFormValidation.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId)
+                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId)
                         }}
-                        error={rtDefaultFormValidation.touched.ct_credit_purchase_ratetype_id && Boolean(rtDefaultFormValidation.errors.ct_credit_purchase_ratetype_id)}
-                        helperText={rtDefaultFormValidation.touched.ct_credit_purchase_ratetype_id && rtDefaultFormValidation.errors.ct_credit_purchase_ratetype_id}
+                        error={rtDefaultValidation.touched.ct_credit_purchase_ratetype_id && Boolean(rtDefaultValidation.errors.ct_credit_purchase_ratetype_id)}
+                        helperText={rtDefaultValidation.touched.ct_credit_purchase_ratetype_id && rtDefaultValidation.errors.ct_credit_purchase_ratetype_id}
                         />
                     </Grid>
 
