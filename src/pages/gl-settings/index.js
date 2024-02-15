@@ -58,15 +58,42 @@ const GLSettings = () => {
           parameters: parameters
         })
         .then(res => {
-           res.list.map(obj => (
-            myObject[obj.key] = obj.value ? parseInt(obj.value): null
-            )); 
-            setInitialValues(myObject)
+            const filteredList = res.list.filter(obj => {
+                return (
+                    obj.key === 'GLACSegments' ||
+                    obj.key === 'GLACSeg0' || 
+                    obj.key === 'GLACSeg1' || 
+                    obj.key === 'GLACSeg2' || 
+                    obj.key === 'GLACSeg3' ||
+                    obj.key === 'GLACSeg4' ||
+                    obj.key === 'GLACSegName0' ||
+                    obj.key === 'GLACSegName1' ||
+                    obj.key === 'GLACSegName2' ||
+                    obj.key === 'GLACSegName3' ||
+                    obj.key === 'GLACSegName4'
+                );
+            });
+        
+            filteredList.forEach(obj => {
+                myObject[obj.key] = (
+                    obj.key === 'GLACSegments' ||
+                    obj.key === 'GLACSeg0' || 
+                    obj.key === 'GLACSeg1' || 
+                    obj.key === 'GLACSeg2' || 
+                    obj.key === 'GLACSeg3' ||
+                    obj.key === 'GLACSeg4' 
+
+                ) ? (obj.value ? parseInt(obj.value) : null) :  (obj.value ? obj.value : null) ;
+               
+            });
+            
+            setInitialValues(myObject);
+            console.log(myObject)
         })
         .catch(error => {
-            setErrorMessage(error)
-        })
-      }
+            setErrorMessage(error);
+        });
+      };
 
     const {
         labels: _labels,
@@ -86,7 +113,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 1 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 2 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSeg0 is required',
             }),
@@ -94,7 +121,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 1 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 2 ? value != null && value !== 0 : true;
                 },
                 message: 'GLACSegName0 is required',
             }),
