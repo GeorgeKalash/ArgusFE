@@ -57,6 +57,7 @@ export const CurrencyTradingSettingsRepository = {
   },
   ExchangeMap: {
     qry: service + 'qryEXM',
+    get2: service + 'getEXM2',
     get: service + 'getEXM',
     set2: service + 'set2EXM'
   }
