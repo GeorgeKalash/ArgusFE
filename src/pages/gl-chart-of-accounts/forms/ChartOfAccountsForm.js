@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Grid } from '@mui/material'
+import { Grid , FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -8,6 +8,8 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from "src/resources/DataSets";
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -26,8 +28,12 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         name: '',
         description :'',
         groupId:'',
-        isCostElement:'',
-        activeStatus:''
+        isCostElement:false,
+ 
+        groupName:'',
+        activeStatus:'',
+        activeStatusName:""
+
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -96,18 +102,41 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             editMode={editMode}
         >
             <Grid container spacing={4}>
+            <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={GeneralLedgerRepository.GLAccountGroups.qry}
+              name='groupId'
+              label={labels.group}
+              columnsInDropDown={[
+
+               
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              valueField='recordId'
+              displayField= {['name']}
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik && formik.setFieldValue('groupId', newValue?.recordId)
+              }}
+
+              // error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+              // helperText={formik.touched.nationalityId && formik.errors.nationalityId}
+            />
+          </Grid>
+          
                 <Grid item xs={12}>
                     <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.reference}
+                    name='accountRef'
+                    label={labels.accountRef}
+                    value={formik.values.accountRef}
                     required
                     maxAccess={maxAccess}
                     maxLength='30'
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    helperText={formik.touched.reference && formik.errors.reference}
+                    onClear={() => formik.setFieldValue('accountRef', '')}
+                    error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
+                    helperText={formik.touched.accountRef && formik.errors.accountRef}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -124,6 +153,67 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                     helperText={formik.touched.name && formik.errors.name}
                     />
                 </Grid>
+                <Grid item xs={12}>
+                    <CustomTextField
+                    name='description'
+                    label={labels.description}
+                    value={formik.values.description}
+                    required
+                    rows={2}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('description', '')}
+                    error={formik.touched.description && Boolean(formik.errors.description)}
+                    helperText={formik.touched.description && formik.errors.description}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <ResourceComboBox
+                      name="activeStatus"
+                      label={labels.status}
+                      datasetId={DataSets.ACTIVE_STATUS}
+                      values={formik.values}
+                      valueField="key"
+                      displayField="value"
+
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          formik.setFieldValue(
+                            "activeStatus",
+                            newValue?.key,
+                            
+                          );
+                        } else {
+                          formik.setFieldValue(
+                            "activeStatus",
+                            newValue?.key
+                          );
+                        }
+                      }}
+
+                      error={
+                        formik.touched. activeStatus &&
+                        Boolean(formik.errors. activeStatus)
+                      }
+                      helperText={
+                        formik.touched. activeStatus &&
+                        formik.errors. activeStatus
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name='isCostElement'
+                  maxAccess={maxAccess}
+                  checked={formik.values?.isCostElement}
+                  onChange={formik.handleChange}
+                />
+              }
+              label={labels.isCostElement}
+            />
+          </Grid>
             </Grid>
         </FormShell>
   )
