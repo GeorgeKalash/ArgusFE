@@ -81,17 +81,16 @@ function Form() {
                   valueFiel: 'recordId',
                   displayField: 'reference'
                 },
-                async onChange({ row: { update, values } }) {
+                async onChange({ row: { update, newRow } }) {
                   try {
-                    console.log(values)
-                    if (!values.currency) return
-                    const rate = await getRate({ currencyId: values.currency.recordId })
+                    if (!newRow.currency) return
+                    const rate = await getRate({ currencyId: newRow.currency.recordId })
 
                     update({
                       rate
                     })
                   } catch (exception) {
-                    stack({ message: `Cannot find rate for ${values.currency.reference}` })
+                    stack({ message: `Cannot find rate for ${newRow.currency.reference}` })
                   }
                 }
               },
@@ -105,9 +104,9 @@ function Form() {
               {
                 component: 'textfield',
                 name: 'fcAmount',
-                async onChange({ row: { update, values } }) {
+                async onChange({ row: { update, newRow } }) {
                   update({
-                    lcAmount: parseFloat(values.rate) * parseFloat(values.fcAmount)
+                    lcAmount: parseFloat(newRow.rate) * parseFloat(newRow.fcAmount)
                   })
                 }
               },

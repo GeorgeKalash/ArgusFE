@@ -1,25 +1,24 @@
 import { DataGrid as MUIDataGrid, gridExpandedSortedRowIdsSelector, useGridApiRef } from '@mui/x-data-grid'
 import components from './components'
 import { Box, Button } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export function DataGrid({ columns, value, error, onChange }) {
-  async function processDependencies(newRow, oldRow) {
-    const changed = columns.filter(({ name }) => newRow[name] !== oldRow[name])
+  async function processDependencies(newRow, oldRow, editCell) {
+    const column = columns.find(({ name }) => name === editCell.field)
 
     let updatedRow = { ...newRow }
 
-    for (const change of changed)
-      if (change.onChange)
-        await change.onChange({
-          row: {
-            values: newRow,
-            update(updates) {
-              updatedRow = { ...updatedRow, ...updates }
-            }
+    if (column.onChange)
+      await column.onChange({
+        row: {
+          newRow,
+          oldRow,
+          update(updates) {
+            updatedRow = { ...updatedRow, ...updates }
           }
-        })
-
+        }
+      })
     return updatedRow
   }
 
@@ -155,6 +154,8 @@ export function DataGrid({ columns, value, error, onChange }) {
     }
   }
 
+  const currentEditCell = useRef(null)
+
   return (
     <MUIDataGrid
       hideFooter
@@ -162,9 +163,16 @@ export function DataGrid({ columns, value, error, onChange }) {
       disableColumnFilter
       disableColumnMenu
       disableColumnSelector
+      disableSelectionOnClick
+      onStateChange={state => {
+        if (Object.entries(state.editRows)[0]) {
+          const [id, obj] = Object.entries(state.editRows)[0]
+          currentEditCell.current = { id, field: Object.keys(obj)[0] }
+        }
+      }}
       processRowUpdate={async (newRow, oldRow) => {
         setIsUpdating(true)
-        const updated = await processDependencies(newRow, oldRow)
+        const updated = await processDependencies(newRow, oldRow, currentEditCell.current)
 
         const change = handleChange(updated, oldRow)
 
