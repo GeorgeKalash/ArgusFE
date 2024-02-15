@@ -48,29 +48,36 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         initialValues,
         enableReinitialize: true,
         validateOnChange: true,
-        validationSchema: yup.object({
-
-        }),
+  
         onSubmit: async obj => {
-          const recordId = obj.recordId
-
+          // Ensure `isCostElement` is a boolean. Convert if it's an array or any other format.
+          const isCostElementBoolean = Array.isArray(obj.isCostElement) ? obj.isCostElement.includes("on") : !!obj.isCostElement;
+          
+          // Prepare the object for submission with `isCostElement` as a boolean.
+          const submissionObject = {
+            ...obj,
+            isCostElement: isCostElementBoolean,
+          };
+        
           const response = await postRequest({
             extension: GeneralLedgerRepository.ChartOfAccounts.set,
-            record: JSON.stringify(obj)
-          })
+            record: JSON.stringify(submissionObject) // Use the modified object here
+          });
           
-          if (!recordId) {
-            toast.success('Record Added Successfully')
+          if (!obj.recordId) {
+            toast.success('Record Added Successfully');
             setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
+              ...submissionObject, // Use the modified object to update the state
+              recordId: response.recordId, // Update the record ID from the response
             });
+          } else {
+            toast.success('Record Edited Successfully');
           }
-          else toast.success('Record Edited Successfully')
-          setEditMode(true)
-
-          invalidate()
+          setEditMode(true);
+        
+          invalidate();
         }
+        
       })
     
       useEffect(() => {
