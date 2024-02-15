@@ -7,6 +7,7 @@ export default function ResourceLookupEdit({ id, field, value }) {
 
   return (
     <ResourceLookup
+      autoFocus
       endpointId={SystemRepository.City.snapshot}
       parameters={{
         _countryId: 1,
