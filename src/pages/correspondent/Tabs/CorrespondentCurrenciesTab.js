@@ -27,10 +27,6 @@ const CorrespondentCurrenciesTab = ({
             currencyRef: '',
 
             //currencyName: '',
-            glCurrencyId: '',
-            glCurrencyRef: '',
-
-            //glCurrencyName: '',
 
             exchangeId: '',
             exchangeRef: '',
