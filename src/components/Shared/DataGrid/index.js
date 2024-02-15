@@ -131,10 +131,15 @@ export function DataGrid({ columns, value, error, onChange }) {
   function addRow() {
     const highestIndex = value.reduce((max, current) => (max.id > current.id ? max : current))?.id + 1
 
+    const defaultValues = Object.fromEntries(
+      columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
+    )
+
     onChange([
       ...value,
       {
-        id: highestIndex
+        id: highestIndex,
+        ...defaultValues
       }
     ])
   }

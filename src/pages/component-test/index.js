@@ -66,64 +66,88 @@ function Form() {
   return (
     <FormShell form={formik}>
       <Grid container>
-        <FieldSet title='Operations'>
-          <DataGrid
-            onChange={value => setFieldValue('operations', value)}
-            value={values.operations}
-            error={errors.operations}
-            columns={[
-              {
-                component: 'id',
-                name: 'id'
-              },
-              {
-                component: 'resourcecombobox',
-                name: 'currency',
-                props: {
-                  endpointId: SystemRepository.Currency.page,
-                  parameters: `_startAt=0&_pageSize=10000&filter=`,
-                  valueFiel: 'recordId',
-                  displayField: 'reference'
+        <DataGrid
+          onChange={value => setFieldValue('operations', value)}
+          value={values.operations}
+          error={errors.operations}
+          columns={[
+            {
+              component: 'id',
+              name: 'id',
+              width: 50
+            },
+            {
+              component: 'resourcelookup',
+              name: 'country',
+              props: {
+                endpointId: SystemRepository.City.snapshot,
+                parameters: {
+                  _countryId: 1,
+                  _stateId: 0
                 },
-                async onChange({ row: { update, newRow } }) {
-                  try {
-                    if (!newRow.currency) return
-                    const rate = await getRate({ currencyId: newRow.currency.recordId })
+                displayField: 'name',
+                valueField: 'name'
+              },
+              width: 200
+            },
+            {
+              component: 'date',
+              name: 'date',
+              width: 200
+            },
+            {
+              component: 'resourcecombobox',
+              name: 'currency',
+              props: {
+                endpointId: SystemRepository.Currency.page,
+                parameters: `_startAt=0&_pageSize=10000&filter=`,
+                valueField: 'recordId',
+                displayField: 'reference'
+              },
+              async onChange({ row: { update, newRow } }) {
+                try {
+                  if (!newRow.currency) return
+                  const rate = await getRate({ currencyId: newRow.currency.recordId })
 
-                    update({
-                      rate
-                    })
-                  } catch (exception) {
-                    stack({ message: `Cannot find rate for ${newRow.currency.reference}` })
-                  }
-                }
-              },
-              {
-                component: 'textfield',
-                name: 'rate',
-                props: {
-                  readOnly: true
-                }
-              },
-              {
-                component: 'textfield',
-                name: 'fcAmount',
-                async onChange({ row: { update, newRow } }) {
                   update({
-                    lcAmount: parseFloat(newRow.rate) * parseFloat(newRow.fcAmount)
+                    rate
                   })
-                }
-              },
-              {
-                component: 'textfield',
-                name: 'lcAmount',
-                props: {
-                  readOnly: true
+                } catch (exception) {
+                  stack({ message: `Cannot find rate for ${newRow.currency.reference}` })
                 }
               }
-            ]}
-          />
-        </FieldSet>
+            },
+            {
+              component: 'numberfield',
+              name: 'rate',
+              props: {
+                readOnly: true
+              },
+              width: 100,
+              defaultValue: 0
+            },
+            {
+              component: 'numberfield',
+              name: 'fcAmount',
+              async onChange({ row: { update, newRow } }) {
+                update({
+                  lcAmount: newRow.rate * newRow.fcAmount
+                })
+              },
+              width: 200,
+              defaultValue: 0
+            },
+            {
+              component: 'numberfield',
+              name: 'lcAmount',
+              props: {
+                readOnly: true
+              },
+              width: 200,
+              defaultValue: 0
+            }
+          ]}
+        />
       </Grid>
       <Button>Some random Button to mess with layout</Button>
     </FormShell>
@@ -139,7 +163,7 @@ export default function Page() {
         stack({
           Component: Form,
           title: 'Demo',
-          width: 1200,
+          width: 1300,
           height: 500
         })
       }}
