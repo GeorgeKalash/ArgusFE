@@ -48,6 +48,13 @@ export function DataGrid({ columns, value, error, onChange }) {
     }
   }, [updating, nextEdit])
 
+  function findCell({ id, field }) {
+    return {
+      rowIndex: apiRef.current.getRowIndexRelativeToVisibleRows(id),
+      columnIndex: apiRef.current.getColumnIndex(field)
+    }
+  }
+
   const handleCellKeyDown = (params, event) => {
     if (event.key === 'Enter') {
       event.stopPropagation()
@@ -62,10 +69,7 @@ export function DataGrid({ columns, value, error, onChange }) {
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
     const visibleColumns = apiRef.current.getVisibleColumns()
 
-    const nextCell = {
-      rowIndex: rowIds.findIndex(id => id === params.id),
-      columnIndex: apiRef.current.getColumnIndex(params.field)
-    }
+    const nextCell = findCell(params)
 
     const currentCell = { ...nextCell }
 
@@ -193,12 +197,14 @@ export function DataGrid({ columns, value, error, onChange }) {
         ...columns.map(column => ({
           field: column.name,
           headerName: column.label || column.name,
-          editable: column.editable ?? true,
+          editable: true,
           width: column.width || 170,
           sortable: false,
           renderCell(params) {
             const Component =
               typeof column.component === 'string' ? components[column.component].view : column.component.view
+
+            const cell = findCell(params)
 
             return (
               <Box
@@ -206,7 +212,7 @@ export function DataGrid({ columns, value, error, onChange }) {
                   width: '100%',
                   height: '100%',
                   padding: '0 20px',
-                  backgroundColor: error?.[params.id - 1]?.[params.field] ? '#ff000050' : 'none',
+                  backgroundColor: error?.[cell.rowIndex]?.[params.field] ? '#ff000050' : 'none',
                   display: 'flex',
                   alignItems: 'center'
                 }}
@@ -225,7 +231,6 @@ export function DataGrid({ columns, value, error, onChange }) {
                   width: '100%',
                   height: '100%',
                   padding: '0 20px',
-                  backgroundColor: error?.[params.id - 1]?.[params.field] ? '#ff000050' : 'none',
                   display: 'flex',
                   alignItems: 'center'
                 }}

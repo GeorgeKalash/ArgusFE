@@ -73,6 +73,10 @@ function Form() {
             error={errors.operations}
             columns={[
               {
+                component: 'id',
+                name: 'id'
+              },
+              {
                 component: 'resourcecombobox',
                 name: 'currency',
                 props: {
