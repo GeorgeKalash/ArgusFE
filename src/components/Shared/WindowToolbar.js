@@ -6,8 +6,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 
 const WindowToolbar = ({
-  print,
-  onPreview,
   onSave,
   onPost,
   onClear,
@@ -33,26 +31,26 @@ const WindowToolbar = ({
 
   const getReportLayout = () => {
     setReportStore([])
+    if(resourceId){
     var parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportLayout,
       parameters: parameters
     })
       .then(res => {
-        setReportStore(prevReportStore => [
-          ...prevReportStore,
-          ...res.list.map(item => ({
+        if(res?.list)
+        setReportStore(res.list.map(item => ({
             api_url: item.api,
             reportClass: item.instanceName,
             parameters: item.parameters,
             layoutName: item.layoutName,
             assembly: 'ArgusRPT.dll'
           }))
-        ])
+        )
       })
       .catch(error => {
         console.log(error)
-      })
+      })}
   }
 
   useEffect(() => {

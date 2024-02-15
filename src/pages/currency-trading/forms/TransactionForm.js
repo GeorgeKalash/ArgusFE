@@ -810,6 +810,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       resourceId={35208}
       editMode={editMode}
       disabledSubmit={Balance && true}
+      previewReport={editMode}
+
     >
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>

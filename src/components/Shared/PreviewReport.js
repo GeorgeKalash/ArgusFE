@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import React, {useState, useEffect, useContext} from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
@@ -30,7 +29,6 @@ export default function PreviewReport({recordId , selectedReport}) {
         console.log({ generateReportERROR: error })
       })
   }
-
 
   return (
       <>

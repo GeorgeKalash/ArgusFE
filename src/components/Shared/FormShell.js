@@ -8,10 +8,10 @@ import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 
 export default function FormShell({
-  form,
+  form, form1,
   children,
-  height,
   editMode,
+  setEditMode,
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
@@ -20,7 +20,8 @@ export default function FormShell({
   isPosted = false,
   clientRelation = false,
   setErrorMessage,
-  previewReport=false
+  previewReport=false,
+  initialValues, initialValues1
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
@@ -34,13 +35,24 @@ export default function FormShell({
     ? false
     : true
 
+    function handleReset(){
+      console.log(initialValues)
+      initialValues &&  form.setValues(initialValues)
+       if(form1){
+        form1.setValues(initialValues1)
+       }
+
+     setEditMode(false)
+    }
+
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%' }}>{children}</DialogContent>
+      <DialogContent sx={{ flex: 1, height: '100%' , zIndex: 0 }}>{children}</DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
           onSave={() => form.handleSubmit()}
+          onClear={() => initialValues ?  handleReset() : false}
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
