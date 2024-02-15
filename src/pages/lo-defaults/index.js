@@ -27,7 +27,7 @@ const LoDefault = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
 
     const [initialValues, setInitialValues] = useState({
-        carrierSite:null,
+        transitSiteId:null,
     });
 
     useEffect(() => {
@@ -41,10 +41,11 @@ const LoDefault = () => {
           extension:  SystemRepository.Defaults.qry,
           parameters: parameters
         })
-        .then(res => {
+        .then(res => {console.log(res);
+            
             const filteredList = res.list.filter(obj => {
                 return (
-                    obj.key === 'carrierSite'
+                    obj.key === 'transitSiteId'
                 );
             });
             filteredList.forEach(obj => (
@@ -83,7 +84,7 @@ const LoDefault = () => {
         })
         postRequest({
             extension: SystemRepository.Defaults.set,
-            record:   JSON.stringify({  carrierSite  : data }),
+            record:   JSON.stringify({  SysDefaults  : data }),
         })
 
         .then(res => {
@@ -112,7 +113,7 @@ const LoDefault = () => {
                     <Grid item xs={12}>
                         <ResourceComboBox
                             endpointId={InventoryRepository.Site.qry}
-                            name='carrierSite'
+                            name='transitSiteId'
                             label={_labels.carrierSite}
                             columnsInDropDown={[
                             { key: 'reference', value: 'Reference' },
@@ -123,11 +124,11 @@ const LoDefault = () => {
                             displayField='name'
                             maxAccess={access}
                             onChange={(event, newValue) => {
-                            formik.setFieldValue('carrierSite', newValue?.recordId)
+                            formik.setFieldValue('transitSiteId', newValue?.recordId)
                             }}
-                            error={formik.touched.carrierSite && Boolean(formik.errors.carrierSite)}
+                            error={formik.touched.transitSiteId && Boolean(formik.errors.transitSiteId)}
 
-                            // helperText={formik.touched.carrierSite && formik.errors.carrierSite}
+                            // helperText={formik.touched.transitSiteId && formik.errors.transitSiteId}
                         />
                     </Grid>
                     <Grid sx={{
