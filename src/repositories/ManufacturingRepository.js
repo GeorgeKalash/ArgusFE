@@ -65,5 +65,20 @@ export const ManufacturingRepository = {
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'
+  },
+  ProductionClass: {
+    page: service + 'pageCLS',
+    qry: service + 'qryCLS',
+    set: service + 'setCLS',
+    get: service + 'getCLS',
+    del: service + 'delCLS'
+  },
+  ProductionStandard: {
+    qry: service + 'qrySTD'
+  },
+  ProductionClassSemiFinished: {
+    set: service + 'setCSF',
+    get: service + 'getCSF',
+    del: service + 'delCSF'
   }
 }
