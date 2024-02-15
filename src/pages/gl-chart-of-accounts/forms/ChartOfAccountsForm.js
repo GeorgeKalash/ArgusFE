@@ -29,7 +29,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         description :'',
         groupId:'',
         isCostElement:false,
- 
+        sign:'',
         groupName:'',
         activeStatus:'',
         activeStatusName:""
@@ -201,6 +201,40 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                       error={
                         formik.touched. activeStatus &&
                         Boolean(formik.errors. activeStatus)
+                      }
+                      helperText={
+                        formik.touched. activeStatus &&
+                        formik.errors. activeStatus
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      name="sign"
+                      label={labels.creditDebit}
+                      datasetId={DataSets.Sign}
+                      values={formik.values}
+                      valueField="key"
+                      displayField="value"
+
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          formik.setFieldValue(
+                            "sign",
+                            newValue?.key,
+                            
+                          );
+                        } else {
+                          formik.setFieldValue(
+                            "sign",
+                            newValue?.key
+                          );
+                        }
+                      }}
+
+                      error={
+                        formik.touched. sign &&
+                        Boolean(formik.errors. sign)
                       }
                       helperText={
                         formik.touched. activeStatus &&
