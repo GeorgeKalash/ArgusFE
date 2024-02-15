@@ -79,4 +79,5 @@ export const ResourceIds = {
   CommissionSchedule : 51118,
   SystemDefaults: 20108,
   LoCollectors: 40202,
+  LoCarriers: 40201,
 }
