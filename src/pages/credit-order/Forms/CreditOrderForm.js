@@ -6,6 +6,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 // ** MUI Imports
 import { Grid, Box, FormControlLabel, Checkbox, RadioGroup, Radio } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
+import { useError } from 'src/error'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -23,26 +24,26 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded }) {
+export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
-  const [rateType, setRateType] = useState(null)
+  const [rateType, setRateType] = useState(SystemFunction.CurrencyCreditOrderPurchase)
   const [editMode, setEditMode] = useState(!!recordId)
+  const { stack: stackError } = useError()
 
   const [initialValues, setInitialData] = useState({
-    recordId: null,
+    recordId: recordId || null,
     date: '',
+    deliveryDate: new Date(),
     reference: '',
-    plantId: '',
+    plantId: plantId,
     corId: '',
     corRef: '',
     corName: '',
-    purchase: false,
-    sale: false,
-    notes: '',
-    isOnPostClicked: false
+    notes: ''
   })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -161,8 +162,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     {
       field: 'combobox',
       header: labels[8],
-      nameId: 'currencyId',
-      name: 'currencyRef',
+      name: 'currencyId',
       mandatory: true,
       store: currencyStore.list,
       valueField: 'recordId',
@@ -173,7 +173,42 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' }
       ],
-      width: 230
+      width: 230,
+      async onChange(row) {
+        if (row?.newValue > 0) {
+          const exchange = await fetchRate({
+            currencyId: row.newValue
+          })
+
+          if (!exchange?.rate)
+            stackError({
+              message: `Rate not defined for ${row.value}.`
+            })
+
+          if (exchange) {
+            const exRate = exchange.rate
+            const rateCalcMethod = exchange.rateCalcMethod
+
+            const amount =
+              rateCalcMethod === 1
+                ? parseFloat(row.newRowData.fcAmount.toString().replace(/,/g, '')) * exRate
+                : rateCalcMethod === 2
+                ? parseFloat(row.newRowData.fcAmount.toString().replace(/,/g, '')) / exRate
+                : 0
+            formik.setFieldValue(`rows[${row.rowIndex}].amount`, amount)
+          }
+
+          formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
+          formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.rate)
+          formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.rateCalcMethod)
+        } else {
+          formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
+          formik.setFieldValue(`rows[${row.rowIndex}].exRate`, 0)
+          formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
+
+          return
+        }
+      }
     },
     {
       field: 'textfield',
@@ -181,40 +216,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       name: 'currencyName',
       readOnly: true,
       width: 300
-    },
-    {
-      field: 'combobox',
-      header: labels[8],
-      nameId: 'currencyId',
-      name: 'currencyRef',
-      mandatory: true,
-      store: currencyStore.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: '200',
-      fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ],
-      width: 230
-    },
-    {
-      field: 'combobox',
-      header: labels[18],
-      nameId: 'rateTypeId',
-      name: 'rateTypeName',
-      mandatory: true,
-      store: currencyStore.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: '200',
-      fieldsToUpdate: [{ from: 'name', to: 'rateTypeName' }],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ],
-      width: 230
     },
     {
       field: 'textfield',
@@ -262,14 +263,13 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       })
   }
   async function setOperationType(type) {
-    console.log('typeValue ', type)
-    if (type === '3504' || type === '3505') {
+    if (type == SystemFunction.CurrencyCreditOrderPurchase || type == SystemFunction.CurrencyCreditOrderSale) {
       const res = await getRequest({
         extension: 'SY.asmx/getDE',
         parameters:
-          type === '3504'
+          type == SystemFunction.CurrencyCreditOrderPurchase
             ? '_key=ct_credit_purchase_ratetype_id'
-            : type === '3505'
+            : type == SystemFunction.CurrencyCreditOrderSale
             ? '_key=ct_credit_sales_ratetype_id'
             : ''
       })
@@ -277,12 +277,20 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       formik.setFieldValue('functionId', type)
     }
   }
-  useEffect(() => {}, [height])
+  async function fetchRate({ currencyId }) {
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
+      parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateType}`
+    })
+
+    return response.record
+  }
 
   useEffect(() => {
     ;(async function () {
       try {
         fillCurrencyStore()
+        setOperationType(rateType)
         setOperationType(formik.values?.functionId)
         if (recordId) {
           setIsLoading(true)
@@ -302,14 +310,14 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       }
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [height])
 
   return (
     <FormShell resourceId={ResourceIds.CreditOrder} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container>
         <Grid container xs={12}>
           {/* First Column */}
-          <Grid container rowGap={1} xs={4} style={{ marginTop: '10px' }}>
+          <Grid container rowGap={1} xs={3} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
               <CustomDatePicker
                 name='date'
@@ -325,31 +333,26 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             </Grid>
           </Grid>
           {/* Second Column */}
-          <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+          <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
-                label={labels[3]}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                readOnly={true}
+                label={labels[3]} //readOnly={true}
                 values={formik.values}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={'reference'}
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId)
+                  formik && formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
           </Grid>
           {/* Third Column */}
-          <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+          <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
@@ -359,8 +362,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
                 maxLength='30'
                 readOnly={true}
                 required
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
                 helperText={formik.touched.reference && formik.errors.reference}
               />
@@ -369,7 +370,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         </Grid>
         <Grid container xs={12}>
           {/* First Column */}
-          <Grid container rowGap={1} xs={4} style={{ marginTop: '10px' }}>
+          <Grid container rowGap={1} xs={3} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={RemittanceSettingsRepository.Correspondent.qry}
@@ -393,7 +394,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             </Grid>
           </Grid>
           {/* Second Column */}
-          <Grid container rowGap={1} xs={8} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+          <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
               <CustomTextField
                 name='corName'
@@ -408,11 +409,41 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
               />
             </Grid>
           </Grid>
+          {/* Third Column */}
+          <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='deliveryDate'
+                label={labels[18]}
+                value={formik?.values?.deliveryDate}
+                onChange={formik.handleChange}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('deliveryDate', '')}
+                error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
+                helperText={formik.touched.deliveryDate && formik.errors.deliveryDate}
+              />
+            </Grid>
+          </Grid>
         </Grid>
         <Grid container xs={12}>
-          <RadioGroup row value={formik.values.functionId} onChange={e => setOperationType(e.target.value)}>
-            <FormControlLabel value={'3504'} control={<Radio />} label={labels[6]} />
-            <FormControlLabel value={'3505'} control={<Radio />} label={labels[7]} />
+          <RadioGroup
+            row
+            value={formik.values.functionId}
+            defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
+            onChange={e => setOperationType(e.target.value)}
+          >
+            <FormControlLabel
+              value={SystemFunction.CurrencyCreditOrderPurchase}
+              control={<Radio />}
+              label={labels[6]}
+              disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+            />
+            <FormControlLabel
+              value={SystemFunction.CurrencyCreditOrderSale}
+              control={<Radio />}
+              label={labels[7]}
+              disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+            />
           </RadioGroup>
         </Grid>
         <Grid container sx={{ pt: 2 }} xs={12}>
@@ -420,16 +451,20 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             <InlineEditGrid
               gridValidation={detailsFormik}
               columns={columns}
+              background={
+                formik.values.functionId &&
+                (formik.values.functionId == SystemFunction.CurrencyCreditOrderPurchase
+                  ? '#C7F6C7'
+                  : 'rgb(245, 194, 193)')
+              }
               defaultRow={{
-                itemId: '',
-                sku: '',
-                itemName: '',
+                orderId: '',
+                seqNo: '',
+                currencyId: '',
                 qty: '',
-                totalCost: '',
-                muQty: '',
-                qtyInBase: '',
-                notes: '',
-                seqNo: ''
+                rateCalcMethod: '',
+                exRate: '',
+                amount: ''
               }}
               allowDelete={true}
               allowAddNewLine={true}
