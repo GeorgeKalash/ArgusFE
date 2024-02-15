@@ -19,6 +19,7 @@ export function DataGrid({ columns, value, error, onChange }) {
           }
         }
       })
+
     return updatedRow
   }
 
