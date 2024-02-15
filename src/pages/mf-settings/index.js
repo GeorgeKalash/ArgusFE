@@ -46,15 +46,22 @@ const MFSettings = () => {
           parameters: parameters
         })
         .then(res => {
-           res.list.map(obj => (
-           myObject[obj.key] = obj.value? parseInt(obj.value): null
-            )); 
-            setInitialValues(myObject)
-        })
-        .catch(error => {
-            setErrorMessage(error)
-        })
-      }
+          const filteredList = res.list.filter(obj => {
+              return (
+                  obj.key === 'mf_mu' || 
+                  obj.key === 'documentType' || 
+                  obj.key === 'site' 
+              );
+          });
+          filteredList.forEach(obj => (
+              myObject[obj.key] = obj.value? parseInt(obj.value): null
+               )); 
+               setInitialValues(myObject)
+           })
+           .catch(error => {
+               setErrorMessage(error)
+           })
+         }
 
     const {
         labels: _labels,

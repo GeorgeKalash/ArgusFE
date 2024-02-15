@@ -7,10 +7,11 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 
 export default function FormShell({
-  form,
+  form, form1,
   children,
   height,
   editMode,
+  setEditMode,
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
@@ -18,7 +19,8 @@ export default function FormShell({
   maxAccess,
   isPosted = false,
   clientRelation = false,
-  setErrorMessage
+  setErrorMessage,
+  initialValues, initialValues1 , setIDInfoAutoFilled
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
@@ -31,12 +33,25 @@ export default function FormShell({
     ? false
     : true
 
+    function handleReset(){
+       initialValues &&  form.setValues(initialValues)
+       if(form1){
+        form1.setValues(initialValues1)
+       }
+     if(setIDInfoAutoFilled){
+      setIDInfoAutoFilled(false)
+     }
+     setEditMode(false)
+    }
+
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%' }}>{children}</DialogContent>
+      <DialogContent sx={{ flex: 1, height: '100%' , zIndex: 0 }}>{children}</DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           onSave={() => form.handleSubmit()}
+          onClear={() => initialValues ?  handleReset() : false
+        }
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
