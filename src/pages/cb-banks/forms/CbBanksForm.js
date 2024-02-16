@@ -11,7 +11,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
@@ -101,7 +100,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
             value={formik.values.reference}
             required
             maxAccess={maxAccess}
-            maxLength='30'
+            maxLength='20'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -125,12 +124,13 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-          <CustomTextArea
+          <CustomTextField
             name='swiftCode'
             label={labels.swiftCode}
             value={formik.values.swiftCode}
             type='numeric'
             rows={2}
+            maxLength='20'
             maxAccess={maxAccess}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('swiftCode', '')}
