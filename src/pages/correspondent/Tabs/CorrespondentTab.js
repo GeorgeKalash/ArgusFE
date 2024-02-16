@@ -4,6 +4,8 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const CorrespondentTab = ({
   labels,
@@ -72,6 +74,25 @@ const CorrespondentTab = ({
           maxAccess={maxAccess}
         />
       </Grid>
+      <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Currency.qry}
+              name='currencyId'
+              label={labels.currency}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={correspondentValidation.values}
+              onChange={(event, newValue) => {
+                correspondentValidation.setFieldValue('currencyId', newValue?.recordId)
+              }}
+              error={correspondentValidation.touched.countryId && Boolean(correspondentValidation.errors.countryId)}
+              helperText={correspondentValidation.touched.countryId && correspondentValidation.errors.countryId}
+            />
+          </Grid>
       <Grid item xs={12}>
         <FormControlLabel
           control={

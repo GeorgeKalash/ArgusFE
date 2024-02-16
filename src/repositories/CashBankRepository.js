@@ -16,5 +16,12 @@ export const CashBankRepository = {
     get: service + 'getGRP',
     set: service + 'setGRP',
     del: service + 'delGRP'
+  },
+  CbBank:{
+    qry: service + 'qryBNK',
+    get: service + 'getBNK',
+    set: service + 'setBNK',
+    del: service + 'delBNK',
+    page: service + 'pageBNK'
   }
 }

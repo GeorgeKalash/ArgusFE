@@ -120,10 +120,7 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const getRowId = row => {
-    const recordId = row.recordId || ''
-    const seqNo = row.seqNo || ''
-
-    return `${recordId}-${seqNo}`
+    return props.rowId.map(field => row[field]).join('-')
   }
 
   const CustomPagination = () => {
