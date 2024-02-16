@@ -151,6 +151,25 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     endpointId: 'CTTRX.asmx/pageCIV'
   })
 
+
+
+  const initial1 = {
+    rows: [
+      {
+        seqNo: 1,
+        cashAccountId: '',
+        cashInvoiceId: null,
+        type: '',
+        typeName: '',
+        ccName: '',
+        amount: '',
+        ccId: '',
+        bankFees: 0,
+        receiptRef: ''
+      }
+    ]
+  }
+
   const initial = {
     recordId: null,
     reference: null,
@@ -214,85 +233,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     search: null
   }
 
-  const initial1 = {
-    rows: [
-      {
-        seqNo: 1,
-        cashAccountId: '',
-        cashInvoiceId: null,
-        type: '',
-        typeName: '',
-        ccName: '',
-        amount: '',
-        ccId: '',
-        bankFees: 0,
-        receiptRef: ''
-      }
-    ]
-  }
-
-  const [initialValues, setInitialValues] = useState({
-    recordId: null,
-    reference: null,
-    rows: [
-      {
-        seqNo: 1,
-        currencyId: '',
-        fcAmount: '',
-        defaultExRate: 0,
-        exRate: '',
-        lcAmount: '',
-        minRate: 0,
-        maxRate: 0
-      }
-    ],
-    rows2: [
-      {
-        seqNo: 1,
-        cashAccountId: '',
-        cashInvoiceId: null,
-        type: '',
-        typeName: '',
-        ccName: '',
-        amount: '',
-        ccId: '',
-        bankFees: 0,
-        receiptRef: ''
-      }
-    ],
-    date: new Date(),
-    clientId: null,
-    clientName: null,
-    clientType: '1',
-    firstName: null,
-    middleName: null,
-    familyName: null,
-    fl_firstName: null,
-    fl_lastName: null,
-    fl_middleName: null,
-    fl_familyName: null,
-    birth_date: null,
-    resident: false,
-    profession: null,
-    source_of_income: null,
-    sponsor: null,
-    id_number: null,
-    issue_country: null,
-    id_type: null,
-    expiry_date: null,
-    remarks: null,
-    purpose_of_exchange: null,
-    nationality: null,
-    cell_phone: null,
-    status: editMode ? null : '1',
-    type: -1,
-    wip: 1,
-    functionId: '3502',
-    idNoConfirm: '',
-    cellPhoneConfirm: '',
-    otp: false,
-    search: null
-  })
+  const [initialValues, setInitialValues] = useState(initial)
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -333,8 +274,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
             })
 
         return errors ;
-
-
     },
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -350,8 +289,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       profession: yup.string().required()
     }),
     initialValues,
-
-    // onReset,
     onSubmit
   })
 
@@ -522,19 +459,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   // })
 
   const CashFormik = useFormik({
-    // validate: values => {
-    //   const type = values.rows && values.rows.every(row => !!row.type)
-    //   const amount = values.rows && values.rows.every(row => !!row.amount)
 
-    //   return type && amount
-    //     ? {}
-    //     : {
-    //         rows: Array(values.rows && values.rows.length).fill({
-    //           amount: 'field is required',
-    //           type: 'field is required'
-    //         })
-    //       }
-    // },
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
@@ -634,7 +559,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       otp: false
     })
 
-    // CashFormik.setValues()
 
     return
   }
@@ -801,7 +725,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         setIDInfoAutoFilled(true)
       }
     } catch (error) {
-      // Handle other errors, such as network issues or exceptions
       console.error('An error occurred:', error.message)
     }
   }
@@ -892,52 +815,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   <FormControlLabel value={'2'} control={<Radio />} label={labels.corporate} disabled />
                 </RadioGroup>
               </Grid>
-              {/* <Grid item xs={4}>{formik.values.clientId}
-                <CustomLookup
-                  onChange={(e, v) => {
-                    const client = valueOf(v.recordId)
-                    if (client) {
-                      formik.setFieldValue('clientId', client.recordId)
-                      fetchClientInfo({ clientId: client.recordId })
-                    }
-                  }}
-                  valueField='name'
-                  displayField='name'
-                  setStore={setStore}
-                  store={store}
-                  value={formik.values.clientId}
-                  firstValue={formik.values.clientName}
-                  secondDisplayField={false}
-                  onLookup={lookup}
-                  readOnly={editMode || idInfoAutoFilled}
-                />
-              </Grid> */}
+
               <Grid item xs={4}>
-                {/* <ResourceLookup
-                  endpointId={CurrencyTradingClientRepository.Client.snapshot}
-                  parameters={{
-                    _category: 1
-                  }}
-                  valueField='name'
-                  displayField='name'
-                  name='clientId'
-                  valueShow='clientName'
-                  label={labels.client}
-                  form={formik}
-                  readOnly={editMode || idInfoAutoFilled}
-                 secondDisplayField={false}
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('clientId', newValue?.recordId)
-                      formik.setFieldValue('clientName', newValue?.name)
-                      fetchClientInfo({ clientId: newValue?.recordId })
-                    } else {
-                      formik.setFieldValue('clientId', '')
-                      formik.setFieldValue('clientName', '')
-                    }
-                  }}
-                  errorCheck={'clientId'}
-                /> */}
                 <FormField
                   name='search'
                   Component={CustomTextField}
