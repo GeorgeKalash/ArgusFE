@@ -5,7 +5,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import * as yup from 'yup'
 
-export default function ConfirmationOnSubmit({ formik, labels }) {
+export default function ConfirmationOnSubmit({ formik, labels , window }) {
   const fetchFormik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
@@ -38,6 +38,8 @@ export default function ConfirmationOnSubmit({ formik, labels }) {
       formik.setFieldValue('idNoConfirm', values.idNoRepeat)
 
       formik.handleSubmit()
+      window.close()
+
     }
   })
 
