@@ -39,7 +39,8 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
         {
           classId: recordId || '',
           sfItemId: null,
-          itemName: ''
+          itemName: '',
+          sku:''
         }
       ]
     },
@@ -92,14 +93,13 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
       field: 'lookup',
       header: labels.semiFinishedItemRef,
       nameId: 'sfItemId',
-      name: 'itemRef',
+      name: 'sku',
       mandatory: true,
       store: itemStore,
       valueField: 'recordId',
       displayField: 'sku',
       widthDropDown: 200,
       fieldsToUpdate: [
-        { from: 'sku', to: 'itemRef' },
         { from: 'name', to: 'itemName' }
       ],
       columnsInDropDown: [
@@ -136,7 +136,8 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
                 {
                   classId: recordId || '',
                   sfItemId: null,
-                  itemName: ''
+                  itemName: '',
+                  sku:''
                 }
               ]
             })
@@ -167,7 +168,8 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
             defaultRow={{
               classId: recordId || '',
               sfItemId: null,
-              itemName: ''
+              itemName: '',
+              sku:''
             }}
             scrollHeight={250}
             width={500}
