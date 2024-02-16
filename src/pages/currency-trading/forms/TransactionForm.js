@@ -76,7 +76,7 @@ function FormField({ name, Component, valueField, onFocus, ...rest }) {
         }
       }}
       onClear={() => {
-        formik.setFieldValue(name ,  '' )
+        formik.setFieldValue(name, '')
       }}
       form={formik}
     />
@@ -403,6 +403,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
       setCurrencyStore(response.list)
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function getData(id) {
@@ -545,6 +546,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     )
 
     formik.setFieldValue('rows2', initialValues.rows2)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [CashFormik.values])
 
   function onReset(e) {
@@ -760,7 +762,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       // Check if the response status is OK (200)
       const clientInfo = response && response.record
       if (!!clientInfo) {
-
         formik.setFieldValue('firstName', clientInfo.firstName)
         formik.setFieldValue('middleName', clientInfo.middleName)
         formik.setFieldValue('lastName', clientInfo.lastName)
@@ -1005,7 +1006,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           stackError({
                             message: `Rate not defined for ${row.value}.`
                           })
-                          formik.setFieldValue(`rows[${row.rowIndex}].lcAmount`, '')
+                        formik.setFieldValue(`rows[${row.rowIndex}].lcAmount`, '')
 
                         if (exchange) {
                           const exRate = exchange.rate
@@ -1114,7 +1115,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           formik.setFieldValue(`rows[${e.rowIndex}].fcAmount`, lc / nv)
                         }
                       } else {
-                        if(nv) formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                        if (nv) formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
                       }
                     }
                   },
@@ -1149,7 +1150,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         fcAmount = fcAmount / exRate
                         fcAmount && formik.setFieldValue(`rows[${rowIndex}].fcAmount`, fcAmount)
                       }
-
                     }
                   }
                 ]}
@@ -1195,15 +1195,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       }
                     }}
                     onFocus={value => {
-                      value &&   setIdNumber(value)
+                      value && setIdNumber(value)
                     }}
-                    readOnly={editMode  || idInfoAutoFilled}
+                    readOnly={editMode || idInfoAutoFilled}
                     required
                   />
                 </Grid>
                 <Grid item xs={7}>
-
-
                   <CustomDatePicker
                     name='birth_date'
                     label={labels.birth_date}
@@ -1306,7 +1304,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                      readOnly={editMode || idInfoAutoFilled }
+                    readOnly={editMode || idInfoAutoFilled}
                     required
                   />
                 </Grid>
