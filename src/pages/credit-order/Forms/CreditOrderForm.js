@@ -162,24 +162,21 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       ],
       width: 230,
       async onChange(row) {
-        if (row.rowData.qty != '') {
-          if (row?.newValue > 0) {
-            const exchange = await fetchRate({
-              currencyId: row.newValue,
-              qty: row.rowData.qty
-            })
-            formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-            formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.rate)
-            formik.setFieldValue(`rows[${row.rowIndex}].amount`, exchange?.amount)
-            formik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, exchange?.baseAmount)
-          } else {
-            formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
-            formik.setFieldValue(`rows[${row.rowIndex}].exRate`, 0)
-            formik.setFieldValue(`rows[${row.rowIndex}].amount`, 0)
-            formik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, 0)
+        if (row?.newValue > 0) {
+          const exchange = await fetchRate({
+            currencyId: row.newValue
+          })
+          formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
+          formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.rate)
+          formik.setFieldValue(`rows[${row.rowIndex}].amount`, exchange?.amount)
+          formik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, exchange?.baseAmount)
+        } else {
+          formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
+          formik.setFieldValue(`rows[${row.rowIndex}].exRate`, 0)
+          formik.setFieldValue(`rows[${row.rowIndex}].amount`, 0)
+          formik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, 0)
 
-            return
-          }
+          return
         }
       }
     },
@@ -258,10 +255,10 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       formik.setFieldValue('functionId', type)
     }
   }
-  async function fetchRate({ currencyId, qty }) {
+  async function fetchRate({ currencyId }) {
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.get2,
-      parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateType}&_qty=${qty}`
+      parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateType}`
     })
 
     return response.record
