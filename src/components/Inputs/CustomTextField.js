@@ -34,7 +34,7 @@ const CustomTextField = ({
 
 
   useEffect(() => {
-    if(inputRef.current.selectionStart !== undefined && focus && value   ){
+    if(inputRef.current.selectionStart !== undefined && focus && value  && value?.length < 1 ){
          inputRef.current.focus();
       }
   }, [value]);
@@ -67,14 +67,14 @@ const CustomTextField = ({
     <div style={{ display: hidden ? 'none' : 'block' }}>
 
       <TextField
-        key={(value?.length < 1 || readOnly ) && value }
+        key={(value?.length < 1 || readOnly  || value === null) && value }
         inputRef={inputRef}
         type={type}
         variant={variant}
         defaultValue={value}
         size={size}
         fullWidth={fullWidth}
-        autoFocus={autoFocus}
+        autoFocus={focus}
         inputProps={{
           autoComplete: "off",
           readOnly: _readOnly,

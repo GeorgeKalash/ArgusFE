@@ -21,7 +21,7 @@ export default function FormShell({
   clientRelation = false,
   setErrorMessage,
   previewReport=false,
-  initialValues, initialValues1
+  initialValues, initialValues1 , setIDInfoAutoFilled
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
@@ -36,12 +36,13 @@ export default function FormShell({
     : true
 
     function handleReset(){
-      console.log(initialValues)
-      initialValues &&  form.setValues(initialValues)
+       initialValues &&  form.setValues(initialValues)
        if(form1){
         form1.setValues(initialValues1)
        }
-
+     if(setIDInfoAutoFilled){
+      setIDInfoAutoFilled(false)
+     }
      setEditMode(false)
     }
 
