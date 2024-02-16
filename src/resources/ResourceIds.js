@@ -36,7 +36,7 @@ export const ResourceIds = {
   IdCategories: 21106,
   Groups: 21101,
   SystemDefault: 36115,
-  SystemDefaults: 35108,
+  CtDefaults: 35108,
   IdTypes: 35109,
   Plants: 20110,
   BPMasterData: 21201,
@@ -78,4 +78,6 @@ export const ResourceIds = {
   MaterialsAdjustment: 41204,
   CommissionSchedule : 51118,
   CbBanks:33101,
+  SystemDefaults: 20108,
+  LoCollectors: 40202,
 }
