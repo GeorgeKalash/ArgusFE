@@ -77,8 +77,10 @@ export const ManufacturingRepository = {
     qry: service + 'qrySTD'
   },
   ProductionClassSemiFinished: {
+    qry: service + 'qryCSF',
     set: service + 'setCSF',
     get: service + 'getCSF',
-    del: service + 'delCSF'
+    del: service + 'delCSF',
+    set2: service + 'set2CSF'
   }
 }

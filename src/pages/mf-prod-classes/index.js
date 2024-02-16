@@ -31,6 +31,8 @@ const MfProductionClasses = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
+  const [editMode, setEditMode] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
   const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
@@ -71,18 +73,24 @@ const MfProductionClasses = () => {
     }
   ]
 
+  const tabs = [{ label: _labels.class }, { label: _labels.semiFinishedItem, disabled: !editMode }]
+
   const add = () => {
     setWindowOpen(true)
+    setActiveTab(0)
+    setEditMode(false)
   }
 
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
+    setActiveTab(0)
+    setEditMode(true)
   }
 
   const del = async obj => {
 
-    const itemRes = await getRequest({
+    /*const itemRes = await getRequest({
       extension: ManufacturingRepository.ProductionClassSemiFinished.get,
       parameters: `_classId=${obj.recordId}`
     })
@@ -93,7 +101,7 @@ const MfProductionClasses = () => {
         extension: ManufacturingRepository.ProductionClassSemiFinished.del,
         record: JSON.stringify(itemObj)
       })
-    }
+    }*/
 
     await postRequest({
       extension: ManufacturingRepository.ProductionClass.del,
@@ -131,6 +139,12 @@ const MfProductionClasses = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
+          activeTab={activeTab}
+          tabs={tabs}
+          editMode={editMode}
+          setEditMode={setEditMode}
+          setErrorMessage={setErrorMessage}
+          setActiveTab={setActiveTab}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

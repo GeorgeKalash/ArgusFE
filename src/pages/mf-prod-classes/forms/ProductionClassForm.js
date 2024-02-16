@@ -17,18 +17,14 @@ import { ResourceLookup } from 'src/components/Shared//ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function ProductionClassForm({ labels, maxAccess, recordId }) {
+export default function ProductionClassForm({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordIds, editMode, setEditMode }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
     reference: '',
     name: '',
-    standardId: '',
-    sfItemId: null,
-    itemRef: '',
-    itemName: ''
+    standardId: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -87,20 +83,6 @@ export default function ProductionClassForm({ labels, maxAccess, recordId }) {
           })
 
           setInitialData(res.record)
-
-          const itemRes = await getRequest({
-            extension: ManufacturingRepository.ProductionClassSemiFinished.get,
-            parameters: `_classId=${recordId}`
-          })
-          if (itemRes) {
-            const itemDetRes = await getRequest({
-              extension: InventoryRepository.Item.get,
-              parameters: `_classId=${itemRes.record.sfItemId}`
-            })
-            formik.setFieldValue('sfItemId', itemRes.record.sfItemId)
-            formik.setFieldValue('itemName', itemDetRes.record.name)
-            formik.setFieldValue('itemRef', itemDetRes.record.sku)
-          }
         }
       } catch (exception) {
         setErrorMessage(error)
@@ -159,37 +141,6 @@ export default function ProductionClassForm({ labels, maxAccess, recordId }) {
             }}
             error={formik.touched.standardId && Boolean(formik.errors.standardId)}
             helperText={formik.touched.standardId && formik.errors.standardId}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceLookup
-            endpointId={InventoryRepository.Item.snapshot}
-            parameters={{
-              _msId: 0,
-              _categoryId: 0,
-              _startAt: 0,
-              _size: 1000
-            }}
-            form={formik}
-            valueField='sku'
-            displayField='name'
-            name='itemRef'
-            label={labels.semiFinishedItem}
-            secondDisplayField={true}
-            secondValue={formik.values.itemName}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('sfItemId', newValue?.recordId)
-                formik.setFieldValue('itemRef', newValue?.sku)
-                formik.setFieldValue('itemName', newValue?.name)
-              } else {
-                formik.setFieldValue('sfItemId', null)
-                formik.setFieldValue('itemRef', '')
-                formik.setFieldValue('itemName', '')
-              }
-            }}
-            error={formik.touched.sfItemId && Boolean(formik.errors.sfItemId)}
-            helperText={formik.touched.sfItemId && formik.errors.sfItemId}
           />
         </Grid>
       </Grid>
