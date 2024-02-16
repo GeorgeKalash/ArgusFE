@@ -1,7 +1,7 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import ExpenseTypesForm from '../forms/ExpenseTypesForm'
+import ExpenseTypesForms from '../Forms/ExpenseTypesForm'
 
 const ExpenseTypesWindow = ({
   onClose,
@@ -20,7 +20,7 @@ const ExpenseTypesWindow = ({
       height={300}
     >
       <CustomTabPanel>
-        <ExpenseTypesForm
+        <ExpenseTypesForms
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}

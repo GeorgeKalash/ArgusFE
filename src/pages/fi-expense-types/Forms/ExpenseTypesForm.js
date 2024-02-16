@@ -124,7 +124,7 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <CustomTextArea
+                    <CustomTextField
                     name='description'
                     label={labels.description}
                     value={formik.values.description}
