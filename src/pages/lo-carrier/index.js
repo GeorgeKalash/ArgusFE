@@ -22,10 +22,11 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 
 const LoCarrier = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+  const [businessPartnerStore, setBusinessPartnerStore] = useState([])
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -54,6 +55,20 @@ const LoCarrier = () => {
   const invalidate = useInvalidate({
     endpointId: LogisticsRepository.LoCarrier.page
   })
+
+  const lookupBusinessPartners = searchQry => {
+    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
+    getRequest({
+      extension: BusinessPartnerRepository.MasterData.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setBusinessPartnerStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
 
   const columns = [
     {
@@ -114,6 +129,9 @@ const LoCarrier = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
+          lookupBusinessPartners={lookupBusinessPartners}
+          businessPartnerStore={businessPartnerStore}
+          setBusinessPartnerStore={setBusinessPartnerStore}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

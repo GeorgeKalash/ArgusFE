@@ -17,8 +17,16 @@ import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
+import CustomLookup from 'src/components/Inputs/CustomLookup'
 
-export default function LoCarriersForms({ labels, maxAccess, recordId }) {
+export default function LoCarriersForms({ 
+  labels, 
+  maxAccess, 
+  recordId, 
+  lookupBusinessPartners, 
+  businessPartnerStore, 
+  setBusinessPartnerStore }) {
+
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -29,6 +37,8 @@ export default function LoCarriersForms({ labels, maxAccess, recordId }) {
     type:null,
     siteId:null,
     bpId:null,
+    bpName:null,
+    bpRef:null,
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -166,19 +176,33 @@ export default function LoCarriersForms({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-          <CustomTextField
-            name='bpId'
-            label={labels.businessPartner}
-            value={formik.values.bpId}
+          <CustomLookup
+            name='bpRef'
             maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('bpId', '')}
+            label={labels.businessPartner}
+            valueField='reference'
+            displayField='name'
+            store={businessPartnerStore}
+            setStore={setBusinessPartnerStore}
+            firstValue={formik.values.bpRef}
+            secondValue={formik.values.bpName}
+            onLookup={lookupBusinessPartners}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                formik.setFieldValue('bpId', newValue?.recordId)
+                formik.setFieldValue('bpRef', newValue?.reference)
+                formik.setFieldValue('bpName', newValue?.name)
+              } else {
+                formik.setFieldValue('bpId', null)
+                formik.setFieldValue('bpRef', null)
+                formik.setFieldValue('bpName', null)
+              }
+            }}
             error={formik.touched.bpId && Boolean(formik.errors.bpId)}
 
             // helperText={formik.touched.bpId && formik.errors.bpId}
           />
         </Grid>
-        
       </Grid>
     </FormShell>
   )

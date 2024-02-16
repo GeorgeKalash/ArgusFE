@@ -7,7 +7,10 @@ const LoCarriersWindow = ({
   onClose,
   labels,
   maxAccess,
-  recordId
+  recordId,
+  lookupBusinessPartners,
+  businessPartnerStore,
+  setBusinessPartnerStore,
 }) => {
   
   return (
@@ -24,6 +27,9 @@ const LoCarriersWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
+          lookupBusinessPartners={lookupBusinessPartners}
+          businessPartnerStore={businessPartnerStore}
+          setBusinessPartnerStore={setBusinessPartnerStore}
         />
        
       </CustomTabPanel>
