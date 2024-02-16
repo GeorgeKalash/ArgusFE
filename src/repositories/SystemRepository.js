@@ -139,13 +139,5 @@ export const SystemRepository = {
     qry: service + 'qryDE',
     get: service + 'getDE',
     set: service + 'set2DE'
-  },GLSettings:{
-    qry: service + 'qryDE',
-    get: service + 'getDE',
-    set: service + 'setDE',
-    del: service + 'delDE',
-    page: service + 'pageDE'
-
-
   }
 }

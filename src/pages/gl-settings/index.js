@@ -54,7 +54,7 @@ const GLSettings = () => {
         const myObject = {};
         var parameters = `_filter=`
         getRequest({
-          extension:  SystemRepository.GLSettings.qry,
+          extension:  SystemRepository.Defaults.qry,
           parameters: parameters
         })
         .then(res => {
@@ -209,8 +209,8 @@ const GLSettings = () => {
      
         })
         postRequest({
-            extension: SystemRepository.GLSettings.set,
-            record:   JSON.stringify({  sysGLSettings  : data }),
+            extension: SystemRepository.Defaults.set,
+            record:   JSON.stringify({  sysDefaults  : data }),
         })
 
         .then(res => {
@@ -273,7 +273,7 @@ const GLSettings = () => {
                                     value={formik.values[name]}
                                     onClear={() => formik.setFieldValue(name, '')}
                                     type='number'
-                                    
+
                                     numberField={true}
                                     onChange={formik.handleChange}
                                     error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
