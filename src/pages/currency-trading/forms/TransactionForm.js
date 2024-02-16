@@ -43,7 +43,7 @@ export async function Country(getRequest) {
   return res.record.value
 }
 
-function FormField({ name, Component, valueField, onFocus, ...rest }) {
+function FormField({ type, name, Component, valueField, onFocus, ...rest }) {
   const { formik, labels } = useContext(FormContext)
   const { getRequest } = useContext(RequestsContext)
 
@@ -51,11 +51,13 @@ function FormField({ name, Component, valueField, onFocus, ...rest }) {
     const countryId = await Country(getRequest)
     formik.setFieldValue('issue_country', parseInt(countryId))
   }
+  console.log(formik)
 
   return (
     <Component
       {...{
         ...rest,
+        type,
         name,
         label: labels[name],
         values: formik.values,
@@ -295,22 +297,44 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: false,
-    validateOnBlur: false,
+    validateOnBlur: true,
     validate: values => {
+      const errors = {}
+
       const type = values.rows2 && values.rows2.every(row => !!row.type)
       const amount = values.rows2 && values.rows2.every(row => !!row.amount)
       const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
       const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
       const exRate = values.rows && values.rows.every(row => !!row.exRate)
+      console.log(amount)
+      if (values.rows) {
+        console.log('yes')
+        values.rows.forEach((row, index) => {
+          if (row.exRate > row.maxRate || row.exRate < row.minRate ) {
+            if (!errors.rows[index]) {
+              errors.rows = {};
+            }
 
-      return type && amount && exRate && lcAmount && fcAmount
-        ? {}
-        : {
-            rows2: Array(values.rows2 && values.rows2.length).fill({
-              amount: 'field is required',
-              type: 'field is required'
-            })
+            errors.rows[index].exRate = 'exRate must be between minRate and maxRate' + row.exRate;
           }
+        });
+      }
+    if(!exRate && !lcAmount && !fcAmount)
+      errors.rows =
+      Array(values.rows && values.rows.length).fill({
+        lcAmount: 'field is required',
+        fcAmount: 'field is required',
+        exRate : 'field is required'
+      })
+      if(!type && !amount)
+        errors.rows2 = Array(values.rows2 && values.rows2.length).fill({
+              amount: amount,
+              type: exRate
+            })
+
+        return errors ;
+
+
     },
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -1006,7 +1030,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                             message: `Rate not defined for ${row.value}.`
                           })
 
-                        if (exchange) {
+                        if (exchange && row.newRowData.fcAmount) {
                           const exRate = exchange.rate
                           const rateCalcMethod = exchange.rateCalcMethod
 
@@ -1037,7 +1061,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         formik.setFieldValue(`rows[${row.rowIndex}].minRate`, 0)
                         formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, 0)
 
-                        return
                       }
 
                       //                       if(row.newValue !== formik.values.rows[row.rowIndex].currencyId && formik.values.rows[row.rowIndex].fcAmount){
@@ -1113,7 +1136,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           formik.setFieldValue(`rows[${e.rowIndex}].fcAmount`, lc / nv)
                         }
                       } else {
-                        formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+
+                            //  formik.setFieldError(`rows[${e.rowIndex}].exRate`,`Rate not in the [${minRate}-${maxRate}] range.`)
+                             stackError({
+                              message: `Rate not in the [${minRate}-${maxRate}] range.`
+                            })
+                            formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+
+
                       }
                     }
                   },
@@ -1168,13 +1198,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
               <Grid container rowGap={3} xs={4} sx={{ px: 2 }}>
                 <Grid item xs={7}>
                   <FormField
+                    type="password"
                     name='id_number'
                     Component={CustomTextField}
                     onBlur={e => {
-                      if (e.target.value != idNumber) {
-                        checkTypes(e.target.value)
+                      if (e.target.value &&  e.target.value != idNumber) {
+                      checkTypes(e.target.value)
 
-                        fetchIDInfo({ idNumber: e.target.value })
+                     fetchIDInfo({ idNumber: e.target.value })
                           .then(IDInfo => {
                             if (!!IDInfo) {
                               formik.setFieldValue('issue_country', IDInfo.idCountryId)
@@ -1315,6 +1346,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
                 <Grid item xs={12}>
                   <FormField
+                    type="password"
                     name='cell_phone'
                     Component={CustomTextField}
                     required
@@ -1480,7 +1512,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       header: labels.type,
                       nameId: 'type',
                       name: 'typeName',
-                      store: typeStore,
+
+                      store: formik.values.functionId ==='3502' ? typeStore.filter((item)=>item.key ==="2"): typeStore,
                       mandatory: true,
                       widthDropDown: '300',
                       columnsInDropDown: [{ key: 'value', value: 'Value' }]

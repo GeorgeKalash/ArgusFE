@@ -10,12 +10,14 @@ const WindowToolbar = ({
   onPost,
   onClear,
   onInfo,
+  onClose,
   onGenerateReport,
   disabledSubmit,
   editMode = false,
   smallBox = false,
   infoVisible = true,
   postVisible = false,
+  closeVisible = false,
   clientRelation,
   onClientRelation = false,
   isPosted = false,
@@ -99,6 +101,11 @@ const WindowToolbar = ({
       {onInfo && infoVisible && (
         <Button onClick={onInfo} variant='contained' sx={{ mr: 1 }} disabled={!editMode}>
           Info
+        </Button>
+      )}
+       {onClose && closeVisible && (
+        <Button onClick={onClose} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 }} disabled={isPosted || !editMode}>
+          Post
         </Button>
       )}
       {onPost && postVisible && (
