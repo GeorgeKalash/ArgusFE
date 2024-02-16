@@ -14,8 +14,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const RoutingSeqForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordId }) => {
-    console.log('tab2')
-    console.log(recordId)
+
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [workCenterStore, setWorkCenterStore] =useState([])
   const [operationStore, setOperationStore] =useState([])
