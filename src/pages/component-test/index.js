@@ -7,14 +7,13 @@ import FormShell from 'src/components/Shared/FormShell'
 import { useWindow } from 'src/windows'
 import { Button, Grid } from '@mui/material'
 import * as yup from 'yup'
-import FieldSet from 'src/components/Shared/FieldSet'
 
 async function getRate({ currencyId }) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (currencyId === 2) resolve(14.2)
       else if (currencyId == 162) resolve(2)
-      else reject()
+      else reject(new Error('Currency rate not found.'))
     }, 1000)
   })
 }

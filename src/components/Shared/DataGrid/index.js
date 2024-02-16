@@ -2,6 +2,7 @@ import { DataGrid as MUIDataGrid, gridExpandedSortedRowIdsSelector, useGridApiRe
 import components from './components'
 import { Box, Button } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
+import { useError } from 'src/error'
 
 export function DataGrid({ columns, value, error, onChange }) {
   async function processDependencies(newRow, oldRow, editCell) {
@@ -34,12 +35,12 @@ export function DataGrid({ columns, value, error, onChange }) {
 
   const apiRef = useGridApiRef()
 
-  const [updating, setIsUpdating] = useState(false)
+  const [isUpdatingField, setIsUpdating] = useState(false)
 
   const [nextEdit, setNextEdit] = useState(null)
 
   useEffect(() => {
-    if (!updating && nextEdit) {
+    if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
 
       if (apiRef.current.getCellMode(id, field) === 'view') apiRef.current.startCellEditMode({ id, field })
@@ -47,7 +48,7 @@ export function DataGrid({ columns, value, error, onChange }) {
 
       setNextEdit(null)
     }
-  }, [updating, nextEdit])
+  }, [isUpdatingField, nextEdit])
 
   function findCell({ id, field }) {
     return {
@@ -166,6 +167,8 @@ export function DataGrid({ columns, value, error, onChange }) {
 
   const currentEditCell = useRef(null)
 
+  const { stack } = useError()
+
   return (
     <MUIDataGrid
       hideFooter
@@ -189,6 +192,14 @@ export function DataGrid({ columns, value, error, onChange }) {
         setIsUpdating(false)
 
         return change
+      }}
+      onProcessRowUpdateError={e => {
+        console.error(
+          `[Datagrid - ERROR]: Error updating row with id ${currentEditCell.current.id} and field ${currentEditCell.current.field}.`
+        )
+        console.error('[Datagrid - ERROR]: Please handle all errors inside onChange of your respective field.')
+        console.error('[Datagrid - ERROR]:', e)
+        stack({ message: 'Error occured while updating row.' })
       }}
       onCellKeyDown={handleCellKeyDown}
       rows={value}
@@ -241,7 +252,7 @@ export function DataGrid({ columns, value, error, onChange }) {
                   alignItems: 'center'
                 }}
               >
-                <Component {...params} column={column} />
+                <Component {...params} column={column} isLoading={isUpdatingField} />
               </Box>
             )
           }
