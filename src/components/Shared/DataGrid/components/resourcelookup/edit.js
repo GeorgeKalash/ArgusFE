@@ -1,24 +1,23 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function ResourceLookupEdit({ id, field, value }) {
+export default function ResourceLookupEdit({ id, field, value, column: { props } }) {
   const api = useGridApiContext()
 
   return (
     <ResourceLookup
       autoFocus
-      endpointId={SystemRepository.City.snapshot}
+      endpointId={props.endpointId}
       parameters={{
-        _countryId: 1,
-        _stateId: 0
+        _countryId: props.parameters._countryId,
+        _stateId: props.parameters._stateId
       }}
-      valueField='name'
-      displayField='name'
-      name='city'
+      valueField={props.displayField}
+      displayField={props.valueField}
+      name='field'
       form={{
         values: {
-          city: value
+          field: value
         }
       }}
       secondDisplayField={false}
@@ -30,7 +29,6 @@ export default function ResourceLookupEdit({ id, field, value }) {
             value: newValue
           })
       }}
-      errorCheck={'cityId'}
     />
   )
 }
