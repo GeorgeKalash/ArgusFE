@@ -90,19 +90,6 @@ const MfProductionClasses = () => {
 
   const del = async obj => {
 
-    /*const itemRes = await getRequest({
-      extension: ManufacturingRepository.ProductionClassSemiFinished.get,
-      parameters: `_classId=${obj.recordId}`
-    })
-    if(itemRes)
-    {
-      const itemObj = {classId: itemRes.record.classId, sfItemId: itemRes.record.sfItemId}
-      await postRequest({
-        extension: ManufacturingRepository.ProductionClassSemiFinished.del,
-        record: JSON.stringify(itemObj)
-      })
-    }*/
-
     await postRequest({
       extension: ManufacturingRepository.ProductionClass.del,
       record: JSON.stringify(obj)

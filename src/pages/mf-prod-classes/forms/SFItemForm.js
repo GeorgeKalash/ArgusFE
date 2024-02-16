@@ -70,7 +70,6 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
 
   const lookupItem = inp => {
     const input = inp
-    console.log({ list: [] })
 
     if (input) {
       var parameters = `_size=30&_startAt=0&_filter=${input}&_categoryId=0&_msId=0`
@@ -80,7 +79,6 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
         parameters: parameters
       })
         .then(res => {
-          console.log(res.list)
           setItemStore(res.list)
         })
         .catch(error => {

@@ -17,7 +17,7 @@ import { ResourceLookup } from 'src/components/Shared//ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function ProductionClassForm({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordIds, editMode, setEditMode }) {
+export default function ProductionClassForm({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordId, editMode, setEditMode }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [initialValues, setInitialData] = useState({
@@ -50,20 +50,13 @@ export default function ProductionClassForm({ labels, maxAccess, recordId, setEr
         record: JSON.stringify(obj)
       })
 
-      /*if (obj.sfItemId) {
-        const itemObj = { classId: obj.recordId, sfItemId: obj.sfItemId }
-        await postRequest({
-          extension: ManufacturingRepository.ProductionClassSemiFinished.set,
-          record: JSON.stringify(itemObj)
-        })
-      }*/ //FIX, ERROR MSG GEORGE, GET, 2 TAB, TEST
-
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
           ...obj, // Spread the existing properties
           recordId: response.recordId // Update only the recordId field
         })
+        setSelectedRecordId(response.recordId)
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
 
