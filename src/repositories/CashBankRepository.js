@@ -10,6 +10,13 @@ export const CashBankRepository = {
   CreditCard :{
     qry: service + 'qryCC',
   },
+  CbCashGroup:{
+    qry: service + 'qryGRP',
+    page: service + 'pageGRP',
+    get: service + 'getGRP',
+    set: service + 'setGRP',
+    del: service + 'delGRP'
+  },
   CbBank:{
     qry: service + 'qryBNK',
     get: service + 'getBNK',
