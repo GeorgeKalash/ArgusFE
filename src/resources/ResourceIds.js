@@ -4,7 +4,7 @@ export const ResourceIds = {
   GeographicRegions: 20133,
   WorkCenters: 42101,
   Cities: 20125,
-  Labor : 42103,
+  Labor: 42103,
   Currencies: 20106,
   GroupLegalDocument: 21109,
   ProductMaster: 36103,
@@ -76,7 +76,8 @@ export const ResourceIds = {
   Machines: 42106,
   GateKeeper: 42322,
   MaterialsAdjustment: 41204,
-  CommissionSchedule : 51118,
+  CommissionSchedule: 51118,
   SystemDefaults: 20108,
-  CreditOrder: 35301,
+  LoCollectors: 40202,
+  CreditOrder: 35301
 }
