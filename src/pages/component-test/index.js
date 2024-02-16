@@ -33,9 +33,9 @@ function Form() {
                 recordId: yup.string().required('Currency recordId is required')
               })
               .required('Currency is required'),
-            rate: yup.mixed().nullable().required('Rate is required'),
-            fcAmount: yup.mixed().nullable().required('FcAmount is required'),
-            lcAmount: yup.mixed().nullable().required('LcAmount is required')
+            rate: yup.number().nullable().required('Rate is required'),
+            fcAmount: yup.number().min(0.1).required('FcAmount is required'),
+            lcAmount: yup.number().min(0.1).required('LcAmount is required')
           })
         )
         .required('Operations array is required')
@@ -103,13 +103,14 @@ function Form() {
                 valueField: 'recordId',
                 displayField: 'reference'
               },
-              async onChange({ row: { update, newRow } }) {
+              async onChange({ row: { update, oldRow, newRow } }) {
                 try {
-                  if (!newRow.currency) return
+                  if (!newRow.currency || oldRow.currency.recordId === newRow.currency.recordId) return
                   const rate = await getRate({ currencyId: newRow.currency.recordId })
 
                   update({
-                    rate
+                    rate,
+                    lcAmount: 0
                   })
                 } catch (exception) {
                   stack({ message: `Cannot find rate for ${newRow.currency.reference}` })
