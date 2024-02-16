@@ -43,7 +43,7 @@ export async function Country(getRequest) {
   return res.record.value
 }
 
-function FormField({ type, name, Component, valueField, onFocus, ...rest }) {
+function FormField({ type, name, Component, valueField, onFocus,language, ...rest }) {
   const { formik, labels } = useContext(FormContext)
   const { getRequest } = useContext(RequestsContext)
 
@@ -64,7 +64,8 @@ function FormField({ type, name, Component, valueField, onFocus, ...rest }) {
         value: formik.values[name],
         error: formik.errors[name],
         errors: formik.errors,
-        valueField: valueField
+        valueField: valueField,
+        language: language
       }}
       onChange={(e, v) => {
         if (name === 'id_type' && v && v['type'] && (v['type'] === 1 || v['type'] === 2)) {
@@ -1262,10 +1263,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       Component={CustomTextField}
                       readOnly={editMode || idInfoAutoFilled}
                       required
+                      language='english'
+
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='middleName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+                    <FormField name='middleName'  language='english' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
@@ -1273,10 +1276,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       Component={CustomTextField}
                       readOnly={editMode || idInfoAutoFilled}
                       required
+                      language='english'
+
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='familyName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+                    <FormField name='familyName'   language='english'
+ Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
                   </Grid>
                 </Grid>
                 <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
@@ -1285,6 +1291,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       name='fl_firstName'
                       Component={CustomTextField}
                       readOnly={editMode || idInfoAutoFilled}
+                      language='arabic'
                     />
                   </Grid>
                   <Grid item xs={3}>
@@ -1292,6 +1299,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       name='fl_middleName'
                       Component={CustomTextField}
                       readOnly={editMode || idInfoAutoFilled}
+                      language='arabic'
+
                     />
                   </Grid>
                   <Grid item xs={3}>
@@ -1302,6 +1311,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       name='fl_familyName'
                       Component={CustomTextField}
                       readOnly={editMode || idInfoAutoFilled}
+                      language='arabic'
+
                     />
                   </Grid>
                 </Grid>
