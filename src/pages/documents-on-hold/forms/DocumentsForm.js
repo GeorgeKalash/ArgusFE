@@ -12,6 +12,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import FormShellDocument from 'src/components/Shared/formShellDocument'
@@ -19,7 +20,7 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import {
   formatDateToApi,
   formatDateToApiFunction,
-  formatDateFromApi,formatDateDefault
+  formatDateFromApi,formatDateDefault,formatDateFromApiInline
 } from "src/lib/date-helper";
 
 
@@ -57,15 +58,15 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
         initialValues,
         enableReinitialize: true,
         validateOnChange: true,
-        validationSchema: yup.object({
-          reference: yup.string().required('This field is required')
-        }),
+   
         onSubmit: async obj => {
           
           const functionId = initialValues.functionId
           const seqNo = initialValues.seqNo
           const recordId = initialValues.recordId
           obj.response = responseValue
+
+          obj.date = formatDateToApi(obj.date)
           try {
             const response = await postRequest({
               extension: DocumentReleaseRepository.DocumentsOnHold.set,
@@ -74,12 +75,14 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
             
             if (!functionId&&!seqNo&&!recordId && responseValue !== null) {
               toast.success('Record Added Successfully')
-              setInitialData({
-                ...obj, // Spread the existing properties
-                recordId: response.recordId, // Update only the recordId field
-                response: responseValue,
-                date:formatDateDefault(obj.date)
-              });
+
+              // setInitialData({
+              //   ...obj, // Spread the existing properties
+              //   recordId: response.recordId, // Update only the recordId field
+              //   response: responseValue,
+
+              //    date:formatDateDefault(obj.date)
+              // });
             }
             else toast.success('Record Edited Successfully')
   
@@ -104,7 +107,8 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
            
               setInitialData({
                 ...res.record,
-                date: formatDateDefault(res.record.date) 
+
+                 date: formatDateFromApi(res.record.date) 
               });
           } catch (exception) {
             setErrorMessage(error)
@@ -156,12 +160,14 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <CustomTextField
+                    <CustomDatePicker
                     name='date'
                     label={labels.date}
+                    onChange={formik.setFieldValue}
                     value={formik.values.date}
                     readOnly={true}
                     maxAccess={maxAccess}
+                    
                     />
                 </Grid>
                 <Grid item xs={12}>
