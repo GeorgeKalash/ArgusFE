@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Grid , FormControlLabel, Checkbox } from '@mui/material'
+import { Grid , FormControlLabel, Checkbox, Box, TextField } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -17,6 +17,8 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
+
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -57,12 +59,13 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
           const submissionObject = {
             ...obj,
             isCostElement: isCostElementBoolean,
-          };
-        
+          };          
+
           const response = await postRequest({
             extension: GeneralLedgerRepository.ChartOfAccounts.set,
             record: JSON.stringify(submissionObject) // Use the modified object here
           });
+
           
           if (!obj.recordId) {
             toast.success('Record Added Successfully');
@@ -86,11 +89,14 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             if (recordId) {
               setIsLoading(true)
     
+              getDataResult();
+              
               const res = await getRequest({
                 extension: GeneralLedgerRepository.ChartOfAccounts.get,
                 parameters: `_recordId=${recordId}`
               })
-              
+              console.log(res.record)
+
               setInitialData(res.record)
             }
           } catch (exception) {
@@ -98,7 +104,54 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
           }
           setIsLoading(false)
         })()
-      }, [])
+      }, []);
+
+
+      const [segments, setSegments] = useState([]);
+      
+      const getDataResult = () => {
+        console.log("SOmething")
+        const myObject = {};
+        var parameters = `_filter=`
+        getRequest({
+          extension:  SystemRepository.Defaults.qry,
+          parameters: parameters
+        })
+        .then(res => {
+          
+            const filteredList = res.list.filter(obj => {
+                return (
+                    obj.key === 'GLACSeg0' || 
+                    obj.key === 'GLACSeg1' || 
+                    obj.key === 'GLACSeg2' || 
+                    obj.key === 'GLACSeg3' ||
+                    obj.key === 'GLACSeg4'
+                )
+            }).map(obj => {
+              obj.value = parseInt(obj.value)
+              
+              return obj;
+            });
+
+            // filteredList.forEach(obj => {
+            //     myObject[obj.key] = (
+            //         obj.key === 'GLACSeg0' || 
+            //         obj.key === 'GLACSeg1' || 
+            //         obj.key === 'GLACSeg2' || 
+            //         obj.key === 'GLACSeg3' ||
+            //         obj.key === 'GLACSeg4' 
+
+            //     ) ? (obj.value ? parseInt(obj.value) : null) :  (obj.value ? obj.value : null) ;
+              
+            // });
+            
+            setSegments(filteredList);
+        })
+        .catch(error => {
+            setErrorMessage(error);
+        });
+      };
+
       
     return (
         <FormShell 
@@ -131,9 +184,9 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
               // helperText={formik.touched.nationalityId && formik.errors.nationalityId}
             />
           </Grid>
-          
                 <Grid item xs={12}>
-                    <CustomTextField
+                    <SegmentedInput segments={segments} setInput={(input) => formik && formik.setFieldValue('accountRef', input)} />
+                    {/* <CustomTextField
                     name='accountRef'
                     label={labels.accountRef}
                     value={formik.values.accountRef}
@@ -144,7 +197,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                     onClear={() => formik.setFieldValue('accountRef', '')}
                     error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
                     helperText={formik.touched.accountRef && formik.errors.accountRef}
-                    />
+                    /> */}
                 </Grid>
                 <Grid item xs={12}>
                     <CustomTextField
@@ -259,3 +312,60 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         </FormShell>
   )
 }
+
+
+import {  createRef } from 'react';
+
+const SegmentedInput = ({ segments, setInput }) => {
+  // Create state to hold values of each segment
+  const [values, setValues] = useState([]);
+  
+  // Create refs for each input to manage focus
+  const inputRefs = Array(segments.length).fill().map(() => createRef());
+  
+  const handleChange = (index, event) => {
+    const maxLength = segments[index].value;
+    const newValues = [...values];
+    newValues[index] = event.target.value.slice(0, maxLength);
+    setValues(newValues);
+  
+    // Move focus to next input if we've reached the max length and it's not the last input
+    if (event.target.value.length >= maxLength && index < segments.length - 1) {
+      inputRefs[index + 1].current.focus();
+    }
+      let finalInput = '';
+      inputRefs.forEach((input, index) => {
+        finalInput += input.current.value
+
+        if(index != inputRefs.length - 1 && input.current.value.length == segments[index].value)
+          finalInput += "-"
+
+      });
+      console.log(finalInput)
+    setInput(finalInput)
+
+  };
+
+  useEffect(() => {
+    setValues(Array(segments.length).fill(""))
+  }, [segments])
+
+  
+  return (
+    <div>
+      {values.map((value, index) => (
+        <>
+        <input
+          key={index}
+          ref={inputRefs[index]}
+          value={value}
+          onChange={(e) => handleChange(index, e)}
+          maxLength={segments[index].value}
+          style={{ marginRight: '8px', width: segments[index].value + 1 + "ch" }} // Add some spacing between inputs
+        />
+        {index != values.length - 1 && "-"}
+        </>
+        ))}
+    </div>
+  );
+};
