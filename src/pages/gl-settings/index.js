@@ -113,7 +113,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 2 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 2 ? value != null && value >= 1 && value <=8 : true;
                 },
                 message: 'GLACSeg0 is required',
             }),
@@ -121,7 +121,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 2 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 2 ? value != null && value !== '' : true;
                 },
                 message: 'GLACSegName0 is required',
             }),
@@ -129,7 +129,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 2 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 2 ? value != null && value >= 1 && value <=8 : true;
                 },
                 message: 'GLACSeg1 is required',
             }),
@@ -137,7 +137,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 2 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 2 ? value != null && value !== '' : true;
                 },
                 message: 'GLACSegName1 is required',
             }),
@@ -145,7 +145,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 3 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 3 ? value != null && value >= 1 && value <=8 : true;
                 },
                 message: 'GLACSeg2 is required',
             }),
@@ -153,7 +153,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 3 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 3 ? value != null && value !== '' : true;
                 },
                 message: 'GLACSegName2 is required',
             }),
@@ -161,7 +161,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
                     
-                    return GLACSegments >= 4 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 4 ? value != null && value >= 1 && value <=8 : true;
                 },
                 message: 'GLACSeg3 is required',
             }),
@@ -169,7 +169,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 4 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 4 ? value != null && value !== '' : true;
                 },
                 message: 'GLACSegName3 is required',
             }),
@@ -177,7 +177,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 5 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 5 ? value != null && value >= 1 && value <=8 : true;
                 },
                 message: 'GLACSeg4 is required',
             }),
@@ -185,7 +185,7 @@ const GLSettings = () => {
                 test: function(value) {
                     const GLACSegments = this.parent.GLACSegments;
 
-                    return GLACSegments >= 5 ? value != null && value !== 0 : true;
+                    return GLACSegments >= 5 ? value != null && value !== '' : true;
                 },
                 message: 'GLACSegName4 is required',
             }),
@@ -241,6 +241,22 @@ const GLSettings = () => {
         "GLACSegName4",
       ]
 
+      useEffect(() => {
+        const segmentsNum = formik.values.GLACSegments
+        
+        segNumb.forEach((seg, idx) => {
+            if(idx >= segmentsNum) {
+                formik.setFieldValue(seg, null)
+            }
+        })
+        segName.forEach((seg, idx) => {
+            if(idx >= segmentsNum) {
+                formik.setFieldValue(seg, null)
+            }
+        })
+
+      }, [formik.values.GLACSegments]);
+
       return(
         <>
         <FormShell
@@ -270,10 +286,10 @@ const GLSettings = () => {
                                 <CustomTextField
                                     name={name}
                                     label={_labels["segment" + idx]}
+                                    readOnly={formik.values.GLACSegments <= idx}
                                     value={formik.values[name]}
                                     onClear={() => formik.setFieldValue(name, '')}
                                     type='number'
-
                                     numberField={true}
                                     onChange={formik.handleChange}
                                     error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
@@ -287,6 +303,7 @@ const GLSettings = () => {
                                 <CustomTextField
                                     name={name}
                                     label={"GLACSegName" + (idx + 1)}
+                                    readOnly={formik.values.GLACSegments <= idx}
                                     value={formik.values[name]}
                                     onClear={() => formik.setFieldValue(name, '')}
                                     maxLength='20'
