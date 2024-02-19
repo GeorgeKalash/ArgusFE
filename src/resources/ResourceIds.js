@@ -77,7 +77,10 @@ export const ResourceIds = {
   GateKeeper: 42322,
   MaterialsAdjustment: 41204,
   CommissionSchedule : 51118,
+  CbCashGroups:33100,
+  CbBanks:33101,
   SystemDefaults: 20108,
   LoCollectors: 40202,
   LoCarriers: 40201,
+  Routings: 42105
 }
