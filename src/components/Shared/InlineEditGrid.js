@@ -663,10 +663,10 @@ return (
                           : 'none'
                     }}
                   >
-                    {/* {cellRender(row, column)} */}
+                    {cellRender(row, column)}
 
-                    {gridValidation.errors?.rows && gridValidation.errors?.rows[rowIndex.rowIndex] && !gridValidation.values?.rows[rowIndex.rowIndex][column.name] ? <Box sx={{fontSize:'13px' , p:1, color:'red'}}>{gridValidation.errors?.rows[rowIndex.rowIndex][column.name]}</Box>
-                    : cellRender(row, column) }
+                    {/* {gridValidation.errors?.rows && gridValidation.errors?.rows[rowIndex.rowIndex] && !gridValidation.values?.rows[rowIndex.rowIndex][column.name] ? <Box sx={{fontSize:'13px' , p:1, color:'red'}}>{gridValidation.errors?.rows[rowIndex.rowIndex][column.name]}</Box>
+                    : cellRender(row, column) } */}
                   </Box>
                 )
               }}

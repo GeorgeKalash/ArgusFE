@@ -1150,7 +1150,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onClear={() => formik.setFieldValue('birth_date', '')}
                     error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
                     readOnly={editMode || idInfoAutoFilled}
-                    helperText={formik.touched.birth_date && formik.errors.birth_date}
+
+                    // helperText={formik.touched.birth_date && formik.errors.birth_date}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -1210,7 +1211,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('expiry_date', '')}
                     error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
-                    helperText={formik.touched.expiry_date && formik.errors.expiry_date}
+
+                    // helperText={formik.touched.expiry_date && formik.errors.expiry_date}
                     readOnly={editMode || idInfoAutoFilled}
                     maxAccess={maxAccess}
                   />
