@@ -43,7 +43,7 @@ export async function Country(getRequest) {
   return res.record.value
 }
 
-function FormField({ type, name, Component, valueField, onFocus,language, ...rest }) {
+function FormField({ type, name, Component, valueField, onFocus,language,...rest }) {
   const { formik, labels } = useContext(FormContext)
   const { getRequest } = useContext(RequestsContext)
 
@@ -77,10 +77,21 @@ function FormField({ type, name, Component, valueField, onFocus,language, ...res
         if (onFocus && (name == 'id_number' || name == 'search')) {
           onFocus(e.target.value)
         }
+        if (onFocus && (name == 'cell_phone' )) {
+          onFocus(e.target.value)
+        }
+
+
       }}
       onClear={() => {
         formik.setFieldValue(name ,  '' )
       }}
+
+
+
+
+
+      // }}
       form={formik}
     />
   )
@@ -310,6 +321,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   const [currencyStore, setCurrencyStore] = useState([])
+  const [showAsPasswordIDNumber, setShowAsPasswordIDNumber] = useState(false);
+  const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(false);
 
   const fillType = () => {
     var parameters = `_filter=`
@@ -1003,13 +1016,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       const {
                         rowIndex,
                         rowData: { minRate, maxRate, lcAmount, fcAmount },
-                        newValue
+                        newValue, value
                       } = e
-
                       const nv = parseFloat(newValue?.toString().replace(/,/g, ''))
                       const lc = parseFloat(lcAmount?.toString().replace(/,/g, ''))
                       const fc = parseFloat(fcAmount?.toString().replace(/,/g, ''))
-
+                      if(nv){
                       if (nv >= minRate && nv <= maxRate) {
                         formik.setFieldValue(`rows[${e.rowIndex}].exRate`, e.value)
 
@@ -1021,13 +1033,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       } else {
 
                             //  formik.setFieldError(`rows[${e.rowIndex}].exRate`,`Rate not in the [${minRate}-${maxRate}] range.`)
+                            if(formik.values.rows[e.rowIndex].exRate)
                              stackError({
                               message: `Rate not in the [${minRate}-${maxRate}] range.`
                             })
                             if(nv) formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
 
 
-                      }
+                      }}
                     }
                   },
 
@@ -1082,10 +1095,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
               <Grid container rowGap={3} xs={4} sx={{ px: 2 }}>
                 <Grid item xs={7}>
                   <FormField
-                    type="password"
                     name='id_number'
+                    type={showAsPasswordIDNumber &&  formik.values['id_number'] ? "password" : "text"}
+
                     Component={CustomTextField}
                     onBlur={e => {
+                      setShowAsPasswordIDNumber(true)
+
                       if (e.target.value &&  e.target.value != idNumberOne) {
                       checkTypes(e.target.value)
 
@@ -1106,8 +1122,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                             console.error('Error fetching ID info:', error)
                           })
                       }
+
                     }}
                     onFocus={value => {
+                      setShowAsPasswordIDNumber(false)
                       value &&   setIdNumber(value)
                     }}
                     readOnly={editMode  || idInfoAutoFilled}
@@ -1226,11 +1244,17 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
                 <Grid item xs={12}>
                   <FormField
-                    type="password"
+                    type={showAsPasswordPhone &&  formik.values['cell_phone'] ? "password" : "text"}
                     name='cell_phone'
                     Component={CustomTextField}
                     required
                     readOnly={editMode || idInfoAutoFilled}
+                    onBlur={(e) => {
+                        setShowAsPasswordPhone(true)
+                    }}
+                    onFocus={value => {
+                      setShowAsPasswordPhone(false)
+                    }}
                   />
                 </Grid>
                 <Grid item xs={7}>
