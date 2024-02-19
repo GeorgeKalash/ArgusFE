@@ -1,23 +1,23 @@
-
-
 const getNewCreditOrder = () => {
   return {
     recordId: null,
     name: null,
     reference: null,
     date: null,
-    functionId:null,
+    functionId: null,
     currencyId: null,
     plantId: null,
     corId: null,
     amount: null,
     notes: null,
     wip: null,
+    status: null,
+    releaseStatus: null,
     exRate: null,
     rateCalcMethod: null,
     plantRef: null,
     correspondantName: null,
-    currencyRef: null,
+    currencyRef: null
   }
 }
 
@@ -34,11 +34,13 @@ const populateCreditOrder = obj => {
     amount: obj.amount,
     notes: obj.notes,
     wip: obj.wip,
+    releaseStatus: obj.releaseStatus,
+    status: obj.status,
     exRate: obj.exRate,
     rateCalcMethod: obj.rateCalcMethod,
     plantRef: obj.plantRef,
     correspondantName: obj.correspondantName,
-    currencyRef: obj.currencyRef,
+    currencyRef: obj.currencyRef
   }
 }
 

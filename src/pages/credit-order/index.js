@@ -22,6 +22,8 @@ const CreditOrder = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [plantId, setPlantId] = useState(null)
 
+  //const [data, setData] = useState(null)
+
   const getPlantId = async () => {
     const userData = window.sessionStorage.getItem('userData')
       ? JSON.parse(window.sessionStorage.getItem('userData'))
@@ -55,11 +57,12 @@ const CreditOrder = () => {
   const search = inp => {
     setData({ count: 0, list: [], message: '', statusId: 1 })
     const input = inp
+    console.log('inppp ', inp)
     if (input) {
       var parameters = `_filter=${input}`
 
       getRequest({
-        extension: CTTRXrepository.CurrencyTrading.snapshot,
+        extension: CTTRXrepository.CreditOrder.snapshot,
         parameters: parameters
       })
         .then(res => {
@@ -175,6 +178,8 @@ const CreditOrder = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           plantId={plantId}
+          setPlantId={setPlantId}
+          setErrorMessage={setErrorMessage}
           setSelectedRecordId={setSelectedRecordId}
         />
       )}
