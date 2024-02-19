@@ -14,15 +14,31 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { DataSets } from 'src/resources/DataSets'
+import CustomLookup from 'src/components/Inputs/CustomLookup'
 
-export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
+export default function LoCarriersForms({ 
+  labels, 
+  maxAccess, 
+  recordId, 
+  lookupBusinessPartners, 
+  businessPartnerStore, 
+  setBusinessPartnerStore }) {
+
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
     reference: '',
-    name: ''
+    name: '',
+    type:null,
+    siteId:null,
+    bpId:null,
+    bpName:null,
+    bpRef:null,
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -30,7 +46,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
   //const editMode = !!recordId
 
   const invalidate = useInvalidate({
-    endpointId: LogisticsRepository.LoCollector.page
+    endpointId: LogisticsRepository.LoCarrier.page
   })
 
   const formik = useFormik({
@@ -39,13 +55,14 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(' '),
-      name: yup.string().required(' ')
+      name: yup.string().required(' '),
+      type: yup.string().required(' '),
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
 
       const response = await postRequest({
-        extension: LogisticsRepository.LoCollector.set,
+        extension: LogisticsRepository.LoCarrier.set,
         record: JSON.stringify(obj)
       })
 
@@ -69,7 +86,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
           setIsLoading(true)
 
           const res = await getRequest({
-            extension: LogisticsRepository.LoCollector.get,
+            extension: LogisticsRepository.LoCarrier.get,
             parameters: `_recordId=${recordId}`
           })
 
@@ -84,7 +101,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.LoCollectors}
+      resourceId={ResourceIds.LoCarriers}
       form={formik}
       height={300}
       maxAccess={maxAccess}
@@ -119,6 +136,71 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
             error={formik.touched.name && Boolean(formik.errors.name)}
 
             // helperText={formik.touched.name && formik.errors.name}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+              datasetId={DataSets.LO_TYPE}
+              name='type'
+              label={labels.type}
+              valueField='key'
+              required
+              displayField='value'
+              values={formik.values} 
+              onChange={(event, newValue) => {
+                  if (newValue) {
+                      formik.setFieldValue('type', newValue?.key)
+                  } else {
+                      formik.setFieldValue('type', '')
+                  }
+              }}
+              error={formik.touched.type && Boolean(formik.errors.type)}
+
+              // helperText={formik.touched.type && formik.errors.type}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={InventoryRepository.Site.qry}
+            name='siteId'
+            label={labels.site}
+            values={formik.values}
+            displayField='name'
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('siteId', newValue?.recordId)
+            }}
+            error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+
+            // helperText={formik.touched.siteId && formik.errors.siteId}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomLookup
+            name='bpRef'
+            maxAccess={maxAccess}
+            label={labels.businessPartner}
+            valueField='reference'
+            displayField='name'
+            store={businessPartnerStore}
+            setStore={setBusinessPartnerStore}
+            firstValue={formik.values.bpRef}
+            secondValue={formik.values.bpName}
+            onLookup={lookupBusinessPartners}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                formik.setFieldValue('bpId', newValue?.recordId)
+                formik.setFieldValue('bpRef', newValue?.reference)
+                formik.setFieldValue('bpName', newValue?.name)
+              } else {
+                formik.setFieldValue('bpId', null)
+                formik.setFieldValue('bpRef', null)
+                formik.setFieldValue('bpName', null)
+              }
+            }}
+            error={formik.touched.bpId && Boolean(formik.errors.bpId)}
+
+            // helperText={formik.touched.bpId && formik.errors.bpId}
           />
         </Grid>
       </Grid>
