@@ -8,6 +8,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const CustomDatePicker = ({
   name,
@@ -59,7 +60,7 @@ const CustomDatePicker = ({
   };
 
 return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} >
+    <LocalizationProvider dateAdapter={AdapterDateFns} >
       <DatePicker
         variant={variant}
         size={size}
@@ -67,7 +68,7 @@ return (
         label={label}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
-        inputFormat={dateFormat}
+        format={dateFormat}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
@@ -86,20 +87,18 @@ return (
             helperText: helperText,
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
-                <>
+                <InputAdornment position='end'>
                   {value && (
-                    <InputAdornment>
-                      <IconButton onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
+                      <IconButton tabIndex={-1}  edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
                         <ClearIcon />
                       </IconButton>
-                    </InputAdornment>
+
                   )}
-                  <InputAdornment>
-                    <IconButton onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
+                    <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
                       <EventIcon />
                     </IconButton>
                   </InputAdornment>
-                </>
+
               )
             }
           }

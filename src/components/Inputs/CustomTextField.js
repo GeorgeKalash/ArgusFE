@@ -34,14 +34,14 @@ const CustomTextField = ({
 
 
   useEffect(() => {
-    if(inputRef.current.selectionStart !== undefined && focus  ){
+    if(inputRef.current.selectionStart !== undefined && focus && value  && value?.length < 1 ){
          inputRef.current.focus();
       }
   }, [value]);
 
 
   useEffect(() => {
-    if (typeof inputRef.current.selectionStart !== undefined && position && value) {
+    if (typeof inputRef.current.selectionStart !== undefined && position   ) {
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
@@ -54,6 +54,11 @@ const CustomTextField = ({
       e.target.value = truncatedValue;
       props?.onChange(e);
     }
+    if (phone) {
+      const truncatedValue = inputValue.slice(0, maxLength);
+      e.target.value = truncatedValue?.replace(/\D/g, '');
+      props?.onChange(e);
+    }
   };
 
 
@@ -62,15 +67,14 @@ const CustomTextField = ({
     <div style={{ display: hidden ? 'none' : 'block' }}>
 
       <TextField
-
-        key={value}
+        key={(value?.length < 1 || readOnly  || value === null) && value }
         inputRef={inputRef}
         type={type}
         variant={variant}
-        defaultValue={phone ? value?.replace(/\D/g, '') : value}
+        defaultValue={value}
         size={size}
         fullWidth={fullWidth}
-        autoFocus={autoFocus}
+        autoFocus={focus}
         inputProps={{
           autoComplete: "off",
           readOnly: _readOnly,
@@ -84,7 +88,6 @@ const CustomTextField = ({
 
           }
         }}
-
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
         onInput={handleInput}

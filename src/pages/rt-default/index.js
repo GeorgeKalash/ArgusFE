@@ -163,16 +163,16 @@ const DocumentTypeMaps = () => {
 
     })
 
-      postRequest({
-        extension: RemittanceSettingsRepository.RtDefault.set2,
-        record:   JSON.stringify({  sysDefaults  : data })
+    postRequest({
+      extension: RemittanceSettingsRepository.RtDefault.set2,
+      record:   JSON.stringify({  sysDefaults  : data })
+    })
+    .then(res => { console.log(res)
+        if (res) toast.success('Record Successfully')
+    })
+      .catch(error => {
+        setErrorMessage(error)
       })
-        .then(res => {
-          if (res) toast.success('Record Successfully')
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
   }
 
   const handleSubmit = () => {

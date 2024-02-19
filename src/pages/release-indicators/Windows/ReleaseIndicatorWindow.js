@@ -3,33 +3,36 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // **Tabs
-import ReleaseIndicatorTab from 'src/pages/release-indicators/Tabs/ReleaseIndicatorTab'
+import ReleaseIndicatorForm from 'src/pages/release-indicators/forms/ReleaseIndicatorForm'
 
 const ReleaseIndicatorWindow = ({
     onClose,
-    onSave,
-    releaseIndValidation,
-    changeabilityStore,
-    width,
-    height,
-    _labels,
-    editMode,
-    maxAccess
+  labels,
+  maxAccess,
+  recordId,
+  setWindowOpen
 }) => {
-    return (
-        <Window id='PlantWindow' Title={_labels.releaseInd} onClose={onClose} width={width} height={height} 
-         onSave={onSave}>
-            <CustomTabPanel>
-                <ReleaseIndicatorTab
-                    releaseIndValidation={releaseIndValidation}
-                    changeabilityStore={changeabilityStore}
-                    _labels={_labels}
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                />
-            </CustomTabPanel>
-        </Window>
-    )
+  
+  return (
+    <Window
+      id='ReleaseIndicatorWindow'
+      Title={labels.releaseIndicator}
+      controlled={true}
+      onClose={onClose}
+      width={600}
+      height={450}
+    >
+      <CustomTabPanel>
+        <ReleaseIndicatorForm
+          labels={labels}
+          maxAccess={maxAccess}
+          recordId={recordId}
+          setWindowOpen={setWindowOpen}
+        />
+       
+      </CustomTabPanel>
+    </Window>
+  )
 }
 
 

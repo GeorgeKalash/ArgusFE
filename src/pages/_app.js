@@ -67,6 +67,7 @@ import 'primereact/resources/themes/saga-blue/theme.css'
 import '../../styles/globals.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
+import { ErrorProvider } from 'src/error'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -93,13 +94,7 @@ const Guard = ({ children, authGuard, guestGuard }) => {
   }
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: Infinity
-    }
-  }
-})
+const queryClient = new QueryClient({})
 
 // ** Configure JSS & ClassName
 const App = props => {
@@ -126,17 +121,13 @@ const App = props => {
     <Provider store={store}>
       <CacheProvider value={emotionCache}>
         <Head>
-          <title>{`${themeConfig.templateName} - Material Design React Admin Template`}</title>
-          <meta
-            name='description'
-            content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
-          />
-          <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
+          <title>{`Argus ERP`}</title>
+          <meta name='description' content={`Argus ERP`} />
+          <meta name='keywords' content='Argus, ERP, ArgusERP' />
           <meta name='viewport' content='initial-scale=1, width=device-width' />
         </Head>
 
-        <AuthProvider>          
-
+        <AuthProvider>
           <QueryClientProvider client={queryClient}>
             <RequestsProvider>
               <ControlProvider>
@@ -150,9 +141,11 @@ const App = props => {
                               <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
                                 <PrimeReactProvider>
                                   {getLayout(
-                                    <WindowProvider>
-                                      <Component {...pageProps} />
-                                    </WindowProvider>
+                                    <ErrorProvider key={(typeof window !== 'undefined' ? window.location.pathname : '')}>
+                                      <WindowProvider key={(typeof window !== 'undefined' ? window.location.pathname : '')}>
+                                        <Component {...pageProps} />
+                                      </WindowProvider>
+                                    </ErrorProvider>
                                   )}
                                 </PrimeReactProvider>
                               </AclGuard>

@@ -3,9 +3,27 @@ import { useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
+import { ClientRelationForm } from './ClientRelationForm'
+import { useWindow } from 'src/windows'
 
-export default function FormShell({ form, children, height, editMode, resourceId, maxAccess }) {
+export default function FormShell({
+  form, form1,
+  children,
+  height,
+  editMode,
+  setEditMode,
+  disabledSubmit,
+  infoVisible = true,
+  postVisible = false,
+  resourceId,
+  maxAccess,
+  isPosted = false,
+  clientRelation = false,
+  setErrorMessage,
+  initialValues, initialValues1 , setIDInfoAutoFilled
+}) {
   const [windowInfo, setWindowInfo] = useState(null)
+  const { stack } = useWindow()
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -15,10 +33,65 @@ export default function FormShell({ form, children, height, editMode, resourceId
     ? false
     : true
 
+    function handleReset(){
+       initialValues &&  form.setValues(initialValues)
+       if(form1){
+        form1.setValues(initialValues1)
+       }
+     if(setIDInfoAutoFilled){
+      setIDInfoAutoFilled(false)
+     }
+     setEditMode(false)
+    }
+
   return (
     <>
-      <DialogContent sx={{ height: false ? `calc(100vh - 48px - 180px)` : height, p: 1 }}>{children}</DialogContent>
-      {windowToolbarVisible && <WindowToolbar onSave={() => form.handleSubmit()} onInfo={() => setWindowInfo(true)} editMode={editMode}/>}
+      <DialogContent sx={{ flex: 1, height: '100%' , zIndex: 0 }}>{children}</DialogContent>
+      {windowToolbarVisible && (
+        <WindowToolbar
+          onSave={() => form.handleSubmit()}
+          onClear={() => initialValues ?  handleReset() : false
+        }
+          onPost={() => {
+            // Set a flag in the Formik state before calling handleSubmit
+            form.setFieldValue('isOnPostClicked', true)
+            form.handleSubmit()
+          }}
+          onInfo={() =>
+            stack({
+              Component: TransactionLog,
+              props: {
+                recordId: form.values.recordId ?? form.values.clientId,
+                resourceId: resourceId,
+                setErrorMessage: setErrorMessage
+              },
+              width: 700,
+              height: 400,
+              title: 'Transaction Log'
+            })
+          }
+          onClientRelation={() =>
+            stack({
+              Component: ClientRelationForm,
+              props: {
+                recordId: form.values.recordId ?? form.values.clientId,
+                name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
+                reference: form.values.reference,
+                setErrorMessage: setErrorMessage
+              },
+              width: 900,
+              height: 600,
+              title: 'Client Relation'
+            })
+          }
+          editMode={editMode}
+          disabledSubmit={disabledSubmit}
+          infoVisible={infoVisible}
+          postVisible={postVisible}
+          isPosted={isPosted}
+          clientRelation={clientRelation}
+        />
+      )}
       {windowInfo && (
         <TransactionLog
           resourceId={resourceId}

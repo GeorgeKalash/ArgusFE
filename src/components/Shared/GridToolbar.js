@@ -7,15 +7,20 @@ import { useState } from 'react'
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
 
-const GridToolbar = ({ initialLoad, onAdd, openRPB, disableRPB = false, onGo, paramsArray, children , labels, inputSearch,search , onSearch, ...props }) => {
+const GridToolbar = ({ initialLoad, onAdd, openRPB, disableRPB = false, onGo, paramsArray, children , labels,onClear, inputSearch, search , onSearch, onSearchClear, ...props }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.NOACCESS
-const [searchValue , setSearchValue] = useState('')
+  const [searchValue , setSearchValue] = useState('')
 
   const formatDataForApi = paramsArray => {
     const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
 
     return formattedData
+  }
+  function clear(){
+    setSearchValue('');
+    onSearch('')
+
   }
 
   return (
@@ -41,8 +46,8 @@ const [searchValue , setSearchValue] = useState('')
             <CustomTextField
               name='search'
               value={searchValue}
-              label={labels.search}
-              onClear={() =>setSearchValue('')}
+             label={labels.search}
+              onClear={clear}
               onChange={(e)=>setSearchValue(e.target.value)}
               onSearch={onSearch}
               search={true}

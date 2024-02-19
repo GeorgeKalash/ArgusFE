@@ -49,23 +49,25 @@ const Users = () => {
   const [languageStore, setLanguageStore] = useState([])
   const [notificationGrpStore, setNotificationGrpStore] = useState([])
   const [employeeStore, setEmployeeStore] = useState([])
-
   const [siteStore, setSiteStore] = useState([])
   const [plantStore, setPlantStore] = useState([])
   const [cashAccStore, setCashAccStore] = useState([])
   const [salesPersonStore, setSalesPersonStore] = useState([])
-  const [securityGrpGridData, setSecurityGrpGridData] = useState([])
-  const [initialAllListData, setSecurityGrpALLData] = useState([])
-  const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
+  const [moduleStore, setModuleStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
+  const [currentRecord, setCurrentRecord] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [emailPresent, setEmailPresent] = useState(false)
   const [passwordState, setPasswordState] = useState(false)
   const [securityGrpWindowOpen, setSecurityGrpWindowOpen] = useState(false)
+  const [securityGrpGridData, setSecurityGrpGridData] = useState([])
+  const [rowGridData, setRowGridData] = useState([])
+  const [initialAllListData, setSecurityGrpALLData] = useState([])
+  const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
 
   //control
   const [labels, setLabels] = useState(null)
@@ -94,10 +96,15 @@ const Users = () => {
     securityGrp: labels && labels.find(item => item.key === '19').value,
     all: labels && labels.find(item => item.key === '20').value,
     selected: labels && labels.find(item => item.key === '21').value,
-    group: labels && labels.find(item => item.key === '22').value
+    group: labels && labels.find(item => item.key === '22').value,
+    rowAccess: labels && labels.find(item => item.key === '23').value,
+    selectModule: labels && labels.find(item => item.key === '24').value,
+    checkAll: labels && labels.find(item => item.key === '25').value,
+    unCheckAll: labels && labels.find(item => item.key === '26').value,
+    active: labels && labels.find(item => item.key === '27').value
   }
 
-  const itemSelectorLabels=[_labels.securityGrp,_labels.all,_labels.selected]
+  const itemSelectorLabels = [_labels.securityGrp, _labels.all, _labels.selected]
 
   const columns = [
     {
@@ -135,7 +142,8 @@ const Users = () => {
   const tabs = [
     { label: _labels.users },
     { label: _labels.defaults, disabled: !editMode },
-    { label: _labels.securityGrp, disabled: !editMode }
+    { label: _labels.securityGrp, disabled: !editMode },
+    { label: _labels.rowAccess, disabled: !editMode }
   ]
 
   const usersValidation = useFormik({
@@ -200,6 +208,7 @@ const Users = () => {
     else if (activeTab === 1 && (defaultsValidation.values != undefined || defaultsValidation.values != null)) {
       defaultsValidation.handleSubmit()
     } else if (activeTab === 2) securityGrpValidation.handleSubmit()
+    else if (activeTab === 3) rowAccessValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -212,6 +221,7 @@ const Users = () => {
     })
       .then(res => {
         setGridData(res)
+        console.log('res response ',res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -268,19 +278,23 @@ const Users = () => {
     setSecurityGrpGridData([])
   }
 
-  const editUsers = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.Users.get,
-      parameters: parameters
-    })
-      .then(res => {
-        usersValidation.setValues(populateUserInfo(res.record))
-        setEditMode(true)
-        setWindowOpen(true)
-        fillActiveStatusStore()
+  const editUsers = async (obj) => {
+    try {
+      const _recordId = obj.recordId;
+      const defaultParams = `_recordId=${_recordId}`;
+      var parameters = defaultParams;
+  
+      const res = await getRequest({
+        extension: SystemRepository.Users.get,
+        parameters: parameters
+      });
+
+      setCurrentRecord(res.record.recordId)
+      usersValidation.setValues(populateUserInfo(res.record));
+
+      setEditMode(true);
+      setWindowOpen(true);
+      fillActiveStatusStore();
         fillUserTypeStore()
         fillLanguageStore()
         fillNotificationGrpStore()
@@ -290,11 +304,14 @@ const Users = () => {
         getSecurityGrpGridData(res.record.recordId)
         setPasswordState(true)
         getDefaultsById(obj)
+        setRowGridData([])
+        getRowAccessGridData(20110)
+        fillModuleStore()
         setActiveTab(0)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      
+    } catch (error) {
+      setErrorMessage(error);
+    }
   }
 
   const fillActiveStatusStore = () => {
@@ -385,7 +402,7 @@ const Users = () => {
         userId: recordId
       }
       postRequest({
-        extension: SystemRepository.UserDocument.set,
+        extension: SystemRepository.UserDefaults.set,
         record: JSON.stringify(request)
       })
         .then(res => {})
@@ -407,7 +424,7 @@ const Users = () => {
       const parameters = defaultParams
 
       const res = await getRequest({
-        extension: SystemRepository.UserDocument.qry,
+        extension: SystemRepository.UserDefaults.qry,
         parameters: parameters
       })
 
@@ -571,7 +588,7 @@ const Users = () => {
         const allList = resGRPFunction.list.map(x => {
           const n = {
             id: x.recordId,
-            name: x.name, 
+            name: x.name
           }
 
           return n
@@ -589,9 +606,7 @@ const Users = () => {
 
         // Remove items from allList that have the same sgId and userId as items in selectedList
         const filteredAllList = allList.filter(item => {
-          return !selectedList.some(
-            selectedItem => selectedItem.id === item.id && selectedItem.id === item.id
-          )
+          return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
         })
         setSecurityGrpALLData(filteredAllList)
       })
@@ -612,13 +627,13 @@ const Users = () => {
 
   const postSecurityGrp = () => {
     const userId = usersValidation.values.recordId
-    const selectedItems = [];
- 
+    const selectedItems = []
+
     //initialSelectedListData returns an array that contain id, where id is sgId
-   //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
+    //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
     initialSelectedListData.forEach(item => {
-      selectedItems.push({userId:userId , sgId: item.id})
-  });
+      selectedItems.push({ userId: userId, sgId: item.id })
+    })
 
     const data = {
       sgId: 0,
@@ -660,6 +675,147 @@ const Users = () => {
       })
   }
 
+  //Row access tab
+
+  const rowColumns = [
+    {
+      field: 'name',
+      headerName: '',
+      flex: 2
+    }
+  ]
+
+  const rowAccessValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({}),
+    initialValues: {
+       recordId: '',
+      name: '',
+      hasAccess: false
+    },
+    onSubmit: values => {
+      postRowAccess()
+    }
+  })
+
+  const handleRowAccessSubmit = () => {
+    if (rowAccessValidation) {
+      rowAccessValidation.handleSubmit()
+    }
+  }
+
+  const handleCheckedRows = checkedRows => {
+    console.log('hanle checked rows ',checkedRows)
+  }
+
+  const getRowAccessGridData = classId => {
+    setRowGridData([])
+    console.log('rowAccessUser class ',classId)
+
+    classId = classId || 20110
+    const userId = currentRecord
+
+    console.log('rowAccessUser userId ',userId)
+
+    const plantRequestPromise = getRequest({
+      extension: SystemRepository.Plant.qry,
+      parameters: '_filter='
+    })
+
+    const cashAccountRequestPromise = getRequest({
+      extension: CashBankRepository.CashAccount.qry,
+      parameters: '_filter=&_type=0'
+    })
+
+    const salesPersonRequestPromise = getRequest({
+      extension: SaleRepository.SalesPerson.qry,
+      parameters:'_filter='
+    })
+
+    const rowAccessUserPromise  = getRequest({
+        extension: AccessControlRepository.RowAccessUserView.qry,
+        parameters: `_resourceId=${classId}&_userId=${userId}`
+      });
+    
+
+    let rar = {
+      recordId: null,
+      name: null,
+      hasAccess: false,
+      classId: null
+    }
+
+
+    Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise,rowAccessUserPromise]).then(
+      ([cashAccountRequest, plantRequest, salesPersonRequest,rowAccessUser]) => {
+        //Plant
+        if (classId == 20110 || classId === 'undefined') {
+          // Use map to transform each item in res.list
+          rar = plantRequest.list.map(item => {
+            // Create a new object for each item
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              hasAccess: false
+            }
+          })
+        }
+
+        //Cash account
+        else if (classId == 33102) {
+          // Use map to transform each item in res.list
+          rar = cashAccountRequest.list.map(item => {
+            // Create a new object for each item
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              hasAccess: false
+            }
+          })
+        }
+
+        //Sales Person
+        else if (classId == 51201) {
+          // Use map to transform each item in res.list
+          rar = salesPersonRequest.list.map(item => {
+            // Create a new object for each item
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              hasAccess: false
+            }
+          })
+        }
+       
+        console.log('rowAccessUser list ',rowAccessUser.list)
+        if(classId !== 'undefined'){
+        for (let i = 0; i < rar.length; i++) {
+          let rowId = rar[i].recordId;
+          rowAccessUser.list.forEach(storedItem => {
+              let storedId = storedItem.recordId.toString();
+              if (storedId == rowId) {
+                rar[i].hasAccess = true;
+              }
+          });
+      }
+        
+      let resultObject = { list: rar };
+      setRowGridData(resultObject)
+    }
+      }
+    )
+  }
+
+  const fillModuleStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.ROW_ACCESS,
+      callback: setModuleStore
+    })
+  }
+
+  const postRowAccess = () => {}
+
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Users, setAccess)
     else {
@@ -670,6 +826,7 @@ const Users = () => {
         fillUserTypeStore()
         fillLanguageStore()
         fillNotificationGrpStore()
+        getRowAccessGridData(20110)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -712,7 +869,7 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          
+
           //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
@@ -741,6 +898,15 @@ const Users = () => {
           getSecurityGrpGridData={getSecurityGrpGridData}
           delSecurityGrp={delSecurityGrp}
           addSecurityGrp={addSecurityGrp}
+
+          //Row Access
+          moduleStore={moduleStore}
+          rowGridData={rowGridData}
+          handleRowAccessSubmit={handleRowAccessSubmit}
+          getRowAccessGridData={getRowAccessGridData}
+          rowAccessValidation={rowAccessValidation}
+          rowColumns={rowColumns}
+          handleCheckedRows={handleCheckedRows}
         />
       )}
       {securityGrpWindowOpen && (
