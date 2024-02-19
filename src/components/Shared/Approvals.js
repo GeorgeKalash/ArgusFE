@@ -5,6 +5,7 @@ import Table from './Table'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useResourceQuery } from 'src/hooks/resource'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const Approvals = (props) =>{
   const {recordId , functionId }= props
@@ -35,7 +36,9 @@ const columns = [
   {
     field: 'date',
     headerName: _labels.date,
-    flex: 1
+    flex: 1,
+    valueGetter: ({ row }) => formatDateDefault(row?.date)
+
   },
   {
     field: 'email',
