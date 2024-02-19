@@ -24,6 +24,7 @@ import {
 } from "src/lib/date-helper";
 
 
+
 export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recordId, onClose }) {
     const [isLoading, setIsLoading] = useState(false)
 
@@ -58,19 +59,26 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
         initialValues,
         enableReinitialize: true,
         validateOnChange: true,
-   
+      
         onSubmit: async obj => {
+          const data = {
+            ...obj,
+            date: formatDateToApi(obj.date),
+            functionId : initialValues.functionId,
+             seqNo : initialValues.seqNo,
+             recordId : initialValues.recordId,
+             response : responseValue
+          }
           
-          const functionId = initialValues.functionId
-          const seqNo = initialValues.seqNo
-          const recordId = initialValues.recordId
-          obj.response = responseValue
+      
+         
+          // obj.response = responseValue
 
-          obj.date = formatDateToApi(obj.date)
+          // obj.date = formatDateToApi(obj.date)
           try {
             const response = await postRequest({
               extension: DocumentReleaseRepository.DocumentsOnHold.set,
-              record: JSON.stringify(obj),
+              record: JSON.stringify(data),
             })
             
             if (!functionId&&!seqNo&&!recordId && responseValue !== null) {
@@ -84,7 +92,20 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
               //    date:formatDateDefault(obj.date)
               // });
             }
-            else toast.success('Record Edited Successfully')
+            else {
+              
+              //  setInitialData({
+              //    ...obj, // Spread the existing properties
+              //    recordId: response.recordId, // Update only the recordId field
+              //    response: responseValue,
+              //     date:formatDateDefault(obj.date)
+                  
+              //  });
+               console.log(obj)
+              
+              
+              toast.success('Record Edited Successfully')
+            }
   
             invalidate()
           } catch (error) {
@@ -159,7 +180,7 @@ export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recor
                     maxAccess={maxAccess}
                     />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} >
                     <CustomDatePicker
                     name='date'
                     label={labels.date}
