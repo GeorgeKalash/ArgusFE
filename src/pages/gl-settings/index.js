@@ -241,6 +241,7 @@ const GLSettings = () => {
         "GLACSegName4",
       ]
 
+
       useEffect(() => {
         const segmentsNum = formik.values.GLACSegments
         
@@ -293,7 +294,6 @@ const GLSettings = () => {
                                 <CustomTextField
                                    name={name}
                                    label={_labels["segment" + idx]}
-                                   readOnly={formik.values.GLACSegments <= idx}
                                    value={formik.values[name]}
                                    onClear={() => formik.setFieldValue(name, '')}
                                    type='number'
@@ -303,7 +303,7 @@ const GLSettings = () => {
                                    inputProps={{
                                      min: 1,
                                      max: 8,
-                                    
+                                    readOnly:formik.values.GLACSegments <= idx|| formik.values.GLACSegments=='null',
                                      maxLength: 1,
                                      inputMode: 'numeric',
                                      pattern: '[1-8]*',
@@ -319,7 +319,7 @@ const GLSettings = () => {
                                     name={name}
                                     label={"GLACSegName" + (idx + 1)}
 
-                                    readOnly={formik.values.GLACSegments <= idx}
+                                    readOnly={formik.values.GLACSegments <= idx|| formik.values.GLACSegments=='null'}
                                     value={formik.values[name]}
                                     onClear={() => formik.setFieldValue(name, '')}
                                     maxLength='20'
