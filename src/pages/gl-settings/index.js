@@ -276,6 +276,13 @@ const GLSettings = () => {
                             numberField={true}
                             onClear={() => formik.setFieldValue('GLACSegments', '')}
                             error={formik.touched.GLACSegments && Boolean(formik.errors.GLACSegments)}
+                            inputProps={{
+                                min: 2, 
+                                max: 5, 
+                                maxLength: 1,
+                                inputMode: 'numeric', 
+                                pattern: '[2-5]*',
+                            }}
 
                             // helperText={formik.touched.hourRate && formik.errors.hourRate}
                         />
@@ -284,15 +291,23 @@ const GLSettings = () => {
                         <Grid item xs={12} lg={6}>
                             {segNumb.map((name, idx) => <Grid key={name} item xs={12} sx={{marginTop:'7px'}}>
                                 <CustomTextField
-                                    name={name}
-                                    label={_labels["segment" + idx]}
-                                    readOnly={formik.values.GLACSegments <= idx}
-                                    value={formik.values[name]}
-                                    onClear={() => formik.setFieldValue(name, '')}
-                                    type='number'
-                                    numberField={true}
-                                    onChange={formik.handleChange}
-                                    error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
+                                   name={name}
+                                   label={_labels["segment" + idx]}
+                                   readOnly={formik.values.GLACSegments <= idx}
+                                   value={formik.values[name]}
+                                   onClear={() => formik.setFieldValue(name, '')}
+                                   type='number'
+                                   numberField={true}
+                                   onChange={formik.handleChange}
+                                   error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
+                                   inputProps={{
+                                     min: 1,
+                                     max: 8,
+                                    
+                                     maxLength: 1,
+                                     inputMode: 'numeric',
+                                     pattern: '[1-8]*',
+                                   }}
 
                                     // helperText={formik.touched.hourRate && formik.errors.hourRate}
                                 />
@@ -303,6 +318,7 @@ const GLSettings = () => {
                                 <CustomTextField
                                     name={name}
                                     label={"GLACSegName" + (idx + 1)}
+
                                     readOnly={formik.values.GLACSegments <= idx}
                                     value={formik.values[name]}
                                     onClear={() => formik.setFieldValue(name, '')}
@@ -337,158 +353,3 @@ const GLSettings = () => {
 
   export default GLSettings
 
-
-
-
-/**
- * 
- * 
- *  <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSeg0'
-                    label={_labels.segment0}
-                    value={formik.values.GLACSeg0}
-                    onClear={() => formik.setFieldValue('GLACSeg0', '')}
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.touched.GLACSeg0 && Boolean(formik.errors.GLACSeg0)}
-
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                    </Grid>
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSeg1'
-                    label={_labels.segment1}
-                    value={formik.values.GLACSeg1}
-                    onClear={() => formik.setFieldValue('GLACSeg1', '')}
-
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.touched.GLACSeg1 && Boolean(formik.errors.GLACSeg1)}
-
-                    // helperText={formik.touched.GLACSeg0 && formik.errors.GLACSeg0}
-                  />
-                    </Grid>
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSeg2'
-                    label={_labels.segment2}
-                    value={formik.values.GLACSeg2}
-                    onClear={() => formik.setFieldValue('GLACSeg2', '')}
-
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    
-                    error={formik.values.GLACSegments >= 3 && Boolean(formik.errors.GLACSeg2)}
-
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                    </Grid>  
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSeg3'
-                    label={_labels.segment3}
-                    value={formik.values.GLACSeg3}
-                    onClear={() => formik.setFieldValue('GLACSeg3', '')}
-
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.values.GLACSegments >= 4 && Boolean(formik.errors.GLACSeg3)}
-
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                    </Grid>  
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSeg4'
-                    label={_labels.segment4}
-                    value={formik.values.GLACSeg4}
-                    onClear={() => formik.setFieldValue('GLACSeg4', '')}
-
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.touched.GLACSeg4 && Boolean(formik.errors.GLACSeg4)}
-
-                    // helperText={formik.touched.GLACSeg4 && formik.errors.GLACSeg4}
-                  />
-                    </Grid>  
-                   
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSegName0'
-                    label={"GLACSegName1"}
-                    value={formik.values.GLACSegName0}
-                    onClear={() => formik.setFieldValue('GLACSegName0', '')}
-
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.touched.GLACSegName0 && Boolean(formik.errors.GLACSegName0)}
-
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                    </Grid> 
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSegName1'
-                    label={"GLACSegName2"}
-                    value={formik.values.GLACSegName1}
-                    onClear={() => formik.setFieldValue('GLACSegName1', '')}
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.touched.GLACSegName1 && Boolean(formik.errors.GLACSegName1)}
-
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                    </Grid> 
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSegName2'
-                    label={"GLACSegName3"}
-                    value={formik.values.GLACSegName2}
-                    onClear={() => formik.setFieldValue('GLACSegName2', '')}
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.touched.GLACSegName2 && Boolean(formik.errors.GLACSegName2)}
-
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                    </Grid> 
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSegName3'
-                    label={"GLACSegName4"}
-                    value={formik.values.GLACSegName3}
-                    onClear={() => formik.setFieldValue('GLACSegName3', '')}
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.touched.GLACSegName3 && Boolean(formik.errors.GLACSegName3)}
-                    
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                    </Grid> 
-                    <Grid item xs={12}>
-                    <CustomTextField
-                    name='GLACSegName4'
-                    label={'GLACSegName5'}
-                    value={formik.values.GLACSegName4}
-                    onClear={() => formik.setFieldValue('GLACSegName4', '')}
-                    type='number'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    error={formik.touched.GLACSegName4 && Boolean(formik.errors.GLACSegName4)}
-
-                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
-                  />
-                    </Grid> 
- * 
- */

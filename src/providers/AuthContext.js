@@ -68,7 +68,7 @@ const AuthProvider = ({ children }) => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
 
-      const accountName = matchHostname ? matchHostname[1] : 'Anthonys'
+      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
 
       try {
