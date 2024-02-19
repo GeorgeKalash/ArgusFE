@@ -915,7 +915,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     ],
                     async onChange(row) {
                       console.log(row?.newValue)
-                      if (row?.newValue > 0) {
+                      if (row?.newValue > 0 && formik.values.rows[row.rowIndex].currencyId !== row.newValue) {
                         const exchange = await fetchRate({
                           currencyId: row.newValue
                         })
@@ -945,6 +945,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.rateCalcMethod)
                         formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
                         formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
+
 
                         //  row.rowData.currencyId = row.newValue
                         //  row.rowData.exRate = exchange.exchangeRate.rate
@@ -1018,6 +1019,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         rowData: { minRate, maxRate, lcAmount, fcAmount },
                         newValue, value
                       } = e
+                      console.log(newValue)
                       const nv = parseFloat(newValue?.toString().replace(/,/g, ''))
                       const lc = parseFloat(lcAmount?.toString().replace(/,/g, ''))
                       const fc = parseFloat(fcAmount?.toString().replace(/,/g, ''))
@@ -1032,15 +1034,19 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         }
                       } else {
 
-                            //  formik.setFieldError(`rows[${e.rowIndex}].exRate`,`Rate not in the [${minRate}-${maxRate}] range.`)
                             if(formik.values.rows[e.rowIndex].exRate)
                              stackError({
-                              message: `Rate not in the [${minRate}-${maxRate}] range.`
+                              message: `Rate not in the [${minRate}-${maxRate}]range.`
                             })
-                            if(nv) formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                            if(nv){
+                            formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                            formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
+}
+                      }}else{
+                        formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                        formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
 
-
-                      }}
+                      }
                     }
                   },
 
@@ -1081,9 +1087,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 defaultRow={{
                   seqNo: 1,
                   currencyId: '',
-                  fcAmount: 0,
-                  exRate: 0,
-                  lcAmount: 0,
+                  fcAmount: '',
+                  exRate: '',
+                  lcAmount: '',
                   minRate: 0,
                   maxRate: 0
                 }}
