@@ -21,7 +21,7 @@ export default function FormShell({
   clientRelation = false,
   setErrorMessage,
   previewReport=false,
-  initialValues, initialValues1 , setIDInfoAutoFilled
+  initialValues, initialValues1 , setIDInfoAutoFilled, actions
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
@@ -98,6 +98,7 @@ export default function FormShell({
               title: 'Preview Report'
             })
           }
+          actions={actions}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
