@@ -714,7 +714,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         extension: RTCLRepository.Client.get,
         parameters: `_clientId=${clientId}`
       })
-      setIDInfoAutoFilled(false)
+
+      // setIDInfoAutoFilled(false)
+      setInfoAutoFilled(false)
 
       // Check if the response status is OK (200)
       const clientInfo = response && response.record
@@ -733,7 +735,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         formik.setFieldValue('profession', clientInfo.professionId)
         formik.setFieldValue('sponsor', clientInfo.sponsorName)
         formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
-        setIDInfoAutoFilled(true)
+
+        // setIDInfoAutoFilled(true)
+        setInfoAutoFilled(true)
+
       }
     } catch (error) {
       console.error('An error occurred:', error.message)
@@ -1096,6 +1101,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   currencyId: '',
                   fcAmount: '',
                   exRate: '',
+                  defaultExRate: '',
                   lcAmount: '',
                   minRate: 0,
                   maxRate: 0
@@ -1156,7 +1162,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('birth_date', '')}
                     error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
 
                     // helperText={formik.touched.birth_date && formik.errors.birth_date}
                     maxAccess={maxAccess}
@@ -1171,7 +1177,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                       valueField='recordId'
                       displayField='name'
-                      readOnly={editMode || idInfoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       required
                     />
                   </Grid>
@@ -1220,7 +1226,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
 
                     // helperText={formik.touched.expiry_date && formik.errors.expiry_date}
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -1236,7 +1242,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                     required
                   />
                 </Grid>
@@ -1252,7 +1258,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                      readOnly={editMode || idInfoAutoFilled }
+                    readOnly={editMode || idInfoAutoFilled }
                     required
                   />
                 </Grid>
@@ -1279,7 +1285,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.handleChange}
                     control={<Checkbox defaultChecked />}
                     label='Resident'
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1300,20 +1306,21 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='firstName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       required
                       language='english'
 
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='middleName'  language='english' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+                    <FormField name='middleName'  language='english' Component={CustomTextField}                     readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+ />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
                       name='lastName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       required
                       language='english'
 
@@ -1321,7 +1328,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   </Grid>
                   <Grid item xs={3}>
                     <FormField name='familyName'   language='english'
- Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+ Component={CustomTextField}
+            readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+ />
                   </Grid>
                 </Grid>
                 <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
@@ -1329,7 +1338,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='fl_firstName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
                     />
                   </Grid>
@@ -1337,19 +1346,20 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='fl_middleName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
 
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_lastName' Component={CustomTextField} readOnly={editMode || idInfoAutoFilled} />
+                    <FormField name='fl_lastName' Component={CustomTextField}                     readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+/>
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
                       name='fl_familyName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
 
                     />
@@ -1388,8 +1398,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode || idInfoAutoFilled}
-                    />
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      />
                   </Grid>
 
                   <Grid item xs={12}>
@@ -1404,8 +1414,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode || idInfoAutoFilled}
-                    />
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      />
                   </Grid>
 
                   <Grid item xs={12}>
