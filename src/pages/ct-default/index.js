@@ -353,7 +353,7 @@ return (
                     <Grid item xs={12}>
                         <CustomComboBox
                         name='ct_credit_eval_ratetype_id'
-                        label={_labels.credit_purchase_ratetype}
+                        label={_labels.credit_eval_ratetype}
                         valueField='recordId'
                         displayField='name'
                         store={store}
