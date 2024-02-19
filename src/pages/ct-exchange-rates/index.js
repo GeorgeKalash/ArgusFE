@@ -314,7 +314,7 @@ const CTExchangeRates = () => {
               </Grid>
               <Grid item xs={6}></Grid>
               <Grid item xs={6}>
-                <FieldSet title={labels.purchase}>
+                <FieldSet>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={MultiCurrencyRepository.RateType.qry}
@@ -354,7 +354,7 @@ const CTExchangeRates = () => {
                 </FieldSet>
               </Grid>
               <Grid item xs={6}>
-                <FieldSet title={labels.sales}>
+                <FieldSet>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={MultiCurrencyRepository.RateType.qry}

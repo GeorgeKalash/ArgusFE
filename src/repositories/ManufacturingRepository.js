@@ -82,5 +82,9 @@ export const ManufacturingRepository = {
     get: service + 'getCSF',
     del: service + 'delCSF',
     set2: service + 'set2CSF'
+  },
+  RoutingSequence: {
+    set2: service + 'set2RTS', //RoutingSequencePack
+    qry: service + 'qryRTS'
   }
 }
