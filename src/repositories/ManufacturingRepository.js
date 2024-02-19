@@ -65,5 +65,9 @@ export const ManufacturingRepository = {
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'
+  },
+  RoutingSequence: {
+    set2: service + 'set2RTS', //RoutingSequencePack
+    qry: service + 'qryRTS'
   }
 }

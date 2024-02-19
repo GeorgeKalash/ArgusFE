@@ -81,4 +81,5 @@ export const ResourceIds = {
   CbBanks:33101,
   SystemDefaults: 20108,
   LoCollectors: 40202,
+  Routings: 42105
 }
