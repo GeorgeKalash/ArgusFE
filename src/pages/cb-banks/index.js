@@ -1,10 +1,8 @@
-// ** React Importsport
+// ** React Imports
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -13,20 +11,21 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
 // ** Windows
-import CurrencyWindow from './Windows/CurrencyWindow'
+import CbBanksWindow from './Windows/CbBanksWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
+// ** Resources
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-const Currencies = () => {
+const CbBank = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+ 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -37,7 +36,7 @@ const Currencies = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: SystemRepository.Currency.page,
+      extension: CashBankRepository.CbBank.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -48,12 +47,12 @@ const Currencies = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Currency.page,
-    datasetId: ResourceIds.Currencies
+    endpointId: CashBankRepository.CbBank.page,
+    datasetId: ResourceIds.CbBanks
   })
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.Currency.page
+    endpointId: CashBankRepository.CbBank.page
   })
 
   const columns = [
@@ -61,33 +60,17 @@ const Currencies = () => {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1
-    },
-    {
+    },{
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
-    ,
-    {
-      field: 'flName',
-      headerName: _labels.foreignLanguage,
-      flex: 1
-    },
-    {
-      field: 'currencyTypeName',
-      headerName: _labels.currencyType,
+    },{
+      field: 'swiftCode',
+      headerName: _labels.swiftCode,
       flex: 1
     }
   ]
 
-  const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.Currency.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
-  }
 
   const add = () => {
     setWindowOpen(true)
@@ -97,6 +80,16 @@ const Currencies = () => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
+
+  const del = async obj => {
+    await postRequest({
+      extension: CashBankRepository.CbBank.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
+  }
+  
 
   return (
     <>
@@ -115,7 +108,7 @@ const Currencies = () => {
         />
       </Box>
       {windowOpen && (
-        <CurrencyWindow
+        <CbBanksWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -131,4 +124,4 @@ const Currencies = () => {
   )
 }
 
-export default Currencies
+export default CbBank

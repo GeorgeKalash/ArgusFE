@@ -9,4 +9,11 @@ export const LogisticsRepository = {
     page: service + 'pageCOL',
     del: service + 'delCOL'
   },
+  LoCarrier: {
+    qry: service + 'qryCAR',
+    get: service + 'getCAR',
+    set: service + 'setCAR',
+    page: service + 'pageCAR',
+    del: service + 'delCAR'
+  },
 }

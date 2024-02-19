@@ -8,16 +8,17 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { DataSets } from 'src/resources/DataSets'
-import { Dataset } from '@mui/icons-material'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setWindowOpen }) {
+import { SystemRepository } from 'src/repositories/SystemRepository'
+
+// ** Helpers
+import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+
+export default function CountryForm({ _labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -25,8 +26,15 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
     recordId: null,
     name: '',
     reference: '',
-    changeability: '',
-    isReleased: false
+    flName: '',
+    currencyId: null,
+    regionId: null,
+    ibanLength: '',
+    isInactive: false,
+    currencyRef: null,
+    currencyName: null,
+    regionRef: null,
+    regionName: null
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -34,7 +42,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
   //const editMode = !!recordId
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.ReleaseIndicator.page
+    endpointId: SystemRepository.Country.page
   })
 
   const formik = useFormik({
@@ -42,17 +50,21 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
+      ibanLength: yup
+        .number()
+        .transform((value, originalValue) => validateNumberField(value, originalValue))
+        .min(0, 'Value must be greater than or equal to 0')
+        .max(32767, 'Value must be less than or equal to 32,767'),
       name: yup.string().required('This field is required'),
       reference: yup.string().required('This field is required'),
-
-      recordId: yup.string().required('This field is required'),
-      changeability: yup.string().required('This field is required')
+      flName: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
+      obj.ibanLength = getNumberWithoutCommas(obj.ibanLength)
       const recordId = obj.recordId
 
       const response = await postRequest({
-        extension: DocumentReleaseRepository.ReleaseIndicator.set,
+        extension: SystemRepository.Country.set,
         record: JSON.stringify(obj)
       })
 
@@ -64,7 +76,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
-      setWindowOpen(false)
+
       invalidate()
     }
   })
@@ -76,7 +88,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
           setIsLoading(true)
 
           const res = await getRequest({
-            extension: DocumentReleaseRepository.ReleaseIndicator.get,
+            extension: SystemRepository.Country.get,
             parameters: `_recordId=${recordId}`
           })
 
@@ -90,92 +102,108 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ReleaseIndicators}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.Countries} form={formik} height={400} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
             name='reference'
-            label={labels.reference}
-            readOnly={editMode}
+            label={_labels.reference}
             value={formik.values.reference}
+            readOnly={editMode}
             required
-            maxAccess={maxAccess}
-            maxLength='1'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
             helperText={formik.touched.reference && formik.errors.reference}
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
           <CustomTextField
             name='name'
-            label={labels.name}
-            readOnly={editMode}
+            label={_labels.name}
             value={formik.values.name}
             required
-            maxAccess={maxAccess}
-            maxLength='30'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
             helperText={formik.touched.name && formik.errors.name}
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
           <CustomTextField
-            name='recordId'
-            label={labels.id}
-            readOnly={editMode}
-            value={formik.values.recordId}
+            name='flName'
+            label={_labels.fLang}
+            value={formik.values.flName}
             required
-            maxAccess={maxAccess}
-            maxLength='30'
             onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('recordId', '')}
-            error={formik.touched.recordId && Boolean(formik.errors.recordId)}
-            helperText={formik.touched.recordId && formik.errors.recordId}
+            onClear={() => formik.setFieldValue('flName', '')}
+            error={formik.touched.flName && Boolean(formik.errors.flName)}
+            helperText={formik.touched.flName && formik.errors.flName}
+            maxLength='30'
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
           <ResourceComboBox
-            readOnly={false}
-            datasetId={DataSets.DR_CHANGEABILITY}
-            name='changeability'
-            label={labels.changeability}
-            valueField='key'
-            displayField='value'
+            endpointId={SystemRepository.Currency.qry}
+            name='currencyId'
+            label={_labels.currency}
+            valueField='recordId'
+            displayField='name'
             values={formik.values}
-            required
-            maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik && formik.setFieldValue('changeability', newValue?.key)
+              formik && formik.setFieldValue('currencyId', newValue?.recordId)
             }}
-            error={formik.touched.changeability && Boolean(formik.errors.changeability)}
-            helperText={formik.touched.changeability && formik.errors.changeability}
+            error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+            helperText={formik.touched.currencyId && formik.errors.currencyId}
+            maxAccess={maxAccess}
           />
         </Grid>
-
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={SystemRepository.GeographicRegion.qry}
+            name='regionId'
+            label={_labels.geoRegion}
+            valueField='recordId'
+            displayField='name'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik && formik.setFieldValue('regionId', newValue?.recordId)
+            }}
+            error={formik.touched.regionId && Boolean(formik.errors.regionId)}
+            helperText={formik.touched.regionId && formik.errors.regionId}
+            maxAccess={maxAccess}
+            parameters='_startAt=0&_pageSize=1000'
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='ibanLength'
+            label={_labels.ibanLength}
+            value={getFormattedNumberMax(formik.values.ibanLength, 5, 0)}
+            onChange={e => formik.setFieldValue('ibanLength', getFormattedNumberMax(e.target.value, 5, 0))}
+            onClear={() => formik.setFieldValue('ibanLength', '')}
+            error={formik.touched.ibanLength && Boolean(formik.errors.ibanLength)}
+            helperText={formik.touched.ibanLength && formik.errors.ibanLength}
+            maxAccess={maxAccess}
+          />
+        </Grid>
         <Grid item xs={12}>
           <FormControlLabel
             control={
               <Checkbox
-                name='isReleased'
+                name='isInactive'
                 maxAccess={maxAccess}
-                checked={formik.values?.isReleased}
+                checked={formik.values?.isInactive}
                 onChange={formik.handleChange}
               />
             }
-            label={labels.isReleased}
+            label={_labels.isInactive}
           />
         </Grid>
       </Grid>
     </FormShell>
-  )
+ )
 }

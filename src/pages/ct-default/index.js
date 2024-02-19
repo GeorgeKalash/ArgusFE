@@ -26,8 +26,8 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { position } from 'stylis'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 const Defaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,100 +35,65 @@ const Defaults = () => {
 
   //control
   const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
   const [numberRangeStore, setNumberRangeStore] = useState([])
   const[store, setStore] = useState([])
-
-const [ initialValues, setInitialValues] = useState({
-  'ct-nra-individual' : null,
-  'ct-nra-corporate': null,
-  nraId: null, nraRef: null, nraDescription: null, // ct-nra-individual
-  nraId2: null, nraRef2: null, nraDescription2: null,  //ct-nra-corporate
-  ct_cash_sales_ratetype_id : null,
-  ct_cash_purchase_ratetype_id : null,
-  ct_credit_sales_ratetype_id : null,
-  ct_credit_purchase_ratetype_id : null
-
- })
-
-  //stores
-
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const arrayAllow = [
+    'ct-nra-individual',
+    'ct-nra-corporate',
+    "ct_cash_sales_ratetype_id" ,
+    'ct_cash_purchase_ratetype_id' ,
+    "ct_credit_sales_ratetype_id" ,
+    "ct_credit_purchase_ratetype_id",
+    "ct_credit_eval_ratetype_id" ];
 
 
-
+    const {
+      labels: _labels,
+      access
+    } = useResourceParams({
+      datasetId: ResourceIds.CtDefaults
+    })
   useEffect(() => {
-    if (!access) getAccess(ResourceIds.CtDefaults, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getLabels(ResourceIds.CtDefaults, setLabels)
-
         getDataResult()
         getData()
-
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-
-    // getDataResult()
   }, [access])
 
-  const _labels = {
-    nri: labels && labels.find(item => item.key === "1")?.value,
-    nrc: labels && labels.find(item => item.key ==="2")?.value,
-    cash_sales_ratetype
-: labels && labels.find(item => item.key === "cash_sales_ratetype")?.value,
-cash_purchase_ratetype: labels && labels.find(item => item.key ==="cash_purchase_ratetype")?.value,
-credit_purchase_ratetype
-: labels && labels.find(item => item.key === "credit_purchase_ratetype")?.value,
-credit_sales_ratetype: labels && labels.find(item => item.key ==="credit_sales_ratetype")?.value
 
-  }
-
-  const rtDefaultValidation = useFormik({
+  const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       'ct-nra-individual': null,
+      'ct-nra-individual-ref': null,
+      'ct-nra-individual-description': null,
+      'ct-nra-corporate':null,
+      'ct-nra-corporate-ref': null,
+      'ct-nra-corporate-description': null,
       "ct_cash_sales_ratetype_id" : null,
       'ct_cash_purchase_ratetype_id' : null,
       "ct_credit_sales_ratetype_id" : null,
-      "ct_credit_purchase_ratetype_id" : null
-
+      "ct_credit_purchase_ratetype_id" : null,
+      "ct_credit_eval_ratetype_id":null
       },
     onSubmit: values => {
-
       postRtDefault(values)
     }
   })
 
-  const rtDefaultFormValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues,
-    onSubmit: values => {
-      // postRtDefault(values)
-    }
-  })
-console.log(rtDefaultFormValidation)
-
    const getDataResult = () => {
-
-
     var parameters = `_filter=`
     getRequest({
       extension:  CurrencyTradingSettingsRepository.Defaults.qry,
       parameters: parameters
      })
       .then(res => {
-        const myObject = { ...initialValues }; // Clone the current state
+        const myObject = {}
         res.list.forEach(obj => {
-          if (obj.key in myObject) {
+          if (arrayAllow.includes(obj.key)) {
              myObject[obj.key] = obj.value ? parseInt(obj.value) : null;
-            rtDefaultFormValidation.setFieldValue(obj.key,parseInt(obj.value) )
-            rtDefaultValidation.setFieldValue(obj.key, parseInt(obj.value) )
+            formik.setFieldValue(obj.key, parseInt(obj.value) )
 
           }
         });
@@ -140,9 +105,6 @@ console.log(rtDefaultFormValidation)
         if(myObject && myObject['ct-nra-corporate']){
           getNumberRange(myObject['ct-nra-corporate'], "ct-nra-corporate")
         }
-
-
-
       })
       .catch(error => {
         setErrorMessage(error)
@@ -158,22 +120,16 @@ console.log(rtDefaultFormValidation)
       .then(res => {
         // console.log(res)
         if(key==='ct-nra-individual'){
-        rtDefaultValidation.setFieldValue('ct-nra-individual' , res.record.recordId)
-        rtDefaultFormValidation.setFieldValue('nraId' , res.record.recordId)
-        rtDefaultFormValidation.setFieldValue('nraRef' , res.record.reference)
-        rtDefaultFormValidation.setFieldValue('nraDescription' , res.record.description)
+        formik.setFieldValue('ct-nra-individual' , res.record.recordId)
+        formik.setFieldValue('ct-nra-individual-ref' , res.record.reference)
+        formik.setFieldValue('ct-nra-individual-description' , res.record.description)
       }
       if(key==='ct-nra-corporate'){
+        formik.setFieldValue('ct-nra-corporate' , res.record.recordId)
+        formik.setFieldValue('ct-nra-corporate-ref' , res.record.reference)
+        formik.setFieldValue('ct-nra-corporate-description' , res.record.description)
 
-        rtDefaultValidation.setFieldValue('ct-nra-corporate' , res.record.recordId)
-
-        rtDefaultFormValidation.setFieldValue('nraId2' , res.record.recordId)
-        rtDefaultFormValidation.setFieldValue('nraRef2' , res.record.reference)
-        rtDefaultFormValidation.setFieldValue('nraDescription2' , res.record.description)
       }
-
-
-
 
       })
       .catch(error => {
@@ -181,24 +137,14 @@ console.log(rtDefaultFormValidation)
       })
   }
 
-
-
-
-
-
-
-
-
   const postRtDefault = obj => {
 
    var data = []
     Object.entries(obj).forEach(([key, value], i) => {
-      // console.log(`Key: ${key}, Value: ${value}`);
-      const newObj = { key: key  , value : value };
-
-      // Push the new object into the array
-      data.push(newObj);
-
+      if(arrayAllow.includes(key)){
+        const newObj = { key: key  , value : value };
+        data.push(newObj);
+      }
     })
 
       postRequest({
@@ -214,7 +160,7 @@ console.log(rtDefaultFormValidation)
   }
 
   const handleSubmit = () => {
-    rtDefaultValidation.handleSubmit()
+    formik.handleSubmit()
   }
 
   const getData = () => {
@@ -262,33 +208,31 @@ return (
       <Grid item xs={12}>
                 <CustomLookup
                   name='ct-nra-individual'
-                  label={_labels.nri}
+                  label={_labels['ct-nra-individual']}
                   valueField='reference'
                   displayField='description'
                   store={numberRangeStore}
 
                   setStore={setNumberRangeStore}
 
-                  firstValue={rtDefaultFormValidation.values.nraRef}
-                  secondValue={rtDefaultFormValidation.values.nraDescription}
+                  firstValue={formik.values['ct-nra-individual-ref']}
+                  secondValue={formik.values['ct-nra-individual-description']}
                   onLookup={lookupNumberRange}
                   onChange={(event, newValue) => {
                     if (newValue) {
-                      rtDefaultValidation.setFieldValue('ct-nra-individual', newValue?.recordId)
 
-                      rtDefaultFormValidation.setFieldValue('nraId', newValue?.recordId)
-                      rtDefaultFormValidation.setFieldValue('nraRef', newValue?.reference)
-                      rtDefaultFormValidation.setFieldValue('nraDescription', newValue?.description)
+                      formik.setFieldValue('ct-nra-individual', newValue?.recordId)
+                      formik.setFieldValue('ct-nra-individual-ref', newValue?.reference)
+                      formik.setFieldValue('ct-nra-individual-description', newValue?.description)
                     } else {
-                      rtDefaultValidation.setFieldValue('ct-nra-individual', '')
-                      rtDefaultFormValidation.setFieldValue('nraId', null)
-                      rtDefaultFormValidation.setFieldValue('nraRef', null)
-                      rtDefaultFormValidation.setFieldValue('nraDescription', null)
+                      formik.setFieldValue('ct-nra-individual', '')
+                      formik.setFieldValue('ct-nra-individual-ref', '')
+                      formik.setFieldValue('ct-nra-individual-description', '')
                     }
                   }}
 
-                  error={rtDefaultFormValidation.touched.nraId && Boolean(rtDefaultFormValidation.errors.nraId)}
-                  helperText={rtDefaultFormValidation.touched.nraId && rtDefaultFormValidation.errors.nraId}
+                  error={formik.touched['ct-nra-individual'] && Boolean(formik.errors['ct-nra-individual'])}
+                  helperText={formik.touched['ct-nra-individual'] && formik.errors['ct-nra-individual']}
                   maxAccess={access}
                 />
               </Grid>
@@ -296,33 +240,30 @@ return (
               <Grid item xs={12}>
                 <CustomLookup
                   name='ct-nra-corporate'
-                  label={_labels.nrc}
+                  label={_labels['ct-nra-corporate']}
                   valueField='reference'
                   displayField='description'
                   store={numberRangeStore}
-
                   setStore={setNumberRangeStore}
-
-                  firstValue={rtDefaultFormValidation.values.nraRef2}
-                  secondValue={rtDefaultFormValidation.values.nraDescription2}
+                  firstValue={formik.values['ct-nra-corporate-ref']}
+                  secondValue={formik.values['ct-nra-corporate-description']}
                   onLookup={lookupNumberRange}
                   onChange={(event, newValue) => {
                     if (newValue) {
-                      rtDefaultValidation.setFieldValue('ct-nra-corporate', newValue?.recordId)
+                      formik.setFieldValue('ct-nra-corporate', newValue?.recordId)
 
-                      rtDefaultFormValidation.setFieldValue('nraId2', newValue?.recordId)
-                      rtDefaultFormValidation.setFieldValue('nraRef2', newValue?.reference)
-                      rtDefaultFormValidation.setFieldValue('nraDescription2', newValue?.description)
+                      formik.setFieldValue('ct-nra-corporate', newValue?.recordId)
+                      formik.setFieldValue('ct-nra-corporate-ref', newValue?.reference)
+                      formik.setFieldValue('ct-nra-corporate-description', newValue?.description)
                     } else {
-                      rtDefaultValidation.setFieldValue('ct-nra-corporate', '')
-                      rtDefaultFormValidation.setFieldValue('nraId2', null)
-                      rtDefaultFormValidation.setFieldValue('nraRef2', null)
-                      rtDefaultFormValidation.setFieldValue('nraDescription2', null)
+                      formik.setFieldValue('ct-nra-corporate', '')
+                      formik.setFieldValue('ct-nra-corporate-ref', '')
+                      formik.setFieldValue('ct-nra-corporate-description', '')
                     }
                   }}
 
-                  error={rtDefaultFormValidation.touched.nraId2 && Boolean(rtDefaultFormValidation.errors.nraId2)}
-                  helperText={rtDefaultFormValidation.touched.nraId2 && rtDefaultFormValidation.errors.nraId2}
+                  error={formik.touched['ct-nra-corporate'] && Boolean(formik.errors['ct-nra-corporate'])}
+                  helperText={formik.touched['ct-nra-corporate'] && formik.errors['ct-nra-corporate']}
                   maxAccess={access}
                 />
               </Grid>
@@ -335,18 +276,17 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultValidation.values.ct_cash_sales_ratetype_id ? store.filter(item => item.recordId === rtDefaultValidation.values.ct_cash_sales_ratetype_id)[0] : ''}
+                        value={formik.values.ct_cash_sales_ratetype_id ? store.filter(item => item.recordId === formik.values.ct_cash_sales_ratetype_id)[0] : ''}
                         onChange={(event, newValue) => {
                           if(newValue)
-                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_cash_sales_ratetype_id', newValue?.recordId)
+                            formik && formik.setFieldValue('ct_cash_sales_ratetype_id', newValue?.recordId)
 
                             else
-                            rtDefaultValidation.setFieldValue('ct_cash_sales_ratetype_id', null)
-
+                            formik.setFieldValue('ct_cash_sales_ratetype_id', null)
 
                         }}
-                        error={rtDefaultValidation.touched.ct_cash_sales_ratetype_id && Boolean(rtDefaultValidation.errors.ct_cash_sales_ratetype_id)}
-                        helperText={rtDefaultValidation.touched.ct_cash_sales_ratetype_id && rtDefaultValidation.errors.ct_cash_sales_ratetype_id}
+                        error={formik.touched.ct_cash_sales_ratetype_id && Boolean(formik.errors.ct_cash_sales_ratetype_id)}
+                        helperText={formik.touched.ct_cash_sales_ratetype_id && formik.errors.ct_cash_sales_ratetype_id}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -357,16 +297,16 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultValidation.values.ct_cash_purchase_ratetype_id ? store.filter(item => item.recordId === rtDefaultValidation.values.ct_cash_purchase_ratetype_id)[0] : ''}
+                        value={formik.values.ct_cash_purchase_ratetype_id ? store.filter(item => item.recordId === formik.values.ct_cash_purchase_ratetype_id)[0] : ''}
                         onChange={(event, newValue) => {
                           if(newValue)
-                          rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId)
+                          formik && formik.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId)
                           else
-                            rtDefaultValidation.setFieldValue('ct_cash_purchase_ratetype_id', null)
+                            formik.setFieldValue('ct_cash_purchase_ratetype_id', null)
 
                         }}
-                        error={rtDefaultValidation.touched.ct_cash_purchase_ratetype_id && Boolean(rtDefaultValidation.errors.ct_cash_purchase_ratetype_id)}
-                        helperText={rtDefaultValidation.touched.ct_cash_purchase_ratetype_id && rtDefaultValidation.errors.ct_cash_purchase_ratetype_id}
+                        error={formik.touched.ct_cash_purchase_ratetype_id && Boolean(formik.errors.ct_cash_purchase_ratetype_id)}
+                        helperText={formik.touched.ct_cash_purchase_ratetype_id && formik.errors.ct_cash_purchase_ratetype_id}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -377,17 +317,17 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultValidation.values.ct_credit_sales_ratetype_id ? store.filter(item => item.recordId === rtDefaultValidation.values.ct_credit_sales_ratetype_id)[0] : ''}
+                        value={formik.values.ct_credit_sales_ratetype_id ? store.filter(item => item.recordId === formik.values.ct_credit_sales_ratetype_id)[0] : ''}
                         onChange={(event, newValue) => {
                           if(newValue)
 
-                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId)
+                            formik && formik.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId)
                             else
-                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_sales_ratetype_id', '')
+                            formik && formik.setFieldValue('ct_credit_sales_ratetype_id', '')
 
                         }}
-                        error={rtDefaultValidation.touched.ct_credit_sales_ratetype_id && Boolean(rtDefaultValidation.errors.ct_credit_sales_ratetype_id)}
-                        helperText={rtDefaultValidation.touched.ct_credit_sales_ratetype_id && rtDefaultValidation.errors.ct_credit_sales_ratetype_id}
+                        error={formik.touched.ct_credit_sales_ratetype_id && Boolean(formik.errors.ct_credit_sales_ratetype_id)}
+                        helperText={formik.touched.ct_credit_sales_ratetype_id && formik.errors.ct_credit_sales_ratetype_id}
                         />
                     </Grid>
                     <Grid item xs={12}>
@@ -398,19 +338,38 @@ return (
                         displayField='name'
                         store={store}
 
-                        value={rtDefaultValidation.values.ct_credit_purchase_ratetype_id ? store.filter(item => item.recordId === rtDefaultValidation.values.ct_credit_purchase_ratetype_id)[0] : ''}
+                        value={formik.values.ct_credit_purchase_ratetype_id ? store.filter(item => item.recordId === formik.values.ct_credit_purchase_ratetype_id)[0] : ''}
                         onChange={(event, newValue) => {
                           if(newValue)
-                            rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId)
+                            formik && formik.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId)
                           else
-                           rtDefaultValidation && rtDefaultValidation.setFieldValue('ct_credit_purchase_ratetype_id', '')
+                           formik && formik.setFieldValue('ct_credit_purchase_ratetype_id', '')
 
                         }}
-                        error={rtDefaultValidation.touched.ct_credit_purchase_ratetype_id && Boolean(rtDefaultValidation.errors.ct_credit_purchase_ratetype_id)}
-                        helperText={rtDefaultValidation.touched.ct_credit_purchase_ratetype_id && rtDefaultValidation.errors.ct_credit_purchase_ratetype_id}
+                        error={formik.touched.ct_credit_purchase_ratetype_id && Boolean(formik.errors.ct_credit_purchase_ratetype_id)}
+                        helperText={formik.touched.ct_credit_purchase_ratetype_id && formik.errors.ct_credit_purchase_ratetype_id}
                         />
                     </Grid>
+                    <Grid item xs={12}>
+                        <CustomComboBox
+                        name='ct_credit_eval_ratetype_id'
+                        label={_labels.credit_eval_ratetype}
+                        valueField='recordId'
+                        displayField='name'
+                        store={store}
 
+                        value={formik.values.ct_credit_eval_ratetype_id ? store.filter(item => item.recordId === formik.values.ct_credit_eval_ratetype_id)[0] : ''}
+                        onChange={(event, newValue) => {
+                          if(newValue)
+                            formik && formik.setFieldValue('ct_credit_eval_ratetype_id', newValue?.recordId)
+                          else
+                           formik && formik.setFieldValue('ct_credit_eval_ratetype_id', '')
+
+                        }}
+                        error={formik.touched.ct_credit_eval_ratetype_id && Boolean(formik.errors.ct_credit_eval_ratetype_id)}
+                        helperText={formik.touched.ct_credit_eval_ratetype_id && formik.errors.ct_credit_eval_ratetype_id}
+                        />
+                    </Grid>
               </Grid>
               <Grid sx={{
           position: 'fixed',

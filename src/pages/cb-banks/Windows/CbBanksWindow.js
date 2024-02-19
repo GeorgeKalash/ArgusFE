@@ -1,33 +1,29 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import CbBanksForm from '../forms/CbBanksForm'
 
-// **Tabs
-import ReleaseIndicatorForm from 'src/pages/release-indicators/forms/ReleaseIndicatorForm'
-
-const ReleaseIndicatorWindow = ({
-    onClose,
+const CbBanksWindow = ({
+  onClose,
   labels,
   maxAccess,
-  recordId,
-  setWindowOpen
+  recordId
 }) => {
   
   return (
     <Window
-      id='ReleaseIndicatorWindow'
-      Title={labels.releaseIndicator}
+      id='CbBanksWindow'
+      Title={labels.bank}
       controlled={true}
       onClose={onClose}
-      width={600}
-      height={450}
+      width={500}
+      height={350}
     >
       <CustomTabPanel>
-        <ReleaseIndicatorForm
+        <CbBanksForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
-          setWindowOpen={setWindowOpen}
         />
        
       </CustomTabPanel>
@@ -35,5 +31,4 @@ const ReleaseIndicatorWindow = ({
   )
 }
 
-
-export default ReleaseIndicatorWindow
+export default CbBanksWindow

@@ -34,6 +34,7 @@ import CharacteristicWindow from './Windows/CharacteristicWindow'
 import ValueWindow from './Windows/ValueWindow'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { isNull } from '@antfu/utils'
+import { formatDateDefault, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 const Characteristics = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -48,8 +49,6 @@ const Characteristics = () => {
   const [gridData, setGridData] = useState([])
 
   const [valueGridData, setValueGridData] = useState([]) //for value tab
-  const [dataTypeStore, setDataTypeStore] = useState([])
-  const [currencyStore, setCurrencyStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
@@ -60,6 +59,8 @@ const Characteristics = () => {
   const [valueWindowOpen, setValueWindowOpen] = useState(false)
   const [valueEditMode, setValueEditMode] = useState(false)
 
+  const [seqNoVar, setSeqNo] = useState(1)
+
   const _labels = {
     name: labels && labels.find(item => item.key === "1").value,
     dataType: labels && labels.find(item => item.key === "2").value,
@@ -68,7 +69,8 @@ const Characteristics = () => {
     isMultiple: labels && labels.find(item => item.key === "5").value,
     allowNeg: labels && labels.find(item => item.key === "6").value,
     caseSensitive: labels && labels.find(item => item.key === "7").value,
-    currency: labels && labels.find(item => item.key === "8").value,
+
+    //currency: labels && labels.find(item => item.key === "8").value,
     textSize: labels && labels.find(item => item.key === "9").value,
     validFrom: labels && labels.find(item => item.key === "10").value,
     characteristic: labels && labels.find(item => item.key === "11").value,
@@ -92,7 +94,8 @@ const Characteristics = () => {
     {
       field: 'validFrom',
       headerName: _labels.validFrom,
-      flex: 1
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.validFrom)
     }
   ]
 
@@ -104,7 +107,7 @@ const Characteristics = () => {
     validationSchema: yup.object({
       name: yup.string().required('This field is required'),
       dataType: yup.string().required('This field is required'),
-      currencyName: yup.string().required('This field is required'),
+      propertyName: yup.string().required('This field is required'), 
       validFrom: yup.string().required('This field is required'),
       textSize: yup
         .number()
@@ -114,7 +117,8 @@ const Characteristics = () => {
     }),
     onSubmit: values => {
       console.log(values)
-      values.textSize = getNumberWithoutCommas(values.textSize)
+      values.textSize = getNumberWithoutCommas(values.textSize)   
+      values.validFrom = formatDateToApi(values.validFrom)
       postCharacteristic(values)
     }
   })
@@ -149,6 +153,7 @@ const Characteristics = () => {
     })
       .then(res => {
         characteristicValidation.setFieldValue('recordId', res.recordId)
+        characteristicValidation.setFieldValue('validFrom', formatDateFromApi(obj.validFrom))
         getGridData({})
         if (!recordId) {
           toast.success('Record Added Successfully')
@@ -179,8 +184,6 @@ const Characteristics = () => {
     characteristicValidation.setValues(getNewCharGeneral)
     resetValue()
     setValueGridData([])
-    fillDataTypeStore() 
-    fillCurrencyStore() 
     setEditMode(false)
     setWindowOpen(true)
     setActiveTab(0)
@@ -189,8 +192,6 @@ const Characteristics = () => {
   const editCharacteristic = obj => {
     setActiveTab(0)
     console.log(obj)
-    fillDataTypeStore() 
-    fillCurrencyStore()
     resetValue()
     getValueGridData(obj.recordId)
     getCharById(obj)
@@ -214,27 +215,6 @@ const Characteristics = () => {
         setErrorMessage(error)
       })
   }
-
-  const fillDataTypeStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.DR_CHA_DATA_TYPE,
-      callback: setDataTypeStore
-    })
-  }
-
-   const fillCurrencyStore = () => {
-    var parameters = '_filter='
-    getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  } 
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.Characteristics, setAccess)
@@ -269,12 +249,13 @@ const Characteristics = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        if (!codeId) {
+        if (!recordId) {
           toast.success('Record Added Successfully')
         } else toast.success('Record Editted Successfully')
 
         setValueWindowOpen(false)
         getValueGridData(chId)
+        setSeqNo(seqNoVar + 1)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -314,7 +295,7 @@ const Characteristics = () => {
   }
 
   const addValue = () => {
-    valueValidation.setValues(getNewCharValue(characteristicValidation.values.recordId))
+    valueValidation.setValues(getNewCharValue(characteristicValidation.values.recordId, seqNoVar))
     setValueWindowOpen(true)
   }
 
@@ -382,8 +363,6 @@ const Characteristics = () => {
           _labels={_labels}
           maxAccess={access}
           editMode={editMode}
-          currencyStore={currencyStore}
-          dataTypeStore={dataTypeStore}
           
           //Value tab (grid)
           valueGridData={valueGridData}
@@ -400,6 +379,7 @@ const Characteristics = () => {
           valueValidation={valueValidation}
           maxAccess={access}
           _labels={_labels}
+          editMode={editMode}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

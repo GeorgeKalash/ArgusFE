@@ -11,11 +11,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
-export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
+export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -30,7 +29,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
   //const editMode = !!recordId
 
   const invalidate = useInvalidate({
-    endpointId: LogisticsRepository.LoCollector.page
+    endpointId: CashBankRepository.CbCashGroup.page
   })
 
   const formik = useFormik({
@@ -45,7 +44,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
       const recordId = obj.recordId
 
       const response = await postRequest({
-        extension: LogisticsRepository.LoCollector.set,
+        extension: CashBankRepository.CbCashGroup.set,
         record: JSON.stringify(obj)
       })
 
@@ -69,7 +68,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
           setIsLoading(true)
 
           const res = await getRequest({
-            extension: LogisticsRepository.LoCollector.get,
+            extension: CashBankRepository.CbCashGroup.get,
             parameters: `_recordId=${recordId}`
           })
 
@@ -84,7 +83,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.LoCollectors}
+      resourceId={ResourceIds.CbCashGroups}
       form={formik}
       height={300}
       maxAccess={maxAccess}
@@ -98,7 +97,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
             value={formik.values.reference}
             required
             maxAccess={maxAccess}
-            maxLength='10'
+            maxLength='30'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -112,8 +111,8 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
             label={labels.name}
             value={formik.values.name}
             required
+            rows={2}
             maxAccess={maxAccess}
-            maxLength='30'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
