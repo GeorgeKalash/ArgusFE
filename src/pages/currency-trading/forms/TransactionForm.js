@@ -51,7 +51,6 @@ function FormField({ type, name, Component, valueField, onFocus,language,...rest
     const countryId = await Country(getRequest)
     formik.setFieldValue('issue_country', parseInt(countryId))
   }
-  console.log(formik)
 
   return (
     <Component
@@ -190,7 +189,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         seqNo: 1,
         currencyId: '',
         fcAmount: '',
-        defaultExRate: 0,
+        defaultExRate: '',
         exRate: '',
         lcAmount: '',
         minRate: 0,
@@ -259,9 +258,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
       const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
       const exRate = values.rows && values.rows.every(row => !!row.exRate)
-      console.log(amount)
       if (values.rows) {
-        console.log('yes')
         values.rows.forEach((row, index) => {
           if (row.exRate > row.maxRate || row.exRate < row.minRate ) {
             if (!errors.rows[index]) {
@@ -519,7 +516,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           seqNo: 1,
           currencyId: '',
           fcAmount: '',
-          defaultExRate: 0,
+          defaultExRate: '',
           exRate: '',
           lcAmount: '',
           minRate: 0,
@@ -915,7 +912,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     ],
                     async onChange(row) {
                       console.log(row?.newValue)
-                      if (row?.newValue > 0 && formik.values.rows[row.rowIndex].currencyId !== row.newValue) {
+
+                      if (row?.newValue !=='' && formik.values.rows[row.rowIndex].currencyId !== row.newValue) {
                         const exchange = await fetchRate({
                           currencyId: row.newValue
                         })
@@ -1019,11 +1017,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         rowData: { minRate, maxRate, lcAmount, fcAmount },
                         newValue, value
                       } = e
-                      console.log(newValue)
                       const nv = parseFloat(newValue?.toString().replace(/,/g, ''))
                       const lc = parseFloat(lcAmount?.toString().replace(/,/g, ''))
                       const fc = parseFloat(fcAmount?.toString().replace(/,/g, ''))
-                      if(nv){
+
+                   if(nv !==0){
+                      if( nv > 0 && nv !==''){
                       if (nv >= minRate && nv <= maxRate) {
                         formik.setFieldValue(`rows[${e.rowIndex}].exRate`, e.value)
 
@@ -1038,15 +1037,23 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                              stackError({
                               message: `Rate not in the [${minRate}-${maxRate}]range.`
                             })
-                            if(nv){
-                            formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
-                            formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
-}
+                               formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                              formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
+
                       }}else{
-                        formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
-                        formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
+
+                        console.log(nv)
+                       !isNaN(nv)  && formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                       !isNaN(nv) && formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
 
                       }
+
+                    }else{
+                       formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                       formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
+
+
+                    }
                     }
                   },
 
