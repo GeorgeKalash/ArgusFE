@@ -73,7 +73,6 @@ return await getRequest({
   })
 
 
-  // const [searchValue, setSearchValue] = useState("")
 
   function onSearchClear() {
     setSearchValue('')
@@ -116,33 +115,6 @@ return await getRequest({
     toast.success('Record Deleted Successfully')
   }
 
-
-
-  // const search = inp => {
-  //   setSearchValue(inp)
-  //   setGridData({count : 0, list: [] , message :"",  statusId:1})
-  //    const input = inp
-
-  //    if(input){
-  //   var parameters = `_filter=${input}`
-
-  //   getRequest({
-  //     extension: GeneralLedgerRepository.CostCenter.snapshot,
-  //     parameters: parameters
-  //   })
-  //     .then(res => {
-  //       setGridData(res)
-  //     })
-  //     .catch(error => {
-  //       setErrorMessage(error)
-  //     })
-
-  //   }else{
-
-  //     setGridData({count : 0, list: [] , message :"",  statusId:1})
-  //   }
-
-  // }
 
   return (
     <>
