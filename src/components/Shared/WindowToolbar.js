@@ -24,7 +24,7 @@ const WindowToolbar = ({
   resourceId,
   setSelectedReport,
   selectedReport,
-  previewReport, actions
+  previewReport, actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
