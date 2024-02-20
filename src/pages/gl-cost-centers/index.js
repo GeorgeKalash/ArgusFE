@@ -44,13 +44,12 @@ const CostCenter = () => {
     })
   }
 
-  async function fetchWithSearch({options = {} , qrySearch}) {
+  async function fetchWithSearch({options = {} , qry}) {
     const { _startAt = 0, _pageSize = 50 } = options
-console.log(qrySearch)
 
 return await getRequest({
-      extension: GeneralLedgerRepository.CostCenter.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qrySearch}`
+      extension: GeneralLedgerRepository.CostCenter.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
     })
   }
 
@@ -66,7 +65,6 @@ return await getRequest({
     search: {
       endpointId: GeneralLedgerRepository.CostCenter.snapshot,
       searchFn: fetchWithSearch,
-
     }
   })
 
@@ -146,15 +144,13 @@ return await getRequest({
 
   // }
 
-
-
   return (
     <>
       <Box>
         <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={onSearchClear} labels={_labels}  inputSearch={true}/>
         <Table
           columns={columns}
-          gridData={ data }
+          gridData={  data ?? {list: []} }
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
