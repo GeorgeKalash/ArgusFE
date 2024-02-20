@@ -19,7 +19,6 @@ export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
     enabled:  access?.record?.maxAccess > 0
   })
 
-
   return {
     access,
     labels,

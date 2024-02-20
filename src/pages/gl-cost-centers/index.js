@@ -133,22 +133,9 @@ return await getRequest({
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
-          onSubmit={() => {
-            if(searchValue !== "") {
-              var parameters = `_filter=${searchValue}`
+          onSubmit={(val) => {
+            search(val)
 
-              getRequest({
-                extension: GeneralLedgerRepository.CostCenter.snapshot,
-                parameters: parameters
-              })
-                .then(res => {
-                  setGridData(res)
-                })
-                .catch(error => {
-                  setErrorMessage(error)
-                })
-
-            }
           }
         }
         />
