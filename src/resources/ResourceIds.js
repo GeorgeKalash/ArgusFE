@@ -80,4 +80,5 @@ export const ResourceIds = {
   SystemDefaults: 20108,
   LoCollectors: 40202,
   LoCarriers: 40201,
+  Accounts:31201,
 }

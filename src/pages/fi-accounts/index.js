@@ -11,10 +11,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 // ** Windows
-import MachinesWindow from './Windows/MachinesWindow'
+import AccountsWindow from './Windows/AccountsWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -23,7 +23,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const Machines = () => {
+const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -36,7 +36,7 @@ const Machines = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: ManufacturingRepository.Machine.page,
+      extension: FinancialRepository.Account.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -47,12 +47,12 @@ const Machines = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.Machine.page,
-    datasetId: ResourceIds.Machines
+    endpointId: FinancialRepository.Account.page,
+    datasetId: ResourceIds.Accounts
   })
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Machine.page
+    endpointId: FinancialRepository.Account.page
   })
 
   const columns = [
@@ -67,20 +67,15 @@ const Machines = () => {
       flex: 1
     },
     {
-      field: 'workCenterName',
-      headerName: _labels.workCenterName,
+      field: 'groupId',
+      headerName: _labels.accountGroup,
       flex: 1
     },
     {
-      field: 'operationName',
-      headerName: _labels.operationName,
+      field: 'type',
+      headerName: _labels.type,
       flex: 1
     },
-    {
-        field: 'laborName',
-        headerName: _labels.laborName,
-        flex: 1
-      },
   ]
 
 
@@ -96,11 +91,11 @@ const Machines = () => {
   const del = async (obj) => {
     try {
       await postRequest({
-          extension: ManufacturingRepository.MachineSpecification.del,
-          record: JSON.stringify({ machineId: obj.recordId })
+          extension: FinancialRepository.AccountSpecification.del,
+          record: JSON.stringify({ AccountId: obj.recordId })
       })
       await postRequest({
-          extension: ManufacturingRepository.Machine.del,
+          extension: FinancialRepository.Account.del,
           record: JSON.stringify(obj)
       })
       toast.success('Record Deleted Successfully')
@@ -127,7 +122,7 @@ const Machines = () => {
         />
       </Box>
       {windowOpen && (
-        <MachinesWindow
+        <AccountsWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -143,4 +138,4 @@ const Machines = () => {
   )
 }
 
-export default Machines
+export default MfAccounts
