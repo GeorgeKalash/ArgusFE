@@ -30,6 +30,8 @@ import FormShell from 'src/components/Shared/FormShell'
 const GLSettings = () => {
     const [errorMessage, setErrorMessage] = useState(null)
     const { getRequest, postRequest } = useContext(RequestsContext)
+    const [focus, setFocus] = useState()
+    const handleBlur = () => setFocus(undefined)
 
     const [initialValues, setInitialValues] = useState({
         
@@ -228,22 +230,21 @@ const GLSettings = () => {
 
 
 
-    //   useEffect(() => {
-    //     const segmentsNum = formik.values.GLACSegments
+      useEffect(() => {
+        const segmentsNum = formik.values.GLACSegments
         
-    //     segNumb.forEach((seg, idx) => {
-    //         if(idx >= segmentsNum) {
-    //             formik.setFieldValue(seg, null)
-    //         }
-    //     })
-    //     segName.forEach((seg, idx) => {
-    //         if(idx >= segmentsNum) {
-    //             formik.setFieldValue(seg, null)
-    //         }
-    //     })
+        segNumb.forEach((seg, idx) => {
+            if(idx >= segmentsNum) {
+                formik.setFieldValue(seg, null)
+            }
+        })
+        segName.forEach((seg, idx) => {
+            if(idx >= segmentsNum) {
+                formik.setFieldValue(seg, null)
+            }
+        })
 
-    //   }, [formik.values.GLACSegments]);
-      const fadedStyle = { backgroundColor: '#f5f5f5', color: '#ddd', opacity: 0.5 };
+      }, [formik.values.GLACSegments]);
 
       return(
         <>
@@ -259,10 +260,11 @@ const GLSettings = () => {
                             name='GLACSegments'
                             label={_labels.segments}
                             value={formik.values.GLACSegments}
-                            onChange={formik.handleChange}
+
+                            // onChange={formik.handleChange}
                             type='number'
                             numberField={true}
-                            
+                            onBlur={formik.handleChange}
                             onClear={() => formik.setFieldValue('GLACSegments', '')}
                             error={formik.touched.GLACSegments && Boolean(formik.errors.GLACSegments)}
                             inputProps={{
@@ -280,7 +282,6 @@ const GLSettings = () => {
                         <Grid item xs={12} lg={6}>
                             {segNumb.map((name, idx) => <Grid key={name} item xs={12} sx={{marginTop:'7px'}}>
                                 <CustomTextField
-                                    style={formik.values.GLACSegments <= idx ? fadedStyle : {}}
                                    name={name}
                                    label={_labels["segment" + idx]}
                                    value={formik.values[name]}
@@ -306,10 +307,9 @@ const GLSettings = () => {
                             {segName.map((name, idx) => <Grid key={name} item xs={12} sx={{marginTop:'7px'}}>
                                 <CustomTextField
                                     name={name}
-                                    label={"GLACSegName" + (idx + 1)}
-                                    style={formik.values.GLACSegments <= idx ? fadedStyle : {}}
+                                    onBlur={handleBlur}
+                                    onFocus={e => setFocus(e.target.name)}
 
-                                    
                                     value={formik.values[name]}
                                     onClear={() => formik.setFieldValue(name, '')}
                                     
