@@ -3,6 +3,7 @@ export const ResourceIds = {
   DocumentTypes: 20104,
   DocumentTypeMaps: 20201,
   GeographicRegions: 20133,
+  GLSettings : 30110,
   WorkCenters: 42101,
   Cities: 20125,
   Labor : 42103,
