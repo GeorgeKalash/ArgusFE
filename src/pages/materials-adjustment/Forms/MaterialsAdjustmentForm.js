@@ -23,7 +23,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { TrendingUp } from '@mui/icons-material'
 
 export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, setErrorMessage, expanded }) {
   const { height } = useWindowDimensions()
@@ -194,7 +193,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       valueField: 'recordId',
       displayField: 'sku',
       widthDropDown: 400,
-      readOnly:isPosted,
+      readOnly: isPosted,
       fieldsToUpdate: [
         { from: 'recordId', to: 'itemId' },
         { from: 'sku', to: 'sku' },
@@ -219,7 +218,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       header: labels[9],
       name: 'qty',
       mandatory: true,
-      readOnly:isPosted,
+      readOnly: isPosted,
       width: 100
     },
     {
@@ -234,7 +233,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       field: 'textfield',
       header: labels[6],
       name: 'notes',
-      readOnly:isPosted,
+      readOnly: isPosted,
       width: 300
     }
   ]
@@ -301,8 +300,9 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
       editMode={editMode}
       isPosted={isPosted}
       postVisible={true}
-    >
+      previewReport={editMode}
 
+    >
       <Grid container>
         <Grid container xs={12} style={{ overflow: 'hidden' }}>
           {/* First Column */}
@@ -434,7 +434,7 @@ export default function MaterialsAdjustmentForm({ labels, maxAccess, recordId, s
               allowDelete={!isPosted}
               allowAddNewLine={!isPosted}
               scrollable={true}
-              scrollHeight={`${ expanded ? height-430  : 200}px`}
+              scrollHeight={`${expanded ? height - 430 : 200}px`}
             />
           </Box>
         </Grid>
