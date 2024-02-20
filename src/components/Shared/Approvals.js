@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, {  useContext } from 'react'
 import CustomTabPanel from './CustomTabPanel'
 
 import Table from './Table'
@@ -6,9 +6,11 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 const Approvals = (props) =>{
   const {recordId , functionId }= props
+  const { getRequest } = useContext(RequestsContext)
 
   const {
     query: { data },
@@ -63,10 +65,11 @@ const columns = [
   }
 
 ]
+
 async function fetchGridData() {
   return await getRequest({
     extension: DocumentReleaseRepository.Approvals.qry,
-    parameters: `_recordId=${recordId}&_functionId=${functionId}`,
+    parameters: `_recordId=${recordId}&_functionId=${functionId}`
   })
 }
 
