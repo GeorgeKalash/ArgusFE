@@ -24,7 +24,7 @@ const WindowToolbar = ({
   resourceId,
   setSelectedReport,
   selectedReport,
-  previewReport
+  previewReport, actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
@@ -86,7 +86,11 @@ const WindowToolbar = ({
       </Button>
       </Box> : <Box></Box>}
       <Box sx={{ display: 'flex', alignItems: 'center'}}>
-
+      {actions.map((actionObj, index) => (
+        <Button key={index} onClick={actionObj.action} variant='contained' sx={{ mr: 1  }} disabled={(!editMode && actionObj.title==='Approval')}>
+          {actionObj.title}
+        </Button>
+      ))}
       {onClear && (
         <Button onClick={onClear} sx={{ mr: 1}} variant='contained'>
           Clear

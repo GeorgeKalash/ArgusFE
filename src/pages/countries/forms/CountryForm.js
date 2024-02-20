@@ -182,7 +182,7 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
           <CustomTextField
             name='ibanLength'
             label={_labels.ibanLength}
-            value={getFormattedNumberMax(formik.values.ibanLength, 5, 0)}
+            value={formik.values.ibanLength && getFormattedNumberMax(formik.values.ibanLength, 5, 0)}
             onChange={e => formik.setFieldValue('ibanLength', getFormattedNumberMax(e.target.value, 5, 0))}
             onClear={() => formik.setFieldValue('ibanLength', '')}
             error={formik.touched.ibanLength && Boolean(formik.errors.ibanLength)}
