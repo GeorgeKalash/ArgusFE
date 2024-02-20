@@ -96,7 +96,6 @@ return await getRequest({
       }
   ]
 
-
   const add = () => {
     setWindowOpen(true)
   }
@@ -114,7 +113,6 @@ return await getRequest({
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-
 
   return (
     <>
