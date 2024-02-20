@@ -176,7 +176,7 @@ const GateKeeper = () => {
           <Table
             columns={columns}
             gridData={data}
-            rowId={['recordId']}
+            rowId={['recordId','seqNo']}
             isLoading={false}
             maxAccess={access}
             showCheckboxColumn={true}
