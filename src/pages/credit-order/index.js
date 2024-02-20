@@ -4,6 +4,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
+import toast from 'react-hot-toast'
 import { formatDateDefault } from 'src/lib/date-helper'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -14,7 +15,7 @@ import CreditOrderWindow from './Windows/CreditOrderWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const CreditOrder = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -22,7 +23,7 @@ const CreditOrder = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [plantId, setPlantId] = useState(null)
 
-  //const [data, setData] = useState(null)
+  const [data, setData] = useState(null)
 
   const getPlantId = async () => {
     const userData = window.sessionStorage.getItem('userData')
@@ -57,7 +58,6 @@ const CreditOrder = () => {
   const search = inp => {
     setData({ count: 0, list: [], message: '', statusId: 1 })
     const input = inp
-    console.log('inppp ', inp)
     if (input) {
       var parameters = `_filter=${input}`
 
@@ -85,7 +85,7 @@ const CreditOrder = () => {
   }
 
   const {
-    query: { data },
+    query: {},
     labels: _labels,
     access
   } = useResourceQuery({
@@ -143,7 +143,7 @@ const CreditOrder = () => {
               headerName: _labels[3]
             },
             {
-              field: 'correspondantName',
+              field: 'corName',
               headerName: _labels[5],
               flex: 1
             },

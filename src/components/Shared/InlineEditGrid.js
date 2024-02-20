@@ -82,7 +82,7 @@ const InlineEditGrid = ({
         return row[column.name]
           ? typeof row[column.name] === 'string'
             ? row[column.name]
-            : column.store.length > 0
+            : column.store?.length > 0
             ? column.store.find(item => item[column.valueField] === row[column.name])[column.displayField]
             : ''
           : ''
@@ -388,7 +388,7 @@ const InlineEditGrid = ({
                   </Box>
                 )
             }}
-
+            
             // onFocus={() => setOpen(true)}
 
             // getOptionLabel={option => {
@@ -485,7 +485,6 @@ const InlineEditGrid = ({
                           />
                         </IconButton>
                       </InputAdornment>
-
 
                       {/* Adjust color as needed */}
                       {/* {params.InputProps.startAdornment} */}
@@ -640,7 +639,7 @@ const InlineEditGrid = ({
               hidden={column.hidden}
               style={{
                 width: column.width || tableWidth / columns.length,
-                background:  background,
+                background: background
               }}
               body={row => {
                 return (
@@ -686,7 +685,7 @@ const InlineEditGrid = ({
                 </div>
               )
             }}
-            style={{ maxWidth: '60px' , background: background }}
+            style={{ maxWidth: '60px', background: background }}
           />
         )}
       </DataTable>

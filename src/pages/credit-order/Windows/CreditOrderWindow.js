@@ -7,9 +7,7 @@ const CreditOrderWindow = ({ onClose, labels, maxAccess, recordId, plantId }) =>
   return (
     <>
       <Window id='CreditOrderWindow' Title={labels[1]} controlled={true} onClose={onClose} width={900} height={600}>
-        <CustomTabPanel>
-          <CreditOrderForm labels={labels} maxAccess={maxAccess} recordId={recordId} plantId={plantId} />
-        </CustomTabPanel>
+        <CreditOrderForm labels={labels} maxAccess={maxAccess} recordId={recordId} plantId={plantId} />
       </Window>
     </>
   )

@@ -14,6 +14,7 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 // ** Custom Imports
@@ -25,21 +26,31 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { FormatLineSpacing } from '@mui/icons-material'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
-  const [rateType, setRateType] = useState(null)
+  const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
   const { stack: stackError } = useError()
   const [toCurrency, setToCurrency] = useState(null)
+  const [toCurrencyRef, setToCurrencyRef] = useState(null)
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
     currencyId: '',
     date: new Date(),
+    functionId: SystemFunction.CurrencyCreditOrderPurchase,
     deliveryDate: new Date(),
+
+    /*(() => {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+
+      return tomorrow
+    })(),*/
     reference: '',
     plantId: parseInt(plantId),
     corId: '',
@@ -48,7 +59,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     wip: '',
     status: '',
     releaseStatus: '',
-    notes: ''
+    notes: '',
+    currencyId: '',
+    amount: '',
+    exRate: '',
+    rateCalcMethod: ''
   })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -76,8 +91,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         copy.wip = copy.wip === '' ? 1 : copy.wip
         copy.status = copy.status === '' ? 1 : copy.status
         copy.releaseStatus = copy.releaseStatus === '' ? 1 : copy.releaseStatus
-
-        copy.currencyId = 2
+        copy.amount = totalCUR
 
         const updatedRows = detailsFormik.values.rows.map((orderDetail, index) => {
           const seqNo = index + 1 // Adding 1 to make it 1-based index
@@ -85,11 +99,9 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
           return {
             ...orderDetail,
             seqNo: seqNo,
-            orderId: orderDetail.orderId || 0
+            orderId: formik.values.recordId || 0
           }
         })
-
-        console.log('updatedRows 2 ', updatedRows)
 
         if (updatedRows.length == 1 && updatedRows[0].currencyId == '') {
           throw new Error('Grid not filled. Please fill the grid before saving.')
@@ -110,7 +122,12 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
           formik.setFieldValue('recordId', res.recordId)
           invalidate()
           setEditMode(true)
-          invalidate()
+
+          const res2 = await getRequest({
+            extension: CTTRXrepository.CreditOrder.get,
+            parameters: `_recordId=${res.recordId}`
+          })
+          formik.setFieldValue('reference', res2.record.reference)
         }
       } catch (error) {
         setErrorMessage(error)
@@ -135,7 +152,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
           baseAmount: '',
           amount: '',
           notes: '',
-
           exRate1: '', //currency to local
           exRate2: '', //local to correspondent
           rateCalcMethod1: '',
@@ -157,14 +173,14 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
 
   const totalCUR = detailsFormik.values.rows.reduce((curSum, row) => {
     // Parse amount as a number
-    const curValue = parseFloat(row.amount) || 0
+    const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
 
     return curSum + curValue
   }, 0)
 
-  const totalLoal = detailsFormik.values.rows.reduce((cumLocal, row) => {
+  const totalLocal = detailsFormik.values.rows.reduce((cumLocal, row) => {
     // Parse baseAmount as a number
-    const curLocal = parseFloat(row.baseAmount) || 0
+    const curLocal = parseFloat(row?.baseAmount?.toString().replace(/,/g, '')) || 0
 
     return cumLocal + curLocal
   }, 0)
@@ -184,22 +200,38 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
   }
 
   const getCorrespondentById = async recordId => {
-    try {
-      if (recordId) {
-        const _recordId = recordId
-        const defaultParams = `_recordId=${_recordId}`
-        var parameters = defaultParams
+    if (recordId) {
+      const _recordId = recordId
+      const defaultParams = `_recordId=${_recordId}`
+      var parameters = defaultParams
 
-        getRequest({
-          extension: RemittanceSettingsRepository.Correspondent.get,
-          parameters: parameters
-        }).then(res => {
-          setToCurrency(res.record.currencyId)
-        })
-      } else setToCurrency(null)
-    } catch (error) {
-      setErrorMessage(error)
+      getRequest({
+        extension: RemittanceSettingsRepository.Correspondent.get,
+        parameters: parameters
+      }).then(res => {
+        setToCurrency(res.record.currencyId)
+        setToCurrencyRef(res.record.currencyRef)
+        getNewCorrExchangeMap(plantId ?? formik.values.plantId, res.record.currencyId, rateType)
+      })
+    } else {
+      setToCurrency(null)
+      setToCurrencyRef(null)
     }
+  }
+
+  const getNewCorrExchangeMap = (plantId, currencyId, rateType) => {
+    if (!plantId || !currencyId || !rateType) {
+      return
+    }
+    var parameters = `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateType}`
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
+      parameters: parameters
+    }).then(res => {
+      formik.setFieldValue('currencyId', currencyId)
+      formik.setFieldValue('exRate', res.record?.rate)
+      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+    })
   }
 
   const columns = [
@@ -231,22 +263,44 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
           const exchange = await fetchRate({
             currencyId: row.newValue
           })
+
+          const firstRate = exchange?.rate
+          const rateCalcMethod = exchange?.rateCalcMethod
+          const qtyToCur = rateCalcMethod === 1 ? 1 * firstRate : rateCalcMethod === 2 ? 1 / firstRate : 0
+
+          if (row.rowData.qty != 0) {
+            const qtyToCur2 =
+              rateCalcMethod === 1
+                ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) * firstRate
+                : rateCalcMethod === 2
+                ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) / firstRate
+                : 0
+
+            const curToBase =
+              formik.values.rateCalcMethod === 1
+                ? parseFloat(qtyToCur2) * formik.values.exRate
+                : formik.values.rateCalcMethod === 2
+                ? parseFloat(qtyToCur2) / formik.values.exRate
+                : 0
+
+            detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, qtyToCur2)
+            detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, getFormattedNumber(curToBase.toFixed(2)))
+          }
+          detailsFormik.setFieldValue(`rows[${row.rowIndex}].exRate`, finalRate(1, qtyToCur))
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.rateCalcMethod)
-
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].exRate1`, exchange?.rate)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].exRate2`, exchange?.secondRate)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod1`, exchange?.rateCalcMethod)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod2`, exchange?.secondRateCalcMethod)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod2`, exchange?.secondRateCalcMethod)
         } else {
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
+          detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, 0)
+          detailsFormik.setFieldValue(`rows[${row.rowIndex}].qty`, 0)
+          detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, 0)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].minRate`, 0)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].maxRate`, 0)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 1)
-
+          detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].exRate1`, 1)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].exRate2`, 1)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod1`, 1)
@@ -268,15 +322,14 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       header: labels[14],
       name: 'qty',
       mandatory: true,
-      width: 100,
+      width: 200,
       async onChange(row) {
         const exchange = await fetchRate({
           currencyId: row.rowData.currencyId
         })
         const firstRate = exchange?.rate
-        const secondRate = exchange?.secondRate
         const rateCalcMethod = exchange?.rateCalcMethod
-        const secondRateCalcMethod = exchange?.secondRateCalcMethod
+        detailsFormik.setFieldValue(`rows[${row.rowIndex}].qty`, getFormattedNumber(row.value))
 
         const qtyToCur =
           rateCalcMethod === 1
@@ -286,14 +339,17 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             : 0
 
         const curToBase =
-          secondRateCalcMethod === 1
-            ? parseFloat(qtyToCur) * secondRate
-            : secondRateCalcMethod === 2
-            ? parseFloat(qtyToCur) / secondRate
+          formik.values.rateCalcMethod === 1
+            ? parseFloat(qtyToCur) * formik.values.exRate
+            : formik.values.rateCalcMethod === 2
+            ? parseFloat(qtyToCur) / formik.values.exRate
             : 0
-        detailsFormik.setFieldValue(`rows[${row.rowIndex}].exRate`, finalRate(row.rowData.qty, qtyToCur))
-        detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, qtyToCur)
-        detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, curToBase)
+        detailsFormik.setFieldValue(
+          `rows[${row.rowIndex}].exRate`,
+          finalRate(parseFloat(row.rowData.qty.toString().replace(/,/g, '')), qtyToCur)
+        )
+        detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, getFormattedNumber(qtyToCur.toFixed(2)))
+        detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, getFormattedNumber(curToBase.toFixed(2)))
       }
     },
     {
@@ -301,11 +357,15 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       header: labels[15],
       name: 'exRate',
       mandatory: true,
-      width: 100,
+      width: 200,
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
-        const minRate = parseFloat(row.rowData.minRate.toString().replace(/,/g, ''))
-        const maxRate = parseFloat(row.rowData.maxRate.toString().replace(/,/g, ''))
+
+        const exchange = await fetchRate({
+          currencyId: row.rowData.currencyId
+        })
+        const minRate = parseFloat(exchange.minRate.toString().replace(/,/g, ''))
+        const maxRate = parseFloat(exchange.maxRate.toString().replace(/,/g, ''))
 
         if (nv >= minRate && nv <= maxRate) {
           formik.setFieldValue(`rows[${row.rowIndex}].exRate`, row.value)
@@ -314,9 +374,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             currencyId: row.rowData.currencyId
           })
           const firstRate = nv
-          const secondRate = exchange?.secondRate
           const rateCalcMethod = exchange?.rateCalcMethod
-          const secondRateCalcMethod = exchange?.secondRateCalcMethod
 
           const qtyToCur =
             rateCalcMethod === 1
@@ -326,13 +384,13 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
               : 0
 
           const curToBase =
-            secondRateCalcMethod === 1
-              ? parseFloat(qtyToCur) * secondRate
-              : secondRateCalcMethod === 2
-              ? parseFloat(qtyToCur) / secondRate
+            formik.values.rateCalcMethod === 1
+              ? parseFloat(qtyToCur) * formik.values.exRate
+              : formik.values.rateCalcMethod === 2
+              ? parseFloat(qtyToCur) / formik.values.exRate
               : 0
 
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, qtyToCur)
+          detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, getFormattedNumber(qtyToCur.toFixed(2)))
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, curToBase)
         } else {
           stackError({
@@ -361,7 +419,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       name: 'amount',
       readOnly: true,
       mandatory: true,
-      width: 100
+      width: 200
     }
   ]
 
@@ -372,18 +430,15 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         extension: CTTRXrepository.CreditOrderItem.qry,
         parameters: parameters
       }).then(res => {
-        res.list.forEach(item => {
-          /*    if (item.rateCalcMethod1 === 1 && item.rateCalcMethod2 === 1) {
-            item.exRate = finalRate(item.exRate1,item.exRate2)
-          } else if (item.rateCalcMethod1 === 2 && item.rateCalcMethod2 === 2) {
-            item.exRate = finalRate(item.exRate1,item.exRate2)
-          }
-*/
-          detailsFormik.values.rows.push(item)
-        })
+        // Create a new list by modifying each object in res.list
+        const modifiedList = res.list.map(item => ({
+          ...item,
+          exRate: finalRate(item.qty, item.amount)
+        }))
 
         detailsFormik.setValues({
-          ...detailsFormik.values
+          ...detailsFormik.values,
+          rows: modifiedList
         })
       })
     } catch (error) {
@@ -409,6 +464,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             : ''
       })
       setRateType(res.record.value)
+      getNewCorrExchangeMap(plantId ?? formik.values.plantId, toCurrency, res.record.value)
       formik.setFieldValue('functionId', type)
     }
   }
@@ -429,8 +485,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         fillCurrencyStore()
         if (recordId) {
           setIsLoading(true)
-
-          //fillItemsGrid(recordId)
+          fillItemsGrid(recordId)
 
           const res = await getRequest({
             extension: CTTRXrepository.CreditOrder.get,
@@ -462,7 +517,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
                 required
                 label={labels[2]}
                 value={formik?.values?.date}
-                onChange={formik.handleChange}
+                onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -542,6 +597,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
                 label={labels[17]}
                 value={formik.values?.corName}
                 maxAccess={maxAccess}
+                readOnly={true}
                 required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('corName', '')}
@@ -559,7 +615,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
                 value={formik?.values?.deliveryDate}
                 onChange={formik.handleChange}
                 maxAccess={maxAccess}
-                disabledDate={'<='}
+                disabledRangeDate={{ date: formik.values.date, day: 30 }}
                 onClear={() => formik.setFieldValue('deliveryDate', '')}
                 error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
                 helperText={formik.touched.deliveryDate && formik.errors.deliveryDate}
@@ -641,10 +697,20 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
           {/* Second Column  */}
           <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
-              <CustomTextField name='totalCUR' label={labels[12]} value={totalCUR} readOnly={true} />
+              <CustomTextField
+                name='totalCUR'
+                label={`Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`}
+                value={getFormattedNumber(totalCUR.toFixed(2))}
+                readOnly={true}
+              />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='totalLocal' label={labels[13]} value={totalLoal} readOnly={true} />
+              <CustomTextField
+                name='totalLocal'
+                label={labels[13]}
+                value={getFormattedNumber(totalLocal.toFixed(2))}
+                readOnly={true}
+              />
             </Grid>
           </Grid>
         </Grid>
