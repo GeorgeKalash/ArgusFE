@@ -108,87 +108,66 @@ const GLSettings = () => {
         validateOnChange: true,
        
         validationSchema: yup.object({
-            GLACSegments: yup.number().nullable(),
-            GLACSeg0: yup.number().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
-
-                    return GLACSegments >= 2 ? value != null && value >= 1 && value <=8 : true;
-                },
-                message: 'GLACSeg0 is required',
-            }),
-            GLACSegName0: yup.string().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
-
-                    return GLACSegments >= 2 ? value != null && value !== '' : true;
-                },
-                message: 'GLACSegName0 is required',
-            }),
-            GLACSeg1: yup.number().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
-
-                    return GLACSegments >= 2 ? value != null && value >= 1 && value <=8 : true;
-                },
-                message: 'GLACSeg1 is required',
-            }),
-            GLACSegName1: yup.string().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
-
-                    return GLACSegments >= 2 ? value != null && value !== '' : true;
-                },
-                message: 'GLACSegName1 is required',
-            }),
-            GLACSeg2: yup.number().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
-
-                    return GLACSegments >= 3 ? value != null && value >= 1 && value <=8 : true;
-                },
-                message: 'GLACSeg2 is required',
-            }),
-            GLACSegName2: yup.string().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
-
-                    return GLACSegments >= 3 ? value != null && value !== '' : true;
-                },
-                message: 'GLACSegName2 is required',
-            }),
-            GLACSeg3: yup.number().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
+            GLACSegments: yup.number().nullable().required('GLACSegments is required').min(2).max(5),
+            GLACSeg0: yup.number().nullable().required('GLACSeg0 is required').min(1).max(8),
+            GLACSegName0: yup.string().nullable().required('GLACSegName0 is required'),
+            GLACSeg1: yup.number().nullable().required('GLACSeg1 is required').min(1).max(8),
+            GLACSegName1: yup.string().nullable().required('GLACSegName1 is required'),
+            GLACSeg2: yup.number().nullable().test(
+                'is-glacseg2-required',
+                'GLACSeg2 is required',
+                function (value) {
+                    const { GLACSegments } = this.parent;
                     
-                    return GLACSegments >= 4 ? value != null && value >= 1 && value <=8 : true;
-                },
-                message: 'GLACSeg3 is required',
-            }),
-            GLACSegName3: yup.string().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
+                    return GLACSegments >= 3 ? value != null && value >= 1 && value <= 8 : true;
+                }
+            ),
+            GLACSegName2: yup.string().nullable().test(
+                'is-glacsegname2-required',
+                'GLACSegName2 is required',
+                function (value) {
+                    const { GLACSegments } = this.parent;
+                    
+                    return GLACSegments >= 3 ? value != null && value.trim() !== '' : true;
+                }
+            ),
+            GLACSeg3: yup.number().nullable().test(
+                'is-glacseg3-required',
+                'GLACSeg3 is required',
+                function (value) {
+                    const { GLACSegments } = this.parent;
+                    
+                    return GLACSegments >= 4 ? value != null && value >= 1 && value <= 8 : true;
+                }
+            ),
+            GLACSegName3: yup.string().nullable().test(
+                'is-glacsegname3-required',
+                'GLACSegName3 is required',
+                function (value) {
+                    const { GLACSegments } = this.parent;
+                    
+                    return GLACSegments >= 4 ? value != null && value.trim() !== '' : true;
+                }
+            ),
+            GLACSeg4: yup.number().nullable().test(
+                'is-glacseg4-required',
+                'GLACSeg4 is required',
+                function (value) {
+                    const { GLACSegments } = this.parent;
 
-                    return GLACSegments >= 4 ? value != null && value !== '' : true;
-                },
-                message: 'GLACSegName3 is required',
-            }),
-            GLACSeg4: yup.number().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
+                    
+                    return GLACSegments >= 5 ? value != null && value >= 1 && value <= 8 : true;
+                }
+            ),
+            GLACSegName4: yup.string().nullable().test(
+                'is-glacsegname4-required',
+                'GLACSegName4 is required',
+                function (value) {
+                    const { GLACSegments } = this.parent;
 
-                    return GLACSegments >= 5 ? value != null && value >= 1 && value <=8 : true;
-                },
-                message: 'GLACSeg4 is required',
-            }),
-            GLACSegName4: yup.string().test({
-                test: function(value) {
-                    const GLACSegments = this.parent.GLACSegments;
-
-                    return GLACSegments >= 5 ? value != null && value !== '' : true;
-                },
-                message: 'GLACSegName4 is required',
-            }),
+                    return GLACSegments >= 5 ? value != null && value.trim() !== '' : true;
+                }
+            ),
         }),
         
         onSubmit: values => {
@@ -242,6 +221,7 @@ const GLSettings = () => {
       ]
 
 
+
       useEffect(() => {
         const segmentsNum = formik.values.GLACSegments
         
@@ -285,7 +265,7 @@ const GLSettings = () => {
                                 pattern: '[2-5]*',
                             }}
 
-                            // helperText={formik.touched.hourRate && formik.errors.hourRate}
+                            helperText={formik.touched.GLACSegments && formik.errors.GLACSegments}
                         />
                     </Grid>
                     
@@ -309,7 +289,7 @@ const GLSettings = () => {
                                      pattern: '[1-8]*',
                                    }}
 
-                                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
+                                    // helperText={formik.touched.name && formik.errors.name}
                                 />
                             </Grid>)}
                         </Grid>
