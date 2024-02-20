@@ -126,9 +126,6 @@ const AuthProvider = ({ children }) => {
         }
       })
 
-      console.log('defaultSettings')
-      console.log(defaultSettings)
-
       const defaultSet = {
         dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
       }
