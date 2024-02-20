@@ -178,27 +178,33 @@ const GLSettings = () => {
     });
 
     const postGLSettings = obj => {
-
-        var data = []
-        Object.entries(obj).forEach(([key, value]) => {
-           const newObj = { key: key  , value : value };
-     
-           // Push the new object into the array
-           data.push(newObj);
-     
-        })
+        const activeSegments = obj.GLACSegments || 0;
+        var dataToPost = [];
+    
+        dataToPost.push({ key: 'GLACSegments', value: obj.GLACSegments });
+            for (let i = 0; i < activeSegments; i++) {
+            const segKey = `GLACSeg${i}`;
+            const nameKey = `GLACSegName${i}`;
+    
+            if (obj[segKey] !== undefined) {
+                dataToPost.push({ key: segKey, value: obj[segKey] });
+            }
+            if (obj[nameKey] !== undefined) {
+                dataToPost.push({ key: nameKey, value: obj[nameKey] });
+            }
+        }
+    
         postRequest({
             extension: SystemRepository.Defaults.set,
-            record:   JSON.stringify({  sysDefaults  : data }),
+            record: JSON.stringify({ sysDefaults: dataToPost }),
         })
-
         .then(res => {
-            if (res) toast.success('Record Successfully')
+            toast.success('Record Successfully');
         })
         .catch(error => {
-            setErrorMessage(error)
-        })
-    }
+            setErrorMessage(error);
+        });
+    };
 
        const handleSubmit = () => {
         formik.handleSubmit()
@@ -222,21 +228,22 @@ const GLSettings = () => {
 
 
 
-      useEffect(() => {
-        const segmentsNum = formik.values.GLACSegments
+    //   useEffect(() => {
+    //     const segmentsNum = formik.values.GLACSegments
         
-        segNumb.forEach((seg, idx) => {
-            if(idx >= segmentsNum) {
-                formik.setFieldValue(seg, null)
-            }
-        })
-        segName.forEach((seg, idx) => {
-            if(idx >= segmentsNum) {
-                formik.setFieldValue(seg, null)
-            }
-        })
+    //     segNumb.forEach((seg, idx) => {
+    //         if(idx >= segmentsNum) {
+    //             formik.setFieldValue(seg, null)
+    //         }
+    //     })
+    //     segName.forEach((seg, idx) => {
+    //         if(idx >= segmentsNum) {
+    //             formik.setFieldValue(seg, null)
+    //         }
+    //     })
 
-      }, [formik.values.GLACSegments]);
+    //   }, [formik.values.GLACSegments]);
+      const fadedStyle = { backgroundColor: '#f5f5f5', color: '#ddd', opacity: 0.5 };
 
       return(
         <>
@@ -255,6 +262,7 @@ const GLSettings = () => {
                             onChange={formik.handleChange}
                             type='number'
                             numberField={true}
+                            
                             onClear={() => formik.setFieldValue('GLACSegments', '')}
                             error={formik.touched.GLACSegments && Boolean(formik.errors.GLACSegments)}
                             inputProps={{
@@ -272,6 +280,7 @@ const GLSettings = () => {
                         <Grid item xs={12} lg={6}>
                             {segNumb.map((name, idx) => <Grid key={name} item xs={12} sx={{marginTop:'7px'}}>
                                 <CustomTextField
+                                    style={formik.values.GLACSegments <= idx ? fadedStyle : {}}
                                    name={name}
                                    label={_labels["segment" + idx]}
                                    value={formik.values[name]}
@@ -298,6 +307,7 @@ const GLSettings = () => {
                                 <CustomTextField
                                     name={name}
                                     label={"GLACSegName" + (idx + 1)}
+                                    style={formik.values.GLACSegments <= idx ? fadedStyle : {}}
 
                                     
                                     value={formik.values[name]}
