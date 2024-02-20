@@ -319,15 +319,19 @@ const GLSettings = () => {
                                     name={name}
                                     label={"GLACSegName" + (idx + 1)}
 
-                                    readOnly={formik.values.GLACSegments <= idx|| formik.values.GLACSegments=='null'}
+                                    
                                     value={formik.values[name]}
                                     onClear={() => formik.setFieldValue(name, '')}
-                                    maxLength='20'
+                                    
                                     numberField={true}
                                     onChange={formik.handleChange}
                                     error={formik.values.GLACSegments > idx  && Boolean(formik.errors[name])}
-
-                                    // helperText={formik.touched.hourRate && formik.errors.hourRate}
+                                    inputProps={{
+                                        maxLength: '20',
+                                        style: { textAlign: 'left' },
+                                        readOnly:formik.values.GLACSegments <= idx|| formik.values.GLACSegments=='null'
+                                      }}
+                                  
                                 />
                             </Grid>)}
                         </Grid>
