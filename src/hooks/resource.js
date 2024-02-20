@@ -1,9 +1,20 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import useResourceParams from './useResourceParams'
+import { useState } from 'react'
 
-export function useResourceQuery({ endpointId, datasetId, queryFn }) {
+export function useResourceQuery({ endpointId, datasetId, queryFn , search }) {
+  const [searchValue, setSearchValue] = useState("")
+  const isSearchMode = !!searchValue
+
   const { access, labels } = useResourceParams({
     datasetId
+  })
+
+
+  const searchQuery = useQuery({
+    queryKey: [search.endpointId],
+    queryFn : search.searchFn,
+    enabled:  isSearchMode && access?.record?.maxAccess > 0
   })
 
   const query = useQuery({
@@ -15,7 +26,11 @@ export function useResourceQuery({ endpointId, datasetId, queryFn }) {
   return {
     access,
     labels,
-    query
+    query : isSearchMode ? searchQuery : query ,
+    search(query){
+      setSearchValue(query)
+
+    }
   }
 }
 
