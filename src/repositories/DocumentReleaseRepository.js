@@ -72,9 +72,6 @@ export const DocumentReleaseRepository = {
     set: service + 'setSTG',
     del: service + 'delSTG'
   },
-  Approvals: {
-    qry: service + 'qry2TRX',
-  },
   StrategyCode:
   {
     qry: service + 'qrySCO',
@@ -100,7 +97,9 @@ export const DocumentReleaseRepository = {
   ApplySTG:
   {
     apply: service + 'applySTG'
-    
+  },
+  Approvals: {
+    qry: service + 'qry2TRX'
   }
 
 
