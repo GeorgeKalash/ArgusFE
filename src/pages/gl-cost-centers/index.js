@@ -73,12 +73,6 @@ return await getRequest({
   })
 
 
-
-  function onSearchClear() {
-    setSearchValue('')
-
-  }
-
   const columns = [
     {
       field: 'reference',
@@ -117,7 +111,7 @@ return await getRequest({
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={onSearchClear} labels={_labels}  inputSearch={true}/>
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={search} labels={_labels}  inputSearch={true}/>
         <Table
           columns={columns}
           gridData={  data ?? {list: []} }

@@ -10,25 +10,20 @@ export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
     datasetId
   })
 
-  const searchQuery = useQuery({
-    queryKey: [endpointId, searchValue],
-    queryFn: ({ queryKey: [_, qry] }) =>
-      search.searchFn({
+  const query = useQuery({
+    queryKey: [endpointId , searchValue],
+    queryFn: isSearchMode ? ({ queryKey: [_, qry] }) =>
+   search.searchFn({
         qry
-      }),
-    enabled: isSearchMode && access?.record?.maxAccess > 0
+      }) :  ()=> queryFn(),
+    enabled:  access?.record?.maxAccess > 0
   })
 
-  const query = useQuery({
-    queryKey: [endpointId],
-    queryFn: () => queryFn(),
-    enabled: access?.record?.maxAccess > 0
-  })
 
   return {
     access,
     labels,
-    query: isSearchMode ? searchQuery : query,
+    query: query,
     search(query) {
       setSearchValue(query)
     }
