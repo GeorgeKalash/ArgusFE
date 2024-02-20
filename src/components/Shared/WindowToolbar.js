@@ -1,5 +1,4 @@
-// ** MUI Imports
-import { DialogActions, Button, Box, Autocomplete, TextField } from '@mui/material'
+import { DialogActions, Button, Box, Autocomplete, TextField, Tooltip } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -30,6 +29,7 @@ const WindowToolbar = ({
 
   // //states
   const [reportStore, setReportStore] = useState([])
+  const [buttonIcons, setButtonIcons] = useState({})
 
   const getReportLayout = () => {
     setReportStore([])
@@ -82,41 +82,55 @@ const WindowToolbar = ({
         onClick={onGenerateReport}
         size='small'
       >
-        Preview
+        <Tooltip title="Preview">
+          <img src="/images/buttonsIcons/preview.png" alt="Preview" />
+        </Tooltip>
       </Button>
       </Box> : <Box></Box>}
       <Box sx={{ display: 'flex', alignItems: 'center'}}>
 
       {onClear && (
-        <Button onClick={onClear} sx={{ mr: 1}} variant='contained'>
-          Clear
-        </Button>
+        <Tooltip title="Clear">
+          <Button onClick={onClear} sx={{ mr: 1}} variant='contained' style={{backgroundColor:'#f44336'}}>
+            <img src="/images/buttonsIcons/clear.png" alt="Clear" />
+          </Button>
+        </Tooltip>
       )}
       {clientRelation && (
-        <Button onClick={onClientRelation} variant='contained' sx={{ mr: 1, mt: smallBox && 0 }} disabled={!editMode}>
-          Client Relation
-        </Button>
+        <Tooltip title="Client Relation">
+          <Button onClick={onClientRelation} variant='contained' sx={{ mr: 1, mt: smallBox && 0 }} style={{backgroundColor:'#f44336'}} disabled={!editMode}>
+            <img src="/images/buttonsIcons/clear.png" alt="Client Relation" />
+          </Button>
+        </Tooltip>
       )}
 
       {onInfo && infoVisible && (
-        <Button onClick={onInfo} variant='contained' sx={{ mr: 1 }} disabled={!editMode}>
-          Info
-        </Button>
+        <Tooltip title="Info">
+          <Button onClick={onInfo} variant='contained' sx={{ mr: 1 }} style={{backgroundColor:'#4355a5'}} disabled={!editMode}>
+            <img src="/images/buttonsIcons/info.png" alt="Info" />
+          </Button>
+        </Tooltip>
       )}
        {onClose && closeVisible && (
-        <Button onClick={onClose} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 }} disabled={isPosted || !editMode}>
-          Post
-        </Button>
+        <Tooltip title="Close">
+          <Button onClick={onClose} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 }} style={{backgroundColor:'#231f20'}} disabled={isPosted || !editMode}>
+            <img src="public/images/buttonsIcons/post.png" alt="Close" />
+          </Button>
+        </Tooltip>
       )}
       {onPost && postVisible && (
-        <Button onClick={onPost} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 }} disabled={isPosted || !editMode}>
-          Post
-        </Button>
+        <Tooltip title="Post">
+          <Button onClick={onPost} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 }} style={{backgroundColor:'#231f20'}} disabled={isPosted || !editMode}>
+            <img src="/images/buttonsIcons/post.png" alt="Post" />
+          </Button>
+        </Tooltip>
       )}
       {onSave && (
-        <Button onClick={onSave} variant='contained' sx={{ mr: 2 , mt: smallBox && 0 }} disabled={disabledSubmit || isPosted}>
-          Submit
-        </Button>
+        <Tooltip title="Submit">
+          <Button onClick={onSave} variant='contained' sx={{ mr: 2 , mt: smallBox && 0 }} style={{backgroundColor:'#4eb558'}} disabled={disabledSubmit || isPosted}>
+            <img src="/images/buttonsIcons/save.png" alt="Submit"/>
+          </Button>
+        </Tooltip>
       )}
         </Box>  </Box>
     </DialogActions>
