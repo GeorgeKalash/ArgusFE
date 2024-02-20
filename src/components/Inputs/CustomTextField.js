@@ -102,7 +102,8 @@ const CustomTextField = ({
         }}
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
-        onInput={handleInput}
+        
+        // onInput={handleInput}
         onKeyDown={(e)=> e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)}
         InputProps={{
 

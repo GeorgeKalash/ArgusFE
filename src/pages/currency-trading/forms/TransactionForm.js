@@ -29,6 +29,7 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
+import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 
 const FormContext = React.createContext(null)
 
@@ -763,7 +764,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   return (
-    <FormShell
+    <ApprovalFormShell
       height={400}
       form={formik}
       initialValues={initial}
@@ -1521,6 +1522,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           </FieldSet>
         </Grid>
       </FormProvider>
-    </FormShell>
+    </ApprovalFormShell>
   )
 }

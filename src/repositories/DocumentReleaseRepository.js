@@ -1,7 +1,7 @@
 const service = 'DR.asmx/'
 
 export const DocumentReleaseRepository = {
-  
+
   ReleaseIndicator: {
     page: service + 'pageIND',
     qry: service + 'qryIND',
@@ -70,7 +70,12 @@ export const DocumentReleaseRepository = {
     get: service + 'getSTG',
     set: service + 'setSTG',
     del: service + 'delSTG'
+  },
+  Approvals: {
+    qry: service + 'qry2TRX',
   }
+
+
 
 
 }
