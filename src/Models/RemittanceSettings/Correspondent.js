@@ -4,6 +4,8 @@ const getNewCorrespondent = () => {
     name: null,
     reference: null,
     bpId: null,
+    currencyId: null,
+    currencyRef: null,
     isInactive: false
   }
 }
@@ -16,6 +18,8 @@ const populateCorrespondent = obj => {
     bpId: obj.bpId,
     bpRef: obj.bpRef,
     bpName: obj.bpName,
+    currencyId: obj.currencyId,
+    currencyRef: obj.currencyRef,
     isInactive: obj.isInactive
   }
 }

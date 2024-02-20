@@ -1,15 +1,15 @@
-import { DialogContent } from '@mui/material'
+import { DialogContent, Box } from '@mui/material'
 import { useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
+import PreviewReport from './PreviewReport'
 
 export default function FormShell({
   form, form1,
   children,
-  height,
   editMode,
   setEditMode,
   disabledSubmit,
@@ -20,10 +20,12 @@ export default function FormShell({
   isPosted = false,
   clientRelation = false,
   setErrorMessage,
+  previewReport=false,
   initialValues, initialValues1 , setIDInfoAutoFilled
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
+  const [selectedReport, setSelectedReport] = useState(null)
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -49,9 +51,9 @@ export default function FormShell({
       <DialogContent sx={{ flex: 1, height: '100%' , zIndex: 0 }}>{children}</DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
+          print={print}
           onSave={() => form.handleSubmit()}
-          onClear={() => initialValues ?  handleReset() : false
-        }
+          onClear={() => initialValues ?  handleReset() : false}
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
@@ -84,12 +86,29 @@ export default function FormShell({
               title: 'Client Relation'
             })
           }
+          onGenerateReport={() =>
+            stack({
+              Component: PreviewReport,
+              props: {
+                selectedReport: selectedReport,
+                recordId: form.values.recordId
+              },
+              width: 1000,
+              height: 500,
+              title: 'Preview Report'
+            })
+          }
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
           isPosted={isPosted}
           clientRelation={clientRelation}
+          resourceId={resourceId}
+          recordId={form.values.recordId}
+          selectedReport={selectedReport}
+          setSelectedReport={setSelectedReport}
+          previewReport={previewReport}
         />
       )}
       {windowInfo && (
