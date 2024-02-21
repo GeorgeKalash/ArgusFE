@@ -106,7 +106,6 @@ const Table = ({
   checkTitle = '',
   ...props
 }) => {
-  console.log(props.gridData)
   const [gridData, setGridData] = useState(props.gridData)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
@@ -116,7 +115,8 @@ const Table = ({
 
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
-  const api = props.api
+  const api = props?.api ? props?.api: props.paginationParameters
+  const refresh = props?.refresh
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
@@ -125,16 +125,13 @@ const Table = ({
   }
 
   const CustomPagination = () => {
-    console.log(gridData)
     if (pagination) {
       if (paginationType === 'api' && gridData ) {
-        const startAt = gridData._startAt ? gridData._startAt : 1
+        const startAt = gridData._startAt
         const totalRecords = gridData?.count ? gridData?.count : 0
 
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
-console.log('page' , page)
-console.log('startAt' , startAt)
-console.log(gridData)
+
         const pageCount = Math.ceil(gridData.count ? gridData.count / pageSize : 1)
 
         const incrementPage = () => {
@@ -256,11 +253,11 @@ console.log(gridData)
               <IconButton onClick={goToLastPage} disabled={page === pageCount}>
                 <LastPageIcon />
               </IconButton>
-              {api && (
-                <IconButton onClick={goToFirstPage}>
+              {/* {api && ( */}
+                <IconButton onClick={refresh}>
                   <RefreshIcon />
                 </IconButton>
-              )}
+              {/* )} */}
               Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
               {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
               {totalRecords}
@@ -342,17 +339,16 @@ console.log(gridData)
   const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
   useEffect(() => {
-    console.log('enter useEffect')
-    console.log(props.gridData)
+    // console.log('enter useEffect')
+    // console.log(props.gridData)
     if (props.gridData && props.gridData.list) setGridData(props.gridData)
     if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
-      console.log('enter if')
+      // console.log('enter if')
       setPage(1)
     }
     setCheckedRows([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.gridData])
-  console.log(CustomPagination)
 
   return (
     <>

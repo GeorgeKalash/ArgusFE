@@ -33,21 +33,23 @@ const Currencies = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchGridData() {
+
 
     return await getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: `_filter=`
     })
+
   }
 
   const {
     query: { data },
     labels: _labels,
+    refresh,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
+    queryFn:  fetchGridData,
     endpointId: SystemRepository.Currency.qry,
     datasetId: ResourceIds.Currencies
   })
@@ -108,6 +110,7 @@ const Currencies = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          refresh={refresh}
           isLoading={false}
           pageSize={50}
           paginationType='client'
