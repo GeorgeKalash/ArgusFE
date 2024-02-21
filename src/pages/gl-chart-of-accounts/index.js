@@ -45,18 +45,34 @@ const ChartOfAccounts = () => {
 
   const {
     query: { data },
+    search,
+    clear, 
     labels: _labels,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.ChartOfAccounts.page,
-    datasetId: ResourceIds.ChartOfAccounts
-  })
+    datasetId: ResourceIds.ChartOfAccounts,
+    search: {
+      endpointId: GeneralLedgerRepository.ChartOfAccounts.snapshot,
+      searchFn: fetchWithSearch,
+    }
+  });
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.ChartOfAccounts.page
   })
 
+  
+
+  async function fetchWithSearch({options = {} , qry}) {
+    const { _startAt = 0, _pageSize = 50 } = options;
+    
+    return await getRequest({
+      extension: GeneralLedgerRepository.ChartOfAccounts.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
+    });
+  }
 
   const columns = [
     {
@@ -106,10 +122,10 @@ const ChartOfAccounts = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access}/>
+      <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true}/>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={  data ?? {list: []} }
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}

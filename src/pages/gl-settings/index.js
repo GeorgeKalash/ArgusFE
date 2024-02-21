@@ -111,13 +111,13 @@ const GLSettings = () => {
        
         validationSchema: yup.object({
             GLACSegments: yup.number().nullable().required('GLACSegments is required').min(2).max(5),
-            GLACSeg0: yup.number().nullable().required('GLACSeg0 is required').min(1).max(8),
+            GLACSeg0: yup.number().nullable().required('Segment 1 is required').min(1).max(8),
             GLACSegName0: yup.string().nullable().required('GLACSegName0 is required'),
-            GLACSeg1: yup.number().nullable().required('GLACSeg1 is required').min(1).max(8),
+            GLACSeg1: yup.number().nullable().required('Segment 2 is required').min(1).max(8),
             GLACSegName1: yup.string().nullable().required('GLACSegName1 is required'),
-            GLACSeg2: yup.number().nullable().test(
+            GLACSeg2: yup.number().nullable().min(1).max(8).test(
                 'is-glacseg2-required',
-                'GLACSeg2 is required',
+                'Segment 3 is required',
                 function (value) {
                     const { GLACSegments } = this.parent;
                     
@@ -133,9 +133,9 @@ const GLSettings = () => {
                     return GLACSegments >= 3 ? value != null && value.trim() !== '' : true;
                 }
             ),
-            GLACSeg3: yup.number().nullable().test(
+            GLACSeg3: yup.number().nullable().min(1).max(8).test(
                 'is-glacseg3-required',
-                'GLACSeg3 is required',
+                'Segment 4 is required',
                 function (value) {
                     const { GLACSegments } = this.parent;
                     
@@ -151,9 +151,9 @@ const GLSettings = () => {
                     return GLACSegments >= 4 ? value != null && value.trim() !== '' : true;
                 }
             ),
-            GLACSeg4: yup.number().nullable().test(
+            GLACSeg4: yup.number().nullable().min(1).max(8).test(
                 'is-glacseg4-required',
-                'GLACSeg4 is required',
+                'Segment 5 is required',
                 function (value) {
                     const { GLACSegments } = this.parent;
 
@@ -299,7 +299,7 @@ const GLSettings = () => {
                                      pattern: '[1-8]*',
                                    }}
 
-                                    // helperText={formik.touched.name && formik.errors.name}
+                                    helperText={formik.touched[name] && formik.errors[name]}
                                 />
                             </Grid>)}
                         </Grid>

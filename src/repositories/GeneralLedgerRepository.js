@@ -38,6 +38,7 @@ export const GeneralLedgerRepository = {
       del: service + 'delCCG',
       
     },ChartOfAccounts:{
+      snapshot:service + 'snapshotAC',
       page:service + 'pageAC', 
       qry: service + 'qryAC',
       get: service + 'getAC',

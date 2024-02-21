@@ -34,7 +34,8 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         sign:'',
         groupName:'',
         activeStatus:'',
-        activeStatusName:""
+        activeStatusName:"",
+       
 
       })
 
@@ -98,10 +99,11 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
       useEffect(() => {
         ;(async function () {
           try {
+            
+            getDataResult();
             if (recordId) {
               setIsLoading(true)
     
-              getDataResult();
               
               const res = await getRequest({
                 extension: GeneralLedgerRepository.ChartOfAccounts.get,
@@ -197,12 +199,13 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             />
           </Grid>
           <Grid item xs={12}>
+      
                     <SegmentedInput
                         segments={segments}
                         name="accountRef"
                         setFieldValue={formik.setFieldValue}
                         values={formik.values.accountRef.split('-')}
-                    />                {/* <CustomTextField
+                    />               {/* <CustomTextField
                     name='accountRef'
                     label={labels.accountRef}
                     value={formik.values.accountRef}
@@ -336,25 +339,28 @@ import React, {  createRef } from 'react';
 const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
   const inputRefs = segments.map(() => createRef());
 
-  // This function handles the change event for each segment.
   const handleChange = (index, event) => {
     const newValues = [...values];
     newValues[index] = event.target.value.slice(0, segments[index].value);
     
-    // Build the final input value by combining all segment values.
+    
+    setFieldValue("segments", newValues);
+    
+
     const finalInput = newValues.join('-');
     
-    // Update the Formik field value.
     setFieldValue(name, finalInput);
 
-    // Focus the next input field if necessary.
+
     if (event.target.value.length >= segments[index].value && index < segments.length - 1) {
       inputRefs[index + 1].current.focus();
     }
   };
 
   return (
-    <div>
+    <div style={
+      {border:'solid grey 1px'}
+    }>
       {segments.map((segment, index) => (
         <React.Fragment key={index}>
           <input
@@ -362,7 +368,7 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
             value={values[index] || ''}
             onChange={(e) => handleChange(index, e)}
             maxLength={segment.value}
-            style={{ marginRight: '8px', width: `${segment.value + 1}ch` }} // Add some spacing between inputs
+            style={{ marginRight: '8px', width: `${segment.value + 1}ch`,border:"none",borderBottom:'1px solid black' }} // Add some spacing between inputs
           />
           {index !== segments.length - 1 && "-"}
         </React.Fragment>
