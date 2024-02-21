@@ -56,6 +56,7 @@ return await getRequest({
   const {
     query: { data },
     search,
+    clear,
     labels: _labels,
     access
   } = useResourceQuery({
@@ -111,7 +112,7 @@ return await getRequest({
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={search} labels={_labels}  inputSearch={true}/>
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
         <Table
           columns={columns}
           gridData={  data ?? {list: []} }
@@ -133,11 +134,12 @@ return await getRequest({
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
-          onSubmit={(val) => {
-            search(val)
 
-          }
-        }
+        //   onSubmit={(val) => {
+        //     // search(val)
+
+        //   }
+        // }
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

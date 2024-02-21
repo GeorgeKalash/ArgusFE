@@ -60,11 +60,13 @@ export default function CostCenterForm({ labels, maxAccess, recordId,onSubmit })
               ...obj, // Spread the existing properties
               recordId: response.recordId, // Update only the recordId field
             });
-            onSubmit(obj.reference)
+
+            // onSubmit(obj.reference)
           }
           else toast.success('Record Edited Successfully')
           setEditMode(true)
-          onSubmit(obj.reference)
+
+          // onSubmit(obj.reference)
 
           invalidate()
         }

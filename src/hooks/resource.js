@@ -9,6 +9,7 @@ export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
   const { access, labels } = useResourceParams({
     datasetId
   })
+  const queryClient = useQueryClient(); // Initialize the query client
 
   const query = useQuery({
     queryKey: [endpointId , searchValue],
@@ -25,7 +26,14 @@ export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
     query: query,
     search(query) {
       setSearchValue(query)
+    },
+    clear() {
+      setSearchValue('')
+    },
+    invalidate: () => {
+      queryClient.invalidateQueries([endpointId]); // Invalidate queries when needed
     }
+
   }
 }
 
