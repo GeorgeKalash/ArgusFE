@@ -10,9 +10,11 @@ const WindowToolbar = ({
   onPost,
   onClear,
   onInfo,
+  onApply,
   onClose,
   onGenerateReport,
   disabledSubmit,
+  disabledApply,
   editMode = false,
   smallBox = false,
   infoVisible = true,
@@ -120,6 +122,11 @@ const WindowToolbar = ({
       {onSave && (
         <Button onClick={onSave} variant='contained' sx={{ mr: 2 , mt: smallBox && 0 }} disabled={disabledSubmit || isPosted}>
           Submit
+        </Button>
+      )}
+       {onApply && (
+        <Button onClick={onApply} variant='contained' disabled={disabledApply}>
+          Apply
         </Button>
       )}
         </Box>  </Box>
