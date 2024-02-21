@@ -20,14 +20,14 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 export default function CostCenterForm({ labels, maxAccess, recordId,onSubmit }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
-    
+
     const [initialValues, setInitialData] = useState({
         recordId: null,
         reference: '',
         name: '',
         ccgId:null,
-        
-        
+
+
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -37,7 +37,7 @@ export default function CostCenterForm({ labels, maxAccess, recordId,onSubmit })
     const invalidate = useInvalidate({
         endpointId: GeneralLedgerRepository.CostCenter.page
       })
-  
+
     const formik = useFormik({
         initialValues,
         enableReinitialize: true,
@@ -53,33 +53,36 @@ export default function CostCenterForm({ labels, maxAccess, recordId,onSubmit })
             extension: GeneralLedgerRepository.CostCenter.set,
             record: JSON.stringify(obj)
           })
-          
+
           if (!recordId) {
             toast.success('Record Added Successfully')
             setInitialData({
               ...obj, // Spread the existing properties
               recordId: response.recordId, // Update only the recordId field
             });
-            onSubmit()
+
+            // onSubmit(obj.reference)
           }
           else toast.success('Record Edited Successfully')
           setEditMode(true)
 
+          // onSubmit(obj.reference)
+
           invalidate()
         }
       })
-    
+
       useEffect(() => {
         ;(async function () {
           try {
             if (recordId) {
               setIsLoading(true)
-    
+
               const res = await getRequest({
                 extension: GeneralLedgerRepository.CostCenter.get,
                 parameters: `_recordId=${recordId}`
               })
-              
+
               setInitialData(res.record)
             }
           } catch (exception) {
@@ -88,13 +91,13 @@ export default function CostCenterForm({ labels, maxAccess, recordId,onSubmit })
           setIsLoading(false)
         })()
       }, [])
-      
+
     return (
-        <FormShell 
+        <FormShell
             resourceId={ResourceIds.CostCenter}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
+            form={formik}
+            height={300}
+            maxAccess={maxAccess}
             editMode={editMode}
         >
             <Grid container spacing={4}>
@@ -120,7 +123,7 @@ export default function CostCenterForm({ labels, maxAccess, recordId,onSubmit })
                     maxLength='30'
 
                     required
-                    
+
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
