@@ -51,37 +51,49 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         enableReinitialize: true,
         validateOnChange: true,
   
-        onSubmit: async obj => {
-          // Ensure `isCostElement` is a boolean. Convert if it's an array or any other format.
-          const isCostElementBoolean = Array.isArray(obj.isCostElement) ? obj.isCostElement.includes("on") : !!obj.isCostElement;
-          
-          // Prepare the object for submission with `isCostElement` as a boolean.
-          const submissionObject = {
-            ...obj,
-            isCostElement: isCostElementBoolean,
-          };          
+        onSubmit: async (values, { setSubmitting }) => {
+          setSubmitting(true);
+          console.log('Submitting the following values:', values);
 
-          const response = await postRequest({
-            extension: GeneralLedgerRepository.ChartOfAccounts.set,
-            record: JSON.stringify(submissionObject) // Use the modified object here
-          });
+          // Convert isCostElement to boolean if needed
+          values.isCostElement = !!values.isCostElement;
 
+          // Check if accountRef is present and log it
+          console.log('AccountRef:', values.accountRef);
           
-          if (!obj.recordId) {
-            toast.success('Record Added Successfully');
-            setInitialData({
-              ...submissionObject, // Use the modified object to update the state
-              recordId: response.recordId, // Update the record ID from the response
-            });
-          } else {
-            toast.success('Record Edited Successfully');
+          try {
+              // Submit the values to your endpoint
+              const response = await postRequest({
+                  extension: GeneralLedgerRepository.ChartOfAccounts.set,
+                  record: JSON.stringify(values)
+              });
+
+              // Handle the response
+              if (!values.recordId) {
+                  toast.success('Record Added Successfully');
+                  setInitialData({
+                      ...values,
+                      recordId: response.recordId
+                  });
+              } else {
+                  toast.success('Record Edited Successfully');
+              }
+              setEditMode(true);
+              invalidate();
+              
+          } catch (error) {
+              // Handle any errors
+              console.error(error);
+              toast.error('Error submitting form');
+          } finally {
+              setSubmitting(false);
           }
-          setEditMode(true);
-        
-          invalidate();
-        }
-        
-      })
+      }
+  });
+      useEffect(() => {
+        console.log(formik.values.accountRef);
+    }, [formik.values.accountRef]);
+
     
       useEffect(() => {
         ;(async function () {
@@ -184,9 +196,13 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
               // helperText={formik.touched.nationalityId && formik.errors.nationalityId}
             />
           </Grid>
-                <Grid item xs={12}>
-                    <SegmentedInput segments={segments} setInput={(input) => formik && formik.setFieldValue('accountRef', input)} />
-                    {/* <CustomTextField
+          <Grid item xs={12}>
+                    <SegmentedInput
+                        segments={segments}
+                        name="accountRef"
+                        setFieldValue={formik.setFieldValue}
+                        values={formik.values.accountRef.split('-')}
+                    />                {/* <CustomTextField
                     name='accountRef'
                     label={labels.accountRef}
                     value={formik.values.accountRef}
@@ -314,58 +330,43 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
 }
 
 
-import {  createRef } from 'react';
+import React, {  createRef } from 'react';
 
-const SegmentedInput = ({ segments, setInput }) => {
-  // Create state to hold values of each segment
-  const [values, setValues] = useState([]);
-  
-  // Create refs for each input to manage focus
-  const inputRefs = Array(segments.length).fill().map(() => createRef());
-  
+
+const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
+  const inputRefs = segments.map(() => createRef());
+
+  // This function handles the change event for each segment.
   const handleChange = (index, event) => {
-    const maxLength = segments[index].value;
     const newValues = [...values];
-    newValues[index] = event.target.value.slice(0, maxLength);
-    setValues(newValues);
-  
-    // Move focus to next input if we've reached the max length and it's not the last input
-    if (event.target.value.length >= maxLength && index < segments.length - 1) {
+    newValues[index] = event.target.value.slice(0, segments[index].value);
+    
+    // Build the final input value by combining all segment values.
+    const finalInput = newValues.join('-');
+    
+    // Update the Formik field value.
+    setFieldValue(name, finalInput);
+
+    // Focus the next input field if necessary.
+    if (event.target.value.length >= segments[index].value && index < segments.length - 1) {
       inputRefs[index + 1].current.focus();
     }
-      let finalInput = '';
-      inputRefs.forEach((input, index) => {
-        finalInput += input.current.value
-
-        if(index != inputRefs.length - 1 && input.current.value.length == segments[index].value)
-          finalInput += "-"
-
-      });
-      console.log(finalInput)
-    setInput(finalInput)
-
   };
 
-  useEffect(() => {
-    setValues(Array(segments.length).fill(""))
-  }, [segments])
-
-  
   return (
     <div>
-      {values.map((value, index) => (
-        <>
-        <input
-          key={index}
-          ref={inputRefs[index]}
-          value={value}
-          onChange={(e) => handleChange(index, e)}
-          maxLength={segments[index].value}
-          style={{ marginRight: '8px', width: segments[index].value + 1 + "ch" }} // Add some spacing between inputs
-        />
-        {index != values.length - 1 && "-"}
-        </>
-        ))}
+      {segments.map((segment, index) => (
+        <React.Fragment key={index}>
+          <input
+            ref={inputRefs[index]}
+            value={values[index] || ''}
+            onChange={(e) => handleChange(index, e)}
+            maxLength={segment.value}
+            style={{ marginRight: '8px', width: `${segment.value + 1}ch` }} // Add some spacing between inputs
+          />
+          {index !== segments.length - 1 && "-"}
+        </React.Fragment>
+      ))}
     </div>
   );
 };

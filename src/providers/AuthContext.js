@@ -67,8 +67,7 @@ const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-
-      const accountName = matchHostname ? matchHostname[1] : 'burger'
+      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
 
       try {
@@ -127,9 +126,6 @@ const AuthProvider = ({ children }) => {
           'Content-Type': 'multipart/form-data'
         }
       })
-
-      console.log('defaultSettings')
-      console.log(defaultSettings)
 
       const defaultSet = {
         dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'
