@@ -8,6 +8,8 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {
 
+  console.log('data')
+  console.log(approverGridData)
 
   const columns = [
     {

@@ -41,9 +41,6 @@ export const CurrencyTradingSettingsRepository = {
     set: service + 'setACT',
     del: service + 'delACT'
   },
-  ExchangeRate: {
-    get: service + 'getEXM'
-  },
   RiskLevel: {
     qry: service + 'qryRSK',
     get: service + 'getRSK',

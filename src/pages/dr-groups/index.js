@@ -233,6 +233,7 @@ const DRGroups = () => {
       parameters: parameters
     })
       .then(res => {
+        console.log(res)
         setApproverGridData(res)
       })
       .catch(error => {

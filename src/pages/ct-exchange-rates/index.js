@@ -18,12 +18,17 @@ import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useResourceQuery } from 'src/hooks/resource'
 import FieldSet from 'src/components/Shared/FieldSet'
+import { DataSets } from 'src/resources/DataSets'
+import { CommonContext } from 'src/providers/CommonContext'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //state
   const [errorMessage, setErrorMessage] = useState()
+  const [plantStore, setPlantsStore] = useState(null)
+  const [rcmStore, setRcmStore] = useState([])
   const { height } = useWindowDimensions()
 
   const { labels: labels, access } = useResourceQuery({
@@ -49,25 +54,23 @@ const CTExchangeRates = () => {
   const exchangeRatesInlineGridColumns = [
     {
       field: 'textfield',
-      header: labels.exchangeRef,
-      nameId: 'exchangeId',
-      name: 'exchangeRef',
+      header: labels.plant,
+      nameId: 'plantId',
+      name: 'plantName',
       mandatory: true,
       readOnly: true
     },
     {
-      field: 'textfield',
-      header: labels.exchangeName,
-      name: 'exchangeName',
-      mandatory: true,
-      readOnly: true
-    },
-    {
-      field: 'textfield',
+      field: 'combobox',
+      valueField: 'key',
+      displayField: 'value',
       header: labels.rcm,
+      nameId: 'rateCalcMethod',
       name: 'rateCalcMethodName',
+      store: rcmStore,
       mandatory: true,
-      readOnly: true
+      widthDropDown: '150',
+      columnsInDropDown: [{ key: 'value', value: 'rateCalcMethodName' }]
     },
     {
       field: 'textfield',
@@ -101,8 +104,6 @@ const CTExchangeRates = () => {
       const isValidMax = values.rows && values.rows.every(row => !!row.minRate)
       const isValidRate = values.rows && values.rows.every(row => !!row.rate)
 
-      const isValidExchangeId = values.rows && values.rows.every(row => !!row.minRate)
-
       return isValidMin && isValidMax & isValidRate
         ? {}
         : {
@@ -114,7 +115,7 @@ const CTExchangeRates = () => {
           }
     },
     onSubmit: values => {
-      postExchangeMaps(values)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.puRateTypeId)
     }
   })
 
@@ -127,8 +128,6 @@ const CTExchangeRates = () => {
       const isValidMax = values.rows && values.rows.every(row => !!row.minRate)
       const isValidRate = values.rows && values.rows.every(row => !!row.rate)
 
-      const isValidExchangeId = values.rows && values.rows.every(row => !!row.minRate)
-
       return isValidMin && isValidMax & isValidRate
         ? {}
         : {
@@ -140,17 +139,19 @@ const CTExchangeRates = () => {
           }
     },
     onSubmit: values => {
-      postExchangeMaps(values)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.saRateTypeId)
     }
   })
 
-  const postExchangeMaps = obj => {
+  const postExchangeMaps = (obj, currencyId, rateTypeId) => {
     const data = {
-      items: obj.rows
+      currencyId: currencyId,
+      rateTypeId: rateTypeId,
+      exchangeMaps: obj.rows
     }
 
     postRequest({
-      extension: CurrencyTradingSettingsRepository.ExchangeRates.set2,
+      extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
       record: JSON.stringify(data)
     })
       .then(res => {
@@ -177,6 +178,21 @@ const CTExchangeRates = () => {
     }
   }, [formik.values.currencyId, formik.values.saRateTypeId])
 
+  useEffect(() => {
+    getAllPlants()
+    fillRcmStore()
+  }, [])
+
+  const getAllPlants = () => {
+    const parameters = ''
+    getRequest({
+      extension: SystemRepository.Plant.qry,
+      parameters: parameters
+    }).then(plants => {
+      setPlantsStore(plants.list)
+    })
+  }
+
   const getExchangeRates = (cuId, rateTypeId, formik) => {
     formik.setValues({ rows: [] })
     if (cuId && rateTypeId) {
@@ -186,42 +202,78 @@ const CTExchangeRates = () => {
         parameters: parameters
       })
         .then(values => {
-          // Create a set to store unique exchangeIds
-          const uniqueExchangeIds = new Set()
+          //step 1: display all plants
 
-          // Filtered list to store dictionaries with distinct exchangeIds
-          const filteredList = []
+          // Create a mapping of commissionId to values entry for efficient lookup
+          const valuesMap = values.list.reduce((acc, fee) => {
+            acc[fee.plantId] = fee
 
-          // Iterate through each dictionary in the original list
-          values?.list.forEach(exchange => {
-            const exchangeId = exchange.exchangeId
+            return acc
+          }, {})
 
-            // Check if the exchangeId is not in the set (not seen before)
-            if (!uniqueExchangeIds.has(exchangeId)) {
-              // Add the exchangeId to the set to mark it as seen
-              uniqueExchangeIds.add(exchangeId)
+          // Combine exchangeTable and values
+          const rows = plantStore.map(plant => {
+            const value = valuesMap[plant.recordId] || 0
 
-              // Add the dictionary to the filtered list
-              filteredList.push({
-                exchangeId: exchange.exchange?.recordId ? exchange.exchange.recordId : '',
-                exchangeRef: exchange.exchange?.reference ? exchange.exchange.reference : '',
-                exchangeName: exchange.exchange?.name ? exchange.exchange.name : '',
-                rateCalcMethodName: exchange.exchange?.rateCalcMethodName ? exchange.exchange.rateCalcMethodName : '',
-                rate: exchange.exchangeRate?.rate ? exchange.exchangeRate.rate : '',
-                minRate: exchange.exchangeRate?.minRate ? exchange.exchangeRate.minRate : '',
-                maxRate: exchange.exchangeRate?.maxRate ? exchange.exchangeRate.maxRate : ''
-              })
+            return {
+              currencyId: cuId,
+              rateTypeId: rateTypeId,
+              plantId: plant.recordId,
+              plantName: plant.name,
+              rateCalcMethod: value.rateCalcMethod,
+              rateCalcMethodName: value.rateCalcMethodName,
+              rate: value.rate,
+              minRate: value.minRate,
+              maxRate: value.maxRate
             }
           })
 
-          const rows = filteredList
-
           formik.setValues({ rows })
         })
+
+        //   // Create a set to store unique exchangeIds
+        //   const uniqueExchangeIds = new Set()
+
+        //   // Filtered list to store dictionaries with distinct exchangeIds
+        //   const filteredList = []
+
+        //   // Iterate through each dictionary in the original list
+        //   values?.list.forEach(exchange => {
+        //     const exchangeId = exchange.exchangeId
+
+        //     // Check if the exchangeId is not in the set (not seen before)
+        //     if (!uniqueExchangeIds.has(exchangeId)) {
+        //       // Add the exchangeId to the set to mark it as seen
+        //       uniqueExchangeIds.add(exchangeId)
+
+        //       // Add the dictionary to the filtered list
+        //       filteredList.push({
+        //         exchangeId: exchange.exchange?.recordId ? exchange.exchange.recordId : '',
+        //         exchangeRef: exchange.exchange?.reference ? exchange.exchange.reference : '',
+        //         exchangeName: exchange.exchange?.name ? exchange.exchange.name : '',
+        //         rateCalcMethodName: exchange.exchange?.rateCalcMethodName ? exchange.exchange.rateCalcMethodName : '',
+        //         rate: exchange.exchangeRate?.rate ? exchange.exchangeRate.rate : '',
+        //         minRate: exchange.exchangeRate?.minRate ? exchange.exchangeRate.minRate : '',
+        //         maxRate: exchange.exchangeRate?.maxRate ? exchange.exchangeRate.maxRate : ''
+        //       })
+        //     }
+        //   })
+
+        //   const rows = filteredList
+
+        //   formik.setValues({ rows })
+        // })
         .catch(error => {
           setErrorMessage(error)
         })
     }
+  }
+
+  const fillRcmStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.MC_RATE_CALC_METHOD,
+      callback: setRcmStore
+    })
   }
 
   const handleSubmit = () => {
@@ -262,7 +314,7 @@ const CTExchangeRates = () => {
               </Grid>
               <Grid item xs={6}></Grid>
               <Grid item xs={6}>
-                <FieldSet title={labels.purchase}>
+                <FieldSet>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={MultiCurrencyRepository.RateType.qry}
@@ -302,7 +354,7 @@ const CTExchangeRates = () => {
                 </FieldSet>
               </Grid>
               <Grid item xs={6}>
-                <FieldSet title={labels.sales}>
+                <FieldSet>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={MultiCurrencyRepository.RateType.qry}

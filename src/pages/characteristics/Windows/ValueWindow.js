@@ -6,7 +6,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const ValueWindow = ({ onClose, onSave, valueValidation, _labels, maxAccess }) => {
+const ValueWindow = ({ onClose, onSave, valueValidation, _labels, maxAccess, editMode }) => {
   return (
     <Window id='ValueWindow' Title={_labels.value} onClose={onClose} onSave={onSave} width={500} height={300}>
       <CustomTabPanel index={0} value={0}>
@@ -24,7 +24,6 @@ const ValueWindow = ({ onClose, onSave, valueValidation, _labels, maxAccess }) =
                   name='value'
                   label={_labels.value}
                   value={valueValidation.values.value}
-                  readOnly={editMode}
                   required
                   onChange={valueValidation.handleChange}
                   onClear={() => valueValidation.setFieldValue('value', '')}

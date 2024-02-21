@@ -45,15 +45,23 @@ const MCDefault = () => {
           parameters: parameters
         })
         .then(res => {
-           res.list.map(obj => (
-           myObject[obj.key] = obj.value? parseInt(obj.value): null
-            )); 
-            setInitialValues(myObject)
-        })
-        .catch(error => {
-            setErrorMessage(error)
-        })
-      }
+            const filteredList = res.list.filter(obj => {
+                return (
+                    obj.key === 'mc_defaultRTSA' || 
+                    obj.key === 'mc_defaultRTPU' || 
+                    obj.key === 'mc_defaultRTMF' || 
+                    obj.key === 'mc_defaultRTFI' 
+                );
+            });
+            filteredList.forEach(obj => (
+                myObject[obj.key] = obj.value? parseInt(obj.value): null
+                 )); 
+                 setInitialValues(myObject)
+             })
+             .catch(error => {
+                 setErrorMessage(error)
+             })
+           }
 
     const {
         labels: _labels,
@@ -76,8 +84,6 @@ const MCDefault = () => {
         var data = []
         Object.entries(obj).forEach(([key, value]) => {
            const newObj = { key: key  , value : value };
-     
-           // Push the new object into the array
            data.push(newObj);
      
         })

@@ -15,6 +15,7 @@ import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { formatDateFromApi, formatDateFromApiInline, formatDateDefault } from 'src/lib/date-helper'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { fontSize } from '@mui/system'
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
@@ -44,7 +45,9 @@ const InlineEditGrid = ({
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
 
   const cellRender = (row, column) => {
+
     switch (column.field) {
+
       case 'numberfield':
         return (
           <Box
@@ -56,6 +59,7 @@ const InlineEditGrid = ({
             }}
           >
             {row[column.name] === 0 ? row[column.name] : getFormattedNumber(row[column.name])}
+
           </Box>
         )
       case 'checkbox':
@@ -179,6 +183,7 @@ const InlineEditGrid = ({
         )
       case 'numberfield':
         return (
+
           <TextField
             numberField={true}
             id={cellId}
@@ -232,7 +237,12 @@ const InlineEditGrid = ({
                     </InputAdornment>
                   ))
             }}
-          />
+            helperText={  gridValidation.errors?.rows && gridValidation.errors?.rows[rowIndex] && gridValidation.errors?.rows[rowIndex][fieldName]}
+            error={  gridValidation.errors?.rows &&  gridValidation.errors?.rows[rowIndex] && Boolean(gridValidation.errors?.rows[rowIndex][fieldName])}
+
+            />
+
+
         )
       case 'combobox':
         return (
@@ -480,7 +490,6 @@ const InlineEditGrid = ({
                             style={{ cursor: 'pointer' }}
                             onClick={() => {
                               // Handle search action if needed
-                              console.log('Search clicked')
                             }}
                           />
                         </IconButton>
@@ -642,8 +651,9 @@ const InlineEditGrid = ({
                 width: column.width || tableWidth / columns.length,
                 background:  background,
               }}
-              body={row => {
-                return (
+              body={(row, rowIndex) => {
+
+return (
                   <Box
                     sx={{
                       height: '30px',
@@ -654,6 +664,9 @@ const InlineEditGrid = ({
                     }}
                   >
                     {cellRender(row, column)}
+
+                    {/* {gridValidation.errors?.rows && gridValidation.errors?.rows[rowIndex.rowIndex] && !gridValidation.values?.rows[rowIndex.rowIndex][column.name] ? <Box sx={{fontSize:'13px' , p:1, color:'red'}}>{gridValidation.errors?.rows[rowIndex.rowIndex][column.name]}</Box>
+                    : cellRender(row, column) } */}
                   </Box>
                 )
               }}

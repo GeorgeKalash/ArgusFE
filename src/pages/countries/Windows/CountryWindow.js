@@ -1,53 +1,27 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
-// **Tabs
-import CountryTab from 'src/pages/countries/Tabs/countryTab'
-import TransactionLog from 'src/components/Shared/TransactionLog'
-import { useState } from 'react'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import CountryForm from 'src/pages/countries/forms/CountryForm'
 
 
 const CountryWindow = ({
     onClose,
-    onSave,
-    countryValidation,
-    currencyStore,
-    regionStore,
-    width,
-    height,
     _labels,
-    editMode,
-    maxAccess
+    maxAccess,
+    recordId
 }) => {
-    const [windowInfo, setWindowInfo] = useState(null)
 
     return (
         <>
-        <Window id='CountryWindow' Title={_labels.country} onClose={onClose} width={width} height={height} 
-         onSave={onSave}
-         onInfo={() => setWindowInfo(true)}
-         disabledInfo={!editMode && true}
-         onInfoClose={() => setWindowInfo(false)}>
+        <Window id='CountryWindow' Title={_labels.country} controlled={true} onClose={onClose} width={600} height={400} >
             <CustomTabPanel>
-                <CountryTab
-                    countryValidation={countryValidation}
-                    currencyStore={currencyStore}
-                    regionStore={regionStore}
+                <CountryForm
                     _labels={_labels}
                     maxAccess={maxAccess}
-                    editMode={editMode}
+                    recordId={recordId}
                 />
             </CustomTabPanel>
         </Window>
-        {windowInfo && (
-        <TransactionLog
-          resourceId={ResourceIds && ResourceIds.Countries}
-          recordId={countryValidation.values.recordId}
-          onInfoClose={() => setWindowInfo(false)}
-        />
-      )}
     </>
   )
 }

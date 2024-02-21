@@ -1,11 +1,11 @@
 import { formatDateFromApi } from "src/lib/date-helper"
 
-const getNewCharValue = (chId) => {
+const getNewCharValue = (chId, seqNo) => {
     return {
       recordId: null,
       value: null,
       chId: chId,
-      seqNo: null
+      seqNo: seqNo
     }
   }
   

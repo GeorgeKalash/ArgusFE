@@ -91,6 +91,11 @@ const Correspondent = () => {
       flex: 1
     },
     {
+      field: 'currencyRef',
+      headerName: _labels.currency,
+      flex: 1
+    },
+    {
       field: 'isInactive',
       headerName: _labels.isInactive,
       flex: 1
@@ -239,9 +244,8 @@ const Correspondent = () => {
     validateOnChange: true,
     validate: values => {
       const isValid = values.rows.every(row => !!row.currencyId)
-      const isValidGlCurrencyId = values.rows.every(row => !!row.glCurrencyId)
 
-      return isValid && isValidGlCurrencyId
+      return isValid 
         ? {}
         : { rows: Array(values.rows.length).fill({ currencyId: 'Currency is required' }) }
     },
@@ -256,9 +260,6 @@ const Correspondent = () => {
           currencyId: '',
           currencyRef: '',
           currencyName: '',
-          glCurrencyId: '',
-          glCurrencyRef: '',
-          glCurrencyName: '',
           exchangeId: '',
           exchangeRef: '',
           exchangeName: '',
@@ -281,22 +282,6 @@ const Correspondent = () => {
       header: _labels.currency,
       nameId: 'currencyId',
       name: 'currencyRef',
-      mandatory: true,
-      store: currencyStore.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: '300',
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' },
-        { key: 'flName', value: 'FL Name' }
-      ]
-    },
-    {
-      field: 'combobox',
-      header: _labels.glCurrency,
-      nameId: 'glCurrencyId',
-      name: 'glCurrencyRef',
       mandatory: true,
       store: currencyStore.list,
       valueField: 'recordId',
@@ -406,9 +391,6 @@ const Correspondent = () => {
                 currencyId: '',
                 currencyRef: '',
                 currencyName: '',
-                glCurrencyId: '',
-                glCurrencyRef: '',
-                glCurrencyName: '',
                 exchangeId: '',
                 exchangeRef: '',
                 exchangeName: '',
@@ -714,9 +696,6 @@ const Correspondent = () => {
           currencyId: '',
           currencyRef: '',
           currencyName: '',
-          glCurrencyId: '',
-          glCurrencyRef: '',
-          glCurrencyName: '',
           exchangeId: '',
           exchangeRef: '',
           outward: false,
@@ -866,6 +845,7 @@ const Correspondent = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
   return (

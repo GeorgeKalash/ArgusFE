@@ -480,6 +480,7 @@ const ClientTemplateForm = ({
                       values={formik.values}
                       valueField="key"
                       displayField="value"
+                      readOnly={editMode && true}
                       onChange={(event, newValue) => {
                         if (newValue) {
                           formik.setFieldValue(

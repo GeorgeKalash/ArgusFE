@@ -12,5 +12,15 @@ export const SaleRepository = {
     get: service + 'getSP',
     set: service + 'setSP',
     del: service + 'delSP'
+  },
+  CommissionSchedule: {
+    qry: service + 'qryCSC',
+    get: service + 'getCSC',
+    set: service + 'setCSC',
+    del: service + 'delCSC',
+    set2: service + 'set2CSC',
+  },
+  CommissionScheduleBracket: {
+    qry: service + 'qryCSB',
   }
 }

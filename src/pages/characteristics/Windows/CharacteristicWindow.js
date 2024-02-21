@@ -18,8 +18,6 @@ const CharacteristicWindow = ({
   tabs,
   activeTab,
   setActiveTab,
-  currencyStore,
-  dataTypeStore,
 
   //value tab
   valueGridData,
@@ -34,7 +32,7 @@ const CharacteristicWindow = ({
     setActiveTab={setActiveTab}>
       <CustomTabPanel index={0} value={activeTab}>
         <CharacteristicTab characteristicValidation={characteristicValidation} _labels={_labels} maxAccess={maxAccess}
-        editMode={editMode} currencyStore={currencyStore} dataTypeStore={dataTypeStore} />
+        editMode={editMode} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
        <ValueTab
