@@ -40,11 +40,15 @@ const CTExchangeRates = () => {
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required('This field is required'),
+      rateAgainst: yup.string().required('This field is required'),
+      toCurrencyId: yup.string().required('This field is required'),
       puRateTypeId: yup.string().required('This field is required'),
       saRateTypeId: yup.string().required('This field is required')
     }),
     initialValues: {
       currencyId: null,
+      rateAgainst: null,
+      toCurrencyId: null,
       puRateTypeId: null,
       saRateTypeId: null
     },
@@ -115,7 +119,7 @@ const CTExchangeRates = () => {
           }
     },
     onSubmit: values => {
-      postExchangeMaps(values, formik.values.currencyId, formik.values.puRateTypeId)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.toCurrencyId, formik.values.puRateTypeId)
     }
   })
 
@@ -139,14 +143,15 @@ const CTExchangeRates = () => {
           }
     },
     onSubmit: values => {
-      postExchangeMaps(values, formik.values.currencyId, formik.values.saRateTypeId)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.toCurrencyId, formik.values.saRateTypeId)
     }
   })
 
-  const postExchangeMaps = (obj, currencyId, rateTypeId) => {
+  const postExchangeMaps = (obj, currencyId, toCurrencyId, rateTypeId) => {
     const data = {
       currencyId: currencyId,
       rateTypeId: rateTypeId,
+      toCurrencyId: toCurrencyId,
       exchangeMaps: obj.rows
     }
 
@@ -217,6 +222,7 @@ const CTExchangeRates = () => {
 
             return {
               currencyId: cuId,
+              toCurrencyId: toCuId,
               rateTypeId: rateTypeId,
               plantId: plant.recordId,
               plantName: plant.name,
@@ -312,7 +318,48 @@ const CTExchangeRates = () => {
                   helperText={formik.touched.currencyId && formik.errors.currencyId}
                 />
               </Grid>
-              <Grid item xs={6}></Grid>
+              <Grid item xs={3}>
+                <ResourceComboBox
+                  name='rateAgainst'
+                  label={labels.rateAgainst}
+                  datasetId={DataSets.MC_RATE_AGAINST}
+                  values={formik.values}
+                  valueField='key'
+                  displayField='value'
+                  required
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      formik.setFieldValue('rateAgainst', newValue?.key)
+                    } else {
+                      formik.setFieldValue('rateAgainst', newValue?.key)
+                    }
+                  }}
+                  error={formik.touched.rateAgainst && Boolean(formik.errors.rateAgainst)}
+                  helperText={formik.touched.rateAgainst && formik.errors.rateAgainst}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
+                  name='toCurrencyId'
+                  label={labels.currency}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Currency Ref' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  required
+                  readOnly={!formik.values.rateAgainst && formik.values.rateAgainst !== '2' ? true : false}
+                  maxAccess={access}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('toCurrencyId', newValue?.recordId)
+                  }}
+                  error={formik.touched.toCurrencyId && Boolean(formik.errors.toCurrencyId)}
+                  helperText={formik.touched.toCurrencyId && formik.errors.toCurrencyId}
+                />
+              </Grid>
               <Grid item xs={6}>
                 <FieldSet>
                   <Grid item xs={12}>
