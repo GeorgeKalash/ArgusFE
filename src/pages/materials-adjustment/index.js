@@ -134,8 +134,9 @@ const MaterialsAdjustment = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          height={670}
-          paginationType='client'
+
+          // height={670}
+          paginationType='api'
           maxAccess={access}
         />
       </Box>

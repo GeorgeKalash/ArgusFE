@@ -37,8 +37,8 @@ const Currencies = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: SystemRepository.Currency.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: SystemRepository.Currency.qry,
+      parameters: `_filter=`
     })
   }
 
@@ -48,12 +48,12 @@ const Currencies = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Currency.page,
+    endpointId: SystemRepository.Currency.qry,
     datasetId: ResourceIds.Currencies
   })
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.Currency.page
+    endpointId: SystemRepository.Currency.qry
   })
 
   const columns = [

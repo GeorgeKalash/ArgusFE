@@ -109,7 +109,7 @@ const Countries = () => {
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
-    
+
   }
 
   return (

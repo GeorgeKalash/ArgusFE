@@ -106,6 +106,7 @@ const Table = ({
   checkTitle = '',
   ...props
 }) => {
+  console.log(props.gridData)
   const [gridData, setGridData] = useState(props.gridData)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
@@ -124,13 +125,16 @@ const Table = ({
   }
 
   const CustomPagination = () => {
+    console.log(gridData)
     if (pagination) {
-      if (paginationType === 'api') {
-        const startAt = gridData._startAt
-        const totalRecords = gridData.count ? gridData.count : 0
+      if (paginationType === 'api' && gridData ) {
+        const startAt = gridData._startAt ? gridData._startAt : 1
+        const totalRecords = gridData?.count ? gridData?.count : 0
 
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
-
+console.log('page' , page)
+console.log('startAt' , startAt)
+console.log(gridData)
         const pageCount = Math.ceil(gridData.count ? gridData.count / pageSize : 1)
 
         const incrementPage = () => {
@@ -231,7 +235,9 @@ const Table = ({
                 list: slicedGridData
               })
               setPage(pageCount)
-              setStartAt(originalGridData.length - pageSize)
+              const pageNumber = parseInt(originalGridData.length/pageSize)
+              const start = pageSize*pageNumber
+              setStartAt(start)
             }
           }
 
@@ -337,6 +343,7 @@ const Table = ({
 
   useEffect(() => {
     console.log('enter useEffect')
+    console.log(props.gridData)
     if (props.gridData && props.gridData.list) setGridData(props.gridData)
     if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
       console.log('enter if')
@@ -345,6 +352,7 @@ const Table = ({
     setCheckedRows([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.gridData])
+  console.log(CustomPagination)
 
   return (
     <>
@@ -365,7 +373,7 @@ const Table = ({
           >
             {/* <ScrollableTable> */}
             <StripedDataGrid
-              rows={gridData?.list || []}
+              rows={gridData?.list ?  page < 2 ? gridData?.list.slice(0 , 50) : gridData?.list : []}
               sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
               density='compact'
               components={{
