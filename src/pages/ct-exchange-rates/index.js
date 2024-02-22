@@ -41,14 +41,14 @@ const CTExchangeRates = () => {
     validationSchema: yup.object({
       currencyId: yup.string().required('This field is required'),
       rateAgainst: yup.string().required('This field is required'),
-      toCurrencyId: yup.string().required('This field is required'),
+      raCurrencyId: yup.string().required('This field is required'),
       puRateTypeId: yup.string().required('This field is required'),
       saRateTypeId: yup.string().required('This field is required')
     }),
     initialValues: {
       currencyId: null,
       rateAgainst: null,
-      toCurrencyId: null,
+      raCurrencyId: null,
       puRateTypeId: null,
       saRateTypeId: null
     },
@@ -119,7 +119,7 @@ const CTExchangeRates = () => {
           }
     },
     onSubmit: values => {
-      postExchangeMaps(values, formik.values.currencyId, formik.values.toCurrencyId, formik.values.puRateTypeId)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId)
     }
   })
 
@@ -143,15 +143,15 @@ const CTExchangeRates = () => {
           }
     },
     onSubmit: values => {
-      postExchangeMaps(values, formik.values.currencyId, formik.values.toCurrencyId, formik.values.saRateTypeId)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
     }
   })
 
-  const postExchangeMaps = (obj, currencyId, toCurrencyId, rateTypeId) => {
+  const postExchangeMaps = (obj, currencyId, raCurrencyId, rateTypeId) => {
     const data = {
       currencyId: currencyId,
       rateTypeId: rateTypeId,
-      toCurrencyId: toCurrencyId,
+      raCurrencyId: raCurrencyId,
       exchangeMaps: obj.rows
     }
 
@@ -170,18 +170,18 @@ const CTExchangeRates = () => {
   useEffect(() => {
     if (formik.values) {
       if (formik.values.currencyId != null && formik.values.puRateTypeId != null) {
-        getExchangeRates(formik.values.currencyId, formik.values.puRateTypeId, puFormik)
+        getExchangeRates(formik.values.currencyId, formik.values.puRateTypeId, formik.values.raCurrencyId, puFormik)
       }
     }
-  }, [formik.values.currencyId, formik.values.puRateTypeId])
+  }, [formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId])
 
   useEffect(() => {
     if (formik.values) {
       if (formik.values.currencyId != null && formik.values.saRateTypeId != null) {
-        getExchangeRates(formik.values.currencyId, formik.values.saRateTypeId, saFormik)
+        getExchangeRates(formik.values.currencyId, formik.values.saRateTypeId, formik.values.raCurrencyId, saFormik)
       }
     }
-  }, [formik.values.currencyId, formik.values.saRateTypeId])
+  }, [formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId])
 
   useEffect(() => {
     getAllPlants()
@@ -198,10 +198,10 @@ const CTExchangeRates = () => {
     })
   }
 
-  const getExchangeRates = (cuId, rateTypeId, formik) => {
+  const getExchangeRates = (cuId, rateTypeId, raCurrencyId, formik) => {
     formik.setValues({ rows: [] })
     if (cuId && rateTypeId) {
-      const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}`
+      const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
       getRequest({
         extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
         parameters: parameters
@@ -222,7 +222,7 @@ const CTExchangeRates = () => {
 
             return {
               currencyId: cuId,
-              toCurrencyId: toCuId,
+              raCurrencyId: raCurrencyId,
               rateTypeId: rateTypeId,
               plantId: plant.recordId,
               plantName: plant.name,
@@ -233,42 +233,9 @@ const CTExchangeRates = () => {
               maxRate: value.maxRate
             }
           })
-
           formik.setValues({ rows })
         })
 
-        //   // Create a set to store unique exchangeIds
-        //   const uniqueExchangeIds = new Set()
-
-        //   // Filtered list to store dictionaries with distinct exchangeIds
-        //   const filteredList = []
-
-        //   // Iterate through each dictionary in the original list
-        //   values?.list.forEach(exchange => {
-        //     const exchangeId = exchange.exchangeId
-
-        //     // Check if the exchangeId is not in the set (not seen before)
-        //     if (!uniqueExchangeIds.has(exchangeId)) {
-        //       // Add the exchangeId to the set to mark it as seen
-        //       uniqueExchangeIds.add(exchangeId)
-
-        //       // Add the dictionary to the filtered list
-        //       filteredList.push({
-        //         exchangeId: exchange.exchange?.recordId ? exchange.exchange.recordId : '',
-        //         exchangeRef: exchange.exchange?.reference ? exchange.exchange.reference : '',
-        //         exchangeName: exchange.exchange?.name ? exchange.exchange.name : '',
-        //         rateCalcMethodName: exchange.exchange?.rateCalcMethodName ? exchange.exchange.rateCalcMethodName : '',
-        //         rate: exchange.exchangeRate?.rate ? exchange.exchangeRate.rate : '',
-        //         minRate: exchange.exchangeRate?.minRate ? exchange.exchangeRate.minRate : '',
-        //         maxRate: exchange.exchangeRate?.maxRate ? exchange.exchangeRate.maxRate : ''
-        //       })
-        //     }
-        //   })
-
-        //   const rows = filteredList
-
-        //   formik.setValues({ rows })
-        // })
         .catch(error => {
           setErrorMessage(error)
         })
@@ -280,6 +247,20 @@ const CTExchangeRates = () => {
       _dataset: DataSets.MC_RATE_CALC_METHOD,
       callback: setRcmStore
     })
+  }
+
+  const getDefaultBaseCurrencyId = () => {
+    var parameters = `_key=baseCurrencyId`
+    getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: parameters
+    })
+      .then(res => {
+        formik.setFieldValue('raCurrencyId', parseInt(res?.record?.value))
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
   }
 
   const handleSubmit = () => {
@@ -328,10 +309,11 @@ const CTExchangeRates = () => {
                   displayField='value'
                   required
                   onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('rateAgainst', newValue?.key)
+                    formik.setFieldValue('rateAgainst', newValue?.key)
+                    if (!newValue) {
+                      formik.setFieldValue('raCurrencyId', null)
                     } else {
-                      formik.setFieldValue('rateAgainst', newValue?.key)
+                      if (newValue.key === '1') getDefaultBaseCurrencyId()
                     }
                   }}
                   error={formik.touched.rateAgainst && Boolean(formik.errors.rateAgainst)}
@@ -341,7 +323,7 @@ const CTExchangeRates = () => {
               <Grid item xs={3}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Currency.qry}
-                  name='toCurrencyId'
+                  name='raCurrencyId'
                   label={labels.currency}
                   valueField='recordId'
                   displayField={['reference', 'name']}
@@ -354,10 +336,10 @@ const CTExchangeRates = () => {
                   readOnly={!formik.values.rateAgainst && formik.values.rateAgainst !== '2' ? true : false}
                   maxAccess={access}
                   onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('toCurrencyId', newValue?.recordId)
+                    formik && formik.setFieldValue('raCurrencyId', newValue?.recordId)
                   }}
-                  error={formik.touched.toCurrencyId && Boolean(formik.errors.toCurrencyId)}
-                  helperText={formik.touched.toCurrencyId && formik.errors.toCurrencyId}
+                  error={formik.touched.raCurrencyId && Boolean(formik.errors.raCurrencyId)}
+                  helperText={formik.touched.raCurrencyId && formik.errors.raCurrencyId}
                 />
               </Grid>
               <Grid item xs={6}>
