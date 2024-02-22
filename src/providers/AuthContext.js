@@ -69,7 +69,6 @@ const AuthProvider = ({ children }) => {
 
       const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
-
       try {
         const response = await axios({
           method: 'GET',
@@ -126,9 +125,6 @@ const AuthProvider = ({ children }) => {
           'Content-Type': 'multipart/form-data'
         }
       })
-
-      console.log('defaultSettings')
-      console.log(defaultSettings)
 
       const defaultSet = {
         dateFormat: defaultSettings.data.record.value ? defaultSettings.data.record.value : 'dd/MM/yyyy'

@@ -33,6 +33,8 @@ const Window = ({
   editMode = false,
   disabledSubmit,
   disabledInfo,
+  onApply,
+  disabledApply,
   ...props
 }) => {
   const { settings } = useSettings()
@@ -145,8 +147,10 @@ const Window = ({
                     onSave={onSave}
                     onClear={onClear}
                     onInfo={onInfo}
+                    onApply={onApply}
                     disabledSubmit={disabledSubmit}
                     disabledInfo={disabledInfo}
+                    disabledApply={disabledApply}
                   />
                 )}
               </>

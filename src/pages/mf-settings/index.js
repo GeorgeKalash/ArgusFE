@@ -46,15 +46,22 @@ const MFSettings = () => {
           parameters: parameters
         })
         .then(res => {
-           res.list.map(obj => (
-           myObject[obj.key] = obj.value? parseInt(obj.value): null
-            )); 
-            setInitialValues(myObject)
-        })
-        .catch(error => {
-            setErrorMessage(error)
-        })
-      }
+          const filteredList = res.list.filter(obj => {
+              return (
+                  obj.key === 'mf_mu' || 
+                  obj.key === 'documentType' || 
+                  obj.key === 'site' 
+              );
+          });
+          filteredList.forEach(obj => (
+              myObject[obj.key] = obj.value? parseInt(obj.value): null
+               )); 
+               setInitialValues(myObject)
+           })
+           .catch(error => {
+               setErrorMessage(error)
+           })
+         }
 
     const {
         labels: _labels,
@@ -109,7 +116,7 @@ const MFSettings = () => {
                 <Grid container spacing={5} sx={{pl:'10px'}} lg={3} md={7} sm={7} xs={12} >
                     <Grid item xs={12}>
                         <ResourceComboBox
-                        datasetId={DataSets.GRID_COL_OPTIONS}
+                        datasetId={DataSets.POS_GRID_COL_OPTIONS}
                         name='mf_mu'
                         label={_labels.measurementUnit}
                         valueField='key'

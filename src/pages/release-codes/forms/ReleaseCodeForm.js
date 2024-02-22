@@ -103,7 +103,7 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
                  value={formik.values.reference}
                  required
                  maxAccess={maxAccess}
-                 maxLength='30'
+                 maxLength='10'
                  onChange={formik.handleChange}
                  onClear={() => formik.setFieldValue('reference', '')}
                  error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -114,7 +114,7 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
                     <CustomTextField
                  name='name'
                  label={labels.name}
-                 
+                 maxLength='30'
                  value={formik.values.name}
                  required
                  rows={2}

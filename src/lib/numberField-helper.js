@@ -52,7 +52,7 @@ function getFormattedNumberMax(number, digitsBeforePoint, digitsAfterPoint) {
   var beforePoint = parts[0].slice(0, digitsBeforePoint)
   var afterPoint = (parts[1] || '').slice(0, digitsAfterPoint)
   beforePoint = new Intl.NumberFormat('en-US').format(beforePoint)
-
+   console.log(beforePoint)
   if (value?.indexOf('.') > -1) {
     return beforePoint + '.' + afterPoint
   } else {
