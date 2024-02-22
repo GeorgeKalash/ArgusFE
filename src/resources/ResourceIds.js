@@ -15,6 +15,7 @@ export const ResourceIds = {
   CostCenter: 30107,
   CostCenterGroup: 30111,
   Interface: 36108,
+  DocumentsOnHold : 10301,
   Countries: 20101,
   LegalStatus: 21108,
   Correspondent: 36101,
