@@ -23,8 +23,6 @@ const CreditOrder = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [plantId, setPlantId] = useState(null)
 
-  const [data, setData] = useState(null)
-
   const getPlantId = async () => {
     const userData = window.sessionStorage.getItem('userData')
       ? JSON.parse(window.sessionStorage.getItem('userData'))
@@ -55,26 +53,6 @@ const CreditOrder = () => {
     }
   }
 
-  const search = inp => {
-    setData({ count: 0, list: [], message: '', statusId: 1 })
-    const input = inp
-    if (input) {
-      var parameters = `_filter=${input}`
-
-      getRequest({
-        extension: CTTRXrepository.CreditOrder.snapshot,
-        parameters: parameters
-      })
-        .then(res => {
-          setData(res)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    } else {
-      setData({ count: 0, list: [], message: '', statusId: 1 })
-    }
-  }
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -83,15 +61,27 @@ const CreditOrder = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: CTTRXrepository.CreditOrder.snapshot,
+      parameters: `_filter=${qry}`
+    })
+  }
 
   const {
-    query: {},
+    query: { data },
     labels: _labels,
+    search,
+    clear,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CTTRXrepository.CreditOrder.qry,
-    datasetId: ResourceIds.CreditOrder
+    datasetId: ResourceIds.CreditOrder,
+    search: {
+      endpointId: CTTRXrepository.CreditOrder.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
   const invalidate = useInvalidate({
@@ -124,7 +114,14 @@ const CreditOrder = () => {
   return (
     <>
       <Box>
-        <GridToolbar maxAccess={access} onAdd={add} onSearch={search} labels={_labels} inputSearch={true} />
+        <GridToolbar
+          maxAccess={access}
+          onAdd={add}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={[
             {
@@ -158,7 +155,7 @@ const CreditOrder = () => {
               flex: 1
             }
           ]}
-          gridData={data}
+          gridData={data ?? { list: [] }}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
