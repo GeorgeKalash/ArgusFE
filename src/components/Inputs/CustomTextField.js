@@ -77,13 +77,13 @@ const CustomTextField = ({
 
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
-
       <TextField
         key={(value?.length < 1 || readOnly  || value === null) && value }
         inputRef={inputRef}
         type={type}
         variant={variant}
         defaultValue={value}
+        value={!readOnly && value ? value : undefined} // Use value conditionally based on readOnly
         size={size}
         fullWidth={fullWidth}
         autoFocus={focus}
@@ -102,7 +102,7 @@ const CustomTextField = ({
         }}
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
-        
+
         // onInput={handleInput}
         onKeyDown={(e)=> e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)}
         InputProps={{
