@@ -1,21 +1,39 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import useResourceParams from './useResourceParams'
+import { useState } from 'react'
 
-export function useResourceQuery({ endpointId, datasetId, queryFn }) {
+export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
+  const [searchValue, setSearchValue] = useState('')
+  const isSearchMode = !!searchValue
+
   const { access, labels } = useResourceParams({
     datasetId
   })
+  const queryClient = useQueryClient(); // Initialize the query client
 
   const query = useQuery({
-    queryKey: [endpointId],
-    queryFn,
-    enabled: access?.record?.maxAccess > 0
+    queryKey: [endpointId , searchValue],
+    queryFn: isSearchMode ? ({ queryKey: [_, qry] }) =>
+   search.searchFn({
+        qry
+      }) :  ()=> queryFn(),
+    enabled:  access?.record?.maxAccess > 0
   })
 
   return {
     access,
     labels,
-    query
+    query: query,
+    search(query) {
+      setSearchValue(query)
+    },
+    clear() {
+      setSearchValue('')
+    },
+    invalidate: () => {
+      queryClient.invalidateQueries([endpointId]); // Invalidate queries when needed
+    }
+
   }
 }
 
