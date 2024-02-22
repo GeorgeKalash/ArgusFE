@@ -23,6 +23,7 @@ const CustomTextField = ({
   hidden = false,
   phone = false,
   search= false,
+  language="",
 
   ...props
 }) => {
@@ -59,6 +60,17 @@ const CustomTextField = ({
       e.target.value = truncatedValue?.replace(/\D/g, '');
       props?.onChange(e);
     }
+    if (language ==='arabic') {
+      e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '');
+      console.log("e.target.value" , e.target.value)
+      props?.onChange(e);
+    }
+
+    if (language ==='english') {
+      e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '');
+      console.log("e.target.value" , e.target.value)
+      props?.onChange(e);
+    }
   };
 
 
@@ -90,7 +102,8 @@ const CustomTextField = ({
         }}
         autoComplete={autoComplete}
         style={{ textAlign: 'right' }}
-        onInput={handleInput}
+        
+        // onInput={handleInput}
         onKeyDown={(e)=> e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)}
         InputProps={{
 

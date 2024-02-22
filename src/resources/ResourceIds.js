@@ -1,7 +1,9 @@
 export const ResourceIds = {
+  FRT_DR_approvals :10302,
   DocumentTypes: 20104,
   DocumentTypeMaps: 20201,
   GeographicRegions: 20133,
+  GLSettings : 30110,
   WorkCenters: 42101,
   Cities: 20125,
   Labor: 42103,
@@ -80,6 +82,9 @@ export const ResourceIds = {
   CbCashGroups: 33100,
   CbBanks: 33101,
   SystemDefaults: 20108,
+  ProductionClass: 42108,
+  carrierSite: 40203,
   LoCollectors: 40202,
+  Routings: 42105,
   CreditOrder: 35301
 }

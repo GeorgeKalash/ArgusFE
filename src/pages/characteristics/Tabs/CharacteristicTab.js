@@ -7,8 +7,10 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 import { getFormattedNumberMax } from 'src/lib/numberField-helper'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
-const CharacteristicTab = ({ characteristicValidation, _labels, maxAccess, editMode, currencyStore, dataTypeStore }) => {
+const CharacteristicTab = ({ characteristicValidation, _labels, maxAccess, editMode, currencyStore}) => {
   return (
     <>
       <Grid container spacing={4}>
@@ -28,21 +30,21 @@ const CharacteristicTab = ({ characteristicValidation, _labels, maxAccess, editM
           />
         </Grid>
         <Grid item xs={12}>
-          <CustomComboBox
-            name='dataType'
-            label={_labels.dataType}
-            valueField='key'
-            displayField='value'
-            store={dataTypeStore}
-            value={dataTypeStore.filter(item => item.key === characteristicValidation.values.dataType?.toString())[0]}
-            required
-            onChange={(event, newValue) => {
-              characteristicValidation.setFieldValue('dataType', newValue?.key)
-            }}
-            error={characteristicValidation.touched.dataType && Boolean(characteristicValidation.errors.dataType)}
-            helperText={characteristicValidation.touched.dataType && characteristicValidation.errors.dataType}
-            maxAccess={maxAccess}
-          />
+        <ResourceComboBox
+              datasetId={DataSets.DR_CHA_DATA_TYPE}
+              name='dataType'
+              label={_labels.dataType}
+              valueField='key'
+              displayField='value'
+              values={characteristicValidation.values}
+              required
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                characteristicValidation.setFieldValue('dataType', newValue?.key)
+              }}
+              error={characteristicValidation.touched.dataType && Boolean(characteristicValidation.errors.dataType)}
+              helperText={characteristicValidation.touched.dataType && characteristicValidation.errors.dataType}
+            />
         </Grid>
         <Grid item xs={12}>
           <CustomTextField
@@ -113,27 +115,6 @@ const CharacteristicTab = ({ characteristicValidation, _labels, maxAccess, editM
           />
         </Grid>
         <Grid item xs={12}>
-          <CustomComboBox
-            name='currencyId'
-            label={_labels.currency}
-            valueField='recordId'
-            displayField='name'  
-            required
-            store={currencyStore}
-            value={currencyStore.filter(item => item.recordId === characteristicValidation.values.currencyId)[0]}
-            onChange={(event, newValue) => {
-              characteristicValidation.setFieldValue('currencyId', newValue?.recordId)
-            }}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            error={characteristicValidation.touched.currencyId && Boolean(characteristicValidation.errors.currencyId)}
-            helperText={characteristicValidation.touched.currencyId && characteristicValidation.errors.currencyId}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
           <CustomTextField
             name='textSize'
             label={_labels.textSize}
@@ -146,17 +127,17 @@ const CharacteristicTab = ({ characteristicValidation, _labels, maxAccess, editM
           />
         </Grid>
         <Grid item xs={12}>
-            <CustomDatePicker
-              name='validFrom'
-              label={_labels.validFrom}
-              value={ characteristicValidation.values.validFrom}
-              required
-              onChange={characteristicValidation.handleChange}
-              maxAccess={maxAccess}
-              onClear={() => characteristicValidation.setFieldValue('validFrom', '')}
-              error={characteristicValidation.touched.validFrom && Boolean(characteristicValidation.errors.validFrom)}
-              helperText={characteristicValidation.touched.validFrom && characteristicValidation.errors.validFrom}
-            />
+        <CustomDatePicker
+                name='validFrom'
+                label={_labels.validFrom}
+                value={characteristicValidation?.values?.validFrom}
+                required
+                onChange={characteristicValidation.setFieldValue}
+                maxAccess={maxAccess}
+                onClear={() => characteristicValidation.setFieldValue('validFrom', '')}
+                error={characteristicValidation.touched.validFrom && Boolean(characteristicValidation.errors.validFrom)}
+                helperText={characteristicValidation.touched.validFrom && characteristicValidation.errors.validFrom}
+              />
           </Grid>
       </Grid>
     </>
