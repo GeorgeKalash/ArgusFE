@@ -4,6 +4,8 @@ import { useState } from 'react'
 
 export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
   const [searchValue, setSearchValue] = useState('')
+  const [apiOption, setApiOption] = useState('')
+
   const isSearchMode = !!searchValue
 
   const { access, labels } = useResourceParams({
@@ -12,11 +14,12 @@ export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
   const queryClient = useQueryClient(); // Initialize the query client
 
   const query = useQuery({
-    queryKey: [endpointId , searchValue],
+    queryKey: [endpointId , searchValue, apiOption],
     queryFn: isSearchMode ? ({ queryKey: [_, qry] }) =>
-   search.searchFn({
+     search.searchFn({
         qry
-      }) :  ()=> queryFn(),
+      }) : apiOption ? ()=> queryFn(apiOption)
+       :   ()=> queryFn(),
     enabled:  access?.record?.maxAccess > 0
   })
 
@@ -27,8 +30,14 @@ export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
     search(query) {
       setSearchValue(query)
     },
+    paginationParameters(res){
+      setApiOption(res)
+    },
     clear() {
       setSearchValue('')
+    },
+    refetch() {
+      query.refetch();
     },
     invalidate: () => {
       queryClient.invalidateQueries([endpointId]); // Invalidate queries when needed

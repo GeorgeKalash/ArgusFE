@@ -115,7 +115,8 @@ const Table = ({
 
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
-  const api = props.api
+  const api = props?.api ? props?.api: props.paginationParameters
+  const refetch = props?.refetch
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
@@ -125,9 +126,9 @@ const Table = ({
 
   const CustomPagination = () => {
     if (pagination) {
-      if (paginationType === 'api') {
+      if (paginationType === 'api' && gridData ) {
         const startAt = gridData._startAt
-        const totalRecords = gridData.count ? gridData.count : 0
+        const totalRecords = gridData?.count ? gridData?.count : 0
 
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
 
@@ -231,7 +232,9 @@ const Table = ({
                 list: slicedGridData
               })
               setPage(pageCount)
-              setStartAt(originalGridData.length - pageSize)
+              const pageNumber = parseInt(originalGridData.length/pageSize)
+              const start = pageSize*pageNumber
+              setStartAt(start)
             }
           }
 
@@ -250,11 +253,11 @@ const Table = ({
               <IconButton onClick={goToLastPage} disabled={page === pageCount}>
                 <LastPageIcon />
               </IconButton>
-              {api && (
-                <IconButton onClick={goToFirstPage}>
+              {/* {api && ( */}
+                <IconButton onClick={refetch}>
                   <RefreshIcon />
                 </IconButton>
-              )}
+              {/* )} */}
               Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
               {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
               {totalRecords}
@@ -336,11 +339,20 @@ const Table = ({
   const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
   useEffect(() => {
-    console.log('enter useEffect')
-    if (props.gridData && props.gridData.list) setGridData(props.gridData)
+
+    if (props.gridData && props.gridData.list && paginationType === 'client'){
+       var slicedGridData = props.gridData.list.slice((page-1) * pageSize, (page) * pageSize)
+       setGridData({
+        ...gridData,
+        list: slicedGridData
+      })
+    }
+    if (props.gridData && props.gridData.list && paginationType === 'api'){
+      setGridData( props.gridData)
+   }
     if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
-      console.log('enter if')
-      setPage(1)
+      // console.log('enter if')
+      // setPage(1)
     }
     setCheckedRows([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -365,7 +377,7 @@ const Table = ({
           >
             {/* <ScrollableTable> */}
             <StripedDataGrid
-              rows={gridData?.list || []}
+              rows={gridData?.list ?  (page < 2 && paginationType === 'api') ? gridData?.list.slice(0 , 50) : gridData?.list : []}
               sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
               density='compact'
               components={{
