@@ -26,7 +26,6 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -46,7 +45,7 @@ const Currencies = () => {
   const {
     query: { data },
     labels: _labels,
-    refresh,
+    refetch,
     access
   } = useResourceQuery({
     queryFn:  fetchGridData,
@@ -54,9 +53,9 @@ const Currencies = () => {
     datasetId: ResourceIds.Currencies
   })
 
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.Currency.qry
-  })
+  // const invalidate = useInvalidate({
+  //   endpointId: SystemRepository.Currency.qry
+  // })
 
   const columns = [
     {
@@ -87,7 +86,7 @@ const Currencies = () => {
       extension: SystemRepository.Currency.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+    refresh()
     toast.success('Record Deleted Successfully')
   }
 
@@ -110,7 +109,7 @@ const Currencies = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          refresh={refresh}
+          refetch={refetch}
           isLoading={false}
           pageSize={50}
           paginationType='client'

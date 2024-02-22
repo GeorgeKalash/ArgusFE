@@ -116,7 +116,7 @@ const Table = ({
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props?.api ? props?.api: props.paginationParameters
-  const refresh = props?.refresh
+  const refetch = props?.refetch
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
@@ -254,7 +254,7 @@ const Table = ({
                 <LastPageIcon />
               </IconButton>
               {/* {api && ( */}
-                <IconButton onClick={refresh}>
+                <IconButton onClick={refetch}>
                   <RefreshIcon />
                 </IconButton>
               {/* )} */}
@@ -339,12 +339,20 @@ const Table = ({
   const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
   useEffect(() => {
-    // console.log('enter useEffect')
-    // console.log(props.gridData)
-    if (props.gridData && props.gridData.list) setGridData(props.gridData)
+
+    if (props.gridData && props.gridData.list && paginationType === 'client'){
+       var slicedGridData = props.gridData.list.slice((page-1) * pageSize, (page) * pageSize)
+       setGridData({
+        ...gridData,
+        list: slicedGridData
+      })
+    }
+    if (props.gridData && props.gridData.list && paginationType === 'api'){
+      setGridData( props.gridData)
+   }
     if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
       // console.log('enter if')
-      setPage(1)
+      // setPage(1)
     }
     setCheckedRows([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -369,7 +377,7 @@ const Table = ({
           >
             {/* <ScrollableTable> */}
             <StripedDataGrid
-              rows={gridData?.list ?  page < 2 ? gridData?.list.slice(0 , 50) : gridData?.list : []}
+              rows={gridData?.list ?  (page < 2 && paginationType === 'api') ? gridData?.list.slice(0 , 50) : gridData?.list : []}
               sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
               density='compact'
               components={{

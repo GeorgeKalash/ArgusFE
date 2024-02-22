@@ -37,15 +37,19 @@ const Countries = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: SystemRepository.Country.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return {...response,  _startAt: _startAt}
+
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -130,7 +134,8 @@ const Countries = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Box>

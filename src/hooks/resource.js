@@ -36,7 +36,7 @@ export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
     clear() {
       setSearchValue('')
     },
-    refresh() {
+    refetch() {
       query.refetch();
     },
     invalidate: () => {
