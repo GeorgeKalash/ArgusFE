@@ -165,6 +165,33 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     })
   })
 
+  const onPost = () => {
+    console.log('enter onpost')
+  }
+
+  const onClose = async () => {
+    try {
+      const obj = formik.values
+      console.log('onClose ', obj)
+      const copy = { ...obj }
+
+      copy.date = formatDateToApi(copy.date)
+      copy.deliveryDate = formatDateToApi(copy.deliveryDate)
+      copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.status = copy.status === '' ? 1 : copy.status
+      copy.releaseStatus = copy.releaseStatus === '' ? 1 : copy.releaseStatus
+      copy.amount = totalCUR
+      copy.baseAmount = totalLoc
+
+      const res = await postRequest({
+        extension: CTTRXrepository.CreditOrder.close,
+        record: JSON.stringify(copy)
+      })
+    } catch (error) {
+      setErrorMessage(error)
+    }
+  }
+
   const totalCUR = detailsFormik.values.rows.reduce((curSum, row) => {
     // Parse amount as a number
     const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
@@ -213,13 +240,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     }
   }
 
-  const onPost = () => {
-    console.log('enter onpost')
-  }
-
-  const onClose = () => {
-    console.log('enter onClose')
-  }
   async function getEXMBase(plantId, currencyId, baseCurrency, rateType) {
     if (!plantId || !currencyId || !rateType || !baseCurrency) {
       if (!plantId) {
@@ -289,6 +309,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
       widthDropDown: '200',
       fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
       columnsInDropDown: [
@@ -297,14 +318,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       ],
       width: 230,
       async onChange(row) {
-        if (toCurrency == null) {
-          stackError({
-            message: `Correspondant Cannot Be Empty.`
-          })
-          detailsFormik.resetForm()
-
-          return
-        }
         if (row?.newValue > 0) {
           const exchange = await getEXMCur({
             plantId: plantId ?? formik.values.plantId,
@@ -351,14 +364,16 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       header: labels[9],
       name: 'currencyName',
       readOnly: true,
-      width: 300
+      width: 300,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
     },
     {
-      field: 'textfield',
+      field: 'numberfield',
       header: labels[14],
       name: 'qty',
       mandatory: true,
       width: 200,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
       async onChange(row) {
         const rate = row.rowData?.exRate
         const rateCalcMethod = row.rowData?.rateCalcMethod
@@ -388,11 +403,12 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       }
     },
     {
-      field: 'textfield',
+      field: 'numberfield',
       header: labels[15],
       name: 'exRate',
       mandatory: true,
       width: 200,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
         if (parseFloat(row.rowData.exRate.toString().replace(/,/g, '')) > 0) {
@@ -443,12 +459,13 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       }
     },
     {
-      field: 'textfield',
+      field: 'numberfield',
       header: labels[10],
       name: 'amount',
       readOnly: true,
       mandatory: true,
-      width: 200
+      width: 200,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
     }
   ]
 

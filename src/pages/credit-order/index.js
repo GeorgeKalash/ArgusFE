@@ -153,6 +153,21 @@ const CreditOrder = () => {
               field: 'amount',
               headerName: _labels[10],
               flex: 1
+            },
+            {
+              field: 'rsName',
+              headerName: _labels[19],
+              flex: 1
+            },
+            {
+              field: 'statusName',
+              headerName: _labels[21],
+              flex: 1
+            },
+            {
+              field: 'wipName',
+              headerName: _labels[20],
+              flex: 1
             }
           ]}
           gridData={data ?? { list: [] }}

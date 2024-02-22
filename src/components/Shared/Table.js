@@ -313,6 +313,7 @@ const Table = ({
       renderCell: params => {
         const { row } = params
         const isStatus3 = row.status === 3
+        const isWIP = row.wip === 2
 
         return (
           <>
@@ -321,7 +322,7 @@ const Table = ({
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
               </IconButton>
             )}
-            {!isStatus3 && deleteBtnVisible && (
+            {!isStatus3 && deleteBtnVisible && !isWIP && (
               <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
