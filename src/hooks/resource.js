@@ -12,6 +12,8 @@ export function useResourceQuery({ endpointId, datasetId, queryFn, search }) {
   const queryClient = useQueryClient(); // Initialize the query client
 
   const query = useQuery({
+    retry: false,
+    refetchOnWindowFocus: false,
     queryKey: [endpointId , searchValue],
     queryFn: isSearchMode ? ({ queryKey: [_, qry] }) =>
    search.searchFn({
