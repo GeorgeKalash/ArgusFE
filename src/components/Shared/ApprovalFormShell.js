@@ -30,7 +30,7 @@ export default function ApprovalFormShell(props) {
 
   }
 
-  const actions = [ { action : onPost , title :'Post'}, { action : onClose , title :'Close'}, { action : onApproval , title :'Approval'}   ]
+  const actions = [ { action : onPost , title :'Post', color:'#231f20', colorHover:'#4d393e'}, { action : onClose , title :'Close', color:'#231f20', colorHover:'#241c1e'}, { action : onApproval , title :'Approval', color:'#231f20', colorHover:'#4d393e'}   ]
 
   return (
 

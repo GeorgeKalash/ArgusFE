@@ -89,9 +89,11 @@ const WindowToolbar = ({
       </Box> : <Box></Box>}
       <Box sx={{ display: 'flex', alignItems: 'center'}}>
       {actions.map((actionObj, index) => (
-        <Button key={index} onClick={actionObj.action} variant='contained' sx={{ mr: 1  }} disabled={(!editMode && actionObj.title==='Approval')}>
-          {actionObj.title}
-        </Button>
+        <Tooltip title={`${actionObj.title}`} key={`${actionObj.title}`}>
+          <Button key={index} onClick={actionObj.action} variant='contained' sx={{ mr: 1 ,backgroundColor: actionObj.color, '&:hover': { backgroundColor: actionObj.colorHover}}} disabled={(!editMode && actionObj.title==='Approval')}>
+              <img src={`/images/buttonsIcons/${actionObj.title}.png`} alt={`${actionObj.title}`} />
+          </Button>
+        </Tooltip>
       ))}
       {onClear && (
         <Tooltip title="Clear">
