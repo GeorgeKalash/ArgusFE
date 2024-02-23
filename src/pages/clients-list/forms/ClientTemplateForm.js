@@ -191,7 +191,6 @@ const ClientTemplateForm = ({
     const idType = await getValue(value);
     if (idType){
       clientIndividualFormik.setFieldValue("idtId", idType);
-      console.log(idType)
       const res =  idTypeStore.filter((item)=> item.recordId===idType)[0]
 
       if( res['type'] &&  (res['type']===1 || res['type']===2)){
@@ -204,7 +203,6 @@ const ClientTemplateForm = ({
 
   async function  getCountry(){
     var parameters = `_filter=&_key=countryId`
-console.log(parameters)
 
     const res=   await getRequest({
         extension: SystemRepository.Defaults.get,
@@ -218,7 +216,6 @@ console.log(parameters)
   useEffect(() => {
     fillProfessionStore();
     fillType();
-    console.log(recordId);
 
     if (recordId) {
       getClient(recordId);
@@ -229,7 +226,6 @@ console.log(parameters)
 
 
   async function getClient(recordId) {
-    console.log(recordId);
     const defaultParams = `_clientId=${recordId}`;
     var parameters = defaultParams;
     await getRequest({
@@ -592,7 +588,6 @@ console.log(parameters)
       unitNo: address.unitNo,
       subNo: address.subNo,
     };
-console.log(obj6)
 
     const data = {
       plantId: clientIndividualFormik.values.plantId ,

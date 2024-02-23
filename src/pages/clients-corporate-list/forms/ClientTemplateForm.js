@@ -236,19 +236,19 @@ const ClientTemplateForm = ({
 
 
 
- async  function getClient(recordId) {
+ async  function getClient(_recordId) {
     try {
-      if (recordId) {
+      if (_recordId) {
         setEditMode(true);
 
         const res = await getRequest({
           extension: CTCLRepository.ClientCorporate.get,
-          parameters: `_clientId=${recordId}`,
+          parameters: `_clientId=${_recordId}`,
         });
         if(res){
         const obj = res?.record;
         setInitialData({
-          clientId: obj.clientCorporate.clientId,
+          clientId: obj.clientCorporate?.clientId,
           lgsId: obj.clientCorporate.lgsId,
           industry: obj.clientCorporate.industry,
           activityId: obj.clientCorporate.activityId,
@@ -309,8 +309,9 @@ const ClientTemplateForm = ({
   }
 
   useEffect(() => {
+    console.log(recordId)
     getClient(recordId);
-  }, []);
+  }, [recordId]);
 
   return (
     <FormShell
