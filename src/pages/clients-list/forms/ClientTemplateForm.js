@@ -50,6 +50,7 @@ const ClientTemplateForm = ({
   setErrorMessage,
   recordId,
   _labels,
+  plantId,
   maxAccess,
 }) => {
   const { stack } = useWindow();
@@ -137,7 +138,7 @@ const ClientTemplateForm = ({
     keyword: "",
     otp: "",
     status: "-1",
-    plantId: "",
+    plantId: plantId || '',
     name: "",
     oldReference: "",
 
@@ -385,9 +386,9 @@ console.log(parameters)
   };
 
   const checkIdNumber = (id) => {
-
     var parameters = `_idNo=`+ id;
-    if(id) getRequest({
+    if(id)
+    getRequest({
       extension: CTCLRepository.IDNumber.get,
       parameters: parameters,
     })
@@ -483,9 +484,7 @@ console.log(parameters)
       flName: obj.fl_firstName,
       nationalityId: obj.nationalityId,
       addressId: null,
-      plantId: clientIndividualFormik.values.plantId
-        ? clientIndividualFormik.values.plantId
-        : 3,
+      plantId: clientIndividualFormik.values.plantId,
       cellPhone: obj.cellPhone,
       createdDate: formatDateToApiFunction(date.toISOString()),
       expiryDate: formatDateToApiFunction(obj.expiryDate),
@@ -502,9 +501,7 @@ console.log(parameters)
     //CCTD
     const obj2 = {
       idNo: obj.idNo,
-      plantId: clientIndividualFormik.values.plantId
-        ? clientIndividualFormik.values.plantId
-        : 3,
+      plantId: clientIndividualFormik.values.plantId,
       idCountryId: obj.idCountry,
       idtId: obj.idtId, //5
       idExpiryDate: formatDateToApiFunction(obj.expiryDate),
@@ -598,7 +595,7 @@ console.log(parameters)
 console.log(obj6)
 
     const data = {
-      plantId: clientIndividualFormik.values.plantId || 3,
+      plantId: clientIndividualFormik.values.plantId ,
       clientMaster: obj1, //CTCL
       clientID: obj2, //CTID
       ClientIndividual: obj3, //CTCLI
@@ -750,8 +747,9 @@ console.log(obj6)
                       onCopy={handleCopy}
                       onPaste={handleCopy}
                       onBlur={(e) => {
-                        checkTypes(e.target.value), setShowAsPassword(true);
-                        checkIdNumber(e.target.value)
+                        checkTypes(e.target.value),
+                        setShowAsPassword(true);
+                       !editMode && checkIdNumber(e.target.value)
                       }}
                       readOnly={editMode && true}
                       maxLength="15"

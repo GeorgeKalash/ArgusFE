@@ -147,7 +147,7 @@ const ClientsList = () => {
 
   }
 
-  function openForm (recordId){
+  function openForm (recordId, _plantId){
     stack({
       Component: ClientTemplateForm,
       props: {
@@ -155,6 +155,7 @@ const ClientsList = () => {
         _labels : _labels,
         maxAccess: access,
         recordId: recordId ? recordId : null ,
+        plantId: _plantId,
         maxAccess: access
       },
       width: 1100,
@@ -167,7 +168,7 @@ const ClientsList = () => {
     try {
       const plantId = await getPlantId();
       if (plantId !== '') {
-        openForm('')
+        openForm('' , plantId)
       } else {
         setErrorMessage({ error: 'The user does not have a default plant' });
       }
@@ -202,7 +203,7 @@ const ClientsList = () => {
 
   const editClient= obj => {
     const _recordId = obj.recordId
-    openForm(_recordId)
+    openForm(_recordId, '')
   }
 
   return (
