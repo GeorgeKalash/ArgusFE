@@ -91,14 +91,14 @@ const WindowToolbar = ({
 
       {onClear && (
         <Tooltip title="Clear">
-          <Button onClick={onClear} sx={{ mr: 1}} variant='contained' style={{backgroundColor:'#f44336'}}>
+          <Button onClick={onClear} sx={{ mr: 1 ,backgroundColor:'#f44336', '&:hover': { backgroundColor: '#99271f' }}} variant='contained'>
             <img src="/images/buttonsIcons/clear.png" alt="Clear" />
           </Button>
         </Tooltip>
       )}
       {clientRelation && (
         <Tooltip title="Client Relation">
-          <Button onClick={onClientRelation} variant='contained' sx={{ mr: 1, mt: smallBox && 0 }} style={{backgroundColor:'#f44336'}} disabled={!editMode}>
+          <Button onClick={onClientRelation} variant='contained' sx={{ mr: 1, mt: smallBox && 0 ,backgroundColor:'#f44336', '&:hover': { backgroundColor: '#d32f2f' }}} disabled={!editMode}>
             <img src="/images/buttonsIcons/clear.png" alt="Client Relation" />
           </Button>
         </Tooltip>
@@ -106,28 +106,28 @@ const WindowToolbar = ({
 
       {onInfo && infoVisible && (
         <Tooltip title="Info">
-          <Button onClick={onInfo} variant='contained' sx={{ mr: 1 }} style={{backgroundColor:'#4355a5'}} disabled={!editMode}>
+          <Button onClick={onInfo} variant='contained' sx={{ mr: 1 ,backgroundColor:'#4355a5', '&:hover': { backgroundColor: '#24316b' }}} disabled={!editMode}>
             <img src="/images/buttonsIcons/info.png" alt="Info" />
           </Button>
         </Tooltip>
       )}
        {onClose && closeVisible && (
         <Tooltip title="Close">
-          <Button onClick={onClose} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 }} style={{backgroundColor:'#231f20'}} disabled={isPosted || !editMode}>
+          <Button onClick={onClose} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 ,backgroundColor:'#231f20', '&:hover': { backgroundColor: '#1c1718' }}} disabled={isPosted || !editMode}>
             <img src="public/images/buttonsIcons/post.png" alt="Close" />
           </Button>
         </Tooltip>
       )}
       {onPost && postVisible && (
         <Tooltip title="Post">
-          <Button onClick={onPost} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 }} style={{backgroundColor:'#231f20'}} disabled={isPosted || !editMode}>
+          <Button onClick={onPost} variant='contained' sx={{ mr: 1 , mt: smallBox && 0 ,backgroundColor:'#231f20', '&:hover': { backgroundColor: '#1c1718' }}} disabled={isPosted || !editMode}>
             <img src="/images/buttonsIcons/post.png" alt="Post" />
           </Button>
         </Tooltip>
       )}
       {onSave && (
         <Tooltip title="Submit">
-          <Button onClick={onSave} variant='contained' sx={{ mr: 2 , mt: smallBox && 0 }} style={{backgroundColor:'#4eb558'}} disabled={disabledSubmit || isPosted}>
+          <Button onClick={onSave} variant='contained' sx={{ mr: 2 , mt: smallBox && 0 ,backgroundColor:'#4eb558', '&:hover': { backgroundColor: '#3e8c45' }}} disabled={disabledSubmit || isPosted}>
             <img src="/images/buttonsIcons/save.png" alt="Submit"/>
           </Button>
         </Tooltip>
