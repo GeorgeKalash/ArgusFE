@@ -26,35 +26,36 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchGridData() {
+
 
     return await getRequest({
-      extension: SystemRepository.Currency.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: SystemRepository.Currency.qry,
+      parameters: `_filter=`
     })
+
   }
 
   const {
     query: { data },
     labels: _labels,
+    refetch,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: SystemRepository.Currency.page,
+    queryFn:  fetchGridData,
+    endpointId: SystemRepository.Currency.qry,
     datasetId: ResourceIds.Currencies
   })
 
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.Currency.page
-  })
+  // const invalidate = useInvalidate({
+  //   endpointId: SystemRepository.Currency.qry
+  // })
 
   const columns = [
     {
@@ -85,7 +86,7 @@ const Currencies = () => {
       extension: SystemRepository.Currency.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+    refresh()
     toast.success('Record Deleted Successfully')
   }
 
@@ -108,6 +109,7 @@ const Currencies = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          refetch={refetch}
           isLoading={false}
           pageSize={50}
           paginationType='client'
