@@ -1,9 +1,9 @@
 export const ResourceIds = {
-  FRT_DR_approvals :10302,
+  FRT_DR_approvals: 10302,
   DocumentTypes: 20104,
   DocumentTypeMaps: 20201,
   GeographicRegions: 20133,
-  GLSettings : 30110,
+  GLSettings: 30110,
   WorkCenters: 42101,
   Cities: 20125,
   Labor: 42103,
@@ -15,7 +15,7 @@ export const ResourceIds = {
   CostCenter: 30107,
   CostCenterGroup: 30111,
   Interface: 36108,
-  DocumentsOnHold : 10301,
+  DocumentsOnHold: 10301,
   Countries: 20101,
   LegalStatus: 21108,
   Correspondent: 36101,
@@ -87,5 +87,6 @@ export const ResourceIds = {
   carrierSite: 40203,
   LoCollectors: 40202,
   Routings: 42105,
-  CreditOrder: 35301
+  CreditOrder: 35301,
+  UndeliveredCreditOrder: 35302
 }

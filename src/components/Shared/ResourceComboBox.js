@@ -44,7 +44,10 @@ export default function ResourceComboBox({
 
   const filteredStore = store.filter(filter)
 
-  const value = (datasetId ? filteredStore.find(item => item[valueField] === values[name]?.toString()) :  filteredStore.find(item => item[valueField] === values[name])) ?? ''
+  const value =
+    (datasetId
+      ? filteredStore.find(item => item[valueField] === values[name]?.toString())
+      : filteredStore.find(item => item[valueField] === values[name])) ?? ''
 
   return (
     <>

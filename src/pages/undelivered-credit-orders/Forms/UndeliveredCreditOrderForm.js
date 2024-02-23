@@ -29,7 +29,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { FormatLineSpacing } from '@mui/icons-material'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 
-export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
+export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
@@ -48,7 +48,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     functionId: SystemFunction.CurrencyCreditOrderPurchase,
     deliveryDate: new Date(),
     reference: '',
-    plantId: parseInt(plantId),
+    plantId: '',
     corId: '',
     corRef: '',
     corName: '',
@@ -67,7 +67,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditOrder.qry
+    endpointId: CTTRXrepository.UndeliveredCreditOrder.qry
   })
 
   const formik = useFormik({
@@ -576,7 +576,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
 
   return (
     <ApprovalFormShell
-      resourceId={ResourceIds.CreditOrder}
+      resourceId={ResourceIds.UndeliveredCreditOrder}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

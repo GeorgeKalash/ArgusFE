@@ -108,7 +108,7 @@ const WindowToolbar = ({
             </Button>
           ))}
           {onClear && (
-            <Button onClick={onClear} sx={{ mr: 1 }} variant='contained' disabled={isClosed}>
+            <Button onClick={onClear} sx={{ mr: 1 }} variant='contained'>
               Clear
             </Button>
           )}
