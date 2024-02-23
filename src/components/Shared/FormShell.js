@@ -16,6 +16,7 @@ export default function FormShell({
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
+  closeVisible = false,
   resourceId,
   maxAccess,
   isPosted = false,
@@ -108,6 +109,7 @@ export default function FormShell({
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
+          closeVisible={closeVisible}
           isPosted={isPosted}
           isClosed={isClosed}
           clientRelation={clientRelation}

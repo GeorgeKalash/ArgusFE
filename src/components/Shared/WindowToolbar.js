@@ -19,11 +19,10 @@ const WindowToolbar = ({
   smallBox = false,
   infoVisible = true,
   postVisible = false,
-  closeVisible = false,
+  isClosed = false,
   clientRelation,
   onClientRelation = false,
   isPosted = false,
-  isClose = false,
   resourceId,
   setSelectedReport,
   selectedReport,
@@ -102,13 +101,14 @@ const WindowToolbar = ({
               onClick={actionObj.action}
               variant='contained'
               sx={{ mr: 1 }}
-              disabled={!editMode && actionObj.title === 'Approval'}
+              style={{ display: actionObj.isHidden ? 'none' : 'block' }}
+              disabled={actionObj.isDisabled}
             >
               {actionObj.title}
             </Button>
           ))}
           {onClear && (
-            <Button onClick={onClear} sx={{ mr: 1 }} variant='contained'>
+            <Button onClick={onClear} sx={{ mr: 1 }} variant='contained' disabled={isClosed}>
               Clear
             </Button>
           )}
@@ -128,16 +128,6 @@ const WindowToolbar = ({
               Info
             </Button>
           )}
-          {onClose && closeVisible && (
-            <Button
-              onClick={onClose}
-              variant='contained'
-              sx={{ mr: 1, mt: smallBox && 0 }}
-              disabled={isClose || !editMode}
-            >
-              Post
-            </Button>
-          )}
           {onPost && postVisible && (
             <Button
               onClick={onPost}
@@ -153,7 +143,7 @@ const WindowToolbar = ({
               onClick={onSave}
               variant='contained'
               sx={{ mr: 2, mt: smallBox && 0 }}
-              disabled={disabledSubmit || isPosted}
+              disabled={disabledSubmit || isPosted || isClosed}
             >
               Submit
             </Button>

@@ -4,7 +4,17 @@ import { Approval } from '@mui/icons-material'
 import Approvals from './Approvals'
 
 export default function ApprovalFormShell(props) {
-  const { children, form, onPost, onClose, ...remaining } = props
+  const {
+    children,
+    form,
+    onPost,
+    onClose,
+    isClosed,
+    editMode,
+    hiddenClose = false,
+    hiddenPost = false,
+    ...remaining
+  } = props
   const { stack } = useWindow()
 
   function onApproval() {
@@ -21,13 +31,13 @@ export default function ApprovalFormShell(props) {
   }
 
   const actions = [
-    { action: onPost, title: 'Post' },
-    { action: onClose, title: 'Close' },
-    { action: onApproval, title: 'Approval' }
+    { action: onPost, title: 'Post', isDisabled: !editMode, isHidden: hiddenPost },
+    { action: onClose, title: 'Close', isDisabled: isClosed || !editMode, isHidden: hiddenClose },
+    { action: onApproval, title: 'Approval', isDisabled: !isClosed, isHidden: hiddenClose }
   ]
 
   return (
-    <FormShell actions={actions} form={form} {...remaining}>
+    <FormShell actions={actions} form={form} isClosed={isClosed} {...remaining}>
       {children}
     </FormShell>
   )

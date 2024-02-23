@@ -32,6 +32,7 @@ import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
+  const [isClosed, setIsClosed] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -165,14 +166,9 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     })
   })
 
-  const onPost = () => {
-    console.log('enter onpost')
-  }
-
   const onClose = async () => {
     try {
       const obj = formik.values
-      console.log('onClose ', obj)
       const copy = { ...obj }
 
       copy.date = formatDateToApi(copy.date)
@@ -187,6 +183,10 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         extension: CTTRXrepository.CreditOrder.close,
         record: JSON.stringify(copy)
       })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        setIsClosed(true)
+      }
     } catch (error) {
       setErrorMessage(error)
     }
@@ -220,7 +220,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     }
   }
 
-  const getCorrespondentById = async (recordId, baseCurrency) => {
+  const getCorrespondentById = async (recordId, baseCurrency, plant) => {
     if (recordId) {
       const _recordId = recordId
       const defaultParams = `_recordId=${_recordId}`
@@ -232,7 +232,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       }).then(res => {
         setToCurrency(res.record.currencyId)
         setToCurrencyRef(res.record.currencyRef)
-        getEXMBase(plantId ?? formik.values.plantId, res.record.currencyId, baseCurrency, 150)
+        getEXMBase(plant, res.record.currencyId, baseCurrency, 150)
       })
     } else {
       setToCurrency(null)
@@ -309,7 +309,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       widthDropDown: '200',
       fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
       columnsInDropDown: [
@@ -337,6 +337,14 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
                 ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) / rate
                 : 0
             detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, qtyToCur.toFixed(2))
+
+            const curToBase =
+              formik.values.rateCalcMethod === 1
+                ? parseFloat(qtyToCur) * formik.values.exRate
+                : rateCalcMethod === 2
+                ? parseFloat(qtyToCur) / formik.values.exRate
+                : 0
+            detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, getFormattedNumber(curToBase.toFixed(2)))
           }
           detailsFormik.setFieldValue(
             `rows[${row.rowIndex}].exRate`,
@@ -365,7 +373,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       name: 'currencyName',
       readOnly: true,
       width: 300,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
     },
     {
       field: 'numberfield',
@@ -373,7 +381,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       name: 'qty',
       mandatory: true,
       width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       async onChange(row) {
         const rate = row.rowData?.exRate
         const rateCalcMethod = row.rowData?.rateCalcMethod
@@ -408,7 +416,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       name: 'exRate',
       mandatory: true,
       width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
         if (parseFloat(row.rowData.exRate.toString().replace(/,/g, '')) > 0) {
@@ -465,7 +473,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       readOnly: true,
       mandatory: true,
       width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
     }
   ]
 
@@ -531,12 +539,13 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             extension: CTTRXrepository.CreditOrder.get,
             parameters: `_recordId=${recordId}`
           })
+          setIsClosed(res.record.wip === 2 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
           setInitialData(res.record)
           const baseCurrency = await getBaseCurrency()
-          getCorrespondentById(res.record.corId ?? '', baseCurrency)
+          getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
         }
       } catch (error) {
         //  setErrorMessage(error)
@@ -553,8 +562,9 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      onPost={onPost}
       onClose={onClose}
+      isClosed={isClosed}
+      hiddenPost={true}
     >
       <Grid container>
         <Grid container xs={12}>
@@ -564,6 +574,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
               <CustomDatePicker
                 name='date'
                 required
+                readOnly={isClosed}
                 label={labels[2]}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
@@ -631,7 +642,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
                 maxAccess={maxAccess}
                 onChange={async (event, newValue) => {
                   const baseCurrency = await getBaseCurrency()
-                  getCorrespondentById(newValue?.recordId, baseCurrency)
+                  getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
                   formik.setFieldValue('corId', newValue?.recordId)
                   formik.setFieldValue('corName', newValue?.name || '')
                 }}
@@ -661,6 +672,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             <Grid item xs={12}>
               <CustomDatePicker
                 name='deliveryDate'
+                readOnly={isClosed}
                 label={labels[18]}
                 value={formik?.values?.deliveryDate}
                 onChange={formik.setFieldValue}
