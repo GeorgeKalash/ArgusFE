@@ -17,6 +17,7 @@ const CustomLookup = ({
   secondDisplayField= true,
   store = [],
   setStore,
+  onKeyUp,
   valueField = 'key',
   displayField = 'value',
   onLookup,
@@ -88,6 +89,7 @@ const CustomLookup = ({
                 variant={variant}
                 label={label}
                 required={required}
+                onKeyUp={onKeyUp}
                 autoFocus={autoFocus}
                 error={error}
                 helperText={helperText}
@@ -149,6 +151,7 @@ const CustomLookup = ({
             value={secondValue ? secondValue : ''}
             required={required}
             disabled={disabled}
+
             InputProps={{
               readOnly: true
             }}
