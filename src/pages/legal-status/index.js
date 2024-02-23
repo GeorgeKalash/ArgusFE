@@ -26,7 +26,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const LegalStatus = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -87,7 +87,7 @@ const LegalStatus = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
+
 
   return (
     <>
@@ -97,8 +97,6 @@ const LegalStatus = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
           isLoading={false}
           pageSize={50}
           paginationType='client'

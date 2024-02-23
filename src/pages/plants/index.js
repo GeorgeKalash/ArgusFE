@@ -282,7 +282,7 @@ const Plants = () => {
   }, [access])
 
   const fillCostCenterStore = () => {
-    var parameters = `_filter=`
+    var parameters = `_params=&_startAt=0&_pageSize=1000`
     getRequest({
       extension: GeneralLedgerRepository.CostCenter.qry,
       parameters: parameters
