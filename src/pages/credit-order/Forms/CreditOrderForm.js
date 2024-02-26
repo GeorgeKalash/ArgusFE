@@ -89,7 +89,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         // Default values for properties if they are empty
         copy.wip = copy.wip === '' ? 1 : copy.wip
         copy.status = copy.status === '' ? 1 : copy.status
-        copy.releaseStatus = copy.releaseStatus === '' ? 1 : copy.releaseStatus
         copy.amount = totalCUR
         copy.baseAmount = totalLoc
 
@@ -176,7 +175,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
       copy.deliveryDate = formatDateToApi(copy.deliveryDate)
       copy.wip = copy.wip === '' ? 1 : copy.wip
       copy.status = copy.status === '' ? 1 : copy.status
-      copy.releaseStatus = copy.releaseStatus === '' ? 1 : copy.releaseStatus
       copy.amount = totalCUR
       copy.baseAmount = totalLoc
 

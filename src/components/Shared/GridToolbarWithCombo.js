@@ -1,8 +1,6 @@
 import GridToolbar from './GridToolbar'
 import { Box } from '@mui/material'
 import ResourceComboBox from './ResourceComboBox'
-import { useFormik } from 'formik'
-import * as yup from 'yup'
 
 export default function GridToolbarWithCombo(props) {
   const {
@@ -11,10 +9,11 @@ export default function GridToolbarWithCombo(props) {
     inputSearch,
     onSearchClear,
     onSearch,
+    invalidate,
     comboEndpoint,
     comboLabel,
-    fetchGridData,
     comboFormik,
+    correspondantChange,
     ...remaining
   } = props
 
@@ -45,15 +44,9 @@ export default function GridToolbarWithCombo(props) {
             values={comboFormik.values}
             valueField='recordId'
             displayField={['reference', 'name']}
-            required
             onChange={(event, newValue) => {
-              if (newValue) {
-                comboFormik.setFieldValue('corId', newValue?.recordId)
-              } else {
-                comboFormik.setFieldValue('corId', 0)
-              }
-              console.log('fomrik test 1 ', newValue)
-              fetchGridData({ corId: comboFormik.values.corId })
+              comboFormik.setFieldValue('corId', newValue?.recordId ?? 0)
+              correspondantChange()
             }}
           />
         </Box>

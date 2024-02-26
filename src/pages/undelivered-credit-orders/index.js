@@ -18,6 +18,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import GridToolbarWithCombo from 'src/components/Shared/GridToolbarWithCombo'
+import { useEffect } from 'react'
 
 const UndeliveredCreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -27,22 +28,16 @@ const UndeliveredCreditOrder = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  const comboFormik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      corId: ''
-    }
-  })
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, corId: paramCorId } = options
-    const corId = paramCorId !== undefined ? paramCorId : 0
+    const { _startAt = 0, _pageSize = 50 } = options
+    const correspondantId = comboFormik.values.corId ?? 0
 
     return await getRequest({
       extension: CTTRXrepository.UndeliveredCreditOrder.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=${corId}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=${correspondantId}`
     })
   }
+
   async function fetchWithSearch({ qry }) {
     return await getRequest({
       extension: CTTRXrepository.UndeliveredCreditOrder.snapshot,
@@ -70,6 +65,16 @@ const UndeliveredCreditOrder = () => {
     }
   })
 
+  const comboFormik = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      corId: ''
+    }
+  })
+
+  const correspondantChange = () => {}
+
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
@@ -84,9 +89,10 @@ const UndeliveredCreditOrder = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
-          fetchGridData={fetchGridData}
-          comboLabel={_labels[5]}
+          invalidate={invalidate}
           comboFormik={comboFormik}
+          correspondantChange={correspondantChange}
+          comboLabel={_labels[5]}
           comboEndpoint={RemittanceSettingsRepository.Correspondent.qry}
         />
 
