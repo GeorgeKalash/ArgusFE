@@ -89,7 +89,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
         // Default values for properties if they are empty
         copy.wip = copy.wip === '' ? 1 : copy.wip
         copy.status = copy.status === '' ? 1 : copy.status
-        copy.releaseStatus = copy.releaseStatus === '' ? 1 : copy.releaseStatus
+        copy.releaseStatus = copy.releaseStatus === '' ? 0 : copy.releaseStatus
         copy.amount = totalCUR
         copy.baseAmount = totalLoc
 
@@ -176,7 +176,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
       copy.deliveryDate = formatDateToApi(copy.deliveryDate)
       copy.wip = copy.wip === '' ? 1 : copy.wip
       copy.status = copy.status === '' ? 1 : copy.status
-      copy.releaseStatus = copy.releaseStatus === '' ? 1 : copy.releaseStatus
+      copy.releaseStatus = copy.releaseStatus === '' ? 0 : copy.releaseStatus
       copy.amount = totalCUR
       copy.baseAmount = totalLoc
 
