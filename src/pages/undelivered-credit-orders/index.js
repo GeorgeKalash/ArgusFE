@@ -8,6 +8,8 @@ import toast from 'react-hot-toast'
 import { formatDateDefault } from 'src/lib/date-helper'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useFormik } from 'formik'
+import * as yup from 'yup'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 
 // ** Windows
@@ -24,15 +26,21 @@ const UndeliveredCreditOrder = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [corId, setCorId] = useState(0)
 
+  const comboFormik = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: {
+      corId: ''
+    }
+  })
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-    const cor = corId
+    const { _startAt = 0, _pageSize = 50, corId: paramCorId } = options
+    const corId = paramCorId !== undefined ? paramCorId : 0
 
     return await getRequest({
       extension: CTTRXrepository.UndeliveredCreditOrder.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=0`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=${corId}`
     })
   }
   async function fetchWithSearch({ qry }) {
@@ -76,6 +84,10 @@ const UndeliveredCreditOrder = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          fetchGridData={fetchGridData}
+          comboLabel={_labels[5]}
+          comboFormik={comboFormik}
+          comboEndpoint={RemittanceSettingsRepository.Correspondent.qry}
         />
 
         <Table
