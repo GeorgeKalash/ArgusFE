@@ -1,5 +1,6 @@
 // ** MUI Imports
 import { Grid , FormControlLabel, Checkbox, Box, TextField } from '@mui/material'
+import {  InputAdornment } from '@mui/material';
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -10,6 +11,9 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from "src/resources/DataSets";
+
+ import  styles from  'styles/phoneVerification.module.css';
+
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -199,12 +203,13 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             />
           </Grid>
           <Grid item xs={12}>
-      
+               
                     <SegmentedInput
                         segments={segments}
                         name="accountRef"
                         setFieldValue={formik.setFieldValue}
                         values={formik.values.accountRef.split('-')}
+                        error={formik.touched.name && Boolean(formik.errors.name)}
                     />               {/* <CustomTextField
                     name='accountRef'
                     label={labels.accountRef}
@@ -342,33 +347,48 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
   const handleChange = (index, event) => {
     const newValues = [...values];
     newValues[index] = event.target.value.slice(0, segments[index].value);
-    
-    
     setFieldValue("segments", newValues);
-    
-
+  
     const finalInput = newValues.join('-');
-    
     setFieldValue(name, finalInput);
-
-
+  
     if (event.target.value.length >= segments[index].value && index < segments.length - 1) {
       inputRefs[index + 1].current.focus();
     }
   };
-
+  
+  const handleKeyDown = (index, event) => {
+    if (event.key === 'Backspace') {
+      if (!values[index] || values[index].length === 0) {
+        event.preventDefault();
+        if (index > 0) {
+          const previousIndex = index - 1;
+          const previousValue = values[previousIndex];
+  
+          if (previousValue && previousValue.length > 0) {
+            const input = inputRefs[previousIndex].current;
+            input.focus();
+            const len = input.value.length;
+            input.setSelectionRange(len, len);
+          }
+        }
+      }
+    }
+  };
+  
   return (
-    <div style={
-      {border:'solid grey 1px'}
-    }>
+    <div >
       {segments.map((segment, index) => (
-        <React.Fragment key={index}>
+        <React.Fragment key={index} style={'border:none'}>
           <input
+            className={styles.inputText}
             ref={inputRefs[index]}
             value={values[index] || ''}
             onChange={(e) => handleChange(index, e)}
+            onKeyDown={(e) => handleKeyDown(index, e)}
             maxLength={segment.value}
-            style={{ marginRight: '8px', width: `${segment.value + 1}ch`,border:"none",borderBottom:'1px solid black' }} // Add some spacing between inputs
+
+            // style={{ margin: '8px', width: `${segment.value + 3}ch`,borderRadius:"5px",border:'1px solid grey',padding:'9px' }}
           />
           {index !== segments.length - 1 && "-"}
         </React.Fragment>
