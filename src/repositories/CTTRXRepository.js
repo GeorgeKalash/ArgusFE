@@ -18,5 +18,16 @@ export const CTTRXrepository = {
   UndeliveredCreditOrder: {
     qry: service + 'qryORD2',
     snapshot: service + 'snapshotORD2'
+  },
+  CreditInvoice: {
+    qry: service + 'qryINV',
+    get: service + 'getINV',
+    del: service + 'delINV',
+    snapshot: service + 'snapshotINV',
+    set: service + 'set2INV',
+    close: service + 'closeINV'
+  },
+  CreditInvoiceItem: {
+    qry: service + 'qryINI'
   }
 }
