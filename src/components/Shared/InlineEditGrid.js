@@ -45,9 +45,7 @@ const InlineEditGrid = ({
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState([false, null])
 
   const cellRender = (row, column) => {
-
     switch (column.field) {
-
       case 'numberfield':
         return (
           <Box
@@ -59,7 +57,6 @@ const InlineEditGrid = ({
             }}
           >
             {row[column.name] === 0 ? row[column.name] : getFormattedNumber(row[column.name])}
-
           </Box>
         )
       case 'checkbox':
@@ -86,7 +83,7 @@ const InlineEditGrid = ({
         return row[column.name]
           ? typeof row[column.name] === 'string'
             ? row[column.name]
-            : column.store.length > 0
+            : column.store?.length > 0
             ? column.store.find(item => item[column.valueField] === row[column.name])[column.displayField]
             : ''
           : ''
@@ -120,6 +117,7 @@ const InlineEditGrid = ({
             value={gridValidation.values.rows[rowIndex][fieldName]}
             required={column?.mandatory}
             readOnly={column?.readOnly}
+            disabled={column?.disabled}
             onChange={event => {
               const newValue = event.target.value
               gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
@@ -140,6 +138,7 @@ const InlineEditGrid = ({
               value={formatDateFromApiInline(gridValidation.values.rows[rowIndex][fieldName])}
               required={column?.mandatory}
               readOnly={column?.readOnly}
+              disabled={column?.disabled}
               format={dateFormat}
               onChange={newDate => {
                 if (newDate) {
@@ -183,7 +182,6 @@ const InlineEditGrid = ({
         )
       case 'numberfield':
         return (
-
           <TextField
             numberField={true}
             id={cellId}
@@ -213,6 +211,7 @@ const InlineEditGrid = ({
             fullWidth={true}
             inputProps={{
               readOnly: column?.readOnly,
+              disabled:column?.disabled,
               pattern: '[0-9]*',
               style: {
                 textAlign: 'right'
@@ -237,12 +236,17 @@ const InlineEditGrid = ({
                     </InputAdornment>
                   ))
             }}
-            helperText={  gridValidation.errors?.rows && gridValidation.errors?.rows[rowIndex] && gridValidation.errors?.rows[rowIndex][fieldName]}
-            error={  gridValidation.errors?.rows &&  gridValidation.errors?.rows[rowIndex] && Boolean(gridValidation.errors?.rows[rowIndex][fieldName])}
-
-            />
-
-
+            helperText={
+              gridValidation.errors?.rows &&
+              gridValidation.errors?.rows[rowIndex] &&
+              gridValidation.errors?.rows[rowIndex][fieldName]
+            }
+            error={
+              gridValidation.errors?.rows &&
+              gridValidation.errors?.rows[rowIndex] &&
+              Boolean(gridValidation.errors?.rows[rowIndex][fieldName])
+            }
+          />
         )
       case 'combobox':
         return (
@@ -252,6 +256,7 @@ const InlineEditGrid = ({
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
             readOnly={column?.readOnly}
+            disabled={column?.disabled}
             options={column.store}
             getOptionLabel={option => {
               if (typeof option === 'object') {
@@ -368,6 +373,7 @@ const InlineEditGrid = ({
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.name}`]}
             readOnly={column?.readOnly}
+            disabled={column?.disbaled}
             options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
             open={write}
@@ -494,7 +500,6 @@ const InlineEditGrid = ({
                           />
                         </IconButton>
                       </InputAdornment>
-
 
                       {/* Adjust color as needed */}
                       {/* {params.InputProps.startAdornment} */}
@@ -649,11 +654,10 @@ const InlineEditGrid = ({
               hidden={column.hidden}
               style={{
                 width: column.width || tableWidth / columns.length,
-                background:  background,
+                background: background
               }}
               body={(row, rowIndex) => {
-
-return (
+                return (
                   <Box
                     sx={{
                       height: '30px',
@@ -699,7 +703,7 @@ return (
                 </div>
               )
             }}
-            style={{ maxWidth: '60px' , background: background }}
+            style={{ maxWidth: '60px', background: background }}
           />
         )}
       </DataTable>
