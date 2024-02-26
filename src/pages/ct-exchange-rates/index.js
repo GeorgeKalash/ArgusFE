@@ -186,6 +186,8 @@ const CTExchangeRates = () => {
   useEffect(() => {
     getAllPlants()
     fillRcmStore()
+    formik.setFieldValue('rateAgainst', '1')
+    getDefaultBaseCurrencyId()
   }, [])
 
   const getAllPlants = () => {
@@ -333,7 +335,7 @@ const CTExchangeRates = () => {
                   ]}
                   values={formik.values}
                   required
-                  readOnly={!formik.values.rateAgainst && formik.values.rateAgainst !== '2' ? true : false}
+                  readOnly={!formik.values.rateAgainst || formik.values.rateAgainst === '1' ? true : false}
                   maxAccess={access}
                   onChange={(event, newValue) => {
                     formik && formik.setFieldValue('raCurrencyId', newValue?.recordId)
