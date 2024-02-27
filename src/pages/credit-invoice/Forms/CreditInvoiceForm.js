@@ -657,8 +657,11 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
                 form={formik}
                 valueShow='corRef'
                 secondValueShow='corName'
-                onChange={(event, newValue) => {
+                readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                onChange={async (event, newValue) => {
                   if (newValue) {
+                    const baseCurrency = await getBaseCurrency()
+                    getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
                     formik.setFieldValue('corId', newValue?.recordId)
                     formik.setFieldValue('corName', newValue?.name || '')
                     formik.setFieldValue('corRef', newValue?.reference || '')
@@ -703,6 +706,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
             form={formik}
             valueShow='cashAccountRef'
             secondValueShow='cashAccountName'
+            readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             onChange={(event, newValue) => {
               if (newValue) {
                 formik.setFieldValue('cashAccountId', newValue?.recordId)
