@@ -43,10 +43,17 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     search(query) {
       setSearchValue(query)
     },
-    filter(name, value) {
+    filterBy(name, value) {
       setFilters({
         ...filters,
         [name]: value
+      })
+    },
+    clearFilter(name) {
+      setFilters(filters => {
+        const newFilters = { ...filters }
+        delete newFilters[name]
+        return newFilters
       })
     },
     filters,

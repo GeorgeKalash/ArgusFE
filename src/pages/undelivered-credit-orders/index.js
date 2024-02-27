@@ -46,7 +46,8 @@ const UndeliveredCreditOrder = () => {
     labels: _labels,
     search,
     clear,
-    filter,
+    filterBy,
+    clearFilter,
     access,
     filters
   } = useResourceQuery({
@@ -68,7 +69,8 @@ const UndeliveredCreditOrder = () => {
   })
 
   const onChange = value => {
-    filter('corId', value)
+    if (value) filterBy('corId', value)
+    else clearFilter('corId')
   }
 
   const edit = obj => {
