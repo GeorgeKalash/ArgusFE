@@ -28,8 +28,9 @@ import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { FormatLineSpacing } from '@mui/icons-material'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
+export default function CreditOrderForm({ _labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
@@ -302,7 +303,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
   const columns = [
     {
       field: 'combobox',
-      header: labels[8],
+      header: _labels[8],
       name: 'currencyId',
       mandatory: true,
       store: currencyStore.list,
@@ -368,7 +369,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     },
     {
       field: 'textfield',
-      header: labels[9],
+      header: _labels[9],
       name: 'currencyName',
       readOnly: true,
       width: 300,
@@ -376,7 +377,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     },
     {
       field: 'numberfield',
-      header: labels[14],
+      header: _labels[14],
       name: 'qty',
       mandatory: true,
       width: 200,
@@ -411,7 +412,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
     },
     {
       field: 'numberfield',
-      header: labels[15],
+      header: _labels[15],
       name: 'exRate',
       mandatory: true,
       width: 200,
@@ -591,7 +592,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
                 name='date'
                 required
                 readOnly={isClosed}
-                label={labels[2]}
+                label={_labels[2]}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -607,7 +608,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
-                label={labels[3]}
+                label={_labels[3]}
                 readOnly={true}
                 values={formik.values}
                 valueField='recordId'
@@ -626,7 +627,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
-                label={labels[4]}
+                label={_labels[4]}
                 value={formik?.values?.reference}
                 maxAccess={maxAccess}
                 maxLength='30'
@@ -640,46 +641,34 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
         </Grid>
         <Grid container xs={12}>
           {/* First Column */}
-          <Grid container rowGap={1} xs={3} style={{ marginTop: '10px' }}>
+          <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
-              <ResourceComboBox
+              <ResourceLookup
                 endpointId={RemittanceSettingsRepository.Correspondent.qry}
+                valueField='reference'
+                displayField='name'
                 name='corId'
-                label={labels[16]}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={'reference'}
+                label={_labels[16]}
+                form={formik}
                 required
+                valueShow='corRef'
+                secondValueShow='corName'
                 readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
                 maxAccess={maxAccess}
                 onChange={async (event, newValue) => {
-                  const baseCurrency = await getBaseCurrency()
-                  getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
-                  formik.setFieldValue('corId', newValue?.recordId)
-                  formik.setFieldValue('corName', newValue?.name || '')
+                  if (newValue) {
+                    const baseCurrency = await getBaseCurrency()
+                    getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
+                    formik.setFieldValue('corId', newValue?.recordId)
+                    formik.setFieldValue('corName', newValue?.name || '')
+                    formik.setFieldValue('corRef', newValue?.reference || '')
+                  } else {
+                    formik.setFieldValue('corId', null)
+                    formik.setFieldValue('corName', null)
+                    formik.setFieldValue('corRef', null)
+                  }
                 }}
-                error={formik.touched.corId && Boolean(formik.errors.corId)}
-              />
-            </Grid>
-          </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='corName'
-                label={labels[17]}
-                value={formik.values?.corName}
-                maxAccess={maxAccess}
-                readOnly={true}
-                required
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('corName', '')}
-                error={formik.touched.corName && Boolean(formik.errors.corName)}
-                helperText={formik.touched.corName && formik.errors.corName}
+                errorCheck={'corId'}
               />
             </Grid>
           </Grid>
@@ -689,7 +678,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
               <CustomDatePicker
                 name='deliveryDate'
                 readOnly={isClosed}
-                label={labels[18]}
+                label={_labels[18]}
                 value={formik?.values?.deliveryDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -711,13 +700,13 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
             <FormControlLabel
               value={SystemFunction.CurrencyCreditOrderPurchase}
               control={<Radio />}
-              label={labels[6]}
+              label={_labels[6]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
             <FormControlLabel
               value={SystemFunction.CurrencyCreditOrderSale}
               control={<Radio />}
-              label={labels[7]}
+              label={_labels[7]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
           </RadioGroup>
@@ -764,7 +753,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorM
           <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
             <CustomTextArea
               name='notes'
-              label={labels[11]}
+              label={_labels[11]}
               value={formik.values.notes}
               rows={3}
               maxAccess={maxAccess}

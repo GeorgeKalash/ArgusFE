@@ -9,19 +9,20 @@ import { formatDateDefault } from 'src/lib/date-helper'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
+import { useWindow } from 'src/windows'
 
 // ** Windows
-import CreditOrderWindow from './Windows/CreditOrderWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import CreditOrderForm from './Forms/CreditOrderForm'
 
 const CreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [plantId, setPlantId] = useState(null)
+  const { stack } = useWindow()
 
   const getPlantId = async () => {
     const userData = window.sessionStorage.getItem('userData')
@@ -91,15 +92,41 @@ const CreditOrder = () => {
   const add = async () => {
     const plantId = await getPlantId()
     if (plantId !== '') {
-      setWindowOpen(true)
+      openFormWindow(null, plantId)
     } else {
       setErrorMessage({ error: 'The user does not have a default plant' })
     }
   }
 
-  const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+  async function openFormWindow(recordId) {
+    if (!recordId) {
+      try {
+        const plantId = await getPlantId()
+        if (plantId !== '') {
+          openForm('', plantId)
+        } else {
+          setErrorMessage({ error: 'The user does not have a default plant' })
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    } else {
+      openForm(recordId)
+    }
+  }
+  function openForm(recordId, plantId) {
+    stack({
+      Component: CreditOrderForm,
+      props: {
+        _labels,
+        maxAccess: access,
+        plantId: plantId,
+        recordId
+      },
+      width: 900,
+      height: 600,
+      title: _labels[1]
+    })
   }
 
   const del = async obj => {
@@ -172,7 +199,9 @@ const CreditOrder = () => {
           ]}
           gridData={data ?? { list: [] }}
           rowId={['recordId']}
-          onEdit={edit}
+          onEdit={obj => {
+            openFormWindow(obj.recordId, plantId)
+          }}
           onDelete={del}
           isLoading={false}
           pageSize={50}
@@ -180,21 +209,7 @@ const CreditOrder = () => {
           paginationType='client'
         />
       </Box>
-      {windowOpen && (
-        <CreditOrderWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          plantId={plantId}
-          setPlantId={setPlantId}
-          setErrorMessage={setErrorMessage}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
