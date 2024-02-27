@@ -9,6 +9,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 
 // ** Custom Imports
@@ -36,7 +37,7 @@ export default function DocumentTypeMapForm ({
     const [initialValues, setInitialData] = useState({
         recordId: null,
         fromFunctionId: null,
-        fromDTId: null,
+        fromDTId: '',
         toFunctionId: null,
         decimals: null,
         profileId: null,
@@ -84,7 +85,7 @@ export default function DocumentTypeMapForm ({
             toast.success('Record Added Successfully')
             setInitialData({
               ...obj, // Spread the existing properties
-              recordId: Math.floor(Math.random() * 10000) + 1,
+              recordId: Math.floor(Math.random() * 100000000) + 1,
             });
             setEditMode(false)
           }
@@ -143,31 +144,12 @@ export default function DocumentTypeMapForm ({
                 
                 }}
 
-                // error={
-                //     formik.touched.fromFunctionId &&
-                //   Boolean(formik.errors.fromFunctionId)
-                // }
-                // helperText={
-                //     formik.touched.fromFunctionId && formik.errors.fromFunctionId
-                // }
+      
                 
               />
 
 
-{/* datasetId={DataSets.DR_CHA_DATA_TYPE}
-              name='dataType'
-              label={_labels.dataType}
-              valueField='key'
-              displayField='value'
-              values={characteristicValidation.values}
-              required
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                characteristicValidation.setFieldValue('dataType', newValue?.key)
-              }}
-              error={characteristicValidation.touched.dataType && Boolean(characteristicValidation.errors.dataType)}
-              helperText={characteristicValidation.touched.dataType && characteristicValidation.errors.dataType}
-            /> */}
+
 
 
             </Grid>
@@ -177,14 +159,14 @@ export default function DocumentTypeMapForm ({
                 name='fromDTId'
                 label='From Document Type'
                 valueField='recordId'
-                displayField='reference'
+                displayField='name'
                 values={formik.values}
-                parameters={formik.values.fromFunctionId &&`_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`}
+                parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
                
                 maxAccess={maxAccess}
                 
                 onChange={(event, newValue) => {
-                  formik &&formik.setFieldValue('fromDTId', newValue?.key)
+                  formik.setFieldValue('fromDTId', newValue?.recordId)
 
                     // formik.setFieldValue('fromDTName', newValue?.values)
                 }}
@@ -194,25 +176,7 @@ export default function DocumentTypeMapForm ({
                 helperText={formik.touched.fromDTId && formik.errors.fromDTId}
  
               />
-                       {/* <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField= {['reference', 'name']}
-                    columnsInDropDown= {[
-                      { key: 'reference', value: 'Currency Ref' },
-                      { key: 'name', value: 'Name' },
-                    ]}
-                    values={formik.values}
-                    required
-                    maxAccess={access}
-                    onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('currencyId', newValue?.recordId)
-                    }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                    helperText={formik.touched.currencyId && formik.errors.currencyId}
-                  /> */}
+ 
             </Grid>
             <Grid item xs={12}>
             <ResourceComboBox
@@ -241,17 +205,15 @@ export default function DocumentTypeMapForm ({
             endpointId={SystemRepository.DocumentType.qry}
                 name='dtId'
                 label='To Document Type'
-                valueField='key'
-                displayField='value'
+                valueField='recordId'
+                displayField='reference'
           
                 maxAccess={maxAccess}
                 values={formik.values}
-                parameters={`_dgId=${formik.values.dtId}&_startAt=${0}&_pageSize=${50}`}
+                parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
                 
                 onChange={(event, newValue) => {
-                  formik &&formik.setFieldValue('dtId', newValue?.key)
-
-                  formik &&formik.setFieldValue('toDTName', newValue?.value)
+                  formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={
                     formik.touched.dtId && Boolean(formik.errors.dtId)
@@ -259,28 +221,8 @@ export default function DocumentTypeMapForm ({
                 helperText={formik.touched.dtId && formik.errors.dtId}
  
               />
-                            {/* <ResourceComboBox
-              endpointId={SystemRepository.DocumentType.qry}
-                name='fromDTId'
-                label='From Document Type'
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                parameters={`_dgId=${formik.values.dtId}&_startAt=${0}&_pageSize=${50}`}
-               
-                maxAccess={maxAccess}
-                
-                onChange={(event, newValue) => {
-                  formik &&formik.setFieldValue('fromDTId', newValue?.key)
-
-                    // formik.setFieldValue('fromDTName', newValue?.values)
-                }}
-                error={
-                    formik.touched.fromDTId && Boolean(formik.errors.fromDTId)
-                }
-                helperText={formik.touched.fromDTId && formik.errors.fromDTId}
- 
-              /> */}
+   
+       
             </Grid>
             <Grid item xs={12}>
               <FormControlLabel
