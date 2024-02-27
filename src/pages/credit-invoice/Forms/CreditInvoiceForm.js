@@ -32,7 +32,7 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
+export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
@@ -308,7 +308,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
   const columns = [
     {
       field: 'combobox',
-      header: labels[8],
+      header: _labels[8],
       name: 'currencyId',
       mandatory: true,
       store: currencyStore.list,
@@ -374,7 +374,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
     },
     {
       field: 'textfield',
-      header: labels[9],
+      header: _labels[9],
       name: 'currencyName',
       readOnly: true,
       width: 300,
@@ -382,7 +382,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
     },
     {
       field: 'numberfield',
-      header: labels[14],
+      header: _labels[14],
       name: 'qty',
       mandatory: true,
       width: 200,
@@ -417,7 +417,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
     },
     {
       field: 'numberfield',
-      header: labels[15],
+      header: _labels[15],
       name: 'exRate',
       mandatory: true,
       width: 200,
@@ -597,7 +597,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
                 name='date'
                 required
                 readOnly={isClosed}
-                label={labels[2]}
+                label={_labels[2]}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -613,7 +613,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
-                label={labels[3]}
+                label={_labels[3]}
                 readOnly={true}
                 values={formik.values}
                 valueField='recordId'
@@ -632,7 +632,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
-                label={labels[4]}
+                label={_labels[4]}
                 value={formik?.values?.reference}
                 maxAccess={maxAccess}
                 maxLength='30'
@@ -653,7 +653,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
                 valueField='reference'
                 displayField='name'
                 name='corId'
-                label={labels[16]}
+                label={_labels[16]}
                 form={formik}
                 valueShow='corRef'
                 secondValueShow='corName'
@@ -678,7 +678,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
               <CustomDatePicker
                 name='deliveryDate'
                 readOnly={isClosed}
-                label={labels[18]}
+                label={_labels[18]}
                 value={formik?.values?.deliveryDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -699,7 +699,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
             valueField='accountNo'
             displayField='name'
             name='cashAccountId'
-            label={labels[22]}
+            label={_labels[22]}
             form={formik}
             valueShow='cashAccountRef'
             secondValueShow='cashAccountName'
@@ -727,13 +727,13 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
             <FormControlLabel
               value={SystemFunction.CurrencyCreditOrderPurchase}
               control={<Radio />}
-              label={labels[6]}
+              label={_labels[6]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
             <FormControlLabel
               value={SystemFunction.CurrencyCreditOrderSale}
               control={<Radio />}
-              label={labels[7]}
+              label={_labels[7]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
           </RadioGroup>
@@ -780,7 +780,7 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
           <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
             <CustomTextArea
               name='notes'
-              label={labels[11]}
+              label={_labels[11]}
               value={formik.values.notes}
               rows={3}
               maxAccess={maxAccess}
