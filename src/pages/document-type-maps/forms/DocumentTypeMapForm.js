@@ -176,10 +176,10 @@ export default function DocumentTypeMapForm ({
               endpointId={SystemRepository.DocumentType.qry}
                 name='fromDTId'
                 label='From Document Type'
-                valueField='key'
-                displayField='value'
+                valueField='recordId'
+                displayField='reference'
                 values={formik.values}
-                parameters={`_dgId=${formik.values.dtId}&_startAt=${0}&_pageSize=${50}`}
+                parameters={formik.values.fromFunctionId &&`_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`}
                
                 maxAccess={maxAccess}
                 
@@ -238,7 +238,7 @@ export default function DocumentTypeMapForm ({
             </Grid>
             <Grid item xs={12}>
             <ResourceComboBox
-              datasetId={DataSets.SYSTEM_FUNCTION}
+            endpointId={SystemRepository.DocumentType.qry}
                 name='dtId'
                 label='To Document Type'
                 valueField='key'
@@ -246,6 +246,8 @@ export default function DocumentTypeMapForm ({
           
                 maxAccess={maxAccess}
                 values={formik.values}
+                parameters={`_dgId=${formik.values.dtId}&_startAt=${0}&_pageSize=${50}`}
+                
                 onChange={(event, newValue) => {
                   formik &&formik.setFieldValue('dtId', newValue?.key)
 
@@ -257,6 +259,28 @@ export default function DocumentTypeMapForm ({
                 helperText={formik.touched.dtId && formik.errors.dtId}
  
               />
+                            {/* <ResourceComboBox
+              endpointId={SystemRepository.DocumentType.qry}
+                name='fromDTId'
+                label='From Document Type'
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                parameters={`_dgId=${formik.values.dtId}&_startAt=${0}&_pageSize=${50}`}
+               
+                maxAccess={maxAccess}
+                
+                onChange={(event, newValue) => {
+                  formik &&formik.setFieldValue('fromDTId', newValue?.key)
+
+                    // formik.setFieldValue('fromDTName', newValue?.values)
+                }}
+                error={
+                    formik.touched.fromDTId && Boolean(formik.errors.fromDTId)
+                }
+                helperText={formik.touched.fromDTId && formik.errors.fromDTId}
+ 
+              /> */}
             </Grid>
             <Grid item xs={12}>
               <FormControlLabel
