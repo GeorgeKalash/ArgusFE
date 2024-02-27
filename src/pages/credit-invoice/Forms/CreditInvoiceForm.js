@@ -655,7 +655,8 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
                 name='corId'
                 label={labels[16]}
                 form={formik}
-                secondDisplayField={true}
+                valueShow='corRef'
+                secondValueShow='corName'
                 onChange={(event, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('corId', newValue?.recordId)
@@ -666,9 +667,6 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
                     formik.setFieldValue('corName', null)
                     formik.setFieldValue('corRef', null)
                   }
-                  formik.setFieldValue('corId', null)
-                  formik.setFieldValue('corName', null)
-                  formik.setFieldValue('corRef', null)
                 }}
                 errorCheck={'corId'}
               />
@@ -703,7 +701,8 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
             name='cashAccountId'
             label={labels[22]}
             form={formik}
-            secondDisplayField={true}
+            valueShow='cashAccountRef'
+            secondValueShow='cashAccountName'
             onChange={(event, newValue) => {
               if (newValue) {
                 formik.setFieldValue('cashAccountId', newValue?.recordId)
@@ -714,9 +713,6 @@ export default function CreditInvoiceForm({ labels, maxAccess, recordId, setErro
                 formik.setFieldValue('cashAccountRef', null)
                 formik.setFieldValue('cashAccountName', null)
               }
-              formik.setFieldValue('cashAccountId', null)
-              formik.setFieldValue('cashAccountRef', null)
-              formik.setFieldValue('cashAccountName', null)
             }}
             errorCheck={'cashAccountId'}
           />
