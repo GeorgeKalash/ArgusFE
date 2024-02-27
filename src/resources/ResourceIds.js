@@ -1,4 +1,5 @@
 export const ResourceIds = {
+  JournalVoucher : 30302,
   FRT_DR_approvals :10302,
   DocumentTypes: 20104,
   DocumentTypeMaps: 20201,
