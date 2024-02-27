@@ -13,7 +13,8 @@ export default function GridToolbarWithCombo(props) {
     comboEndpoint,
     comboLabel,
     comboFormik,
-    correspondantChange,
+    value,
+    onChange,
     ...remaining
   } = props
 
@@ -41,12 +42,13 @@ export default function GridToolbarWithCombo(props) {
               { key: 'name', value: 'Name' }
             ]}
             name='corId'
-            values={comboFormik.values}
+            values={{
+              corId: value
+            }}
             valueField='recordId'
             displayField={['reference', 'name']}
             onChange={(event, newValue) => {
-              comboFormik.setFieldValue('corId', newValue?.recordId ?? 0)
-              correspondantChange()
+              onChange(newValue?.recordId)
             }}
           />
         </Box>

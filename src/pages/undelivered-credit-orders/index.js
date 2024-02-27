@@ -2,46 +2,38 @@ import { Box } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-import toast from 'react-hot-toast'
 import { formatDateDefault } from 'src/lib/date-helper'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useFormik } from 'formik'
-import * as yup from 'yup'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 
-// ** Windows
 import UndeliveredCreditOrderWindow from './Windows/UndeliveredCreditOrderWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import GridToolbarWithCombo from 'src/components/Shared/GridToolbarWithCombo'
-import { useEffect } from 'react'
+import { useWindow } from 'src/windows'
 
 const UndeliveredCreditOrder = () => {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-    const correspondantId = comboFormik.values.corId ?? 0
 
     return await getRequest({
       extension: CTTRXrepository.UndeliveredCreditOrder.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=${correspondantId}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=0`
     })
   }
 
-  async function fetchWithSearch({ qry }) {
+  async function fetchWithFilter({ filters }) {
     return await getRequest({
       extension: CTTRXrepository.UndeliveredCreditOrder.snapshot,
-      parameters: `_filter=${qry}`
+      parameters: `_filter=&_corId=${filters.corId}`
     })
   }
 
@@ -54,14 +46,16 @@ const UndeliveredCreditOrder = () => {
     labels: _labels,
     search,
     clear,
-    access
+    filter,
+    access,
+    filters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CTTRXrepository.UndeliveredCreditOrder.qry,
     datasetId: ResourceIds.CreditOrder,
-    search: {
+    filter: {
       endpointId: CTTRXrepository.UndeliveredCreditOrder.snapshot,
-      searchFn: fetchWithSearch
+      filterFn: fetchWithFilter
     }
   })
 
@@ -73,7 +67,9 @@ const UndeliveredCreditOrder = () => {
     }
   })
 
-  const correspondantChange = () => {}
+  const onChange = value => {
+    filter('corId', value)
+  }
 
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
@@ -88,10 +84,11 @@ const UndeliveredCreditOrder = () => {
           onSearch={search}
           onSearchClear={clear}
           labels={_labels}
+          value={filters.corId}
           inputSearch={true}
           invalidate={invalidate}
           comboFormik={comboFormik}
-          correspondantChange={correspondantChange}
+          onChange={onChange}
           comboLabel={_labels[5]}
           comboEndpoint={RemittanceSettingsRepository.Correspondent.qry}
         />
