@@ -1,23 +1,23 @@
 import { Box } from '@mui/material'
 import { useContext, useState } from 'react'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
 import { formatDateDefault } from 'src/lib/date-helper'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useFormik } from 'formik'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 
-import UndeliveredCreditOrderWindow from './Windows/UndeliveredCreditOrderWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import GridToolbarWithCombo from 'src/components/Shared/GridToolbarWithCombo'
 import { useWindow } from 'src/windows'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import UndeliveredCreditOrderForm from './Forms/UndeliveredCreditOrderForm'
 
 const UndeliveredCreditOrder = () => {
   const { getRequest } = useContext(RequestsContext)
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
+  const { stack } = useWindow()
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -33,19 +33,13 @@ const UndeliveredCreditOrder = () => {
   async function fetchWithFilter({ filters }) {
     return await getRequest({
       extension: CTTRXrepository.UndeliveredCreditOrder.snapshot,
-      parameters: `_filter=&_corId=${filters.corId}`
+      parameters: `_filter=${filters.qry ?? ''}&_corId=${filters.corId ?? 0}`
     })
   }
-
-  const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.UndeliveredCreditOrder.qry
-  })
 
   const {
     query: { data },
     labels: _labels,
-    search,
-    clear,
     filterBy,
     clearFilter,
     access,
@@ -60,41 +54,66 @@ const UndeliveredCreditOrder = () => {
     }
   })
 
-  const comboFormik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      corId: ''
-    }
-  })
-
   const onChange = value => {
     if (value) filterBy('corId', value)
     else clearFilter('corId')
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj.recordId)
+  }
+  function openForm(recordId) {
+    stack({
+      Component: UndeliveredCreditOrderForm,
+      props: {
+        setErrorMessage: setErrorMessage,
+        _labels: _labels,
+        maxAccess: access,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
+      },
+      width: 900,
+      height: 600,
+      title: _labels[1]
+    })
   }
 
   return (
     <>
       <Box>
-        <GridToolbarWithCombo
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          value={filters.corId}
-          inputSearch={true}
-          invalidate={invalidate}
-          comboFormik={comboFormik}
-          onChange={onChange}
-          comboLabel={_labels[5]}
-          comboEndpoint={RemittanceSettingsRepository.Correspondent.qry}
-        />
-
+        <div style={{ display: 'flex' }}>
+          <GridToolbar
+            maxAccess={access}
+            onSearch={value => {
+              filterBy('qry', value)
+            }}
+            onSearchClear={() => {
+              clearFilter('qry')
+            }}
+            labels={_labels}
+            inputSearch={true}
+          >
+            <Box sx={{ display: 'flex', width: '350px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.Correspondent.qry}
+                labels={_labels[5]}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                name='corId'
+                values={{
+                  corId: filters.corId
+                }}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                onChange={(event, newValue) => {
+                  onChange(newValue?.recordId)
+                }}
+              />
+            </Box>
+          </GridToolbar>
+        </div>
         <Table
           columns={[
             {
@@ -152,19 +171,7 @@ const UndeliveredCreditOrder = () => {
           paginationType='client'
         />
       </Box>
-      {windowOpen && (
-        <UndeliveredCreditOrderWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setErrorMessage={setErrorMessage}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

@@ -53,6 +53,7 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       setFilters(filters => {
         const newFilters = { ...filters }
         delete newFilters[name]
+
         return newFilters
       })
     },

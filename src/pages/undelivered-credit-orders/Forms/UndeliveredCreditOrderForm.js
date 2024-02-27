@@ -29,7 +29,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { FormatLineSpacing } from '@mui/icons-material'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 
-export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded }) {
+export default function UndeliveredCreditOrderForm({ _labels, maxAccess, recordId, setErrorMessage, expanded }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
@@ -304,7 +304,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
   const columns = [
     {
       field: 'combobox',
-      header: labels[8],
+      header: _labels[8],
       name: 'currencyId',
       mandatory: true,
       store: currencyStore.list,
@@ -370,7 +370,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
     },
     {
       field: 'textfield',
-      header: labels[9],
+      header: _labels[9],
       name: 'currencyName',
       readOnly: true,
       width: 300,
@@ -378,7 +378,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
     },
     {
       field: 'numberfield',
-      header: labels[14],
+      header: _labels[14],
       name: 'qty',
       mandatory: true,
       width: 200,
@@ -413,7 +413,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
     },
     {
       field: 'numberfield',
-      header: labels[15],
+      header: _labels[15],
       name: 'exRate',
       mandatory: true,
       width: 200,
@@ -593,7 +593,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
                 name='date'
                 required
                 readOnly={isClosed}
-                label={labels[2]}
+                label={_labels[2]}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -609,7 +609,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
-                label={labels[3]}
+                label={_labels[3]}
                 readOnly={true}
                 values={formik.values}
                 valueField='recordId'
@@ -628,7 +628,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
-                label={labels[4]}
+                label={_labels[4]}
                 value={formik?.values?.reference}
                 maxAccess={maxAccess}
                 maxLength='30'
@@ -647,7 +647,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
               <ResourceComboBox
                 endpointId={RemittanceSettingsRepository.Correspondent.qry}
                 name='corId'
-                label={labels[16]}
+                label={_labels[16]}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -673,7 +673,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
             <Grid item xs={12}>
               <CustomTextField
                 name='corName'
-                label={labels[17]}
+                label={_labels[17]}
                 value={formik.values?.corName}
                 maxAccess={maxAccess}
                 readOnly={true}
@@ -691,7 +691,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
               <CustomDatePicker
                 name='deliveryDate'
                 readOnly={isClosed}
-                label={labels[18]}
+                label={_labels[18]}
                 value={formik?.values?.deliveryDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -713,13 +713,13 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
             <FormControlLabel
               value={SystemFunction.CurrencyCreditOrderPurchase}
               control={<Radio />}
-              label={labels[6]}
+              label={_labels[6]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
             <FormControlLabel
               value={SystemFunction.CurrencyCreditOrderSale}
               control={<Radio />}
-              label={labels[7]}
+              label={_labels[7]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
           </RadioGroup>
@@ -766,7 +766,7 @@ export default function UndeliveredCreditOrderForm({ labels, maxAccess, recordId
           <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
             <CustomTextArea
               name='notes'
-              label={labels[11]}
+              label={_labels[11]}
               value={formik.values.notes}
               rows={3}
               maxAccess={maxAccess}
