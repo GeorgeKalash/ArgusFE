@@ -1,64 +1,36 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CityTab from 'src/pages/cities/Tabs/CityTab'
-import TransactionLog from 'src/components/Shared/TransactionLog'
+import CityForm from 'src/pages/cities/Forms/CityForm'
 import { useState } from 'react'
-import { ResourceIds } from 'src/resources/ResourceIds'
 
 
 
 const CityWindow = ({
     onClose,
-    width,
-    height,
-    onSave,
-    editMode,
-    stateStore,
-    countryStore,
-    cityValidation,
-    fillStateStore,
     labels,
-    maxAccess
+    maxAccess,
+    recordId
 }) => {
-    const [windowInfo, setWindowInfo] = useState(null)
 
     return (
         <>
         <Window
         id='CityWindow'
         Title={labels.cities}
+        controlled={true}
         onClose={onClose}
-        width={width}
-        height={height}
-        onSave={onSave}
-        cityValidation={cityValidation}
-        countryStore={countryStore}
-        stateStore={stateStore}
-        onInfo={() => setWindowInfo(true)}
-        disabledInfo={!editMode && true}
-        onInfoClose={() => setWindowInfo(false)}
+        width={600}
+        height={400}
         >
             <CustomTabPanel>
-               <CityTab
+               <CityForm
                   labels={labels}
-                  cityValidation={cityValidation}
-                  countryStore={countryStore}
-                  stateStore={stateStore}
-                  editMode={editMode}
-                  fillStateStore={fillStateStore}
                   maxAccess={maxAccess}
-                  
+                  recordId={recordId}                
                />
             </CustomTabPanel>
             </Window>
-        {windowInfo && (
-        <TransactionLog
-          resourceId={ResourceIds && ResourceIds.Cities}
-          recordId={cityValidation.values.recordId}
-          onInfoClose={() => setWindowInfo(false)}
-        />
-      )}
     </>
   )
 }

@@ -27,7 +27,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const CostCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -44,27 +44,35 @@ const CostCenter = () => {
     })
   }
 
+  async function fetchWithSearch({options = {} , qry}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+return await getRequest({
+      extension: GeneralLedgerRepository.CostCenter.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
+    })
+  }
+
   const {
     query: { data },
+    search,
+    clear,
     labels: _labels,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.CostCenter.page,
-    datasetId: ResourceIds.CostCenter
+    datasetId: ResourceIds.CostCenter,
+    search: {
+      endpointId: GeneralLedgerRepository.CostCenter.snapshot,
+      searchFn: fetchWithSearch,
+    }
   })
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.CostCenter.page
   })
 
-
-  const [searchValue, setSearchValue] = useState("")
-
-  function onSearchClear() {
-    setSearchValue('')
-
-  }
 
   const columns = [
     {
@@ -82,7 +90,6 @@ const CostCenter = () => {
         flex: 1
       }
   ]
-
 
   const add = () => {
     setWindowOpen(true)
@@ -102,44 +109,13 @@ const CostCenter = () => {
     toast.success('Record Deleted Successfully')
   }
 
- 
-  
-  const search = inp => {
-    setSearchValue(inp)    
-    setGridData({count : 0, list: [] , message :"",  statusId:1})
-     const input = inp
-     
-
-     if(input){
-    var parameters = `_filter=${input}`
-
-    getRequest({
-      extension: GeneralLedgerRepository.CostCenter.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-
-    }else{
-
-      setGridData({count : 0, list: [] , message :"",  statusId:1})
-    }
-    
-  }
-
-  
-
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={onSearchClear} labels={_labels}  inputSearch={true}/>
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
         <Table
           columns={columns}
-          gridData={searchValue.length > 0 ? gridData : data}
+          gridData={  data ?? {list: []} }
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
@@ -158,24 +134,12 @@ const CostCenter = () => {
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
-          onSubmit={() => {
-            if(searchValue !== "") {
-              var parameters = `_filter=${searchValue}`
 
-              getRequest({
-                extension: GeneralLedgerRepository.CostCenter.snapshot,
-                parameters: parameters
-              })
-                .then(res => {
-                  setGridData(res)
-                })
-                .catch(error => {
-                  setErrorMessage(error)
-                })
-                
-            }
-          }
-        }
+        //   onSubmit={(val) => {
+        //     // search(val)
+
+        //   }
+        // }
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

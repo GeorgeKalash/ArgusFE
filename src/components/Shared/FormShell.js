@@ -8,20 +8,26 @@ import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 
 export default function FormShell({
-  form, form1,
+  form,
+  form1,
   children,
   editMode,
   setEditMode,
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
+  closeVisible = false,
   resourceId,
   maxAccess,
   isPosted = false,
+  isClosed = false,
   clientRelation = false,
   setErrorMessage,
-  previewReport=false,
-  initialValues, initialValues1 , setIDInfoAutoFilled
+  previewReport = false,
+  initialValues,
+  initialValues1,
+  setIDInfoAutoFilled,
+  actions
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
@@ -35,25 +41,25 @@ export default function FormShell({
     ? false
     : true
 
-    function handleReset(){
-       initialValues &&  form.setValues(initialValues)
-       if(form1){
-        form1.setValues(initialValues1)
-       }
-     if(setIDInfoAutoFilled){
-      setIDInfoAutoFilled(false)
-     }
-     setEditMode(false)
+  function handleReset() {
+    initialValues && form.setValues(initialValues)
+    if (form1) {
+      form1.setValues(initialValues1)
     }
+    if (setIDInfoAutoFilled) {
+      setIDInfoAutoFilled(false)
+    }
+    setEditMode(false)
+  }
 
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%' , zIndex: 0 }}>{children}</DialogContent>
+      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>{children}</DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
           onSave={() => form.handleSubmit()}
-          onClear={() => initialValues ?  handleReset() : false}
+          onClear={() => (initialValues ? handleReset() : false)}
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
@@ -98,11 +104,14 @@ export default function FormShell({
               title: 'Preview Report'
             })
           }
+          actions={actions}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
           postVisible={postVisible}
+          closeVisible={closeVisible}
           isPosted={isPosted}
+          isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}
           recordId={form.values.recordId}

@@ -1,7 +1,7 @@
 const service = 'DR.asmx/'
 
 export const DocumentReleaseRepository = {
-  
+
   ReleaseIndicator: {
     page: service + 'pageIND',
     qry: service + 'qryIND',
@@ -66,11 +66,50 @@ export const DocumentReleaseRepository = {
   },
   Strategy:
   {
+    page: service + 'pageSTG',
     qry: service + 'qrySTG',
     get: service + 'getSTG',
     set: service + 'setSTG',
     del: service + 'delSTG'
+  },
+  DocumentsOnHold :{
+    
+    qry: service + 'qryTRX',
+    get: service + 'getTRX',
+    set: service + 'setTRX',
+    del: service + 'delTRX'
+  },
+  Approvals: {
+    qry: service + 'qry2TRX',
+  },
+  StrategyCode:
+  {
+    qry: service + 'qrySCO',
+    get: service + 'getSCO',
+    set: service + 'setSCO',
+    del: service + 'delSCO'
+  },
+  StrategyIndicator:
+  {
+    qry: service + 'qrySTS',
+    get: service + 'getSTS',
+    set: service + 'setSTS',
+    set2: service + 'set2STS',
+    del: service + 'delSTS'
+  },
+  StrategyPrereq:
+  {
+    qry: service + 'qryPRE',
+    get: service + 'getPRE',
+    set: service + 'setPRE',
+    del: service + 'delPRE'
+  },
+  ApplySTG:
+  {
+    apply: service + 'applySTG'
   }
+
+
 
 
 }
