@@ -48,7 +48,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
     recordId: recordId || null,
     currencyId: '',
     date: new Date(),
-    functionId: SystemFunction.CurrencyCreditOrderPurchase,
+    functionId: SystemFunction.CreditInvoicePurchase,
     reference: '',
     plantId: parseInt(plantId),
     corId: '',
@@ -82,7 +82,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
     validationSchema: yup.object({
       date: yup.string().required('This field is required'),
       plantId: yup.string().required('This field is required'),
-      corId: yup.string().required('This field is required')
+      corId: yup.string().required('This field is required'),
+      cashAccountId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       try {
@@ -506,13 +507,13 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
   }
 
   async function setOperationType(type) {
-    if (type == SystemFunction.CurrencyCreditOrderPurchase || type == SystemFunction.CurrencyCreditOrderSale) {
+    if (type == SystemFunction.CreditInvoicePurchase || type == SystemFunction.CreditInvoiceSales) {
       const res = await getRequest({
         extension: 'SY.asmx/getDE',
         parameters:
-          type == SystemFunction.CurrencyCreditOrderPurchase
+          type == SystemFunction.CreditInvoicePurchase
             ? '_key=ct_credit_purchase_ratetype_id'
-            : type == SystemFunction.CurrencyCreditOrderSale
+            : type == SystemFunction.CreditInvoiceSales
             ? '_key=ct_credit_sales_ratetype_id'
             : ''
       })
@@ -649,6 +650,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
                 name='corId'
                 label={_labels[16]}
                 form={formik}
+                required
                 valueShow='corRef'
                 secondValueShow='corName'
                 readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
@@ -679,6 +681,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
             valueField='accountNo'
             displayField='name'
             name='cashAccountId'
+            required
             label={_labels[22]}
             form={formik}
             valueShow='cashAccountRef'
@@ -702,17 +705,17 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
           <RadioGroup
             row
             value={formik.values.functionId}
-            defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
+            defaultValue={SystemFunction.CreditInvoicePurchase}
             onChange={e => setOperationType(e.target.value)}
           >
             <FormControlLabel
-              value={SystemFunction.CurrencyCreditOrderPurchase}
+              value={SystemFunction.CreditInvoicePurchase}
               control={<Radio />}
               label={_labels[6]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
             <FormControlLabel
-              value={SystemFunction.CurrencyCreditOrderSale}
+              value={SystemFunction.CreditInvoiceSales}
               control={<Radio />}
               label={_labels[7]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
@@ -726,9 +729,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
               columns={columns}
               background={
                 formik.values.functionId &&
-                (formik.values.functionId != SystemFunction.CurrencyCreditOrderPurchase
-                  ? '#C7F6C7'
-                  : 'rgb(245, 194, 193)')
+                (formik.values.functionId != SystemFunction.CreditInvoicePurchase ? '#C7F6C7' : 'rgb(245, 194, 193)')
               }
               defaultRow={{
                 invoiceId: '',
