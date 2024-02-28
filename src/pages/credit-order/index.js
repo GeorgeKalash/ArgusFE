@@ -57,10 +57,12 @@ const CreditOrder = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CTTRXrepository.CreditOrder.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
   async function fetchWithSearch({ qry }) {
     return await getRequest({
@@ -72,6 +74,7 @@ const CreditOrder = () => {
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
     search,
     clear,
     access
@@ -206,7 +209,8 @@ const CreditOrder = () => {
           isLoading={false}
           pageSize={50}
           maxAccess={access}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Box>
 

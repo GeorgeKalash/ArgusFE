@@ -24,10 +24,12 @@ const UndeliveredCreditOrder = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CTTRXrepository.UndeliveredCreditOrder.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=0`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters }) {
@@ -42,6 +44,7 @@ const UndeliveredCreditOrder = () => {
     labels: _labels,
     filterBy,
     clearFilter,
+    paginationParameters,
     access,
     filters
   } = useResourceQuery({
@@ -168,7 +171,8 @@ const UndeliveredCreditOrder = () => {
           isLoading={false}
           pageSize={50}
           maxAccess={access}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Box>
 

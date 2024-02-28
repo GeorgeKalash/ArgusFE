@@ -44,18 +44,21 @@ const DocumentsOnHold = () => {
   const [gridData, setGridData] = useState([])
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 100 } = options
+    const { _startAt = 0, _pageSize = 50 } = options
     console.log('request')
 
-    return await getRequest({
+    const response = await getRequest({
       extension: DocumentReleaseRepository.DocumentsOnHold.qry,
       parameters: `_startAt=${_startAt}&_functionId=0&_reference=&_sortBy=reference desc&_response=0&_status=1&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -171,7 +174,8 @@ const DocumentsOnHold = () => {
           popupComponent={popupComponent}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Box>
