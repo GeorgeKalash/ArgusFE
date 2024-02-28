@@ -37,7 +37,7 @@ export default function ApprovalFormShell(props) {
   ]
 
   return (
-    <FormShell actions={actions} form={form} isClosed={isClosed} {...remaining}>
+    <FormShell actions={actions} form={form} isClosed={isClosed} editMode={editMode} {...remaining}>
       {children}
     </FormShell>
   )

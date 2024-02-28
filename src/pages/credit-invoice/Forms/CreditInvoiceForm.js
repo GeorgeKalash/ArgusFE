@@ -49,7 +49,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
     currencyId: '',
     date: new Date(),
     functionId: SystemFunction.CurrencyCreditOrderPurchase,
-    deliveryDate: new Date(),
     reference: '',
     plantId: parseInt(plantId),
     corId: '',
@@ -90,7 +89,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
         const copy = { ...obj }
         delete copy.rows
         copy.date = formatDateToApi(copy.date)
-        copy.deliveryDate = formatDateToApi(copy.deliveryDate)
 
         // Default values for properties if they are empty
         copy.wip = copy.wip === '' ? 1 : copy.wip
@@ -104,7 +102,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
           return {
             ...orderDetail,
             seqNo: seqNo,
-            orderId: formik.values.recordId || 0
+            invoiceId: formik.values.recordId || 0
           }
         })
 
@@ -146,7 +144,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
     initialValues: {
       rows: [
         {
-          orderId: '',
+          invoiceId: '',
           seqNo: '',
           currencyId: '',
           qty: '',
@@ -178,7 +176,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
       const copy = { ...obj }
 
       copy.date = formatDateToApi(copy.date)
-      copy.deliveryDate = formatDateToApi(copy.deliveryDate)
       copy.wip = copy.wip === '' ? 1 : copy.wip
       copy.status = copy.status === '' ? 1 : copy.status
       copy.amount = totalCUR
@@ -482,9 +479,9 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
     }
   ]
 
-  const fillItemsGrid = orderId => {
+  const fillItemsGrid = invoiceId => {
     try {
-      var parameters = `_orderId=${orderId}`
+      var parameters = `_invoiceId=${invoiceId}`
       getRequest({
         extension: CTTRXrepository.CreditInvoiceItem.qry,
         parameters: parameters
@@ -563,7 +560,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
           })
           setIsClosed(res.record.wip === 2 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
-          res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
           setInitialData(res.record)
           const baseCurrency = await getBaseCurrency()
@@ -577,6 +573,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
+  console.log('editMode ', editMode)
 
   return (
     <ApprovalFormShell
@@ -589,61 +586,58 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
       hiddenPost={true}
     >
       <Grid container>
-        <Grid container xs={12}>
+        <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
           {/* First Column */}
-          <Grid container rowGap={1} xs={3} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name='date'
-                required
-                readOnly={isClosed}
-                label={_labels[2]}
-                value={formik?.values?.date}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-                helperText={formik.touched.date && formik.errors.date}
-              />
-            </Grid>
+          <Grid item xs={3} style={{ marginRight: '10px' }}>
+            <CustomDatePicker
+              name='date'
+              required
+              readOnly={isClosed}
+              label={_labels[2]}
+              value={formik?.values?.date}
+              onChange={formik.setFieldValue}
+              maxAccess={maxAccess}
+              onClear={() => formik.setFieldValue('date', '')}
+              error={formik.touched.date && Boolean(formik.errors.date)}
+              helperText={formik.touched.date && formik.errors.date}
+            />
           </Grid>
+
           {/* Second Column */}
-          <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='plantId'
-                label={_labels[3]}
-                readOnly={true}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('plantId', newValue?.recordId)
-                }}
-                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-              />
-            </Grid>
+          <Grid item style={{ marginRight: '10px', width: '420px' }}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Plant.qry}
+              name='plantId'
+              label={_labels[3]}
+              readOnly={true}
+              values={formik.values}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              required
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik && formik.setFieldValue('plantId', newValue?.recordId)
+              }}
+              error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+            />
           </Grid>
+
           {/* Third Column */}
-          <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={_labels[4]}
-                value={formik?.values?.reference}
-                maxAccess={maxAccess}
-                maxLength='30'
-                readOnly={true}
-                required
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
-              />
-            </Grid>
+          <Grid item style={{ marginRight: '10px', width: '190px' }}>
+            <CustomTextField
+              name='reference'
+              label={_labels[4]}
+              value={formik?.values?.reference}
+              maxAccess={maxAccess}
+              maxLength='30'
+              readOnly={true}
+              required
+              error={formik.touched.reference && Boolean(formik.errors.reference)}
+              helperText={formik.touched.reference && formik.errors.reference}
+            />
           </Grid>
         </Grid>
+
         <Grid container xs={12}>
           {/* First Column */}
           <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
@@ -672,23 +666,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
                   }
                 }}
                 errorCheck={'corId'}
-              />
-            </Grid>
-          </Grid>
-          {/* Third Column */}
-          <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name='deliveryDate'
-                readOnly={isClosed}
-                label={_labels[18]}
-                value={formik?.values?.deliveryDate}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                disabledRangeDate={{ date: formik.values.date, day: 30 }}
-                onClear={() => formik.setFieldValue('deliveryDate', '')}
-                error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
-                helperText={formik.touched.deliveryDate && formik.errors.deliveryDate}
               />
             </Grid>
           </Grid>
@@ -754,7 +731,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
                   : 'rgb(245, 194, 193)')
               }
               defaultRow={{
-                orderId: '',
+                invoiceId: '',
                 seqNo: '',
                 currencyId: '',
                 qty: '',

@@ -27,7 +27,7 @@ export const CTTRXrepository = {
     set: service + 'set2IVC',
     close: service + 'closeIVC'
   },
-  CreditIVCoiceItem: {
-    qry: service + 'qryINI'
+  CreditInvoiceItem: {
+    qry: service + 'qryIVI'
   }
 }

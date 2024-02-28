@@ -4,7 +4,6 @@ const getNewCreditOrder = () => {
     name: null,
     reference: null,
     date: null,
-    deliveryDate: null,
     functionId: null,
     currencyId: null,
     plantId: null,
@@ -47,8 +46,7 @@ const populateCreditOrder = obj => {
     rateCalcMethod: obj.rateCalcMethod,
     plantRef: obj.plantRef,
     correspondantName: obj.correspondantName,
-    currencyRef: obj.currencyRef,
-    deliveryDate: obj.deliveryDate
+    currencyRef: obj.currencyRef
   }
 }
 
