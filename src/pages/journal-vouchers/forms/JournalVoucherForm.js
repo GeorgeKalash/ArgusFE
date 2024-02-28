@@ -121,6 +121,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
+            
             editMode={editMode}
         >
             <Grid container spacing={4}>

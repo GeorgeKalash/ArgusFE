@@ -12,12 +12,14 @@ const WindowToolbar = ({
   onInfo,
   onApply,
   onClose,
+  yourNewHandler,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
   editMode = false,
   smallBox = false,
   infoVisible = true,
+  aliComponentVisible,
   postVisible = false,
   closeVisible = false,
   clientRelation,
@@ -30,8 +32,12 @@ const WindowToolbar = ({
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
-  // //states
+  const [showGLC, setShowGLC] = useState(false);
+  
   const [reportStore, setReportStore] = useState([])
+
+
+
 
   const getReportLayout = () => {
     setReportStore([])
@@ -103,7 +109,13 @@ const WindowToolbar = ({
           Client Relation
         </Button>
       )}
-
+      {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
+      {  aliComponentVisible && (
+          <Button onClick={yourNewHandler} variant="contained">
+          hi
+        </Button>
+      )}
+      {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
       {onInfo && infoVisible && (
         <Button onClick={onInfo} variant='contained' sx={{ mr: 1 }} disabled={!editMode}>
           Info

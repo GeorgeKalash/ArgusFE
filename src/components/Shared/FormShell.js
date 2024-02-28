@@ -6,6 +6,7 @@ import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
+import RecordDetailComponent from 'src/pages/RecordDetailComponent'
 
 export default function FormShell({
   form, form1,
@@ -16,6 +17,7 @@ export default function FormShell({
   infoVisible = true,
   postVisible = false,
   resourceId,
+  aliComponentVisible=true,
   maxAccess,
   isPosted = false,
   clientRelation = false,
@@ -46,6 +48,8 @@ export default function FormShell({
      setEditMode(false)
     }
 
+    
+    
   return (
     <>
       <DialogContent sx={{ flex: 1, height: '100%' , zIndex: 0 }}>{children}</DialogContent>
@@ -70,6 +74,17 @@ export default function FormShell({
               width: 700,
               height: 400,
               title: 'Transaction Log'
+            })
+          }
+          yourNewHandler={() =>
+            stack({
+              Component: RecordDetailComponent,
+              props: {
+                recordId: form.values.recordId, 
+              },
+              width: 500, 
+              height: 300,
+              title: 'Record Details'
             })
           }
           onClientRelation={() =>
@@ -102,6 +117,7 @@ export default function FormShell({
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
+          aliComponentVisible={aliComponentVisible}
           postVisible={postVisible}
           isPosted={isPosted}
           clientRelation={clientRelation}
