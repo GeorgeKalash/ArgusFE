@@ -17,7 +17,7 @@ export default function FormShell({
   infoVisible = true,
   postVisible = false,
   resourceId,
-  aliComponentVisible=true,
+  aliComponentVisible=false,
   maxAccess,
   isPosted = false,
   clientRelation = false,
