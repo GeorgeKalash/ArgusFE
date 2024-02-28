@@ -161,7 +161,7 @@ export default function DocumentTypeMapForm ({
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
+                parameters={`_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`}
                
                 maxAccess={maxAccess}
                 
