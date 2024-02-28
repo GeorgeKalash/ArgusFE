@@ -2,7 +2,8 @@ const service = 'IV.asmx/'
 
 export const InventoryRepository = {
   Item: {
-    snapshot: service + 'snapshotIT'
+    snapshot: service + 'snapshotIT',
+    get: service + 'getIT'
   },
   Category: {
     qry: service + 'qryCA',
@@ -21,5 +22,17 @@ export const InventoryRepository = {
     get: service + 'getSI',
     set: service + 'setSI',
     del: service + 'delSI'
+  },
+  MaterialsAdjustment: {
+    qry: service + 'qryADJ',
+    get: service + 'getADJ',
+    set: service + 'setADJ',
+    set2: service + 'set2ADJ',
+    post: service + 'postADJ',
+    unpost: service + 'unpostADJ',
+    del: service + 'delADJ'
+  },
+  MaterialsAdjustmentDetail: {
+    qry: service + 'qryADI'
   }
 }

@@ -94,13 +94,7 @@ const Guard = ({ children, authGuard, guestGuard }) => {
   }
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: Infinity
-    }
-  }
-})
+const queryClient = new QueryClient({})
 
 // ** Configure JSS & ClassName
 const App = props => {
@@ -147,8 +141,8 @@ const App = props => {
                               <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
                                 <PrimeReactProvider>
                                   {getLayout(
-                                    <ErrorProvider>
-                                      <WindowProvider>
+                                    <ErrorProvider key={(typeof window !== 'undefined' ? window.location.pathname : '')}>
+                                      <WindowProvider key={(typeof window !== 'undefined' ? window.location.pathname : '')}>
                                         <Component {...pageProps} />
                                       </WindowProvider>
                                     </ErrorProvider>

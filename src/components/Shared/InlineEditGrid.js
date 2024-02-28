@@ -15,6 +15,7 @@ import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { formatDateFromApi, formatDateFromApiInline, formatDateDefault } from 'src/lib/date-helper'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { fontSize } from '@mui/system'
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
@@ -82,7 +83,7 @@ const InlineEditGrid = ({
         return row[column.name]
           ? typeof row[column.name] === 'string'
             ? row[column.name]
-            : column.store.length > 0
+            : column.store?.length > 0
             ? column.store.find(item => item[column.valueField] === row[column.name])[column.displayField]
             : ''
           : ''
@@ -116,6 +117,7 @@ const InlineEditGrid = ({
             value={gridValidation.values.rows[rowIndex][fieldName]}
             required={column?.mandatory}
             readOnly={column?.readOnly}
+            disabled={column?.disabled}
             onChange={event => {
               const newValue = event.target.value
               gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
@@ -136,6 +138,7 @@ const InlineEditGrid = ({
               value={formatDateFromApiInline(gridValidation.values.rows[rowIndex][fieldName])}
               required={column?.mandatory}
               readOnly={column?.readOnly}
+              disabled={column?.disabled}
               format={dateFormat}
               onChange={newDate => {
                 if (newDate) {
@@ -208,6 +211,7 @@ const InlineEditGrid = ({
             fullWidth={true}
             inputProps={{
               readOnly: column?.readOnly,
+              disabled:column?.disabled,
               pattern: '[0-9]*',
               style: {
                 textAlign: 'right'
@@ -232,6 +236,16 @@ const InlineEditGrid = ({
                     </InputAdornment>
                   ))
             }}
+            helperText={
+              gridValidation.errors?.rows &&
+              gridValidation.errors?.rows[rowIndex] &&
+              gridValidation.errors?.rows[rowIndex][fieldName]
+            }
+            error={
+              gridValidation.errors?.rows &&
+              gridValidation.errors?.rows[rowIndex] &&
+              Boolean(gridValidation.errors?.rows[rowIndex][fieldName])
+            }
           />
         )
       case 'combobox':
@@ -242,6 +256,7 @@ const InlineEditGrid = ({
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
             readOnly={column?.readOnly}
+            disabled={column?.disabled}
             options={column.store}
             getOptionLabel={option => {
               if (typeof option === 'object') {
@@ -358,6 +373,7 @@ const InlineEditGrid = ({
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.name}`]}
             readOnly={column?.readOnly}
+            disabled={column?.disbaled}
             options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
             open={write}
@@ -480,34 +496,6 @@ const InlineEditGrid = ({
                             style={{ cursor: 'pointer' }}
                             onClick={() => {
                               // Handle search action if needed
-                              console.log('Search clicked')
-                            }}
-                          />
-                        </IconButton>
-                      </InputAdornment>
-
-                      {gridValidation.values.rows[rowIndex][`${column.nameId}`] && (
-                        <InputAdornment position='end'>
-                          <IconButton
-                            tabIndex={-1}
-                            edge='end'
-                            onClick={() => {
-                              gridValidation.setFieldValue(`rows[${rowIndex}].${column.nameId}`, null)
-                              gridValidation.setFieldValue(`rows[${rowIndex}].${column.name}`, null)
-                            }}
-                            aria-label='clear input'
-                          >
-                            <ClearIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      )}
-                      <InputAdornment position='end'>
-                        <IconButton tabIndex={-1} edge='end' aria-label='clear input'>
-                          <SearchIcon
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => {
-                              // Handle search action if needed
-                              // console.log('Search clicked');
                             }}
                           />
                         </IconButton>
@@ -666,9 +654,9 @@ const InlineEditGrid = ({
               hidden={column.hidden}
               style={{
                 width: column.width || tableWidth / columns.length,
-                background:  background,
+                background: background
               }}
-              body={row => {
+              body={(row, rowIndex) => {
                 return (
                   <Box
                     sx={{
@@ -680,6 +668,9 @@ const InlineEditGrid = ({
                     }}
                   >
                     {cellRender(row, column)}
+
+                    {/* {gridValidation.errors?.rows && gridValidation.errors?.rows[rowIndex.rowIndex] && !gridValidation.values?.rows[rowIndex.rowIndex][column.name] ? <Box sx={{fontSize:'13px' , p:1, color:'red'}}>{gridValidation.errors?.rows[rowIndex.rowIndex][column.name]}</Box>
+                    : cellRender(row, column) } */}
                   </Box>
                 )
               }}
@@ -712,7 +703,7 @@ const InlineEditGrid = ({
                 </div>
               )
             }}
-            style={{ maxWidth: '60px' , background: background }}
+            style={{ maxWidth: '60px', background: background }}
           />
         )}
       </DataTable>

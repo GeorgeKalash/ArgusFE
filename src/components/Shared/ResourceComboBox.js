@@ -9,7 +9,7 @@ export default function ResourceComboBox({
   datasetId,
   name,
   valueField = 'recordId',
-  values,
+  values = {},
   parameters = '_filter=',
   filter = () => true,
   ...rest

@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 // ** MUI Imports
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
@@ -33,6 +33,8 @@ const Window = ({
   editMode = false,
   disabledSubmit,
   disabledInfo,
+  onApply,
+  disabledApply,
   ...props
 }) => {
   const { settings } = useSettings()
@@ -145,13 +147,17 @@ const Window = ({
                     onSave={onSave}
                     onClear={onClear}
                     onInfo={onInfo}
+                    onApply={onApply}
                     disabledSubmit={disabledSubmit}
                     disabledInfo={disabledInfo}
+                    disabledApply={disabledApply}
                   />
                 )}
               </>
             ) : (
-              children
+              React.Children.map(children, child => {
+                return React.cloneElement(child, { expanded: expanded, height : height }); // Pass containerHeight as prop to children
+              })
             )}
           </Paper>
         </Box>
