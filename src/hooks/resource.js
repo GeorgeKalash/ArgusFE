@@ -59,8 +59,6 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     },
     filters,
     paginationParameters(res) {
-      // setApiOption({_startAt:11})
-      console.log('res')
       setApiOption(res)
     },
     clear() {
