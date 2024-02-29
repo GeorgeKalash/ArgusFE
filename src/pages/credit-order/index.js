@@ -76,6 +76,7 @@ const CreditOrder = () => {
     labels: labels,
     paginationParameters,
     search,
+    refetch,
     clear,
     access
   } = useResourceQuery({
@@ -205,6 +206,7 @@ const CreditOrder = () => {
           onEdit={obj => {
             openFormWindow(obj.recordId, plantId)
           }}
+          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}

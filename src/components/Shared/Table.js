@@ -169,11 +169,11 @@ const Table = ({
             <IconButton onClick={goToLastPage} disabled={page === pageCount}>
               <LastPageIcon />
             </IconButton>
-            {api && (
-              <IconButton onClick={goToFirstPage}>
-                <RefreshIcon />
-              </IconButton>
-            )}
+            {/* {api && ( */}
+            <IconButton onClick={refetch}>
+              <RefreshIcon />
+            </IconButton>
+            {/* )} */}
             Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
             {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
             {totalRecords}

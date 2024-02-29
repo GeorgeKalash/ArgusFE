@@ -61,6 +61,7 @@ const DocumentsOnHold = () => {
   const {
     query: { data },
     labels: _labels,
+    refetch,
     paginationParameters,
     access
   } = useResourceQuery({
@@ -205,6 +206,7 @@ const DocumentsOnHold = () => {
           popupComponent={popupComponent}
           isLoading={false}
           pageSize={50}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}

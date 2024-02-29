@@ -41,6 +41,7 @@ const UndeliveredCreditOrder = () => {
 
   const {
     query: { data },
+    refetch,
     labels: _labels,
     filterBy,
     clearFilter,
@@ -171,6 +172,7 @@ const UndeliveredCreditOrder = () => {
           isLoading={false}
           pageSize={50}
           maxAccess={access}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
         />
