@@ -58,7 +58,8 @@ const CustomDatePicker = ({
   }
   const newDate = new Date(disabledRangeDate.date) // Create a new Date object to avoid mutating the initialDate
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
-  console.log('newDate ', disabledRangeDate.date, ' new ', newDate)
+
+  // console.log('newDate ', disabledRangeDate.date, ' new ', newDate)
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>

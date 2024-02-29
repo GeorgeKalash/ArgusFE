@@ -7,6 +7,7 @@ export default function ResourceLookupEdit({ id, field, value, column: { props }
   return (
     <ResourceLookup
       autoFocus
+      label={''}
       endpointId={props.endpointId}
       parameters={{
         _countryId: props.parameters._countryId,

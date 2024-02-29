@@ -7,7 +7,7 @@ export default function TextFieldEdit({ column: { props }, id, field, value }) {
   return (
     <CustomTextField
       value={value}
-      label={field}
+      label={''}
       readOnly={props?.readOnly}
       autoFocus
       onChange={e => {

@@ -1,10 +1,10 @@
-import { DataGrid as MUIDataGrid, gridExpandedSortedRowIdsSelector, useGridApiRef } from '@mui/x-data-grid'
+import { GridDeleteIcon, DataGrid as MUIDataGrid, gridExpandedSortedRowIdsSelector, useGridApiRef } from '@mui/x-data-grid'
 import components from './components'
-import { Box, Button } from '@mui/material'
+import { Box, Button, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 
-export function DataGrid({ columns, value, error, onChange }) {
+export function DataGrid({ idName = 'id', columns, value, error, onChange }) {
   async function processDependencies(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
@@ -67,13 +67,14 @@ export function DataGrid({ columns, value, error, onChange }) {
     if (event.key !== 'Tab') {
       return
     }
-
+     console.log(params, event)
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
     const visibleColumns = apiRef.current.getVisibleColumns()
 
     const nextCell = findCell(params)
 
     const currentCell = { ...nextCell }
+
 
     if (
       apiRef.current.getCellMode(rowIds[currentCell.rowIndex], visibleColumns[currentCell.columnIndex].field) === 'edit'
@@ -85,7 +86,10 @@ export function DataGrid({ columns, value, error, onChange }) {
 
     if (nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
       addRow()
+
     }
+
+
 
     if (
       nextCell.columnIndex === visibleColumns.length - 1 &&
@@ -131,19 +135,22 @@ export function DataGrid({ columns, value, error, onChange }) {
   }
 
   function addRow() {
-    const highestIndex = value.reduce((max, current) => (max.id > current.id ? max : current))?.id + 1
+    const highestIndex = value.reduce((max, current) => (max[idName] > current[idName]? max : current))[idName] + 1
+
 
     const defaultValues = Object.fromEntries(
-      columns.filter(({ name }) => name !== 'id').map(({ name, defaultValue }) => [name, defaultValue])
+      columns.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
     )
 
-    onChange([
-      ...value,
-      {
-        id: highestIndex,
-        ...defaultValues
-      }
-    ])
+
+        onChange([
+          ...value,
+          {
+            [idName]: highestIndex,
+            ...defaultValues
+          }
+        ])
+
   }
 
   function deleteRow(deleteId) {
@@ -158,9 +165,9 @@ export function DataGrid({ columns, value, error, onChange }) {
     width: '100',
     renderCell({ id }) {
       return (
-        <>
-          <Button onClick={() => deleteRow(id)}>Delete</Button>
-        </>
+          <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => deleteRow(id)}>
+            <GridDeleteIcon />
+          </IconButton>
       )
     }
   }
@@ -177,6 +184,7 @@ export function DataGrid({ columns, value, error, onChange }) {
       disableColumnMenu
       disableColumnSelector
       disableSelectionOnClick
+      getRowId={(row) => row[idName]}
       onStateChange={state => {
         if (Object.entries(state.editRows)[0]) {
           const [id, obj] = Object.entries(state.editRows)[0]
@@ -247,7 +255,7 @@ export function DataGrid({ columns, value, error, onChange }) {
                 sx={{
                   width: '100%',
                   height: '100%',
-                  padding: '0 20px',
+                  padding: '0 0px',
                   display: 'flex',
                   alignItems: 'center'
                 }}

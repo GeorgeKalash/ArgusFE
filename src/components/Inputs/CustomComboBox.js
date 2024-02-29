@@ -4,6 +4,8 @@ import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import Paper from '@mui/material/Paper'
 
+
+
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
   name,
@@ -27,6 +29,7 @@ const CustomComboBox = ({
   sx,
   columnsInDropDown,
   editMode = false,
+  dataGrid=false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -48,6 +51,7 @@ const CustomComboBox = ({
       value={value}
       size={size}
       options={store}
+
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={option => {
         if (columnsInDropDown || typeof displayField == 'object') {
@@ -172,6 +176,20 @@ const CustomComboBox = ({
           autoFocus={autoFocus}
           error={error}
           helperText={helperText}
+          InputProps={{
+            ...params.InputProps,
+            style: {
+              border: 'none', // Set width to 100%
+            },
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                border: dataGrid && 'none', // Hide border
+              },
+            },
+          }}
+
         />
       )}
     />
