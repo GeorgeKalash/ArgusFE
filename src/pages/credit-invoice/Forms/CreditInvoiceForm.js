@@ -151,6 +151,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
           qty: '',
           rateCalcMethod: '',
           exRate: '',
+          defaultRate: '',
           minRate: '',
           maxRate: '',
           amount: '',
@@ -353,6 +354,10 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
             `rows[${row.rowIndex}].exRate`,
             parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(5)
           )
+          detailsFormik.setFieldValue(
+            `rows[${row.rowIndex}].defaultRate`,
+            parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(5)
+          )
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
           detailsFormik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
@@ -415,6 +420,15 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
     },
     {
       field: 'numberfield',
+      header: _labels[23],
+      name: 'defaultRate',
+      readOnly: true,
+      mandatory: true,
+      width: 200,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+    },
+    {
+      field: 'numberfield',
       header: _labels[15],
       name: 'exRate',
       mandatory: true,
@@ -423,19 +437,12 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
         if (parseFloat(row.rowData.exRate.toString().replace(/,/g, '')) > 0) {
-          const exchange = await getEXMCur({
-            plantId: plantId ?? formik.values.plantId,
-            toCurrency: toCurrency ?? '',
-            fromCurrency: row.rowData.currencyId ?? '',
-            rateType: rateType ?? ''
-          })
-
-          const minRate = parseFloat(exchange?.minRate.toString().replace(/,/g, ''))
-          const maxRate = parseFloat(exchange?.maxRate.toString().replace(/,/g, ''))
+          const minRate = parseFloat(row.rowData?.minRate.toString().replace(/,/g, ''))
+          const maxRate = parseFloat(row.rowData?.maxRate.toString().replace(/,/g, ''))
 
           if (nv >= minRate && nv <= maxRate) {
             const rate = nv
-            const rateCalcMethod = exchange?.rateCalcMethod
+            const rateCalcMethod = row.rowData?.rateCalcMethod
 
             const qtyToCur =
               rateCalcMethod === 1
@@ -738,6 +745,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
                 qty: '',
                 rateCalcMethod: '',
                 exRate: '',
+                defaultRate: '',
                 minRate: '',
                 maxRate: '',
                 amount: '',
