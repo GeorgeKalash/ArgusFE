@@ -17,8 +17,8 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
   const queryClient = useQueryClient()
 
   const query = useQuery({
-    retry: false,
-    refetchOnWindowFocus: false,
+    // retry: false,
+    // refetchOnWindowFocus: false,
     queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption],
     queryFn: isSearchMode
       ? ({ queryKey: [_, qry] }) =>
@@ -59,6 +59,8 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     },
     filters,
     paginationParameters(res) {
+      // setApiOption({_startAt:11})
+      console.log('res')
       setApiOption(res)
     },
     clear() {

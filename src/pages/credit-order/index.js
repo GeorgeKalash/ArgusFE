@@ -65,7 +65,7 @@ const CreditOrder = () => {
     return { ...response, _startAt: _startAt }
   }
   async function fetchWithSearch({ qry }) {
-    return await getRequest({
+return await getRequest({
       extension: CTTRXrepository.CreditOrder.snapshot,
       parameters: `_filter=${qry}`
     })
@@ -76,6 +76,7 @@ const CreditOrder = () => {
     labels: labels,
     paginationParameters,
     search,
+    refetch,
     clear,
     access
   } = useResourceQuery({
@@ -205,6 +206,7 @@ const CreditOrder = () => {
           onEdit={obj => {
             openFormWindow(obj.recordId, plantId)
           }}
+          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}
