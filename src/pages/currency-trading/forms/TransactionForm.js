@@ -230,39 +230,39 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     validateOnChange: true,
     validateOnBlur: true,
 
-    validate: values => {
-      const errors = {}
+    // validate: values => {
+    //   const errors = {}
 
-      const type = values.rows2 && values.rows2.every(row => !!row.type)
-      const amount = values.rows2 && values.rows2.every(row => !!row.amount)
-      const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
-      const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
-      const exRate = values.rows && values.rows.every(row => !!row.exRate)
-      if (values.rows) {
-        values.rows.forEach((row, index) => {
-          if (row.exRate > row.maxRate || row.exRate < row.minRate) {
-            if (!errors.rows[index]) {
-              errors.rows = {}
-            }
+    //   const type = values.rows2 && values.rows2.every(row => !!row.type)
+    //   const amount = values.rows2 && values.rows2.every(row => !!row.amount)
+    //   const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
+    //   const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
+    //   const exRate = values.rows && values.rows.every(row => !!row.exRate)
+    //   if (values.rows) {
+    //     values.rows.forEach((row, index) => {
+    //       if (row.exRate > row.maxRate || row.exRate < row.minRate) {
+    //         if (!errors.rows[index]) {
+    //           errors.rows = {}
+    //         }
 
-            errors.rows[index].exRate = 'exRate must be between minRate and maxRate' + row.exRate
-          }
-        })
-      }
-      if (!exRate && !lcAmount && !fcAmount)
-        errors.rows = Array(values.rows && values.rows.length).fill({
-          lcAmount: 'field is required',
-          fcAmount: 'field is required',
-          exRate: 'field is required'
-        })
-      if (!type && !amount)
-        errors.rows2 = Array(values.rows2 && values.rows2.length).fill({
-          amount: amount,
-          type: exRate
-        })
+    //         errors.rows[index].exRate = 'exRate must be between minRate and maxRate' + row.exRate
+    //       }
+    //     })
+    //   }
+    //   if (!exRate && !lcAmount && !fcAmount)
+    //     errors.rows = Array(values.rows && values.rows.length).fill({
+    //       lcAmount: 'field is required',
+    //       fcAmount: 'field is required',
+    //       exRate: 'field is required'
+    //     })
+    //   if (!type && !amount)
+    //     errors.rows2 = Array(values.rows2 && values.rows2.length).fill({
+    //       amount: amount,
+    //       type: exRate
+    //     })
 
-      return errors
-    },
+    //   return errors
+    // },
     validationSchema: yup.object({
       date: yup.string().required(),
       id_type: yup.number().required(),
@@ -285,9 +285,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
               recordId: yup.string().required('Currency recordId is required')
             })
             .required('Currency is required'),
-          rate: yup.number().nullable().required('Rate is required'),
-          fcAmount: yup.number().min(0.1).required('FcAmount is required'),
-          lcAmount: yup.number().min(0.1).required('LcAmount is required')
+          exRate: yup.string().nullable().required('Rate is required'),
+          fcAmount: yup.string().required('FcAmount is required'),
+          lcAmount: yup.string().required('LcAmount is required')
         })
       )
       .required('Operations array is required'),
@@ -298,10 +298,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           types: yup
             .object()
             .shape({
-              recordId: yup.string().required('Currency recordId is required')
+              key: yup.string().required('Currency recordId is required')
             })
             .required('Currency is required'),
-          amount: yup.number().nullable().required('amount is required')
+          amount: yup.string().nullable().required('amount is required')
 
         })
       )
@@ -311,7 +311,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     initialValues,
     onSubmit
   })
-
+console.log(formik)
   async function setOperationType(type) {
     if (type === '3502' || type === '3503') {
       const res = await getRequest({
@@ -822,6 +822,9 @@ console.log(formik)
                 onChange={value => formik.setFieldValue('rows', value)}
                 value={formik.values.rows}
                 error={formik.errors.rows}
+                bg={
+                  formik.values.functionId && (formik.values.functionId === '3503' ? '#C7F6C7' : 'rgb(245, 194, 193)')
+                }
 
                 // idName='seqNo'
                 columns={[
@@ -890,7 +893,7 @@ console.log(formik)
                     name: 'fcAmount',
                     async onChange({ row: { update, newRow } }) {
                     const fcAmount =  parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
-                      update({
+                    !isNaN(fcAmount) && update({
                         lcAmount: getFormattedNumber(newRow.exRate * fcAmount)
                       })
                     },
@@ -905,11 +908,10 @@ console.log(formik)
                       readOnly: false
                     },
                     async onChange({ row: { update, newRow } }) {
-                      console.log(newRow)
                       const fcAmount =  parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
 
                       if(newRow.exRate >= newRow.minRate  &&  newRow.exRate <= newRow.maxRate ){
-                      update({
+                        !isNaN(newRow.exRate * fcAmount) &&     update({
                         lcAmount: newRow.exRate * fcAmount
                       })
                       }else{

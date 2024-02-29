@@ -4,7 +4,7 @@ import { Box, Button, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 
-export function DataGrid({ idName = 'id', columns, value, error, onChange }) {
+export function DataGrid({ idName = 'id', columns, value, error, bg, onChange }) {
   async function processDependencies(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
@@ -85,7 +85,11 @@ export function DataGrid({ idName = 'id', columns, value, error, onChange }) {
       })
 
     if (nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
+      if(!error){
       addRow()
+     }else{
+      return;
+     }
 
     }
 
@@ -237,9 +241,11 @@ export function DataGrid({ idName = 'id', columns, value, error, onChange }) {
                   width: '100%',
                   height: '100%',
                   padding: '0 20px',
-                  backgroundColor: error?.[cell.rowIndex]?.[params.field] ? '#ff000050' : 'none',
+                   backgroundColor: bg,
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
+
                 }}
               >
                 <Component {...params} column={column} />
