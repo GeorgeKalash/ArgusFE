@@ -58,7 +58,7 @@ const CreditOrder = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CTTRXrepository.CreditOrder.qry,
+      extension: CTTRXrepository.CreditOrder.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -80,7 +80,7 @@ const CreditOrder = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CTTRXrepository.CreditOrder.qry,
+    endpointId: CTTRXrepository.CreditOrder.page,
     datasetId: ResourceIds.CreditOrder,
     search: {
       endpointId: CTTRXrepository.CreditOrder.snapshot,
@@ -89,7 +89,7 @@ const CreditOrder = () => {
   })
 
   const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditOrder.qry
+    endpointId: CTTRXrepository.CreditOrder.page
   })
 
   const add = async () => {

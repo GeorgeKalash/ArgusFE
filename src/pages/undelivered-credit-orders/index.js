@@ -25,7 +25,7 @@ const UndeliveredCreditOrder = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: CTTRXrepository.UndeliveredCreditOrder.qry,
+      extension: CTTRXrepository.UndeliveredCreditOrder.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=0`
     })
 
@@ -49,7 +49,7 @@ const UndeliveredCreditOrder = () => {
     filters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CTTRXrepository.UndeliveredCreditOrder.qry,
+    endpointId: CTTRXrepository.UndeliveredCreditOrder.page,
     datasetId: ResourceIds.CreditOrder,
     filter: {
       endpointId: CTTRXrepository.UndeliveredCreditOrder.snapshot,

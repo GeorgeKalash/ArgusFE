@@ -5,6 +5,7 @@ export const CTTRXrepository = {
     snapshot: service + 'snapshotCIV'
   },
   CreditOrder: {
+    page: service + 'pageORD',
     qry: service + 'qryORD',
     get: service + 'getORD',
     del: service + 'delORD',
@@ -16,6 +17,7 @@ export const CTTRXrepository = {
     qry: service + 'qryORI'
   },
   UndeliveredCreditOrder: {
+    page: service + 'pageORD2',
     qry: service + 'qryORD2',
     snapshot: service + 'snapshotORD2'
   }

@@ -434,13 +434,6 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
         if (parseFloat(row.rowData.exRate.toString().replace(/,/g, '')) > 0) {
-          const exchange = await getEXMCur({
-            plantId: plantId ?? formik.values.plantId,
-            toCurrency: toCurrency ?? '',
-            fromCurrency: row.rowData.currencyId ?? '',
-            rateType: rateType ?? ''
-          })
-
           const minRate = parseFloat(row.rowData?.minRate.toString().replace(/,/g, ''))
           const maxRate = parseFloat(row.rowData?.maxRate.toString().replace(/,/g, ''))
 
