@@ -73,7 +73,7 @@ const CreditOrder = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels: labels,
     paginationParameters,
     search,
     clear,
@@ -121,14 +121,14 @@ const CreditOrder = () => {
     stack({
       Component: CreditOrderForm,
       props: {
-        _labels,
+        labels,
         maxAccess: access,
         plantId: plantId,
         recordId
       },
-      width: 900,
+      width: 950,
       height: 600,
-      title: _labels[1]
+      title: labels[1]
     })
   }
 
@@ -149,54 +149,54 @@ const CreditOrder = () => {
           onAdd={add}
           onSearch={search}
           onSearchClear={clear}
-          labels={_labels}
+          labels={labels}
           inputSearch={true}
         />
         <Table
           columns={[
             {
               field: 'reference',
-              headerName: _labels[4],
+              headerName: labels[4],
               flex: 1
             },
             {
               field: 'date',
-              headerName: _labels[2],
+              headerName: labels[2],
               flex: 1,
               valueGetter: ({ row }) => formatDateDefault(row?.date)
             },
             {
               field: 'plantRef',
-              headerName: _labels[3]
+              headerName: labels[3]
             },
             {
               field: 'corName',
-              headerName: _labels[5],
+              headerName: labels[5],
               flex: 1
             },
             {
               field: 'currencyRef',
-              headerName: _labels[8],
+              headerName: labels[8],
               flex: 1
             },
             {
               field: 'amount',
-              headerName: _labels[10],
+              headerName: labels[10],
               flex: 1
             },
             {
               field: 'rsName',
-              headerName: _labels[19],
+              headerName: labels[19],
               flex: 1
             },
             {
               field: 'statusName',
-              headerName: _labels[21],
+              headerName: labels[21],
               flex: 1
             },
             {
               field: 'wipName',
-              headerName: _labels[20],
+              headerName: labels[20],
               flex: 1
             }
           ]}

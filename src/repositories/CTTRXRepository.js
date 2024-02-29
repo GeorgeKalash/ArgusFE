@@ -11,7 +11,9 @@ export const CTTRXrepository = {
     del: service + 'delORD',
     snapshot: service + 'snapshotORD',
     set: service + 'set2ORD',
-    close: service + 'closeORD'
+    close: service + 'closeORD',
+    reopen: service + 'reopenORD',
+    tfr: service + 'transfer2ORD'
   },
   CreditOrderItem: {
     qry: service + 'qryORI'

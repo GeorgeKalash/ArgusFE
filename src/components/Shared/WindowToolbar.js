@@ -8,6 +8,7 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 const WindowToolbar = ({
   onSave,
   onPost,
+  onTFR,
   onClear,
   onInfo,
   onApply,
@@ -19,10 +20,12 @@ const WindowToolbar = ({
   smallBox = false,
   infoVisible = true,
   postVisible = false,
+  visibleTFR = false,
   isClosed = false,
   clientRelation,
   onClientRelation = false,
   isPosted = false,
+  isTFR = false,
   resourceId,
   setSelectedReport,
   selectedReport,
@@ -107,6 +110,11 @@ const WindowToolbar = ({
               {actionObj.title}
             </Button>
           ))}
+          {onTFR && visibleTFR && (
+            <Button onClick={onTFR} variant='contained' sx={{ mr: 1, mt: smallBox && 0 }} disabled={!isTFR}>
+              Transfer
+            </Button>
+          )}
           {onClear && (
             <Button onClick={onClear} sx={{ mr: 1 }} variant='contained'>
               Clear

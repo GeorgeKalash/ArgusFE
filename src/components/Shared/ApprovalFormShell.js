@@ -9,10 +9,16 @@ export default function ApprovalFormShell(props) {
     form,
     onPost,
     onClose,
+    onReopen,
     isClosed,
     editMode,
+    onTFR,
+    isTFR,
     hiddenClose = false,
+    hiddenApprove = false,
+    hiddenReopen = false,
     hiddenPost = false,
+    visibleTFR = false,
     ...remaining
   } = props
   const { stack } = useWindow()
@@ -33,11 +39,21 @@ export default function ApprovalFormShell(props) {
   const actions = [
     { action: onPost, title: 'Post', isDisabled: !editMode, isHidden: hiddenPost },
     { action: onClose, title: 'Close', isDisabled: isClosed || !editMode, isHidden: hiddenClose },
-    { action: onApproval, title: 'Approval', isDisabled: !isClosed, isHidden: hiddenClose }
+    { action: onReopen, title: 'reopen', isDisabled: !isClosed || !editMode, isHidden: hiddenReopen },
+    { action: onApproval, title: 'Approval', isDisabled: !isClosed, isHidden: hiddenApprove }
   ]
 
   return (
-    <FormShell actions={actions} form={form} isClosed={isClosed} editMode={editMode} {...remaining}>
+    <FormShell
+      actions={actions}
+      form={form}
+      isClosed={isClosed}
+      editMode={editMode}
+      visibleTFR={visibleTFR}
+      onTFR={onTFR}
+      isTFR={isTFR}
+      {...remaining}
+    >
       {children}
     </FormShell>
   )

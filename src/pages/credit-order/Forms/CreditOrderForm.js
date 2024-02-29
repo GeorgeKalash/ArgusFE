@@ -29,11 +29,13 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { FormatLineSpacing } from '@mui/icons-material'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-export default function CreditOrderForm({ _labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
+export default function CreditOrderForm({ labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
+  const [isTFR, setIsTFR] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -63,7 +65,8 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
     exRate: '',
     minRate: '',
     maxRate: '',
-    rateCalcMethod: ''
+    rateCalcMethod: '',
+    isTFRClicked: false
   })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -92,42 +95,45 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
         copy.status = copy.status === '' ? 1 : copy.status
         copy.amount = totalCUR
         copy.baseAmount = totalLoc
+        if (!formik.values.isTFRClicked) {
+          const updatedRows = detailsFormik.values.rows.map((orderDetail, index) => {
+            const seqNo = index + 1 // Adding 1 to make it 1-based index
 
-        const updatedRows = detailsFormik.values.rows.map((orderDetail, index) => {
-          const seqNo = index + 1 // Adding 1 to make it 1-based index
-
-          return {
-            ...orderDetail,
-            seqNo: seqNo,
-            orderId: formik.values.recordId || 0
-          }
-        })
-
-        if (updatedRows.length == 1 && updatedRows[0].currencyId == '') {
-          throw new Error('Grid not filled. Please fill the grid before saving.')
-        }
-
-        const resultObject = {
-          header: copy,
-          items: updatedRows
-        }
-
-        const res = await postRequest({
-          extension: CTTRXrepository.CreditOrder.set,
-          record: JSON.stringify(resultObject)
-        })
-
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-          formik.setFieldValue('recordId', res.recordId)
-          invalidate()
-          setEditMode(true)
-
-          const res2 = await getRequest({
-            extension: CTTRXrepository.CreditOrder.get,
-            parameters: `_recordId=${res.recordId}`
+            return {
+              ...orderDetail,
+              seqNo: seqNo,
+              orderId: formik.values.recordId || 0
+            }
           })
-          formik.setFieldValue('reference', res2.record.reference)
+
+          if (updatedRows.length == 1 && updatedRows[0].currencyId == '') {
+            throw new Error('Grid not filled. Please fill the grid before saving.')
+          }
+
+          const resultObject = {
+            header: copy,
+            items: updatedRows
+          }
+
+          const res = await postRequest({
+            extension: CTTRXrepository.CreditOrder.set,
+            record: JSON.stringify(resultObject)
+          })
+
+          if (res.recordId) {
+            toast.success('Record Updated Successfully')
+            formik.setFieldValue('recordId', res.recordId)
+            invalidate()
+            setEditMode(true)
+
+            const res2 = await getRequest({
+              extension: CTTRXrepository.CreditOrder.get,
+              parameters: `_recordId=${res.recordId}`
+            })
+            formik.setFieldValue('reference', res2.record.reference)
+          }
+        } else {
+          await onTFR()
         }
       } catch (error) {
         setErrorMessage(error)
@@ -187,6 +193,71 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
       if (res.recordId) {
         toast.success('Record Closed Successfully')
         setIsClosed(true)
+      }
+    } catch (error) {
+      setErrorMessage(error)
+    }
+  }
+
+  const onReopen = async () => {
+    try {
+      const recordId = formik.values.recordId
+
+      const releaseIndicatorResponse = await getRequest({
+        extension: DocumentReleaseRepository.ReleaseIndicator.get,
+        parameters: `_recordId=${recordId}`
+      })
+
+      if (releaseIndicatorResponse.record) {
+        if (releaseIndicatorResponse?.record?.isReleased == true) {
+          stackError({
+            message: `Document is released, cannot reopen.`
+          })
+        } else {
+          const obj = formik.values
+          const copy = { ...obj }
+
+          copy.date = formatDateToApi(copy.date)
+          copy.deliveryDate = formatDateToApi(copy.deliveryDate)
+          copy.wip = copy.wip === '' ? 1 : copy.wip
+          copy.status = copy.status === '' ? 1 : copy.status
+          copy.amount = totalCUR
+          copy.baseAmount = totalLoc
+
+          const res = await postRequest({
+            extension: CTTRXrepository.CreditOrder.reopen,
+            record: JSON.stringify(copy)
+          })
+          if (res.recordId) {
+            toast.success('Record Closed Successfully')
+            setIsClosed(false)
+          }
+        }
+      }
+    } catch (error) {
+      setErrorMessage(error)
+    }
+  }
+
+  const onTFR = async () => {
+    try {
+      const obj = formik.values
+      const copy = { ...obj }
+
+      copy.date = formatDateToApi(copy.date)
+      copy.deliveryDate = formatDateToApi(copy.deliveryDate)
+      copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.status = copy.status === '' ? 1 : copy.status
+      copy.amount = totalCUR
+      copy.baseAmount = totalLoc
+
+      const res = await postRequest({
+        extension: CTTRXrepository.CreditOrder.tfr,
+        record: JSON.stringify(copy)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        setIsTFR(true)
       }
     } catch (error) {
       setErrorMessage(error)
@@ -304,7 +375,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
   const columns = [
     {
       field: 'combobox',
-      header: _labels[8],
+      header: labels[8],
       name: 'currencyId',
       mandatory: true,
       store: currencyStore.list,
@@ -374,7 +445,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
     },
     {
       field: 'textfield',
-      header: _labels[9],
+      header: labels[9],
       name: 'currencyName',
       readOnly: true,
       width: 300,
@@ -382,7 +453,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
     },
     {
       field: 'numberfield',
-      header: _labels[14],
+      header: labels[14],
       name: 'qty',
       mandatory: true,
       width: 200,
@@ -417,7 +488,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
     },
     {
       field: 'numberfield',
-      header: _labels[22],
+      header: labels[22],
       name: 'defaultRate',
       readOnly: true,
       mandatory: true,
@@ -426,7 +497,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
     },
     {
       field: 'numberfield',
-      header: _labels[15],
+      header: labels[15],
       name: 'exRate',
       mandatory: true,
       width: 200,
@@ -564,6 +635,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
+          setIsTFR(res.record.releaseStatus === 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
@@ -587,19 +659,25 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
       maxAccess={maxAccess}
       editMode={editMode}
       onClose={onClose}
+      onReopen={onReopen}
       isClosed={isClosed}
+      hiddenReopen={!isClosed}
+      hiddenClose={isClosed}
       hiddenPost={true}
+      visibleTFR={true}
+      onTFR={onTFR}
+      isTFR={isTFR}
       previewReport={editMode}
     >
       <Grid container>
         <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
           {/* First Column */}
-          <Grid item xs={3} style={{ marginRight: '10px' }}>
+          <Grid item style={{ marginRight: '10px', width: '205px' }}>
             <CustomDatePicker
               name='date'
               required
               readOnly={isClosed}
-              label={_labels[2]}
+              label={labels[2]}
               value={formik?.values?.date}
               onChange={formik.setFieldValue}
               maxAccess={maxAccess}
@@ -610,11 +688,11 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
           </Grid>
 
           {/* Second Column */}
-          <Grid item style={{ marginRight: '10px', width: '420px' }}>
+          <Grid item style={{ marginRight: '10px', width: '465px' }}>
             <ResourceComboBox
               endpointId={SystemRepository.Plant.qry}
               name='plantId'
-              label={_labels[3]}
+              label={labels[3]}
               readOnly={true}
               values={formik.values}
               valueField='recordId'
@@ -629,10 +707,10 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
           </Grid>
 
           {/* Third Column */}
-          <Grid item style={{ marginRight: '10px', width: '190px' }}>
+          <Grid item style={{ marginRight: '10px', width: '207px' }}>
             <CustomTextField
               name='reference'
-              label={_labels[4]}
+              label={labels[4]}
               value={formik?.values?.reference}
               maxAccess={maxAccess}
               maxLength='30'
@@ -653,7 +731,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
                 valueField='reference'
                 displayField='name'
                 name='corId'
-                label={_labels[16]}
+                label={labels[16]}
                 form={formik}
                 required
                 valueShow='corRef'
@@ -683,7 +761,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
               <CustomDatePicker
                 name='deliveryDate'
                 readOnly={isClosed}
-                label={_labels[18]}
+                label={labels[18]}
                 value={formik?.values?.deliveryDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -705,13 +783,13 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
             <FormControlLabel
               value={SystemFunction.CurrencyCreditOrderPurchase}
               control={<Radio />}
-              label={_labels[6]}
+              label={labels[6]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
             <FormControlLabel
               value={SystemFunction.CurrencyCreditOrderSale}
               control={<Radio />}
-              label={_labels[7]}
+              label={labels[7]}
               disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
             />
           </RadioGroup>
@@ -759,7 +837,7 @@ export default function CreditOrderForm({ _labels, maxAccess, recordId, setError
           <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
             <CustomTextArea
               name='notes'
-              label={_labels[11]}
+              label={labels[11]}
               value={formik.values.notes}
               rows={3}
               maxAccess={maxAccess}
