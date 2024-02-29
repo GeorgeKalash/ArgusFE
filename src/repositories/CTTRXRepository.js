@@ -20,5 +20,16 @@ export const CTTRXrepository = {
     page: service + 'pageORD2',
     qry: service + 'qryORD2',
     snapshot: service + 'snapshotORD2'
+  },
+  CreditInvoice: {
+    qry: service + 'qryIVC',
+    get: service + 'getIVC',
+    del: service + 'delIVC',
+    snapshot: service + 'snapshotIVC',
+    set: service + 'set2IVC',
+    close: service + 'closeIVC'
+  },
+  CreditInvoiceItem: {
+    qry: service + 'qryIVI'
   }
 }

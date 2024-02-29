@@ -30,6 +30,9 @@ import CreditOrder from '../credit-order'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
+import { KVSRepository } from 'src/repositories/KVSRepository'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -108,29 +111,57 @@ const DocumentsOnHold = () => {
   }
   const { stack } = useWindow()
 
-  const { labels: _labelsCOMP, access: accessCOMP } = useResourceParams({
-    datasetId: ResourceIds.CreditOrder
-  })
-
-  const popupComponent = obj => {
-    //Calling the relevant component
-    /* let relevantComponent
-    let resourceId
-    if (obj.functionId == SystemFunction.CurrencyCreditOrderSale || SystemFunction.CurrencyCreditOrderPurchase) {
-      relevantComponent = CreditOrderForm
-      resourceId = ResourceIds.CreditOrder
-    }*/
-    stack({
-      Component: CreditOrderForm,
-      props: {
-        recordId: obj.recordId,
-        labels: _labelsCOMP,
-        maxAccess: accessCOMP
-      },
-      width: 900,
-      height: 600,
-      title: _labelsCOMP[1]
+  async function getLabels(datasetId) {
+    const res = await getRequest({
+      extension: KVSRepository.getLabels,
+      parameters: `_dataset=${datasetId}`
     })
+
+    return res.list ? Object.fromEntries(res.list.map(({ key, value }) => [key, value])) : {}
+  }
+
+  async function getAccess(resourceId) {
+    const res = await getRequest({
+      extension: AccessControlRepository.maxAccess,
+      parameters: `_resourceId=${resourceId}`
+    })
+
+    return res
+  }
+
+  const popupComponent = async obj => {
+    //Calling the relevant component
+    let relevantComponent
+    let labels
+    let relevantAccess
+
+    if (
+      obj.functionId == SystemFunction.CurrencyCreditOrderSale ||
+      obj.functionId == SystemFunction.CurrencyCreditOrderPurchase
+    ) {
+      relevantComponent = CreditOrderForm
+      labels = await getLabels(ResourceIds.CreditOrder)
+      relevantAccess = await getAccess(ResourceIds.CreditOrder)
+    }
+    if (obj.functionId == SystemFunction.CreditInvoiceSales || obj.functionId == SystemFunction.CreditInvoicePurchase) {
+      relevantComponent = CreditInvoiceForm
+      labels = await getLabels(ResourceIds.CreditInvoice)
+      relevantAccess = await getAccess(ResourceIds.CreditInvoice)
+    }
+
+    if (relevantComponent && labels && relevantAccess) {
+      stack({
+        Component: relevantComponent,
+        props: {
+          recordId: obj.recordId,
+          labels: labels,
+          maxAccess: relevantAccess
+        },
+        width: 900,
+        height: 600,
+        title: labels[1]
+      })
+    }
   }
 
   const search = inp => {
@@ -191,6 +222,7 @@ const DocumentsOnHold = () => {
           setSelectedRecordId={setSelectedRecordId}
           functionId={selectedFunctioId}
           seqNo={selectedSeqNo}
+          setWindowOpen={setWindowOpen}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
