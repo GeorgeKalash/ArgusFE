@@ -5,6 +5,7 @@ export const Module = {
   MultiCurrency: 32,
   Cash: 33,
   RecurringExpenses: 34,
+  CurrencyTrading: 35,
   Inventory: 41,
   Manufacturing: 42,
   FixedAssets: 43,

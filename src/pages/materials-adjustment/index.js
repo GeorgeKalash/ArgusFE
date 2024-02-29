@@ -35,15 +35,18 @@ const MaterialsAdjustment = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: InventoryRepository.MaterialsAdjustment.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_size=50&_params=&_dgId=0&_sortBy=recordId&_trxType=1`
     })
+
+    return {...response,  _startAt: _startAt}
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -125,7 +128,7 @@ const MaterialsAdjustment = () => {
 
   return (
     <>
-      <Box>
+      <Box sx={{mt:10}}>
         <Table
           columns={columns}
           gridData={data}
@@ -134,8 +137,8 @@ const MaterialsAdjustment = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          height={670}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Box>

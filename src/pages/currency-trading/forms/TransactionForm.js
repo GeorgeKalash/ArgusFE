@@ -44,7 +44,7 @@ export async function Country(getRequest) {
   return res.record.value
 }
 
-function FormField({ type, name, Component, valueField, onFocus,language,...rest }) {
+function FormField({ type, name, Component, valueField, onFocus, language, ...rest }) {
   const { formik, labels } = useContext(FormContext)
   const { getRequest } = useContext(RequestsContext)
 
@@ -77,20 +77,14 @@ function FormField({ type, name, Component, valueField, onFocus,language,...rest
         if (onFocus && (name == 'id_number' || name == 'search')) {
           onFocus(e.target.value)
         }
-        if (onFocus && (name == 'cell_phone' )) {
+        if (onFocus && name == 'cell_phone') {
           onFocus(e.target.value)
         }
-
-
       }}
       onClear={() => {
-        formik.setFieldValue(name ,  '' )
+        formik.setFieldValue(name, '')
       }}
-
-
-
-
-
+      
       // }}
       form={formik}
     />
@@ -162,8 +156,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const invalidate = useInvalidate({
     endpointId: 'CTTRX.asmx/pageCIV'
   })
-
-
 
   const initial1 = {
     rows: [
@@ -261,29 +253,28 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       const exRate = values.rows && values.rows.every(row => !!row.exRate)
       if (values.rows) {
         values.rows.forEach((row, index) => {
-          if (row.exRate > row.maxRate || row.exRate < row.minRate ) {
+          if (row.exRate > row.maxRate || row.exRate < row.minRate) {
             if (!errors.rows[index]) {
-              errors.rows = {};
+              errors.rows = {}
             }
 
-            errors.rows[index].exRate = 'exRate must be between minRate and maxRate' + row.exRate;
+            errors.rows[index].exRate = 'exRate must be between minRate and maxRate' + row.exRate
           }
-        });
+        })
       }
-    if(!exRate && !lcAmount && !fcAmount)
-      errors.rows =
-      Array(values.rows && values.rows.length).fill({
-        lcAmount: 'field is required',
-        fcAmount: 'field is required',
-        exRate : 'field is required'
-      })
-      if(!type && !amount)
+      if (!exRate && !lcAmount && !fcAmount)
+        errors.rows = Array(values.rows && values.rows.length).fill({
+          lcAmount: 'field is required',
+          fcAmount: 'field is required',
+          exRate: 'field is required'
+        })
+      if (!type && !amount)
         errors.rows2 = Array(values.rows2 && values.rows2.length).fill({
-              amount: amount,
-              type: exRate
-            })
+          amount: amount,
+          type: exRate
+        })
 
-        return errors ;
+      return errors
     },
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -319,8 +310,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   const [currencyStore, setCurrencyStore] = useState([])
-  const [showAsPasswordIDNumber, setShowAsPasswordIDNumber] = useState(false);
-  const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(false);
+  const [showAsPasswordIDNumber, setShowAsPasswordIDNumber] = useState(false)
+  const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(false)
 
   const fillType = () => {
     var parameters = `_filter=`
@@ -376,6 +367,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
       setCurrencyStore(response.list)
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function getData(id) {
@@ -471,7 +463,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   // })
 
   const CashFormik = useFormik({
-
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
@@ -506,6 +497,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     )
 
     formik.setFieldValue('rows2', initialValues.rows2)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [CashFormik.values])
 
   function onReset(e) {
@@ -570,7 +562,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       cellPhoneConfirm: '',
       otp: false
     })
-
 
     return
   }
@@ -722,7 +713,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       // Check if the response status is OK (200)
       const clientInfo = response && response.record
       if (!!clientInfo) {
-
         formik.setFieldValue('firstName', clientInfo.firstName)
         formik.setFieldValue('middleName', clientInfo.middleName)
         formik.setFieldValue('lastName', clientInfo.lastName)
@@ -739,7 +729,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
         // setIDInfoAutoFilled(true)
         setInfoAutoFilled(true)
-
       }
     } catch (error) {
       console.error('An error occurred:', error.message)
@@ -776,7 +765,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       editMode={editMode}
       disabledSubmit={Balance && true}
       previewReport={editMode}
-
     >
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
@@ -919,7 +907,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     async onChange(row) {
                       console.log(row?.newValue)
 
-                      if (row?.newValue !=='' && formik.values.rows[row.rowIndex].currencyId !== row.newValue) {
+                      if (row?.newValue !== '' && formik.values.rows[row.rowIndex].currencyId !== row.newValue) {
                         const exchange = await fetchRate({
                           currencyId: row.newValue
                         })
@@ -928,7 +916,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           stackError({
                             message: `Rate not defined for ${row.value}.`
                           })
-                          formik.setFieldValue(`rows[${row.rowIndex}].lcAmount`, '')
+                        formik.setFieldValue(`rows[${row.rowIndex}].lcAmount`, '')
 
                         if (exchange && row.newRowData.fcAmount) {
                           const exRate = exchange.rate
@@ -950,7 +938,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
                         formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
 
-
                         //  row.rowData.currencyId = row.newValue
                         //  row.rowData.exRate = exchange.exchangeRate.rate
                         //  row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
@@ -961,7 +948,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
                         formik.setFieldValue(`rows[${row.rowIndex}].minRate`, 0)
                         formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, 0)
-
                       }
 
                       //                       if(row.newValue !== formik.values.rows[row.rowIndex].currencyId && formik.values.rows[row.rowIndex].fcAmount){
@@ -1021,45 +1007,40 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       const {
                         rowIndex,
                         rowData: { minRate, maxRate, lcAmount, fcAmount },
-                        newValue, value
+                        newValue,
+                        value
                       } = e
                       const nv = parseFloat(newValue?.toString().replace(/,/g, ''))
                       const lc = parseFloat(lcAmount?.toString().replace(/,/g, ''))
                       const fc = parseFloat(fcAmount?.toString().replace(/,/g, ''))
 
-                   if(nv !==0){
-                      if( nv > 0 && nv !==''){
-                      if (nv >= minRate && nv <= maxRate) {
-                        formik.setFieldValue(`rows[${e.rowIndex}].exRate`, e.value)
+                      if (nv !== 0) {
+                        if (nv > 0 && nv !== '') {
+                          if (nv >= minRate && nv <= maxRate) {
+                            formik.setFieldValue(`rows[${e.rowIndex}].exRate`, e.value)
 
-                        if (fc && nv) {
-                          formik.setFieldValue(`rows[${rowIndex}].lcAmount`, fc * nv)
-                        } else if (lc && nv) {
-                          formik.setFieldValue(`rows[${e.rowIndex}].fcAmount`, lc / nv)
+                            if (fc && nv) {
+                              formik.setFieldValue(`rows[${rowIndex}].lcAmount`, fc * nv)
+                            } else if (lc && nv) {
+                              formik.setFieldValue(`rows[${e.rowIndex}].fcAmount`, lc / nv)
+                            }
+                          } else {
+                            if (formik.values.rows[e.rowIndex].exRate)
+                              stackError({
+                                message: `Rate not in the [${minRate}-${maxRate}]range.`
+                              })
+                            formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                            formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
+                          }
+                        } else {
+                          console.log(nv)
+                          !isNaN(nv) && formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                          !isNaN(nv) && formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
                         }
                       } else {
-
-                            if(formik.values.rows[e.rowIndex].exRate)
-                             stackError({
-                              message: `Rate not in the [${minRate}-${maxRate}]range.`
-                            })
-                               formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
-                              formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
-
-                      }}else{
-
-                        console.log(nv)
-                       !isNaN(nv)  && formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
-                       !isNaN(nv) && formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
-
+                        formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
+                        formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
                       }
-
-                    }else{
-                       formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
-                       formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
-
-
-                    }
                     }
                   },
 
@@ -1093,7 +1074,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         fcAmount = fcAmount / exRate
                         fcAmount && formik.setFieldValue(`rows[${rowIndex}].fcAmount`, fcAmount)
                       }
-
                     }
                   }
                 ]}
@@ -1116,16 +1096,15 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 <Grid item xs={7}>
                   <FormField
                     name='id_number'
-                    type={showAsPasswordIDNumber &&  formik.values['id_number'] ? "password" : "text"}
-
+                    type={showAsPasswordIDNumber && formik.values['id_number'] ? 'password' : 'text'}
                     Component={CustomTextField}
                     onBlur={e => {
                       setShowAsPasswordIDNumber(true)
 
-                      if (e.target.value &&  e.target.value != idNumberOne) {
-                      checkTypes(e.target.value)
+                      if (e.target.value && e.target.value != idNumberOne) {
+                        checkTypes(e.target.value)
 
-                     fetchIDInfo({ idNumber: e.target.value })
+                        fetchIDInfo({ idNumber: e.target.value })
                           .then(IDInfo => {
                             if (!!IDInfo) {
                               formik.setFieldValue('issue_country', IDInfo.idCountryId)
@@ -1142,19 +1121,16 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                             console.error('Error fetching ID info:', error)
                           })
                       }
-
                     }}
                     onFocus={value => {
                       setShowAsPasswordIDNumber(false)
-                      value &&   setIdNumber(value)
+                      value && setIdNumber(value)
                     }}
-                    readOnly={editMode  || idInfoAutoFilled}
+                    readOnly={editMode || idInfoAutoFilled}
                     required
                   />
                 </Grid>
                 <Grid item xs={7}>
-
-
                   <CustomDatePicker
                     name='birth_date'
                     label={labels.birth_date}
@@ -1259,20 +1235,20 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    readOnly={editMode || idInfoAutoFilled }
+                    readOnly={editMode || idInfoAutoFilled}
                     required
                   />
                 </Grid>
 
                 <Grid item xs={12}>
                   <FormField
-                    type={showAsPasswordPhone &&  formik.values['cell_phone'] ? "password" : "text"}
+                    type={showAsPasswordPhone && formik.values['cell_phone'] ? 'password' : 'text'}
                     name='cell_phone'
                     Component={CustomTextField}
                     required
                     readOnly={editMode || idInfoAutoFilled}
-                    onBlur={(e) => {
-                        setShowAsPasswordPhone(true)
+                    onBlur={e => {
+                      setShowAsPasswordPhone(true)
                     }}
                     onFocus={value => {
                       setShowAsPasswordPhone(false)
@@ -1310,12 +1286,15 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       required
                       language='english'
-
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='middleName'  language='english' Component={CustomTextField}                     readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
- />
+                    <FormField
+                      name='middleName'
+                      language='english'
+                      Component={CustomTextField}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
@@ -1324,14 +1303,15 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       required
                       language='english'
-
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='familyName'   language='english'
- Component={CustomTextField}
-            readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
- />
+                    <FormField
+                      name='familyName'
+                      language='english'
+                      Component={CustomTextField}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    />
                   </Grid>
                 </Grid>
                 <Grid xs={12} container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
@@ -1349,12 +1329,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       Component={CustomTextField}
                       readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
-
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <FormField name='fl_lastName' Component={CustomTextField}                     readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
-/>
+                    <FormField
+                      name='fl_lastName'
+                      Component={CustomTextField}
+                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
@@ -1362,7 +1344,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       Component={CustomTextField}
                       readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
-
                     />
                   </Grid>
                 </Grid>
@@ -1400,7 +1381,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         { key: 'name', value: 'Name' }
                       ]}
                       readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
-                      />
+                    />
                   </Grid>
 
                   <Grid item xs={12}>
@@ -1416,7 +1397,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         { key: 'name', value: 'Name' }
                       ]}
                       readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
-                      />
+                    />
                   </Grid>
 
                   <Grid item xs={12}>
@@ -1453,7 +1434,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       nameId: 'type',
                       name: 'typeName',
 
-                      store: formik.values.functionId ==='3502' ? typeStore.filter((item)=>item.key ==="2"): typeStore,
+                      store:
+                        formik.values.functionId === '3502' ? typeStore.filter(item => item.key === '2') : typeStore,
                       mandatory: true,
                       widthDropDown: '300',
                       columnsInDropDown: [{ key: 'value', value: 'Value' }]
