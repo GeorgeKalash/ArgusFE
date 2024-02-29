@@ -17,6 +17,9 @@ export default function FormShell({
   infoVisible = true,
   postVisible = false,
   resourceId,
+  functionId,
+  recordId,
+  
   aliComponentVisible=false,
   maxAccess,
   isPosted = false,
@@ -80,10 +83,15 @@ export default function FormShell({
             stack({
               Component: RecordDetailComponent,
               props: {
-                recordId: form.values.recordId, 
+                formValues:form.values,
+
+                recordId: form.values.recordId,
+                functionId:functionId,
+                
+                
               },
-              width: 500, 
-              height: 300,
+              width: 700, 
+              height: 600,
               title: 'Record Details'
             })
           }

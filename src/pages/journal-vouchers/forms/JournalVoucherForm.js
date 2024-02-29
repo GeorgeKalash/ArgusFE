@@ -120,8 +120,9 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             resourceId={ResourceIds.JournalVoucher }
             form={formik} 
             height={300} 
+            functionId={SystemFunction.JournalVoucher}
             maxAccess={maxAccess} 
-            aliComponentVisible={true}
+            aliComponentVisible={editMode}
             editMode={editMode}
         >
             <Grid container spacing={4}>
