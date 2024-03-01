@@ -3,9 +3,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function ResourceComboBoxEdit({ column: { props }, id, field, value }) {
   const api = useGridApiContext()
-console.log({
-  [field]: value
-})
 
 return (
     <ResourceComboBox
@@ -16,6 +13,7 @@ return (
       }}
       autoFocus
       columnsInDropDown={props.columnsInDropDown}
+      displayField={props.displayField}
       label={''}
       dataGrid={true}
       readOnly={props?.readOnly}

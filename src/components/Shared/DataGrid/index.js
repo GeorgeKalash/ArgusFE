@@ -3,8 +3,11 @@ import components from './components'
 import { Box, Button, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
+import DeleteDialog from '../DeleteDialog'
 
-export function DataGrid({ idName = 'id', columns, value, error, bg, onChange }) {
+export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange }) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
+
   async function processDependencies(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
@@ -25,6 +28,8 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
   }
 
   function handleChange(row) {
+        console.log('onchange')
+
     const newRows = [...value]
     const index = newRows.findIndex(({ id }) => id === row.id)
     newRows[index] = row
@@ -58,6 +63,8 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
   }
 
   const handleCellKeyDown = (params, event) => {
+
+    console.log(params, event)
     if (event.key === 'Enter') {
       event.stopPropagation()
 
@@ -67,7 +74,6 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
     if (event.key !== 'Tab') {
       return
     }
-     console.log(params, event)
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
     const visibleColumns = apiRef.current.getVisibleColumns()
 
@@ -76,6 +82,14 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
     const currentCell = { ...nextCell }
 
 
+    if (nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
+      if (error){
+      event.stopPropagation()
+
+      return
+      }
+
+    }
     if (
       apiRef.current.getCellMode(rowIds[currentCell.rowIndex], visibleColumns[currentCell.columnIndex].field) === 'edit'
     )
@@ -85,11 +99,8 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
       })
 
     if (nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
-      if(!error){
+
       addRow()
-     }else{
-      return;
-     }
 
     }
 
@@ -139,6 +150,7 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
   }
 
   function addRow() {
+
     const highestIndex = value.reduce((max, current) => (max[idName] > current[idName]? max : current))[idName] + 1
 
 
@@ -169,7 +181,7 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
     width: '100',
     renderCell({ id }) {
       return (
-          <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => deleteRow(id)}>
+          <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
             <GridDeleteIcon />
           </IconButton>
       )
@@ -180,10 +192,40 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
 
   const { stack } = useError()
 
-  return (
+
+  async function update({ id, field, value }) {
+    const row = apiRef.current.getRow(id)
+
+    apiRef.current.setEditCellValue({
+      id,
+      field,
+      value
+    })
+
+    const updatedRow = await processDependencies(
+      {
+        ...row,
+        [field]: value
+      },
+      row,
+      {
+        id,
+        field
+      }
+    )
+
+    apiRef.current.updateRows([updatedRow])
+
+    handleChange(updatedRow, row)
+  }
+
+return (
+    <Box sx={{ height: height ? height : 'auto', width: '100%', overflow: 'auto' }}> {/* Container with scroll */}
+
     <MUIDataGrid
       hideFooter
-      autoHeight
+      autoHeight={height ? false : true}
+      autoWidth
       disableColumnFilter
       disableColumnMenu
       disableColumnSelector
@@ -198,7 +240,8 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
       processRowUpdate={async (newRow, oldRow) => {
         setIsUpdating(true)
         const updated = await processDependencies(newRow, oldRow, currentEditCell.current)
-
+        console.log(updated)
+        console.log(oldRow, newRow )
         const change = handleChange(updated, oldRow)
 
         setIsUpdating(false)
@@ -211,7 +254,8 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
         )
         console.error('[Datagrid - ERROR]: Please handle all errors inside onChange of your respective field.')
         console.error('[Datagrid - ERROR]:', e)
-        stack({ message: 'Error occured while updating row.' })
+
+        // stack({ message: 'Error occured while updating row.' })
       }}
       onCellKeyDown={handleCellKeyDown}
       rows={value}
@@ -241,7 +285,7 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
                   width: '100%',
                   height: '100%',
                   padding: '0 20px',
-                   backgroundColor: bg,
+                  backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
                   border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
@@ -266,7 +310,7 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
                   alignItems: 'center'
                 }}
               >
-                <Component {...params} column={column} isLoading={isUpdatingField} />
+                <Component {...params} column={column} update={update} isLoading={isUpdatingField} />
               </Box>
             )
           }
@@ -274,5 +318,14 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, onChange })
         actionsColumn
       ]}
     />
+    <DeleteDialog
+            open={deleteDialogOpen}
+            onClose={() => setDeleteDialogOpen([false, {}])}
+            onConfirm={obj => {
+              setDeleteDialogOpen([false, {}])
+              deleteRow(obj)
+            }}
+          />
+    </Box>
   )
 }

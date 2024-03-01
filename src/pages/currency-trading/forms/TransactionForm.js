@@ -31,6 +31,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { Box } from '@mui/system'
 
 const FormContext = React.createContext(null)
 
@@ -311,7 +312,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     initialValues,
     onSubmit
   })
-console.log(formik)
+
+// console.log(formik)
   async function setOperationType(type) {
     if (type === '3502' || type === '3503') {
       const res = await getRequest({
@@ -687,16 +689,8 @@ console.log(formik)
 
     return response.record
   }
-console.log(formik)
-  async function getRate({ currencyId }) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (currencyId === 2) resolve(14.2)
-        else if (currencyId == 162) resolve(2)
-        else reject(new Error('Currency rate not found.'))
-      }, 1000)
-    })
-  }
+
+
 
   return (
     <ApprovalFormShell
@@ -815,31 +809,30 @@ console.log(formik)
             </Grid>
           </FieldSet>
           <FieldSet title='Operations'>
-            <Grid item xs={12}>
-
-
+            <Grid>
                <DataGrid
                 onChange={value => formik.setFieldValue('rows', value)}
                 value={formik.values.rows}
                 error={formik.errors.rows}
+                height={300}
                 bg={
                   formik.values.functionId && (formik.values.functionId === '3503' ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
 
                 // idName='seqNo'
                 columns={[
-                  {
-                    component: 'id',
-                    name: 'id',
-                    width: 50
-                  },
+                  // {
+                  //   component: 'id',
+                  //   name: 'id',
+                  //   width: 50
+                  // },
                   {
                     component: 'resourcecombobox',
                     label: labels.currency,
                     name: 'currency',
                     props: {
                       endpointId: SystemRepository.Currency.qry,
-                      displayField: 'name',
+                      displayField: ['reference', 'name'],
                       valueField:  'recordId',
                       columnsInDropDown: [
                         { key: "reference", value: "Reference" },
@@ -892,9 +885,10 @@ console.log(formik)
                     label: labels.fcAmount,
                     name: 'fcAmount',
                     async onChange({ row: { update, newRow } }) {
+
                     const fcAmount =  parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
                     !isNaN(fcAmount) && update({
-                        lcAmount: getFormattedNumber(newRow.exRate * fcAmount)
+                        lcAmount: newRow.exRate * fcAmount
                       })
                     },
                     width: 200,
@@ -926,7 +920,7 @@ console.log(formik)
                     }
                     },
                     width: 200,
-                    defaultValue: 0
+                    defaultValue: ''
                   },
                   {
                     component: 'numberfield',
@@ -939,13 +933,13 @@ console.log(formik)
                       const lcAmount =  parseFloat(newRow.lcAmount?.toString().replace(/,/g, ''))
 
                       newRow.exRate && update({
-                        fcAmount: getFormattedNumber(lcAmount / newRow.exRate)
+                        fcAmount: lcAmount / newRow.exRate
                       })
 
 
                     },
                     width: 200,
-                    defaultValue: 0
+                    defaultValue: ''
                   }
                 ]}
               />
@@ -1266,7 +1260,10 @@ console.log(formik)
           </FieldSet>
           <FieldSet title='Amount'>
             <Grid container xs={12} spacing={4}>
-              <Grid item xs={9} spacing={4}>
+              <Grid item  xs={9} spacing={4}>
+              <Grid container xs={12} spacing={4}>
+              <Grid >
+
 
             <DataGrid
                 onChange={value => formik.setFieldValue('rows2', value)}
@@ -1338,6 +1335,8 @@ console.log(formik)
                 ]}
               />
 
+            </Grid>
+            </Grid>
               </Grid>
 
               <Grid container xs={3} spacing={2} sx={{ p: 4 }}>

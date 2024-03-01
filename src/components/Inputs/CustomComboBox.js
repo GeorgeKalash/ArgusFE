@@ -54,50 +54,30 @@ const CustomComboBox = ({
 
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={option => {
-        if (columnsInDropDown || typeof displayField == 'object') {
-          if (value) {
-            const selectedOption = store.find(item => item[valueField] === option[valueField])
-            if (selectedOption) var text = ''
+        if (typeof option === 'object') {
+          // Check if the option is an object
+          if (Array.isArray(displayField)) {
+            // Check if displayField is an array
+            let text = '';
+            displayField.forEach(header => {
+              if (option[header]) {
+                text += `${option[header]} `;
+              } else {
+                text += `${header} `;
+              }
+            });
 
-            if (typeof displayField == 'object') {
-              displayField.forEach(header => {
-                if (option[header]) {
-                  text += `${option[header]} `
-                } else {
-                  text += `${header} `
-                }
-              })
-
-              return text
-            }
-
-            if (selectedOption) return selectedOption[displayField]
-            else return ''
-          }
-          if (typeof option === 'object') {
-            // Check if the option is an object and has multiple fields
-            if (columnsInDropDown && columnsInDropDown.length > 0) {
-              let search = ''
-              columnsInDropDown.forEach(header => {
-                search += `${option[header.key]} `
-              })
-
-              return search.trim() // Trim to remove extra spaces
-            } else {
-              // If no multiple fields, use the specified displayField
-              return `${option[displayField]}`
-            }
+            return text.trim(); // Trim to remove extra spaces
           } else {
-            // If the option is not an object, find the selected option in the store
-            const selectedOption = store.find(item => item[valueField] === option)
-            if (selectedOption) return selectedOption[displayField]
-            else return ''
+            // If displayField is not an array, use it directly
+            return option[displayField] || '';
           }
         } else {
-          if (typeof option === 'object') return option[displayField]
-          else return option
+          // If the option is not an object, return the option itself
+          return option;
         }
       }}
+
       getOptionLabels={option => {
         if (option.length == 1) {
         }

@@ -595,7 +595,6 @@ console.log(parameters)
       unitNo: address.unitNo,
       subNo: address.subNo,
     };
-console.log(obj6)
 
     const data = {
       plantId: clientIndividualFormik.values.plantId || 3,

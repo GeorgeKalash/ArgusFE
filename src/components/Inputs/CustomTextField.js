@@ -55,20 +55,23 @@ const CustomTextField = ({
       e.target.value = truncatedValue;
       props?.onChange(e);
     }
+
     if (phone) {
       const truncatedValue = inputValue.slice(0, maxLength);
       e.target.value = truncatedValue?.replace(/\D/g, '');
       props?.onChange(e);
     }
+    if (language ==='number') {
+      e.target.value = inputValue?.replace(/[^0-9]/g, '');
+      props?.onChange(e);
+    }
     if (language ==='arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '');
-      console.log("e.target.value" , e.target.value)
       props?.onChange(e);
     }
 
     if (language ==='english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '');
-      console.log("e.target.value" , e.target.value)
       props?.onChange(e);
     }
   };
