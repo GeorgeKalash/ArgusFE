@@ -10,6 +10,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 // ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -47,7 +48,7 @@ const CreditOrder = () => {
 
       return ''
     } catch (error) {
-      setErrorMessage(error)
+      throw new Error(error)
       setPlantId('')
 
       return ''
@@ -98,7 +99,7 @@ const CreditOrder = () => {
     if (plantId !== '') {
       openFormWindow(null, plantId)
     } else {
-      setErrorMessage({ error: 'The user does not have a default plant' })
+      throw new Error('The user does not have a default plant')
     }
   }
 
@@ -109,7 +110,7 @@ const CreditOrder = () => {
         if (plantId !== '') {
           openForm('', plantId)
         } else {
-          setErrorMessage({ error: 'The user does not have a default plant' })
+          throw new Error('The user does not have a default plant')
         }
       } catch (error) {
         console.error(error)
@@ -183,7 +184,8 @@ const CreditOrder = () => {
             {
               field: 'amount',
               headerName: labels[10],
-              flex: 1
+              flex: 1,
+              valueGetter: ({ row }) => getFormattedNumber(row?.amount)
             },
             {
               field: 'rsName',

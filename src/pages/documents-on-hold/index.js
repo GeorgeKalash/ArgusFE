@@ -158,7 +158,7 @@ const DocumentsOnHold = () => {
           labels: labels,
           maxAccess: relevantAccess
         },
-        width: 900,
+        width: 950,
         height: 600,
         title: labels[1]
       })

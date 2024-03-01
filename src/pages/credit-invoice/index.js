@@ -14,6 +14,7 @@ import { useWindow } from 'src/windows'
 // ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditInvoiceForm from './Forms/CreditInvoiceForm'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -46,7 +47,7 @@ const CreditInvoice = () => {
 
       return ''
     } catch (error) {
-      setErrorMessage(error)
+      throw new Error(error)
       setPlantId('')
 
       return ''
@@ -73,7 +74,8 @@ const CreditInvoice = () => {
     labels: _labels,
     search,
     clear,
-    access
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CTTRXrepository.CreditInvoice.qry,
@@ -93,7 +95,7 @@ const CreditInvoice = () => {
     if (plantId !== '') {
       openFormWindow(null, plantId)
     } else {
-      setErrorMessage({ error: 'The user does not have a default plant' })
+      throw new Error('The user does not have a default plant')
     }
   }
 
@@ -104,7 +106,7 @@ const CreditInvoice = () => {
         if (plantId !== '') {
           openForm('', plantId)
         } else {
-          setErrorMessage({ error: 'The user does not have a default plant' })
+          throw new Error('The user does not have a default plant')
         }
       } catch (error) {
         console.error(error)
@@ -183,21 +185,12 @@ const CreditInvoice = () => {
             {
               field: 'amount',
               headerName: _labels[10],
-              flex: 1
-            },
-            {
-              field: 'rsName',
-              headerName: _labels[19],
-              flex: 1
+              flex: 1,
+              valueGetter: ({ row }) => getFormattedNumber(row?.amount)
             },
             {
               field: 'statusName',
               headerName: _labels[21],
-              flex: 1
-            },
-            {
-              field: 'wipName',
-              headerName: _labels[20],
               flex: 1
             }
           ]}
@@ -210,6 +203,7 @@ const CreditInvoice = () => {
           isLoading={false}
           pageSize={50}
           maxAccess={access}
+          refetch={refetch}
           paginationType='client'
         />
       </Box>

@@ -32,7 +32,7 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErrorMessage, expanded, plantId }) {
+export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
@@ -124,7 +124,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
         if (res.recordId) {
           toast.success('Record Updated Successfully')
           formik.setFieldValue('recordId', res.recordId)
-          invalidate()
           setEditMode(true)
 
           const res2 = await getRequest({
@@ -132,9 +131,10 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
             parameters: `_recordId=${res.recordId}`
           })
           formik.setFieldValue('reference', res2.record.reference)
+          invalidate()
         }
       } catch (error) {
-        setErrorMessage(error)
+        throw new Error(error)
       }
     }
   })
@@ -192,7 +192,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
         setIsClosed(true)
       }
     } catch (error) {
-      setErrorMessage(error)
+      throw new Error(error)
     }
   }
 
@@ -220,7 +220,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
         setCurrencyStore(res)
       })
     } catch (error) {
-      setErrorMessage(error)
+      throw new Error(error)
     }
   }
 
@@ -509,7 +509,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
         })
       })
     } catch (error) {
-      setErrorMessage(error)
+      throw new Error(error)
     }
   }
 
@@ -550,7 +550,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
         setBaseCurrencyRef(res.record.reference)
       })
     } catch (error) {
-      setErrorMessage(error)
+      throw new Error(error)
     }
   }
 
@@ -574,7 +574,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
         }
       } catch (error) {
-        //  setErrorMessage(error)
+        throw new Error(error)
       } finally {
         setIsLoading(false)
       }
@@ -591,6 +591,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
       editMode={editMode}
       onClose={onClose}
       isClosed={isClosed}
+      hiddenApprove={true}
       hiddenPost={true}
     >
       <Grid container>
@@ -693,7 +694,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
             form={formik}
             valueShow='cashAccountRef'
             secondValueShow='cashAccountName'
-            readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+            readOnly={isClosed}
             onChange={(event, newValue) => {
               if (newValue) {
                 formik.setFieldValue('cashAccountId', newValue?.recordId)
@@ -774,6 +775,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, setErr
               value={formik.values.notes}
               rows={3}
               maxAccess={maxAccess}
+              readOnly={isClosed}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('notes', '')}
               error={formik.touched.notes && Boolean(formik.errors.notes)}

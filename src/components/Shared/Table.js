@@ -127,7 +127,7 @@ const Table = ({
   const CustomPagination = () => {
     if (pagination) {
       if (paginationType === 'api' && gridData) {
-        const startAt = gridData._startAt
+        const startAt = gridData._startAt ?? 0
         const totalRecords = gridData?.count ? gridData?.count : 0
 
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)

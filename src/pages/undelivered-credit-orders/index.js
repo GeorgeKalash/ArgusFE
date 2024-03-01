@@ -174,7 +174,13 @@ const UndeliveredCreditOrder = () => {
           maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType={
+            (filters.qry && !filters.corId) || (filters.corId && !filters.qry) || (filters.qry && filters.corId)
+              ? 'client'
+              : filters.qry && filters.corId
+              ? 'api'
+              : 'api'
+          }
         />
       </Box>
 
