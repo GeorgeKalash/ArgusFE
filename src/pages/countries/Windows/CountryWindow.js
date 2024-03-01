@@ -1,6 +1,5 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CountryForm from 'src/pages/countries/forms/CountryForm'
 
 
@@ -14,13 +13,11 @@ const CountryWindow = ({
     return (
         <>
         <Window id='CountryWindow' Title={_labels.country} controlled={true} onClose={onClose} width={600} height={400} >
-            <CustomTabPanel>
-                <CountryForm
-                    _labels={_labels}
-                    maxAccess={maxAccess}
-                    recordId={recordId}
-                />
-            </CustomTabPanel>
+            <CountryForm
+                _labels={_labels}
+                maxAccess={maxAccess}
+                recordId={recordId}
+            />
         </Window>
     </>
   )
