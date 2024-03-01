@@ -58,7 +58,7 @@ const CreditInvoice = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: CTTRXrepository.CreditInvoice.qry,
+      extension: CTTRXrepository.CreditInvoice.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
@@ -78,7 +78,7 @@ const CreditInvoice = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CTTRXrepository.CreditInvoice.qry,
+    endpointId: CTTRXrepository.CreditInvoice.page,
     datasetId: ResourceIds.CreditInvoice,
     search: {
       endpointId: CTTRXrepository.CreditInvoice.snapshot,
@@ -87,7 +87,7 @@ const CreditInvoice = () => {
   })
 
   const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditInvoice.qry
+    endpointId: CTTRXrepository.CreditInvoice.page
   })
 
   const add = async () => {

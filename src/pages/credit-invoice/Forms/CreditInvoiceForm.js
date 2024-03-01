@@ -72,7 +72,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditInvoice.qry
+    endpointId: CTTRXrepository.CreditInvoice.page
   })
 
   const formik = useFormik({
@@ -593,6 +593,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       isClosed={isClosed}
       hiddenApprove={true}
       hiddenPost={true}
+      hiddenReopen={!isClosed}
+      hiddenClose={isClosed}
     >
       <Grid container>
         <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
@@ -652,7 +654,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={RemittanceSettingsRepository.Correspondent.qry}
+                endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                 valueField='reference'
                 displayField='name'
                 name='corId'

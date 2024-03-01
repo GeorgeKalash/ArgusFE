@@ -111,7 +111,8 @@ const WindowToolbar = ({
                   '&:hover': { backgroundColor: actionObj.colorHover },
                   width: 20,
                   height: 35,
-                  objectFit: 'contain'
+                  objectFit: 'contain',
+                  border: actionObj.border
                 }}
                 style={{ display: actionObj.isHidden ? 'none' : 'block' }}
                 disabled={actionObj.isDisabled}
@@ -122,9 +123,24 @@ const WindowToolbar = ({
           ))}
 
           {onTFR && visibleTFR && (
-            <Button onClick={onTFR} variant='contained' sx={{ mr: 1, mt: smallBox && 0 }} disabled={!isTFR}>
-              Transfer
-            </Button>
+            <Tooltip title='Invoice'>
+              <Button
+                onClick={onTFR}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  mt: smallBox && 0,
+                  backgroundColor: '#231f20',
+                  '&:hover': { backgroundColor: '#080707' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
+                }}
+                disabled={!isTFR}
+              >
+                <img src='/images/buttonsIcons/invoice.png' alt='Invoice' />
+              </Button>
+            </Tooltip>
           )}
 
           {onClear && (

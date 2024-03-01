@@ -81,7 +81,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
   })
 
   const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditOrder.qry
+    endpointId: CTTRXrepository.CreditOrder.page
   })
 
   const formik = useFormik({
@@ -758,7 +758,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
               <Grid item xs={12}>
                 <ResourceLookup
-                  endpointId={RemittanceSettingsRepository.Correspondent.qry}
+                  endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                   valueField='reference'
                   displayField='name'
                   name='corId'

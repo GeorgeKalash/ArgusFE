@@ -50,10 +50,19 @@ export default function ApprovalFormShell(props) {
       title: 'Close',
       isDisabled: isClosed || !editMode,
       isHidden: hiddenClose,
-      color: '#231f20',
-      colorHover: '#241c1e'
+      color: 'transparent',
+      colorHover: 'transparent',
+      border: '1px solid #01a437'
     },
-    { action: onReopen, title: 'reopen', isDisabled: !isClosed || !editMode, isHidden: hiddenReopen },
+    {
+      action: onReopen,
+      title: 'reopen',
+      isDisabled: !isClosed || !editMode,
+      isHidden: hiddenReopen,
+      color: 'transparent',
+      colorHover: 'transparent',
+      border: '1px solid #000000'
+    },
     {
       action: onApproval,
       title: 'Approval',
