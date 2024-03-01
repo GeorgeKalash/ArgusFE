@@ -18,14 +18,12 @@ const CurrencyWindow = ({
         width={600}
         height={400}
         >
-             <CustomTabPanel>
-               <CurrencyForm
-                  labels={labels}
-                  maxAccess={maxAccess}
-                  recordId={recordId}
-               />
-               </CustomTabPanel>
-            </Window> 
+            <CurrencyForm
+                labels={labels}
+                maxAccess={maxAccess}
+                recordId={recordId}
+            />
+        </Window> 
          )
     }
     
