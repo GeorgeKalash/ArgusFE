@@ -43,7 +43,7 @@ export const GeneralLedgerRepository = {
       get: service + 'getJV',
       set: service + 'setJV',
       del: service + 'delJV',
-    },RecordDetailComponent:{
+    },GeneralLedger:{
       qry: service + 'qryTRX',
       get: service + 'getTRX',
       set: service + 'setTRX',

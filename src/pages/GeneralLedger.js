@@ -8,8 +8,10 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
+import newTable from 'src/components/Shared/newTable'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -31,7 +33,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
-const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
+const GeneralLedger =({ labels,recordId ,functionId,formValues}) => {
     const { getRequest, postRequest } = useContext(RequestsContext)
     const [formik, setformik] = useState(null);
      const [tableData, setTableData] = useState([]);
@@ -45,7 +47,7 @@ const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
       const { _startAt = 0, _pageSize = 50 } = options
   
       return await getRequest({
-        extension: GeneralLedgerRepository.RecordDetailComponent.qry,
+        extension: GeneralLedgerRepository.GeneralLedger.qry,
         parameters: `_functionId=${functionId}&_recordId=${recordId}`
       })
     }
@@ -64,20 +66,20 @@ const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
       access
     } = useResourceQuery({
       queryFn: fetchGridData,
-      endpointId: GeneralLedgerRepository.RecordDetailComponent.qry,
-      datasetId: ResourceIds.RecordDetailComponent
+      endpointId: GeneralLedgerRepository.GeneralLedger.qry,
+      datasetId: ResourceIds.GeneralLedger
     })
 
 
   
     const invalidate = useInvalidate({
-      endpointId: GeneralLedgerRepository.RecordDetailComponent.qry
+      endpointId: GeneralLedgerRepository.GeneralLedger.qry
     })
   
     const columns = [
       {
         field:'accountRef',
-        headerName : _labels.accountref,
+        headerName : _labels.accountRef,
         flex: 1
       },
       {
@@ -87,16 +89,16 @@ const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
       },
       {
         field: 'tpAccountRef',
-        headerName: _labels.tpAccountRef,
+        headerName: _labels.thirdPartyRef,
         flex: 1,
         
       },{
         field:"tpAccountName",
-        headerName:_labels.tpAccountName,
+        headerName:_labels.thirdPartyName,
         flex:1
       },{
         field:"currencyRef",
-        headerName:_labels.currencyRef,
+        headerName:_labels.currency,
         flex:1
       },{
         field:"sign",
@@ -119,11 +121,39 @@ const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
         flex:1
       },{
         field:"baseAmount",
-        headerName:_labels.amount,
+        headerName:_labels.base,
         flex:1
       }
 
     ]
+    useEffect(() => {
+      if (data && data.list && Array.isArray(data.list)) {
+        // Base Grid Calculations
+        const baseCredit = data.list.reduce((acc, curr) => curr.sign === 2 ? acc + parseFloat(curr.amount || 0) : acc, 0);
+        const baseDebit = data.list.reduce((acc, curr) => curr.sign === 1 ? acc + parseFloat(curr.amount || 0) : acc, 0);
+        const baseBalance = baseDebit - baseCredit;
+        console.log(`Base Grid - Credit: ${baseCredit}, Debit: ${baseDebit}, Balance: ${baseBalance}`);
+        
+        // Currency Grid Calculations
+        const currencyTotals = data.list.reduce((acc, curr) => {
+          if (!acc[curr.currencyRef]) {
+            acc[curr.currencyRef] = { credit: 0, debit: 0 };
+          }
+          if (curr.sign === 2) {
+            acc[curr.currencyRef].credit += parseFloat(curr.amount || 0);
+          } else if (curr.sign === 1) {
+            acc[curr.currencyRef].debit += parseFloat(curr.amount || 0);
+          }
+          
+          return acc;
+        }, {});
+        
+        Object.entries(currencyTotals).forEach(([currency, { credit, debit }]) => {
+          const balance = debit - credit;
+          console.log(`Currency Grid - Currency: ${currency}, Credit: ${credit}, Debit: ${debit}, Balance: ${balance}`);
+        });
+      }
+    }, [data]);
 
     return (
       <>
@@ -133,15 +163,15 @@ const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
               <Grid item xs={12} sm={6}>
                 <CustomTextField
                   name="reference"
-                  label="Reference"
+                  label={_labels.reference}
                   value={formik.reference}
                   readOnly={true}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <CustomTextField
+                <CustomDatePicker
                   name="date"
-                  label={'date'}
+                  label={_labels.date}
                   value={formik.date}
                   readOnly={true}
                 />
@@ -149,7 +179,7 @@ const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
               <Grid item xs={12} sm={6}>
                 <CustomTextField
                   name="currencyRef"
-                  label="Currency"
+                  label={_labels.currency}
                   value={formik.currencyRef}
                   readOnly={true}
                 />
@@ -157,10 +187,10 @@ const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
               <Grid item xs={12} sm={6}>
                 <CustomTextField
                   name="notes"
-                  label="Notes"
+                  label={_labels.notes}
                   value={formik.notes}
+                 
                   readOnly={true}
-
                 />
               </Grid>
             </Grid>
@@ -181,4 +211,4 @@ const RecordDetailComponent =({labels, recordId ,functionId,formValues}) => {
     );
   };
 
-export default RecordDetailComponent;
+export default GeneralLedger;

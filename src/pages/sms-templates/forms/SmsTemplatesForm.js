@@ -89,7 +89,6 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
       height={300}
       maxAccess={maxAccess}
       editMode={editMode}
-      
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>

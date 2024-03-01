@@ -6,7 +6,7 @@ import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
-import RecordDetailComponent from 'src/pages/RecordDetailComponent'
+import GeneralLedger from 'src/pages/GeneralLedger'
 
 export default function FormShell({
   form, form1,
@@ -79,9 +79,9 @@ export default function FormShell({
               title: 'Transaction Log'
             })
           }
-          yourNewHandler={() =>
+          newHandler={() =>
             stack({
-              Component: RecordDetailComponent,
+              Component: GeneralLedger,
               props: {
                 formValues:form.values,
 
@@ -92,7 +92,7 @@ export default function FormShell({
               },
               width: 700, 
               height: 600,
-              title: 'Record Details'
+              title: 'General Ledger'
             })
           }
           onClientRelation={() =>

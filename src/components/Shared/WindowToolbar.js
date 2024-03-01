@@ -13,7 +13,7 @@ const WindowToolbar = ({
   onApply,
   recordId,
   onClose,
-  yourNewHandler,
+  newHandler,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
@@ -112,7 +112,7 @@ const WindowToolbar = ({
       )}
       {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
       {  aliComponentVisible && (
-        <Button onClick={() => yourNewHandler(recordId)} variant="contained">          hi
+        <Button onClick={() => newHandler(recordId)} variant="contained">          hi
         </Button>
       )}
       {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
