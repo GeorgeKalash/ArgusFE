@@ -31,8 +31,8 @@ export default function ApprovalFormShell(props) {
   }
   
   const actions = [ { action : onPost , title :'Post', isDisabled: !editMode, isHidden: hiddenPost, color:'#231f20', colorHover:'#4d393e'}, 
-                   { action : onClose , title :'Close', isDisabled: isClosed || !editMode, isHidden: hiddenClose, color:'#231f20', colorHover:'#241c1e'}, 
-                   { action : onApproval , title :'Approval', isDisabled: !isClosed, isHidden: hiddenClose, color:'#231f20', colorHover:'#4d393e'}   ]
+                    { action : onClose , title :'Close', isDisabled: isClosed || !editMode, isHidden: hiddenClose, color:'#231f20', colorHover:'#241c1e'}, 
+                    { action : onApproval , title :'Approval', isDisabled: !isClosed, isHidden: hiddenClose, color:'#231f20', colorHover:'#080707'},   ]
 
   return (
     <FormShell actions={actions} form={form} isClosed={isClosed} {...remaining}>
