@@ -1,5 +1,4 @@
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import RateTypesForm from '../forms/RateTypesForm'
 
 const RateTypesWindow = ({
@@ -18,14 +17,11 @@ const RateTypesWindow = ({
       width={500}
       height={300}
     >
-      <CustomTabPanel>
-        <RateTypesForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
-       
-      </CustomTabPanel>
+      <RateTypesForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+      />
     </Window>
   )
 }

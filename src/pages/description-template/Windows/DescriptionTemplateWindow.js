@@ -1,6 +1,5 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import DescriptionTemplateForm from '../Forms/DescriptionTemplateForm'
 
 const DescriptionTemplateWindow = ({
@@ -19,14 +18,11 @@ const DescriptionTemplateWindow = ({
       width={500}
       height={300}
     >
-      <CustomTabPanel>
-        <DescriptionTemplateForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
-       
-      </CustomTabPanel>
+      <DescriptionTemplateForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+      />
     </Window>
   )
 }

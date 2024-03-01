@@ -1,5 +1,4 @@
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GlIntegrationForm from '../forms/GlIntegrationForm'
 
 const GlIntegrationWindow = ({
@@ -18,14 +17,11 @@ const GlIntegrationWindow = ({
       width={500}
       height={300}
     >
-      <CustomTabPanel>
-        <GlIntegrationForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
-       
-      </CustomTabPanel>
+      <GlIntegrationForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+      />
     </Window>
   )
 }
