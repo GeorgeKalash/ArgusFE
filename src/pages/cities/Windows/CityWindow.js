@@ -25,9 +25,9 @@ const CityWindow = ({
         >
             <CustomTabPanel>
                <CityForm
-                  labels={labels}
+                   labels={labels}
                   maxAccess={maxAccess}
-                  recordId={recordId}                
+                  recordId={recordId}               
                />
             </CustomTabPanel>
             </Window>
