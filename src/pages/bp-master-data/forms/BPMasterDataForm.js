@@ -16,9 +16,10 @@ import { DataSets } from 'src/resources/DataSets'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId }) {
+export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId, height }) {
   const [idCategoryStore, setIDCategoryStore] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+console.log(height)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -128,7 +129,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
     <FormShell
       resourceId={ResourceIds.BPMasterData}
       form={formik}
-      height={400}
+      height={height}
       maxAccess={maxAccess}
       editMode={editMode}
     >

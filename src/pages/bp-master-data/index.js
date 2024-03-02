@@ -560,8 +560,29 @@ const BPMasterData = () => {
     addressValidation.handleSubmit()
   }
 
+
   return (
     <>
+      {/* <Button
+                      variant='contained'
+                      onClick={() =>
+                        stack({
+                          Component: BPMasterDataWindow,
+                          props: {
+                            recordId:selectedRecordId,
+
+                            // labels: _labels,
+                            maxAccess: access
+                          },
+                          title: '',
+                          width: 400,
+                          height: 400
+                        })
+                      }
+
+                    >
+                      {labels.fetch} {formik?.values?.birth_Date}
+                    </Button> */}
       <Box>
         <WindowConsumer />
         <GridToolbar onAdd={add} maxAccess={access} />
