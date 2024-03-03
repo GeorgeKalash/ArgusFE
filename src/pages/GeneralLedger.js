@@ -12,21 +12,16 @@ import newTable from 'src/components/Shared/newTable'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomTable from 'src/components/Shared/CustomTable'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-import {
-  formatDateToApi,
-  formatDateToApiFunction,
-  formatDateFromApi,formatDateDefault,formatDateFromApiInline
-} from "src/lib/date-helper";
 
 // ** Windows
 
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
@@ -36,8 +31,9 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 const GeneralLedger =({ labels,recordId ,functionId,formValues}) => {
     const { getRequest, postRequest } = useContext(RequestsContext)
     const [formik, setformik] = useState(null);
-     const [tableData, setTableData] = useState([]);
-    const [selectedRecordId, setSelectedRecordId] = useState(null)
+
+    const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 });
+const [currencyGridData, setCurrencyGridData] = useState([]);
   
     //states
     const [windowOpen, setWindowOpen] = useState(false)
@@ -126,15 +122,15 @@ const GeneralLedger =({ labels,recordId ,functionId,formValues}) => {
       }
 
     ]
+
     useEffect(() => {
       if (data && data.list && Array.isArray(data.list)) {
-        // Base Grid Calculations
         const baseCredit = data.list.reduce((acc, curr) => curr.sign === 2 ? acc + parseFloat(curr.amount || 0) : acc, 0);
         const baseDebit = data.list.reduce((acc, curr) => curr.sign === 1 ? acc + parseFloat(curr.amount || 0) : acc, 0);
         const baseBalance = baseDebit - baseCredit;
-        console.log(`Base Grid - Credit: ${baseCredit}, Debit: ${baseDebit}, Balance: ${baseBalance}`);
         
-        // Currency Grid Calculations
+        setBaseGridData({ base :'Base',credit: baseCredit, debit: baseDebit, balance: baseBalance });
+    
         const currencyTotals = data.list.reduce((acc, curr) => {
           if (!acc[curr.currencyRef]) {
             acc[curr.currencyRef] = { credit: 0, debit: 0 };
@@ -144,16 +140,23 @@ const GeneralLedger =({ labels,recordId ,functionId,formValues}) => {
           } else if (curr.sign === 1) {
             acc[curr.currencyRef].debit += parseFloat(curr.amount || 0);
           }
-          
+
           return acc;
         }, {});
+    
+        const currencyData = Object.entries(currencyTotals).map(([currency, { credit, debit }]) => ({
+          currency,
+          credit,
+          debit,
+          balance: debit - credit
+        }));
+
         
-        Object.entries(currencyTotals).forEach(([currency, { credit, debit }]) => {
-          const balance = debit - credit;
-          console.log(`Currency Grid - Currency: ${currency}, Credit: ${credit}, Debit: ${debit}, Balance: ${balance}`);
-        });
+        setCurrencyGridData(currencyData);
       }
     }, [data]);
+
+
 
     return (
       <>
@@ -195,8 +198,6 @@ const GeneralLedger =({ labels,recordId ,functionId,formValues}) => {
               </Grid>
             </Grid>
           )}
-  
-          <GridToolbar maxAccess={access} />
           <Table
             columns={columns}
             gridData={data}
@@ -205,7 +206,46 @@ const GeneralLedger =({ labels,recordId ,functionId,formValues}) => {
             pageSize={50}
             paginationType='client'
             maxAccess={access}
+            height={"230"}
           />
+          <Grid container paddingTop={2}>
+            <Grid xs={6}>
+              <Box paddingInlineEnd={2}>
+                <Table
+                  gridData={{count: 1, list: [baseGridData]}}
+                  maxAccess={access}
+                  height={"85"}
+                  columns={[
+                    { field: 'base', headerName: 'Base' },
+                    { field: 'credit', headerName: 'Credit' },
+                    { field: 'debit', headerName: 'Debit' },
+                    { field: 'balance', headerName: 'Balance' }
+                  ]}
+                  rowId={['seqNo']}
+                  pagination={false}
+                />
+              </Box>
+            </Grid>
+             <Grid xs={6}>
+              <Box paddingInlineStart={2}>
+                <Table
+                  pagination={false}
+                  gridData={{count: 1, list: currencyGridData}}
+                  columns={[
+                    { field: 'currency', headerName: 'Currency' },
+                    { field: 'credit', headerName: 'Credit' },
+                    { field: 'debit', headerName: 'Debit' },
+                    { field: 'balance', headerName: 'Balance' }
+                  ]}
+                  height={"85"}
+
+                  rowId={['seqNo']}
+                  maxAccess={access}
+                /> 
+              </Box>
+            </Grid>
+          </Grid>
+          <GridToolbar maxAccess={access}  />
         </Box>
       </>
     );
