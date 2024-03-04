@@ -145,9 +145,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         } else {
           setConfirmationWindowOpen(true)
         }
-      } catch (error) {
-        throw new Error(error)
-      }
+      } catch (error) {}
     }
   })
 
@@ -202,11 +200,10 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       })
       if (res.recordId) {
         toast.success('Record Closed Successfully')
+        invalidate()
         setIsClosed(true)
       }
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   const onReopen = async () => {
@@ -240,13 +237,12 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           })
           if (res.recordId) {
             toast.success('Record Closed Successfully')
+            invalidate()
             setIsClosed(false)
           }
         }
       }
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   const onTFR = async () => {
@@ -268,6 +264,8 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       if (res.recordId) {
         toast.success('Record Closed Successfully')
         setIsTFR(true)
+        invalidate()
+        setConfirmationWindowOpen(false)
         window.close()
         stack({
           Component: CreditInvoiceForm,
@@ -281,9 +279,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           title: _labelsINV[1]
         })
       }
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   const totalCUR = detailsFormik.values.rows.reduce((curSum, row) => {
@@ -309,9 +305,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       }).then(res => {
         setCurrencyStore(res)
       })
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   const getCorrespondentById = async (recordId, baseCurrency, plant) => {
@@ -598,9 +592,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           rows: modifiedList
         })
       })
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   async function setOperationType(type) {
@@ -639,9 +631,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       }).then(res => {
         setBaseCurrencyRef(res.record.reference)
       })
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -666,7 +656,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
         }
       } catch (error) {
-        throw new Error(error)
       } finally {
         setIsLoading(false)
       }
