@@ -20,10 +20,12 @@ export default function FormShell({
   resourceId,
   maxAccess,
   isPosted = false,
+  isTFR = false,
   isClosed = false,
   clientRelation = false,
   setErrorMessage,
   previewReport = false,
+  visibleTFR = false,
   initialValues,
   initialValues1,
   setIDInfoAutoFilled,
@@ -63,6 +65,11 @@ export default function FormShell({
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
+            form.handleSubmit()
+          }}
+          onTFR={() => {
+            // Set  flag in the Formik state before calling handleSubmit
+            form.setFieldValue('isTFRClicked', true)
             form.handleSubmit()
           }}
           onInfo={() =>
@@ -110,7 +117,9 @@ export default function FormShell({
           infoVisible={infoVisible}
           postVisible={postVisible}
           closeVisible={closeVisible}
+          visibleTFR={visibleTFR}
           isPosted={isPosted}
+          isTFR={isTFR}
           isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}

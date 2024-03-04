@@ -10,17 +10,16 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 // ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
-import CreditOrderForm from './Forms/CreditOrderForm'
+import CreditInvoiceForm from './Forms/CreditInvoiceForm'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
-const CreditOrder = () => {
+const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   //states
-  const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [plantId, setPlantId] = useState(null)
   const { stack } = useWindow()
@@ -58,40 +57,37 @@ const CreditOrder = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: CTTRXrepository.CreditOrder.page,
+    return await getRequest({
+      extension: CTTRXrepository.CreditInvoice.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
-
-    return { ...response, _startAt: _startAt }
   }
   async function fetchWithSearch({ qry }) {
     return await getRequest({
-      extension: CTTRXrepository.CreditOrder.snapshot,
+      extension: CTTRXrepository.CreditInvoice.snapshot,
       parameters: `_filter=${qry}`
     })
   }
 
   const {
     query: { data },
-    labels: labels,
-    paginationParameters,
+    labels: _labels,
     search,
-    refetch,
     clear,
-    access
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CTTRXrepository.CreditOrder.page,
-    datasetId: ResourceIds.CreditOrder,
+    endpointId: CTTRXrepository.CreditInvoice.page,
+    datasetId: ResourceIds.CreditInvoice,
     search: {
-      endpointId: CTTRXrepository.CreditOrder.snapshot,
+      endpointId: CTTRXrepository.CreditInvoice.snapshot,
       searchFn: fetchWithSearch
     }
   })
 
   const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditOrder.page
+    endpointId: CTTRXrepository.CreditInvoice.page
   })
 
   const add = async () => {
@@ -121,22 +117,22 @@ const CreditOrder = () => {
   }
   function openForm(recordId, plantId) {
     stack({
-      Component: CreditOrderForm,
+      Component: CreditInvoiceForm,
       props: {
-        labels,
+        _labels,
         maxAccess: access,
         plantId: plantId,
         recordId
       },
-      width: 950,
+      width: 900,
       height: 600,
-      title: labels[1]
+      title: _labels[1]
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: CTTRXrepository.CreditOrder.del,
+      extension: CTTRXrepository.CreditInvoice.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -151,55 +147,50 @@ const CreditOrder = () => {
           onAdd={add}
           onSearch={search}
           onSearchClear={clear}
-          labels={labels}
+          labels={_labels}
           inputSearch={true}
         />
         <Table
           columns={[
             {
               field: 'reference',
-              headerName: labels[4],
+              headerName: _labels[4],
               flex: 1
             },
             {
               field: 'date',
-              headerName: labels[2],
+              headerName: _labels[2],
               flex: 1,
               valueGetter: ({ row }) => formatDateDefault(row?.date)
             },
             {
               field: 'plantRef',
-              headerName: labels[3]
+              headerName: _labels[3]
             },
             {
               field: 'corName',
-              headerName: labels[5],
+              headerName: _labels[5],
               flex: 1
             },
             {
               field: 'currencyRef',
-              headerName: labels[8],
+              headerName: _labels[8],
+              flex: 1
+            },
+            {
+              field: 'cashAccountName',
+              headerName: _labels[8],
               flex: 1
             },
             {
               field: 'amount',
-              headerName: labels[10],
+              headerName: _labels[10],
               flex: 1,
               valueGetter: ({ row }) => getFormattedNumber(row?.amount)
             },
             {
-              field: 'rsName',
-              headerName: labels[19],
-              flex: 1
-            },
-            {
               field: 'statusName',
-              headerName: labels[21],
-              flex: 1
-            },
-            {
-              field: 'wipName',
-              headerName: labels[20],
+              headerName: _labels[21],
               flex: 1
             }
           ]}
@@ -208,19 +199,17 @@ const CreditOrder = () => {
           onEdit={obj => {
             openFormWindow(obj.recordId, plantId)
           }}
-          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          refetch={refetch}
+          paginationType='client'
         />
       </Box>
-
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
 
-export default CreditOrder
+export default CreditInvoice

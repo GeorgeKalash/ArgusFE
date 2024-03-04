@@ -7,6 +7,7 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 const WindowToolbar = ({
   onSave,
   onPost,
+  onTFR,
   onClear,
   onInfo,
   onApply,
@@ -18,10 +19,12 @@ const WindowToolbar = ({
   smallBox = false,
   infoVisible = true,
   postVisible = false,
+  visibleTFR = false,
   isClosed = false,
   clientRelation,
   onClientRelation = false,
   isPosted = false,
+  isTFR = false,
   resourceId,
   setSelectedReport,
   selectedReport,
@@ -88,8 +91,8 @@ const WindowToolbar = ({
               onClick={onGenerateReport}
               size='small'
             >
-              <Tooltip title="Preview">
-                <img src="/images/buttonsIcons/preview.png" alt="Preview" />
+              <Tooltip title='Preview'>
+                <img src='/images/buttonsIcons/preview.png' alt='Preview' />
               </Tooltip>
             </Button>
           </Box>
@@ -102,135 +105,160 @@ const WindowToolbar = ({
               <Button
                 onClick={actionObj.action}
                 variant='contained'
-                sx={{ mr: 1 ,
+                sx={{
+                  mr: 1,
                   backgroundColor: actionObj.color,
-                  '&:hover': { backgroundColor: actionObj.colorHover},
-                  width: 20, 
+                  '&:hover': { backgroundColor: actionObj.colorHover },
+                  width: 20,
                   height: 35,
-                  objectFit: 'contain' 
+                  objectFit: 'contain',
+                  border: actionObj.border
                 }}
                 style={{ display: actionObj.isHidden ? 'none' : 'block' }}
                 disabled={actionObj.isDisabled}
               >
-                <img 
-                  src={`/images/buttonsIcons/${actionObj.title}.png`} 
-                  alt={`${actionObj.title}`}
-                />
+                <img src={`/images/buttonsIcons/${actionObj.title}.png`} alt={`${actionObj.title}`} />
               </Button>
             </Tooltip>
           ))}
 
+          {onTFR && visibleTFR && (
+            <Tooltip title='Invoice'>
+              <Button
+                onClick={onTFR}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  mt: smallBox && 0,
+                  backgroundColor: '#231f20',
+                  '&:hover': { backgroundColor: '#080707' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
+                }}
+                disabled={!isTFR}
+              >
+                <img src='/images/buttonsIcons/invoice.png' alt='Invoice' />
+              </Button>
+            </Tooltip>
+          )}
+
           {onClear && (
-            <Tooltip title="Clear">
-              <Button 
-                onClick={onClear} 
-                sx={{ mr: 1 ,
-                      backgroundColor:'#f44336', 
-                      '&:hover': { backgroundColor: '#99271f' },
-                      width: 20, 
-                      height: 35,
-                      objectFit: 'contain' 
-                    }} 
-                variant='contained'>
-                <img src="/images/buttonsIcons/clear.png" alt="Clear" />
+            <Tooltip title='Clear'>
+              <Button
+                onClick={onClear}
+                sx={{
+                  mr: 1,
+                  backgroundColor: '#f44336',
+                  '&:hover': { backgroundColor: '#99271f' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
+                }}
+                variant='contained'
+              >
+                <img src='/images/buttonsIcons/clear.png' alt='Clear' />
               </Button>
             </Tooltip>
           )}
           {clientRelation && (
-            <Tooltip title="Client Relation">
+            <Tooltip title='Client Relation'>
               <Button
                 onClick={onClientRelation}
                 variant='contained'
-                sx={{ mr: 1, 
-                      mt: smallBox && 0,
-                      backgroundColor:'#AC48AE',
-                      '&:hover': { backgroundColor: '#5d205e' },
-                      width: 20, 
-                      height: 35,
-                      objectFit: 'contain' 
-                    }}
+                sx={{
+                  mr: 1,
+                  mt: smallBox && 0,
+                  backgroundColor: '#AC48AE',
+                  '&:hover': { backgroundColor: '#5d205e' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
+                }}
                 disabled={!editMode}
               >
-                <img src="/images/buttonsIcons/clientRelations.png" alt="Client Relation" />
+                <img src='/images/buttonsIcons/clientRelations.png' alt='Client Relation' />
               </Button>
             </Tooltip>
           )}
-
           {onInfo && infoVisible && (
-            <Tooltip title="Info">
-              <Button 
-                onClick={onInfo} 
-                variant='contained' 
-                sx={{ mr: 1 ,
-                      backgroundColor:'#4355a5', 
-                      '&:hover': { backgroundColor: '#24316b' },
-                      width: 20, 
-                      height: 35,
-                      objectFit: 'contain' 
-                    }} 
-                disabled={!editMode}>
-                <img src="/images/buttonsIcons/info.png" alt="Info" />
+            <Tooltip title='Info'>
+              <Button
+                onClick={onInfo}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  backgroundColor: '#4355a5',
+                  '&:hover': { backgroundColor: '#24316b' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
+                }}
+                disabled={!editMode}
+              >
+                <img src='/images/buttonsIcons/info.png' alt='Info' />
               </Button>
             </Tooltip>
-
           )}
           {onPost && postVisible && (
-            <Tooltip title="Post">
+            <Tooltip title='Post'>
               <Button
                 onClick={onPost}
                 variant='contained'
-                sx={{ mr: 1,
-                      mt: smallBox && 0,
-                      backgroundColor:'#231f20', 
-                      '&:hover': { backgroundColor: '#1c1718' },
-                      width: 20, 
-                      height: 35,
-                      objectFit: 'contain' 
+                sx={{
+                  mr: 1,
+                  mt: smallBox && 0,
+                  backgroundColor: '#231f20',
+                  '&:hover': { backgroundColor: '#1c1718' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
                 }}
                 disabled={isPosted || !editMode}
               >
-                <img src="/images/buttonsIcons/post.png" alt="Post" />
+                <img src='/images/buttonsIcons/post.png' alt='Post' />
               </Button>
             </Tooltip>
           )}
           {onSave && (
-            <Tooltip title="Submit">
+            <Tooltip title='Submit'>
               <Button
                 onClick={onSave}
                 variant='contained'
-                sx={{ mr: 1,
+                sx={{
+                  mr: 1,
                   mt: smallBox && 0,
-                  backgroundColor:'#4eb558', 
+                  backgroundColor: '#4eb558',
                   '&:hover': { backgroundColor: '#24782c' },
-                  width: 20, 
+                  width: 20,
                   height: 35,
-                  objectFit: 'contain' 
+                  objectFit: 'contain'
                 }}
                 disabled={disabledSubmit || isPosted || isClosed}
               >
-                <img src="/images/buttonsIcons/save.png" alt="Submit"/>
+                <img src='/images/buttonsIcons/save.png' alt='Submit' />
               </Button>
             </Tooltip>
-
           )}
           {onApply && (
-            <Tooltip title="Apply">
-            <Button
-              onClick={onApply}
-              variant='contained'
-              sx={{ mr: 1,
-                mt: smallBox && 0,
-                backgroundColor:'#4eb558', 
-                '&:hover': { backgroundColor: '#24782c' },
-                width: 20, 
-                height: 35,
-                objectFit: 'contain' 
-              }}
-              disabled={disabledApply}
-            >
-              <img src="/images/buttonsIcons/apply.png" alt="Apply"/>
-            </Button>
-          </Tooltip>
+            <Tooltip title='Apply'>
+              <Button
+                onClick={onApply}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  mt: smallBox && 0,
+                  backgroundColor: '#4eb558',
+                  '&:hover': { backgroundColor: '#24782c' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
+                }}
+                disabled={disabledApply}
+              >
+                <img src='/images/buttonsIcons/apply.png' alt='Apply' />
+              </Button>
+            </Tooltip>
           )}
         </Box>{' '}
       </Box>
