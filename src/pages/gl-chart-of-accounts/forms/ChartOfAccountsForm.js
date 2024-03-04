@@ -60,20 +60,16 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
           setSubmitting(true);
           console.log('Submitting the following values:', values);
 
-          // Convert isCostElement to boolean if needed
           values.isCostElement = !!values.isCostElement;
 
-          // Check if accountRef is present and log it
           console.log('AccountRef:', values.accountRef);
           
           try {
-              // Submit the values to your endpoint
               const response = await postRequest({
                   extension: GeneralLedgerRepository.ChartOfAccounts.set,
                   record: JSON.stringify(values)
               });
 
-              // Handle the response
               if (!values.recordId) {
                   toast.success('Record Added Successfully');
                   setInitialData({
@@ -87,7 +83,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
               invalidate();
               
           } catch (error) {
-              // Handle any errors
               console.error(error);
               toast.error('Error submitting form');
           } finally {
@@ -151,17 +146,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
               return obj;
             });
 
-            // filteredList.forEach(obj => {
-            //     myObject[obj.key] = (
-            //         obj.key === 'GLACSeg0' || 
-            //         obj.key === 'GLACSeg1' || 
-            //         obj.key === 'GLACSeg2' || 
-            //         obj.key === 'GLACSeg3' ||
-            //         obj.key === 'GLACSeg4' 
-
-            //     ) ? (obj.value ? parseInt(obj.value) : null) :  (obj.value ? obj.value : null) ;
-              
-            // });
             
             setSegments(filteredList);
         })
@@ -170,7 +154,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         });
       };
 
-      
     return (
         <FormShell 
             resourceId={ResourceIds.ChartOfAccounts}
@@ -198,8 +181,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 formik && formik.setFieldValue('groupId', newValue?.recordId)
               }}
 
-              // error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
-              // helperText={formik.touched.nationalityId && formik.errors.nationalityId}
             />
           </Grid>
           <Grid item xs={12}>
@@ -210,18 +191,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                         setFieldValue={formik.setFieldValue}
                         values={formik.values.accountRef.split('-')}
                         error={formik.touched.name && Boolean(formik.errors.name)}
-                    />               {/* <CustomTextField
-                    name='accountRef'
-                    label={labels.accountRef}
-                    value={formik.values.accountRef}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='30'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('accountRef', '')}
-                    error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
-                    helperText={formik.touched.accountRef && formik.errors.accountRef}
-                    /> */}
+                    />            
                 </Grid>
                 <Grid item xs={12}>
                     <CustomTextField
@@ -388,7 +358,6 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
             onKeyDown={(e) => handleKeyDown(index, e)}
             maxLength={segment.value}
 
-            // style={{ margin: '8px', width: `${segment.value + 3}ch`,borderRadius:"5px",border:'1px solid grey',padding:'9px' }}
           />
           {index !== segments.length - 1 && "-"}
         </React.Fragment>
