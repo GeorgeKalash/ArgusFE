@@ -164,21 +164,21 @@ var count =1
       label: _labels[2],
       name: 'functionName',
 
-      width: 300
+      width: 400
+    },{
+      component: 'resourcelookup',
+      name: 'templateName',
+      props: {
+        endpointId: SystemRepository.SMSTemplate.snapshot,
+        parameters: {
+          _countryId: 1,
+          _stateId: 0
+        },
+        displayField: 'name',
+        valueField: 'name'
+      },
+      width: 850
     },
-
-    {
-      component: 'resourceLookup',
-      label: _labels[3],
-      valueField: 'recordId',
-      displayField: 'name',
-      fieldsToUpdate: [
-        { from: 'recordId', to: 'templateId' },
-        { from: 'name', to: 'templateName' }
-      ],
-      columnsInDropDown: [{ key: 'name', value: 'name' }],
-      onLookup: lookupTemplate
-    }
   ]
 
   const smsFunctionTemplatesValidation = useFormik({
@@ -232,7 +232,7 @@ var count =1
         <CustomTabPanel index={0} value={0}>
           <Box>
             <Grid container>
-              <Grid xs={12}>
+              <Grid>
                 <Box sx={{ width: '100%' }}>
                   {/* <InlineEditGrid
                     gridValidation={smsFunctionTemplatesValidation}
