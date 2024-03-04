@@ -28,11 +28,25 @@ import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { FormatLineSpacing } from '@mui/icons-material'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { useWindow } from 'src/windows'
+import useResourceParams from 'src/hooks/useResourceParams'
+import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 
-export default function UndeliveredCreditOrderForm({ _labels, maxAccess, recordId, setErrorMessage, expanded }) {
+export default function UndeliveredCreditOrderForm({
+  _labels,
+  maxAccess,
+  recordId,
+  setErrorMessage,
+  expanded,
+  window
+}) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
+  const [isTFR, setIsTFR] = useState(false)
+  const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -40,6 +54,7 @@ export default function UndeliveredCreditOrderForm({ _labels, maxAccess, recordI
   const [toCurrency, setToCurrency] = useState(null)
   const [toCurrencyRef, setToCurrencyRef] = useState(null)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
+  const { stack } = useWindow()
 
   const [initialValues, setInitialData] = useState({
     recordId: recordId || null,
@@ -62,12 +77,17 @@ export default function UndeliveredCreditOrderForm({ _labels, maxAccess, recordI
     exRate: '',
     minRate: '',
     maxRate: '',
-    rateCalcMethod: ''
+    rateCalcMethod: '',
+    isTFRClicked: false
+  })
+
+  const { labels: _labelsINV, access: accessINV } = useResourceParams({
+    datasetId: ResourceIds.CreditInvoice
   })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.UndeliveredCreditOrder.qry
+    endpointId: CTTRXrepository.UndeliveredCreditOrder.page
   })
 
   const formik = useFormik({
@@ -93,41 +113,45 @@ export default function UndeliveredCreditOrderForm({ _labels, maxAccess, recordI
         copy.amount = totalCUR
         copy.baseAmount = totalLoc
 
-        const updatedRows = detailsFormik.values.rows.map((orderDetail, index) => {
-          const seqNo = index + 1 // Adding 1 to make it 1-based index
+        if (!formik.values.isTFRClicked) {
+          const updatedRows = detailsFormik.values.rows.map((orderDetail, index) => {
+            const seqNo = index + 1 // Adding 1 to make it 1-based index
 
-          return {
-            ...orderDetail,
-            seqNo: seqNo,
-            orderId: formik.values.recordId || 0
-          }
-        })
-
-        if (updatedRows.length == 1 && updatedRows[0].currencyId == '') {
-          throw new Error('Grid not filled. Please fill the grid before saving.')
-        }
-
-        const resultObject = {
-          header: copy,
-          items: updatedRows
-        }
-
-        const res = await postRequest({
-          extension: CTTRXrepository.CreditOrder.set,
-          record: JSON.stringify(resultObject)
-        })
-
-        if (res.recordId) {
-          toast.success('Record Updated Successfully')
-          formik.setFieldValue('recordId', res.recordId)
-          invalidate()
-          setEditMode(true)
-
-          const res2 = await getRequest({
-            extension: CTTRXrepository.CreditOrder.get,
-            parameters: `_recordId=${res.recordId}`
+            return {
+              ...orderDetail,
+              seqNo: seqNo,
+              orderId: formik.values.recordId || 0
+            }
           })
-          formik.setFieldValue('reference', res2.record.reference)
+
+          if (updatedRows.length == 1 && updatedRows[0].currencyId == '') {
+            throw new Error('Grid not filled. Please fill the grid before saving.')
+          }
+
+          const resultObject = {
+            header: copy,
+            items: updatedRows
+          }
+
+          const res = await postRequest({
+            extension: CTTRXrepository.CreditOrder.set,
+            record: JSON.stringify(resultObject)
+          })
+
+          if (res.recordId) {
+            toast.success('Record Updated Successfully')
+            formik.setFieldValue('recordId', res.recordId)
+            setEditMode(true)
+
+            const res2 = await getRequest({
+              extension: CTTRXrepository.CreditOrder.get,
+              parameters: `_recordId=${res.recordId}`
+            })
+            formik.setFieldValue('reference', res2.record.reference)
+            invalidate()
+          }
+        } else {
+          setConfirmationWindowOpen(true)
         }
       } catch (error) {
         setErrorMessage(error)
@@ -186,10 +210,87 @@ export default function UndeliveredCreditOrderForm({ _labels, maxAccess, recordI
       })
       if (res.recordId) {
         toast.success('Record Closed Successfully')
+        invalidate()
         setIsClosed(true)
       }
+    } catch (error) {}
+  }
+
+  const onReopen = async () => {
+    try {
+      const releaseStatus = formik.values.releaseStatus
+
+      const releaseIndicatorResponse = await getRequest({
+        extension: DocumentReleaseRepository.ReleaseIndicator.get,
+        parameters: `_recordId=${releaseStatus}`
+      })
+
+      if (releaseIndicatorResponse.record) {
+        if (releaseIndicatorResponse?.record?.isReleased == true) {
+          stackError({
+            message: `Document is released, cannot reopen.`
+          })
+        } else {
+          const obj = formik.values
+          const copy = { ...obj }
+
+          copy.date = formatDateToApi(copy.date)
+          copy.deliveryDate = formatDateToApi(copy.deliveryDate)
+          copy.wip = copy.wip === '' ? 1 : copy.wip
+          copy.status = copy.status === '' ? 1 : copy.status
+          copy.amount = totalCUR
+          copy.baseAmount = totalLoc
+
+          const res = await postRequest({
+            extension: CTTRXrepository.CreditOrder.reopen,
+            record: JSON.stringify(copy)
+          })
+          if (res.recordId) {
+            toast.success('Record Closed Successfully')
+            invalidate()
+            setIsClosed(false)
+          }
+        }
+      }
+    } catch (error) {}
+  }
+
+  const onTFR = async () => {
+    try {
+      const obj = formik.values
+      const copy = { ...obj }
+
+      copy.date = formatDateToApi(copy.date)
+      copy.deliveryDate = formatDateToApi(copy.deliveryDate)
+      copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.status = copy.status === '' ? 1 : copy.status
+      copy.amount = totalCUR
+      copy.baseAmount = totalLoc
+
+      const res = await postRequest({
+        extension: CTTRXrepository.CreditOrder.tfr,
+        record: JSON.stringify(copy)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        setIsTFR(true)
+        setConfirmationWindowOpen(false)
+        invalidate()
+        window.close()
+        stack({
+          Component: CreditInvoiceForm,
+          props: {
+            _labels: _labelsINV,
+            maxAccess: accessINV,
+            recordId: res.recordId
+          },
+          width: 900,
+          height: 650,
+          title: _labelsINV[1]
+        })
+      }
     } catch (error) {
-      setErrorMessage(error)
+      throw new Error(error)
     }
   }
 
@@ -558,6 +659,7 @@ export default function UndeliveredCreditOrderForm({ _labels, maxAccess, recordI
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
+          setIsTFR(res.record.releaseStatus === 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
@@ -575,231 +677,248 @@ export default function UndeliveredCreditOrderForm({ _labels, maxAccess, recordI
   }, [height])
 
   return (
-    <ApprovalFormShell
-      resourceId={ResourceIds.UndeliveredCreditOrder}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      onClose={onClose}
-      isClosed={isClosed}
-      hiddenPost={true}
-    >
-      <Grid container>
-        <Grid container xs={12}>
-          {/* First Column */}
-          <Grid container rowGap={1} xs={3} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name='date'
-                required
-                readOnly={isClosed}
-                label={_labels[2]}
-                value={formik?.values?.date}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-                helperText={formik.touched.date && formik.errors.date}
-              />
+    <>
+      <ConfirmationDialog
+        DialogText={`Are you sure you want to transfer this order`}
+        cancelButtonAction={() => setConfirmationWindowOpen(false)}
+        openCondition={confirmationWindowOpen}
+        okButtonAction={async () => {
+          await onTFR()
+        }}
+      />
+      <ApprovalFormShell
+        resourceId={ResourceIds.UndeliveredCreditOrder}
+        form={formik}
+        maxAccess={maxAccess}
+        editMode={editMode}
+        onClose={onClose}
+        isClosed={isClosed}
+        hiddenPost={true}
+        onReopen={onReopen}
+        hiddenReopen={!isClosed}
+        hiddenClose={isClosed}
+        visibleTFR={true}
+        onTFR={onTFR}
+        isTFR={isTFR}
+        previewReport={editMode}
+      >
+        <Grid container>
+          <Grid container xs={12}>
+            {/* First Column */}
+            <Grid container rowGap={1} xs={3} style={{ marginTop: '10px' }}>
+              <Grid item xs={12}>
+                <CustomDatePicker
+                  name='date'
+                  required
+                  readOnly={isClosed}
+                  label={_labels[2]}
+                  value={formik?.values?.date}
+                  onChange={formik.setFieldValue}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('date', '')}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                  helperText={formik.touched.date && formik.errors.date}
+                />
+              </Grid>
+            </Grid>
+            {/* Second Column */}
+            <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='plantId'
+                  label={_labels[3]}
+                  readOnly={true}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('plantId', newValue?.recordId)
+                  }}
+                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                />
+              </Grid>
+            </Grid>
+            {/* Third Column */}
+            <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='reference'
+                  label={_labels[4]}
+                  value={formik?.values?.reference}
+                  maxAccess={maxAccess}
+                  maxLength='30'
+                  readOnly={true}
+                  required
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  helperText={formik.touched.reference && formik.errors.reference}
+                />
+              </Grid>
             </Grid>
           </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='plantId'
-                label={_labels[3]}
-                readOnly={true}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('plantId', newValue?.recordId)
+          <Grid container xs={12}>
+            {/* First Column */}
+            <Grid container rowGap={1} xs={3} style={{ marginTop: '10px' }}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={RemittanceSettingsRepository.Correspondent.qry}
+                  name='corId'
+                  label={_labels[16]}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={'reference'}
+                  required
+                  readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                  maxAccess={maxAccess}
+                  onChange={async (event, newValue) => {
+                    const baseCurrency = await getBaseCurrency()
+                    getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
+                    formik.setFieldValue('corId', newValue?.recordId)
+                    formik.setFieldValue('corName', newValue?.name || '')
+                  }}
+                  error={formik.touched.corId && Boolean(formik.errors.corId)}
+                />
+              </Grid>
+            </Grid>
+            {/* Second Column */}
+            <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='corName'
+                  label={_labels[17]}
+                  value={formik.values?.corName}
+                  maxAccess={maxAccess}
+                  readOnly={true}
+                  required
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('corName', '')}
+                  error={formik.touched.corName && Boolean(formik.errors.corName)}
+                  helperText={formik.touched.corName && formik.errors.corName}
+                />
+              </Grid>
+            </Grid>
+            {/* Third Column */}
+            <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+              <Grid item xs={12}>
+                <CustomDatePicker
+                  name='deliveryDate'
+                  readOnly={isClosed}
+                  label={_labels[18]}
+                  value={formik?.values?.deliveryDate}
+                  onChange={formik.setFieldValue}
+                  maxAccess={maxAccess}
+                  disabledRangeDate={{ date: formik.values.date, day: 30 }}
+                  onClear={() => formik.setFieldValue('deliveryDate', '')}
+                  error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
+                  helperText={formik.touched.deliveryDate && formik.errors.deliveryDate}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid container xs={12}>
+            <RadioGroup
+              row
+              value={formik.values.functionId}
+              defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
+              onChange={e => setOperationType(e.target.value)}
+            >
+              <FormControlLabel
+                value={SystemFunction.CurrencyCreditOrderPurchase}
+                control={<Radio />}
+                label={_labels[6]}
+                disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+              />
+              <FormControlLabel
+                value={SystemFunction.CurrencyCreditOrderSale}
+                control={<Radio />}
+                label={_labels[7]}
+                disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+              />
+            </RadioGroup>
+          </Grid>
+          <Grid container sx={{ pt: 2 }} xs={12}>
+            <Box sx={{ width: '100%' }}>
+              <InlineEditGrid
+                gridValidation={detailsFormik}
+                columns={columns}
+                background={
+                  formik.values.functionId &&
+                  (formik.values.functionId != SystemFunction.CurrencyCreditOrderPurchase
+                    ? '#C7F6C7'
+                    : 'rgb(245, 194, 193)')
+                }
+                defaultRow={{
+                  orderId: '',
+                  seqNo: '',
+                  currencyId: '',
+                  qty: '',
+                  rateCalcMethod: '',
+                  exRate: '',
+                  minRate: '',
+                  maxRate: '',
+                  amount: '',
+                  baseAmount: '',
+                  notes: ''
                 }}
-                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                allowDelete={true}
+                allowAddNewLine={true}
+                scrollable={true}
+                scrollHeight={`${expanded ? height - 430 : 200}px`}
               />
-            </Grid>
+            </Box>
           </Grid>
-          {/* Third Column */}
-          <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={_labels[4]}
-                value={formik?.values?.reference}
-                maxAccess={maxAccess}
-                maxLength='30'
-                readOnly={true}
-                required
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid container xs={12}>
-          {/* First Column */}
-          <Grid container rowGap={1} xs={3} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={RemittanceSettingsRepository.Correspondent.qry}
-                name='corId'
-                label={_labels[16]}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={'reference'}
-                required
-                readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
-                maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
-                  const baseCurrency = await getBaseCurrency()
-                  getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
-                  formik.setFieldValue('corId', newValue?.recordId)
-                  formik.setFieldValue('corName', newValue?.name || '')
-                }}
-                error={formik.touched.corId && Boolean(formik.errors.corId)}
-              />
-            </Grid>
-          </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={1} xs={6} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='corName'
-                label={_labels[17]}
-                value={formik.values?.corName}
-                maxAccess={maxAccess}
-                readOnly={true}
-                required
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('corName', '')}
-                error={formik.touched.corName && Boolean(formik.errors.corName)}
-                helperText={formik.touched.corName && formik.errors.corName}
-              />
-            </Grid>
-          </Grid>
-          {/* Third Column */}
-          <Grid container rowGap={1} xs={3} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name='deliveryDate'
-                readOnly={isClosed}
-                label={_labels[18]}
-                value={formik?.values?.deliveryDate}
-                onChange={formik.setFieldValue}
-                maxAccess={maxAccess}
-                disabledRangeDate={{ date: formik.values.date, day: 30 }}
-                onClear={() => formik.setFieldValue('deliveryDate', '')}
-                error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
-                helperText={formik.touched.deliveryDate && formik.errors.deliveryDate}
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid container xs={12}>
-          <RadioGroup
-            row
-            value={formik.values.functionId}
-            defaultValue={SystemFunction.CurrencyCreditOrderPurchase}
-            onChange={e => setOperationType(e.target.value)}
+          <Grid
+            container
+            rowGap={1}
+            xs={12}
+            style={{ marginTop: '5px' }}
+            sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
           >
-            <FormControlLabel
-              value={SystemFunction.CurrencyCreditOrderPurchase}
-              control={<Radio />}
-              label={_labels[6]}
-              disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
-            />
-            <FormControlLabel
-              value={SystemFunction.CurrencyCreditOrderSale}
-              control={<Radio />}
-              label={_labels[7]}
-              disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
-            />
-          </RadioGroup>
-        </Grid>
-        <Grid container sx={{ pt: 2 }} xs={12}>
-          <Box sx={{ width: '100%' }}>
-            <InlineEditGrid
-              gridValidation={detailsFormik}
-              columns={columns}
-              background={
-                formik.values.functionId &&
-                (formik.values.functionId != SystemFunction.CurrencyCreditOrderPurchase
-                  ? '#C7F6C7'
-                  : 'rgb(245, 194, 193)')
-              }
-              defaultRow={{
-                orderId: '',
-                seqNo: '',
-                currencyId: '',
-                qty: '',
-                rateCalcMethod: '',
-                exRate: '',
-                minRate: '',
-                maxRate: '',
-                amount: '',
-                baseAmount: '',
-                notes: ''
-              }}
-              allowDelete={true}
-              allowAddNewLine={true}
-              scrollable={true}
-              scrollHeight={`${expanded ? height - 430 : 200}px`}
-            />
-          </Box>
-        </Grid>
-        <Grid
-          container
-          rowGap={1}
-          xs={12}
-          style={{ marginTop: '5px' }}
-          sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
-        >
-          {/* First Column (moved to the left) */}
-          <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
-            <CustomTextArea
-              name='notes'
-              label={_labels[11]}
-              value={formik.values.notes}
-              rows={3}
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('notes', '')}
-              error={formik.touched.notes && Boolean(formik.errors.notes)}
-              helperText={formik.touched.notes && formik.errors.notes}
-            />
-          </Grid>
-          {/* Second Column  */}
-          <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='totalCUR'
-                label={`Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`}
-                value={getFormattedNumber(totalCUR.toFixed(2))}
-                numberField={true}
-                readOnly={true}
+            {/* First Column (moved to the left) */}
+            <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
+              <CustomTextArea
+                name='notes'
+                label={_labels[11]}
+                value={formik.values.notes}
+                rows={3}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
+                helperText={formik.touched.notes && formik.errors.notes}
               />
             </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='baseAmount'
-                label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
-                style={{ textAlign: 'right' }}
-                value={getFormattedNumber(totalLoc.toFixed(2))}
-                numberField={true}
-                readOnly={true}
-              />
+            {/* Second Column  */}
+            <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='totalCUR'
+                  label={`Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`}
+                  value={getFormattedNumber(totalCUR.toFixed(2))}
+                  numberField={true}
+                  readOnly={true}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='baseAmount'
+                  label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
+                  style={{ textAlign: 'right' }}
+                  value={getFormattedNumber(totalLoc.toFixed(2))}
+                  numberField={true}
+                  readOnly={true}
+                />
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
-    </ApprovalFormShell>
+      </ApprovalFormShell>
+    </>
   )
 }

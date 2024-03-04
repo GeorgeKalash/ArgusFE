@@ -35,7 +35,6 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
-  const [isClosed, setIsClosed] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -133,9 +132,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           formik.setFieldValue('reference', res2.record.reference)
           invalidate()
         }
-      } catch (error) {
-        throw new Error(error)
-      }
+      } catch (error) {}
     }
   })
 
@@ -172,30 +169,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     })
   })
 
-  const onClose = async () => {
-    try {
-      const obj = formik.values
-      const copy = { ...obj }
-
-      copy.date = formatDateToApi(copy.date)
-      copy.wip = copy.wip === '' ? 1 : copy.wip
-      copy.status = copy.status === '' ? 1 : copy.status
-      copy.amount = totalCUR
-      copy.baseAmount = totalLoc
-
-      const res = await postRequest({
-        extension: CTTRXrepository.CreditInvoice.close,
-        record: JSON.stringify(copy)
-      })
-      if (res.recordId) {
-        toast.success('Record Closed Successfully')
-        setIsClosed(true)
-      }
-    } catch (error) {
-      throw new Error(error)
-    }
-  }
-
   const totalCUR = detailsFormik.values.rows.reduce((curSum, row) => {
     // Parse amount as a number
     const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
@@ -219,9 +192,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       }).then(res => {
         setCurrencyStore(res)
       })
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   const getCorrespondentById = async (recordId, baseCurrency, plant) => {
@@ -313,7 +284,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
       widthDropDown: '200',
       fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
       columnsInDropDown: [
@@ -381,7 +352,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       name: 'currencyName',
       readOnly: true,
       width: 300,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
     },
     {
       field: 'numberfield',
@@ -389,7 +360,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       name: 'qty',
       mandatory: true,
       width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
       async onChange(row) {
         const rate = row.rowData?.exRate
         const rateCalcMethod = row.rowData?.rateCalcMethod
@@ -425,7 +396,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       readOnly: true,
       mandatory: true,
       width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
     },
     {
       field: 'numberfield',
@@ -433,7 +404,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       name: 'exRate',
       mandatory: true,
       width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
         if (parseFloat(row.rowData.exRate.toString().replace(/,/g, '')) > 0) {
@@ -483,7 +454,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       readOnly: true,
       mandatory: true,
       width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
     }
   ]
 
@@ -508,9 +479,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           rows: modifiedList
         })
       })
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   async function setOperationType(type) {
@@ -549,9 +518,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       }).then(res => {
         setBaseCurrencyRef(res.record.reference)
       })
-    } catch (error) {
-      throw new Error(error)
-    }
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -566,7 +533,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             extension: CTTRXrepository.CreditInvoice.get,
             parameters: `_recordId=${recordId}`
           })
-          setIsClosed(res.record.wip === 2 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           setOperationType(res.record.functionId)
           setInitialData(res.record)
@@ -574,7 +540,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
         }
       } catch (error) {
-        throw new Error(error)
       } finally {
         setIsLoading(false)
       }
@@ -589,12 +554,11 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      onClose={onClose}
-      isClosed={isClosed}
       hiddenApprove={true}
       hiddenPost={true}
-      hiddenReopen={!isClosed}
-      hiddenClose={isClosed}
+      hiddenClose={true}
+      hiddenReopen={true}
+      previewReport={editMode}
     >
       <Grid container>
         <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
@@ -603,7 +567,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             <CustomDatePicker
               name='date'
               required
-              readOnly={isClosed}
               label={_labels[2]}
               value={formik?.values?.date}
               onChange={formik.setFieldValue}
@@ -696,7 +659,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             form={formik}
             valueShow='cashAccountRef'
             secondValueShow='cashAccountName'
-            readOnly={isClosed}
             onChange={(event, newValue) => {
               if (newValue) {
                 formik.setFieldValue('cashAccountId', newValue?.recordId)
@@ -777,7 +739,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
               value={formik.values.notes}
               rows={3}
               maxAccess={maxAccess}
-              readOnly={isClosed}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('notes', '')}
               error={formik.touched.notes && Boolean(formik.errors.notes)}
