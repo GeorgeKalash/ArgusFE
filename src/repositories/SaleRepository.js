@@ -22,5 +22,19 @@ export const SaleRepository = {
   },
   CommissionScheduleBracket: {
     qry: service + 'qryCSB',
-  }
+  },
+  SalesPerson: {
+    qry: service + 'qrySP',
+    get: service + 'getSP',
+    set: service + 'setSP',
+    del: service + 'delSP',
+    page: service + 'pageSP'
+  },
+  SalesZone: {
+    qry: service + 'qrySZ',
+    get: service + 'getSZ',
+    set: service + 'setSZ',
+    del: service + 'delSZ',
+    page: service + 'pageSZ'
+  },
 }

@@ -24,10 +24,12 @@ const UndeliveredCreditOrder = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: CTTRXrepository.UndeliveredCreditOrder.qry,
+    const response = await getRequest({
+      extension: CTTRXrepository.UndeliveredCreditOrder.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_corId=0`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters }) {
@@ -39,14 +41,16 @@ const UndeliveredCreditOrder = () => {
 
   const {
     query: { data },
+    refetch,
     labels: _labels,
     filterBy,
     clearFilter,
+    paginationParameters,
     access,
     filters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CTTRXrepository.UndeliveredCreditOrder.qry,
+    endpointId: CTTRXrepository.UndeliveredCreditOrder.page,
     datasetId: ResourceIds.CreditOrder,
     filter: {
       endpointId: CTTRXrepository.UndeliveredCreditOrder.snapshot,
@@ -168,7 +172,15 @@ const UndeliveredCreditOrder = () => {
           isLoading={false}
           pageSize={50}
           maxAccess={access}
-          paginationType='client'
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType={
+            (filters.qry && !filters.corId) || (filters.corId && !filters.qry) || (filters.qry && filters.corId)
+              ? 'client'
+              : filters.qry && filters.corId
+              ? 'api'
+              : 'api'
+          }
         />
       </Box>
 

@@ -1,6 +1,5 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import SmsTemplatesForm from '../forms/SmsTemplatesForm'
 
 const SmsTemplatesWindow = ({
@@ -19,14 +18,11 @@ const SmsTemplatesWindow = ({
       width={500}
       height={300}
     >
-      <CustomTabPanel>
         <SmsTemplatesForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
         />
-       
-      </CustomTabPanel>
     </Window>
   )
 }

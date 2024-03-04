@@ -9,10 +9,16 @@ export default function ApprovalFormShell(props) {
     form,
     onPost,
     onClose,
+    onReopen,
     isClosed,
     editMode,
+    onTFR,
+    isTFR,
     hiddenClose = false,
+    hiddenApprove = false,
+    hiddenReopen = false,
     hiddenPost = false,
+    visibleTFR = false,
     ...remaining
   } = props
   const { stack } = useWindow()
@@ -31,13 +37,53 @@ export default function ApprovalFormShell(props) {
   }
 
   const actions = [
-    { action: onPost, title: 'Post', isDisabled: !editMode, isHidden: hiddenPost },
-    { action: onClose, title: 'Close', isDisabled: isClosed || !editMode, isHidden: hiddenClose },
-    { action: onApproval, title: 'Approval', isDisabled: !isClosed, isHidden: hiddenClose }
+    {
+      action: onPost,
+      title: 'Post',
+      isDisabled: !editMode,
+      isHidden: hiddenPost,
+      color: '#231f20',
+      colorHover: '#4d393e'
+    },
+    {
+      action: onClose,
+      title: 'Close',
+      isDisabled: isClosed || !editMode,
+      isHidden: hiddenClose,
+      color: 'transparent',
+      colorHover: 'transparent',
+      border: '1px solid #01a437'
+    },
+    {
+      action: onReopen,
+      title: 'reopen',
+      isDisabled: !isClosed || !editMode,
+      isHidden: hiddenReopen,
+      color: 'transparent',
+      colorHover: 'transparent',
+      border: '1px solid #000000'
+    },
+    {
+      action: onApproval,
+      title: 'Approval',
+      isDisabled: !isClosed,
+      isHidden: hiddenApprove,
+      color: '#231f20',
+      colorHover: '#080707'
+    }
   ]
 
   return (
-    <FormShell actions={actions} form={form} isClosed={isClosed} {...remaining}>
+    <FormShell
+      actions={actions}
+      form={form}
+      isClosed={isClosed}
+      editMode={editMode}
+      visibleTFR={visibleTFR}
+      onTFR={onTFR}
+      isTFR={isTFR}
+      {...remaining}
+    >
       {children}
     </FormShell>
   )

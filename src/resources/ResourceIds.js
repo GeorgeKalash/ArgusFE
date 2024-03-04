@@ -86,7 +86,10 @@ export const ResourceIds = {
   ProductionClass: 42108,
   carrierSite: 40203,
   LoCollectors: 40202,
+  LoCarriers: 40201,
+  Accounts:31201,
   Routings: 42105,
   CreditOrder: 35301,
-  UndeliveredCreditOrder: 35302
+  UndeliveredCreditOrder: 35302,
+  CreditInvoice: 35303
 }
