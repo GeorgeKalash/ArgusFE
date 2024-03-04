@@ -36,9 +36,9 @@ export default function DocumentTypeMapForm ({
 
     const [initialValues, setInitialData] = useState({
         recordId: null,
-        fromFunctionId: null,
-        fromDTId: '',
-        toFunctionId: null,
+        fromFunctionId:null,
+        fromDTId:null,
+        toFunctionId:null,
         decimals: null,
         profileId: null,
         currencyType: null,
@@ -53,8 +53,6 @@ export default function DocumentTypeMapForm ({
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
-
-    //const editMode = !!recordId
 
     const invalidate = useInvalidate({
         endpointId: SystemRepository.DocumentTypeMap.qry
@@ -106,7 +104,7 @@ export default function DocumentTypeMapForm ({
                 extension: SystemRepository.DocumentTypeMap.get,
                 parameters: `_fromFunctionId=${fromFunctionId}&_fromDTId=${fromDTId}&_toFunctionId=${toFunctionId}`
               })
-              
+  
               setInitialData({
                 ...res.record,
                 recordId:  Math.floor(Math.random() * 10000) + 1,
@@ -161,14 +159,13 @@ export default function DocumentTypeMapForm ({
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                parameters={`_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`}
+                parameters={formik.values.fromFunctionId ?`_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`:`_dgId=0&_startAt=${0}&_pageSize=${50}`}
                
                 maxAccess={maxAccess}
                 
                 onChange={(event, newValue) => {
                   formik.setFieldValue('fromDTId', newValue?.recordId)
 
-                    // formik.setFieldValue('fromDTName', newValue?.values)
                 }}
                 error={
                     formik.touched.fromDTId && Boolean(formik.errors.fromDTId)
@@ -210,7 +207,7 @@ export default function DocumentTypeMapForm ({
           
                 maxAccess={maxAccess}
                 values={formik.values}
-                parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
+                parameters={formik.values.fromFunctionId ?  `_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`:`_dgId=0&_startAt=${0}&_pageSize=${50}`}
                 
                 onChange={(event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
@@ -240,12 +237,3 @@ export default function DocumentTypeMapForm ({
     </FormShell>
   )
 }
-
-// formik.setFieldValue('toFunctionId', newValue?.key)
-//                     formik.setFieldValue('toFunctionName', newValue?.value)
-
-
-// formik.setFieldValue('dtId', newValue?.recordId)
-// formik.setFieldValue('toDTName', newValue?.name)
-// name='dtId'
-// label='To Document Type'

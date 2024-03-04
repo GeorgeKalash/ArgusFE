@@ -16,7 +16,7 @@ const DocumentTypeMapWindow = ({
     return (
         <Window
         id='DocumentTypeMapWindow'
-        Title={labels.DocumentTypeMap}
+        Title={"labels.DocumentTypeMap"}
         controlled={true}
         onClose={onClose}
         width={600}
@@ -30,7 +30,6 @@ const DocumentTypeMapWindow = ({
                   fromFunctionId={fromFunctionId}
                   fromDTId={fromDTId}
                   toFunctionId={toFunctionId}
-          
                />
                </CustomTabPanel>
             </Window> 
