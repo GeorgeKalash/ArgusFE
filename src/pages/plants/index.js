@@ -16,10 +16,8 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewPlant, populatePlant } from 'src/Models/System/Plant'
-import { getNewAddress, populateAddress } from 'src/Models/System/Address'
+
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -40,15 +38,14 @@ const Plants = () => {
   const [recordId, setRecordId] = useState(null)
 
 
-  async function fetchWithSearch({options = {} , qry}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchWithSearch({ qry}) {
 
   const response=  await getRequest({
     extension: SystemRepository.Plant.snapshot,
-    parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
+    parameters: `_filter=${qry}`
   })
 
-return {...response,  _startAt: _startAt}
+return response
 
 }
 
