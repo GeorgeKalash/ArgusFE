@@ -162,7 +162,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       <>
         <Box>
           {formik && (
-            <Grid container spacing={2}>
+            <Grid container spacing={2} padding={1}>
               <Grid item xs={12} sm={6}>
                 <CustomTextField
                   name="reference"
@@ -216,10 +216,10 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
                   maxAccess={access}
                   height={"85"}
                   columns={[
-                    { field: 'base', headerName: 'Base' },
-                    { field: 'credit', headerName: 'Credit' },
-                    { field: 'debit', headerName: 'Debit' },
-                    { field: 'balance', headerName: 'Balance' }
+                    { field: 'base', headerName:_labels.base },
+                    { field: 'credit', headerName:_labels.credit },
+                    { field: 'debit', headerName: _labels.debit },
+                    { field: 'balance', headerName:_labels.balance }
                   ]}
                   rowId={['seqNo']}
                   pagination={false}
@@ -232,10 +232,10 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
                   pagination={false}
                   gridData={{count: 1, list: currencyGridData}}
                   columns={[
-                    { field: 'currency', headerName: 'Currency' },
-                    { field: 'credit', headerName: 'Credit' },
-                    { field: 'debit', headerName: 'Debit' },
-                    { field: 'balance', headerName: 'Balance' }
+                    { field: 'currency', headerName:_labels.currency },
+                    { field: 'credit', headerName:_labels.credit },
+                    { field: 'debit', headerName: _labels.debit },
+                    { field: 'balance', headerName:_labels.balance }
                   ]}
                   height={"85"}
 
