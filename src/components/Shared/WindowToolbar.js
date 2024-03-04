@@ -20,7 +20,7 @@ const WindowToolbar = ({
   editMode = false,
   smallBox = false,
   infoVisible = true,
-  aliComponentVisible,
+  NewComponentVisible,
   postVisible = false,
   closeVisible = false,
   clientRelation,
@@ -110,12 +110,10 @@ const WindowToolbar = ({
           Client Relation
         </Button>
       )}
-      {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
-      {  aliComponentVisible && (
-        <Button onClick={() => newHandler(recordId)} variant="contained">          hi
+      {  NewComponentVisible && (
+        <Button onClick={() => newHandler(recordId)} variant="contained">Gl
         </Button>
       )}
-      {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
       {onInfo && infoVisible && (
         <Button onClick={onInfo} variant='contained' sx={{ mr: 1 }} disabled={!editMode}>
           Info

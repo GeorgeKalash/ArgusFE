@@ -20,7 +20,7 @@ export default function FormShell({
   functionId,
   recordId,
   
-  aliComponentVisible=false,
+  NewComponentVisible=false,
   maxAccess,
   isPosted = false,
   clientRelation = false,
@@ -125,7 +125,7 @@ export default function FormShell({
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
-          aliComponentVisible={aliComponentVisible}
+          NewComponentVisible={NewComponentVisible}
           postVisible={postVisible}
           isPosted={isPosted}
           clientRelation={clientRelation}

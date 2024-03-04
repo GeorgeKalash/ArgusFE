@@ -221,7 +221,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
           <Grid container paddingTop={2}>
             <Grid xs={6}>
               <Box paddingInlineEnd={2}  sx={{
-              width: '25.5rem',
+              width: '25.8rem',
               overflow:'hidden',
               marginLeft:'3rem'
             }}>
@@ -243,10 +243,10 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
              <Grid xs={6}>
               <Box   paddingInlineStart={2}
             sx={{
-              width: '25.5rem', 
+              width: '26rem', 
               overflow: 'hidden', 
               position: 'relative',
-              marginLeft:'2rem'
+              marginLeft:'1rem'
               
             }}>
                 <Table
