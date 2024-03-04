@@ -33,11 +33,9 @@ const CommissionTypes = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
+  async function fetchGridData() {
     return await getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.page,
+      extension: CurrencyTradingSettingsRepository.CommissionType.qry,
       parameters: `filter=`
     })
 
@@ -50,7 +48,7 @@ const CommissionTypes = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CurrencyTradingSettingsRepository.CommissionType.page,
+    endpointId: CurrencyTradingSettingsRepository.CommissionType.qry,
     datasetId: ResourceIds.CommissionType
   })
 
