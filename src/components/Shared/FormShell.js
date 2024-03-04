@@ -90,7 +90,7 @@ export default function FormShell({
                 
                 
               },
-              width: 815, 
+              width: 1000, 
               height: 600,
               title: 'General Ledger'
             })

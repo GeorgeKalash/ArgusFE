@@ -4,7 +4,11 @@ import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import {Box } from '@mui/material'
-import toast from 'react-hot-toast'
+import { styled } from '@mui/material/styles';
+
+
+
+
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
@@ -106,39 +110,45 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       },{
         field:"notes",
         headerName:_labels.notes,
-        flex:1
+        flex:1,
       },{
         field:"exRate",
         headerName:_labels.exRate,
-        flex:1
+        flex:1,
+        align: 'right',
       },{
         field:"amount",
         headerName:_labels.amount,
-        flex:1
+        flex:1,
+        align: 'right',
+        
       },{
         field:"baseAmount",
         headerName:_labels.base,
-        flex:1
+        flex:1,
+        align: 'right',
+        headerAlign: 'right',
       }
 
     ]
 
     useEffect(() => {
       if (data && data.list && Array.isArray(data.list)) {
-        const baseCredit = data.list.reduce((acc, curr) => curr.sign === 2 ? acc + parseFloat(curr.amount || 0) : acc, 0);
-        const baseDebit = data.list.reduce((acc, curr) => curr.sign === 1 ? acc + parseFloat(curr.amount || 0) : acc, 0);
+        const baseCredit = data.list.reduce((acc, curr) => curr.sign === 2 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
+        const baseDebit = data.list.reduce((acc, curr) => curr.sign === 1 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
         const baseBalance = baseDebit - baseCredit;
         
         setBaseGridData({ base :'Base',credit: baseCredit, debit: baseDebit, balance: baseBalance });
     
         const currencyTotals = data.list.reduce((acc, curr) => {
-          if (!acc[curr.currencyRef]) {
-            acc[curr.currencyRef] = { credit: 0, debit: 0 };
+          const currency = curr.currencyRef;
+          if (!acc[currency]) {
+            acc[currency] = { credit: 0, debit: 0 };
           }
           if (curr.sign === 2) {
-            acc[curr.currencyRef].credit += parseFloat(curr.amount || 0);
+            acc[currency].credit += parseFloat(curr.amount || 0);
           } else if (curr.sign === 1) {
-            acc[curr.currencyRef].debit += parseFloat(curr.amount || 0);
+            acc[currency].debit += parseFloat(curr.amount || 0);
           }
 
           return acc;
@@ -150,7 +160,6 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
           debit,
           balance: debit - credit
         }));
-
         
         setCurrencyGridData(currencyData);
       }
@@ -206,15 +215,20 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
             pageSize={50}
             paginationType='client'
             maxAccess={access}
-            height={"230"}
+            height={"280"}
+            pagination={false}
           />
           <Grid container paddingTop={2}>
             <Grid xs={6}>
-              <Box paddingInlineEnd={2}>
+              <Box paddingInlineEnd={2}  sx={{
+              width: '25.5rem',
+              overflow:'hidden',
+              marginLeft:'3rem'
+            }}>
                 <Table
                   gridData={{count: 1, list: [baseGridData]}}
                   maxAccess={access}
-                  height={"85"}
+                  height={"150"}
                   columns={[
                     { field: 'base', headerName:_labels.base },
                     { field: 'credit', headerName:_labels.credit },
@@ -227,20 +241,26 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
               </Box>
             </Grid>
              <Grid xs={6}>
-              <Box paddingInlineStart={2}>
+              <Box   paddingInlineStart={2}
+            sx={{
+              width: '26rem', 
+              overflow: 'hidden', 
+              position: 'relative',
+              marginLeft:'2rem'
+              
+            }}>
                 <Table
-                  pagination={false}
-                  gridData={{count: 1, list: currencyGridData}}
-                  columns={[
-                    { field: 'currency', headerName:_labels.currency },
-                    { field: 'credit', headerName:_labels.credit },
-                    { field: 'debit', headerName: _labels.debit },
-                    { field: 'balance', headerName:_labels.balance }
-                  ]}
-                  height={"85"}
-
-                  rowId={['seqNo']}
-                  maxAccess={access}
+            pagination={false}
+            gridData={{count: currencyGridData.length, list: currencyGridData}}
+            columns={[
+              { field: 'currency', headerName: 'Currency' },
+              { field: 'debit', headerName: 'Debit' },
+              { field: 'credit', headerName: 'Credit' },
+              { field: 'balance', headerName: 'Balance' }
+            ]}
+            height={"150"}
+            rowId={['currency']}
+            maxAccess={access}
                 /> 
               </Box>
             </Grid>
