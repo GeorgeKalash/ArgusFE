@@ -33,11 +33,15 @@ const CommissionTypes = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: CurrencyTradingSettingsRepository.CommissionType.qry,
-      parameters: `filter=`
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.CommissionType.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return {...response,  _startAt: _startAt}
 
   }
 
@@ -45,10 +49,11 @@ const CommissionTypes = () => {
     query: { data },
     labels: _labels,
     refetch,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CurrencyTradingSettingsRepository.CommissionType.qry,
+    endpointId: CurrencyTradingSettingsRepository.CommissionType.page,
     datasetId: ResourceIds.CommissionType
   })
 
@@ -107,8 +112,9 @@ const CommissionTypes = () => {
           isLoading={false}
           refetch={refetch}
           pageSize={50}
+          paginationParameters={paginationParameters}
           maxAccess={access}
-          paginationType='client'
+          paginationType='api'
         />
       </Box>
       {windowOpen && (
