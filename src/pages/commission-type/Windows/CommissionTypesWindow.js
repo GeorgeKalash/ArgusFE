@@ -1,7 +1,7 @@
 import Window from 'src/components/Shared/Window'
-import RelationTypesForm from '../forms/RelationTypesForm'
+import CommissionTypesForm from '../forms/CommissionTypesForm'
 
-const RelationTypesWindow = ({
+const CommissionTypesWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -10,14 +10,14 @@ const RelationTypesWindow = ({
   
   return (
     <Window
-      id='RelationTypesWindow'
-      Title={labels.RelationTypes}
+      id='CommissionTypesWindow'
+      Title={labels.CommissionTypes}
       controlled={true}
       onClose={onClose}
       width={500}
       height={300}
     >
-      <RelationTypesForm
+      <CommissionTypesForm
         labels={labels}
         maxAccess={maxAccess}
         recordId={recordId}
@@ -26,4 +26,4 @@ const RelationTypesWindow = ({
   )
 }
 
-export default RelationTypesWindow
+export default CommissionTypesWindow
