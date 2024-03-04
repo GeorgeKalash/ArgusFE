@@ -8,13 +8,14 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
   const handleNumberFieldNewValue = (newValue, oldValue, min, max) => {
     const regex = /^[0-9,]+(\.\d+)?$/
     if (newValue && regex.test(newValue)) {
-      newValue = newValue.replace(/[^0-9]/g, '')
+      newValue = newValue.replace(/[^0-9.]/g, '')
       const _newValue = getNumberWithoutCommas(newValue)
 
-return _newValue;
-      console.log(_newValue)
-      if ((min && _newValue < min) || (max && _newValue > max)) return oldValue
-      else return getFormattedNumber(newValue)
+      return _newValue;
+
+      // console.log(_newValue)
+      // if ((min && _newValue < min) || (max && _newValue > max)) return oldValue
+      // else return getFormattedNumber(newValue)
     }
   }
 

@@ -28,7 +28,6 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
   }
 
   function handleChange(row) {
-        console.log('onchange')
 
     const newRows = [...value]
     const index = newRows.findIndex(({ id }) => id === row.id)
@@ -64,7 +63,6 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
 
   const handleCellKeyDown = (params, event) => {
 
-    console.log(params, event)
     if (event.key === 'Enter') {
       event.stopPropagation()
 
@@ -240,8 +238,7 @@ return (
       processRowUpdate={async (newRow, oldRow) => {
         setIsUpdating(true)
         const updated = await processDependencies(newRow, oldRow, currentEditCell.current)
-        console.log(updated)
-        console.log(oldRow, newRow )
+
         const change = handleChange(updated, oldRow)
 
         setIsUpdating(false)
@@ -255,7 +252,7 @@ return (
         console.error('[Datagrid - ERROR]: Please handle all errors inside onChange of your respective field.')
         console.error('[Datagrid - ERROR]:', e)
 
-        // stack({ message: 'Error occured while updating row.' })
+        stack({ message: 'Error occured while updating row.' })
       }}
       onCellKeyDown={handleCellKeyDown}
       rows={value}

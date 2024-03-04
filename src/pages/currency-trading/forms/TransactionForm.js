@@ -469,7 +469,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
-
+    if(currencyId){
     const result = await getRequest({
       extension: SystemRepository.Defaults.get,
       parameters: `_key=baseCurrencyId`
@@ -481,6 +481,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     })
 
     return response.record
+  }
   }
 
   const total = formik.values.rows.reduce((acc, { lcAmount }) => {
@@ -843,14 +844,20 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
                         // if (!newRow.currency || oldRow.currency.recordId === newRow.currency.recordId) return
                         //  console.log( oldRow, newRow)
-                        const exchange = await fetchRate({currencyId: newRow.currency.recordId})
-                        if (!exchange?.rate)
+                        // newRow.currency.recordId
+                        if(!newRow?.currency?.recordId){
+                        return;
+                        }
+                        const exchange = await fetchRate({currencyId: newRow?.currency?.recordId})
+                        if (!exchange?.rate){
                           stackError({
-                            message: `Rate not defined for ${row.value}.`
+                            message: `Rate not defined for ${newRow.currency.name}.`
                           })
 
+                        return;
 
-                        if (exchange && newRow.fcAmount) {
+                        }
+                        if (exchange && newRow.fcAmount ) {
                           const exRate = exchange.rate
                           const rateCalcMethod = exchange.rateCalcMethod
 
@@ -861,10 +868,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                               ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) / exRate
                               : 0
 
-                              update({lcAmount :  lcAmount})
+                              exchange.rate &&  update({lcAmount :  lcAmount})
 
                          }
-
 
                         update({
                           currencyId: newRow.currency.recordId,
@@ -931,9 +937,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     },
                     async onChange({ row: { update, newRow } }) {
                       const lcAmount =  parseFloat(newRow.lcAmount?.toString().replace(/,/g, ''))
-
-                      newRow.exRate && update({
-                        fcAmount: lcAmount / newRow.exRate
+                      const fcAmount = lcAmount ? lcAmount / newRow.exRate : ''
+                      if(fcAmount && newRow.exRate )
+                      update({
+                        fcAmount: fcAmount
                       })
 
 
