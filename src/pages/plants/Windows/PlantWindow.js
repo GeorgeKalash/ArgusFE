@@ -5,66 +5,56 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 // **Tabs
 import PlantTab from 'src/pages/plants/Tabs/PlantTab'
 import AddressTab from 'src/components/Shared/AddressTab'
+import PlantForm from '../Forms/PlantForm'
+import FormShell from 'src/components/Shared/FormShell'
+import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
+import AddressForm from '../Forms/AddressForm'
+import { useState } from 'react'
 
 const PlantWindow = ({
   onClose,
-  onSave,
   plantValidation,
-  costCenterStore,
-  plantGroupStore,
-  segmentStore,
   width,
   height,
-  _labels,
+  labels,
   editMode,
   maxAccess,
-
+  setEditMode,
   tabs,
+  recordId,
+  setRecordId,
   activeTab,
   setActiveTab,
-  countryStore,
-  stateStore,
-  fillStateStore,
-  cityStore,
-  setCityStore,
-  lookupCity,
-  cityDistrictStore,
-  setCityDistrictStore,
-  lookupCityDistrict,
-  fillCountryStore,
   addressValidation
 }) => {
+
+  const [post , setPost] = useState(false)
+
   return (
-    <Window id='PlantWindow' Title={_labels.plant} onClose={onClose} width={width} height={height} onSave={onSave}
-    tabs={tabs}
+    <Window id='PlantWindow' Title='Plant' onClose={onClose} width={width} height={height}
+     controlled={true}
+      tabs={tabs}
       activeTab={activeTab}
       setActiveTab={setActiveTab}>
       <CustomTabPanel index={0} value={activeTab}>
-        <PlantTab
+        <PlantForm
           plantValidation={plantValidation}
-          costCenterStore={costCenterStore}
-          plantGroupStore={plantGroupStore}
-          segmentStore={segmentStore}
-          _labels={_labels}
+          _labels={labels}
           maxAccess={maxAccess}
           editMode={editMode}
+          setEditMode={setEditMode}
+          recordId={recordId}
+          setRecordId={setRecordId}
+
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <AddressTab
-          countryStore={countryStore}
-          stateStore={stateStore}
-          labels={_labels}
-          lookupCity={lookupCity}
-          fillStateStore={fillStateStore}
-          cityStore={cityStore}
-          setCityStore={setCityStore}
-          fillCountryStore={fillCountryStore}
+        <AddressForm
           addressValidation={addressValidation}
+          plantValidation={plantValidation}
+          recordId={recordId}
+          setRecordId={setRecordId}
           maxAccess={maxAccess}
-          lookupCityDistrict={lookupCityDistrict}
-          cityDistrictStore={cityDistrictStore}
-          setCityDistrictStore={setCityDistrictStore}
           editMode={editMode}
         />
       </CustomTabPanel>

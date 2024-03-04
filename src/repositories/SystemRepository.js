@@ -68,6 +68,7 @@ export const SystemRepository = {
     del: service + 'delST'
   },
   Plant: {
+    snapshot: service + 'snapshotPLT',
     qry: service + 'qryPLT',
     get: service + 'getPLT',
     set: service + 'setPLT',

@@ -10,19 +10,23 @@ import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 
 const CustomTabPanel = (props) => {
-    const { children, value, index, ...other } = props
+    const { children, value,  height ,index, ...other  } = props
+console.log( height)
 
-    return (
+return (
         <Box
 
             role="tabpanel"
             hidden={value !== index}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
+
             {...other}
         >
+
             <Box sx={{ p: 3 }}>
-                <Typography>{children}</Typography>
+                <Typography sx={{ height : height, display: 'flex',
+                        flexDirection: 'column', }}>{children}</Typography>
             </Box>
         </Box>
     )

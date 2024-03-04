@@ -203,7 +203,6 @@ const ClientTemplateForm = ({
 
   async function  getCountry(){
     var parameters = `_filter=&_key=countryId`
-console.log(parameters)
 
     const res=   await getRequest({
         extension: SystemRepository.Defaults.get,

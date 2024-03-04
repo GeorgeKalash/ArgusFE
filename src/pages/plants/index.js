@@ -26,83 +26,63 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows
 import PlantWindow from './Windows/PlantWindow'
-import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { useResourceQuery } from 'src/hooks/resource'
 
 const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
 
-  //controls
-  const [labels, setLabels] = useState(null)
-  const [addressLabels, setAddressLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [costCenterStore, setCostCenterStore] = useState([])
-  const [plantGroupStore, setPlantGroupStore] = useState([])
-  const [segmentStore, setSegmentStore] = useState([])
-  const [countryStore, setCountryStore] = useState([])
-  const [cityStore, setCityStore] = useState([])
-  const [cityDistrictStore, setCityDistrictStore] = useState([])
-  const [stateStore, setStateStore] = useState([])
 
   //states
   const [activeTab, setActiveTab] = useState(0)
-
   const [windowOpen, setWindowOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [recordId, setRecordId] = useState(null)
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    licenseNo: labels && labels.find(item => item.key === "3").value,
-    commReg: labels && labels.find(item => item.key === "4").value,
-    costCenter: labels && labels.find(item => item.key === "5").value,
-    plantGrp: labels && labels.find(item => item.key === "6").value,
-    segment: labels && labels.find(item => item.key === "7").value,
-    plant: labels && labels.find(item => item.key === "8").value,
 
-    name:
-      addressLabels && addressLabels.find(item => item.key === "1") && addressLabels.find(item => item.key === "1").value,
-    street1:
-      addressLabels && addressLabels.find(item => item.key === "2") && addressLabels.find(item => item.key === "2").value,
-    street2:
-      addressLabels && addressLabels.find(item => item.key === "3") && addressLabels.find(item => item.key === "3").value,
-    email:
-      addressLabels && addressLabels.find(item => item.key === "4") && addressLabels.find(item => item.key === "4").value,
-    email2:
-      addressLabels && addressLabels.find(item => item.key === "5") && addressLabels.find(item => item.key === "5").value,
+  async function fetchWithSearch({options = {} , qry}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-    country:
-      addressLabels && addressLabels.find(item => item.key === "6") && addressLabels.find(item => item.key === "6").value,
-    state:
-      addressLabels && addressLabels.find(item => item.key === "7") && addressLabels.find(item => item.key === "7").value,
-    city:
-      addressLabels && addressLabels.find(item => item.key === "8") && addressLabels.find(item => item.key === "8").value,
+  const response=  await getRequest({
+    extension: SystemRepository.Plant.snapshot,
+    parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
+  })
 
-    postalCode:
-      addressLabels && addressLabels.find(item => item.key === "9") && addressLabels.find(item => item.key === "9").value,
-    phone:
-      addressLabels && addressLabels.find(item => item.key === "10") && addressLabels.find(item => item.key === "10").value,
-    phone2:
-      addressLabels && addressLabels.find(item => item.key === "11") && addressLabels.find(item => item.key === "11").value,
-    phone3:
-      addressLabels && addressLabels.find(item => item.key === "12") && addressLabels.find(item => item.key === "12").value,
-    address:
-      addressLabels && addressLabels.find(item => item.key === "13") && addressLabels.find(item => item.key === "13").value,
+return {...response,  _startAt: _startAt}
 
-    cityDistrict:
-      addressLabels && addressLabels.find(item => item.key === "14") && addressLabels.find(item => item.key === "14").value,
-    bldgNo:
-      addressLabels && addressLabels.find(item => item.key === "15") && addressLabels.find(item => item.key === "15").value,
-    unitNo:
-      addressLabels && addressLabels.find(item => item.key === "16") && addressLabels.find(item => item.key === "16").value,
-    subNo:
-      addressLabels && addressLabels.find(item => item.key === "17") && addressLabels.find(item => item.key === "17").value
+}
+
+const {
+  query: { data },
+  search,
+  clear,
+  refetch,
+  labels: _labels,
+  paginationParameters,
+  access
+} = useResourceQuery({
+  queryFn: fetchGridData,
+   endpointId: SystemRepository.Plant.page,
+   datasetId: ResourceIds.Plants,
+   search: {
+    endpointId: SystemRepository.Plant.snapshot,
+    searchFn: fetchWithSearch,
   }
+})
+
+
+async function fetchGridData({ _startAt = 0, _pageSize = 50 }) {
+  const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+  var parameters = defaultParams
+
+   const response =  await getRequest({
+    extension: SystemRepository.Plant.page,
+    parameters: parameters
+  })
+
+  return {...response,  _startAt: _startAt}
+
+}
 
   const columns = [
     {
@@ -122,63 +102,6 @@ const Plants = () => {
     }
   ]
 
-  const plantValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log('plantVal:' + values)
-      postPlant(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    if (activeTab === 0) plantValidation.handleSubmit()   
-    else if (activeTab === 1) addressValidation.handleSubmit()
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.Plant.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-        console.log(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const postPlant = obj => {
-    console.log('firstTabBody')
-    console.log(obj)
-    const recordId = obj.recordId
-    postRequest({
-      extension: SystemRepository.Plant.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-
-        plantValidation.setFieldValue('recordId', res.recordId)   
-        if (!recordId) {         
-          addressValidation.setValues(getNewAddress) 
-          toast.success('Record Added Successfully')
-          setEditMode(true)
-        }
-        else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   const delPlant = obj => {
     postRequest({
@@ -187,7 +110,8 @@ const Plants = () => {
     })
       .then(res => {
         console.log({ res })
-        getGridData({})
+
+        // getGridData({})
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
@@ -197,27 +121,14 @@ const Plants = () => {
 
   const addPlant = () => {
     setActiveTab(0)
-    plantValidation.setValues(getNewPlant)
-    addressValidation.setValues(getNewAddress)  // to solve a problem
-    fillCostCenterStore()
-    fillPlantGroupStore()
-    fillSegmentStore()
     setEditMode(false)
+    setRecordId('')
     setWindowOpen(true)
   }
 
   const editPlant = obj => {
-    console.log(obj)
     setActiveTab(0)
-
-    addressValidation.setValues(getNewAddress)
-    fillCountryStore()
-
-    fillCostCenterStore()
-    fillPlantGroupStore()
-    fillSegmentStore()
-
-    fillStateStore(obj.countryId)
+    setRecordId(obj.recordId)
 
     // WITHOUT GETTING BOTH ADDRESS AND PLANT GET REQUEST, I AM FILLING ADDRESS FROM PLANTRECORD.ADDRESS
     /*var parameters = `_filter=` + '&_recordId=' + obj.addressId //try to set address directlyyy
@@ -231,7 +142,7 @@ const Plants = () => {
           console.log(result)
 
           fillStateStore(result.countryId)
-          
+
           addressValidation.setValues(populateAddress(result))
           console.log('addressData')
           getPlantById(obj)
@@ -255,71 +166,8 @@ const Plants = () => {
       parameters: parameters
     })
       .then(res => {
-        console.log('plant')
-        console.log(res)
-        console.log(res.record)
-        plantValidation.setValues(populatePlant(res.record))
-        res.record.address != null ? addressValidation.setValues(populateAddress(res.record.address)) : addressValidation.setValues(getNewAddress)
         setEditMode(true)
         setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.Plants, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
-        getLabels(ResourceIds.Plants, setLabels)
-        getLabels(ResourceIds.Address, setAddressLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
-
-  const fillCostCenterStore = () => {
-    var parameters = `_params=&_startAt=0&_pageSize=1000`
-    getRequest({
-      extension: GeneralLedgerRepository.CostCenter.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCostCenterStore(res.list)
-        console.log(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillPlantGroupStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.PlantGroup.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setPlantGroupStore(res.list)
-        console.log(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillSegmentStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: FinancialRepository.Segment.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setSegmentStore(res.list)
-        console.log(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -330,141 +178,11 @@ const Plants = () => {
 
   const tabs = [{ label: _labels.plant }, { label: _labels.address , disabled: !editMode }]
 
-  const addressValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required'),
-      stateId: yup.string().required('This field is required'),
-      street1: yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required'),
-      cityId: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log('addressVal:' + values)
-      postAddress(values)
-    }
-  })
 
-  const postAddress = obj => { //we can request again plant and save it or directly validation.handlesubmit
-    
-    console.log(obj)
 
-    // 2 options either same validation or get first tab again [2 ways]
 
-    postRequest({
-      extension: SystemRepository.Address.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        console.log(res.recordId)
-        obj.recordId = res.recordId
-        addressValidation.setFieldValue('recordId', obj.recordId)   
 
-        //setWindowOpen(false)
-        //updatePlantAddress(obj)
-        //OR
-        
-        plantValidation.setFieldValue('addressId',  obj.recordId )
-        plantValidation.handleSubmit()
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
-  /*const updatePlantAddress = (obj) => { 
-    console.log(plantValidation.values.recordId)
-    console.log(obj.recordId) //address
-    const _recordId = plantValidation.values.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.Plant.get,
-      parameters: parameters
-    })
-      .then(res => {
-        //res.addressId = obj.recordId //address
-        plantValidation.setValues(populatePlant(res.record)) 
-        plantValidation.setFieldValue('addressId',  obj.recordId )
-        plantValidation.handleSubmit()
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }*/
-
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res.list)
-        setCountryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillStateStore = countryId => {
-    setStateStore([])
-    var parameters = `_countryId=${countryId}`
-    if (countryId) {
-      getRequest({
-        extension: SystemRepository.State.qry,
-        parameters: parameters
-      })
-        .then(res => {
-          setStateStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  }
-
-  const lookupCity = searchQry => {
-    setCityStore([])
-    if (!addressValidation.values.countryId) 
-    {
-      console.log('false') 
-
-     return false
-    }
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_countryId=${addressValidation.values.countryId}&_stateId=${addressValidation.values.stateId}`
-    getRequest({
-      extension: SystemRepository.City.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res.list)
-        setCityStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const lookupCityDistrict = searchQry => {
-    setCityDistrictStore([])
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}&_cityId=${addressValidation.values.cityId}`
-
-    getRequest({
-      extension: SystemRepository.CityDistrict.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res.list)
-        setCityDistrictStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   return (
     <>
@@ -475,14 +193,17 @@ const Plants = () => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addPlant} maxAccess={access} />
+        <GridToolbar onAdd={addPlant} maxAccess={access}  onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
           onEdit={editPlant}
           onDelete={delPlant}
+          refetch={refetch}
+          paginationType='api'
+          paginationParameters={paginationParameters}
+
           isLoading={false}
           pageSize={50}
           maxAccess={access}
@@ -493,30 +214,15 @@ const Plants = () => {
           onClose={() => setWindowOpen(false)}
           width={600}
           height={450}
-          onSave={handleSubmit}
-          plantValidation={plantValidation}
-          costCenterStore={costCenterStore}
-          plantGroupStore={plantGroupStore}
-          segmentStore={segmentStore}
-          _labels={_labels}
-          maxAccess={access}
-          editMode={editMode}
-
+          labels={_labels}
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-
-          countryStore={countryStore}
-          stateStore={stateStore}
-          fillStateStore={fillStateStore}
-          cityStore={cityStore}
-          setCityStore={setCityStore}
-          lookupCity={lookupCity}
-          cityDistrictStore={cityDistrictStore}
-          setCityDistrictStore={setCityDistrictStore}
-          lookupCityDistrict={lookupCityDistrict}
-          fillCountryStore={fillCountryStore}
-          addressValidation={addressValidation}
+          maxAccess={access}
+          editMode={editMode}
+          recordId={recordId}
+          setRecordId={setRecordId}
+          setEditMode={setEditMode}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

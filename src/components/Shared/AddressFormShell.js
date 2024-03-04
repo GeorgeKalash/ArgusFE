@@ -2,11 +2,19 @@ import React, {useState, useEffect} from 'react'
 import FormShell from './FormShell'
 import AddressTab from './AddressTab'
 import { useFormik } from 'formik'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-export const AddressFormShell = ({setAddress , address, labels , maxAccess , editMode , window}) => {
+export const AddressFormShell = ({setAddress , address , maxAccess , editMode , window, readOnly , allowPost, setPost}) => {
   const [requiredOptional, setRequiredOptional] = useState(true)
 
 
+  const {
+    labels: labels,
+    access
+  } = useResourceParams({
+    datasetId: ResourceIds.ClientMaster
+  })
 
   const [initialValues, setInitialData] = useState({
     name: address?.name,
@@ -29,6 +37,10 @@ export const AddressFormShell = ({setAddress , address, labels , maxAccess , edi
     unitNo: address?.unitNo,
     subNo: address?.subNo
   });
+
+  useEffect(()=>{
+    setInitialData(address)
+  },[address])
 
   const WorkAddressFormik = useFormik({
 
@@ -73,8 +85,14 @@ export const AddressFormShell = ({setAddress , address, labels , maxAccess , edi
     initialValues,
 
     onSubmit: values => {
+
         setAddress(values)
-        window.close()
+      if(allowPost){
+          setPost(values)
+      }else{
+          window.close()
+
+      }
     }
   })
 
@@ -89,8 +107,8 @@ export const AddressFormShell = ({setAddress , address, labels , maxAccess , edi
   }, [WorkAddressFormik.values])
 
 return (
-    <FormShell  form={WorkAddressFormik} maxAccess={maxAccess}  infoVisible={false} readOnly={editMode} editMode={editMode}>
-      <AddressTab  addressValidation={WorkAddressFormik} maxAccess={maxAccess} labels={labels} requiredOptional={requiredOptional} readOnly={editMode}  />
+    <FormShell  form={WorkAddressFormik} maxAccess={maxAccess}  infoVisible={false} readOnly={readOnly} editMode={editMode}>
+      <AddressTab  addressValidation={WorkAddressFormik} maxAccess={maxAccess} labels={labels} requiredOptional={requiredOptional}  readOnly={readOnly} />
     </FormShell>
   )
 }
