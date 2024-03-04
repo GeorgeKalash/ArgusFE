@@ -174,19 +174,21 @@ const GLSettings = () => {
         
         onSubmit: values => {
             postGLSettings(values);
+           
             
         },
 
     });
 
     const postGLSettings = obj => {
-        const activeSegments = obj.GLACSegments || 0;
+       
         var dataToPost = [];
     
         dataToPost.push({ key: 'GLACSegments', value: obj.GLACSegments });
-            for (let i = 0; i < activeSegments; i++) {
+            for (let i = 0; i < 5; i++) {
             const segKey = `GLACSeg${i}`;
             const nameKey = `GLACSegName${i}`;
+            
     
             if (obj[segKey] !== undefined) {
                 dataToPost.push({ key: segKey, value: obj[segKey] });
@@ -195,10 +197,11 @@ const GLSettings = () => {
                 dataToPost.push({ key: nameKey, value: obj[nameKey] });
             }
         }
-    
+        console.log(dataToPost)
         postRequest({
             extension: SystemRepository.Defaults.set,
             record: JSON.stringify({ sysDefaults: dataToPost }),
+            
         })
         .then(res => {
             toast.success('Record Successfully');
@@ -228,7 +231,7 @@ const GLSettings = () => {
         "GLACSegName4",
       ]
 
-
+      useEffect(()=>console.log(formik.values),[formik])
 
       useEffect(() => {
         const segmentsNum = formik.values.GLACSegments

@@ -58,18 +58,23 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
   
         onSubmit: async (values, { setSubmitting }) => {
           setSubmitting(true);
+
           console.log('Submitting the following values:', values);
 
+          // Convert isCostElement to boolean if needed
           values.isCostElement = !!values.isCostElement;
 
+          // Check if accountRef is present and log it
           console.log('AccountRef:', values.accountRef);
           
           try {
+              // Submit the values to your endpoint
               const response = await postRequest({
                   extension: GeneralLedgerRepository.ChartOfAccounts.set,
                   record: JSON.stringify(values)
               });
 
+              // Handle the response
               if (!values.recordId) {
                   toast.success('Record Added Successfully');
                   setInitialData({
@@ -83,6 +88,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
               invalidate();
               
           } catch (error) {
+              // Handle any errors
               console.error(error);
               toast.error('Error submitting form');
           } finally {
@@ -123,15 +129,13 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
       const [segments, setSegments] = useState([]);
       
       const getDataResult = () => {
-        console.log("SOmething")
-        const myObject = {};
-        var parameters = `_filter=`
+        console.log("Getting Data Result");
+        const parameters = `_filter=`;
         getRequest({
-          extension:  SystemRepository.Defaults.qry,
-          parameters: parameters
+            extension: SystemRepository.Defaults.qry,
+            parameters: parameters
         })
         .then(res => {
-          
             const filteredList = res.list.filter(obj => {
                 return (
                     obj.key === 'GLACSeg0' || 
@@ -139,21 +143,22 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                     obj.key === 'GLACSeg2' || 
                     obj.key === 'GLACSeg3' ||
                     obj.key === 'GLACSeg4'
-                )
+                );
             }).map(obj => {
-              obj.value = parseInt(obj.value)
-              
-              return obj;
-            });
+                obj.value = parseInt(obj.value);
 
-            
+                return obj;
+            }).filter(obj=>obj.value)
+    
             setSegments(filteredList);
+    
         })
         .catch(error => {
             setErrorMessage(error);
         });
       };
 
+      
     return (
         <FormShell 
             resourceId={ResourceIds.ChartOfAccounts}
@@ -181,17 +186,31 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                 formik && formik.setFieldValue('groupId', newValue?.recordId)
               }}
 
+              // error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+              // helperText={formik.touched.nationalityId && formik.errors.nationalityId}
             />
           </Grid>
           <Grid item xs={12}>
                
                     <SegmentedInput
                         segments={segments}
+
                         name="accountRef"
                         setFieldValue={formik.setFieldValue}
                         values={formik.values.accountRef.split('-')}
                         error={formik.touched.name && Boolean(formik.errors.name)}
-                    />            
+                    />               {/* <CustomTextField
+                    name='accountRef'
+                    label={labels.accountRef}
+                    value={formik.values.accountRef}
+                    required
+                    maxAccess={maxAccess}
+                    maxLength='30'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('accountRef', '')}
+                    error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
+                    helperText={formik.touched.accountRef && formik.errors.accountRef}
+                    /> */}
                 </Grid>
                 <Grid item xs={12}>
                     <CustomTextField
@@ -345,11 +364,12 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
       }
     }
   };
+  console.log(segments)
   
   return (
     <div >
       {segments.map((segment, index) => (
-        <React.Fragment key={index} style={'border:none'}>
+        <React.Fragment key={index} >
           <input
             className={styles.inputText}
             ref={inputRefs[index]}
@@ -358,6 +378,7 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
             onKeyDown={(e) => handleKeyDown(index, e)}
             maxLength={segment.value}
 
+            // style={{ margin: '8px', width: `${segment.value + 3}ch`,borderRadius:"5px",border:'1px solid grey',padding:'9px' }}
           />
           {index !== segments.length - 1 && "-"}
         </React.Fragment>
