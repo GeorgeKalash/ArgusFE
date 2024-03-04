@@ -213,7 +213,7 @@ return {...response,  _startAt: _startAt}
         <PlantWindow
           onClose={() => setWindowOpen(false)}
           width={600}
-          height={450}
+          height={620}
           labels={_labels}
           tabs={tabs}
           activeTab={activeTab}
