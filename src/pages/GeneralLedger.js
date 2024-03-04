@@ -127,7 +127,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
         headerName:_labels.base,
         flex:1,
         align: 'right',
-        headerAlign: 'right',
+  
       }
 
     ]
@@ -231,9 +231,9 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
                   height={"150"}
                   columns={[
                     { field: 'base', headerName:_labels.base },
-                    { field: 'credit', headerName:_labels.credit },
-                    { field: 'debit', headerName: _labels.debit },
-                    { field: 'balance', headerName:_labels.balance }
+                    { field: 'credit', headerName:_labels.credit,align: 'right', },
+                    { field: 'debit', headerName: _labels.debit,align: 'right', },
+                    { field: 'balance', headerName:_labels.balance,align: 'right', }
                   ]}
                   rowId={['seqNo']}
                   pagination={false}
@@ -243,7 +243,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
              <Grid xs={6}>
               <Box   paddingInlineStart={2}
             sx={{
-              width: '26rem', 
+              width: '25.5rem', 
               overflow: 'hidden', 
               position: 'relative',
               marginLeft:'2rem'
@@ -254,9 +254,9 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
             gridData={{count: currencyGridData.length, list: currencyGridData}}
             columns={[
               { field: 'currency', headerName: 'Currency' },
-              { field: 'debit', headerName: 'Debit' },
-              { field: 'credit', headerName: 'Credit' },
-              { field: 'balance', headerName: 'Balance' }
+              { field: 'debit', headerName: 'Debit',align: 'right', },
+              { field: 'credit', headerName: 'Credit',align: 'right', },
+              { field: 'balance', headerName: 'Balance',align: 'right', }
             ]}
             height={"150"}
             rowId={['currency']}

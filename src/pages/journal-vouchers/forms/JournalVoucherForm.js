@@ -57,6 +57,9 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
+          date: yup.string().required('This field is required'),
+          currencyId: yup.string().required('This field is required'),
+          dtId: yup.string().required('This field is required'),
         
         }),
         onSubmit: async obj => {
@@ -67,7 +70,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
                response : responseValue
             }  
             try {
-                //this is where you save.
+              
                 const response = await postRequest({
                   extension: GeneralLedgerRepository.JournalVoucher.set,
                   record: JSON.stringify(data),
@@ -77,8 +80,8 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             toast.success('Record Added Successfully')
 
             setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
+              ...obj, 
+              recordId: response.recordId,
         
             });
           }
@@ -143,6 +146,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
               error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               helperText={formik.touched.dtId && formik.errors.dtId}
               maxAccess={maxAccess}
+              required
             />
       </Grid>
                 <Grid item xs={12}>
@@ -167,6 +171,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
                          onChange={formik.setFieldValue}
                          value={formik.values.date}
                          maxAccess={maxAccess}
+                         required
                          
                         //  disabledDate={Today}
                          
@@ -189,6 +194,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
               error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               helperText={formik.touched.currencyId && formik.errors.currencyId}
               maxAccess={maxAccess}
+              required
             />
       </Grid>
                 <Grid item xs={12}>
@@ -196,7 +202,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
                     name='notes'
                     label={labels.notes}
                     value={formik.values.notes}
-                    required
+                    
                     maxLength='100'
                     rows={2}
                     maxAccess={maxAccess}
