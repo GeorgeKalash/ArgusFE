@@ -24,6 +24,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -66,10 +67,16 @@ const SmsFunctionTemplate = () => {
 
             return n
           })
-
+var count =1
           smsFunctionTemplatesValidation.setValues({
             ...smsFunctionTemplatesValidation.values,
-            rows: finalList
+            rows: finalList?.map(
+          ({  ...rest }) => ({
+            id : count++,
+
+           ...rest
+          })
+            )
           })
         }
       )
@@ -110,7 +117,7 @@ const SmsFunctionTemplate = () => {
     }
   }
 
-  const columns = [
+  const columns1 = [
     {
       field: 'textfield',
       header: _labels[1],
@@ -145,13 +152,42 @@ const SmsFunctionTemplate = () => {
     }
   ]
 
+  const columns = [
+    {
+      component: 'textfield',
+      label: _labels[1],
+      name: 'functionId',
+      width: 150
+    },
+    {
+      component: 'textfield',
+      label: _labels[2],
+      name: 'functionName',
+
+      width: 300
+    },
+
+    {
+      component: 'resourceLookup',
+      label: _labels[3],
+      valueField: 'recordId',
+      displayField: 'name',
+      fieldsToUpdate: [
+        { from: 'recordId', to: 'templateId' },
+        { from: 'name', to: 'templateName' }
+      ],
+      columnsInDropDown: [{ key: 'name', value: 'name' }],
+      onLookup: lookupTemplate
+    }
+  ]
+
   const smsFunctionTemplatesValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
     validate: values => {},
     initialValues: {
       rows: [
-        {
+        { id: 1,
           functionId: ''
         }
       ]
@@ -198,13 +234,20 @@ const SmsFunctionTemplate = () => {
             <Grid container>
               <Grid xs={12}>
                 <Box sx={{ width: '100%' }}>
-                  <InlineEditGrid
+                  {/* <InlineEditGrid
                     gridValidation={smsFunctionTemplatesValidation}
-                    columns={columns}
+                    columns={columns1}
                     allowDelete={false}
                     allowAddNewLine={false}
                     scrollable={true}
                     scrollHeight={`${height - 130}px`}
+                  /> */}
+
+                  <DataGrid
+                   onChange={value => smsFunctionTemplatesValidation.setFieldValue('rows', value)}
+                   value={smsFunctionTemplatesValidation.values.rows}
+                   error={smsFunctionTemplatesValidation.errors.rows}
+                   columns={columns}
                   />
                 </Box>
               </Grid>
