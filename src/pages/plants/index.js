@@ -52,6 +52,7 @@ return {...response,  _startAt: _startAt}
 
 }
 
+
 const {
   query: { data },
   search,
@@ -71,7 +72,9 @@ const {
 })
 
 
-async function fetchGridData({ _startAt = 0, _pageSize = 50 }) {
+async function fetchGridData(options={}) {
+  const { _startAt = 0, _pageSize = 50 } = options
+
   const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
   var parameters = defaultParams
 
@@ -80,7 +83,8 @@ async function fetchGridData({ _startAt = 0, _pageSize = 50 }) {
     parameters: parameters
   })
 
-  return {...response,  _startAt: _startAt}
+
+return {...response,  _startAt: _startAt}
 
 }
 
@@ -203,7 +207,6 @@ async function fetchGridData({ _startAt = 0, _pageSize = 50 }) {
           refetch={refetch}
           paginationType='api'
           paginationParameters={paginationParameters}
-
           isLoading={false}
           pageSize={50}
           maxAccess={access}

@@ -26,7 +26,7 @@ import {
 } from 'src/lib/date-helper'
 import { CTDRRepository } from 'src/repositories/CTDRRepository'
 
-export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, onClose }) {
+export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, onClose, setWindowOpen }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
@@ -98,7 +98,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
 
           toast.success('Record Edited Successfully')
         }
-
+        setWindowOpen(false)
         invalidate()
       } catch (error) {
         toast('Something went wrong')
