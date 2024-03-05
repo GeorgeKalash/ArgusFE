@@ -20,7 +20,7 @@ const WindowToolbar = ({
   editMode = false,
   smallBox = false,
   infoVisible = true,
-  NewComponentVisible,
+  GeneralLedgerComponentVisible,
   postVisible = false,
   visibleTFR = false,
   isClosed = false,
@@ -187,7 +187,7 @@ const WindowToolbar = ({
               </Button>
             </Tooltip>
           )}
-           {  NewComponentVisible && (
+           {  GeneralLedgerComponentVisible && (
         <Button onClick={() => newHandler(recordId)} variant="contained">Gl
         </Button>
       )}

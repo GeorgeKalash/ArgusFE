@@ -125,7 +125,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             height={300} 
             functionId={SystemFunction.JournalVoucher}
             maxAccess={maxAccess} 
-            NewComponentVisible={editMode}
+            GeneralLedgerComponentVisible={editMode}
             editMode={editMode}
         >
             <Grid container spacing={4}>
