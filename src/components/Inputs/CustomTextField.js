@@ -115,11 +115,11 @@ const CustomTextField = ({
             {search &&   <IconButton tabIndex={-1} edge='start' onClick={() =>onSearch(value)}  aria-label='search input'>
                   <SearchIcon />
                 </IconButton>}
-         { !readOnly &&
-            value && ( // Only show the clear icon if readOnly is false
+         { (!readOnly &&
+            ((value || value===0 ) && // Only show the clear icon if readOnly is false
                 <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
                   <ClearIcon />
-                </IconButton>
+                </IconButton>)
             )}
 
             </InputAdornment>
