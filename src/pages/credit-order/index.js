@@ -9,19 +9,21 @@ import { formatDateDefault } from 'src/lib/date-helper'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
+import { useWindow } from 'src/windows'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 // ** Windows
-import CreditOrderWindow from './Windows/CreditOrderWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import CreditOrderForm from './Forms/CreditOrderForm'
 
 const CreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [plantId, setPlantId] = useState(null)
+  const { stack } = useWindow()
 
   const getPlantId = async () => {
     const userData = window.sessionStorage.getItem('userData')
@@ -46,7 +48,7 @@ const CreditOrder = () => {
 
       return ''
     } catch (error) {
-      setErrorMessage(error)
+      throw new Error(error)
       setPlantId('')
 
       return ''
@@ -56,10 +58,12 @@ const CreditOrder = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: CTTRXrepository.CreditOrder.qry,
+    const response = await getRequest({
+      extension: CTTRXrepository.CreditOrder.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
   async function fetchWithSearch({ qry }) {
     return await getRequest({
@@ -70,13 +74,15 @@ const CreditOrder = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels: labels,
+    paginationParameters,
     search,
+    refetch,
     clear,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CTTRXrepository.CreditOrder.qry,
+    endpointId: CTTRXrepository.CreditOrder.page,
     datasetId: ResourceIds.CreditOrder,
     search: {
       endpointId: CTTRXrepository.CreditOrder.snapshot,
@@ -85,21 +91,47 @@ const CreditOrder = () => {
   })
 
   const invalidate = useInvalidate({
-    endpointId: CTTRXrepository.CreditOrder.qry
+    endpointId: CTTRXrepository.CreditOrder.page
   })
 
   const add = async () => {
     const plantId = await getPlantId()
     if (plantId !== '') {
-      setWindowOpen(true)
+      openFormWindow(null, plantId)
     } else {
-      setErrorMessage({ error: 'The user does not have a default plant' })
+      throw new Error('The user does not have a default plant')
     }
   }
 
-  const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+  async function openFormWindow(recordId) {
+    if (!recordId) {
+      try {
+        const plantId = await getPlantId()
+        if (plantId !== '') {
+          openForm('', plantId)
+        } else {
+          throw new Error('The user does not have a default plant')
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    } else {
+      openForm(recordId)
+    }
+  }
+  function openForm(recordId, plantId) {
+    stack({
+      Component: CreditOrderForm,
+      props: {
+        labels,
+        maxAccess: access,
+        plantId: plantId,
+        recordId
+      },
+      width: 950,
+      height: 600,
+      title: labels[1]
+    })
   }
 
   const del = async obj => {
@@ -119,82 +151,73 @@ const CreditOrder = () => {
           onAdd={add}
           onSearch={search}
           onSearchClear={clear}
-          labels={_labels}
+          labels={labels}
           inputSearch={true}
         />
         <Table
           columns={[
             {
               field: 'reference',
-              headerName: _labels[4],
+              headerName: labels[4],
               flex: 1
             },
             {
               field: 'date',
-              headerName: _labels[2],
+              headerName: labels[2],
               flex: 1,
               valueGetter: ({ row }) => formatDateDefault(row?.date)
             },
             {
               field: 'plantRef',
-              headerName: _labels[3]
+              headerName: labels[3]
             },
             {
               field: 'corName',
-              headerName: _labels[5],
+              headerName: labels[5],
               flex: 1
             },
             {
               field: 'currencyRef',
-              headerName: _labels[8],
+              headerName: labels[8],
               flex: 1
             },
             {
               field: 'amount',
-              headerName: _labels[10],
-              flex: 1
+              headerName: labels[10],
+              flex: 1,
+              valueGetter: ({ row }) => getFormattedNumber(row?.amount)
             },
             {
               field: 'rsName',
-              headerName: _labels[19],
+              headerName: labels[19],
               flex: 1
             },
             {
               field: 'statusName',
-              headerName: _labels[21],
+              headerName: labels[21],
               flex: 1
             },
             {
               field: 'wipName',
-              headerName: _labels[20],
+              headerName: labels[20],
               flex: 1
             }
           ]}
           gridData={data ?? { list: [] }}
           rowId={['recordId']}
-          onEdit={edit}
+          onEdit={obj => {
+            openFormWindow(obj.recordId, plantId)
+          }}
+          refetch={refetch}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Box>
-      {windowOpen && (
-        <CreditOrderWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          plantId={plantId}
-          setPlantId={setPlantId}
-          setErrorMessage={setErrorMessage}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
