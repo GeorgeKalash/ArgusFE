@@ -89,7 +89,7 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.SmsTemplates}
+      resourceId={ResourceIds.Activity}
       form={formik}
       height={300}
       maxAccess={maxAccess}
