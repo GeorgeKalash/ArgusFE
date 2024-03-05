@@ -5,7 +5,7 @@ import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const SourceOfIncomeTab = ({ labels, sourceOfIncomeValidation, incomeTypeStore, maxAccess }) => {
+const sourceOfIncomeForm = ({ labels, sourceOfIncomeValidation, incomeTypeStore, maxAccess }) => {
   return (
     <Grid container spacing={4}>
       <Grid item xs={12}>
@@ -71,4 +71,4 @@ const SourceOfIncomeTab = ({ labels, sourceOfIncomeValidation, incomeTypeStore, 
   )
 }
 
-export default SourceOfIncomeTab
+export default sourceOfIncomeForm
