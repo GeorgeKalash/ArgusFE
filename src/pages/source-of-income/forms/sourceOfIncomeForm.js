@@ -50,7 +50,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
       name: yup.string().required('This field is required'),
       reference: yup.string().required('This field is required'),
       incomeType: yup.string().required('This field is required'),
-      flName: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -135,7 +134,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
             name='flName'
             label={labels.flName}
             value={formik.values.flName}
-            required
             rows={2}
             maxAccess={maxAccess}
             onChange={formik.handleChange}
