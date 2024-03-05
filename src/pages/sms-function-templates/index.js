@@ -23,7 +23,6 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const SmsFunctionTemplate = () => {
@@ -67,13 +66,16 @@ const SmsFunctionTemplate = () => {
 
             return n
           })
-var count =1
+        var count = 1
           smsFunctionTemplatesValidation.setValues({
             ...smsFunctionTemplatesValidation.values,
             rows: finalList?.map(
-          ({  ...rest }) => ({
+          ({ templateId, templateName,  ...rest }) => ({
             id : count++,
-
+            template:{
+              recordId: templateId,
+              name: templateName
+            },
            ...rest
           })
             )
@@ -97,7 +99,6 @@ var count =1
     datasetId: ResourceIds.SmsFunctionTemplates
   })
 
-  console.log('labels ',_labels)
 
   const lookupTemplate = searchQry => {
     setTemplateStore([])
@@ -167,18 +168,20 @@ var count =1
       width: 400
     },{
       component: 'resourcelookup',
-      name: 'templateName',
+      label: _labels[3],
+      name: 'template',
       props: {
         endpointId: SystemRepository.SMSTemplate.snapshot,
-        parameters: {
-          _countryId: 1,
-          _stateId: 0
-        },
         displayField: 'name',
-        valueField: 'name'
+        valueField: 'name',
+        columnsInDropDown: [
+          { key: "reference", value: "Reference" },
+          { key: "name", value: "Name" },
+        ],
       },
-      width: 850
+      width: 550
     },
+
   ]
 
   const smsFunctionTemplatesValidation = useFormik({
@@ -203,13 +206,13 @@ var count =1
 
 
   const postSmsFunctionTemplates = () => {
-    //After filtering the objects where templateId is not null, then map operation transforms the filtered array, extracting only the functionId and templateId properties from each object and creating a new object with these properties.
     const obj = {
-      smsFunctionTemplates: smsFunctionTemplatesValidation.values.rows
-        .filter(row => row.templateId != null)
-        .map(({ functionId, templateId }) => ({ functionId, templateId }))
-    }
+      smsFunctionTemplates: smsFunctionTemplatesValidation.values.rows.map(({ functionId, template }) => ({ functionId,
+          templateId : template.recordId ,  templateName : template.name}))
+          .filter(row => row.templateId != null)
 
+
+    }
     postRequest({
       extension: SystemRepository.SMSFunctionTemplate.set,
       record: JSON.stringify(obj)
@@ -234,15 +237,6 @@ var count =1
             <Grid container>
               <Grid>
                 <Box sx={{ width: '100%' }}>
-                  {/* <InlineEditGrid
-                    gridValidation={smsFunctionTemplatesValidation}
-                    columns={columns1}
-                    allowDelete={false}
-                    allowAddNewLine={false}
-                    scrollable={true}
-                    scrollHeight={`${height - 130}px`}
-                  /> */}
-
                   <DataGrid
                    onChange={value => smsFunctionTemplatesValidation.setFieldValue('rows', value)}
                    value={smsFunctionTemplatesValidation.values.rows}
