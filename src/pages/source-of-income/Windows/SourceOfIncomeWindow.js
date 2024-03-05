@@ -1,6 +1,7 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import  sourceOfIncomeForm from '../forms/sourceOfIncomeForm'
+
+import  SourceOfIncomeForm from '../forms/sourceOfIncomeForm'
 
 const SourceOfIncomeWindow = ({
   onClose,
@@ -18,7 +19,7 @@ const SourceOfIncomeWindow = ({
       width={500}
       height={300}
     >
-        <sourceOfIncomeForm
+        <SourceOfIncomeForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
