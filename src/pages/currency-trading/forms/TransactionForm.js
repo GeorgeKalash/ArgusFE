@@ -817,7 +817,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 error={formik.errors.rows}
                 height={300}
                 bg={
-                  formik.values.functionId && (formik.values.functionId === '3503' ? '#C7F6C7' : 'rgb(245, 194, 193)')
+                  formik.values.functionId && (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
 
                 // idName='seqNo'

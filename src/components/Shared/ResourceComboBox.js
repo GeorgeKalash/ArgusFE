@@ -28,7 +28,7 @@ export default function ResourceComboBox({
           callback: setStore
         })
       else
-        getRequest({
+      endpointId &&   getRequest({
           extension: endpointId,
           parameters
         }).then(res => {

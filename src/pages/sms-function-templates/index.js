@@ -236,8 +236,9 @@ const SmsFunctionTemplate = () => {
           <Box>
             <Grid container>
               <Grid>
-                <Box sx={{ width: '100%' }}>
+                <Box sx={{ width: '100%'  }}>
                   <DataGrid
+                   height={height-150}
                    onChange={value => smsFunctionTemplatesValidation.setFieldValue('rows', value)}
                    value={smsFunctionTemplatesValidation.values.rows}
                    error={smsFunctionTemplatesValidation.errors.rows}
