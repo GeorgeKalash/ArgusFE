@@ -35,20 +35,24 @@ const SourceOfIncome = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: RemittanceSettingsRepository.SourceOfIncome.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return {...response,  _startAt: _startAt}
   }
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.SourceOfIncome.page,
-    datasetId: ResourceIds.SourceOfIncome
+    datasetId: ResourceIds.IdTypes
   })
 
   const invalidate = useInvalidate({
@@ -69,7 +73,7 @@ const SourceOfIncome = () => {
     ,
     {
       field: 'flName',
-      headerName: _labels.foreignLanguage,
+      headerName: _labels.flName,
       flex: 1
     },
     {

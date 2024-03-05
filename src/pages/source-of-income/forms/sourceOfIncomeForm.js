@@ -117,7 +117,7 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-          <CustomTextArea
+          <CustomTextField
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
@@ -131,9 +131,9 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-          <CustomTextArea
+          <CustomTextField
             name='flName'
-            label={labels.foreignLanguage}
+            label={labels.flName}
             value={formik.values.flName}
             required
             rows={2}
@@ -151,14 +151,14 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
               label={labels.incomeType}
               valueField='key'
               displayField='value'
-              values={characteristicValidation.values}
+              values={formik.values}
               required
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
-                characteristicValidation.setFieldValue('incomeType', newValue?.key)
+                formik.setFieldValue('incomeType', newValue?.key)
               }}
-              error={characteristicValidation.touched.incomeType && Boolean(characteristicValidation.errors.incomeType)}
-              helperText={characteristicValidation.touched.incomeType && characteristicValidation.errors.incomeType}
+              error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
+              helperText={formik.touched.incomeType && formik.errors.incomeType}
             />
         </Grid>
       </Grid>
