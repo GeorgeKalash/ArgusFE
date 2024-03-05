@@ -36,7 +36,7 @@ export const GeneralLedgerRepository = {
       get: service + 'getCCG',
       set: service + 'setCCG',
       del: service + 'delCCG',
-      
+
     },ChartOfAccounts:{
       snapshot:service + 'snapshotAC',
       page:service + 'pageAC', 
@@ -44,8 +44,19 @@ export const GeneralLedgerRepository = {
       get: service + 'getAC',
       set: service + 'setAC',
       del: service + 'delAC',
+
+    },
+    JournalVoucher: {
+      page:   service + 'pageJV', 
+      qry: service + 'qryJV',
+      get: service + 'getJV',
+      set: service + 'setJV',
+      del: service + 'delJV',
+    },
+    GeneralLedger:{
+      qry: service + 'qryTRX',
+      get: service + 'getTRX',
+      set: service + 'setTRX',
+      del: service + 'delTRX'}
       
-    }
-
-
 }

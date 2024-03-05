@@ -72,6 +72,13 @@ export const DocumentReleaseRepository = {
     set: service + 'setSTG',
     del: service + 'delSTG'
   },
+  DocumentsOnHold :{
+    
+    qry: service + 'qryTRX',
+    get: service + 'getTRX',
+    set: service + 'setTRX',
+    del: service + 'delTRX'
+  },
   Approvals: {
     qry: service + 'qry2TRX',
   },
