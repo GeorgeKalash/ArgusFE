@@ -36,13 +36,10 @@ const WindowToolbar = ({
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
-  const [showGLC, setShowGLC] = useState(false);
-  
+  const [showGLC, setShowGLC] = useState(false)
+
   const [reportStore, setReportStore] = useState([])
   const [buttonIcons, setButtonIcons] = useState({})
-
-
-
 
   const getReportLayout = () => {
     setReportStore([])
@@ -128,7 +125,7 @@ const WindowToolbar = ({
               </Button>
             </Tooltip>
           ))}
-{onTFR && visibleTFR && (
+          {onTFR && visibleTFR && (
             <Tooltip title='Invoice'>
               <Button
                 onClick={onTFR}
@@ -187,10 +184,25 @@ const WindowToolbar = ({
               </Button>
             </Tooltip>
           )}
-           {  NewComponentVisible && (
-        <Button onClick={() => newHandler(recordId)} variant="contained">Gl
-        </Button>
-      )}
+          {NewComponentVisible && (
+            <Tooltip title='GL'>
+              <Button
+                onClick={() => newHandler(recordId)}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  backgroundColor: '#231f20',
+                  '&:hover': { backgroundColor: '#1c1718' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
+                }}
+                disabled={!editMode}
+              >
+                <img src='/images/buttonsIcons/gl.png' alt='gl' />
+              </Button>
+            </Tooltip>
+          )}
           {onInfo && infoVisible && (
             <Tooltip title='Info'>
               <Button
@@ -272,7 +284,6 @@ const WindowToolbar = ({
           )}
         </Box>{' '}
       </Box>
-
     </DialogActions>
   )
 }
