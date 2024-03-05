@@ -11,13 +11,16 @@ const WindowToolbar = ({
   onClear,
   onInfo,
   onApply,
+  recordId,
   onClose,
+  newHandler,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
   editMode = false,
   smallBox = false,
   infoVisible = true,
+  NewComponentVisible,
   postVisible = false,
   visibleTFR = false,
   isClosed = false,
@@ -33,9 +36,13 @@ const WindowToolbar = ({
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
-  // //states
+  const [showGLC, setShowGLC] = useState(false);
+  
   const [reportStore, setReportStore] = useState([])
   const [buttonIcons, setButtonIcons] = useState({})
+
+
+
 
   const getReportLayout = () => {
     setReportStore([])
@@ -121,8 +128,7 @@ const WindowToolbar = ({
               </Button>
             </Tooltip>
           ))}
-
-          {onTFR && visibleTFR && (
+{onTFR && visibleTFR && (
             <Tooltip title='Invoice'>
               <Button
                 onClick={onTFR}
@@ -181,6 +187,10 @@ const WindowToolbar = ({
               </Button>
             </Tooltip>
           )}
+           {  NewComponentVisible && (
+        <Button onClick={() => newHandler(recordId)} variant="contained">Gl
+        </Button>
+      )}
           {onInfo && infoVisible && (
             <Tooltip title='Info'>
               <Button
@@ -262,6 +272,7 @@ const WindowToolbar = ({
           )}
         </Box>{' '}
       </Box>
+
     </DialogActions>
   )
 }
