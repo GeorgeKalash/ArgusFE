@@ -9,13 +9,15 @@ import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 
 export default function FormShell({
-  form, form1,
+  form,
+  form1,
   children,
   editMode,
   setEditMode,
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
+  closeVisible = false,
   resourceId,
   functionId,
   recordId,
@@ -23,10 +25,16 @@ export default function FormShell({
   NewComponentVisible=false,
   maxAccess,
   isPosted = false,
+  isTFR = false,
+  isClosed = false,
   clientRelation = false,
   setErrorMessage,
-  previewReport=false,
-  initialValues, initialValues1 , setIDInfoAutoFilled, actions
+  previewReport = false,
+  visibleTFR = false,
+  initialValues,
+  initialValues1,
+  setIDInfoAutoFilled,
+  actions
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
@@ -40,30 +48,35 @@ export default function FormShell({
     ? false
     : true
 
-    function handleReset(){
-       initialValues &&  form.setValues(initialValues)
-       if(form1){
-        form1.setValues(initialValues1)
-       }
-     if(setIDInfoAutoFilled){
-      setIDInfoAutoFilled(false)
-     }
-     setEditMode(false)
+  function handleReset() {
+    initialValues && form.setValues(initialValues)
+    if (form1) {
+      form1.setValues(initialValues1)
     }
+    if (setIDInfoAutoFilled) {
+      setIDInfoAutoFilled(false)
+    }
+    setEditMode(false)
+  }
 
     
     
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%' , zIndex: 0 }}>{children}</DialogContent>
+      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>{children}</DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
           onSave={() => form.handleSubmit()}
-          onClear={() => initialValues ?  handleReset() : false}
+          onClear={() => (initialValues ? handleReset() : false)}
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
+            form.handleSubmit()
+          }}
+          onTFR={() => {
+            // Set  flag in the Formik state before calling handleSubmit
+            form.setFieldValue('isTFRClicked', true)
             form.handleSubmit()
           }}
           onInfo={() =>
@@ -127,7 +140,11 @@ export default function FormShell({
           infoVisible={infoVisible}
           NewComponentVisible={NewComponentVisible}
           postVisible={postVisible}
+          closeVisible={closeVisible}
+          visibleTFR={visibleTFR}
           isPosted={isPosted}
+          isTFR={isTFR}
+          isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}
           recordId={form.values.recordId}
