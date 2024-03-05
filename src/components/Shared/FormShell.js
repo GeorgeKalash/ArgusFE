@@ -6,7 +6,7 @@ import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
-import GeneralLedger from 'src/pages/GeneralLedger'
+import GeneralLedger from 'src/components/Shared/GeneralLedger'
 
 export default function FormShell({
   form, form1,
