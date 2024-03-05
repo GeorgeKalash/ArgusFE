@@ -70,6 +70,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
       // obj.response = responseValue
 
       // obj.date = formatDateToApi(obj.date)
+
       try {
         const response = await postRequest({
           extension: CTDRRepository.DocumentsOnHold.set,

@@ -12,10 +12,11 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { formatDateDefault } from 'src/lib/date-helper';
 
 // ** Windows
-import RelationTypesWindow from './Windows/RelationTypesWindow'
+import JournalVoucherWindow from './Windows/JournalVoucherWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -24,7 +25,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const RelationTypes = () => {
+const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -36,47 +37,49 @@ const RelationTypes = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.RelationType.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    return await getRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=&_sortField=`
     })
-
-    return {...response,  _startAt: _startAt}
-
   }
 
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
-    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: CurrencyTradingSettingsRepository.RelationType.page,
-    datasetId: ResourceIds.RelationType
+    endpointId: GeneralLedgerRepository.JournalVoucher.qry,
+    datasetId: ResourceIds.JournalVoucher
   })
 
   const invalidate = useInvalidate({
-    endpointId: CurrencyTradingSettingsRepository.RelationType.page
+    endpointId: GeneralLedgerRepository.JournalVoucher.qry
   })
 
   const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1,
+      flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'date',
+      headerName: _labels.date,
       flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.date)
     },
     {
-      field: 'flName',
-      headerName: _labels.flName,
-      flex: 1,
+      field: 'description',
+      headerName: _labels.description,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.status,
+      flex: 1
     }
+    
   ]
 
 
@@ -91,7 +94,7 @@ const RelationTypes = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: CurrencyTradingSettingsRepository.RelationType.del,
+      extension: GeneralLedgerRepository.JournalVoucher.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -111,14 +114,12 @@ const RelationTypes = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
+          paginationType='client'
           maxAccess={access}
         />
       </Box>
       {windowOpen && (
-        <RelationTypesWindow
+        <JournalVoucherWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -134,4 +135,4 @@ const RelationTypes = () => {
   )
 }
 
-export default RelationTypes
+export default JournalVoucher

@@ -9,6 +9,7 @@ export const CurrencyTradingSettingsRepository = {
     del: service + 'delCOM'
   },
   RelationType: {
+    page: service + 'pageRT',
     qry: service + 'qryRT',
     get: service + 'getRT',
     set: service + 'setRT',

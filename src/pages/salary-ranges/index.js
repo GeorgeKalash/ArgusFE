@@ -34,15 +34,20 @@ const SalaryRange = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: RemittanceSettingsRepository.SalaryRange.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return {...response,  _startAt: _startAt}
+
   }
 
   const {
     query: { data },
     labels: _labels,
+    refetch,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -57,13 +62,13 @@ const SalaryRange = () => {
   const columns = [
     {
       field: 'min',
-      headerName: _labels[2],
+      headerName: _labels.min,
       flex: 1,
       editable: false
     },
     {
       field: 'max',
-      headerName: _labels[3],
+      headerName: _labels.max,
       flex: 1,
       editable: false
     }
@@ -100,8 +105,10 @@ const SalaryRange = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
-          paginationType='client'
         />
       </Box>
       {windowOpen && (
