@@ -41,7 +41,7 @@ export default function ApprovalFormShell(props) {
   const actions = [
     {
       action: onPost,
-      title: 'Post',
+      title: 'post',
       isDisabled: !editMode,
       isHidden: hiddenPost,
       color: '#231f20',
@@ -49,7 +49,7 @@ export default function ApprovalFormShell(props) {
     },
     {
       action: onClose,
-      title: 'Close',
+      title: 'close',
       isDisabled: isClosed || !editMode,
       isHidden: hiddenClose,
       color: 'transparent',
@@ -67,7 +67,7 @@ export default function ApprovalFormShell(props) {
     },
     {
       action: onApproval,
-      title: 'Approval',
+      title: 'approval',
       isDisabled: !isClosed,
       isHidden: hiddenApprove,
       color: '#231f20',
