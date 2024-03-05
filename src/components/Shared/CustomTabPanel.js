@@ -11,7 +11,6 @@ import PropTypes from 'prop-types'
 
 const CustomTabPanel = (props) => {
     const { children, value,  height ,index, ...other  } = props
-console.log( height)
 
 return (
         <Box

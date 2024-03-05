@@ -10,6 +10,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressForm from '../Forms/AddressForm'
 import { useState } from 'react'
+import { Tab, Tabs } from '@mui/material'
 
 const PlantWindow = ({
   onClose,
@@ -23,21 +24,24 @@ const PlantWindow = ({
   tabs,
   recordId,
   setRecordId,
-  activeTab,
-  setActiveTab,
+
+  // activeTab,
+  // setActiveTab,
   addressValidation
 }) => {
 
+  const [activeTab , setActiveTab] = useState(0)
   const [post , setPost] = useState(false)
 
   return (
-    <Window id='PlantWindow' Title='Plant' onClose={onClose} width={width} height={height}
-     controlled={true}
-      tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}>
-      <CustomTabPanel index={0} value={activeTab}>
-        <PlantForm
+    < >
+        <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                {tabs.map((tab, i) => (
+                  <Tab key={i} label={tab.label} disabled={tab?.disabled} />
+                ))}
+              </Tabs>
+      <CustomTabPanel index={0} value={activeTab}>rrrr
+        {/* <PlantForm
           plantValidation={plantValidation}
           _labels={labels}
           maxAccess={maxAccess}
@@ -46,19 +50,20 @@ const PlantWindow = ({
           recordId={recordId}
           setRecordId={setRecordId}
 
-        />
+        /> */}
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-        <AddressForm
+      <CustomTabPanel index={1} value={activeTab}>sss
+        {/* <AddressForm
           addressValidation={addressValidation}
           plantValidation={plantValidation}
           recordId={recordId}
           setRecordId={setRecordId}
           maxAccess={maxAccess}
           editMode={editMode}
-        />
+        /> */}
       </CustomTabPanel>
-    </Window>
+
+    </>
   )
 }
 

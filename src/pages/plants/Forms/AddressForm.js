@@ -85,7 +85,7 @@ const AddressForm = ({
           })
           .catch(error => {})
         }
-    },[])
+    },[address])
 
 
 return (

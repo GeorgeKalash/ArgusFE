@@ -25,6 +25,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Windows
 import PlantWindow from './Windows/PlantWindow'
 import { useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
 
 const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -36,6 +37,7 @@ const Plants = () => {
   const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [recordId, setRecordId] = useState(null)
+  const { stack } = useWindow()
 
 
   async function fetchWithSearch({ qry}) {
@@ -125,6 +127,7 @@ return {...response,  _startAt: _startAt}
     setEditMode(false)
     setRecordId('')
     setWindowOpen(true)
+    openForm()
   }
 
   const editPlant = obj => {
@@ -179,7 +182,18 @@ return {...response,  _startAt: _startAt}
 
   const tabs = [{ label: _labels.plant }, { label: _labels.address , disabled: !editMode }]
 
+  function openForm (){
+    stack({
+      Component: PlantWindow,
+      props: {
+        tabs: tabs
+      },
 
+      width: 1100,
+      height: 600,
+      title: "Plant"
+    })
+  }
 
 
 
