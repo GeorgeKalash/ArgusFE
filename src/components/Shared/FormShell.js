@@ -21,8 +21,8 @@ export default function FormShell({
   resourceId,
   functionId,
   recordId,
-  
-  NewComponentVisible=false,
+
+  NewComponentVisible = false,
   maxAccess,
   isPosted = false,
   isTFR = false,
@@ -59,8 +59,6 @@ export default function FormShell({
     setEditMode(false)
   }
 
-    
-    
   return (
     <>
       <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>{children}</DialogContent>
@@ -96,14 +94,12 @@ export default function FormShell({
             stack({
               Component: GeneralLedger,
               props: {
-                formValues:form.values,
+                formValues: form.values,
 
                 recordId: form.values.recordId,
-                functionId:functionId,
-                
-                
+                functionId: functionId
               },
-              width: 1000, 
+              width: 1000,
               height: 600,
               title: 'General Ledger'
             })

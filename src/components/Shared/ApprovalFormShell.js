@@ -14,6 +14,8 @@ export default function ApprovalFormShell(props) {
     editMode,
     onTFR,
     isTFR,
+    NewComponentVisible = false,
+    functionId,
     hiddenClose = false,
     hiddenApprove = false,
     hiddenReopen = false,
@@ -82,6 +84,8 @@ export default function ApprovalFormShell(props) {
       visibleTFR={visibleTFR}
       onTFR={onTFR}
       isTFR={isTFR}
+      functionId={functionId}
+      NewComponentVisible={NewComponentVisible}
       {...remaining}
     >
       {children}
