@@ -37,15 +37,18 @@ const CityDistricts = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: SystemRepository.CityDistrict.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
+    refetch,
     paginationParameters,
     access
   } = useResourceQuery({
@@ -112,6 +115,7 @@ const CityDistricts = () => {
           isLoading={false}
           pageSize={50}
           maxAccess={access}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
         />

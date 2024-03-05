@@ -16,13 +16,11 @@ const CityDistrictWindow = ({
         <>
         <Window id='CityDistrictWindow' Title={_labels.cityDistrict} controlled={true} onClose={onClose} width={600}
         height={400} >
-            <CustomTabPanel>
                 <CityDistrictForm
                     _labels={_labels}
                     maxAccess={maxAccess}
                     recordId={recordId}  
                 />
-            </CustomTabPanel>
             </Window>
     </>
   )

@@ -135,7 +135,8 @@ export default function CityDistrictForm ({ _labels, recordId, maxAccess }) {
             displayFieldWidth={1}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
+              { key: 'name', value: 'Name' },
+              { key: 'flName', value: 'Foreign Language' }
             ]}
             values={formik.values}
             required
