@@ -12,8 +12,8 @@ const ActivityWindow = ({
   
   return (
     <Window
-    id='SourceOfIncomeWindow'
-    Title={labels.sourceOfIncome}
+    id='ActivityWindow'
+    Title={labels.Activity}
       controlled={true}
       onClose={onClose}
       width={500}

@@ -14,6 +14,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function ActivityForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -122,28 +123,60 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
             helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='flName'
+            label={labels.flName}
+            value={formik.values.flName}
+            required
+            rows={2}
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('reference', '')}
+            error={formik.touched.flName && Boolean(formik.errors.flName)}
+            helperText={formik.touched.flName && formik.errors.flName}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+           datasetId={DataSets.DR_CHA_DATA_TYPE}
+           name='dataType'
+           label={labels.indId}
+           valueField='key'
+           displayField='value'
+           values={characteristicValidation.values}
+           required
+           maxAccess={maxAccess}
+           onChange={(event, newValue) => {
+             characteristicValidation.setFieldValue('dataType', newValue?.key)
+           }}
+            error={activityValidation.touched.industry && Boolean(activityValidation.errors.industry)}
+            helperText={activityValidation.touched.industry && activityValidation.errors.industry}
+      
+          />
+        </Grid>
       </Grid>
     </FormShell>
   )
 }
 
-//         <Grid item xs={12}>
-//           <CustomComboBox
-//             name='industry'
-//             label={_labels.industryId}
-//             valueField='key'
-//             displayField='value'
-//             required
-//             store={industryStore}
-//             value={industryStore.filter(item => item.key === activityValidation.values.industry?.toString())[0]}
-//             onChange={(event, newValue) => {
-//               activityValidation.setFieldValue('industry', newValue?.key)
-//             }}
-//             error={activityValidation.touched.industry && Boolean(activityValidation.errors.industry)}
-//             helperText={activityValidation.touched.industry && activityValidation.errors.industry}
-//             maxAccess={maxAccess}
-//           />
-//         </Grid>
+        // <Grid item xs={12}>
+        //   <CustomComboBox
+        //     name='industry'
+        //     label={_labels.industryId}
+        //     valueField='key'
+        //     displayField='value'
+        //     required
+        //     store={industryStore}
+        //     value={industryStore.filter(item => item.key === activityValidation.values.industry?.toString())[0]}
+        //     onChange={(event, newValue) => {
+        //       activityValidation.setFieldValue('industry', newValue?.key)
+        //     }}
+        //     error={activityValidation.touched.industry && Boolean(activityValidation.errors.industry)}
+        //     helperText={activityValidation.touched.industry && activityValidation.errors.industry}
+        //     maxAccess={maxAccess}
+        //   />
+        // </Grid>
 //       </Grid>
 //     </>
 //   )
