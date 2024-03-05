@@ -14,7 +14,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 // ** Windows
-import SourceOfIncomeWindow from './Windows/SourceOfIncomeWindow'
+import ActivityWindow from './Windows/ActivityWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -37,7 +37,8 @@ const Activities = () => {
 
     const response = await getRequest({
 
-      extension: CurrencyTradingSettingsRepository.Activity.qry,
+      extension:CurrencyTradingSettingsRepository.Activity.qry,
+
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
 
     })
@@ -118,7 +119,7 @@ const Activities = () => {
         />
       </Box>
       {windowOpen && (
-        <SourceOfIncomeWindow
+        <ActivityWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)

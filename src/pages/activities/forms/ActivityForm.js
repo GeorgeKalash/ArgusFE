@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -128,7 +129,6 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
             name='flName'
             label={labels.flName}
             value={formik.values.flName}
-            required
             rows={2}
             maxAccess={maxAccess}
             onChange={formik.handleChange}
@@ -138,48 +138,24 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-          <ResourceComboBox
-           datasetId={DataSets.DR_CHA_DATA_TYPE}
-           name='dataType'
-           label={labels.indId}
-           valueField='key'
-           displayField='value'
-           values={characteristicValidation.values}
-           required
-           maxAccess={maxAccess}
-           onChange={(event, newValue) => {
-             characteristicValidation.setFieldValue('dataType', newValue?.key)
-           }}
-            error={activityValidation.touched.industry && Boolean(activityValidation.errors.industry)}
-            helperText={activityValidation.touched.industry && activityValidation.errors.industry}
-      
-          />
+        <ResourceComboBox
+              datasetId={DataSets.INDUSTRY}
+              name='industry'
+              label={labels.indId}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              required
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('industry', newValue?.key)
+              }}
+              error={formik.touched.industry && Boolean(formik.errors.industry)}
+              helperText={formik.touched.industry && formik.errors.industry}
+            />
         </Grid>
       </Grid>
     </FormShell>
   )
 }
 
-        // <Grid item xs={12}>
-        //   <CustomComboBox
-        //     name='industry'
-        //     label={_labels.industryId}
-        //     valueField='key'
-        //     displayField='value'
-        //     required
-        //     store={industryStore}
-        //     value={industryStore.filter(item => item.key === activityValidation.values.industry?.toString())[0]}
-        //     onChange={(event, newValue) => {
-        //       activityValidation.setFieldValue('industry', newValue?.key)
-        //     }}
-        //     error={activityValidation.touched.industry && Boolean(activityValidation.errors.industry)}
-        //     helperText={activityValidation.touched.industry && activityValidation.errors.industry}
-        //     maxAccess={maxAccess}
-        //   />
-        // </Grid>
-//       </Grid>
-//     </>
-//   )
-// }
-
-// export default ActivityTab
