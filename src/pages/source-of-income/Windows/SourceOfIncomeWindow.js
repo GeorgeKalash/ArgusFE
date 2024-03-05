@@ -17,7 +17,7 @@ const SourceOfIncomeWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
-      height={400}
+      height={430}
     >
         <SourceOfIncomeForm
           labels={labels}

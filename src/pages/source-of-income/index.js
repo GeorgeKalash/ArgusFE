@@ -36,14 +36,16 @@ const SourceOfIncome = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
+
       extension: RemittanceSettingsRepository.SourceOfIncome.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+
     })
 
     return {...response,  _startAt: _startAt}
   }
 
-  const {
+ const {
     query: { data },
     labels: _labels,
     paginationParameters,
@@ -52,7 +54,7 @@ const SourceOfIncome = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.SourceOfIncome.page,
-    datasetId: ResourceIds.IdTypes
+    datasetId: ResourceIds.SourceOfIncome
   })
 
   const invalidate = useInvalidate({
@@ -115,7 +117,9 @@ const SourceOfIncome = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Box>
