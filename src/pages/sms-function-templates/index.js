@@ -118,53 +118,25 @@ const SmsFunctionTemplate = () => {
     }
   }
 
-  const columns1 = [
-    {
-      field: 'textfield',
-      header: _labels[1],
-      name: 'functionId',
-      mandatory: true,
-      readOnly: true,
-      width: 150
-    },
-    {
-      field: 'textfield',
-      header: _labels[2],
-      name: 'functionName',
-      mandatory: true,
-      readOnly: true,
-      width: 300
-    },
-    {
-      field: 'lookup',
-      header: _labels[3],
-      nameId: 'templateId',
-      name: 'templateName',
-      mandatory: false,
-      store: templateStore,
-      valueField: 'recordId',
-      displayField: 'name',
-      fieldsToUpdate: [
-        { from: 'recordId', to: 'templateId' },
-        { from: 'name', to: 'templateName' }
-      ],
-      columnsInDropDown: [{ key: 'name', value: 'name' }],
-      onLookup: lookupTemplate
-    }
-  ]
+
 
   const columns = [
     {
       component: 'textfield',
       label: _labels[1],
       name: 'functionId',
-      width: 150
+      width: 150,
+        props: {
+   readOnly: true
+      }
     },
     {
       component: 'textfield',
       label: _labels[2],
       name: 'functionName',
-
+      props: {
+   readOnly: true
+      },
       width: 400
     },{
       component: 'resourcelookup',

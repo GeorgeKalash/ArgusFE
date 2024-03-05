@@ -249,58 +249,58 @@ const ClientTemplateForm = ({
         const obj = res?.record;
         setInitialData({
           clientId: obj.clientCorporate?.clientId,
-          lgsId: obj.clientCorporate.lgsId,
-          industry: obj.clientCorporate.industry,
-          activityId: obj.clientCorporate.activityId,
-          capital: obj.clientCorporate.capital,
-          trading: obj.clientCorporate.trading,
-          outward: obj.clientCorporate.outward,
-          inward: obj.clientCorporate.inward,
+          lgsId: obj.clientCorporate?.lgsId,
+          industry: obj.clientCorporate?.industry,
+          activityId: obj.clientCorporate?.activityId,
+          capital: obj.clientCorporate?.capital,
+          trading: obj.clientCorporate?.trading,
+          outward: obj.clientCorporate?.outward,
+          inward: obj.clientCorporate?.inward,
 
           //address
 
           //address
-          countryId: obj.addressView.countryId,
-          cityId: obj.addressView.cityId,
-          city: obj.addressView.city,
-          stateId: obj.addressView.stateId,
-          cityDistrictId: obj.addressView.cityDistrictId,
-          cityDistrict: obj.addressView.cityDistrict,
+          countryId: obj.addressView?.countryId,
+          cityId: obj.addressView?.cityId,
+          city: obj.addressView?.city,
+          stateId: obj.addressView?.stateId,
+          cityDistrictId: obj.addressView?.cityDistrictId,
+          cityDistrict: obj.addressView?.cityDistrict,
 
-          email1: obj.addressView.email1,
-          email2: obj.addressView.email2,
-          name: obj.addressView.name,
-          phone: obj.addressView.phone,
-          phone2: obj.addressView.phone2,
-          phone3: obj.addressView.phone3,
-          postalCode: obj.addressView.postalCode,
-          street1: obj.addressView.street1,
-          street2: obj.addressView.street2,
-          subNo: obj.addressView.subNo,
-          unitNo: obj.addressView.unitNo,
-          bldgNo: obj.addressView.bldgNo,
+          email1: obj.addressView?.email1,
+          email2: obj.addressView?.email2,
+          name: obj.addressView?.name,
+          phone: obj.addressView?.phone,
+          phone2: obj.addressView?.phone2,
+          phone3: obj.addressView?.phone3,
+          postalCode: obj.addressView?.postalCode,
+          street1: obj.addressView?.street1,
+          street2: obj.addressView?.street2,
+          subNo: obj.addressView?.subNo,
+          unitNo: obj.addressView?.unitNo,
+          bldgNo: obj.addressView?.bldgNo,
 
           //end address
 
           //clientMaster
           oldReference: obj.clientMaster.oldReference,
-          category: obj.clientMaster.category,
-          reference: obj.clientMaster.reference,
-          name1: obj.clientMaster.name,
-          flName: obj.clientMaster.flName,
-          keyword: obj.clientMaster.keyword,
-          nationalityId: obj.clientMaster.nationalityId,
+          category: obj.clientMaster?.category,
+          reference: obj.clientMaster?.reference,
+          name1: obj.clientMaster?.name,
+          flName: obj.clientMaster?.flName,
+          keyword: obj.clientMaster?.keyword,
+          nationalityId: obj.clientMaster?.nationalityId,
           expiryDate:
-            obj.clientMaster.expiryDate &&
-            formatDateFromApi(obj.clientMaster.expiryDate),
+            obj.clientMaster?.expiryDate &&
+            formatDateFromApi(obj.addressView?.expiryDate),
           createdDate:
-            obj.clientMaster.createdDate &&
-            formatDateFromApi(obj.clientMaster.createdDate),
-          status: obj.clientMaster.status,
-          addressId: obj.clientMaster.addressId,
-          plantId: obj.clientMaster.plantId,
-          cellPhone: obj.clientMaster.cellPhone,
-          otp: obj.clientMaster.otp,
+            obj.addressView?.createdDate &&
+            formatDateFromApi(obj.addressView?.createdDate),
+          status: obj.addressView?.status,
+          addressId: obj.addressView?.addressId,
+          plantId: obj.addressView?.plantId,
+          cellPhone: obj.addressView?.cellPhone,
+          otp: obj.addressView?.otp,
         });}
       }
     } catch (error) {
