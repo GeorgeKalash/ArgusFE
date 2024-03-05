@@ -139,7 +139,7 @@ const Activities = () => {
 export default Activities
 
 
-// import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+
 // dataset: DataSets.INDUSTRY,
 // Activity
 // extension: CurrencyTradingSettingsRepository.Activity.qry
