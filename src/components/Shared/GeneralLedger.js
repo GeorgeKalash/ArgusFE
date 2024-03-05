@@ -12,11 +12,9 @@ import { styled } from '@mui/material/styles';
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
-import newTable from 'src/components/Shared/newTable'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import CustomTable from 'src/components/Shared/CustomTable'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
