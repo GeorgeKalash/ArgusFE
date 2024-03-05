@@ -1,6 +1,5 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import AgentForm from '../Forms/AgentForm'
 
 const AgentWindow = ({ 
@@ -13,17 +12,16 @@ const AgentWindow = ({
     <Window
       id='AgentWindow'
       Title={labels.agents}
+      controlled={true}
       onClose={onClose}
-      width={600}
-      height={400}
+      width={500}
+      height={300}
     >
-      <CustomTabPanel>
         <AgentForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
         />
-      </CustomTabPanel>
     </Window>
   )
 }

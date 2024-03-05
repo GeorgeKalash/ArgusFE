@@ -23,7 +23,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -66,10 +66,19 @@ const SmsFunctionTemplate = () => {
 
             return n
           })
-
+        var count = 1
           smsFunctionTemplatesValidation.setValues({
             ...smsFunctionTemplatesValidation.values,
-            rows: finalList
+            rows: finalList?.map(
+          ({ templateId, templateName,  ...rest }) => ({
+            id : count++,
+            template:{
+              recordId: templateId,
+              name: templateName
+            },
+           ...rest
+          })
+            )
           })
         }
       )
@@ -90,7 +99,6 @@ const SmsFunctionTemplate = () => {
     datasetId: ResourceIds.SmsFunctionTemplates
   })
 
-  console.log('labels ',_labels)
 
   const lookupTemplate = searchQry => {
     setTemplateStore([])
@@ -110,7 +118,7 @@ const SmsFunctionTemplate = () => {
     }
   }
 
-  const columns = [
+  const columns1 = [
     {
       field: 'textfield',
       header: _labels[1],
@@ -145,13 +153,44 @@ const SmsFunctionTemplate = () => {
     }
   ]
 
+  const columns = [
+    {
+      component: 'textfield',
+      label: _labels[1],
+      name: 'functionId',
+      width: 150
+    },
+    {
+      component: 'textfield',
+      label: _labels[2],
+      name: 'functionName',
+
+      width: 400
+    },{
+      component: 'resourcelookup',
+      label: _labels[3],
+      name: 'template',
+      props: {
+        endpointId: SystemRepository.SMSTemplate.snapshot,
+        displayField: 'name',
+        valueField: 'name',
+        columnsInDropDown: [
+          { key: "reference", value: "Reference" },
+          { key: "name", value: "Name" },
+        ],
+      },
+      width: 550
+    },
+
+  ]
+
   const smsFunctionTemplatesValidation = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
     validate: values => {},
     initialValues: {
       rows: [
-        {
+        { id: 1,
           functionId: ''
         }
       ]
@@ -167,13 +206,13 @@ const SmsFunctionTemplate = () => {
 
 
   const postSmsFunctionTemplates = () => {
-    //After filtering the objects where templateId is not null, then map operation transforms the filtered array, extracting only the functionId and templateId properties from each object and creating a new object with these properties.
     const obj = {
-      smsFunctionTemplates: smsFunctionTemplatesValidation.values.rows
-        .filter(row => row.templateId != null)
-        .map(({ functionId, templateId }) => ({ functionId, templateId }))
-    }
+      smsFunctionTemplates: smsFunctionTemplatesValidation.values.rows.map(({ functionId, template }) => ({ functionId,
+          templateId : template.recordId ,  templateName : template.name}))
+          .filter(row => row.templateId != null)
 
+
+    }
     postRequest({
       extension: SystemRepository.SMSFunctionTemplate.set,
       record: JSON.stringify(obj)
@@ -196,15 +235,14 @@ const SmsFunctionTemplate = () => {
         <CustomTabPanel index={0} value={0}>
           <Box>
             <Grid container>
-              <Grid xs={12}>
-                <Box sx={{ width: '100%' }}>
-                  <InlineEditGrid
-                    gridValidation={smsFunctionTemplatesValidation}
-                    columns={columns}
-                    allowDelete={false}
-                    allowAddNewLine={false}
-                    scrollable={true}
-                    scrollHeight={`${height - 130}px`}
+              <Grid>
+                <Box sx={{ width: '100%'  }}>
+                  <DataGrid
+                   height={height-150}
+                   onChange={value => smsFunctionTemplatesValidation.setFieldValue('rows', value)}
+                   value={smsFunctionTemplatesValidation.values.rows}
+                   error={smsFunctionTemplatesValidation.errors.rows}
+                   columns={columns}
                   />
                 </Box>
               </Grid>
