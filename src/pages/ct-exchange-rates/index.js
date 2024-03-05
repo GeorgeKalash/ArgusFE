@@ -173,6 +173,7 @@ const CTExchangeRates = () => {
         getExchangeRates(formik.values.currencyId, formik.values.puRateTypeId, formik.values.raCurrencyId, puFormik)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId])
 
   useEffect(() => {
@@ -181,6 +182,7 @@ const CTExchangeRates = () => {
         getExchangeRates(formik.values.currencyId, formik.values.saRateTypeId, formik.values.raCurrencyId, saFormik)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId])
 
   useEffect(() => {

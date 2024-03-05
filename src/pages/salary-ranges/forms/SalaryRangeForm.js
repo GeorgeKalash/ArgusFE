@@ -100,7 +100,7 @@ export default function SalaryRangeForm ({labels, maxAccess,recordId}){
           <Grid item xs={12}>
             <CustomTextField
               name='min'
-              label={labels[2]}
+              label={labels.min}
               value={formik.values.min}
               required
               maxLength = '10'
@@ -108,13 +108,14 @@ export default function SalaryRangeForm ({labels, maxAccess,recordId}){
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('min', '')}
               error={formik.touched.min && Boolean(formik.errors.min)}
-              helperText={formik.touched.min && formik.errors.min}
+
+              // helperText={formik.touched.min && formik.errors.min}
             />
           </Grid>
           <Grid item xs={12}>
           <CustomTextField
               name='max'
-              label={labels[3]}
+              label={labels.max}
               value={formik.values.max}
               required
               maxLength = '10'
@@ -122,7 +123,8 @@ export default function SalaryRangeForm ({labels, maxAccess,recordId}){
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('max', '')}
               error={formik.touched.max && Boolean(formik.errors.max)}
-              helperText={formik.touched.max && formik.errors.max}
+
+              // helperText={formik.touched.max && formik.errors.max}
             />
           </Grid>
 
