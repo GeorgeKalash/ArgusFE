@@ -12,14 +12,11 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import UndeliveredCreditOrderForm from './Forms/UndeliveredCreditOrderForm'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
 
 const UndeliveredCreditOrder = () => {
   const { getRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
   const { stack } = useWindow()
-  const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {

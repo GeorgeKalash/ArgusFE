@@ -625,6 +625,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 name='corId'
                 label={_labels[16]}
                 form={formik}
+                firstFieldWidth='30%'
                 required
                 valueShow='corRef'
                 secondValueShow='corName'
@@ -653,6 +654,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             parameters={{
               _type: 0
             }}
+            firstFieldWidth='30%'
             valueField='accountNo'
             displayField='name'
             name='cashAccountId'
