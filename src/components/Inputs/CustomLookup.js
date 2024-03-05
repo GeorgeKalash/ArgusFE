@@ -23,7 +23,7 @@ const CustomLookup = ({
   onLookup,
   onChange,
   error,
-  firstFieldWidth = '210px',
+  firstFieldWidth = '100%',
   helperText,
   variant = 'outlined', //outlined, standard, filled
   size = 'small', //small, medium
@@ -31,7 +31,7 @@ const CustomLookup = ({
   autoFocus = false,
   disabled = false,
   readOnly = false,
-  editMode,
+  editMode, dataGrid=false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -55,8 +55,15 @@ const CustomLookup = ({
                 borderTopRightRadius: 0,
                 borderBottomRightRadius: 0
               }
-            })
+            }),
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                border: dataGrid && 'none', // Hide border
+              },
+            }, width: '100%',
+
           }}
+
         >
           <Autocomplete
             name={name}
@@ -93,6 +100,7 @@ const CustomLookup = ({
                 autoFocus={autoFocus}
                 error={error}
                 helperText={helperText}
+
                 style={{ textAlign: 'right', width: firstFieldWidth }}
                 InputProps={{
                   ...params.InputProps,
@@ -128,7 +136,9 @@ const CustomLookup = ({
             readOnly={_readOnly}
             freeSolo={_readOnly}
             disabled={disabled}
-            sx={{ flex: 1, width: firstFieldWidth }}
+
+            // sx={{ flex: 1, width: firstFieldWidth }}
+
           />
         </Box>
         {secondDisplayField && (
@@ -154,7 +164,7 @@ const CustomLookup = ({
               }}
               error={error}
               helperText={helperText}
-              sx={{ flex: 1, width: '100%' }}
+
             />
           </Box>
         )}

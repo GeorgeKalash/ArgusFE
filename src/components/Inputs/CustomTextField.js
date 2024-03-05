@@ -24,14 +24,14 @@ const CustomTextField = ({
   phone = false,
   search= false,
   language="",
-
+ dataGrid=false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
   const inputRef = useRef(null)
-  const [focus, setFocus] = useState(false);
+  const [focus, setFocus] = useState(dataGrid);
 
 
   useEffect(() => {
@@ -55,20 +55,23 @@ const CustomTextField = ({
       e.target.value = truncatedValue;
       props?.onChange(e);
     }
+
     if (phone) {
       const truncatedValue = inputValue.slice(0, maxLength);
       e.target.value = truncatedValue?.replace(/\D/g, '');
       props?.onChange(e);
     }
+    if (language ==='number') {
+      e.target.value = inputValue?.replace(/[^0-9.]/g, '');
+      props?.onChange(e);
+    }
     if (language ==='arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '');
-      console.log("e.target.value" , e.target.value)
       props?.onChange(e);
     }
 
     if (language ==='english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '');
-      console.log("e.target.value" , e.target.value)
       props?.onChange(e);
     }
   };
@@ -78,7 +81,8 @@ const CustomTextField = ({
   return (
     <div style={{ display: hidden ? 'none' : 'block' }}>
       <TextField
-        key={(value?.length < 1 || readOnly  || value === null) && value }
+
+        key={(value?.length < 1 || readOnly  || value === null)  && value }
         inputRef={inputRef}
         type={type}
         variant={variant}
@@ -91,7 +95,7 @@ const CustomTextField = ({
           autoComplete: "off",
           readOnly: _readOnly,
           maxLength: maxLength,
-          dir: dir, // Set direction to right-to-left
+           dir:  dir, // Set direction to right-to-left
           inputMode: 'numeric',
           pattern: numberField && '[0-9]*', // Allow only numeric input
           style: {
@@ -101,9 +105,8 @@ const CustomTextField = ({
           }
         }}
         autoComplete={autoComplete}
-        style={{ textAlign: 'right' }}
 
-        // onInput={handleInput}
+        onInput={handleInput}
         onKeyDown={(e)=> e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)}
         InputProps={{
 
@@ -120,6 +123,15 @@ const CustomTextField = ({
             )}
 
             </InputAdornment>
+
+        }}
+
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: dataGrid && 'none', // Hide border
+            },
+          },
         }}
         {...props}
       />
