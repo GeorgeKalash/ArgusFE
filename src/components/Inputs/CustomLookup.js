@@ -23,7 +23,7 @@ const CustomLookup = ({
   onLookup,
   onChange,
   error,
-  firstFieldWidth = '100%',
+  firstFieldWidth = secondDisplayField ? "50%" : '100%',
   helperText,
   variant = 'outlined', //outlined, standard, filled
   size = 'small', //small, medium
@@ -60,7 +60,7 @@ const CustomLookup = ({
               '& fieldset': {
                 border: dataGrid && 'none', // Hide border
               },
-            }, width: '100%',
+            }, width: firstFieldWidth,
 
           }}
 
@@ -101,7 +101,7 @@ const CustomLookup = ({
                 error={error}
                 helperText={helperText}
 
-                style={{ textAlign: 'right', width: firstFieldWidth }}
+                // style={{ textAlign: 'right', width: firstFieldWidth }}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -137,13 +137,13 @@ const CustomLookup = ({
             freeSolo={_readOnly}
             disabled={disabled}
 
-            // sx={{ flex: 1, width: firstFieldWidth }}
 
           />
         </Box>
         {secondDisplayField && (
           <Box
             sx={{
+              width: `calc(100% - ${firstFieldWidth})`, // Calculate the width dynamically
               flex: 1,
               display: 'flex',
               '& .MuiInputBase-root': {
@@ -164,7 +164,10 @@ const CustomLookup = ({
               }}
               error={error}
               helperText={helperText}
+              sx={{
+                width: `calc(100%)`, // Calculate the width dynamically
 
+              }}
             />
           </Box>
         )}
