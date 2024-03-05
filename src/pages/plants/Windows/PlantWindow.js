@@ -1,48 +1,29 @@
 // ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
-// **Tabs
-import PlantTab from 'src/pages/plants/Tabs/PlantTab'
-import AddressTab from 'src/components/Shared/AddressTab'
 import PlantForm from '../Forms/PlantForm'
-import FormShell from 'src/components/Shared/FormShell'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import AddressForm from '../Forms/AddressForm'
 import { useState } from 'react'
 import { Tab, Tabs } from '@mui/material'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
 
 const PlantWindow = ({
-  onClose,
-  plantValidation,
-  width,
-  height,
   labels,
   editMode,
   maxAccess,
   setEditMode,
-  tabs,
   recordId,
   setRecordId,
-
-  // activeTab,
-  // setActiveTab,
-  addressValidation
 }) => {
 
   const [activeTab , setActiveTab] = useState(0)
-  const [post , setPost] = useState(false)
+  const tabs = [{ label: labels.plant }, { label: labels.address , disabled: !editMode }]
 
-  return (
-    < >
-        <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
-                {tabs.map((tab, i) => (
-                  <Tab key={i} label={tab.label} disabled={tab?.disabled} />
-                ))}
-              </Tabs>
-      <CustomTabPanel index={0} value={activeTab}>rrrr
-        {/* <PlantForm
-          plantValidation={plantValidation}
+return (
+    <>
+      <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <CustomTabPanel index={0} value={activeTab}>
+        <PlantForm
           _labels={labels}
           maxAccess={maxAccess}
           editMode={editMode}
@@ -50,17 +31,16 @@ const PlantWindow = ({
           recordId={recordId}
           setRecordId={setRecordId}
 
-        /> */}
+        />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>sss
-        {/* <AddressForm
-          addressValidation={addressValidation}
-          plantValidation={plantValidation}
+      <CustomTabPanel index={1} value={activeTab}>
+        <AddressForm
+           _labels={labels}
           recordId={recordId}
           setRecordId={setRecordId}
           maxAccess={maxAccess}
           editMode={editMode}
-        /> */}
+        />
       </CustomTabPanel>
 
     </>

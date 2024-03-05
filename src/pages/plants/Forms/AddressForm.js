@@ -85,18 +85,18 @@ const AddressForm = ({
           })
           .catch(error => {})
         }
-    },[address])
+    },[recordId])
 
 
 return (
   <>
-   {editMode && <AddressFormShell
+    <AddressFormShell
     editMode={editMode}
     setAddress={setAddress}
     address={address}
     allowPost={true}
     setPost={setPost}
-    />}
+    />
     </>
   )
 }

@@ -29,14 +29,10 @@ import { useWindow } from 'src/windows'
 
 const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-
-  //states
-  const [activeTab, setActiveTab] = useState(0)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [recordId, setRecordId] = useState(null)
+  const [editMode, setEditMode] = useState(false)
+
   const { stack } = useWindow()
 
 
@@ -123,40 +119,16 @@ return {...response,  _startAt: _startAt}
   }
 
   const addPlant = () => {
-    setActiveTab(0)
     setEditMode(false)
     setRecordId('')
-    setWindowOpen(true)
     openForm()
   }
 
   const editPlant = obj => {
-    setActiveTab(0)
+    setEditMode(false)
     setRecordId(obj.recordId)
-
-    // WITHOUT GETTING BOTH ADDRESS AND PLANT GET REQUEST, I AM FILLING ADDRESS FROM PLANTRECORD.ADDRESS
-    /*var parameters = `_filter=` + '&_recordId=' + obj.addressId //try to set address directlyyy
-    if (obj.addressId) {
-      getRequest({
-        extension: SystemRepository.Address.get,
-        parameters: parameters
-      })
-        .then(res => {
-          var result = res.record
-          console.log(result)
-
-          fillStateStore(result.countryId)
-
-          addressValidation.setValues(populateAddress(result))
-          console.log('addressData')
-          getPlantById(obj)
-
-        })
-        .catch(error => {})
-    } else {*/
+    openForm(obj.recordId)
       getPlantById(obj)
-
-    //}
   }
 
   const getPlantById = obj => {
@@ -178,26 +150,21 @@ return {...response,  _startAt: _startAt}
       })
   }
 
-  // ADDRESS TAB
 
-  const tabs = [{ label: _labels.plant }, { label: _labels.address , disabled: !editMode }]
-
-  function openForm (){
+  function openForm (recordId){
     stack({
       Component: PlantWindow,
       props: {
-        tabs: tabs
+        labels: _labels,
+        recordId: recordId? recordId : null,
+        editMode: editMode
       },
 
-      width: 1100,
+      width: 1000,
       height: 600,
       title: "Plant"
     })
   }
-
-
-
-
 
   return (
     <>
@@ -223,23 +190,8 @@ return {...response,  _startAt: _startAt}
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
-        <PlantWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={620}
-          labels={_labels}
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          maxAccess={access}
-          editMode={editMode}
-          recordId={recordId}
-          setRecordId={setRecordId}
-          setEditMode={setEditMode}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+
+      {/* <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} /> */}
     </>
   )
 }
