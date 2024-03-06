@@ -10,67 +10,28 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 
 const AddressForm = ({
+  recordId,
+  address,
+  setStore,
   editMode,
-  recordId
+  onSubmit
 }) => {
-
-  const [address , setAddress] = useState([])
-  const [post , setPost] = useState(false)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  useEffect(()=>{
-    console.log(address)
-
-    if(post && post.cityId){
+  function onAddressSubmit(post){
+     const data = {...post ,  recordId: recordId}
       postRequest({
         extension: SystemRepository.Address.set,
-        record: JSON.stringify(address)
+        record: JSON.stringify(data)
       })
         .then(res => {
-          postPlant(res.recordId)
-          toast.success('Record Added Successfully')
+          onSubmit(res)
         })
-}
-  },[post])
-
- async function postPlant (addressId){
-
-    const res = await getPlantAddress()
-    console.log(res.record)
-    if(res.record){
-    const data ={...res.record, address: addressId , recordId: recordId}
-     await  postRequest({
-      extension: SystemRepository.Plant.set,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-
-        if (recordId) {
-          toast.success('Record Added Successfully')
-
-        //   setEditMode(true)
-        //   setRecordId(res.recordId)
-        }
-
-        // else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-      })}
-  }
-
-  const getPlantAddress =  () => {
-    //always gives value?
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
-
-      return  getRequest({
-      extension: SystemRepository.Plant.get,
-      parameters: parameters
-    })
 
   }
+
   useEffect(()=>{
+    console.log(recordId)
     var parameters = `_filter=` + '&_recordId=' + recordId
       if (recordId) {
         getRequest({
@@ -79,23 +40,33 @@ const AddressForm = ({
         })
           .then(res => {
             var result = res.record
-            console.log("result" + result)
-            setAddress(result)
 
+            setStore(prevStore => ({
+              ...prevStore,
+              address: result
+            }));
+            setAddress(result)
           })
           .catch(error => {})
         }
     },[recordId])
 
+   function setAddress(res){
+    console.log(res)
+    setStore(prevStore => ({
+      ...prevStore,
+      address: res
+    }));
+   }
 
 return (
   <>
-    <AddressFormShell
-    editMode={editMode}
-    setAddress={setAddress}
-    address={address}
-    allowPost={true}
-    setPost={setPost}
+  <AddressFormShell
+     editMode={editMode}
+     setAddress={setAddress}
+     address={address}
+     allowPost={true}
+     onSubmit={onAddressSubmit}
     />
     </>
   )

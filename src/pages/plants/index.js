@@ -30,8 +30,6 @@ import { useWindow } from 'src/windows'
 const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [recordId, setRecordId] = useState(null)
-  const [editMode, setEditMode] = useState(false)
 
   const { stack } = useWindow()
 
@@ -108,9 +106,6 @@ return {...response,  _startAt: _startAt}
       record: JSON.stringify(obj)
     })
       .then(res => {
-        console.log({ res })
-
-        // getGridData({})
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
@@ -119,36 +114,14 @@ return {...response,  _startAt: _startAt}
   }
 
   const addPlant = () => {
-    setEditMode(false)
-    setRecordId('')
     openForm()
   }
 
   const editPlant = obj => {
-    setEditMode(false)
-    setRecordId(obj.recordId)
     openForm(obj.recordId)
-      getPlantById(obj)
   }
 
-  const getPlantById = obj => {
-    console.log('recId')
-    console.log(obj.recordId)
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.Plant.get,
-      parameters: parameters
-    })
-      .then(res => {
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
+
 
 
   function openForm (recordId){
@@ -157,9 +130,8 @@ return {...response,  _startAt: _startAt}
       props: {
         labels: _labels,
         recordId: recordId? recordId : null,
-        editMode: editMode
+        editMode: recordId && true
       },
-
       width: 1000,
       height: 600,
       title: "Plant"
@@ -191,7 +163,6 @@ return {...response,  _startAt: _startAt}
         />
       </Box>
 
-      {/* <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} /> */}
     </>
   )
 }

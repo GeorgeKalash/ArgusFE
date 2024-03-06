@@ -18,16 +18,16 @@ import { useFormik } from 'formik'
 const PlantForm = ({
   _labels,
   maxAccess,
-  setEditMode,
-  editMode,
-  recordId,
-  setRecordId
+  store,
+  setStore
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const {recordId ,editMode } = store
 
  const[initialValues , setInitialData] = useState({
     recordId: recordId || null,
     addressId: null,
+    address: null,
     reference: null,
     name: null,
     segmentRef: null,
@@ -63,9 +63,11 @@ const PlantForm = ({
 
         if (res.recordId) {
           toast.success('Record Added Successfully')
-          setEditMode(true)
-          setRecordId(res?.recordId)
 
+          setStore(prevStore => ({
+            ...prevStore,
+            plant: obj ,  editMode: true, recordId: res.recordId
+          }));
 
         }
         else toast.success('Record Edited Successfully')
@@ -84,20 +86,22 @@ const PlantForm = ({
         .then(res => {
           var result = res.record
           setInitialData(result)
-
-
+          setStore(prevStore => ({
+            ...prevStore,
+            plant: result
+          }));
         })
         .catch(error => {})
       }
-  },[])
+  },[recordId])
 
 return (
 
     <FormShell
-    form={formik}
-    resourceId={ResourceIds.Plants}
-    maxAccess={maxAccess}
-    editMode={editMode}
+     form={formik}
+     resourceId={ResourceIds.Plants}
+     maxAccess={maxAccess}
+     editMode={editMode}
 
     >
       <Grid container spacing={4}>

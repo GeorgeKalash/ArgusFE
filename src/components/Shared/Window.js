@@ -60,8 +60,8 @@ const Window = ({
 
   const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
   const containerHeight = `calc(100vh - 48px)`
-  const containerHeightPanel = `calc(100vh - 200px)`
-  const heightPanel = height-120
+  const containerHeightPanel = `calc(100vh - 180px)`
+  const heightPanel = height- 120
 
 return (
     <Box

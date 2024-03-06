@@ -20,8 +20,6 @@ export default function FormShell({
   closeVisible = false,
   resourceId,
   functionId,
-  recordId,
-
   NewComponentVisible = false,
   maxAccess,
   isPosted = false,
@@ -81,7 +79,7 @@ export default function FormShell({
             stack({
               Component: TransactionLog,
               props: {
-                recordId: form.values.recordId ?? form.values.clientId,
+                recordId: form.values?.recordId ?? form.values.clientId,
                 resourceId: resourceId,
                 setErrorMessage: setErrorMessage
               },
@@ -96,7 +94,7 @@ export default function FormShell({
               props: {
                 formValues: form.values,
 
-                recordId: form.values.recordId,
+                recordId: form.values?.recordId,
                 functionId: functionId
               },
               width: 1000,
@@ -108,7 +106,7 @@ export default function FormShell({
             stack({
               Component: ClientRelationForm,
               props: {
-                recordId: form.values.recordId ?? form.values.clientId,
+                recordId: form.values?.recordId ?? form.values.clientId,
                 name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
                 reference: form.values.reference,
                 setErrorMessage: setErrorMessage
@@ -123,7 +121,7 @@ export default function FormShell({
               Component: PreviewReport,
               props: {
                 selectedReport: selectedReport,
-                recordId: form.values.recordId
+                recordId: form.values?.recordId
               },
               width: 1000,
               height: 500,
@@ -143,7 +141,7 @@ export default function FormShell({
           isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}
-          recordId={form.values.recordId}
+          recordId={form.values?.recordId}
           selectedReport={selectedReport}
           setSelectedReport={setSelectedReport}
           previewReport={previewReport}
@@ -153,7 +151,7 @@ export default function FormShell({
         <TransactionLog
           resourceId={resourceId}
           onInfoClose={() => setWindowInfo(false)}
-          recordId={form.values.recordId}
+          recordId={form.values?.recordId}
         />
       )}
     </>
