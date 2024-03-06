@@ -31,7 +31,6 @@ const AddressForm = ({
   }
 
   useEffect(()=>{
-    console.log(recordId)
     var parameters = `_filter=` + '&_recordId=' + recordId
       if (recordId) {
         getRequest({
@@ -52,7 +51,6 @@ const AddressForm = ({
     },[recordId])
 
    function setAddress(res){
-    console.log(res)
     setStore(prevStore => ({
       ...prevStore,
       address: res
