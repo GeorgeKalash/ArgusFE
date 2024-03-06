@@ -31,7 +31,8 @@ const SmsFunctionTemplate = () => {
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
-  const [templateStore, setTemplateStore] = useState([])
+
+
 
   const getGridData = () => {
     try {
@@ -100,23 +101,6 @@ const SmsFunctionTemplate = () => {
   })
 
 
-  const lookupTemplate = searchQry => {
-    setTemplateStore([])
-
-    if (searchQry) {
-      var parameters = `_filter=${searchQry}`
-      getRequest({
-        extension: SystemRepository.SMSTemplate.snapshot,
-        parameters: parameters
-      })
-        .then(res => {
-          setTemplateStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  }
 
 
 
@@ -151,7 +135,7 @@ const SmsFunctionTemplate = () => {
           { key: "name", value: "Name" },
         ],
       },
-      width: 550
+      width: 600
     },
 
   ]
@@ -215,6 +199,8 @@ const SmsFunctionTemplate = () => {
                    value={smsFunctionTemplatesValidation.values.rows}
                    error={smsFunctionTemplatesValidation.errors.rows}
                    columns={columns}
+                   allowDelete={false}
+                   allowAddNewLine={false}
                   />
                 </Box>
               </Grid>

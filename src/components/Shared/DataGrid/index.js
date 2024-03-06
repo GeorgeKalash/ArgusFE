@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 
-export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange }) {
+export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=false, allowAddNewLine=true}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   async function processDependencies(newRow, oldRow, editCell) {
@@ -80,8 +80,8 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
     const currentCell = { ...nextCell }
 
 
-    if (nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
-      if (error){
+    if ((nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1)) {
+      if (error || !allowAddNewLine){
       event.stopPropagation()
 
       return
@@ -312,7 +312,7 @@ return (
             )
           }
         })),
-        actionsColumn
+     allowDelete &&   actionsColumn
       ]}
     />
     <DeleteDialog
