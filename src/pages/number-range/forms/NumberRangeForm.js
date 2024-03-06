@@ -49,7 +49,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.NumberRange.qry
@@ -97,7 +96,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
     }
     
   })
-  console.log(formik.values)
 
   useEffect(() => {
     ;(async function () {
