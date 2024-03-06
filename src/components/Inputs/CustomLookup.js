@@ -23,7 +23,7 @@ const CustomLookup = ({
   onLookup,
   onChange,
   error,
-  firstFieldWidth = '210px',
+  firstFieldWidth = secondDisplayField ? '50%' : '100%',
   helperText,
   variant = 'outlined', //outlined, standard, filled
   size = 'small', //small, medium
@@ -32,10 +32,10 @@ const CustomLookup = ({
   disabled = false,
   readOnly = false,
   editMode,
+  dataGrid = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
   return (
@@ -55,7 +55,13 @@ const CustomLookup = ({
                 borderTopRightRadius: 0,
                 borderBottomRightRadius: 0
               }
-            })
+            }),
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                border: dataGrid && 'none' // Hide border
+              }
+            },
+            width: firstFieldWidth
           }}
         >
           <Autocomplete
@@ -92,8 +98,7 @@ const CustomLookup = ({
                 onKeyUp={onKeyUp}
                 autoFocus={autoFocus}
                 error={error}
-                helperText={helperText}
-                style={{ textAlign: 'right', width: firstFieldWidth }}
+                helperText={helperText} // style={{ textAlign: 'right', width: firstFieldWidth }}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -118,7 +123,6 @@ const CustomLookup = ({
                           <SearchIcon style={{ cursor: 'pointer' }} />
                         </IconButton>
                       </InputAdornment>
-
                       {/* Adjust color as needed */}
                     </div>
                   )
@@ -128,12 +132,12 @@ const CustomLookup = ({
             readOnly={_readOnly}
             freeSolo={_readOnly}
             disabled={disabled}
-            sx={{ flex: 1, width: firstFieldWidth }}
           />
         </Box>
         {secondDisplayField && (
           <Box
             sx={{
+              width: `calc(100% - ${firstFieldWidth})`, // Calculate the width dynamically
               flex: 1,
               display: 'flex',
               '& .MuiInputBase-root': {
@@ -154,7 +158,9 @@ const CustomLookup = ({
               }}
               error={error}
               helperText={helperText}
-              sx={{ flex: 1, width: '100%' }}
+              sx={{
+                width: `calc(100%)` // Calculate the width dynamically
+              }}
             />
           </Box>
         )}

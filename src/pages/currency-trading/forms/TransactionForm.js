@@ -30,6 +30,8 @@ import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { Box } from '@mui/system'
 
 const FormContext = React.createContext(null)
 
@@ -84,7 +86,7 @@ function FormField({ type, name, Component, valueField, onFocus, language, ...re
       onClear={() => {
         formik.setFieldValue(name, '')
       }}
-      
+
       // }}
       form={formik}
     />
@@ -157,41 +159,26 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     endpointId: 'CTTRX.asmx/pageCIV'
   })
 
-  const initial1 = {
-    rows: [
-      {
-        seqNo: 1,
-        cashAccountId: '',
-        cashInvoiceId: null,
-        type: '',
-        typeName: '',
-        ccName: '',
-        amount: '',
-        ccId: '',
-        bankFees: 0,
-        receiptRef: ''
-      }
-    ]
-  }
+
 
   const initial = {
     recordId: null,
     reference: null,
     rows: [
-      {
-        seqNo: 1,
+       {
+        id: 1,
         currencyId: '',
         fcAmount: '',
-        defaultExRate: '',
+        defaultRate: '',
         exRate: '',
         lcAmount: '',
-        minRate: 0,
-        maxRate: 0
+        minRate: '',
+        maxRate: ''
       }
     ],
     rows2: [
       {
-        seqNo: 1,
+        id: 1,
         cashAccountId: '',
         cashInvoiceId: null,
         type: '',
@@ -199,7 +186,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         ccName: '',
         amount: '',
         ccId: '',
-        bankFees: 0,
+        bankFees: '',
         receiptRef: ''
       }
     ],
@@ -241,41 +228,42 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
   const formik = useFormik({
     enableReinitialize: true,
-    validateOnChange: false,
+    validateOnChange: true,
     validateOnBlur: true,
-    validate: values => {
-      const errors = {}
 
-      const type = values.rows2 && values.rows2.every(row => !!row.type)
-      const amount = values.rows2 && values.rows2.every(row => !!row.amount)
-      const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
-      const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
-      const exRate = values.rows && values.rows.every(row => !!row.exRate)
-      if (values.rows) {
-        values.rows.forEach((row, index) => {
-          if (row.exRate > row.maxRate || row.exRate < row.minRate) {
-            if (!errors.rows[index]) {
-              errors.rows = {}
-            }
+    // validate: values => {
+    //   const errors = {}
 
-            errors.rows[index].exRate = 'exRate must be between minRate and maxRate' + row.exRate
-          }
-        })
-      }
-      if (!exRate && !lcAmount && !fcAmount)
-        errors.rows = Array(values.rows && values.rows.length).fill({
-          lcAmount: 'field is required',
-          fcAmount: 'field is required',
-          exRate: 'field is required'
-        })
-      if (!type && !amount)
-        errors.rows2 = Array(values.rows2 && values.rows2.length).fill({
-          amount: amount,
-          type: exRate
-        })
+    //   const type = values.rows2 && values.rows2.every(row => !!row.type)
+    //   const amount = values.rows2 && values.rows2.every(row => !!row.amount)
+    //   const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
+    //   const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
+    //   const exRate = values.rows && values.rows.every(row => !!row.exRate)
+    //   if (values.rows) {
+    //     values.rows.forEach((row, index) => {
+    //       if (row.exRate > row.maxRate || row.exRate < row.minRate) {
+    //         if (!errors.rows[index]) {
+    //           errors.rows = {}
+    //         }
 
-      return errors
-    },
+    //         errors.rows[index].exRate = 'exRate must be between minRate and maxRate' + row.exRate
+    //       }
+    //     })
+    //   }
+    //   if (!exRate && !lcAmount && !fcAmount)
+    //     errors.rows = Array(values.rows && values.rows.length).fill({
+    //       lcAmount: 'field is required',
+    //       fcAmount: 'field is required',
+    //       exRate: 'field is required'
+    //     })
+    //   if (!type && !amount)
+    //     errors.rows2 = Array(values.rows2 && values.rows2.length).fill({
+    //       amount: amount,
+    //       type: exRate
+    //     })
+
+    //   return errors
+    // },
     validationSchema: yup.object({
       date: yup.string().required(),
       id_type: yup.number().required(),
@@ -287,12 +275,45 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       issue_country: yup.string().required(),
       nationality: yup.string().required(),
       cell_phone: yup.string().required(),
-      profession: yup.string().required()
+      profession: yup.string().required(),
+      rows: yup
+      .array()
+      .of(
+        yup.object().shape({
+          currency: yup
+            .object()
+            .shape({
+              recordId: yup.string().required('Currency recordId is required')
+            })
+            .required('Currency is required'),
+          exRate: yup.string().nullable().required('Rate is required'),
+          fcAmount: yup.string().required('FcAmount is required'),
+          lcAmount: yup.string().required('LcAmount is required')
+        })
+      )
+      .required('Operations array is required'),
+      rows2: yup
+      .array()
+      .of(
+        yup.object().shape({
+          types: yup
+            .object()
+            .shape({
+              key: yup.string().required('Currency recordId is required')
+            })
+            .required('Currency is required'),
+          amount: yup.string().nullable().required('amount is required')
+
+        })
+      )
+      .required('Operations array is required')
     }),
+
     initialValues,
     onSubmit
   })
 
+// console.log(formik)
   async function setOperationType(type) {
     if (type === '3502' || type === '3503') {
       const res = await getRequest({
@@ -367,7 +388,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
       setCurrencyStore(response.list)
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function getData(id) {
@@ -380,11 +400,37 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     if (!recordId) {
       formik.setFieldValue('reference', record.headerView.reference)
     } else {
+      setOperationType(record.headerView.functionId)
+
       formik.setValues({
         recordId: recordId,
         reference: record.headerView.reference,
-        rows: record.items,
-        rows2: record.cash,
+        rows: record.items.map(
+          ({ seqNo, currencyId, currencyName, currencyRef, lcAmount, fcAmount, minRate, maxRate, ...rest }) => ({
+            id : seqNo,
+            currencyId: currencyId,
+            currency :{
+             recordId: currencyId, name :currencyName, reference :currencyRef
+            },
+            lcAmount: getFormattedNumber(lcAmount),
+            fcAmount: getFormattedNumber(fcAmount),
+            minRate, maxRate,
+           ...rest
+          })
+        ),
+        rows2: record.cash.map(
+          ({ seqNo,amount,type, typeName, ccId, ccName, ...rest }) => ({
+            id : seqNo,
+            types :{
+              key: type, value :typeName
+             },
+             creditCards :{
+              recordId: ccId, name :ccName
+             },
+            amount: getFormattedNumber(amount),
+           ...rest
+          })
+        ),
         clientType: record.clientMaster.category,
         date: formatDateFromApi(record.headerView.date),
         clientId: record?.clientIndividual?.clientId,
@@ -416,27 +462,26 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         status: record.headerView.status
       })
 
-      CashFormik.setValues({ rows: record.cash })
     }
   }
 
-  // const [plantId, setPlantId] = useState(null)
 
   const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
-    // const { record } = await getRequest({
-    //   extension: `SY.asmx/getUD`,
-    //   parameters: `_userId=${userId}&_key=plantId`
-    // })
-    // setPlantId(record.value)
+    if(currencyId){
+    const result = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_key=baseCurrencyId`
+    })
 
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
-      parameters: `_plantId=${plantId}&_currencyId=${currencyId}&_rateTypeId=${rateType}`
+      parameters: `_plantId=${plantId ? plantId : formik.values.plantId }&_currencyId=${currencyId}&_rateTypeId=${rateType}&_racurrencyId=${result.record.value}`
     })
 
     return response.record
+  }
   }
 
   const total = formik.values.rows.reduce((acc, { lcAmount }) => {
@@ -457,114 +502,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
   const Balance = total - receivedTotal
 
-  // const { lookup, store, valueOf, clear } = useLookup({
-  //   endpointId: CurrencyTradingClientRepository.Client.snapshot,
-  //   parameters: { _category: 1 }
-  // })
-
-  const CashFormik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      rows: [
-        {
-          seqNo: 1,
-          cashAccountId: '',
-          cashInvoiceId: null,
-          type: '',
-          typeName: '',
-          ccName: '',
-          amount: '',
-          ccId: '',
-          bankFees: 0,
-          receiptRef: ''
-        }
-      ]
-    },
-    onSubmit: values => {}
-  })
-  useEffect(() => {
-    initialValues.rows2 = CashFormik.values.rows.map(
-      ({ seqNo, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
-        seqNo,
-        type,
-        ccId,
-        bankFees,
-        amount,
-        receiptRef,
-        cashAccountId
-      })
-    )
-
-    formik.setFieldValue('rows2', initialValues.rows2)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [CashFormik.values])
-
-  function onReset(e) {
-    setInitialValues({
-      recordId: null,
-      reference: null,
-      rows: [
-        {
-          seqNo: 1,
-          currencyId: '',
-          fcAmount: '',
-          defaultExRate: '',
-          exRate: '',
-          lcAmount: '',
-          minRate: 0,
-          maxRate: 0
-        }
-      ],
-      rows2: [
-        {
-          seqNo: 1,
-          cashAccountId: '',
-          cashInvoiceId: null,
-          type: '',
-          typeName: '',
-          ccName: '',
-          amount: '',
-          ccId: '',
-          bankFees: 0,
-          receiptRef: ''
-        }
-      ],
-      date: new Date(),
-      clientId: null,
-      clientName: null,
-      clientType: '1',
-      firstName: null,
-      middleName: null,
-      familyName: null,
-      fl_firstName: null,
-      fl_lastName: null,
-      fl_middleName: null,
-      fl_familyName: null,
-      birth_date: null,
-      resident: false,
-      profession: null,
-      source_of_income: null,
-      sponsor: null,
-      id_number: null,
-      issue_country: null,
-      id_type: null,
-      expiry_date: null,
-      remarks: null,
-      purpose_of_exchange: null,
-      nationality: null,
-      cell_phone: null,
-      status: editMode ? null : '1',
-      type: -1,
-      wip: 1,
-      functionId: '3502',
-      idNoConfirm: '',
-      cellPhoneConfirm: '',
-      otp: false
-    })
-
-    return
-  }
   async function onSubmit(values) {
     if (
       (!values.idNoConfirm && values.clientId) ||
@@ -613,12 +550,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           notes: values.remarks
         },
         items: values.rows.map(
-          ({ seqNo, currencyId, exRate, defaultExRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
-            seqNo,
+          ({ id, currencyId, exRate, defaultRate, minRate, maxRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
+            seqNo: id,
             currencyId,
             exRate,
-            defaultExRate,
+            defaultRate,
             rateCalcMethod,
+            minRate,
+            maxRate,
             fcAmount: String(fcAmount || '').replaceAll(',', ''),
             lcAmount: lcAmount
           })
@@ -666,9 +605,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         },
 
         cash:
-          CashFormik.values.rows.length > 0 &&
-          CashFormik.values.rows.map(({ seqNo, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
-            seqNo,
+          formik.values.rows2.length > 0 &&
+          formik.values.rows2.map(({ id, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
+            seqNo: id,
             type,
             ccId,
             bankFees,
@@ -752,13 +691,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     return response.record
   }
 
+
+
   return (
     <ApprovalFormShell
       height={400}
       form={formik}
       initialValues={initial}
-      initialValues1={initial1}
-      form1={CashFormik}
       setEditMode={setEditMode}
       setIDInfoAutoFilled={setIDInfoAutoFilled}
       resourceId={35208}
@@ -871,223 +810,147 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
             </Grid>
           </FieldSet>
           <FieldSet title='Operations'>
-            <Grid item xs={12}>
-              <InlineEditGrid
-                maxAccess={maxAccess}
-                gridValidation={formik}
-                scrollHeight={350}
-                width={1500}
-                background={
-                  formik.values.functionId && (formik.values.functionId === '3503' ? '#C7F6C7' : 'rgb(245, 194, 193)')
+            <Grid>
+               <DataGrid
+                onChange={value => formik.setFieldValue('rows', value)}
+                value={formik.values.rows}
+                error={formik.errors.rows}
+                height={300}
+                bg={
+                  formik.values.functionId && (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
+
+                // idName='seqNo'
                 columns={[
+                  // {
+                  //   component: 'id',
+                  //   name: 'id',
+                  //   width: 50
+                  // },
                   {
-                    field: 'incremented',
-                    header: 'SL#',
-                    name: 'seqNo',
-                    readOnly: true,
-                    hidden: true,
-                    valueSetter: () => {
-                      return formik.values.rows.length + 1
-                    }
-                  },
-                  {
-                    field: 'combobox',
-                    valueField: 'recordId',
-                    displayField: 'reference',
-                    header: 'Currency',
-                    name: 'currencyId',
-                    store: currencyStore,
-                    widthDropDown: '300',
-                    mandatory: true,
-                    columnsInDropDown: [
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ],
-                    async onChange(row) {
-                      console.log(row?.newValue)
+                    component: 'resourcecombobox',
+                    label: labels.currency,
+                    name: 'currency',
+                    props: {
+                      endpointId: SystemRepository.Currency.qry,
+                      displayField: ['reference', 'name'],
+                      valueField:  'recordId',
+                      columnsInDropDown: [
+                        { key: "reference", value: "Reference" },
+                        { key: "name", value: "Name" },
+                      ],
+                    },
+                    async onChange({ row: { update, oldRow, newRow } }) {
 
-                      if (row?.newValue !== '' && formik.values.rows[row.rowIndex].currencyId !== row.newValue) {
-                        const exchange = await fetchRate({
-                          currencyId: row.newValue
-                        })
-
-                        if (!exchange?.rate)
+                        // if (!newRow.currency || oldRow.currency.recordId === newRow.currency.recordId) return
+                        //  console.log( oldRow, newRow)
+                        // newRow.currency.recordId
+                        if(!newRow?.currency?.recordId){
+                        return;
+                        }
+                        const exchange = await fetchRate({currencyId: newRow?.currency?.recordId})
+                        if (!exchange?.rate){
                           stackError({
-                            message: `Rate not defined for ${row.value}.`
+                            message: `Rate not defined for ${newRow.currency.name}.`
                           })
-                        formik.setFieldValue(`rows[${row.rowIndex}].lcAmount`, '')
 
-                        if (exchange && row.newRowData.fcAmount) {
+                        return;
+
+                        }
+                        if (exchange && newRow.fcAmount ) {
                           const exRate = exchange.rate
                           const rateCalcMethod = exchange.rateCalcMethod
 
                           const lcAmount =
                             rateCalcMethod === 1
-                              ? parseFloat(row.newRowData.fcAmount.toString().replace(/,/g, '')) * exRate
+                              ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) * exRate
                               : rateCalcMethod === 2
-                              ? parseFloat(row.newRowData.fcAmount.toString().replace(/,/g, '')) / exRate
+                              ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) / exRate
                               : 0
-                          formik.setFieldValue(`rows[${row.rowIndex}].lcAmount`, lcAmount)
-                        }
 
-                        formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, exchange?.rate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, exchange?.rate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.rateCalcMethod)
-                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
-                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
+                              exchange.rate &&  update({lcAmount :  lcAmount})
 
-                        //  row.rowData.currencyId = row.newValue
-                        //  row.rowData.exRate = exchange.exchangeRate.rate
-                        //  row.rowData.rateCalcMethod = exchange.exchange.rateCalcMethod
-                      } else {
-                        formik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
-                        formik.setFieldValue(`rows[${row.rowIndex}].exRate`, 0)
-                        formik.setFieldValue(`rows[${row.rowIndex}].defaultExRate`, 0)
-                        formik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
-                        formik.setFieldValue(`rows[${row.rowIndex}].minRate`, 0)
-                        formik.setFieldValue(`rows[${row.rowIndex}].maxRate`, 0)
-                      }
+                         }
 
-                      //                       if(row.newValue !== formik.values.rows[row.rowIndex].currencyId && formik.values.rows[row.rowIndex].fcAmount){
+                        update({
+                          currencyId: newRow.currency.recordId,
+                          exRate: exchange?.rate,
+                          defaultRate: exchange?.rate,
+                          rateCalcMethod : exchange?.rateCalcMethod,
+                          minRate :exchange?.minRate,
+                          maxRate:  exchange?.maxRate,
+                        })
 
-                      //                         const exRate = formik.values?.rows[row.rowIndex]?.exRate
-                      //                         const  rateCalcMethod = formik.values?.rows[row?.rowIndex]?.rateCalcMethod
+                    },
 
-                      //                         const lcAmount =
-                      //                         rateCalcMethod === 1
-                      //                           ? parseFloat(newValue.toString().replace(/,/g, '')) * exRate
-                      //                           : rateCalcMethod === 2
-                      //                           ? parseFloat(newValue.toString().replace(/,/g, '')) / exRate
-                      //                           : 0
-                      //                       formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
 
-                      // return
-                      //                       }
-                    }
+                    width: 260
                   },
                   {
-                    field: 'numberfield',
-                    header: 'FC Amount',
-                    mandatory: true,
+                    component: 'numberfield',
+                    label: labels.fcAmount,
                     name: 'fcAmount',
-                    async onChange(e) {
-                      const {
-                        rowIndex,
-                        rowData: { exRate, rateCalcMethod },
-                        newValue
-                      } = e
-                      if (!newValue) return
+                    async onChange({ row: { update, newRow } }) {
 
-                      const lcAmount =
-                        rateCalcMethod === 1
-                          ? parseFloat(newValue.toString().replace(/,/g, '')) * exRate
-                          : rateCalcMethod === 2
-                          ? parseFloat(newValue.toString().replace(/,/g, '')) / exRate
-                          : 0
-                      formik.setFieldValue(`rows[${rowIndex}].lcAmount`, lcAmount)
-                      e.rowData.lcAmount = lcAmount
-                    }
-                  },
-
-                  {
-                    field: 'textfield',
-                    name: 'defaultExRate',
-                    readOnly: false,
-                    hidden: true
+                    const fcAmount =  parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
+                    !isNaN(fcAmount) && update({
+                        lcAmount: newRow.exRate * fcAmount
+                      })
+                    },
+                    width: 200,
+                    defaultValue: ''
                   },
                   {
-                    field: 'numberfield',
-                    header: 'Rate',
+                    component: 'numberfield',
                     name: 'exRate',
-                    readOnly: false,
-                    mandatory: true,
-                    async onChange(e) {
-                      const {
-                        rowIndex,
-                        rowData: { minRate, maxRate, lcAmount, fcAmount },
-                        newValue,
-                        value
-                      } = e
-                      const nv = parseFloat(newValue?.toString().replace(/,/g, ''))
-                      const lc = parseFloat(lcAmount?.toString().replace(/,/g, ''))
-                      const fc = parseFloat(fcAmount?.toString().replace(/,/g, ''))
+                    label: labels.Rate,
+                    props: {
+                      readOnly: false
+                    },
+                    async onChange({ row: { update, newRow } }) {
+                      const fcAmount =  parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
 
-                      if (nv !== 0) {
-                        if (nv > 0 && nv !== '') {
-                          if (nv >= minRate && nv <= maxRate) {
-                            formik.setFieldValue(`rows[${e.rowIndex}].exRate`, e.value)
+                      if(newRow.exRate >= newRow.minRate  &&  newRow.exRate <= newRow.maxRate ){
+                        !isNaN(newRow.exRate * fcAmount) &&     update({
+                        lcAmount: newRow.exRate * fcAmount
+                      })
+                      }else{
+                      stackError({
+                        message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
+                      })
+                      update({
+                        exRate: ''
+                      })
 
-                            if (fc && nv) {
-                              formik.setFieldValue(`rows[${rowIndex}].lcAmount`, fc * nv)
-                            } else if (lc && nv) {
-                              formik.setFieldValue(`rows[${e.rowIndex}].fcAmount`, lc / nv)
-                            }
-                          } else {
-                            if (formik.values.rows[e.rowIndex].exRate)
-                              stackError({
-                                message: `Rate not in the [${minRate}-${maxRate}]range.`
-                              })
-                            formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
-                            formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
-                          }
-                        } else {
-                          console.log(nv)
-                          !isNaN(nv) && formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
-                          !isNaN(nv) && formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
-                        }
-                      } else {
-                        formik.setFieldValue(`rows[${e.rowIndex}].exRate`, '')
-                        formik.setFieldValue(`rows[${e.rowIndex}].lcAmount`, '')
-                      }
+                    return
                     }
-                  },
-
-                  {
-                    field: 'numberfield',
-                    name: 'minRate',
-                    readOnly: false,
-                    hidden: true
+                    },
+                    width: 200,
+                    defaultValue: ''
                   },
                   {
-                    field: 'numberfield',
-                    name: 'maxRate',
-                    readOnly: false,
-                    hidden: true
-                  },
-                  {
-                    field: 'numberfield',
-                    header: 'LC Amount',
+                    component: 'numberfield',
                     name: 'lcAmount',
-                    mandatory: true,
-                    readOnly: false,
-                    async onChange(e) {
-                      const {
-                        rowIndex,
-                        rowData: { exRate },
-                        newValue
-                      } = e
-                      if (newValue && exRate) {
-                        var fcAmount = String(newValue || 0).replaceAll(',', '')
-                        fcAmount = parseFloat(fcAmount) || 0
-                        fcAmount = fcAmount / exRate
-                        fcAmount && formik.setFieldValue(`rows[${rowIndex}].fcAmount`, fcAmount)
-                      }
-                    }
+                    label: labels.lcAmount,
+                    props: {
+                      readOnly: false
+                    },
+                    async onChange({ row: { update, newRow } }) {
+                      const lcAmount =  parseFloat(newRow.lcAmount?.toString().replace(/,/g, ''))
+                      const fcAmount = lcAmount ? lcAmount / newRow.exRate : ''
+                      if(fcAmount && newRow.exRate )
+                      update({
+                        fcAmount: fcAmount
+                      })
+
+
+                    },
+                    width: 200,
+                    defaultValue: ''
                   }
                 ]}
-                defaultRow={{
-                  seqNo: 1,
-                  currencyId: '',
-                  fcAmount: '',
-                  exRate: '',
-                  defaultExRate: '',
-                  lcAmount: '',
-                  minRate: 0,
-                  maxRate: 0
-                }}
               />
+
             </Grid>
           </FieldSet>
           <FieldSet title='Individual'>
@@ -1187,12 +1050,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 </Grid>
 
                 <Grid item xs={7}>
-                  {/* <FormField
-                    name='expiry_date'
-                    Component={CustomDatePicker}
-                    readOnly={editMode || idInfoAutoFilled}
-                    required
-                  /> */}
+
                   <CustomDatePicker
                     name='expiry_date'
                     label={labels.expiry_date}
@@ -1409,84 +1267,83 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           </FieldSet>
           <FieldSet title='Amount'>
             <Grid container xs={12} spacing={4}>
-              <Grid item xs={9} spacing={4}>
-                <InlineEditGrid
-                  maxAccess={maxAccess}
-                  gridValidation={CashFormik}
-                  scrollHeight={350}
-                  width={850}
-                  columns={[
-                    {
-                      field: 'incremented',
-                      header: 'SL#',
-                      name: 'seqNo',
-                      hidden: true,
-                      readOnly: true,
-                      valueSetter: () => {
-                        return CashFormik.values.rows.length + 1
-                      }
-                    },
-                    {
-                      field: 'combobox',
-                      valueField: 'key',
+              <Grid item  xs={9} spacing={4}>
+              <Grid container xs={12} spacing={4}>
+              <Grid >
+
+
+            <DataGrid
+                onChange={value => formik.setFieldValue('rows2', value)}
+                value={formik.values.rows2}
+                error={formik.errors.rows2}
+
+                // idName='seqNo'
+                columns={[
+                  {
+                    component: 'id',
+                    name: 'id',
+                    width: 50
+                  },
+                  {
+                    component: 'resourcecombobox',
+                    label: labels.type,
+                    name: 'types',
+                    props: {
+                      datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
                       displayField: 'value',
-                      header: labels.type,
-                      nameId: 'type',
-                      name: 'typeName',
-
-                      store:
-                        formik.values.functionId === '3502' ? typeStore.filter(item => item.key === '2') : typeStore,
-                      mandatory: true,
-                      widthDropDown: '300',
-                      columnsInDropDown: [{ key: 'value', value: 'Value' }]
+                      valueField: 'key',
+                      filter:  (item) =>  formik.values.functionId === '3502' ? (item.key === '2') : true
                     },
-                    {
-                      field: 'numberfield',
-                      header: 'Amount',
-                      name: 'amount',
-                      mandatory: true,
-                      required: true,
-                      readOnly: false
+                    async onChange({ row: { update, newRow } }) {
+                      update({
+                        type : newRow.types.key
+                      })
                     },
 
-                    {
-                      field: 'combobox',
+                    width: 150
+                  },
+                  {
+                    component: 'numberfield',
+                    name: 'amount',
+                    async onChange({ row: { update, newRow } }) {
+                      update({
+                        lcAmount: newRow.exRate * newRow.fcAmount
+                      })
+                    },
+                    width: 150,
+                    defaultValue: ''
+                  },
+                  {
+                    component: 'resourcecombobox',
+                    name: 'creditCard',
+                    label: labels.creditCard,
+                    props: {
+                      endpointId: CashBankRepository.CreditCard.qry,
                       valueField: 'recordId',
                       displayField: 'name',
-                      header: labels.creditCard,
-                      nameId: 'ccId',
-                      name: 'ccName',
-                      store: creditCardStore,
-                      widthDropDown: '300',
-                      columnsInDropDown: [
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'name' }
-                      ]
                     },
-                    {
-                      field: 'numberfield',
-                      header: labels.BanKFees,
-                      name: 'bankFees'
-                    },
-                    {
-                      field: 'textfield',
-                      header: labels.receiptRef,
-                      name: 'receiptRef'
-                    }
-                  ]}
-                  defaultRow={{
-                    seqNo: 0,
-                    cashAccountId: '',
-                    cashInvoiceId: null,
-                    type: '',
-                    typeName: '',
-                    ccName: '',
-                    amount: 0,
-                    ccId: '',
-                    bankFees: 0,
-                    receiptRef: ''
-                  }}
-                />
+                    width: 150
+                  },
+                  {
+                    component: 'numberfield',
+                    header: labels.receiptRef,
+                    name: 'bankFees',
+                    label: labels.BanKFees,
+                    width: 110
+                  },
+                  {
+                    component: 'numberfield',
+                    header: labels.receiptRef,
+                    name: 'receiptRef',
+                    label: labels.receiptRef,
+                    width: 110
+
+                  }
+                ]}
+              />
+
+            </Grid>
+            </Grid>
               </Grid>
 
               <Grid container xs={3} spacing={2} sx={{ p: 4 }}>

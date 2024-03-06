@@ -6,6 +6,7 @@ import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
+import GeneralLedger from 'src/components/Shared/GeneralLedger'
 
 export default function FormShell({
   form,
@@ -18,6 +19,10 @@ export default function FormShell({
   postVisible = false,
   closeVisible = false,
   resourceId,
+  functionId,
+  recordId,
+
+  NewComponentVisible = false,
   maxAccess,
   isPosted = false,
   isTFR = false,
@@ -85,6 +90,20 @@ export default function FormShell({
               title: 'Transaction Log'
             })
           }
+          newHandler={() =>
+            stack({
+              Component: GeneralLedger,
+              props: {
+                formValues: form.values,
+
+                recordId: form.values.recordId,
+                functionId: functionId
+              },
+              width: 1000,
+              height: 600,
+              title: 'General Ledger'
+            })
+          }
           onClientRelation={() =>
             stack({
               Component: ClientRelationForm,
@@ -115,6 +134,7 @@ export default function FormShell({
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
+          NewComponentVisible={NewComponentVisible}
           postVisible={postVisible}
           closeVisible={closeVisible}
           visibleTFR={visibleTFR}

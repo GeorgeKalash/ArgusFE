@@ -50,6 +50,7 @@ const ClientTemplateForm = ({
   setErrorMessage,
   recordId,
   _labels,
+  plantId,
   maxAccess,
 }) => {
   const { stack } = useWindow();
@@ -137,7 +138,7 @@ const ClientTemplateForm = ({
     keyword: "",
     otp: "",
     status: "-1",
-    plantId: "",
+    plantId: plantId || '',
     name: "",
     oldReference: "",
 
@@ -190,7 +191,6 @@ const ClientTemplateForm = ({
     const idType = await getValue(value);
     if (idType){
       clientIndividualFormik.setFieldValue("idtId", idType);
-      console.log(idType)
       const res =  idTypeStore.filter((item)=> item.recordId===idType)[0]
 
       if( res['type'] &&  (res['type']===1 || res['type']===2)){
@@ -216,7 +216,6 @@ const ClientTemplateForm = ({
   useEffect(() => {
     fillProfessionStore();
     fillType();
-    console.log(recordId);
 
     if (recordId) {
       getClient(recordId);
@@ -227,7 +226,6 @@ const ClientTemplateForm = ({
 
 
   async function getClient(recordId) {
-    console.log(recordId);
     const defaultParams = `_clientId=${recordId}`;
     var parameters = defaultParams;
     await getRequest({
@@ -262,30 +260,30 @@ const ClientTemplateForm = ({
           cityName: obj.clientIDView.idCityName,
 
           //address
-          countryId: obj.addressView.countryId,
-          cityId: obj.addressView.cityId,
-          city: obj.addressView.city,
-          stateId: obj.addressView.stateId,
-          cityDistrictId: obj.addressView.cityDistrictId,
-          cityDistrict: obj.addressView.cityDistrict,
+          countryId: obj.addressView?.countryId,
+          cityId: obj.addressView?.cityId,
+          city: obj.addressView?.city,
+          stateId: obj.addressView?.stateId,
+          cityDistrictId: obj.addressView?.cityDistrictId,
+          cityDistrict: obj.addressView?.cityDistrict,
 
-          email1: obj.addressView.email1,
-          email2: obj.addressView.email2,
-          name: obj.addressView.name,
-          phone: obj.addressView.phone,
-          phone2: obj.addressView.phone2,
-          phone3: obj.addressView.phone3,
-          postalCode: obj.addressView.postalCode,
-          street1: obj.addressView.street1,
-          street2: obj.addressView.street2,
-          subNo: obj.addressView.subNo,
-          unitNo: obj.addressView.unitNo,
-          bldgNo:obj.addressView.bldgNo,
+          email1: obj.addressView?.email1,
+          email2: obj.addressView?.email2,
+          name: obj.addressView?.name,
+          phone: obj.addressView?.phone,
+          phone2: obj.addressView?.phone2,
+          phone3: obj.addressView?.phone3,
+          postalCode: obj.addressView?.postalCode,
+          street1: obj.addressView?.street1,
+          street2: obj.addressView?.street2,
+          subNo: obj.addressView?.subNo,
+          unitNo: obj.addressView?.unitNo,
+          bldgNo:obj.addressView?.bldgNo,
 
           //end address
 
-          whatsappNo: obj.whatsappNo,
-          sponsorName: obj.sponsorName,
+          // whatsappNo: obj.whatsappNo,
+          // sponsorName: obj.sponsorName,
 
           //clientIndividual
           birthDate:
@@ -331,34 +329,34 @@ const ClientTemplateForm = ({
 
           //clientRemittance
           recordId: recordId,
-          otpVerified: obj.clientRemittance.otpVerified,
-          addressId: obj.clientRemittance.addressId,
-          batchId: obj.clientRemittance.batchId,
-          civilStatus: obj.clientRemittance.civilStatus,
-          clientId: obj.clientRemittance.clientId,
-          coveredFace: obj.clientRemittance.coveredFace,
-          date: obj.clientRemittance.date,
-          dtId: obj.clientRemittance.dtId,
-          educationLevel: obj.clientRemittance.educationLevel,
-          gender: obj.clientRemittance.gender,
-          idNo: obj.clientRemittance.idNo,
+          otpVerified: obj.clientRemittance?.otpVerified,
+          addressId: obj.clientRemittance?.addressId,
+          batchId: obj.clientRemittance?.batchId,
+          civilStatus: obj.clientRemittance?.civilStatus,
+          clientId: obj.clientRemittance?.clientId,
+          coveredFace: obj.clientRemittance?.coveredFace,
+          date: obj.clientRemittance?.date,
+          dtId: obj.clientRemittance?.dtId,
+          educationLevel: obj.clientRemittance?.educationLevel,
+          gender: obj.clientRemittance?.gender,
+          idNo: obj.clientRemittance?.idNo,
 
-          // isDiplomat: obj.clientRemittance.isDiplomat,
-          isEmployee: obj.clientRemittance.isEmployee,
-          relativeDiplomatInfo: obj.clientRemittance.relativeDiplomatInfo,
-          releaseStatus: obj.clientRemittance.releaseStatus,
-          riskLevel: obj.clientRemittance.riskLevel,
+          // isDiplomat: obj.clientRemittance?.isDiplomat,
+          isEmployee: obj.clientRemittance?.isEmployee,
+          relativeDiplomatInfo: obj.clientRemittance?.relativeDiplomatInfo,
+          releaseStatus: obj.clientRemittance?.releaseStatus,
+          riskLevel: obj.clientRemittance?.riskLevel,
 
-          // salary: obj.clientRemittance.salary,
-          salaryRangeId: obj.clientRemittance.salaryRangeId,
-          smsLanguage: obj.clientRemittance.smsLanguage,
-          status: obj.clientRemittance.status,
-          whatsAppNo: obj.clientRemittance.whatsAppNo,
-          wip: obj.clientRemittance.wip,
-          workAddressId: obj.clientRemittance.workAddressId,
-          title: obj.clientRemittance.title,
-          mobileVerified: obj.clientRemittance.mobileVerifiedStatus,
-          isRelativeDiplomat: obj.clientRemittance.isRelativeDiplomat,
+          // salary: obj.clientRemittance?.salary,
+          salaryRangeId: obj.clientRemittance?.salaryRangeId,
+          smsLanguage: obj.clientRemittance?.smsLanguage,
+          status: obj.clientRemittance?.status,
+          whatsAppNo: obj.clientRemittance?.whatsAppNo,
+          wip: obj.clientRemittance?.wip,
+          workAddressId: obj.clientRemittance?.workAddressId,
+          title: obj.clientRemittance?.title,
+          mobileVerified: obj.clientRemittance?.mobileVerifiedStatus,
+          isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat,
         });
 
         setEditMode(true);
@@ -384,9 +382,9 @@ const ClientTemplateForm = ({
   };
 
   const checkIdNumber = (id) => {
-
     var parameters = `_idNo=`+ id;
-    if(id) getRequest({
+    if(id)
+    getRequest({
       extension: CTCLRepository.IDNumber.get,
       parameters: parameters,
     })
@@ -482,9 +480,7 @@ const ClientTemplateForm = ({
       flName: obj.fl_firstName,
       nationalityId: obj.nationalityId,
       addressId: null,
-      plantId: clientIndividualFormik.values.plantId
-        ? clientIndividualFormik.values.plantId
-        : 3,
+      plantId: clientIndividualFormik.values.plantId,
       cellPhone: obj.cellPhone,
       createdDate: formatDateToApiFunction(date.toISOString()),
       expiryDate: formatDateToApiFunction(obj.expiryDate),
@@ -501,9 +497,7 @@ const ClientTemplateForm = ({
     //CCTD
     const obj2 = {
       idNo: obj.idNo,
-      plantId: clientIndividualFormik.values.plantId
-        ? clientIndividualFormik.values.plantId
-        : 3,
+      plantId: clientIndividualFormik.values.plantId,
       idCountryId: obj.idCountry,
       idtId: obj.idtId, //5
       idExpiryDate: formatDateToApiFunction(obj.expiryDate),
@@ -594,10 +588,9 @@ const ClientTemplateForm = ({
       unitNo: address.unitNo,
       subNo: address.subNo,
     };
-console.log(obj6)
 
     const data = {
-      plantId: clientIndividualFormik.values.plantId || 3,
+      plantId: clientIndividualFormik.values.plantId ,
       clientMaster: obj1, //CTCL
       clientID: obj2, //CTID
       ClientIndividual: obj3, //CTCLI
@@ -749,8 +742,9 @@ console.log(obj6)
                       onCopy={handleCopy}
                       onPaste={handleCopy}
                       onBlur={(e) => {
-                        checkTypes(e.target.value), setShowAsPassword(true);
-                        checkIdNumber(e.target.value)
+                        checkTypes(e.target.value),
+                        setShowAsPassword(true);
+                       !editMode && checkIdNumber(e.target.value)
                       }}
                       readOnly={editMode && true}
                       maxLength="15"

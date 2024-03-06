@@ -9,7 +9,7 @@ const IdCategoriesWindow = ({
   maxAccess,
   recordId
 }) => {
-  
+
   return (
     <Window
       id='IdCategoriesWindow'
@@ -17,16 +17,14 @@ const IdCategoriesWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
+      height={500}
     >
-      <CustomTabPanel>
         <IdCategoryForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
         />
-       
-      </CustomTabPanel>
+
     </Window>
   )
 }
