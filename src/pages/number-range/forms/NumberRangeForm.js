@@ -66,22 +66,20 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
       max: yup.string().required('This field is required'),
       current: yup.string().required('This field is required'),
 
-      startDate: !!dateRanges ? yup.date().required() : yup.date(),
-      endDate: !!dateRanges? yup.date().required() : yup.date(),
+      startDate: !!dateRanges ? yup.string().required() : yup.date().nullable(),
+      endDate: !!dateRanges ? yup.string().required() : yup.date().nullable(),
     }),
   
     onSubmit: async obj => {
       const data = { ...obj };
       const recordId = obj.recordId;
       
-      
+      if(dateRanges){
         data.startDate = formatDateToApi(data.startDate);
- 
-      
-   
         data.endDate = formatDateToApi(data.endDate);
 
-    
+      }
+        
       const response = await postRequest({
         extension: SystemRepository.NumberRange.set,
         record: JSON.stringify(data)
@@ -92,14 +90,14 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
       } else {
         toast.success('Record Edited Successfully');
       }
-    
+      
       setEditMode(true);
       invalidate();
-      console.log(formik);
+      
     }
     
   })
- 
+  console.log(formik.values)
 
   useEffect(() => {
     ;(async function () {
@@ -115,7 +113,7 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
             res.record.startDate=formatDateFromApi(res.record.startDate),
             res.record.endDate=formatDateFromApi(res.record.endDate),
             setInitialData(res.record)
-           
+            setDateRange(res.record.dateRange)
           }
         }
       } catch (exception) {
@@ -124,6 +122,8 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
       setIsLoading(false)
     })()
   }, [])
+
+
 
   return (
     <FormShell
@@ -233,8 +233,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
                 formik.setFieldValue('startDate', null)
                 formik.setFieldValue('endDate', null)
                 setDateRange(newValue)
-                
-
                 formik.handleChange(e) 
               }}
             />
