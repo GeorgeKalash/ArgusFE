@@ -172,7 +172,8 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
                          value={formik.values.date}
                          maxAccess={maxAccess}
                          required
-                         
+                         error={formik.touched.date && Boolean(formik.errors.date)}
+
                         //  disabledDate={Today}
                          
                   />

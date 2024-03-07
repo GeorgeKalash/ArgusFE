@@ -1,68 +1,67 @@
-import React, { useContext, useEffect } from 'react'
-import { Box, Grid } from '@mui/material'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import Table from 'src/components/Shared/Table'
-import { useState } from 'react'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import NumberRangeWindow from './Windows/NumberRangeWindow'
-import { useFormik } from 'formik'
-import { getNewNumberRange, populateNumberRange } from 'src/Models/System/NumberRange'
-import * as yup from 'yup'
+// ** React Imports
+import { useState, useContext } from 'react'
+
+// ** MUI Imports
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
+
+// ** Custom Imports
+import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+
+// ** API
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+
+// ** Windows
+import NumberRangeWindow from './Windows/NumberRangeWindow'
+
+// ** Helpers
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateToApi } from 'src/lib/date-helper'
 
 const NumberRange = () => {
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-  const [dateRequired, setDateRequired] = useState(null)
-
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [typeStore, setTypeStore] = useState([])
+ 
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
-  const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.NumberRange, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-        // fillSysFunctionsStore()
-        // fillActiveStatusStore()
-        getLabels(ResourceIds.NumberRange, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
+    const response = await getRequest({
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    description: labels && labels.find(item => item.key === "2").value,
-    min: labels && labels.find(item => item.key === "3").value,
-    max: labels && labels.find(item => item.key === "4").value,
-    current: labels && labels.find(item => item.key === "5").value,
-    external: labels && labels.find(item => item.key === "6").value,
-    dateRange: labels && labels.find(item => item.key === "7").value,
-    startDate: labels && labels.find(item => item.key === "8").value,
-    endDate: labels && labels.find(item => item.key === "9").value,
-    title: labels && labels.find(item => item.key === "10").value
+      extension: SystemRepository.NumberRange.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+
+    })
+
+    return {...response,  _startAt: _startAt}
   }
 
-  const columns = [
+ const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    refetch,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.NumberRange.qry,
+    datasetId: ResourceIds.NumberRange
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.NumberRange.qry
+  })
+
+   const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
@@ -95,134 +94,64 @@ const NumberRange = () => {
     }
   ]
 
-  const addNumberRange = () => {
-    NumberRangeValidation.setValues(getNewNumberRange())
+
+  const add = () => {
     setWindowOpen(true)
   }
 
-  const delNumberRange = obj => {
-    postRequest({
-      extension: SystemRepository.NumberRange.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const editNumberRange = obj => {
-    NumberRangeValidation.setValues(populateNumberRange(obj))
-
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: SystemRepository.NumberRange.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const NumberRangeValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema:
-      windowOpen &&
-      yup.object({
-        reference: yup.string().required('This field is required'),
-        min: yup.string().required('This field is required'),
-        max: yup.string().required('This field is required'),
-        current: yup.string().required('This field is required'),
-        description: yup.string().required('This field is required'),
-        startDate: dateRequired && yup.date().required('This field is required'),
-        endDate: dateRequired && yup.date().required('This field is required')
-      }),
-    onSubmit: values => {
-      // IN CASE FORMIK DIDN'T CONVERT A DATE FROM DATE OBJ TO DATE STRING (FORMAT SENT TO API)
-      // USE THE COMMENTED OUT CODE, THIS WILL MANUALLY CONVERT THE DATE USING formatDateToApi
-      // AND SEND apiValues TO API
-      // var apiValues = values
-
-      // if (apiValues.startDate) apiValues.startDate = formatDateToApi(apiValues.startDate)
-      // if (apiValues.endDate) apiValues.endDate = formatDateToApi(apiValues.endDate)
-
-      // console.log({ apiValues })
-
-      postNumberRange(values)
-    }
-  })
-
-  const postNumberRange = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: SystemRepository.NumberRange.set,
+  const del = async obj => {
+    await postRequest({
+      extension:SystemRepository.NumberRange.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
-
-  const handleSubmit = () => {
-    NumberRangeValidation.handleSubmit()
-  }
+  
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addNumberRange} maxAccess={access} />
-
+      <Box>
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
+          pageSize={50}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
-          onEdit={editNumberRange}
-          onDelete={delNumberRange}
         />
       </Box>
-
       {windowOpen && (
         <NumberRangeWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={'65vh'}
-          onSave={handleSubmit}
-          NumberRangeValidation={NumberRangeValidation}
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
           labels={_labels}
           maxAccess={access}
-          setRequired={setDateRequired}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
+        
         />
       )}
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
 
+
+
+
 export default NumberRange
+

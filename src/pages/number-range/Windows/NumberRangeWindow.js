@@ -1,42 +1,34 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import NumberRangeTab from '../Tabs/NumberRangeTab'
+
+import  NumberRangeForm from '../forms/NumberRangeForm'
 
 const NumberRangeWindow = ({
   onClose,
-  width,
-  height,
-  onSave,
-  editMode,
-  typeStore,
-  NumberRangeValidation,
-  setRequired,
   labels,
-  maxAccess
+  maxAccess,
+  recordId,
+
 }) => {
+  
   return (
     <Window
-      id='RelationWindow'
-      Title={labels.title}
+    id='RelationWindow'
+    Title={labels.numberRange}
+      controlled={true}
       onClose={onClose}
-      width={width}
-      height={height}
-      onSave={onSave}
-      NumberRangeValidation={NumberRangeValidation}
-      typeStore={typeStore}
+      width={500}
+      height={430}
     >
-      <CustomTabPanel>
-        <NumberRangeTab
+        <NumberRangeForm
           labels={labels}
-          NumberRangeValidation={NumberRangeValidation}
-          typeStore={typeStore}
           maxAccess={maxAccess}
-          setRequired={setRequired}
+          recordId={recordId}
         />
-      </CustomTabPanel>
     </Window>
   )
 }
+
+
 
 export default NumberRangeWindow
