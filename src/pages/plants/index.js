@@ -53,6 +53,7 @@ const {
   refetch,
   labels: _labels,
   paginationParameters,
+  invalidate,
   access
 } = useResourceQuery({
   queryFn: fetchGridData,
@@ -106,6 +107,7 @@ return {...response,  _startAt: _startAt}
       record: JSON.stringify(obj)
     })
       .then(res => {
+        invalidate()
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {

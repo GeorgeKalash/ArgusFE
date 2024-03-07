@@ -29,7 +29,6 @@ const PlantWindow = ({
 
   async function onSubmit (address){
     const addressId = address.recordId
-
     if(!store.plant.addressId){
       setStore(prevStore => ({
         ...prevStore,
@@ -42,19 +41,16 @@ const PlantWindow = ({
       extension: SystemRepository.Plant.set,
       record: JSON.stringify(data)
     })
-      .then(res => {
+      .then(result => {
         if (!addressId) {
           toast.success('Record Added Successfully')
-
-
         }
-
         else toast.success('Record Edited Successfully')
       })
       .catch(error => {
       })}
-  }else{
 
+  }else{
     toast.success('Record Added Successfully')
   }
 
@@ -64,7 +60,7 @@ const PlantWindow = ({
 return (
     <>
       <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-        <CustomTabPanel height={"100%"} index={0} value={activeTab}>
+        <CustomTabPanel height={height} index={0} value={activeTab}>
         <PlantForm
           _labels={labels}
           maxAccess={maxAccess}
