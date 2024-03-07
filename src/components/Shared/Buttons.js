@@ -35,7 +35,7 @@ export const Buttons = [
         title:'Info',
         condition:'onInfo && infoVisible',
         onClick:'onInfo',
-        color:'#231f20',
+        color:'#4355a5',
         disabled:'!editMode',
         image:'info.png',
     },
