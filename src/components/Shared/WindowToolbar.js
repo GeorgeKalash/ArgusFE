@@ -35,6 +35,15 @@ const WindowToolbar = ({
   previewReport,
   actions = []
 }) => {
+    const functionMapping = {
+      onSave,
+      onPost,
+      onTFR,
+      onClear,
+      onInfo,
+      onApply,
+      newHandler: () => newHandler(recordId),
+    };
   const { getRequest } = useContext(RequestsContext)
 
   const [showGLC, setShowGLC] = useState(false)
@@ -126,31 +135,36 @@ const WindowToolbar = ({
               </Button>
             </Tooltip>
           ))}
-          {Buttons.map((button, index) => (
-            eval(button.condition) && (
-              <Tooltip title={button.title} key={index}>
-                <Button
-                  onClick={() => eval(button.onClick)}
-                  variant="contained"
-                  sx={{
-                    mr: 1,
-                    backgroundColor: button.color,
-                    '&:hover': { 
+          {Buttons.map((button, index) => {
+            const isVisible = eval(button.condition); 
+            const isDisabled = eval(button.disabled);
+            const handleClick = functionMapping[button.onClick];
+
+            return (
+              isVisible && (
+                <Tooltip title={button.title} key={index}>
+                  <Button
+                    onClick={handleClick}
+                    variant="contained"
+                    sx={{
+                      mr: 1,
                       backgroundColor: button.color,
-                      opacity: 0.8,
-                    },
-                    width: 20,
-                    height: 35,
-                    objectFit: 'contain'
-                  }}
-                  disabled={eval(button.disabled)}
-                >
-                  <img src={`/images/buttonsIcons/${button.image}`} alt={button.title} />
-                </Button>
-              </Tooltip>
-            )
-          ))
-        }
+                      '&:hover': {
+                        backgroundColor: button.color,
+                        opacity: 0.8,
+                      },
+                      width: 20,
+                      height: 35,
+                      objectFit: 'contain'
+                    }}
+                    disabled={isDisabled}
+                  >
+                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.title} />
+                  </Button>
+                </Tooltip>
+              )
+            );
+          })}
         </Box>{' '}
       </Box>
     </DialogActions>
