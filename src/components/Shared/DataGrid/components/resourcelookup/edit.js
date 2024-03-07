@@ -34,6 +34,15 @@ return (
             field,
             value: newValue
           })
+
+          else
+
+          api.current.setEditCellValue({
+            id,
+            field,
+            value: ''
+          })
+
       }}
     />
   )
