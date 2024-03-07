@@ -135,7 +135,7 @@ const SmsFunctionTemplate = () => {
           { key: "name", value: "Name" },
         ],
       },
-      width: 600
+      width: 400
     },
 
   ]
