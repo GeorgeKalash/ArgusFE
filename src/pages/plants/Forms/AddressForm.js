@@ -12,7 +12,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 const AddressForm = ({
   recordId,
   address,
-  setStore,
+  setAddress,
   editMode,
   onSubmit
 }) => {
@@ -40,22 +40,14 @@ const AddressForm = ({
           .then(res => {
             var result = res.record
 
-            setStore(prevStore => ({
-              ...prevStore,
-              address: result
-            }));
+
             setAddress(result)
           })
           .catch(error => {})
         }
     },[recordId])
 
-   function setAddress(res){
-    setStore(prevStore => ({
-      ...prevStore,
-      address: res
-    }));
-   }
+
 
 return (
   <>

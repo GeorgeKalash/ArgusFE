@@ -18,11 +18,11 @@ const PlantWindow = ({
 
   const [store , setStore] = useState({
     recordId : recordId || null,
-    addressId : null,
     plant: [],
     address: [],
     editMode: editMode
   })
+
   const [activeTab , setActiveTab] = useState(0)
   const tabs = [{ label: labels.plant }, { label: labels.address , disabled: !store.editMode }]
   const { postRequest } = useContext(RequestsContext)
@@ -55,7 +55,12 @@ const PlantWindow = ({
   }
 
 }
-
+   function setAddress(res){
+    setStore(prevStore => ({
+      ...prevStore,
+      address: res
+    }));
+   }
 
 return (
     <>
@@ -76,8 +81,7 @@ return (
           editMode={editMode}
           recordId={store.plant.addressId}
           address={store.address}
-          store={store}
-          setStore={setStore}
+          setAddress={setAddress}
           onSubmit={onSubmit}
         />
       </CustomTabPanel>

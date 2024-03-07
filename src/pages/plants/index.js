@@ -29,10 +29,7 @@ import { useWindow } from 'src/windows'
 
 const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [errorMessage, setErrorMessage] = useState(null)
-
   const { stack } = useWindow()
-
 
   async function fetchWithSearch({ qry}) {
 
@@ -44,7 +41,6 @@ const Plants = () => {
 return response
 
 }
-
 
 const {
   query: { data },
@@ -111,7 +107,6 @@ return {...response,  _startAt: _startAt}
         toast.success('Record Deleted Successfully')
       })
       .catch(error => {
-        setErrorMessage(error)
       })
   }
 

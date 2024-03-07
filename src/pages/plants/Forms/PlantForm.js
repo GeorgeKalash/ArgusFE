@@ -19,10 +19,10 @@ const PlantForm = ({
   _labels,
   maxAccess,
   store,
-  setStore
+  editMode
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const {recordId ,editMode } = store
+  const {recordId } = store
 
  const[initialValues , setInitialData] = useState({
     recordId: recordId || null,
