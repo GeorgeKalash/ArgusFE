@@ -42,6 +42,7 @@ const WindowToolbar = ({
       onClear,
       onInfo,
       onApply,
+      onClientRelation,
       newHandler: () => newHandler(recordId),
     };
   const { getRequest } = useContext(RequestsContext)
