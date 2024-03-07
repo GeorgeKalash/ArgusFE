@@ -3,6 +3,7 @@ const service = 'MC.asmx/'
 export const MultiCurrencyRepository = {
   ExchangeTable: {
     qry: service + 'qryEX',
+    page: service + 'pageEX',
     qry2: service +  "qryEX2",
     get: service + 'getEX',
     set: service + 'setEX',

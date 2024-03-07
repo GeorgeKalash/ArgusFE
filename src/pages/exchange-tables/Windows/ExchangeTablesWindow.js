@@ -1,7 +1,7 @@
 import Window from 'src/components/Shared/Window'
-import StatesForm from '../forms/StatesForm'
+import ExchangeTablesForm from '../forms/ExchangeTablesForm'
 
-const StatesWindow = ({
+const ExchangeTablesWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -10,14 +10,14 @@ const StatesWindow = ({
   
   return (
     <Window
-      id='StatesWindow'
-      Title={labels.State}
+      id='ExchangeTablesWindow'
+      Title={labels.ExchangeTables}
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
+      height={500}
     >
-      <StatesForm
+      <ExchangeTablesForm
         labels={labels}
         maxAccess={maxAccess}
         recordId={recordId}
@@ -26,4 +26,4 @@ const StatesWindow = ({
   )
 }
 
-export default StatesWindow
+export default ExchangeTablesWindow

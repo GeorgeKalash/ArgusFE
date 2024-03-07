@@ -12,20 +12,19 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 
 
-export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
+export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
     
     const [initialValues, setInitialData] = useState({
         recordId: null,
         reference: '',
-        name: '',
-        typeName: '',
+        name: '',    
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,7 +32,7 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
     //const editMode = !!recordId
 
     const invalidate = useInvalidate({
-        endpointId: CurrencyTradingSettingsRepository.CommissionType.page
+        endpointId: SystemRepository.GeographicRegion.page
       })
   
     const formik = useFormik({
@@ -42,15 +41,13 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
         validateOnChange: true,
         validationSchema: yup.object({
           reference: yup.string().required(' '),
-          name: yup.string().required(' '),
-          typeName: yup.string().required(' ')
-   
+          name: yup.string().required(' '),   
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
 
           const response = await postRequest({
-            extension: CurrencyTradingSettingsRepository.CommissionType.set,
+            extension: SystemRepository.GeographicRegion.set,
             record: JSON.stringify(obj)
           })
           
@@ -75,7 +72,7 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
               setIsLoading(true)
     
               const res = await getRequest({
-                extension: CurrencyTradingSettingsRepository.CommissionType.get,
+                extension: SystemRepository.GeographicRegion.get,
                 parameters: `_recordId=${recordId}`
               })
               
@@ -90,7 +87,7 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
       
     return (
         <FormShell 
-            resourceId={ResourceIds.CommissionType}
+            resourceId={ResourceIds.GeographicRegion}
             form={formik} 
             height={300} 
             maxAccess={maxAccess} 
@@ -125,24 +122,6 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
 
                     // helperText={formik.touched.name && formik.errors.name}
                     />
-                </Grid>
-                <Grid item xs={12}>
-                <ResourceComboBox
-                  datasetId={DataSets.CT_COMMISSION_TYPES}
-                  name='typeName'
-                  label={labels.type}
-                  valueField='key'
-                  displayField='value'
-                  values={formik.values}
-                  required
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('typeName', newValue?.key)
-                  }}
-                  error={formik.touched.typeName && Boolean(formik.errors.typeName)}
-
-                  // helperText={formik.touched.typeName && formik.errors.typeName}
-                />
                 </Grid>
               </Grid>
         </FormShell>
