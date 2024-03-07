@@ -31,7 +31,8 @@ const SmsFunctionTemplate = () => {
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
-  const [templateStore, setTemplateStore] = useState([])
+
+
 
   const getGridData = () => {
     try {
@@ -100,23 +101,6 @@ const SmsFunctionTemplate = () => {
   })
 
 
-  const lookupTemplate = searchQry => {
-    setTemplateStore([])
-
-    if (searchQry) {
-      var parameters = `_filter=${searchQry}`
-      getRequest({
-        extension: SystemRepository.SMSTemplate.snapshot,
-        parameters: parameters
-      })
-        .then(res => {
-          setTemplateStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  }
 
 
 
@@ -125,7 +109,8 @@ const SmsFunctionTemplate = () => {
       component: 'textfield',
       label: _labels[1],
       name: 'functionId',
-      width: 150,
+
+      // width: 200,
         props: {
    readOnly: true
       }
@@ -137,7 +122,8 @@ const SmsFunctionTemplate = () => {
       props: {
    readOnly: true
       },
-      width: 400
+
+      // width: 300
     },{
       component: 'resourcelookup',
       label: _labels[3],
@@ -151,7 +137,8 @@ const SmsFunctionTemplate = () => {
           { key: "name", value: "Name" },
         ],
       },
-      width: 550
+
+      // width: 500
     },
 
   ]
@@ -207,7 +194,7 @@ const SmsFunctionTemplate = () => {
         <CustomTabPanel index={0} value={0}>
           <Box>
             <Grid container>
-              <Grid>
+              <Grid sx={{ width: '100%'  }}>
                 <Box sx={{ width: '100%'  }}>
                   <DataGrid
                    height={height-150}
@@ -215,6 +202,8 @@ const SmsFunctionTemplate = () => {
                    value={smsFunctionTemplatesValidation.values.rows}
                    error={smsFunctionTemplatesValidation.errors.rows}
                    columns={columns}
+                   allowDelete={false}
+                   allowAddNewLine={false}
                   />
                 </Box>
               </Grid>

@@ -3,7 +3,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
 export default function ResourceLookupEdit({ id, field, value, width , column: { props } }) {
   const api = useGridApiContext()
-console.log(field, value)
+console.log('field', value)
 
 return (
     <ResourceLookup
@@ -34,6 +34,15 @@ return (
             field,
             value: newValue
           })
+
+          else
+
+          api.current.setEditCellValue({
+            id,
+            field,
+            value: ''
+          })
+
       }}
     />
   )

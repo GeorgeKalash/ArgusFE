@@ -810,7 +810,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
             </Grid>
           </FieldSet>
           <FieldSet title='Operations'>
-            <Grid>
+            <Grid width={"100%"}>
                <DataGrid
                 onChange={value => formik.setFieldValue('rows', value)}
                 value={formik.values.rows}
@@ -884,7 +884,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     },
 
 
-                    width: 260
+                    flex: 1.5
                   },
                   {
                     component: 'numberfield',
@@ -897,7 +897,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         lcAmount: newRow.exRate * fcAmount
                       })
                     },
-                    width: 200,
                     defaultValue: ''
                   },
                   {
@@ -925,7 +924,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     return
                     }
                     },
-                    width: 200,
+
                     defaultValue: ''
                   },
                   {
@@ -945,7 +944,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
 
                     },
-                    width: 200,
+
                     defaultValue: ''
                   }
                 ]}
@@ -1269,7 +1268,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
             <Grid container xs={12} spacing={4}>
               <Grid item  xs={9} spacing={4}>
               <Grid container xs={12} spacing={4}>
-              <Grid >
+              <Grid width={"100%"} >
 
 
             <DataGrid
@@ -1279,11 +1278,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
                 // idName='seqNo'
                 columns={[
-                  {
-                    component: 'id',
-                    name: 'id',
-                    width: 50
-                  },
+                  // {
+                  //   component: 'id',
+                  //   name: 'id',
+                  //   width: 1
+                  // },
                   {
                     component: 'resourcecombobox',
                     label: labels.type,
@@ -1300,7 +1299,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       })
                     },
 
-                    width: 150
                   },
                   {
                     component: 'numberfield',
@@ -1310,7 +1308,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         lcAmount: newRow.exRate * newRow.fcAmount
                       })
                     },
-                    width: 150,
                     defaultValue: ''
                   },
                   {
@@ -1322,21 +1319,18 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       valueField: 'recordId',
                       displayField: 'name',
                     },
-                    width: 150
                   },
                   {
                     component: 'numberfield',
                     header: labels.receiptRef,
                     name: 'bankFees',
                     label: labels.BanKFees,
-                    width: 110
                   },
                   {
                     component: 'numberfield',
                     header: labels.receiptRef,
                     name: 'receiptRef',
                     label: labels.receiptRef,
-                    width: 110
 
                   }
                 ]}
