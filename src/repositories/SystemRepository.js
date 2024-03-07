@@ -103,7 +103,7 @@ export const SystemRepository = {
     qry: service + 'qryFUN',
     get: service + 'getFUN',
     set: service + 'setFUN',
-    set2: service + 'set2FUN'
+    set2: service + 'set2FUN' // SystemFunctionPack ehich contains list of SystemFunction class items
   },
   SMSFunctionTemplate: {
     qry: service + 'qrySFT',

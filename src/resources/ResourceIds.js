@@ -93,5 +93,6 @@ export const ResourceIds = {
   Routings: 42105,
   CreditOrder: 35301,
   UndeliveredCreditOrder: 35302,
-  CreditInvoice: 35303
+  CreditInvoice: 35303,
+  SystemFunction: 20105
 }
