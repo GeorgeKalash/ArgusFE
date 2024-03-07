@@ -14,15 +14,21 @@ import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
+import { useInvalidate } from 'src/hooks/resource'
 
 const PlantForm = ({
   _labels,
   maxAccess,
   store,
+  setStore,
   editMode
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const {recordId } = store
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.Plant.page
+  })
 
  const[initialValues , setInitialData] = useState({
     recordId: recordId || null,
@@ -53,22 +59,22 @@ const PlantForm = ({
     }
   })
 
-  const postPlant = obj => {
-    const recordId = obj.recordId
-    postRequest({
+  const postPlant  = async obj => {
+  await  postRequest({
       extension: SystemRepository.Plant.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
 
-        if (res.recordId) {
+      if (res.recordId) {
           toast.success('Record Added Successfully')
 
           setStore(prevStore => ({
             ...prevStore,
-            plant: obj ,  editMode: true, recordId: res.recordId
+              plant: obj,
+              recordId: res.recordId
           }));
-
+          invalidate()
         }
         else toast.success('Record Edited Successfully')
       })
