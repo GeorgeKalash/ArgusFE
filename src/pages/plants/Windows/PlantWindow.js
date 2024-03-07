@@ -20,7 +20,6 @@ const PlantWindow = ({
     recordId : recordId || null,
     plant: [],
     address: [],
-    editMode: editMode
   })
 
   const [activeTab , setActiveTab] = useState(0)
@@ -71,6 +70,7 @@ return (
           maxAccess={maxAccess}
           store={store}
           setStore={setStore}
+          editMode={editMode}
 
         />
       </CustomTabPanel>
