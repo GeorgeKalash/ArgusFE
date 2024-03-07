@@ -3,6 +3,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function ResourceComboBoxEdit({ column: { props }, id, field, value }) {
   const api = useGridApiContext()
+    console.log(value)
 
 return (
     <ResourceComboBox
