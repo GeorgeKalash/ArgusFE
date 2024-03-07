@@ -1,24 +1,23 @@
 // ** React Imports
 import { useEffect, useState, useContext } from 'react'
 
+// ** React ImportsCustomLookup
+import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
+
 // ** MUI Imports
-import { Box } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
-import FormShell from 'src/components/Shared/FormShell'
-
-// ** Custom Imports
-import Table from 'src/components/Shared/Table'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -26,19 +25,15 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
-import { useWindow } from 'src/windows'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const [numberRangeStore, setNumberRangeStore] = useState([])
-  const [batchNumberRangeStore, setBatchNumberRangeStore] = useState([])
+  const { height } = useWindowDimensions()
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
+
 
   async function getGridData() {
     return await getRequest({
@@ -49,8 +44,7 @@ const SystemFunction = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    refetch,
+    labels: labels,
     access
   } = useResourceQuery({
     queryFn: getGridData,
@@ -58,55 +52,10 @@ const SystemFunction = () => {
     datasetId: ResourceIds.SystemFunction
   })
 
-  /*const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
-    datasetId: ResourceIds.SystemFunction
-  })*/
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.SystemFunction.qry
-  })
-
-  const lookupNumberRange = inp => {
-    const input = inp
-
-    if (input) {
-      var parameters = `_filter=${input}`
-
-      getRequest({
-        extension: SystemRepository.NumberRange.snapshot,
-        parameters: parameters
-      })
-        .then(res => {
-          setNumberRangeStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  }
-
-  const lookupBatchNumberRange = inp => {
-    const input = inp
-
-    if (input) {
-      var parameters = `_filter=${input}`
-
-      getRequest({
-        extension: SystemRepository.NumberRange.snapshot,
-        parameters: parameters
-      })
-        .then(res => {
-          setBatchNumberRangeStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  }
 
   const columns = [
     {
-      field: 'numberfield',
+      component: 'numberfield',
       header: labels.functionId,
       name: 'functionId',
       mandatory: false,
@@ -114,7 +63,7 @@ const SystemFunction = () => {
       readOnly: true
     },
     {
-      field: 'textfield',
+      component: 'textfield',
       header: labels.name,
       name: 'sfName',
       mandatory: false,
@@ -122,12 +71,12 @@ const SystemFunction = () => {
       readOnly: true
     },
     {
-      field: 'lookup',
+      component: 'resourcelookup',
       header: labels.numberRange,
       nameId: 'nraId',
       name: 'nraRef',
+      endpointId: SystemRepository.NumberRange.snapshot,
       mandatory: false,
-      store: numberRangeStore,
       valueField: 'recordId',
       displayField: 'reference',
       widthDropDown: 200,
@@ -135,16 +84,15 @@ const SystemFunction = () => {
       columnsInDropDown: [
         { key: 'reference', value: 'Reference' },
         { key: 'description', value: 'Description' }
-      ],
-      onLookup: lookupNumberRange
+      ]
     },
     {
-      field: 'lookup',
+      component: 'resourcelookup',
       header: labels.batchNR,
       nameId: 'batchNRAId',
       name: 'batchNRARef',
+      endpointId: SystemRepository.NumberRange.snapshot,
       mandatory: false,
-      store: batchNumberRangeStore,
       valueField: 'recordId',
       displayField: 'reference',
       widthDropDown: 200,
@@ -152,20 +100,18 @@ const SystemFunction = () => {
       columnsInDropDown: [
         { key: 'reference', value: 'Reference' },
         { key: 'description', value: 'Description' }
-      ],
-      onLookup: lookupBatchNumberRange
+      ]
     }
   ]
 
   const formik = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
-    validationSchema: yup.object({}),
+    validate: values => {},
     initialValues: {
-      rows: [{}]
-
-      /*rows: [
+      rows: [
         {
+          id:1,
           functionId: '',
           sfName: '',
           nraId: '',
@@ -173,7 +119,7 @@ const SystemFunction = () => {
           nraRef: '',
           batchNRARef:''
         }
-      ]*/
+      ]
     },
     onSubmit: async obj => {
       const resultObject = {
@@ -182,47 +128,66 @@ const SystemFunction = () => {
 
       console.log('rows ', resultObject)
 
-      const response = await postRequest({
+      postRequest({
         extension: SystemRepository.SystemFunction.set2,
         record: JSON.stringify(resultObject)
       })
-
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          //recordId: response.recordId // Update only the recordId field
+        .then(res => {
+          toast.success('Record Updated Successfully')
         })
-      } else toast.success('Record Edited Successfully')
-
-      invalidate()
+        .catch(error => {
+          setErrorMessage(error)
+        })
     }
   })
 
-
-  /*const handleSubmit = () => {
-    gateKeeperValidation.handleSubmit()
-  }*/
+  const handleSubmit = () => {
+    formik.handleSubmit()
+  }
 
   return (
-    <FormShell
-    resourceId={ResourceIds.SystemFunction}
-    form={formik}
-    maxAccess={access}
-  >
-    <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', marginTop: -5 }}>
-    <InlineEditGrid
-            gridValidation={formik}
-            maxAccess={access}
-            columns={columns}
-            defaultRow={{}}
+    <>
+      <Box
+        sx={{
+          height: `${height - 80}px`
+        }}
+      >
+        <CustomTabPanel index={0} value={0}>
+          <Box>
+            <Grid container>
+              <Grid sx={{ width: '100%' }}>
+                <Box sx={{ width: '100%' }}>
+                  <DataGrid
+                    height={height - 150}
+                    onChange={value => formik.setFieldValue('rows', value)}
+                    value={formik.values.rows}
+                    error={formik.errors.rows}
+                    columns={columns}
+                    allowDelete={false}
+                    allowAddNewLine={false}
+                    maxAccess={access}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
 
-            //scrollHeight={250}
-            //width={500}
-          />
+          <Box
+            sx={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              width: '100%',
+              margin: 0
+            }}
+          >
+            <WindowToolbar onSave={handleSubmit} />
+          </Box>
+        </CustomTabPanel>
+      </Box>
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </Box>
-    </FormShell>
+    </>
   )
 }
 
