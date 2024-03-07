@@ -112,7 +112,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
@@ -126,7 +125,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -139,7 +137,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('flName', '')}
             error={formik.touched.flName && Boolean(formik.errors.flName)}
-            helperText={formik.touched.flName && formik.errors.flName}
           />
         </Grid>
         <Grid item xs={12}>
@@ -156,7 +153,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
                 formik.setFieldValue('incomeType', newValue?.key)
               }}
               error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
-              helperText={formik.touched.incomeType && formik.errors.incomeType}
             />
         </Grid>
       </Grid>

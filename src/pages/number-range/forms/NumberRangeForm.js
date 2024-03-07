@@ -144,7 +144,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -158,7 +157,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('description', '')}
             error={formik.touched.description && Boolean(formik.errors.description)}
-            helperText={formik.touched.description && formik.errors.description}
           />
         </Grid>
         <Grid item xs={12}>
@@ -173,7 +171,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
           onChange={formik.handleChange}
           onClear={() => formik.setFieldValue('min', '')}
           error={formik.touched.max && Boolean(formik.errors.min)}
-          helperText={formik.touched.max && formik.errors.min}
         />
       </Grid>
       <Grid item xs={12}>
@@ -188,7 +185,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
           onChange={formik.handleChange}
           onClear={() => formik.setFieldValue('max', '')}
           error={formik.touched.max && Boolean(formik.errors.max)}
-          helperText={formik.touched.max && formik.errors.max}
         />
       </Grid>
       <Grid item xs={12}>
@@ -202,7 +198,6 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
           onChange={formik.handleChange}
           onClear={() => formik.setFieldValue('current', '')}
           error={formik.touched.current && Boolean(formik.errors.current)}
-          helperText={formik.touched.current && formik.errors.current}
         />
       </Grid>
       
