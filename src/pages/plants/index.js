@@ -123,9 +123,6 @@ return {...response,  _startAt: _startAt}
     openForm(obj.recordId)
   }
 
-
-
-
   function openForm (recordId){
     stack({
       Component: PlantWindow,
