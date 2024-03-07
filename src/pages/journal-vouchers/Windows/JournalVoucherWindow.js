@@ -1,33 +1,36 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import IdCategoryForm from '../forms/IdCategoryForm'
+import JournalVoucherForm from '../forms/JournalVoucherForm'
 
-const IdCategoriesWindow = ({
+const JournalVoucherWindow = ({
   onClose,
   labels,
   maxAccess,
-  recordId
-}) => {
+  recordId,
 
+}) => {
+  
   return (
     <Window
-      id='IdCategoriesWindow'
-      Title={labels.idCategory}
+      id='JournalVoucherWindow'
+      Title={labels.generalJournal}
       controlled={true}
       onClose={onClose}
       width={500}
       height={500}
     >
-        <IdCategoryForm
+      <CustomTabPanel>
+        <JournalVoucherForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
+   
         />
-
+       
+      </CustomTabPanel>
     </Window>
   )
 }
 
-export default IdCategoriesWindow
-
+export default JournalVoucherWindow

@@ -11,13 +11,16 @@ const WindowToolbar = ({
   onClear,
   onInfo,
   onApply,
+  recordId,
   onClose,
+  newHandler,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
   editMode = false,
   smallBox = false,
   infoVisible = true,
+  NewComponentVisible,
   postVisible = false,
   visibleTFR = false,
   isClosed = false,
@@ -33,7 +36,8 @@ const WindowToolbar = ({
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
-  // //states
+  const [showGLC, setShowGLC] = useState(false)
+
   const [reportStore, setReportStore] = useState([])
   const [buttonIcons, setButtonIcons] = useState({})
 
@@ -121,7 +125,6 @@ const WindowToolbar = ({
               </Button>
             </Tooltip>
           ))}
-
           {onTFR && visibleTFR && (
             <Tooltip title='Invoice'>
               <Button
@@ -178,6 +181,25 @@ const WindowToolbar = ({
                 disabled={!editMode}
               >
                 <img src='/images/buttonsIcons/clientRelations.png' alt='Client Relation' />
+              </Button>
+            </Tooltip>
+          )}
+          {NewComponentVisible && (
+            <Tooltip title='GL'>
+              <Button
+                onClick={() => newHandler(recordId)}
+                variant='contained'
+                sx={{
+                  mr: 1,
+                  backgroundColor: '#231f20',
+                  '&:hover': { backgroundColor: '#1c1718' },
+                  width: 20,
+                  height: 35,
+                  objectFit: 'contain'
+                }}
+                disabled={!editMode}
+              >
+                <img src='/images/buttonsIcons/gl.png' alt='gl' />
               </Button>
             </Tooltip>
           )}

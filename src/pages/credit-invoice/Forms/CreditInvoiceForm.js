@@ -559,6 +559,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       hiddenClose={true}
       hiddenReopen={true}
       previewReport={editMode}
+      functionId={formik.values.functionId}
+      NewComponentVisible={editMode}
     >
       <Grid container>
         <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
@@ -623,6 +625,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 name='corId'
                 label={_labels[16]}
                 form={formik}
+                firstFieldWidth='30%'
                 required
                 valueShow='corRef'
                 secondValueShow='corName'
@@ -651,6 +654,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             parameters={{
               _type: 0
             }}
+            firstFieldWidth='30%'
             valueField='accountNo'
             displayField='name'
             name='cashAccountId'

@@ -208,7 +208,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
 
   const onReopen = async () => {
     try {
-      const releaseStatus = formik.values.releaseStatus
+      /*  const releaseStatus = formik.values.releaseStatus
 
       const releaseIndicatorResponse = await getRequest({
         extension: DocumentReleaseRepository.ReleaseIndicator.get,
@@ -221,27 +221,29 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             message: `Document is released, cannot reopen.`
           })
         } else {
-          const obj = formik.values
-          const copy = { ...obj }
+          */
+      const obj = formik.values
+      const copy = { ...obj }
 
-          copy.date = formatDateToApi(copy.date)
-          copy.deliveryDate = formatDateToApi(copy.deliveryDate)
-          copy.wip = copy.wip === '' ? 1 : copy.wip
-          copy.status = copy.status === '' ? 1 : copy.status
-          copy.amount = totalCUR
-          copy.baseAmount = totalLoc
+      copy.date = formatDateToApi(copy.date)
+      copy.deliveryDate = formatDateToApi(copy.deliveryDate)
+      copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.status = copy.status === '' ? 1 : copy.status
+      copy.amount = totalCUR
+      copy.baseAmount = totalLoc
 
-          const res = await postRequest({
-            extension: CTTRXrepository.CreditOrder.reopen,
-            record: JSON.stringify(copy)
-          })
-          if (res.recordId) {
-            toast.success('Record Closed Successfully')
-            invalidate()
-            setIsClosed(false)
-          }
-        }
+      const res = await postRequest({
+        extension: CTTRXrepository.CreditOrder.reopen,
+        record: JSON.stringify(copy)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        invalidate()
+        setIsClosed(false)
       }
+
+      //    }
+      //  }
     } catch (error) {}
   }
 
@@ -754,6 +756,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   label={labels[16]}
                   form={formik}
                   required
+                  firstFieldWidth='30%'
                   valueShow='corRef'
                   secondValueShow='corName'
                   readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
