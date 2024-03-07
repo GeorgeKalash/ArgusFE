@@ -109,7 +109,8 @@ const SmsFunctionTemplate = () => {
       component: 'textfield',
       label: _labels[1],
       name: 'functionId',
-      width: 150,
+
+      // width: 200,
         props: {
    readOnly: true
       }
@@ -121,7 +122,8 @@ const SmsFunctionTemplate = () => {
       props: {
    readOnly: true
       },
-      width: 400
+
+      // width: 300
     },{
       component: 'resourcelookup',
       label: _labels[3],
@@ -135,7 +137,8 @@ const SmsFunctionTemplate = () => {
           { key: "name", value: "Name" },
         ],
       },
-      width: 400
+
+      // width: 500
     },
 
   ]
@@ -191,7 +194,7 @@ const SmsFunctionTemplate = () => {
         <CustomTabPanel index={0} value={0}>
           <Box>
             <Grid container>
-              <Grid>
+              <Grid sx={{ width: '100%'  }}>
                 <Box sx={{ width: '100%'  }}>
                   <DataGrid
                    height={height-150}

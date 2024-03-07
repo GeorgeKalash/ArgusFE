@@ -176,6 +176,7 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
   const actionsColumn = {
     field: 'actions',
     editable: false,
+    flex: 0,
     width: '100',
     renderCell({ id }) {
       return (
@@ -223,7 +224,9 @@ return (
     <MUIDataGrid
       hideFooter
       autoHeight={height ? false : true}
-      autoWidth
+      columnResizable={false}
+
+      // autoWidth
       disableColumnFilter
       disableColumnMenu
       disableColumnSelector
@@ -268,7 +271,9 @@ return (
           field: column.name,
           headerName: column.label || column.name,
           editable: true,
-          width: column.width || 170,
+          flex: column.flex || 1,
+
+          // width: column.width || 170,
           sortable: false,
           renderCell(params) {
             const Component =
