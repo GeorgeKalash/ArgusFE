@@ -1,9 +1,18 @@
 import { useGridApiContext } from '@mui/x-data-grid'
+import { useEffect } from 'react';
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ResourceLookupEdit({ id, field, value, width , column: { props } }) {
+export default function ResourceLookupEdit({ id, field, value,  column: { props } }) {
   const api = useGridApiContext()
-console.log('field', value)
+
+  useEffect(() => {
+    // Perform actions using the API
+    if (api.current) {
+      // Example: Log the current selection
+      console.log('api' , api.current.getSelectedRows());
+    }
+  }, [api]); // Make sure to include `api` in the dependency array if needed
+
 
 return (
     <ResourceLookup
@@ -28,7 +37,7 @@ return (
       }}
       secondDisplayField={false}
       onChange={(event, newValue) => {
-        if (newValue)
+        if (newValue?.recordId)
           api.current.setEditCellValue({
             id,
             field,
@@ -40,7 +49,7 @@ return (
           api.current.setEditCellValue({
             id,
             field,
-            value: ''
+            value: null
           })
 
       }}
