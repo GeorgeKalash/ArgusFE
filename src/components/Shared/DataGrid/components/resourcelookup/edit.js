@@ -11,13 +11,8 @@ return (
       label={''}
       endpointId={props.endpointId}
       parameters={props.parameters}
-      dataGrid={true}
+      hasBorder={false}
       firstFieldWidth='100%'
-
-      // parameters={{
-      //   _countryId: props.parameters._countryId,
-      //   _stateId: props.parameters._stateId
-      // }}
       valueField={props.displayField}
       displayField={props.valueField}
       name='field'

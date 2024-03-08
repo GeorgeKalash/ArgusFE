@@ -24,14 +24,14 @@ const CustomTextField = ({
   phone = false,
   search= false,
   language="",
- dataGrid=false,
+  hasBorder=true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
   const inputRef = useRef(null)
-  const [focus, setFocus] = useState(dataGrid);
+  const [focus, setFocus] = useState(!hasBorder);
 
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const CustomTextField = ({
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: dataGrid && 'none', // Hide border
+              border: !hasBorder && 'none', // Hide border
             },
           },
         }}

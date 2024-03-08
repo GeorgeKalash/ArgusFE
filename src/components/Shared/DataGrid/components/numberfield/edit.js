@@ -26,7 +26,7 @@ return (
       language={'number'}
       readOnly={props?.readOnly}
       autoFocus
-      dataGrid={true}
+      hasBorder={false}
       onChange={e => {
         update({
           id,
