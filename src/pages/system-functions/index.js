@@ -72,35 +72,37 @@ const SystemFunction = () => {
     },
     {
       component: 'resourcelookup',
-      header: labels.numberRange,
-      nameId: 'nraId',
+      label: labels.numberRange,
+      //nameId: 'nraId',
       name: 'nraRef',
-      endpointId: SystemRepository.NumberRange.snapshot,
-      mandatory: false,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: 200,
-      fieldsToUpdate: [{ from: 'reference', to: 'nraRef' }],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'description', value: 'Description' }
-      ]
+      props: {
+        endpointId: SystemRepository.NumberRange.snapshot,
+        displayField: 'reference',
+        valueField: 'recordId',
+        columnsInDropDown: [
+          { key: "reference", value: "Reference" },
+          { key: "name", value: "Name" },
+        ],
+        fieldsToUpdate: [{ from: 'reference', to: 'nraRef' }],
+      },
+      mandatory: false
     },
     {
       component: 'resourcelookup',
-      header: labels.batchNR,
-      nameId: 'batchNRAId',
+      label: labels.batchNR,
+      //nameId: 'batchNRAId',
       name: 'batchNRARef',
-      endpointId: SystemRepository.NumberRange.snapshot,
-      mandatory: false,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: 200,
-      fieldsToUpdate: [{ from: 'reference', to: 'nraRef' }],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'description', value: 'Description' }
-      ]
+      props: {
+        endpointId: SystemRepository.NumberRange.snapshot,
+        displayField: 'reference',
+        valueField: 'recordId',
+        columnsInDropDown: [
+          { key: "reference", value: "Reference" },
+          { key: "name", value: "Name" },
+        ],
+        fieldsToUpdate: [{ from: 'reference', to: 'batchNRARef' }],
+      },
+      mandatory: false
     }
   ]
 
