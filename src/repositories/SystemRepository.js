@@ -114,7 +114,8 @@ export const SystemRepository = {
     get: service + 'getUS',
     set: service + 'setUS',
     del: service + 'delUS',
-    page: service + 'pageUS'
+    page: service + 'pageUS',
+    snapshot: service + 'snapshotUS'
   },
   UserDefaults: {
     qry: service + 'qryUD',

@@ -3,6 +3,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GeneralForm from 'src/pages/sales-person/Forms/GeneralForm'
 import TargetForm from 'src/pages/sales-person/Forms/TargetForm'
+import MonthlyTargetForm from '../Forms/MonthlyTargetForm'
 
 const SalesPersonWindow = ({
   onClose,
@@ -24,7 +25,7 @@ const SalesPersonWindow = ({
         Title={labels[1]}
         onClose={onClose}
         width={800}
-        height={540}
+        height={650}
         tabs={tabs}
         controlled={true}
         activeTab={activeTab}
@@ -44,6 +45,14 @@ const SalesPersonWindow = ({
 
         <CustomTabPanel index={1} value={activeTab}>
           <TargetForm labels={labels} setErrorMessage={setErrorMessage} maxAccess={maxAccess} recordId={recordId} />
+        </CustomTabPanel>
+        <CustomTabPanel index={2} value={activeTab}>
+          <MonthlyTargetForm
+            labels={labels}
+            setErrorMessage={setErrorMessage}
+            maxAccess={maxAccess}
+            recordId={recordId}
+          />
         </CustomTabPanel>
       </Window>
     </>

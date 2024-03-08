@@ -38,6 +38,7 @@ const SalesPerson = () => {
   const {
     query: { data },
     labels: _labels,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -62,7 +63,7 @@ const SalesPerson = () => {
       flex: 1
     },
     {
-      field: 'segmentRef',
+      field: 'userName',
       headerName: _labels[5],
       flex: 1
     },
@@ -70,15 +71,14 @@ const SalesPerson = () => {
       field: 'commissionPct',
       headerName: _labels[4],
       flex: 1
-    },
-    {
-      field: 'plantName',
-      headerName: _labels[6],
-      flex: 1
     }
   ]
 
-  const tabs = [{ label: _labels[8] }, { label: _labels[9], disabled: !editMode }]
+  const tabs = [
+    { label: _labels[8] },
+    { label: _labels[9], disabled: !editMode },
+    { label: _labels[15], disabled: !editMode }
+  ]
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -127,6 +127,7 @@ const SalesPerson = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          refetch={refetch}
           paginationType='client'
           maxAccess={access}
         />

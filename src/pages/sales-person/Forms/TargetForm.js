@@ -14,7 +14,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function TargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [isLoading, setIsLoading] = useState(false)
@@ -62,12 +61,14 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
       header: labels[10],
       name: 'fiscalYear',
       mandatory: true,
-      readOnly: true
+      readOnly: true,
+      width: 300
     },
     {
       field: 'numberfield',
       header: labels[9],
-      name: 'targetAmount'
+      name: 'targetAmount',
+      width: 300
     }
   ]
 
@@ -98,7 +99,7 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
               }
             })
 
-            formik.setValues({recordId: recordId , rows: newRows })
+            formik.setValues({ recordId: recordId, rows: newRows })
           }
         }
       } catch (error) {

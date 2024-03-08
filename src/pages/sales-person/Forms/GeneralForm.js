@@ -15,8 +15,9 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode,setSelectedRecordId }) {
+export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode, setSelectedRecordId }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [initialValues, setInitialData] = useState({
@@ -25,7 +26,9 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     name: '',
     cellPhone: '',
     commissionPct: '',
-    segmentRef: '',
+    userId: '',
+    userEmail: '',
+    username: '',
     plantId: '',
     sptId: ''
   })
@@ -45,7 +48,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
         extension: SaleRepository.SalesPerson.set,
         record: JSON.stringify(obj)
       })
-      
+
       if (response.recordId) {
         toast.success('Record Added Successfully')
         setSelectedRecordId(response.recordId)
@@ -85,7 +88,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     <FormShell
       resourceId={ResourceIds.SalesPerson}
       form={formik}
-      height={370}
+      height={200}
       maxAccess={maxAccess}
       editMode={editMode}
     >
@@ -147,22 +150,26 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
           />
         </Grid>
         <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={FinancialRepository.Segment.qry}
-            name='segmentRef'
+          <ResourceLookup
+            endpointId={SystemRepository.Users.snapshot}
+            name='userId'
             label={labels[5]}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            valueField='reference'
-            displayField={['reference', 'name']}
-            maxAccess={maxAccess}
+            valueField='username'
+            displayField='username'
+            secondDisplayField={false}
+            valueShow='username'
+            form={formik}
             onChange={(event, newValue) => {
-              formik.setFieldValue('segmentRef', newValue?.reference)
+              if (newValue) {
+                formik.setFieldValue('userId', newValue?.recordId)
+                formik.setFieldValue('username', newValue?.username || '')
+              } else {
+                formik.setFieldValue('userId', null)
+                formik.setFieldValue('username', null)
+              }
             }}
-            error={formik.touched.segmentRef && Boolean(formik.errors.segmentRef)}
+            errorCheck={'userId'}
+            maxAccess={maxAccess}
           />
         </Grid>
         <Grid item xs={12}>
