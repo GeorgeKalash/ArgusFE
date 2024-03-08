@@ -458,8 +458,10 @@ return acc + parseFloat(amountString) || 0
   }, 0)
 
   const Balance = total - receivedTotal
-
+  console.log(formik.values)
   async function onSubmit(values) {
+    console.log(values)
+
     if (
       (!values.idNoConfirm && values.clientId) ||
       (!values.confirmIdNo && !values.clientId && !values.cellPhoneConfirm)
@@ -489,6 +491,7 @@ return acc + parseFloat(amountString) || 0
       })
 
       const clientId = values.clientId || 0
+console.log(formik.values)
 
       const payload = {
         header: {
@@ -563,10 +566,10 @@ return acc + parseFloat(amountString) || 0
 
         cash:
           formik.values.amount.length > 0 &&
-          formik.values.amount.map(({ id, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
+          formik.values.amount.map(({ id, types, creditCard, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
             seqNo: id,
-            type,
-            ccId,
+            type : types.key,
+            ccId : creditCard.recordId,
             bankFees,
             amount: String(amount || '').replaceAll(',', ''),
             receiptRef,
@@ -1242,11 +1245,12 @@ return acc + parseFloat(amountString) || 0
                       valueField: 'key',
                       filter:  (item) =>  formik.values.functionId === '3502' ? (item.key === '2') : true
                     },
-                    async onChange({ row: { update, newRow } }) {
-                      update({
-                        type : newRow?.types?.key
-                      })
-                    }
+
+                    // async onChange({ row: { update, newRow } }) {
+                    //   update({
+                    //     type : newRow?.types?.key
+                    //   })
+                    // }
 
                   },
                   {
@@ -1268,12 +1272,13 @@ return acc + parseFloat(amountString) || 0
                       valueField: 'recordId',
                       displayField: 'name',
                     },
-                    async onChange({ row: { update, newRow } }) {
-                      console.log(newRow)
-                      update({
-                        ccId : newRow?.creditCard?.recordId
-                      })
-                    }
+
+                    // async onChange({ row: { update, newRow } }) {
+                    //   console.log(newRow)
+                    //   update({
+                    //     ccId : newRow?.creditCard?.recordId
+                    //   })
+                    // }
 
                   },
                   {
