@@ -1,14 +1,10 @@
-import { useEffect, useState, useContext } from 'react'
-
-// ** React ImportsCustomLookup
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
 import { Box, Grid } from '@mui/material'
 
 // ** Third Party Imports
-import { Formik, useFormik } from 'formik'
+import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
 
@@ -188,8 +184,8 @@ return Promise.reject(error);
               <Grid sx={{ width: '100%'  }}>
                 <Box sx={{ width: '100%'  }}>
                   <DataGrid
-                   height={height-150}
-                   onChange={value => formik.setFieldValue('rows', value)}
+                   height={`calc(100vh - 150px)`}
+                   onChange={value => { console.log(value); formik.setFieldValue('rows', value)}}
                    onCellEditStop={value => console.log(value, 'sms')}
                    value={formik.values.rows}
                    error={formik.errors.rows}
