@@ -1,46 +1,29 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CurrencyTab from 'src/pages/currencies/Tabs/CurrencyTab'
+import CurrencyForm from 'src/pages/currencies/forms/CurrencyForm'
 
 const CurrencyWindow = ({
     onClose,
-    width,
-    height,
-    onSave,
-    editMode,
-    decimalStore,
-    profileStore,
-    currencyStore,
-    currencyValidation,
     labels,
-    maxAccess
+    maxAccess,
+    recordId
 }) => {
     return (
         <Window
         id='CurrencyWindow'
         Title={labels.currency}
+        controlled={true}
         onClose={onClose}
-        width={width}
-        height={height}
-        onSave={onSave}
-        currencyValidation={currencyValidation}
-        decimalStore={decimalStore}
-        profileStore={profileStore}
-        currencyStore={currencyStore}
+        width={600}
+        height={400}
         >
-             <CustomTabPanel>
-               <CurrencyTab
-                  labels={labels}
-                  currencyValidation={currencyValidation}
-                  decimalStore={decimalStore}
-                  profileStore={profileStore}
-                  currencyStore={currencyStore}
-                  editMode={editMode}
-                  maxAccess={maxAccess}
-               />
-               </CustomTabPanel>
-            </Window> 
+            <CurrencyForm
+                labels={labels}
+                maxAccess={maxAccess}
+                recordId={recordId}
+            />
+        </Window> 
          )
     }
     

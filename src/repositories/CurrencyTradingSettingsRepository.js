@@ -9,6 +9,7 @@ export const CurrencyTradingSettingsRepository = {
     del: service + 'delCOM'
   },
   RelationType: {
+    page: service + 'pageRT',
     qry: service + 'qryRT',
     get: service + 'getRT',
     set: service + 'setRT',
@@ -41,9 +42,6 @@ export const CurrencyTradingSettingsRepository = {
     set: service + 'setACT',
     del: service + 'delACT'
   },
-  ExchangeRate: {
-    get: service + 'getEXM'
-  },
   RiskLevel: {
     qry: service + 'qryRSK',
     get: service + 'getRSK',
@@ -60,6 +58,7 @@ export const CurrencyTradingSettingsRepository = {
   },
   ExchangeMap: {
     qry: service + 'qryEXM',
+    get2: service + 'getEXM2',
     get: service + 'getEXM',
     set2: service + 'set2EXM'
   }

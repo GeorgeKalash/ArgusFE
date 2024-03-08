@@ -1,5 +1,4 @@
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import MultiCurrencyForm from '../forms/MultiCurrencyForm'
 
 const MultiCurrencyWindow = ({
@@ -21,17 +20,13 @@ const MultiCurrencyWindow = ({
       width={500}
       height={300}
     >
-      <CustomTabPanel>
-        <MultiCurrencyForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-          currencyId={currencyId}
-          rateTypeId={rateTypeId}
-         
-        />
-       
-      </CustomTabPanel>
+      <MultiCurrencyForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+        currencyId={currencyId}
+        rateTypeId={rateTypeId}
+      />
     </Window>
   )
 }

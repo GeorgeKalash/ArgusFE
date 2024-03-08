@@ -178,7 +178,7 @@ const AddressTab = ({
 
           <Grid item xs={12}>
             <ResourceComboBox
-              endpointId={SystemRepository.State.qry}
+              endpointId={addressValidation.values.countryId && SystemRepository.State.qry}
               parameters={addressValidation.values.countryId && `_countryId=${addressValidation.values.countryId}`}
               name='stateId'
               label={labels.state}

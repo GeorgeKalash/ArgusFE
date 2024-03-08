@@ -23,7 +23,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const Machiness = () => {
+const Machines = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -143,4 +143,4 @@ const Machiness = () => {
   )
 }
 
-export default Machiness
+export default Machines

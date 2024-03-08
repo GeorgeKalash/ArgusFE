@@ -9,6 +9,8 @@ import Table from 'src/components/Shared/Table'
 import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -74,29 +76,65 @@ function openForm(recordId,plantId ){
   })
 }
 
-  const {
-    access,
-    labels,
-    isLoading,
-    query: { data }
-  } = useResourceQuery({
-    datasetId: 35208,
-    endpointId: 'CTTRX.asmx/pageCIV',
-    async queryFn(options = {}) {
-      const { _startAt = 0, _pageSize = 100 } = options
 
-      return await getRequest({
-        extension: 'CTTRX.asmx/pageCIV',
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+
+const {
+  query: { data },
+  search,
+  clear,
+  labels: labels,
+  access
+} = useResourceQuery({
+  endpointId: CTTRXrepository.CurrencyTrading.snapshot,
+  datasetId: 35208,
+  search: {
+    endpointId: CTTRXrepository.CurrencyTrading.snapshot,
+    searchFn: fetchWithSearch,
+  }
+})
+async function fetchWithSearch({options = {} , qry}) {
+  const { _startAt = 0, _pageSize = 50 } = options
+
+  return await getRequest({
+        extension: CTTRXrepository.CurrencyTrading.snapshot,
+        parameters: `_filter=${qry}&_category=1`
       })
-    }
-  })
+}
+
+  // const { labels: labels, access: access } = useResourceParams({
+  //   datasetId: 35208
+  // })
+
+  // const search = inp => {
+  //   setData({count : 0, list: [] , message :"",  statusId:1})
+  //    const input = inp
+  //    if(input){
+  //     var parameters = `_filter=${input}`
+
+  //   getRequest({
+  //     extension: CTTRXrepository.CurrencyTrading.snapshot,
+  //     parameters: parameters
+  //   })
+  //     .then(res => {
+  //       setData(res)
+  //     })
+  //     .catch(error => {
+  //       setErrorMessage(error)
+  //     })
+
+  //   }else{
+
+  //     setData({count : 0, list: [] , message :"",  statusId:1})
+  //   }
+
+  // }
+
 
   return (
     <Box>
-      {!isLoading && labels && access && (
+      { labels && access && (
         <>
-          <GridToolbar onAdd={() => openFormWindow()} maxAccess={access} />
+          <GridToolbar maxAccess={access}  onSearch={search} onSearchClear={clear}  labels={labels} inputSearch={true}/>
           <Table
             columns={[
               {
@@ -139,7 +177,7 @@ function openForm(recordId,plantId ){
             onEdit={obj => {
               openFormWindow(obj.recordId)
             }}
-            gridData={data}
+            gridData={data ? data : {list: []}}
             rowId={['recordId']}
             isLoading={false}
             pageSize={50}
