@@ -16,7 +16,6 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
       cellPhoneRepeat: ''
     },
     validate: values => {
-      console.log(values)
       const errors = {}
 
       if (!formik.values.clientId && !values.cellPhoneRepeat) {
@@ -34,6 +33,7 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
       return errors
     },
     onSubmit: values => {
+      console.log("values" , values)
       formik.setFieldValue('cellPhoneConfirm', values.cellPhoneRepeat)
       formik.setFieldValue('idNoConfirm', values.idNoRepeat)
 

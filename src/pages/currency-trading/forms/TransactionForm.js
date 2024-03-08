@@ -274,7 +274,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     onSubmit
   })
 
-// console.log(formik)
   async function setOperationType(type) {
     if (type === '3502' || type === '3503') {
       const res = await getRequest({
@@ -352,6 +351,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }, [])
 
   async function getData(id) {
+
     const _recordId = recordId ? recordId : id
 
     const { record } = await getRequest({
@@ -364,7 +364,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       setOperationType(record.headerView.functionId)
 
       formik.setValues({
-        recordId: recordId,
+        recordId: _recordId,
         reference: record.headerView.reference,
         operations: record.items.map(
           ({ seqNo, currencyId, currencyName, currencyRef, lcAmount, fcAmount, minRate, maxRate, ...rest }) => ({
@@ -458,14 +458,13 @@ return acc + parseFloat(amountString) || 0
   }, 0)
 
   const Balance = total - receivedTotal
-  console.log(formik.values)
   async function onSubmit(values) {
-    console.log(values)
 
     if (
       (!values.idNoConfirm && values.clientId) ||
       (!values.confirmIdNo && !values.clientId && !values.cellPhoneConfirm)
     ) {
+      console.log('not comfirme')
       stack({
         Component: ConfirmationOnSubmit,
         props: {
@@ -491,11 +490,10 @@ return acc + parseFloat(amountString) || 0
       })
 
       const clientId = values.clientId || 0
-console.log(formik.values)
 
       const payload = {
         header: {
-          recordId: values.recordId,
+          recordId: values?.recordId || null,
           dtId,
           reference: values.reference,
           status: values.status,
@@ -566,10 +564,12 @@ console.log(formik.values)
 
         cash:
           formik.values.amount.length > 0 &&
-          formik.values.amount.map(({ id, types, creditCard, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
+          formik.values.amount.map(({ id, types, creditCards, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
             seqNo: id,
+
             type : types.key,
-            ccId : creditCard.recordId,
+
+            ccId : creditCards.recordId,
             bankFees,
             amount: String(amount || '').replaceAll(',', ''),
             receiptRef,
@@ -1244,13 +1244,7 @@ console.log(formik.values)
                       displayField: 'value',
                       valueField: 'key',
                       filter:  (item) =>  formik.values.functionId === '3502' ? (item.key === '2') : true
-                    },
-
-                    // async onChange({ row: { update, newRow } }) {
-                    //   update({
-                    //     type : newRow?.types?.key
-                    //   })
-                    // }
+                    }
 
                   },
                   {
@@ -1265,20 +1259,13 @@ console.log(formik.values)
                   },
                   {
                     component: 'resourcecombobox',
-                    name: 'creditCard',
+                    name: 'creditCards',
                     label: labels.creditCard,
                     props: {
                       endpointId: CashBankRepository.CreditCard.qry,
                       valueField: 'recordId',
                       displayField: 'name',
-                    },
-
-                    // async onChange({ row: { update, newRow } }) {
-                    //   console.log(newRow)
-                    //   update({
-                    //     ccId : newRow?.creditCard?.recordId
-                    //   })
-                    // }
+                    }
 
                   },
                   {
