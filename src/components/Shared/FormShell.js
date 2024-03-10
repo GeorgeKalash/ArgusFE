@@ -86,7 +86,7 @@ export default function FormShell({
                 setErrorMessage: setErrorMessage
               },
               width: 700,
-              height: 400,
+              height: 600,
               title: 'Transaction Log'
             })
           }
@@ -151,6 +151,7 @@ export default function FormShell({
       )}
       {windowInfo && (
         <TransactionLog
+        
           resourceId={resourceId}
           onInfoClose={() => setWindowInfo(false)}
           recordId={form.values.recordId}

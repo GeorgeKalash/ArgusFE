@@ -156,7 +156,7 @@ const Window = ({
               </>
             ) : (
               React.Children.map(children, child => {
-                return React.cloneElement(child, { expanded: expanded, height : height }); // Pass containerHeight as prop to children
+                return React.cloneElement(child, { expanded: expanded, height : height }); 
               })
             )}
           </Paper>

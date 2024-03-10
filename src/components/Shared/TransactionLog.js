@@ -11,6 +11,7 @@ import Table from './Table'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import { height } from '@mui/system'
 
 const TransactionLog = (props) =>{
 
@@ -135,15 +136,15 @@ const columns = [
 
 ]
 
-
+console.log(props.height)
 
   return (
 
   <div onClose={onInfoClose} Title={_labels.title} >
-  <CustomTabPanel>
 
 
-  <Grid container xs={12} sx={{paddingBottom:'25px'}} >
+
+  <Grid container xs={12} sx={{paddingBottom:'25px',height:'100%',display:'flex',flexDirection:'column'}} >
       <Grid item xs={6} >
                       <CustomComboBox
                         name="idtId"
@@ -197,10 +198,10 @@ const columns = [
 
 
 
-<Grid item xs={4} sx={{paddingBottom: '15px'}}>
+<Grid item   xs={4}  sx={{ paddingBottom: '15px',height:'30%',overflow:'auto'}}>
 {Object.entries(info).map(([key, value]) => (
-        <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
-          <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
+        <Grid key={key} style={{ display: 'flex', alignItems: 'center'}}>
+          <Grid style={{ minWidth: '100px', fontWeight: 'bold',}}>{key}:</Grid>
           <Grid>{value}</Grid>
         </Grid>
       ))}
@@ -208,7 +209,7 @@ const columns = [
 
 
 
-  </CustomTabPanel>
+
 
   </div>
   )
