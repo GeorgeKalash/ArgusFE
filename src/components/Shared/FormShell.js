@@ -86,7 +86,7 @@ export default function FormShell({
                 setErrorMessage: setErrorMessage
               },
               width: 700,
-              height: 400,
+              height: 'auto',
               title: 'Transaction Log'
             })
           }
