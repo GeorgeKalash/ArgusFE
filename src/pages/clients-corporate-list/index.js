@@ -8,11 +8,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { CommonContext } from 'src/providers/CommonContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateToApi, formatDateToApiFunction, formatDateDefault } from 'src/lib/date-helper'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -136,7 +134,6 @@ const ClientsCorporateList = () => {
 
         openForm('')
 
-        // setWindowOpen(true);
       } else {
         setErrorMessage({ error: 'The user does not have a default plant' });
       }
