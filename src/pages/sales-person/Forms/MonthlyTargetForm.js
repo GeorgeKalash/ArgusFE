@@ -80,7 +80,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
         extension: SaleRepository.Target.get,
         parameters: parameters
       })
-      if (res.record.targetAmount) {
+      if (res.record?.targetAmount) {
         formik.setFieldValue('targetAmount', res.record.targetAmount)
       } else {
         formik.setFieldValue('targetAmount', '')

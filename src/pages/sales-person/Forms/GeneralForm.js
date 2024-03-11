@@ -16,6 +16,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode, setSelectedRecordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -30,7 +31,8 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     userEmail: '',
     username: '',
     plantId: '',
-    sptId: ''
+    sptId: '',
+    targetType: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -88,7 +90,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
     <FormShell
       resourceId={ResourceIds.SalesPerson}
       form={formik}
-      height={200}
+      height={700}
       maxAccess={maxAccess}
       editMode={editMode}
     >
@@ -224,6 +226,21 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
               formik.setFieldValue('commissionScheduleId', newValue?.recordId)
             }}
             error={formik.touched.commissionScheduleId && Boolean(formik.errors.commissionScheduleId)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            datasetId={DataSets.TARGET_TYPE}
+            name='targetType'
+            label={labels[16]}
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('targetType', newValue?.key)
+            }}
+            error={formik.touched.targetType && Boolean(formik.errors.targetType)}
           />
         </Grid>
       </Grid>
