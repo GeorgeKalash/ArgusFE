@@ -122,7 +122,7 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
             targetAmount: '',
             fiscalYear: ''
           }}
-          scrollHeight={500}
+          scrollHeight={300}
           allowAddNewLine={false}
           allowDelete={false}
         />

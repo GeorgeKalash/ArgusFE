@@ -167,7 +167,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
 
   return (
     <FormShell resourceId={ResourceIds.SalesPerson} form={formik} height={300} editMode={true} maxAccess={maxAccess}>
-      <Grid container spacing={4}>
+      <Grid container>
         <Grid item xs={12}>
           <Grid container spacing={2} alignItems='center'>
             <Grid item xs={9}>
@@ -189,11 +189,10 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
             </Grid>
             <Grid
               item
-              xs={3}
               container
               alignItems='center'
               justifyContent='flex-start'
-              sx={{ display: 'flex', justifyContent: 'flex-end' }}
+              sx={{ display: 'flex', justifyContent: 'flex-end', width: '170px' }}
             >
               <CustomTextField
                 name='targetAmount'
@@ -201,6 +200,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
                 value={formik.values.targetAmount}
                 maxAccess={maxAccess}
                 readOnly={true}
+                numberField={true}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('targetAmount', '')}
                 error={formik.touched.targetAmount && Boolean(formik.errors.targetAmount)}
@@ -220,13 +220,13 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
                 month: '',
                 amount: ''
               }}
-              scrollHeight={300}
+              scrollHeight={230}
               allowAddNewLine={false}
               allowDelete={false}
             />
           </Box>
         </Grid>
-        <Grid item xs={12} sx={{ pt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Grid item sx={{ pt: 3, display: 'flex', justifyContent: 'flex-end', marginLeft: '560px' }}>
           <CustomTextField
             name='balance'
             label={labels[14]}
@@ -237,7 +237,8 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
             onClear={() => formik.setFieldValue('balance', '')}
             error={formik.touched.balance && Boolean(formik.errors.balance)}
             helperText={formik.touched.balance && formik.errors.balance}
-            sx={{ width: '200px' }}
+            sx={{ width: '160px' }}
+            numberField={true}
           />
         </Grid>
       </Grid>
