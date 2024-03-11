@@ -11,19 +11,21 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 // ** Windows
-import SourceOfIncomeWindow from './Windows/SourceOfIncomeWindow'
+import ChartOfAccountsWindow from './windows/ChartOfAccountsWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
+
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const SourceOfIncome = () => {
+const ChartOfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -35,54 +37,64 @@ const SourceOfIncome = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-
-      extension: RemittanceSettingsRepository.SourceOfIncome.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-
+    return await getRequest({
+      extension: GeneralLedgerRepository.ChartOfAccounts.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
     })
-
-    return {...response,  _startAt: _startAt}
   }
 
- const {
+  const {
     query: { data },
+    search,
+    clear, 
     labels: _labels,
     paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.SourceOfIncome.page,
-    datasetId: ResourceIds.SourceOfIncome
-  })
+    endpointId: GeneralLedgerRepository.ChartOfAccounts.page,
+    datasetId: ResourceIds.ChartOfAccounts,
+    search: {
+      endpointId: GeneralLedgerRepository.ChartOfAccounts.snapshot,
+      searchFn: fetchWithSearch,
+    }
+  });
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.SourceOfIncome.page
+    endpointId: GeneralLedgerRepository.ChartOfAccounts.page
   })
+
+  
+
+  async function fetchWithSearch({options = {} , qry}) {
+    const { _startAt = 0, _pageSize = 50 } = options;
+    
+    return await getRequest({
+      extension: GeneralLedgerRepository.ChartOfAccounts.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${qry}`
+    });
+  }
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'accountRef',
+      headerName: _labels.accountRef,
       flex: 1
     },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
-    ,
-    {
-      field: 'flName',
-      headerName: _labels.flName,
-      flex: 1
-    },
-    {
-      field: 'incomeTypeName',
-      headerName: _labels.incomeType,
-      flex: 1
-    }
+    },  {
+        field: 'description',
+        headerName: _labels.description,
+        flex: 1
+      },  {
+        field: 'activeStatusName',
+        headerName: _labels.status,
+        flex: 1
+      }
   ]
 
 
@@ -97,34 +109,37 @@ const SourceOfIncome = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RemittanceSettingsRepository.SourceOfIncome.del,
+      extension: GeneralLedgerRepository.ChartOfAccounts.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
+
+ 
+  
+
   
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+      <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true}/>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={  data ?? {list: []} }
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}
         />
       </Box>
       {windowOpen && (
-        <SourceOfIncomeWindow
+        <ChartOfAccountsWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -132,7 +147,7 @@ const SourceOfIncome = () => {
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
+
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
@@ -140,11 +155,4 @@ const SourceOfIncome = () => {
   )
 }
 
-
-
-
-export default SourceOfIncome
-
-
-
-
+export default ChartOfAccounts

@@ -1,9 +1,9 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
+import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import ChartOfAccountsForm from '../forms/ChartOfAccountsForm'
 
-import  ActivityForm from '../forms/ActivityForm'
-
-const ActivityWindow = ({
+const ChartOfAccountsWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -12,29 +12,23 @@ const ActivityWindow = ({
   
   return (
     <Window
-    id='ActivityWindow'
-    Title={labels.Activity}
+      id='ChartOfAccountsWindow'
+      Title={labels.chartOfAccount}
       controlled={true}
       onClose={onClose}
       width={500}
-      height={430}
+      height={500}
     >
-        <ActivityForm
+      
+        <ChartOfAccountsForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
         />
+       
+      
     </Window>
   )
 }
 
-
-
-
-
-export default ActivityWindow
-
-
-
-
-
+export default ChartOfAccountsWindow

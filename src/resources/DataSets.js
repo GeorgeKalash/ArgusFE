@@ -16,6 +16,7 @@ export const DataSets = {
     APPROVAL_TYPE: 14,
     PAYMENT_TERM_TYPE: 15,
     UNUSED2: 16,
+    Sign : 157,
     PRICE_TYPE: 17,
     RX_FREQUENCY: 18,
     MC_RATE_CALC_METHOD: 19,
