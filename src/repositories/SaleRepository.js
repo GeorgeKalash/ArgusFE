@@ -44,5 +44,9 @@ export const SaleRepository = {
     qry: service + 'qryTGT',
     set2: service + 'set2TGT',
     get: service + 'getTGT'
+  },
+  TargetMonth: {
+    qry: service + 'qryTGM',
+    set2: service + 'set2TGM'
   }
 }

@@ -34,8 +34,10 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
       rows: [
         {
           spId: recordId,
+          monthId: '',
           month: '',
-          amount: ''
+          targetAmount: '',
+          fiscalYear: ''
         }
       ]
     }
@@ -50,15 +52,34 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
       targetAmount: '',
       balance: ''
     },
+    validationSchema: yup.object({
+      fiscalYear: yup.string().required('This field is required')
+    }),
     onSubmit: async obj => {
+      const updatedRows = detailsFormik.values.rows.map(monthDetail => {
+        return {
+          ...monthDetail,
+          month: parseInt(monthDetail.monthId),
+          fiscalYear: formik.values.fiscalYear
+        }
+      })
+
+      const updatedRowsWithoutMonthId = updatedRows.map(monthDetail => {
+        const { monthId, ...rest } = monthDetail
+
+        return rest
+      })
+
       // Create the resultObject
       const resultObject = {
         spId: recordId,
-        items: obj.rows
+        fiscalYear: obj.fiscalYear,
+        items: updatedRowsWithoutMonthId
       }
+      console.log('object test ', resultObject)
 
-      /* const response = await postRequest({
-        extension: SaleRepository.Target.set2,
+      const response = await postRequest({
+        extension: SaleRepository.TargetMonth.set2,
         record: JSON.stringify(resultObject)
       })
 
@@ -66,7 +87,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
         toast.success('Record Added Successfully')
       } else toast.success('Record Edited Successfully')
 
-      invalidate()*/
+      invalidate()
     }
   })
 
@@ -85,14 +106,50 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
       } else {
         formik.setFieldValue('targetAmount', '')
       }
+      var _language = user.languageId
+      var _dataset = DataSets.MONTHS
+      var parameters = `_dataset=${_dataset}&_language=${_language}`
+
+      const monthRes = await getRequest({
+        extension: SystemRepository.KeyValueStore,
+        parameters: parameters
+      })
+
+      // Assuming sortedList is an array of objects
+      const sortedList = monthRes.list.sort((a, b) => {
+        const keyA = parseInt(a.key, 10)
+        const keyB = parseInt(b.key, 10)
+
+        return keyA - keyB
+      })
+      if (sortedList.length > 0) {
+        const amountRes = await getRequest({
+          extension: SaleRepository.TargetMonth.qry,
+          parameters: `_spId=${recordId}&_fiscalYear=${fiscalYear}`
+        })
+
+        const newRows = sortedList.map(monthObj => {
+          const correspondingAmount = amountRes.list.find(amountObj => amountObj.month === parseInt(monthObj.key))
+
+          return {
+            spId: recordId,
+            monthId: monthObj.key,
+            month: String(monthObj.value), // Convert to string
+            targetAmount: correspondingAmount ? correspondingAmount.targetAmount : 0
+          }
+        })
+
+        detailsFormik.setValues({ rows: newRows })
+      }
     } else {
       formik.setFieldValue('targetAmount', '')
+      detailsFormik.resetForm()
     }
   }
 
   const totalAmount = detailsFormik.values.rows.reduce((sumAmount, row) => {
     // Parse amount as a number
-    const amountValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+    const amountValue = parseFloat(row.targetAmount.toString().replace(/,/g, '')) || 0
 
     return sumAmount + amountValue
   }, 0)
@@ -109,7 +166,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
     {
       field: 'numberfield',
       header: labels[13],
-      name: 'amount',
+      name: 'targetAmount',
       width: 300
     }
   ]
@@ -119,43 +176,6 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
       try {
         if (recordId) {
           setIsLoading(true)
-          var _language = user.languageId
-          var _dataset = DataSets.MONTHS
-          var parameters = `_dataset=${_dataset}&_language=${_language}`
-
-          const monthRes = await getRequest({
-            extension: SystemRepository.KeyValueStore,
-            parameters: parameters
-          })
-
-          // Assuming sortedList is an array of objects
-          const sortedList = monthRes.list.sort((a, b) => {
-            const keyA = parseInt(a.key, 10)
-            const keyB = parseInt(b.key, 10)
-
-            return keyA - keyB
-          })
-
-          /*          const amountRes = await getRequest({
-            extension: SaleRepository.Target.qry,
-            parameters: `_spId=${recordId}`
-          })*/
-
-          if (sortedList.length > 0) {
-            const newRows = sortedList.map(monthObj => {
-              // const correspondingAmount = amountRes.list.find(amountObj => amountObj.month === monthObj.month)
-
-              return {
-                spId: recordId,
-                month: String(monthObj.value), // Convert to string
-                amount: 0
-
-                //correspondingAmount ? correspondingAmount.targetAmount : 0
-              }
-            })
-
-            detailsFormik.setValues({ rows: newRows })
-          }
         }
       } catch (error) {
         setErrorMessage(error)
@@ -178,6 +198,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
                 valueField='fiscalYear'
                 displayField='fiscalYear'
                 values={formik.values}
+                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
@@ -218,7 +239,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
               defaultRow={{
                 spId: recordId,
                 month: '',
-                amount: ''
+                targetAmount: ''
               }}
               scrollHeight={230}
               allowAddNewLine={false}

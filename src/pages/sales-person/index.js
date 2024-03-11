@@ -63,7 +63,7 @@ const SalesPerson = () => {
       flex: 1
     },
     {
-      field: 'userName',
+      field: 'username',
       headerName: _labels[5],
       flex: 1
     },
