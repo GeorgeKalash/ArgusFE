@@ -1,27 +1,21 @@
 // ** React Imports
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
-// ** React ImportsCustomLookup
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 // ** MUI Imports
 import { Box, Grid } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import FormShell from 'src/components/Shared/FormShell'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import {useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -29,23 +23,36 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
 
   //states
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [initialValues, setData] = useState({rows :[]})
 
 
-  async function getGridData() {
-    return await getRequest({
+  const getGridData = async () => {
+    const resSystemFunction = await getRequest({
       extension: SystemRepository.SystemFunction.qry,
       parameters: `_filter=`
     })
+    console.log(resSystemFunction);
+    formik.setValues({
+      ...formik.values,
+      rows: resSystemFunction.list.map(({nraId, nraRef, batchNRAId, batchNRARef, ...rest }, index) => ({
+        id: index + 1,
+        nra: {
+          recordId: nraId,
+          reference: nraRef
+        },
+        batchNRA: {
+          recordId: batchNRAId,
+          reference: batchNRARef
+        },
+        ...rest
+      }))
+    });
   }
 
   const {
-    query: { data },
     labels: labels,
-    access
   } = useResourceQuery({
     queryFn: getGridData,
     endpointId: SystemRepository.SystemFunction.qry,
@@ -56,76 +63,75 @@ const SystemFunction = () => {
   const columns = [
     {
       component: 'numberfield',
-      header: labels.functionId,
+      label: labels.functionId,
       name: 'functionId',
-      mandatory: false,
-      hidden: false,
+      props: {
       readOnly: true
+      }
     },
     {
       component: 'textfield',
-      header: labels.name,
+      label: labels.name,
       name: 'sfName',
-      mandatory: false,
-      hidden: false,
-      readOnly: true
+      props: {
+        readOnly: true
+        }
     },
     {
       component: 'resourcelookup',
       label: labels.numberRange,
-      //nameId: 'nraId',
-      name: 'nraRef',
+      name: 'nra',
       props: {
         endpointId: SystemRepository.NumberRange.snapshot,
         displayField: 'reference',
-        valueField: 'recordId',
+        valueField: 'reference',
         columnsInDropDown: [
           { key: "reference", value: "Reference" },
           { key: "name", value: "Name" },
-        ],
-        fieldsToUpdate: [{ from: 'reference', to: 'nraRef' }],
+        ]
       },
-      mandatory: false
+      onChange({ row: { update, newRow } }) {
+        update({
+          nraId : newRow?.nra?.recordId,
+          nraRef:  newRow?.nra?.reference,
+        })
+      },
     },
     {
       component: 'resourcelookup',
-      label: labels.batchNR,
-      //nameId: 'batchNRAId',
-      name: 'batchNRARef',
+      label: labels.batchNumberRange,
+      name: 'batchNRA',
       props: {
         endpointId: SystemRepository.NumberRange.snapshot,
         displayField: 'reference',
-        valueField: 'recordId',
+        valueField: 'reference',
         columnsInDropDown: [
           { key: "reference", value: "Reference" },
           { key: "name", value: "Name" },
-        ],
-        fieldsToUpdate: [{ from: 'reference', to: 'batchNRARef' }],
+        ]
       },
-      mandatory: false
+      onChange({ row: { update, newRow } }) {
+        update({
+          batchNRAId : newRow?.batchNRA?.recordId,
+          batchNRARef:  newRow?.batchNRA?.reference,
+        })
+      },
     }
   ]
 
   const formik = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
-    validate: values => {},
-    initialValues: {
-      rows: [
-        {
-          id:1,
-          functionId: '',
-          sfName: '',
-          nraId: '',
-          batchNRAId:'',
-          nraRef: '',
-          batchNRARef:''
-        }
-      ]
-    },
-    onSubmit: async obj => {
+    initialValues,
+
+    onSubmit: async values => {
+
+      console.log(values.rows)
+
       const resultObject = {
-        systemFunctionMappings: formik.values.rows
+        systemFunctionMappings: values.rows
+        .map(({functionId, nra, batchNRA }) => ({functionId,
+          nraId : nra?.recordId ,  nraRef : nra?.reference, batchNRAId: batchNRA?.recordId, batchNRARef : batchNRA?.reference}))
       }
 
       console.log('rows ', resultObject)
@@ -143,52 +149,28 @@ const SystemFunction = () => {
     }
   })
 
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
-
   return (
     <>
-      <Box
-        sx={{
-          height: `${height - 80}px`
-        }}
-      >
-        <CustomTabPanel index={0} value={0}>
-          <Box>
+     <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
+          <FormShell form={formik} infoVisible={false} visibleClear={false}>
+
             <Grid container>
-              <Grid sx={{ width: '100%' }}>
-                <Box sx={{ width: '100%' }}>
+              <Grid sx={{ width: '100%'  }}>
+                <Box sx={{ width: '100%'  }}>
                   <DataGrid
-                    height={height - 150}
-                    onChange={value => formik.setFieldValue('rows', value)}
-                    value={formik.values.rows}
-                    error={formik.errors.rows}
-                    columns={columns}
-                    allowDelete={false}
-                    allowAddNewLine={false}
-                    maxAccess={access}
+                   height={`calc(100vh - 150px)`}
+                   onChange={value => { console.log(value); formik.setFieldValue('rows', value)}}
+                   value={formik.values.rows}
+                   error={formik.errors.rows}
+                   columns={columns}
+                   allowDelete={false}
+                   allowAddNewLine={false}
                   />
                 </Box>
               </Grid>
             </Grid>
+          </FormShell>
           </Box>
-
-          <Box
-            sx={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              margin: 0
-            }}
-          >
-            <WindowToolbar onSave={handleSubmit} />
-          </Box>
-        </CustomTabPanel>
-      </Box>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
