@@ -1,5 +1,5 @@
 // ** React Importsport
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
 import { Box } from '@mui/material'
@@ -17,7 +17,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { getNewCorrespondent, populateCorrespondent } from 'src/Models/RemittanceSettings/Correspondent'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Windows
 import CorrespondentWindow from './Windows/CorrespondentWindow'
@@ -29,13 +28,15 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ExchangeMapWindow from './Windows/ExchangeMapWindow'
+import { useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
 
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   //stores
-  const [gridData, setGridData] = useState(null)
+  // const [gridData, setGridData] = useState(null)
   const [corId, setCorId] = useState(null)
 
   const [bpMasterDataStore, setBpMasterDataStore] = useState([])
@@ -52,26 +53,34 @@ const Correspondent = () => {
   const [activeTab, setActiveTab] = useState(0)
 
   //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    bpRef: labels && labels.find(item => item.key === "3").value,
-    outward: labels && labels.find(item => item.key === "4").value,
-    inward: labels && labels.find(item => item.key === "5").value,
-    isInactive: labels && labels.find(item => item.key === "6").value,
-    correspondent: labels && labels.find(item => item.key === "7").value,
-    country: labels && labels.find(item => item.key === "8").value,
-    currency: labels && labels.find(item => item.key === "9").value,
-    glCurrency: labels && labels.find(item => item.key === "10").value,
-    exchangeTable: labels && labels.find(item => item.key === "11").value,
-    bankDeposit: labels && labels.find(item => item.key === "12").value,
-    deal: labels && labels.find(item => item.key === "13").value,
-    exchange: labels && labels.find(item => item.key === "14").value,
-    plant: labels && labels.find(item => item.key === "15").value,
-    exchangeMap: labels && labels.find(item => item.key === "16").value
+  const {
+    query: { data },
+    labels : _labels,
+    paginationParameters,
+    invalidate,
+    refetch,
+    access
+  } = useResourceQuery({
+     queryFn: fetchGridData,
+     endpointId: RemittanceSettingsRepository.Correspondent.qry,
+     datasetId: ResourceIds.Correspondent,
+
+   })
+
+
+  async function fetchGridData(options={}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
+
+     const response =  await getRequest({
+      extension: RemittanceSettingsRepository.Correspondent.qry,
+      parameters: parameters
+    })
+
+    return {...response,  _startAt: _startAt}
   }
 
   const columns = [
@@ -239,119 +248,119 @@ const Correspondent = () => {
   }
 
   // CURRENCIES TAB
-  const currenciesGridValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    validate: values => {
-      const isValid = values.rows.every(row => !!row.currencyId)
+  // const currenciesGridValidation = useFormik({
+  //   enableReinitialize: false,
+  //   validateOnChange: true,
+  //   validate: values => {
+  //     const isValid = values.rows.every(row => !!row.currencyId)
 
-      return isValid 
-        ? {}
-        : { rows: Array(values.rows.length).fill({ currencyId: 'Currency is required' }) }
-    },
-    initialValues: {
-      rows: [
-        {
-          corId: correspondentValidation.values
-            ? correspondentValidation.values.recordId
-              ? correspondentValidation.values.recordId
-              : ''
-            : '',
-          currencyId: '',
-          currencyRef: '',
-          currencyName: '',
-          exchangeId: '',
-          exchangeRef: '',
-          exchangeName: '',
-          outward: false,
-          inward: false,
-          bankDeposit: false,
-          deal: false,
-          isInactive: false
-        }
-      ]
-    },
-    onSubmit: values => {
-      postCorrespondentCurrencies(values.rows)
-    }
-  })
+  //     return isValid
+  //       ? {}
+  //       : { rows: Array(values.rows.length).fill({ currencyId: 'Currency is required' }) }
+  //   },
+  //   initialValues: {
+  //     rows: [
+  //       {
+  //         corId: correspondentValidation.values
+  //           ? correspondentValidation.values.recordId
+  //             ? correspondentValidation.values.recordId
+  //             : ''
+  //           : '',
+  //         currencyId: '',
+  //         currencyRef: '',
+  //         currencyName: '',
+  //         exchangeId: '',
+  //         exchangeRef: '',
+  //         exchangeName: '',
+  //         outward: false,
+  //         inward: false,
+  //         bankDeposit: false,
+  //         deal: false,
+  //         isInactive: false
+  //       }
+  //     ]
+  //   },
+  //   onSubmit: values => {
+  //     postCorrespondentCurrencies(values.rows)
+  //   }
+  // })
 
-  const currenciesInlineGridColumns = [
-    {
-      field: 'combobox',
-      header: _labels.currency,
-      nameId: 'currencyId',
-      name: 'currencyRef',
-      mandatory: true,
-      store: currencyStore.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: '300',
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' },
-        { key: 'flName', value: 'FL Name' }
-      ]
-    },
-    {
-      field: 'combobox',
-      header: _labels.exchange,
-      nameId: 'exchangeId',
-      name: 'exchangeRef',
-      mandatory: false,
-      store: exchangeTableStoreAll.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: '300',
-      fieldsToUpdate: [],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ]
-    },
-    {
-      field: 'checkbox',
-      header: _labels.outward,
-      name: 'outward'
-    },
-    {
-      field: 'checkbox',
-      header: _labels.inward,
-      name: 'inward'
-    },
-    {
-      field: 'checkbox',
-      header: _labels.bankDeposit,
-      name: 'bankDeposit'
-    },
-    {
-      field: 'checkbox',
-      header: _labels.deal,
-      name: 'deal'
-    },
-    {
-      field: 'checkbox',
-      header: _labels.isInactive,
-      name: 'isInactive'
-    },
-    {
-      field: 'button',
-      text: 'Exchange',
-      disabled: row => row.currencyId < 1,
+  // const currenciesInlineGridColumns = [
+  //   {
+  //     field: 'combobox',
+  //     header: _labels.currency,
+  //     nameId: 'currencyId',
+  //     name: 'currencyRef',
+  //     mandatory: true,
+  //     store: currencyStore.list,
+  //     valueField: 'recordId',
+  //     displayField: 'reference',
+  //     widthDropDown: '300',
+  //     columnsInDropDown: [
+  //       { key: 'reference', value: 'Reference' },
+  //       { key: 'name', value: 'Name' },
+  //       { key: 'flName', value: 'FL Name' }
+  //     ]
+  //   },
+  //   {
+  //     field: 'combobox',
+  //     header: _labels.exchange,
+  //     nameId: 'exchangeId',
+  //     name: 'exchangeRef',
+  //     mandatory: false,
+  //     store: exchangeTableStoreAll.list,
+  //     valueField: 'recordId',
+  //     displayField: 'reference',
+  //     widthDropDown: '300',
+  //     fieldsToUpdate: [],
+  //     columnsInDropDown: [
+  //       { key: 'reference', value: 'Reference' },
+  //       { key: 'name', value: 'Name' }
+  //     ]
+  //   },
+  //   {
+  //     field: 'checkbox',
+  //     header: _labels.outward,
+  //     name: 'outward'
+  //   },
+  //   {
+  //     field: 'checkbox',
+  //     header: _labels.inward,
+  //     name: 'inward'
+  //   },
+  //   {
+  //     field: 'checkbox',
+  //     header: _labels.bankDeposit,
+  //     name: 'bankDeposit'
+  //   },
+  //   {
+  //     field: 'checkbox',
+  //     header: _labels.deal,
+  //     name: 'deal'
+  //   },
+  //   {
+  //     field: 'checkbox',
+  //     header: _labels.isInactive,
+  //     name: 'isInactive'
+  //   },
+  //   {
+  //     field: 'button',
+  //     text: 'Exchange',
+  //     disabled: row => row.currencyId < 1,
 
-      onClick: (e, row) => {
-        console.log(row)
-        exchangeMapValidation.setValues({})
+  //     onClick: (e, row) => {
+  //       console.log(row)
+  //       exchangeMapValidation.setValues({})
 
-        if (row.currencyId) {
-          fillExchangeTableStore(row.currencyId)
-          exchangeMapValidation.setValues(row)
-          console.log(exchangeMapValidation)
-          setExchangeMapWindowOpen(true)
-        }
-      }
-    }
-  ]
+  //       if (row.currencyId) {
+  //         fillExchangeTableStore(row.currencyId)
+  //         exchangeMapValidation.setValues(row)
+  //         console.log(exchangeMapValidation)
+  //         setExchangeMapWindowOpen(true)
+  //       }
+  //     }
+  //   }
+  // ]
 
   const postCorrespondentCurrencies = obj => {
     const data = {
@@ -617,21 +626,6 @@ const Correspondent = () => {
     else if (activeTab === 2) currenciesGridValidation.handleSubmit()
   }
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-    var parameters = defaultParams
-    getRequest({
-      extension: RemittanceSettingsRepository.Correspondent.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   const postCorrespondent = obj => {
     console.log(correspondentValidation)
     console.log(obj)
@@ -772,49 +766,46 @@ const Correspondent = () => {
       })
   }
 
-  // const fillPlantStore = () => {
-  //   var parameters = `_filter=`
-  //   getRequest({
-  //     extension: SystemRepository.Plant.qry,
-  //     parameters: parameters
-  //   })
-  //     .then(res => {
-  //       setPlantStore(res)
-  //     })
-  //     .catch(error => {
-  //       setErrorMessage(error)
-  //     })
-  // }
-
   const addCorrespondent = () => {
-    resetCorrespondentCountries()
-    resetCorrespondentCurrencies()
-    resetCorrespondent()
-    correspondentValidation.setValues(getNewCorrespondent())
+    // resetCorrespondentCountries()
+    // resetCorrespondentCurrencies()
+    // resetCorrespondent()
+    // correspondentValidation.setValues(getNewCorrespondent())
 
-    setActiveTab(0)
-    fillCountryStore()
-    fillCurrencyStore()
+    // setActiveTab(0)
+    // fillCountryStore()
+    // fillCurrencyStore()
 
-    // fillExchangeTableStore()
-    // fillPlantStore()
-    setEditMode(false)
-    setWindowOpen(true)
+    // // fillExchangeTableStore()
+    // // fillPlantStore()
+    // setEditMode(false)
+    // setWindowOpen(true)
+    openForm('')
+  }
+
+  function openForm (recordId){
+    stack({
+      Component: CorrespondentWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId? recordId : null,
+
+        // editMode: recordId && true
+      },
+      width: 1000,
+      height: 600,
+      title: "Correspondent"
+    })
   }
 
   const popup = obj => {
-    resetCorrespondentCountries(obj.recordId)
-    resetCorrespondentCurrencies(obj.recordId)
-    resetCorrespondent()
-    fillCountryStore()
-    fillCurrencyStore()
 
-    fillExchangeTableStoreAll()
+   openForm(obj?.recordId)
 
     // fillPlantStore()
-    getCorrespondentById(obj)
-    getCorrespondentCountries(obj)
-    getCorrespondentCurrencies(obj)
+    // getCorrespondentById(obj)
+    // getCorrespondentCountries(obj)
+    // getCorrespondentCurrencies(obj)
   }
 
   const getCorrespondentById = obj => {
@@ -835,18 +826,7 @@ const Correspondent = () => {
       })
   }
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.Correspondent, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 50 })
-        getLabels(ResourceIds.Correspondent, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [access])
+
 
   return (
     <>
@@ -854,18 +834,19 @@ const Correspondent = () => {
         <GridToolbar onAdd={addCorrespondent} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
           onEdit={popup}
           onDelete={delCorrespondent}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
+      {/* {windowOpen && (
         <CorrespondentWindow
           tabs={tabs}
           activeTab={activeTab}
@@ -879,23 +860,15 @@ const Correspondent = () => {
           bpMasterDataStore={bpMasterDataStore}
           setBpMasterDataStore={setBpMasterDataStore}
           correspondentValidation={correspondentValidation}
-
-          //countries tab - inline edit grid
-
-          //countries inline edit grid
           countriesGridValidation={countriesGridValidation}
           countriesInlineGridColumns={countriesInlineGridColumns}
-
-          //currencies tab - inline edit grid
-
-          //currencies inline edit grid
           currenciesGridValidation={currenciesGridValidation}
           currenciesInlineGridColumns={currenciesInlineGridColumns}
           labels={_labels}
           maxAccess={access}
           corId={corId}
         />
-      )}
+      )} */}
 
       {exchangeMapWindowOpen && (
         <ExchangeMapWindow
@@ -909,8 +882,6 @@ const Correspondent = () => {
           getCurrenciesExchangeMaps={getCurrenciesExchangeMaps}
           maxAccess={access}
           labels={_labels}
-          currenciesGridValidation={currenciesGridValidation}
-          countriesGridValidation={countriesGridValidation}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
