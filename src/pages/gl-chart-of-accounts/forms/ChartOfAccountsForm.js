@@ -199,18 +199,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
                         setFieldValue={formik.setFieldValue}
                         values={formik.values.accountRef.split('-')}
                         error={formik.touched.name && Boolean(formik.errors.name)}
-                    />               {/* <CustomTextField
-                    name='accountRef'
-                    label={labels.accountRef}
-                    value={formik.values.accountRef}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='30'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('accountRef', '')}
-                    error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
-                    helperText={formik.touched.accountRef && formik.errors.accountRef}
-                    /> */}
+                    />        
                 </Grid>
                 <Grid item xs={12}>
                     <CustomTextField
