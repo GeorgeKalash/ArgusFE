@@ -10,7 +10,7 @@ export default function TextFieldEdit({ column: { props }, id, field, value }) {
     <Checkbox
     variant='rounded'
     name={field}
-
+autoFocus
     checked={value}
     value={value}
     onChange={e => {
