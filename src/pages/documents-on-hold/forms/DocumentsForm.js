@@ -20,194 +20,185 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import {
   formatDateToApi,
   formatDateToApiFunction,
-  formatDateFromApi,formatDateDefault,formatDateFromApiInline
-} from "src/lib/date-helper";
+  formatDateFromApi,
+  formatDateDefault,
+  formatDateFromApiInline
+} from 'src/lib/date-helper'
+import { CTDRRepository } from 'src/repositories/CTDRRepository'
 
+export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, onClose, setWindowOpen }) {
+  const [isLoading, setIsLoading] = useState(false)
 
+  const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
+  const [responseValue, setResponseValue] = useState(null)
 
-export default function DocumentsForm({ labels, maxAccess,functionId,seqNo,recordId, onClose }) {
-    const [isLoading, setIsLoading] = useState(false)
+  const [initialValues, setInitialData] = useState({
+    recordId: null,
+    reference: '',
+    functionId: '',
+    seqNo: '',
+    thirdParty: '',
+    functionName: '',
+    date: '',
+    notes: '',
+    responseDate: ''
+  })
 
-    const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false);
-    const [responseValue, setResponseValue] = useState(null);
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
+  //const editMode = !!recordId
 
-    const [initialValues, setInitialData] = useState({
-        recordId: null,
-        reference: '',
-        functionId: "",
-        seqNo:'',
-        thirdParty:'',
-        functionName:'',
-        date:'',
-        notes:'',
-        responseDate:''
-        
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
+  })
 
-      })
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
 
-    const { getRequest, postRequest } = useContext(RequestsContext)
+    onSubmit: async obj => {
+      const data = {
+        ...obj,
+        date: formatDateToApi(obj.date),
+        functionId: initialValues.functionId,
+        seqNo: initialValues.seqNo,
+        recordId: initialValues.recordId,
+        response: responseValue
+      }
 
-    //const editMode = !!recordId
+      // obj.response = responseValue
 
-    const invalidate = useInvalidate({
-        endpointId: DocumentReleaseRepository.DocumentsOnHold.qry
-      })
-    
+      // obj.date = formatDateToApi(obj.date)
 
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        validateOnChange: true,
-      
-        onSubmit: async obj => {
-          const data = {
-            ...obj,
-            date: formatDateToApi(obj.date),
-            functionId : initialValues.functionId,
-             seqNo : initialValues.seqNo,
-             recordId : initialValues.recordId,
-             response : responseValue
-          }
-          
-      
-         
-          // obj.response = responseValue
+      try {
+        const response = await postRequest({
+          extension: CTDRRepository.DocumentsOnHold.set,
+          record: JSON.stringify(data)
+        })
 
-          // obj.date = formatDateToApi(obj.date)
-          try {
-            const response = await postRequest({
-              extension: DocumentReleaseRepository.DocumentsOnHold.set,
-              record: JSON.stringify(data),
-            })
-            
-            if (!functionId&&!seqNo&&!recordId && responseValue !== null) {
-              toast.success('Record Added Successfully')
+        if (!functionId && !seqNo && !recordId && responseValue !== null) {
+          toast.success('Record Added Successfully')
 
-              // setInitialData({
-              //   ...obj, // Spread the existing properties
-              //   recordId: response.recordId, // Update only the recordId field
-              //   response: responseValue,
+          // setInitialData({
+          //   ...obj, // Spread the existing properties
+          //   recordId: response.recordId, // Update only the recordId field
+          //   response: responseValue,
 
-              //    date:formatDateDefault(obj.date)
-              // });
-            }
-            else {
-              
-              //  setInitialData({
-              //    ...obj, // Spread the existing properties
-              //    recordId: response.recordId, // Update only the recordId field
-              //    response: responseValue,
-              //     date:formatDateDefault(obj.date)
-                  
-              //  });
-               console.log(obj)
-              
-              
-              toast.success('Record Edited Successfully')
-            }
-  
-            invalidate()
-          } catch (error) {
-            toast("Something went wrong");
-          }
+          //    date:formatDateDefault(obj.date)
+          // });
+        } else {
+          //  setInitialData({
+          //    ...obj, // Spread the existing properties
+          //    recordId: response.recordId, // Update only the recordId field
+          //    response: responseValue,
+          //     date:formatDateDefault(obj.date)
+
+          //  });
+          console.log(obj)
+
+          toast.success('Record Edited Successfully')
         }
-      })
+        setWindowOpen(false)
+        invalidate()
+      } catch (error) {
+        toast('Something went wrong')
+      }
+    }
+  })
 
+  useEffect(() => {
+    ;(async function () {
+      try {
+        setIsLoading(true)
 
+        const res = await getRequest({
+          extension: DocumentReleaseRepository.DocumentsOnHold.get,
+          parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
+        })
 
-      useEffect(() => {
-        ;(async function () {
-          try {
-              setIsLoading(true)
-    
-              const res = await getRequest({
-                extension: DocumentReleaseRepository.DocumentsOnHold.get,
-                parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
-              })
-           
-              setInitialData({
-                ...res.record,
+        setInitialData({
+          ...res.record,
 
-                 date: formatDateFromApi(res.record.date) 
-              });
-          } catch (exception) {
-            setErrorMessage(error)
-          }
-          setIsLoading(false)
-        })()
-      }, [])
-      
-    return (
-      <>
-        <ConfirmationDialog
-          DialogText={`Are you sure you want to ${responseValue === 2 ? "approve" : "reject"} this document`}
-          cancelButtonAction={() => setConfirmationWindowOpen(false)}
-          openCondition={confirmationWindowOpen}
-          okButtonAction={() => {formik.submitForm();setConfirmationWindowOpen(false)}}
-        />
-        <FormShellDocument
-            resourceId={ResourceIds.DocumentsOnHold}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
-            onReject={() => {
-              setConfirmationWindowOpen(true)
-              setResponseValue(-1)
-            }}
-            onApprove={() => {
-              setConfirmationWindowOpen(true)
-              setResponseValue(2)
-            }}
-        >
-            <Grid container spacing={4}>
-                <Grid item xs={12}>
-                    <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.reference}
-                    readOnly={true}
-                    maxAccess={maxAccess}
-                    maxLength='30'
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CustomTextField
-                    name='thirdParty'
-                    label={labels.thirdParty}
-                    value={formik.values.thirdParty}
-                    readOnly={true}
-                    maxAccess={maxAccess}
-                    />
-                </Grid>
-                <Grid item xs={12} >
-                    <CustomDatePicker
-                    name='date'
-                    label={labels.date}
-                    onChange={formik.setFieldValue}
-                    value={formik.values.date}
-                    readOnly={true}
-                    maxAccess={maxAccess}
-                    
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CustomTextArea
-                    name='notes'
-                    label={labels.notes}
-                    value={formik.values.notes}
-                    maxLength='100'
-                    rows={2}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+          date: formatDateFromApi(res.record.date)
+        })
+      } catch (exception) {
+        setErrorMessage(error)
+      }
+      setIsLoading(false)
+    })()
+  }, [])
 
-                    />
-                </Grid>
-
-            </Grid>
-        </FormShellDocument>
-      </>
+  return (
+    <>
+      <ConfirmationDialog
+        DialogText={`Are you sure you want to ${responseValue === 2 ? 'approve' : 'reject'} this document`}
+        cancelButtonAction={() => setConfirmationWindowOpen(false)}
+        openCondition={confirmationWindowOpen}
+        okButtonAction={() => {
+          formik.submitForm()
+          setConfirmationWindowOpen(false)
+        }}
+      />
+      <FormShellDocument
+        resourceId={ResourceIds.DocumentsOnHold}
+        form={formik}
+        height={300}
+        maxAccess={maxAccess}
+        onReject={() => {
+          setConfirmationWindowOpen(true)
+          setResponseValue(-1)
+        }}
+        onApprove={() => {
+          setConfirmationWindowOpen(true)
+          setResponseValue(2)
+        }}
+      >
+        <Grid container spacing={4}>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='reference'
+              label={labels.reference}
+              value={formik.values.reference}
+              readOnly={true}
+              maxAccess={maxAccess}
+              maxLength='30'
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='thirdParty'
+              label={labels.thirdParty}
+              value={formik.values.thirdParty}
+              readOnly={true}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomDatePicker
+              name='date'
+              label={labels.date}
+              onChange={formik.setFieldValue}
+              value={formik.values.date}
+              readOnly={true}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextArea
+              name='notes'
+              label={labels.notes}
+              value={formik.values.notes}
+              maxLength='100'
+              rows={2}
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('notes', '')}
+              error={formik.touched.notes && Boolean(formik.errors.notes)}
+            />
+          </Grid>
+        </Grid>
+      </FormShellDocument>
+    </>
   )
 }

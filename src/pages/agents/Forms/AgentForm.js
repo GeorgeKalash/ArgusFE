@@ -85,7 +85,6 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
     <FormShell
       resourceId={ResourceIds.CorrespondentAgents}
       form={formik}
-      height={300}
       maxAccess={maxAccess}
       editMode={editMode}
     >

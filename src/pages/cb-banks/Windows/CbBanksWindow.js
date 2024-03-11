@@ -1,6 +1,5 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CbBanksForm from '../forms/CbBanksForm'
 
 const CbBanksWindow = ({
@@ -19,14 +18,11 @@ const CbBanksWindow = ({
       width={500}
       height={350}
     >
-      <CustomTabPanel>
-        <CbBanksForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
-       
-      </CustomTabPanel>
+      <CbBanksForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+      />
     </Window>
   )
 }

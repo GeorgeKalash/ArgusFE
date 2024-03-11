@@ -1,6 +1,5 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import OperationsForm from '../forms/OperationsForm'
 
 const OperationsWindow = ({ onClose, labels, maxAccess, recordId }) => {
@@ -12,10 +11,8 @@ const OperationsWindow = ({ onClose, labels, maxAccess, recordId }) => {
       onClose={onClose}
       width={500}
       height={400}
-    >
-      <CustomTabPanel>
-        <OperationsForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
-      </CustomTabPanel>
+    >      
+      <OperationsForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )
 }
