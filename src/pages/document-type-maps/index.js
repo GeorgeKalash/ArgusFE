@@ -46,6 +46,7 @@ const DocumentTypeMaps = () => {
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
     refetch,
     access
   } = useResourceQuery({
@@ -53,6 +54,8 @@ const DocumentTypeMaps = () => {
     endpointId: SystemRepository.DocumentTypeMap.qry,
     datasetId: ResourceIds.DocumentTypeMaps
   })
+
+
 
 
   const columns = [
@@ -117,7 +120,8 @@ const DocumentTypeMaps = () => {
           refetch={refetch}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Box>

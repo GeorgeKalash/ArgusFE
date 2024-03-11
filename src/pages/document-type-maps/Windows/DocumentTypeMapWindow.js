@@ -22,7 +22,7 @@ const DocumentTypeMapWindow = ({
         width={600}
         height={400}
         >
-             <CustomTabPanel>
+            
                <DocumentTypeMapForm
                   labels={labels}
                   maxAccess={maxAccess}
@@ -31,7 +31,7 @@ const DocumentTypeMapWindow = ({
                   fromDTId={fromDTId}
                   toFunctionId={toFunctionId}
                />
-               </CustomTabPanel>
+            
             </Window> 
          )
     }
