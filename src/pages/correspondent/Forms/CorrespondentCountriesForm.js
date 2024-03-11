@@ -1,13 +1,11 @@
 import { Box } from '@mui/material'
 import { useFormik } from 'formik'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 
 // ** Custom Imports
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -51,7 +49,6 @@ const CorrespondentCountriesForm = ({
     })
 
  const postCorrespondentCountries = obj => {
-  console.log(obj.countries)
 
     const correspondentCountries= obj.countries.map(
       ({ country, corId }) => ({
@@ -91,9 +88,50 @@ const CorrespondentCountriesForm = ({
       })
   }
 
+  useEffect(()=>{
+      console.log('obj.recordId')
+      const defaultParams = `_corId=${recordId}`
+      var parameters = defaultParams
+      recordId &&   getRequest({
+        extension: RemittanceSettingsRepository.CorrespondentCountry.qry,
+        parameters: parameters
+      })
+        .then(res => {
+          if (res.list.length > 0) {
+            formik.setValues({ countries: res.list.map(
+              ({ countryId,  countryRef, ...rest } , index) => ({
+                 id : index,
+                 country : { recordId: countryId,
+                //  name: countryName,
+                 reference: countryRef,
+                },  ...rest
+
+
+              }) )})
+          } else {
+            formik.setValues({
+              rows: [
+                {
+                  corId: recordId,
+                  countryId: '',
+                  countryRef: '',
+                  countryName: '',
+                  flName: ''
+                }
+              ]
+            })
+          }
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
+
+
+  },[recordId])
+
 return (
     <>
-         <FormShell
+        <FormShell
           form={formik}
           resourceId={ResourceIds.Correspondent}
           maxAccess={maxAccess}
@@ -102,11 +140,7 @@ return (
             onChange={value => formik.setFieldValue('countries', value)}
             value={formik.values.countries}
             error={formik.errors.countries}
-
-            // columns={columns}
-
             columns={[
-
               {
                 component: 'resourcecombobox',
                 name: 'country',

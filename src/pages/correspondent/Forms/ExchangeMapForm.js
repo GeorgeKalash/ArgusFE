@@ -4,21 +4,24 @@ import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
 // ** Custom Imports
 
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useEffect, useState } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const ExchangeMapWindow = ({
-  recordId,
+const ExchangeMapForm= ({
   maxAccess,
   editMode,
+  currency,
   store,
   labels
 }) => {
+
+  const {recordId : currencyId , name:currencyName } = currency
+  const {recordId, countries} = store
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -33,11 +36,12 @@ const ExchangeMapWindow = ({
         : { rows: Array(values.rows.length).fill({ plantId: 'Plant is required' }) }
     },
     initialValues: {
-      currencyId: '' , countryId : '',
+      currencyId: currencyId ,
+      countryId : '',
       rows: [
         {
           corId: recordId,
-          currencyId: '',
+          currencyId: currencyId,
           countryId: '',
           plantId: '',
           plantRef: '',
@@ -109,20 +113,14 @@ return (
           <Grid container gap={2}>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={6}>
-                <ResourceComboBox
-                  name='currencyId'
+                <CustomTextField
+                  name='currency'
                   label={labels.currency}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
                   readOnly='true'
-                  values={formik.values}
+                  value={currencyName}
                   required
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('currencyId', newValue?.recordId)
-                  }}
-                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                  helperText={formik.touched.currencyId && formik.errors.currencyId}
+
                 />
               </Grid>
               <Grid item xs={6}>
@@ -135,8 +133,8 @@ return (
                     { key: 'countryRef', value: 'Reference' },
                     { key: 'countryName', value: 'Name' },
                   ]}
-                  store={store}
-                  value={store.countries.filter(item => item.countryId === formik.values.countryId)[0]} // Ensure the value matches an option or set it to null
+                  store={countries}
+                  value={countries.filter(item => item.countryId === formik.values.countryId)[0]} // Ensure the value matches an option or set it to null
                   required
                   maxAccess={maxAccess}
                   onChange={(event, newValue) => {
@@ -156,7 +154,7 @@ return (
               </Grid>
             </Grid>
             <Grid xs={12}>
-              <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+              {/* <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                 {formik.values.countryId && (
                   <gridData
                   onChange={value => formik.setFieldValue('countries', value)}
@@ -167,7 +165,7 @@ return (
                     allowAddNewLine={false}
                   />
                 )}
-              </Box>
+              </Box> */}
             </Grid>
           </Grid>
         </Box>
@@ -176,4 +174,4 @@ return (
   )
 }
 
-export default ExchangeMapWindow
+export default ExchangeMapForm
