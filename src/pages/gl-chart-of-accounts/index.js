@@ -48,6 +48,8 @@ const ChartOfAccounts = () => {
     search,
     clear, 
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -131,7 +133,8 @@ const ChartOfAccounts = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Box>

@@ -19,14 +19,14 @@ const ChartOfAccountsWindow = ({
       width={500}
       height={500}
     >
-      <CustomTabPanel>
+      
         <ChartOfAccountsForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
         />
        
-      </CustomTabPanel>
+      
     </Window>
   )
 }
