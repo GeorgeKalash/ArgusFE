@@ -21,12 +21,12 @@ export default function CurrencyForm ({
   labels,
   maxAccess,
   recordId
-}) 
+})
 {
 
     const [isLoading, setIsLoading] = useState(false)
     const [editMode, setEditMode] = useState(!!recordId)
-    
+
     const [initialValues, setInitialData] = useState({
         recordId: null,
         name: '',
@@ -47,9 +47,9 @@ export default function CurrencyForm ({
     //const editMode = !!recordId
 
     const invalidate = useInvalidate({
-        endpointId: SystemRepository.Currency.page
+        endpointId: SystemRepository.Currency.qry
       })
-  
+
     const formik = useFormik({
         initialValues,
         enableReinitialize: true,
@@ -68,7 +68,7 @@ export default function CurrencyForm ({
             extension: SystemRepository.Currency.set,
             record: JSON.stringify(obj)
           })
-          
+
           if (!recordId) {
             toast.success('Record Added Successfully')
             setInitialData({
@@ -76,24 +76,24 @@ export default function CurrencyForm ({
               recordId: response.recordId, // Update only the recordId field
             });
           }
-          else toast.success('Record Edited Successfully')
+          else {toast.success('Record Edited Successfully')
           setEditMode(true)
-
+}
           invalidate()
         }
       })
-    
+
       useEffect(() => {
         ;(async function () {
           try {
             if (recordId) {
               setIsLoading(true)
-    
+
               const res = await getRequest({
                 extension: SystemRepository.Currency.get,
                 parameters: `_recordId=${recordId}`
               })
-              
+
               setInitialData(res.record)
             }
           } catch (exception) {
@@ -104,11 +104,11 @@ export default function CurrencyForm ({
       }, [])
 
   return (
-    <FormShell 
+    <FormShell
     resourceId={ResourceIds.Currencies}
-    form={formik} 
-    height={400} 
-    maxAccess={maxAccess} 
+    form={formik}
+    height={400}
+    maxAccess={maxAccess}
     editMode={editMode}
     >
     <Grid container spacing={4}>

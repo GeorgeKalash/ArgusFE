@@ -1,205 +1,134 @@
-import React, { useContext, useEffect } from 'react'
-import { Box, Grid } from '@mui/material'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import Table from 'src/components/Shared/Table'
-import { useState } from 'react'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import TransactionLog from 'src/components/Shared/TransactionLog'
-import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
-import RelationTypeWindow from './Windows/RelationTypeWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+// ** React Imports
+import { useState, useContext } from 'react'
 
-import { useFormik } from 'formik'
-import { getNewRelationType, populateRelationType } from 'src/Models/CurrencyTradingSettings/RelationType'
-import * as yup from 'yup'
+// ** MUI Imports
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
+
+// ** Custom Imports
+import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+
+// ** API
+import { RequestsContext } from 'src/providers/RequestsContext'
+
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+
+// ** Windows
+import RelationTypesWindow from './Windows/RelationTypesWindow'
+
+// ** Helpers
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const RelationTypes = () => {
-  const { getLabels, getAccess } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [typeStore, setTypeStore] = useState([])
+ 
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
-  const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  const [windowInfo, setWindowInfo] = useState(null)
-  const [editMode, setEditMode] = useState(null)
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.RelationType, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData({ _startAt: 0, _pageSize: 30 })
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.RelationType.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
 
-        // fillSysFunctionsStore()
-        // fillActiveStatusStore()
-        getLabels(ResourceIds.RelationType, setLabels)
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-    
-  }, [access])
+    return {...response,  _startAt: _startAt}
 
-  const _labels = {
-    reference: labels && labels.find(item => item.key === '1').value,
-    name: labels && labels.find(item => item.key === '2').value,
-    flName: labels && labels.find(item => item.key === '3').value,
-    relationtype: labels && labels.find(item => item.key === '4').value
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    refetch,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: CurrencyTradingSettingsRepository.RelationType.page,
+    datasetId: ResourceIds.RelationType
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: CurrencyTradingSettingsRepository.RelationType.page
+  })
 
   const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1,
-      editable: false
     },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1,
-      editable: false
     },
     {
       field: 'flName',
       headerName: _labels.flName,
       flex: 1,
-      editable: false
     }
   ]
 
-  const addRelationType = () => {
-    relationTypeValidation.setValues(getNewRelationType())
 
-    setEditMode(false)
+  const add = () => {
     setWindowOpen(true)
   }
 
-  const delRelationType = obj => {
-    postRequest({
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
+  }
+
+  const del = async obj => {
+    await postRequest({
       extension: CurrencyTradingSettingsRepository.RelationType.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        getGridData({})
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
-
-  const editRelationType = obj => {
-    relationTypeValidation.setValues(populateRelationType(obj))
-
-    setEditMode(true)
-    setWindowOpen(true)
-  }
-
-  const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    var parameters = defaultParams + '&_dgId=0'
-
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.RelationType.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData({ ...res, _startAt })
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const relationTypeValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      flName: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      console.log({ values })
-      postRelationType(values)
-    }
-  })
-
-  const postRelationType = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: CurrencyTradingSettingsRepository.RelationType.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData({})
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Editted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const handleSubmit = () => {
-    relationTypeValidation.handleSubmit()
-  }
+  
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addRelationType} maxAccess={access} />
-
+      <Box>
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
+          pageSize={50}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
-          onEdit={editRelationType}
-          onDelete={delRelationType}
         />
       </Box>
-
       {windowOpen && (
-        <RelationTypeWindow
-          onClose={() => setWindowOpen(false)}
-          width={600}
-          height={400}
-          onSave={handleSubmit}
-          relationTypesValidation={relationTypeValidation}
+        <RelationTypesWindow
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
           labels={_labels}
           maxAccess={access}
-          onInfo={() => setWindowInfo(true)}
-          editMode={editMode}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
         />
       )}
-
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

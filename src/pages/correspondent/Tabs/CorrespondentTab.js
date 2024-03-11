@@ -6,6 +6,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 
 const CorrespondentTab = ({
   labels,
@@ -46,18 +48,20 @@ const CorrespondentTab = ({
           helperText={correspondentValidation.touched.name && correspondentValidation.errors.name}
         />
       </Grid>
-      <Grid item xs={12}>
-        <CustomLookup
+
+         <Grid item xs={12}>
+        <ResourceLookup
+         endpointId={BusinessPartnerRepository.MasterData.snapshot}
           name='bpRef'
           required
           label={labels.bpRef}
           valueField='reference'
           displayField='name'
-          store={bpMasterDataStore}
-          setStore={setBpMasterDataStore}
-          firstValue={correspondentValidation.values.bpRef}
-          secondValue={correspondentValidation.values.bpName}
-          onLookup={lookupBpMasterData}
+
+          valueShow='bpRef'
+          secondValueShow='bpName'
+
+          form={correspondentValidation}
           onChange={(event, newValue) => {
             if (newValue) {
               correspondentValidation.setFieldValue('bpId', newValue?.recordId)
@@ -69,8 +73,7 @@ const CorrespondentTab = ({
               correspondentValidation.setFieldValue('bpName', null)
             }
           }}
-          error={correspondentValidation.touched.bpId && Boolean(correspondentValidation.errors.bpId)}
-          helperText={correspondentValidation.touched.bpId && correspondentValidation.errors.bpId}
+          errorCheck={'bpId'}
           maxAccess={maxAccess}
         />
       </Grid>

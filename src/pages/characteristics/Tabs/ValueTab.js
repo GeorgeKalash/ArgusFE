@@ -30,7 +30,7 @@ const ValueTab = ({ valueGridData, getValueGridData, addValue, delValue, editVal
         <Table
           columns={columns}
           gridData={valueGridData}
-          rowId={['recordId']}
+          rowId={['seqNo']}
           api={getValueGridData}
           onEdit={editValue}
           onDelete={delValue}
