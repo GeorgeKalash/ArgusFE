@@ -67,7 +67,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
           if (!recordId) {
             toast.success('Record Added Successfully')
             setInitialData({
-              ...obj, // Spread the existing properties
+              ...obj, 
               recordId: response.recordId, // Update only the recordId field
             });
           }
