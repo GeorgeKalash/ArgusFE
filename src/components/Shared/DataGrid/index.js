@@ -8,6 +8,7 @@ import DeleteDialog from '../DeleteDialog'
 export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=true, allowAddNewLine=true}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
+
   async function processDependencies(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
@@ -73,14 +74,14 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
       return
     }
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-    const visibleColumns = apiRef.current.getVisibleColumns()
+    const columns = apiRef.current.getAllColumns()
 
     const nextCell = findCell(params)
 
     const currentCell = { ...nextCell }
 
 
-    if ((nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1)) {
+    if ((nextCell.columnIndex === columns.length - 2 && nextCell.rowIndex === rowIds.length - 1)) {
       if (error || !allowAddNewLine){
       event.stopPropagation()
 
@@ -89,23 +90,21 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
 
     }
     if (
-      apiRef.current.getCellMode(rowIds[currentCell.rowIndex], visibleColumns[currentCell.columnIndex].field) === 'edit'
+      apiRef.current.getCellMode(rowIds[currentCell.rowIndex], columns[currentCell.columnIndex].field) === 'edit'
     )
       apiRef.current.stopCellEditMode({
         id: rowIds[nextCell.rowIndex],
-        field: visibleColumns[nextCell.columnIndex].field
+        field: columns[nextCell.columnIndex].field
       })
 
-    if (nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
+    if (nextCell.columnIndex === columns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
 
       addRow()
 
     }
 
-
-
     if (
-      nextCell.columnIndex === visibleColumns.length - 1 &&
+      nextCell.columnIndex === columns.length - 1 &&
       nextCell.rowIndex === rowIds.length - 1 &&
       !event.shiftKey
     ) {
@@ -121,10 +120,10 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
 
     process.nextTick(() => {
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-      const visibleColumns = apiRef.current.getVisibleColumns()
+      const columns = apiRef.current.getAllColumns()
 
       if (!event.shiftKey) {
-        if (nextCell.columnIndex < visibleColumns.length - 2) {
+        if (nextCell.columnIndex < columns.length - 2) {
           nextCell.columnIndex += 1
         } else {
           nextCell.rowIndex += 1
@@ -134,10 +133,10 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
         nextCell.columnIndex -= 1
       } else {
         nextCell.rowIndex -= 1
-        nextCell.columnIndex = visibleColumns.length - 1
+        nextCell.columnIndex = columns.length - 1
       }
 
-      const field = visibleColumns[nextCell.columnIndex].field
+      const field = columns[nextCell.columnIndex].field
       const id = rowIds[nextCell.rowIndex]
 
       setNextEdit({
@@ -258,6 +257,9 @@ return (
         stack({ message: 'Error occured while updating row.' })
       }}
       onCellKeyDown={handleCellKeyDown}
+      columnVisibilityModel= {{
+        actions: allowDelete
+      }}
       rows={value}
       apiRef={apiRef}
       editMode='cell'
@@ -317,8 +319,8 @@ return (
             )
           }
         })),
-     allowDelete ?   actionsColumn : null
-      ].filter(col=> col)}
+       actionsColumn
+      ]}
     />
     <DeleteDialog
             open={deleteDialogOpen}
