@@ -135,7 +135,11 @@ export const DataSets = {
   INDUSTRY: 148,
   FILE_EMPIRY_TYPE: 149,
   EDUCATION_LEVEL: 150,
+  CURRENCY_DECIMALS: 153,
+  TimeZone: 154,
+  DateFormat: 155,
   TYPE: 156,
+  Sign: 157,
   TARGET_TYPE: 160,
   GENDER: 1014,
   CIVIL_STATUS: 1019,
@@ -149,8 +153,5 @@ export const DataSets = {
   RT_Function: 3605,
   RT_Language: 3606,
   TITLE: 3607,
-  ID_TYPE: 3608,
-  CURRENCY_DECIMALS: 153,
-  DateFormat: 155,
-  TimeZone: 154
+  ID_TYPE: 3608
 }
