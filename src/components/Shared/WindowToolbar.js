@@ -32,6 +32,7 @@ const WindowToolbar = ({
   setSelectedReport,
   selectedReport,
   previewReport,
+  visibleClear=true,
   actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -146,7 +147,7 @@ const WindowToolbar = ({
             </Tooltip>
           )}
 
-          {onClear && (
+          {onClear && visibleClear && (
             <Tooltip title='Clear'>
               <Button
                 onClick={onClear}

@@ -307,7 +307,6 @@ const Table = ({
 
   if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
-
     filteredColumns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,
