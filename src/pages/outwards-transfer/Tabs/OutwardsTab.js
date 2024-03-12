@@ -17,6 +17,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWindowOpen }) {
   const [position, setPosition] = useState()

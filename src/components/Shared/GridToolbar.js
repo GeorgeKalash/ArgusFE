@@ -24,7 +24,7 @@ const GridToolbar = ({
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const addBtnVisible = onAdd && maxAccess > TrxType.NOACCESS
+  const addBtnVisible = onAdd && maxAccess > TrxType.GET
   const [searchValue, setSearchValue] = useState('')
 
   const formatDataForApi = paramsArray => {
@@ -50,8 +50,12 @@ const GridToolbar = ({
         )}
         {onAdd && addBtnVisible && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Button onClick={onAdd} variant='contained' style={{backgroundColor:'transparent' ,border:'1px solid #4eb558'}}>
-            <img src="/images/buttonsIcons/add.png" alt="Info" />
+            <Button
+              onClick={onAdd}
+              variant='contained'
+              style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+            >
+              <img src='/images/buttonsIcons/add.png' alt='Info' />
             </Button>
           </Box>
         )}
