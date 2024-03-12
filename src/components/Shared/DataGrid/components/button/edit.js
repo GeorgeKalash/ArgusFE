@@ -1,24 +1,18 @@
-import { Checkbox } from '@mui/material'
 import { useGridApiContext } from '@mui/x-data-grid'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { Button } from '@mui/material'
 
-export default function TextFieldEdit({ column: { props }, id, field, value }) {
-  const api = useGridApiContext()
+export default function TextFieldEdit({ column, row }) {
+
 
   return (
-    <Checkbox
-    variant='rounded'
-    name={field}
-    checked={value}
-    value={value}
-    onChange={e => {
-      api.current.setEditCellValue({
-        id,
-        field,
-        value: e.target.value
-      })
-    }}
-     />
+    <Button
+        sx={{ height: '30px' }}
+        auto
+        onClick={(e) => column.onClick(e, row)} // Corrected the usage of 'row'
+        variant='contained'
+      >
+         {column?.label}
+      </Button>
 
 
   )

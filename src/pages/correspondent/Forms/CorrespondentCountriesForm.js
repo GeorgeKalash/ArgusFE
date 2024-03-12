@@ -50,7 +50,7 @@ const CorrespondentCountriesForm = ({
 
  const postCorrespondentCountries = obj => {
 
-    const correspondentCountries= obj.countries.map(
+    const correspondentCountries= obj?.countries?.map(
       ({ country, corId }) => ({
          countryId: country.recordId,
          countryName: country.name,
@@ -98,7 +98,9 @@ const CorrespondentCountriesForm = ({
       })
         .then(res => {
           if (res.list.length > 0) {
-            formik.setValues({ countries: res.list.map(
+            const correspondentCountries = res.list
+
+            formik.setValues({ countries: correspondentCountries.map(
               ({ countryId,  countryRef, ...rest } , index) => ({
                  id : index,
                  country : { recordId: countryId,
@@ -108,6 +110,10 @@ const CorrespondentCountriesForm = ({
 
 
               }) )})
+              setStore(prevStore => ({
+                ...prevStore,
+                  countries: correspondentCountries
+              }));
           } else {
             formik.setValues({
               rows: [
@@ -159,7 +165,7 @@ return (
               {
                 component: 'textfield',
                 label: labels?.name,
-                name: 'countryName',
+                name: 'countryName'
               }
 
             ]}

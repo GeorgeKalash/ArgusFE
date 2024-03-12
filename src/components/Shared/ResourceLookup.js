@@ -5,12 +5,12 @@ import ErrorWindow from './ErrorWindow'
 
 export const ResourceLookup = ({
   endpointId,
-  name,
-  form,
   parameters,
+  form,
+  name,
+  valueShow,
   secondValueShow,
   errorCheck,
-  valueShow,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -36,7 +36,7 @@ export const ResourceLookup = ({
       })
   }
   const check = errorCheck ? errorCheck : name
-  const firstValue = valueShow ? form.values[valueShow] : form.values[name]
+  const firstValue = valueShow ? form.values[secondValueShow] : form.values[name]
   const secondValue = secondValueShow ? form.values[secondValueShow] : form.values[name]
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])

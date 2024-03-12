@@ -61,7 +61,6 @@ const CorrespondentCurrenciesForm = ({
   })
 
   const postCorrespondentCurrencies = obj => {
-console.log(obj)
 
     const correspondentCurrencies = obj?.currencies?.map(
       ({ currency,  exchange, currencyId ,exchangeId,  ...rest }) => ({
@@ -144,23 +143,22 @@ console.log(obj)
     },
     {
       component: 'checkbox',
-      header: labels.isInactive,
+      label: labels.isInactive,
       name: 'isInactive'
     },
     {
       component: 'button',
-      header: labels.exchange,
+      label: labels.exchange,
       name: 'exchanges',
-      onClick: (e, row) => {
-      console.log(e, row)
+      onClick:  async (e, row) => {
 
-        stack({
+     row?.currency &&   stack({
           Component: ExchangeMapForm,
           props: {
             labels: labels,
             recordId: recordId? recordId : null,
             store: store,
-            currency: row.currency
+            currency: row?.currency
           },
           width: 700,
           height: 600,

@@ -85,10 +85,10 @@ const CorrespondentForm = ({
 
   },[recordId])
 
-  const getCorrespondentById = recordId => {
+  const getCorrespondentById =  recordId => {
     const defaultParams = `_recordId=${recordId}`
     var parameters = defaultParams
-    getRequest({
+     getRequest({
       extension: RemittanceSettingsRepository.Correspondent.get,
       parameters: parameters
     })
@@ -141,13 +141,11 @@ return (
          endpointId={BusinessPartnerRepository.MasterData.snapshot}
           name='bpRef'
           required
-          label={labels.bpRef}
+          label={labels.BusinessPartner}
           valueField='reference'
           displayField='name'
-
           valueShow='bpRef'
           secondValueShow='bpName'
-
           form={formik}
           onChange={(event, newValue) => {
             if (newValue) {
@@ -193,7 +191,7 @@ return (
               maxAccess={maxAccess}
             />
           }
-          label={labels.isInactive}
+          label={labels.IsInactive}
         />
       </Grid>
 

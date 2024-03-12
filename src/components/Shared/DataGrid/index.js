@@ -285,6 +285,7 @@ return (
                   backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
 
                 }}
@@ -304,7 +305,9 @@ return (
                   height: '100%',
                   padding: '0 0px',
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  justifyContent: 'center',
+
                 }}
               >
                 <Component {...params} column={column} update={update} isLoading={isUpdatingField} />

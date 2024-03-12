@@ -2,7 +2,7 @@
 import { Checkbox } from '@mui/material'
 import { useGridApiContext } from '@mui/x-data-grid'
 
-export default function TextFieldEdit({ column: { props }, id, field, value }) {
+export default function TextFieldEdit({ id, field, value }) {
   const api = useGridApiContext()
 
   return (
@@ -10,14 +10,14 @@ export default function TextFieldEdit({ column: { props }, id, field, value }) {
     <Checkbox
     variant='rounded'
     name={field}
-autoFocus
+    autoFocus
     checked={value}
     value={value}
     onChange={e => {
       api.current.setEditCellValue({
         id,
         field,
-        value: e.target.value
+        value: e.target.checked
       })
     }}
      />

@@ -96,7 +96,7 @@ const Correspondent = () => {
     },
     {
       field: 'bpRef',
-      headerName: _labels.bpRef,
+      headerName: _labels.BusinessPartner,
       flex: 1
     },
     {
