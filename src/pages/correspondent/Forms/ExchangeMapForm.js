@@ -15,23 +15,38 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 const ExchangeMapForm= ({
   maxAccess,
   editMode,
   currency,
+  exchange,
   store,
   labels
 }) => {
 
-  const {recordId : currencyId , name:currencyName } = currency
+  const {recordId :currencyId , name:currencyName } = currency
+  const {recordId :exchangeId  } = exchange
+
   const {recordId, countries} = store
   const { postRequest, getRequest} = useContext(RequestsContext)
 
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    countries : store.countries,
+    validationSchema: yup.object({ plants: yup
+      .array()
+      .of(
+        yup.object().shape({
+          exchange: yup
+            .object()
+            .shape({
+              recordId: yup.string().required('country recordId is required')
+            })
+            .required('exchange is required'),
+        })
+      ).required('Operations array is required') }),
 
     // validate: values => {
     //   const isValid = values.plants.every(row => !!row.plantId)
@@ -71,20 +86,20 @@ const columns=[
 
   {
     component: 'textfield',
-    label: labels?.plantRef,
+    label: labels?.name,
     name: 'plantRef',
   },
 
   {
 
     component: 'resourcecombobox',
-    name: 'country',
-    label: labels.country,
+    name: 'exchange',
+    label: labels.ExchangeTable,
     props: {
-      endpointId: SystemRepository.Country.qry,
+      endpointId: MultiCurrencyRepository.ExchangeTable.qry,
       valueField: 'recordId',
       displayField: 'reference',
-      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
+      fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
       columnsInDropDown: [
         { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
@@ -94,7 +109,7 @@ const columns=[
   {
     component: 'textfield',
     label: labels?.name,
-    name: 'countryName',
+    name: 'exchangeName',
   }
 
 ]
@@ -134,10 +149,15 @@ const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
               countryId: countryId,
               plantId: plant.recordId,
               plantName: plant.name,
-              exchangeId: value.exchangeId,
-              plantRef: plant.reference,
-              exchangeRef: value.exchangeRef ? value.exchangeRef : '',
-              exchangeName: value.exchangeName
+              exchange :{
+                recordId: value.exchangeId,
+                reference: value.exchangeRef ? value.exchangeRef : '',
+                name: value.exchangeName
+              },
+
+              // exchangeId: value.exchangeId,
+              plantRef: plant.reference
+
             }
           })
           formik.setValues({  plants })
@@ -158,7 +178,11 @@ const postExchangeMaps = obj => {
     corId: recordId,
     countryId: formik.values.countryId,
     currencyId: currencyId,
-    correspondentExchangeMaps: obj.plants
+    correspondentExchangeMaps: obj.plants?.map(
+      ({ exchange, ...rest }) => ({
+         exchangeId: exchange?.recordId,
+         ...rest
+      }))
   }
 
   postRequest({

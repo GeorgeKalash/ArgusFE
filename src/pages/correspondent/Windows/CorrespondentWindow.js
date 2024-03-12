@@ -11,26 +11,10 @@ import CorrespondentCurrenciesForm from '../Forms/CorrespondentCurrenciesForm'
 const CorrespondentWindow = ({
   height,
   recordId,
-
-  // editMode,
-  // setEditMode,
-  lookupBpMasterData,
-  bpMasterDataStore,
-  setBpMasterDataStore,
-  correspondentValidation,
-
-  //countries tab - inline edit grid
-  countriesGridValidation,
-  countriesInlineGridColumns,
-
-  //currencies tab - inline edit grid
-  currenciesGridValidation,
-  currenciesInlineGridColumns,
-  corId,
   labels,
+  props,
   maxAccess
 }) => {
-
   const [activeTab , setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 

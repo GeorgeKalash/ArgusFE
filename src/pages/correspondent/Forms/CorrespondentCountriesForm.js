@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -9,6 +8,8 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
 
 const CorrespondentCountriesForm = ({
   store,
@@ -24,12 +25,19 @@ const CorrespondentCountriesForm = ({
     const formik = useFormik({
       enableReinitialize: true,
       validateOnChange: true,
+      validationSchema: yup.object({ countries: yup
+        .array()
+        .of(
+          yup.object().shape({
+            country: yup
+              .object()
+              .shape({
+                recordId: yup.string().required('Country recordId is required')
+              })
+              .required('Country is required'),
+          })
+        ).required('Operations array is required') }),
 
-      validate: values => {
-        const isValid = values.countries.every(row => !!row.country)
-
-        return isValid ? {} : { countries: Array(values.countries.length).fill({ countryId: 'Country ID is required' }) }
-      },
       initialValues: {
         countries: [
           {
@@ -51,12 +59,12 @@ const CorrespondentCountriesForm = ({
  const postCorrespondentCountries = obj => {
 
     const correspondentCountries= obj?.countries?.map(
-      ({ country, corId }) => ({
+      ({ country }) => ({
+        corId : recordId,
          countryId: country.recordId,
          countryName: country.name,
          countryRef: country.reference,
-         flName: country.flName,
-         corId,
+         flName: country.flName
       })
     )
 
@@ -142,7 +150,7 @@ return (
           resourceId={ResourceIds.Correspondent}
           maxAccess={maxAccess}
           editMode={editMode} >
-        <DataGrid
+          <DataGrid
             onChange={value => formik.setFieldValue('countries', value)}
             value={formik.values.countries}
             error={formik.errors.countries}
@@ -151,7 +159,7 @@ return (
                 component: 'resourcecombobox',
                 name: 'country',
                 label: labels.country,
-                props: {
+                 props: {
                   endpointId: SystemRepository.Country.qry,
                   valueField: 'recordId',
                   displayField: 'reference',

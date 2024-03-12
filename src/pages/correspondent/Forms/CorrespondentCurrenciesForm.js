@@ -12,6 +12,8 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
 
 const CorrespondentCurrenciesForm = ({
   store,
@@ -19,7 +21,7 @@ const CorrespondentCurrenciesForm = ({
   maxAccess,
   editMode
 }) => {
-
+console.log('labels-cureency', labels)
   const {recordId , counties} = store
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,6 +30,18 @@ const CorrespondentCurrenciesForm = ({
    const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
+    validationSchema: yup.object({ currencies: yup
+    .array()
+    .of(
+      yup.object().shape({
+        currency: yup
+          .object()
+          .shape({
+            recordId: yup.string().required('Currency recordId is required')
+          })
+          .required('Currency is required'),
+      })
+    ).required('Operations array is required') }),
 
     // validate: values => {
     //   const isValid = values.currencies.every(row => !!row.currency?.recordId)
@@ -94,8 +108,6 @@ const CorrespondentCurrenciesForm = ({
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
         displayField: 'reference',
-
-        // fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
@@ -106,13 +118,11 @@ const CorrespondentCurrenciesForm = ({
     {
       component: 'resourcecombobox',
       name: 'exchange',
-      label: labels.exchange,
+      label: labels.Exchange,
       props: {
         endpointId: MultiCurrencyRepository.ExchangeTable.qry,
         valueField: 'recordId',
         displayField: 'reference',
-
-        // fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
@@ -123,27 +133,27 @@ const CorrespondentCurrenciesForm = ({
     {
       component: 'checkbox',
        name: 'outward',
-      label: labels.outward
+      label: labels.Outwards
     },
 
     {
       component: 'checkbox',
-      label: labels.inward,
+      label: labels.Inward,
       name: 'inward'
     },
     {
       component: 'checkbox',
-      label: labels.bankDeposit,
+      label: labels.BankDeposit,
       name: 'bankDeposit'
     },
     {
       component: 'checkbox',
-      label: labels.deal,
+      label: labels.Deal,
       name: 'deal'
     },
     {
       component: 'checkbox',
-      label: labels.isInactive,
+      label: labels.IsInactive,
       name: 'isInactive'
     },
     {
@@ -151,18 +161,18 @@ const CorrespondentCurrenciesForm = ({
       label: labels.exchange,
       name: 'exchanges',
       onClick:  async (e, row) => {
-
      row?.currency &&   stack({
           Component: ExchangeMapForm,
           props: {
             labels: labels,
             recordId: recordId? recordId : null,
             store: store,
-            currency: row?.currency
+            currency: row?.currency,
+            exchange :  row?.exchange
           },
           width: 700,
           height: 600,
-          title: "Correspondent"
+          title: labels.SellingPriceExchangeMap
         })
       }
     },
@@ -178,14 +188,16 @@ const CorrespondentCurrenciesForm = ({
       .then(res => {
         if (res?.list?.length > 0) {
           formik.setValues({ currencies: res.list.map(
-            ({ currencyId,  currencyRef, exchangeId, exhangeRef, ...rest } , index) => ({
+            ({ currencyId,  currencyRef,currencyName, exchangeId, exchangeRef, exchangeName,...rest } , index) => ({
                id : index,
                currency : {
                 recordId: currencyId,
                 reference: currencyRef,
+                name: currencyName,
               }, exchange : {
                 recordId: exchangeId,
                 reference: exchangeRef,
+                name: exchangeName,
               },  ...rest
 }))})
         } else {
