@@ -41,6 +41,7 @@ export const ResourceLookup = ({
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
   const helperText = form?.touched && form.touched[check] && form.errors[check]
+  console.log('value' , firstValue)
 
   useEffect(() => {
     setStore([])
