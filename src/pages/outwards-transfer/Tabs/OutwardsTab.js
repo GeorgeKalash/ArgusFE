@@ -10,10 +10,16 @@ import * as yup from 'yup'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import FormShell from 'src/components/Shared/FormShell'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { useContext } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
-export default function OutwardsTab({ labels, recordId, maxAccess }) {
+export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWindowOpen }) {
   const [position, setPosition] = useState()
-  const [plantStore, setPlantStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
   const [agentsStore, setAgentsStore] = useState([])
   const [dispersalTypeStore, setDispersalTypeStore] = useState([])
@@ -21,6 +27,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess }) {
   const [productsStore, setProductsStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
   const [editMode, setEditMode] = useState(false)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -59,34 +66,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess }) {
     }),
     onSubmit: values => {}
   })
-
-  const fillCountryStore = () => {
-    var parameters = '_filter='
-    getRequest({
-      extension: RemittanceOutwardsRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCountryStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillPlantStore = () => {
-    var parameters = '_filter='
-    getRequest({
-      extension: SystemRepository.Plant.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setPlantStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   const onCountrySelection = countryId => {
     //get dispersals list
@@ -212,323 +191,328 @@ export default function OutwardsTab({ labels, recordId, maxAccess }) {
   }
 
   return (
-    <Grid container>
-      {/* First Column */}
-      <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-        <Grid item xs={12}>
-          <CustomComboBox
-            name='plantId'
-            label='Plant'
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            store={plantStore}
-            required
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            value={plantStore.filter(item => item.recordId === formik.values.plantId)[0]}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('plantId', newValue?.recordId)
-            }}
-            error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-            helperText={formik.touched.plantId && formik.errors.plantId}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomComboBox
-            name='countryId'
-            label='Country'
-            valueField='countryId'
-            displayField={['countryRef', 'countryName']}
-            columnsInDropDown={[
-              { key: 'countryRef', value: 'Reference' },
-              { key: 'countryName', value: 'Name' }
-            ]}
-            store={countryStore}
-            required
-            value={countryStore.filter(item => item.countryId === formik.values.countryId)[0]}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('countryId', newValue?.countryId)
-              if (newValue) onCountrySelection(newValue?.countryId)
-            }}
-            error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-            helperText={formik.touched.countryId && formik.errors.countryId}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomComboBox
-            name='dispersalType'
-            label='dispersal type'
-            valueField='dispersalType'
-            displayField='dispersalTypeName'
-            required // readOnly={formik.values.countryId != null ? false : true}
-            store={dispersalTypeStore}
-            value={dispersalTypeStore?.filter(item => item.dispersalType === formik.values.dispersalType)[0]}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('dispersalType', newValue?.dispersalType)
-              if (newValue) onDispersalSelection(formik.values.countryId, newValue?.dispersalType)
-            }}
-            error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
-            helperText={formik.touched.dispersalType && formik.errors.dispersalType}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomComboBox
-            name='currencyId'
-            label='Currency'
-            valueField='currencyId'
-            displayField={['currencyRef', 'currencyName']}
-            columnsInDropDown={[
-              { key: 'currencyRef', value: 'Reference' },
-              { key: 'currencyName', value: 'Name' }
-            ]}
-            required //readOnly={formik.values.dispersalType != null ? false : true}
-            store={currencyStore}
-            value={currencyStore?.filter(item => item.currencyId === formik.values.currencyId)[0]}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('currencyId', newValue?.currencyId)
-              if (newValue)
-                onCurrencySelection(formik.values.countryId, formik.values.dispersalType, newValue?.currencyId)
-            }}
-            error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-            helperText={formik.touched.currencyId && formik.errors.currencyId}
-          />
-        </Grid>
+    <FormShell resourceId={ResourceIds.Currencies} form={formik} height={480} maxAccess={maxAccess} editMode={editMode}>
+      <Grid container>
+        {/* First Column */}
+        <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Plant.qry}
+              name='plantId'
+              label='Plant'
+              required
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('plantId', newValue?.recordId)
+              }}
+              error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={RemittanceOutwardsRepository.Country.qry}
+              name='countryId'
+              label='Country'
+              required
+              displayField={['countryRef', 'countryName']}
+              columnsInDropDown={[
+                { key: 'countryRef', value: 'Reference' },
+                { key: 'countryName', value: 'Name' }
+              ]}
+              valueField='recordId'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('countryId', newValue?.countryId)
+                if (newValue) onCountrySelection(newValue?.countryId)
+              }}
+              error={formik.touched.plantId && Boolean(formik.errors.countryId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomComboBox
+              name='dispersalType'
+              label='dispersal type'
+              valueField='dispersalType'
+              displayField='dispersalTypeName'
+              required
+              readOnly={formik.values.countryId == ''}
+              store={dispersalTypeStore}
+              value={dispersalTypeStore?.filter(item => item.dispersalType === formik.values.dispersalType)[0]}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('dispersalType', newValue?.dispersalType)
+                if (newValue) onDispersalSelection(formik.values.countryId, newValue?.dispersalType)
+              }}
+              error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
+              helperText={formik.touched.dispersalType && formik.errors.dispersalType}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomComboBox
+              name='currencyId'
+              label='Currency'
+              valueField='currencyId'
+              displayField={['currencyRef', 'currencyName']}
+              columnsInDropDown={[
+                { key: 'currencyRef', value: 'Reference' },
+                { key: 'currencyName', value: 'Name' }
+              ]}
+              required //readOnly={formik.values.dispersalType != null ? false : true}
+              store={currencyStore}
+              value={currencyStore?.filter(item => item.currencyId === formik.values.currencyId)[0]}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('currencyId', newValue?.currencyId)
+                if (newValue)
+                  onCurrencySelection(formik.values.countryId, formik.values.dispersalType, newValue?.currencyId)
+              }}
+              error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              helperText={formik.touched.currencyId && formik.errors.currencyId}
+            />
+          </Grid>
 
-        <Grid item xs={12}>
-          <CustomComboBox
-            name='agentId'
-            label='Agent'
-            valueField='agentId'
-            displayField='agentName' // required={formik.values.dispersalType === 2 ? true : false} readOnly={formik.values.dispersalType != null && formik.values.dispersalType === 2 ? false : true}
-            store={agentsStore}
-            value={agentsStore?.filter(item => item.agentId === formik.values.agentId)[0]}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('agentId', newValue?.agentId)
-            }}
-            error={formik.touched.agentId && Boolean(formik.errors.agentId)}
-            helperText={formik.touched.agentId && formik.errors.agentId}
-          />
-        </Grid>
+          <Grid item xs={12}>
+            <CustomComboBox
+              name='agentId'
+              label='Agent'
+              valueField='agentId'
+              displayField='agentName' // required={formik.values.dispersalType === 2 ? true : false} readOnly={formik.values.dispersalType != null && formik.values.dispersalType === 2 ? false : true}
+              store={agentsStore}
+              value={agentsStore?.filter(item => item.agentId === formik.values.agentId)[0]}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('agentId', newValue?.agentId)
+              }}
+              error={formik.touched.agentId && Boolean(formik.errors.agentId)}
+              helperText={formik.touched.agentId && formik.errors.agentId}
+            />
+          </Grid>
 
-        <Grid item xs={12}>
-          <CustomTextField
-            name='idNo'
-            label='Id No'
-            value={formik.values.idNo}
-            readOnly={editMode}
-            required
-            onChange={formik.handleChange}
-            onBlur={() => {
-              if (formik.values.idNo) onIdNoBlur(formik.values.idNo)
-            }}
-            onClear={() => formik.setFieldValue('idNo', '')}
-            error={formik.touched.idNo && Boolean(formik.errors.idNo)}
-            helperText={formik.touched.idNo && formik.errors.idNo}
-            maxLength='15'
-            maxAccess={maxAccess}
-          />
+          <Grid item xs={12}>
+            <CustomTextField
+              name='idNo'
+              label='Id No'
+              value={formik.values.idNo}
+              readOnly={editMode}
+              required
+              onChange={formik.handleChange}
+              onBlur={() => {
+                if (formik.values.idNo) onIdNoBlur(formik.values.idNo)
+              }}
+              onClear={() => formik.setFieldValue('idNo', '')}
+              error={formik.touched.idNo && Boolean(formik.errors.idNo)}
+              helperText={formik.touched.idNo && formik.errors.idNo}
+              maxLength='15'
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='cl_reference'
+              label='Client reference'
+              value={formik.values.cl_reference}
+              readOnly
+              onChange={formik.handleChange}
+              error={formik.touched.cl_reference && Boolean(formik.errors.cl_reference)}
+              helperText={formik.touched.cl_reference && formik.errors.cl_reference}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='cl_name'
+              label='Client Name'
+              value={formik.values.cl_name}
+              readOnly
+              onChange={formik.handleChange}
+              error={formik.touched.cl_name && Boolean(formik.errors.cl_name)}
+              helperText={formik.touched.cl_name && formik.errors.cl_name}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='idType'
+              label='ID type'
+              value={formik.values.idType}
+              readOnly
+              onChange={formik.handleChange}
+              error={formik.touched.idType && Boolean(formik.errors.idType)}
+              helperText={formik.touched.idType && formik.errors.idType}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='nationalityId'
+              label='Nationality'
+              value={formik.values.nationalityId}
+              readOnly
+              onChange={formik.handleChange}
+              error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+              helperText={formik.touched.nationalityId && formik.errors.nationalityId}
+              maxAccess={maxAccess}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='cl_reference'
-            label='Client reference'
-            value={formik.values.cl_reference}
-            readOnly
-            onChange={formik.handleChange}
-            error={formik.touched.cl_reference && Boolean(formik.errors.cl_reference)}
-            helperText={formik.touched.cl_reference && formik.errors.cl_reference}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='cl_name'
-            label='Client Name'
-            value={formik.values.cl_name}
-            readOnly
-            onChange={formik.handleChange}
-            error={formik.touched.cl_name && Boolean(formik.errors.cl_name)}
-            helperText={formik.touched.cl_name && formik.errors.cl_name}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='idType'
-            label='ID type'
-            value={formik.values.idType}
-            readOnly
-            onChange={formik.handleChange}
-            error={formik.touched.idType && Boolean(formik.errors.idType)}
-            helperText={formik.touched.idType && formik.errors.idType}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='nationalityId'
-            label='Nationality'
-            value={formik.values.nationalityId}
-            readOnly
-            onChange={formik.handleChange}
-            error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
-            helperText={formik.touched.nationalityId && formik.errors.nationalityId}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-      </Grid>
-      {/* Second Column */}
-      <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-        <Grid item xs={12}>
-          <CustomTextField
-            position={position}
-            name='amount'
-            type='text'
-            label='amount'
-            value={formik.values.amount}
-            required
-            readOnly={
-              (formik.values.dispersalType == 2 && formik.values.agentId != null) ||
-              (formik.values.dispersalType == 1 && formik.values.agentId === null)
-                ? false
-                : true
-            }
-            maxAccess={maxAccess}
-            onChange={e => {
-              const input = e.target
-              const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-              // Save current cursor position
-              const currentPosition = input.selectionStart
-
-              // Update field value
-              formik.setFieldValue('amount', formattedValue)
-
-              // Calculate the new cursor position based on the formatted value
-              const newCursorPosition = currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-              setPosition(newCursorPosition)
-            }}
-            onBlur={() => {
-              if (formik.values.amount) onAmountDataFill(formik.values)
-            }}
-            onClear={() => formik.setFieldValue('amount', '')}
-            error={formik.touched.amount && Boolean(formik.errors.amount)}
-            helperText={formik.touched.amount && formik.errors.amount}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomLookup
-            name='corId'
-            label='Correspondent'
-            value={formik.values.corId}
-            required={false}
-            valueField='reference'
-            displayField='name'
-            firstFieldWidth='150px'
-            store={correspondentStore}
-            firstValue={formik.values.corRef}
-            secondValue={formik.values.corName}
-            setStore={setCorrespondentStore}
-            onLookup={lookupCorrespondent}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('corId', newValue?.recordId)
-                formik.setFieldValue('corRef', newValue?.reference)
-                formik.setFieldValue('corName', newValue?.name)
-              } else {
-                formik.setFieldValue('corId', null)
-                formik.setFieldValue('corRef', null)
-                formik.setFieldValue('corName', null)
+        {/* Second Column */}
+        <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+          <Grid item xs={12}>
+            <CustomTextField
+              position={position}
+              name='amount'
+              type='text'
+              label='amount'
+              value={formik.values.amount}
+              required
+              readOnly={
+                (formik.values.dispersalType == 2 && formik.values.agentId != null) ||
+                (formik.values.dispersalType == 1 && formik.values.agentId === null)
+                  ? false
+                  : true
               }
-            }}
-            error={formik.touched.corId && Boolean(formik.errors.corId)}
-            helperText={formik.touched.corId && formik.errors.corId}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Button onClick={() => setProductsWindowOpen(true)}>Open Popup</Button>
-        <Grid item xs={12}>
-          <CustomTextField
-            position={position}
-            name='fees'
-            type='text'
-            label='fees'
-            value={formik.values.fees}
-            required
-            readOnly
-            maxAccess={maxAccess}
-            onChange={e => {
-              const input = e.target
-              const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
+              maxAccess={maxAccess}
+              onChange={e => {
+                const input = e.target
+                const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
 
-              // Save current cursor position
-              const currentPosition = input.selectionStart
+                // Save current cursor position
+                const currentPosition = input.selectionStart
 
-              // Calculate the new cursor position based on the formatted value
-              const newCursorPosition = currentPosition + (formattedValue && formattedValue.length - input.value.length)
+                // Update field value
+                formik.setFieldValue('amount', formattedValue)
 
-              setPosition(newCursorPosition)
-            }}
-            error={formik.touched.fees && Boolean(formik.errors.fees)}
-            helperText={formik.touched.fees && formik.errors.fees}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            position={position}
-            name='baseAmount'
-            type='text'
-            label='Base Amount'
-            value={formik.values.baseAmount}
-            required
-            readOnly
-            maxAccess={maxAccess}
-            onChange={e => {
-              const input = e.target
-              const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
+                // Calculate the new cursor position based on the formatted value
+                const newCursorPosition =
+                  currentPosition + (formattedValue && formattedValue.length - input.value.length)
 
-              // Save current cursor position
-              const currentPosition = input.selectionStart
+                setPosition(newCursorPosition)
+              }}
+              onBlur={() => {
+                if (formik.values.amount) onAmountDataFill(formik.values)
+              }}
+              onClear={() => formik.setFieldValue('amount', '')}
+              error={formik.touched.amount && Boolean(formik.errors.amount)}
+              helperText={formik.touched.amount && formik.errors.amount}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomLookup
+              name='corId'
+              label='Correspondent'
+              value={formik.values.corId}
+              required={false}
+              valueField='reference'
+              displayField='name'
+              firstFieldWidth='150px'
+              store={correspondentStore}
+              firstValue={formik.values.corRef}
+              secondValue={formik.values.corName}
+              setStore={setCorrespondentStore}
+              onLookup={lookupCorrespondent}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  formik.setFieldValue('corId', newValue?.recordId)
+                  formik.setFieldValue('corRef', newValue?.reference)
+                  formik.setFieldValue('corName', newValue?.name)
+                } else {
+                  formik.setFieldValue('corId', null)
+                  formik.setFieldValue('corRef', null)
+                  formik.setFieldValue('corName', null)
+                }
+              }}
+              error={formik.touched.corId && Boolean(formik.errors.corId)}
+              helperText={formik.touched.corId && formik.errors.corId}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Button onClick={() => setProductsWindowOpen(true)}>Open Popup</Button>
+          <Grid item xs={12}>
+            <CustomTextField
+              position={position}
+              name='fees'
+              type='text'
+              label='fees'
+              value={formik.values.fees}
+              required
+              readOnly
+              maxAccess={maxAccess}
+              onChange={e => {
+                const input = e.target
+                const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
 
-              // Calculate the new cursor position based on the formatted value
-              const newCursorPosition = currentPosition + (formattedValue && formattedValue.length - input.value.length)
+                // Save current cursor position
+                const currentPosition = input.selectionStart
 
-              setPosition(newCursorPosition)
-            }}
-            error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
-            helperText={formik.touched.baseAmount && formik.errors.baseAmount}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            position={position}
-            name='net'
-            type='text'
-            label='net to pay'
-            value={formik.values.net}
-            required
-            readOnly
-            maxAccess={maxAccess}
-            onChange={e => {
-              const input = e.target
-              const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
+                // Calculate the new cursor position based on the formatted value
+                const newCursorPosition =
+                  currentPosition + (formattedValue && formattedValue.length - input.value.length)
 
-              // Save current cursor position
-              const currentPosition = input.selectionStart
+                setPosition(newCursorPosition)
+              }}
+              error={formik.touched.fees && Boolean(formik.errors.fees)}
+              helperText={formik.touched.fees && formik.errors.fees}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              position={position}
+              name='baseAmount'
+              type='text'
+              label='Base Amount'
+              value={formik.values.baseAmount}
+              required
+              readOnly
+              maxAccess={maxAccess}
+              onChange={e => {
+                const input = e.target
+                const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
 
-              // Calculate the new cursor position based on the formatted value
-              const newCursorPosition = currentPosition + (formattedValue && formattedValue.length - input.value.length)
+                // Save current cursor position
+                const currentPosition = input.selectionStart
 
-              setPosition(newCursorPosition)
-            }}
-            error={formik.touched.net && Boolean(formik.errors.net)}
-            helperText={formik.touched.net && formik.errors.net}
-          />
+                // Calculate the new cursor position based on the formatted value
+                const newCursorPosition =
+                  currentPosition + (formattedValue && formattedValue.length - input.value.length)
+
+                setPosition(newCursorPosition)
+              }}
+              error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
+              helperText={formik.touched.baseAmount && formik.errors.baseAmount}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              position={position}
+              name='net'
+              type='text'
+              label='net to pay'
+              value={formik.values.net}
+              required
+              readOnly
+              maxAccess={maxAccess}
+              onChange={e => {
+                const input = e.target
+                const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
+
+                // Save current cursor position
+                const currentPosition = input.selectionStart
+
+                // Calculate the new cursor position based on the formatted value
+                const newCursorPosition =
+                  currentPosition + (formattedValue && formattedValue.length - input.value.length)
+
+                setPosition(newCursorPosition)
+              }}
+              error={formik.touched.net && Boolean(formik.errors.net)}
+              helperText={formik.touched.net && formik.errors.net}
+            />
+          </Grid>
         </Grid>
       </Grid>
-    </Grid>
+    </FormShell>
   )
 }
