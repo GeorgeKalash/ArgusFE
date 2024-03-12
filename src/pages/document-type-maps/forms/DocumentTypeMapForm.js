@@ -130,7 +130,7 @@ export default function DocumentTypeMapForm ({
               <ResourceComboBox
                datasetId={DataSets.SYSTEM_FUNCTION}
                 name='fromFunctionId'
-                label='From Function'
+                label={labels.fromFunction}
                 valueField='key'
                 maxAccess={maxAccess}
                 displayField='value'
@@ -155,7 +155,7 @@ export default function DocumentTypeMapForm ({
               <ResourceComboBox
               endpointId={SystemRepository.DocumentType.qry}
                 name='fromDTId'
-                label='From Document Type'
+                label={labels.fromDocument}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
@@ -179,7 +179,7 @@ export default function DocumentTypeMapForm ({
             <ResourceComboBox
               datasetId={DataSets.SYSTEM_FUNCTION}
                 name='toFunctionId'
-                label='To Function'
+                label={labels.toFunction}
                 valueField='key'
                 displayField='value'
           
@@ -201,7 +201,7 @@ export default function DocumentTypeMapForm ({
             <ResourceComboBox
             endpointId={SystemRepository.DocumentType.qry}
                 name='dtId'
-                label='To Document Type'
+                label={labels.toDocument}
                 valueField='recordId'
                 displayField='reference'
           
@@ -230,7 +230,7 @@ export default function DocumentTypeMapForm ({
                     onChange={formik.handleChange}
                   />
                 }
-                label='Use Same Reference'
+                label={labels.useSameRef}
               />
             </Grid>
           </Grid>

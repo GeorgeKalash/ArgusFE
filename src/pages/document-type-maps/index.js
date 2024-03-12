@@ -61,22 +61,22 @@ const DocumentTypeMaps = () => {
   const columns = [
     {
       field: 'fromFunctionName',
-      headerName: 'From Function',
+      headerName: _labels.fromFunction,
       flex: 1
     },
     {
       field: 'fromDTName',
-      headerName: 'From Document',
+      headerName: _labels.fromDocument,
       flex: 1
     },
     {
       field: 'toFunctionName',
-      headerName: 'To Function',
+      headerName: _labels.toFunction,
       flex: 1
     },
     {
       field: 'toDTName',
-      headerName: 'To Document',
+      headerName: _labels.toDocument,
       flex: 1
     }
   ]

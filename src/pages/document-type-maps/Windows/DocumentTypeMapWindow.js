@@ -16,7 +16,7 @@ const DocumentTypeMapWindow = ({
     return (
         <Window
         id='DocumentTypeMapWindow'
-        Title={"labels.DocumentTypeMap"}
+        Title={labels.documentTypeMap}
         controlled={true}
         onClose={onClose}
         width={600}
