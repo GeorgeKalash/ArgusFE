@@ -87,7 +87,7 @@ function FormField({ type, name, Component, valueField, onFocus, language, ...re
         formik.setFieldValue(name, '')
       }}
 
-      // }}
+
       form={formik}
     />
   )
@@ -230,40 +230,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
-
-    // validate: values => {
-    //   const errors = {}
-
-    //   const type = values.rows2 && values.rows2.every(row => !!row.type)
-    //   const amount = values.rows2 && values.rows2.every(row => !!row.amount)
-    //   const fcAmount = values.rows && values.rows.every(row => !!row.fcAmount)
-    //   const lcAmount = values.rows && values.rows.every(row => !!row.lcAmount)
-    //   const exRate = values.rows && values.rows.every(row => !!row.exRate)
-    //   if (values.rows) {
-    //     values.rows.forEach((row, index) => {
-    //       if (row.exRate > row.maxRate || row.exRate < row.minRate) {
-    //         if (!errors.rows[index]) {
-    //           errors.rows = {}
-    //         }
-
-    //         errors.rows[index].exRate = 'exRate must be between minRate and maxRate' + row.exRate
-    //       }
-    //     })
-    //   }
-    //   if (!exRate && !lcAmount && !fcAmount)
-    //     errors.rows = Array(values.rows && values.rows.length).fill({
-    //       lcAmount: 'field is required',
-    //       fcAmount: 'field is required',
-    //       exRate: 'field is required'
-    //     })
-    //   if (!type && !amount)
-    //     errors.rows2 = Array(values.rows2 && values.rows2.length).fill({
-    //       amount: amount,
-    //       type: exRate
-    //     })
-
-    //   return errors
-    // },
     validationSchema: yup.object({
       date: yup.string().required(),
       id_type: yup.number().required(),
@@ -313,7 +279,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     onSubmit
   })
 
-// console.log(formik)
   async function setOperationType(type) {
     if (type === '3502' || type === '3503') {
       const res = await getRequest({
@@ -485,18 +450,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   const total = formik.values.rows.reduce((acc, { lcAmount }) => {
-    // Convert lcAmount to string and replace commas
     const amountString = String(lcAmount || 0).replaceAll(',', '')
 
-    // Parse the amount and add to accumulator
     return acc + parseFloat(amountString) || 0
   }, 0)
 
   const receivedTotal = formik.values.rows2.reduce((acc, { amount }) => {
-    // Convert lcAmount to string and replace commas
     const amountString = String(amount || 0).replaceAll(',', '')
 
-    // Parse the amount and add to accumulator
     return acc + parseFloat(amountString) || 0
   }, 0)
 
@@ -645,11 +606,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         extension: RTCLRepository.Client.get,
         parameters: `_clientId=${clientId}`
       })
-
-      // setIDInfoAutoFilled(false)
       setInfoAutoFilled(false)
-
-      // Check if the response status is OK (200)
       const clientInfo = response && response.record
       if (!!clientInfo) {
         formik.setFieldValue('firstName', clientInfo.firstName)
@@ -666,7 +623,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         formik.setFieldValue('sponsor', clientInfo.sponsorName)
         formik.setFieldValue('source_of_income', clientInfo.incomeSourceId)
 
-        // setIDInfoAutoFilled(true)
         setInfoAutoFilled(true)
       }
     } catch (error) {
@@ -820,13 +776,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   formik.values.functionId && (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
 
-                // idName='seqNo'
                 columns={[
-                  // {
-                  //   component: 'id',
-                  //   name: 'id',
-                  //   width: 50
-                  // },
                   {
                     component: 'resourcecombobox',
                     label: labels.currency,
@@ -842,9 +792,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     },
                     async onChange({ row: { update, oldRow, newRow } }) {
 
-                        // if (!newRow.currency || oldRow.currency.recordId === newRow.currency.recordId) return
-                        //  console.log( oldRow, newRow)
-                        // newRow.currency.recordId
                         if(!newRow?.currency?.recordId){
                         return;
                         }
@@ -976,7 +923,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                                 fetchClientInfo({ clientId: IDInfo.clientId })
                               }
 
-                              // setInfoAutoFilled(true)
                             }
                           })
                           .catch(error => {
@@ -1002,8 +948,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onClear={() => formik.setFieldValue('birth_date', '')}
                     error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
                     readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
-
-                    // helperText={formik.touched.birth_date && formik.errors.birth_date}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -1058,8 +1002,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('expiry_date', '')}
                     error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
-
-                    // helperText={formik.touched.expiry_date && formik.errors.expiry_date}
                     readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                     maxAccess={maxAccess}
                   />
@@ -1276,13 +1218,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 value={formik.values.rows2}
                 error={formik.errors.rows2}
 
-                // idName='seqNo'
                 columns={[
-                  // {
-                  //   component: 'id',
-                  //   name: 'id',
-                  //   width: 1
-                  // },
+
                   {
                     component: 'resourcecombobox',
                     label: labels.type,
