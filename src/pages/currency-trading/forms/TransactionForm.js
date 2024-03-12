@@ -1265,6 +1265,7 @@ return acc + parseFloat(amountString) || 0
                       endpointId: CashBankRepository.CreditCard.qry,
                       valueField: 'recordId',
                       displayField: 'name',
+
                     }
 
                   },
