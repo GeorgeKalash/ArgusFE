@@ -101,6 +101,15 @@ const OutwardsTransfer = () => {
     setSelectedRecordId(obj.recordId)
   }
 
+  const handleProductSelection = () => {
+    const selectedRowData = productsStore?.list.find(row => row.productId === selectedRow)
+    formik.setFieldValue('productId', selectedRowData?.productId)
+    formik.setFieldValue('fees', selectedRowData?.fees)
+    formik.setFieldValue('baseAmount', selectedRowData?.baseAmount)
+    formik.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount)
+    setProductsWindowOpen(false)
+  }
+
   return (
     <>
       <Box>
