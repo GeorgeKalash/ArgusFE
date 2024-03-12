@@ -231,7 +231,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
                 formik.setFieldValue('countryId', newValue?.countryId)
                 if (newValue) onCountrySelection(newValue?.countryId)
               }}
-              error={formik.touched.plantId && Boolean(formik.errors.countryId)}
+              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
             />
           </Grid>
           <Grid item xs={12}>
@@ -262,7 +262,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
                 { key: 'currencyRef', value: 'Reference' },
                 { key: 'currencyName', value: 'Name' }
               ]}
-              required //readOnly={formik.values.dispersalType != null ? false : true}
+              required
+              readOnly={formik.values.dispersalType == ''}
               store={currencyStore}
               value={currencyStore?.filter(item => item.currencyId === formik.values.currencyId)[0]}
               onChange={(event, newValue) => {
@@ -280,7 +281,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
               name='agentId'
               label='Agent'
               valueField='agentId'
-              displayField='agentName' // required={formik.values.dispersalType === 2 ? true : false} readOnly={formik.values.dispersalType != null && formik.values.dispersalType === 2 ? false : true}
+              displayField='agentName'
+              required={formik.values.dispersalType === 2}
+              readOnly={formik.values.dispersalType !== 2}
               store={agentsStore}
               value={agentsStore?.filter(item => item.agentId === formik.values.agentId)[0]}
               onChange={(event, newValue) => {
