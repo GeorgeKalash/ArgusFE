@@ -484,19 +484,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   const total = formik.values.rows.reduce((acc, { lcAmount }) => {
-    // Convert lcAmount to string and replace commas
-    const amountString = String(lcAmount || 0).replaceAll(',', '')
-
-    // Parse the amount and add to accumulator
-    return acc + parseFloat(amountString) || 0
+    return acc + lcAmount
   }, 0)
 
   const receivedTotal = formik.values.rows2.reduce((acc, { amount }) => {
-    // Convert lcAmount to string and replace commas
-    const amountString = String(amount || 0).replaceAll(',', '')
-
-    // Parse the amount and add to accumulator
-    return acc + parseFloat(amountString) || 0
+    return acc + amount
   }, 0)
 
   const Balance = total - receivedTotal
