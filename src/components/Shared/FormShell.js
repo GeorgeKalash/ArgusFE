@@ -48,16 +48,25 @@ export default function FormShell({
     ? false
     : true
 
-  function handleReset() {
-    initialValues && form.setValues(initialValues)
-    if (form1) {
-      form1.setValues(initialValues1)
+    function handleReset() {
+      const resetValues = {}; 
+      form.resetForm({
+        values: resetValues,
+      });
+      if (form1) {
+        const resetValues1 = {}; 
+        form1.resetForm({
+          values: resetValues1,
+        });
+      }
+      if (setIDInfoAutoFilled) {
+        setIDInfoAutoFilled(false);
+      }
+    
+      if (typeof setEditMode === 'function') {
+        setEditMode(false);
+      }
     }
-    if (setIDInfoAutoFilled) {
-      setIDInfoAutoFilled(false)
-    }
-    setEditMode(false)
-  }
 
   return (
     <>
@@ -66,7 +75,7 @@ export default function FormShell({
         <WindowToolbar
           print={print}
           onSave={() => form.handleSubmit()}
-          onClear={() => (initialValues ? handleReset() : false)}
+          onClear={() => handleReset()}
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
