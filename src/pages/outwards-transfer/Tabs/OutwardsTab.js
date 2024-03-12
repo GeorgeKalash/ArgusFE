@@ -76,7 +76,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       parameters: parameters
     })
       .then(res => {
-        setDispersalTypeStore(res)
+        setDispersalTypeStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error.response.data)
@@ -91,7 +91,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       parameters: parameters
     })
       .then(res => {
-        setCurrencyStore(res)
+        setCurrencyStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -106,7 +106,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       parameters: parameters
     })
       .then(res => {
-        setAgentsStore(res)
+        setAgentsStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -131,7 +131,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       parameters: parameters
     })
       .then(res => {
-        setProductsStore(res)
+        setProductsStore(res.list)
       })
       .catch(error => {
         setErrorMessage(error)
