@@ -13,33 +13,27 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { getNewSalesPerson, populateSalesPerson } from 'src/Models/Sales/SalesPerson'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { CommonContext } from 'src/providers/CommonContext'
 
 // ** Windows
-import CurrencyWindow from './Windows/CurrencyWindow'
+import SalesPersonWindow from './Windows/SalesPersonWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
-
-const Currencies = () => {
+const SalesPerson = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
+  const [activeTab, setActiveTab] = useState(0)
   const [windowOpen, setWindowOpen] = useState(false)
+  const [editMode, setEditMode] = useState(false)
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-
-  async function fetchGridData() {
-
-    return await getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: `_filter=`
-    })
-
-  }
 
   const {
     query: { data },
@@ -47,55 +41,78 @@ const Currencies = () => {
     refetch,
     access
   } = useResourceQuery({
-    queryFn:  fetchGridData,
-    endpointId: SystemRepository.Currency.qry,
-    datasetId: ResourceIds.Currencies
+    queryFn: fetchGridData,
+    endpointId: SaleRepository.SalesPerson.qry,
+    datasetId: ResourceIds.SalesPerson
   })
-
-  // const invalidate = useInvalidate({
-  //   endpointId: SystemRepository.Currency.qry
-  // })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'spRef',
+      headerName: _labels[1],
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
-      flex: 1
-    },
-    ,
-    {
-      field: 'flName',
-      headerName: _labels.foreignLanguage,
+      headerName: _labels[2],
       flex: 1
     },
     {
-      field: 'currencyTypeName',
-      headerName: _labels.currencyType,
+      field: 'cellPhone',
+      headerName: _labels[3],
+      flex: 1
+    },
+    {
+      field: 'username',
+      headerName: _labels[5],
+      flex: 1
+    },
+    {
+      field: 'commissionPct',
+      headerName: _labels[4],
       flex: 1
     }
   ]
 
-  const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.Currency.del,
-      record: JSON.stringify(obj)
+  const tabs = [
+    { label: _labels[8] },
+    { label: _labels[9], disabled: !editMode },
+    { label: _labels[15], disabled: !editMode }
+  ]
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: SaleRepository.SalesPerson.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
-    refresh()
-    toast.success('Record Deleted Successfully')
   }
+
+  const invalidate = useInvalidate({
+    endpointId: SaleRepository.SalesPerson.qry
+  })
 
   const add = () => {
     setWindowOpen(true)
+    setActiveTab(0)
+    setEditMode(false)
   }
 
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
+    setActiveTab(0)
+    setEditMode(true)
+  }
+
+  const del = async obj => {
+    await postRequest({
+      extension: SaleRepository.SalesPerson.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
 
   return (
@@ -108,21 +125,27 @@ const Currencies = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          refetch={refetch}
           isLoading={false}
           pageSize={50}
+          refetch={refetch}
           paginationType='client'
           maxAccess={access}
         />
       </Box>
       {windowOpen && (
-        <CurrencyWindow
+        <SalesPersonWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
           }}
           labels={_labels}
           maxAccess={access}
+          activeTab={activeTab}
+          tabs={tabs}
+          editMode={editMode}
+          setEditMode={setEditMode}
+          setErrorMessage={setErrorMessage}
+          setActiveTab={setActiveTab}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
         />
@@ -132,4 +155,4 @@ const Currencies = () => {
   )
 }
 
-export default Currencies
+export default SalesPerson

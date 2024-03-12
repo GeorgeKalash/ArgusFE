@@ -88,7 +88,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId ,editMode ,se
     <FormShell
       resourceId={ResourceIds.CommissionSchedule}
       form={formik}
-      height={300}
+      height={250}
       maxAccess={maxAccess}
       editMode={editMode}
     >

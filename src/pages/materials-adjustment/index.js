@@ -47,6 +47,7 @@ const MaterialsAdjustment = () => {
     query: { data },
     labels: _labels,
     paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -137,6 +138,7 @@ const MaterialsAdjustment = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          refetch={refetch}
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}
