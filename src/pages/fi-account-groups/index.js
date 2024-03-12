@@ -14,7 +14,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 // ** Windows
 import AccountGroupsWindow from './Windows/AccountGroupsWindow'
@@ -39,23 +39,26 @@ const AccountGroups = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: GeneralLedgerRepository.GLAccountGroups.page,
+      extension: FinancialRepository.Group.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
   }
 
+
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: GeneralLedgerRepository.GLAccountGroups.page,
-    datasetId: ResourceIds.GLAccountGroups
+    endpointId: FinancialRepository.Group.qry,
+    datasetId: ResourceIds.FlAccountGroups
   })
 
   const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.GLAccountGroups.page
+    endpointId: FinancialRepository.Group.qry
   })
 
   const columns = [
@@ -68,7 +71,11 @@ const AccountGroups = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
+    },{
+        field: 'nraDescription',
+        headerName: _labels.numberRange,
+        flex: 1
+      },
     
   ]
 
@@ -84,7 +91,7 @@ const AccountGroups = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: GeneralLedgerRepository.GLAccountGroups.del,
+      extension: FinancialRepository.Group.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -104,7 +111,9 @@ const AccountGroups = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Box>

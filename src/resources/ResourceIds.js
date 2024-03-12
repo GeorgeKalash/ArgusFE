@@ -23,6 +23,7 @@ export const ResourceIds = {
   Correspondent: 36101,
   RelationType: 35101,
   Profession: 36116,
+  FlAccountGroups:31101,
   IntegrationPostTypes: 30100,
   SalaryRange: 36118,
   CorrespondentAgents: 36102,
