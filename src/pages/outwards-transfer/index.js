@@ -95,9 +95,12 @@ const OutwardsTransfer = () => {
 
   const delOutwards = obj => {}
 
-  const addOutwards = () => {}
+  const addOutwards = () => {
+    setWindowOpen(true)
+  }
 
   const editOutwards = obj => {
+    setWindowOpen(true)
     setSelectedRecordId(obj.recordId)
   }
 

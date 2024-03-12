@@ -13,8 +13,36 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 
 export default function OutwardsTab({ labels, recordId, maxAccess }) {
   const [position, setPosition] = useState()
+  const [plantStore, setPlantStore] = useState([])
+  const [countryStore, setCountryStore] = useState([])
+  const [agentsStore, setAgentsStore] = useState([])
+  const [dispersalTypeStore, setDispersalTypeStore] = useState([])
+  const [correspondentStore, setCorrespondentStore] = useState([])
+  const [productsStore, setProductsStore] = useState([])
+  const [currencyStore, setCurrencyStore] = useState([])
+  const [editMode, setEditMode] = useState(false)
+
+  const [initialValues, setInitialData] = useState({
+    recordId: null,
+    plantId: '',
+    countryId: '',
+    dispersalType: '',
+    currencyId: '',
+    agentId: '',
+    idNo: '',
+    cl_reference: '',
+    cl_name: '',
+    idType: '',
+    nationalityId: '',
+    amount: '',
+    corId: '',
+    fees: '',
+    baseAmount: '',
+    net: ''
+  })
 
   const formik = useFormik({
+    initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -105,10 +133,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess }) {
       })
   }
 
-  //_type=2&_functionId=1&_plantId=1&_countryId=124&_currencyId=90&_dispersalType=2&_amount=200&_agentId=4
   const onAmountDataFill = formFields => {
     //get products list
-    // type, functionId, plantId, countryId, dispersalType, currencyId, amount, agentId
     var type = 2
     var functionId = 1
     var plant = formFields?.plantId
@@ -236,8 +262,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess }) {
             label='dispersal type'
             valueField='dispersalType'
             displayField='dispersalTypeName'
-            required
-            readOnly={formik.values.countryId != null ? false : true}
+            required // readOnly={formik.values.countryId != null ? false : true}
             store={dispersalTypeStore}
             value={dispersalTypeStore?.filter(item => item.dispersalType === formik.values.dispersalType)[0]}
             onChange={(event, newValue) => {
@@ -258,8 +283,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess }) {
               { key: 'currencyRef', value: 'Reference' },
               { key: 'currencyName', value: 'Name' }
             ]}
-            required
-            readOnly={formik.values.dispersalType != null ? false : true}
+            required //readOnly={formik.values.dispersalType != null ? false : true}
             store={currencyStore}
             value={currencyStore?.filter(item => item.currencyId === formik.values.currencyId)[0]}
             onChange={(event, newValue) => {
@@ -277,9 +301,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess }) {
             name='agentId'
             label='Agent'
             valueField='agentId'
-            displayField='agentName'
-            required={formik.values.dispersalType === 2 ? true : false}
-            readOnly={formik.values.dispersalType != null && formik.values.dispersalType === 2 ? false : true}
+            displayField='agentName' // required={formik.values.dispersalType === 2 ? true : false} readOnly={formik.values.dispersalType != null && formik.values.dispersalType === 2 ? false : true}
             store={agentsStore}
             value={agentsStore?.filter(item => item.agentId === formik.values.agentId)[0]}
             onChange={(event, newValue) => {
