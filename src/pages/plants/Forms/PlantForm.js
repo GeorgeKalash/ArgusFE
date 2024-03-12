@@ -199,26 +199,7 @@ return (
             maxAccess={maxAccess}
           />
         </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            name='segmentRef'
-            label={_labels.segment}
-            valueField='reference'
-            displayField='reference'
-            endpointId={FinancialRepository.Segment.qry}
-            values={ formik.values}
-            columnsInDropDown= {[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' },
-            ]}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('segmentRef', newValue?.reference)
-            }}
-            error={formik.touched.segmentRef && Boolean(formik.errors.segmentRef)}
-            helperText={formik.touched.segmentRef && formik.errors.segmentRef}
-            maxAccess={maxAccess}
-          />
-        </Grid>
+
       </Grid>
     </FormShell>
   )

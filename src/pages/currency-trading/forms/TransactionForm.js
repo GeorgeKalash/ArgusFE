@@ -313,7 +313,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     onSubmit
   })
 
-// console.log(formik)
   async function setOperationType(type) {
     if (type === '3502' || type === '3503') {
       const res = await getRequest({
@@ -842,9 +841,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     },
                     async onChange({ row: { update, oldRow, newRow } }) {
 
-                        // if (!newRow.currency || oldRow.currency.recordId === newRow.currency.recordId) return
-                        //  console.log( oldRow, newRow)
-                        // newRow.currency.recordId
+
                         if(!newRow?.currency?.recordId){
                         return;
                         }
