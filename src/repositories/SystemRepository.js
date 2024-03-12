@@ -127,10 +127,10 @@ export const SystemRepository = {
   },
   State: {
     qry: service + 'qryST',
+    page: service + 'pageST',
     get: service + 'getST',
     set: service + 'setST',
-    del: service + 'delST',
-    page: service + 'pageST'
+    del: service + 'delST'
   },
   Default: {
     get: service + 'getDE'
