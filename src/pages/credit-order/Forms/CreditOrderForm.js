@@ -646,6 +646,28 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
+  
+  const actions = [
+    {
+      action: onClose,
+      title: 'close',
+      isDisabled: isClosed || !editMode,
+      isHidden: isClosed,
+      color: 'transparent',
+      colorHover: 'transparent',
+      border: '1px solid #01a437'
+    },
+    {
+      action: onReopen,
+      title: 'reopen',
+      isDisabled: !isClosed || !editMode,
+      isHidden: !isClosed,
+      color: 'transparent',
+      colorHover: 'transparent',
+      border: '1px solid #000000'
+    },
+  ]
+
 
   return (
     <>
@@ -658,15 +680,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         }}
       />
       <FormShell
+        actions={actions}
         resourceId={ResourceIds.CreditOrder}
         form={formik}
         maxAccess={maxAccess}
         editMode={editMode}
-        onClose={onClose}
-        onReopen={onReopen}
-        isClosed={isClosed}
-        hiddenReopen={!isClosed}
-        hiddenClose={isClosed}
         hiddenPost={true}
         visibleTFR={true}
         onTFR={onTFR}
