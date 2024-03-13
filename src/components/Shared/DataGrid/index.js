@@ -292,7 +292,7 @@ return (
                   backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  justifyContent: column.component === 'checkbox' && 'center',
                   border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
 
                 }}
@@ -313,7 +313,7 @@ return (
                   padding: '0 0px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  justifyContent: column.component === 'checkbox' && 'center',
 
                 }}
               >

@@ -94,7 +94,7 @@ const columns=[
 
     component: 'resourcecombobox',
     name: 'exchange',
-    label: labels.ExchangeTable,
+    label: labels.exchangeTable,
     props: {
       endpointId: MultiCurrencyRepository.ExchangeTable.qry,
       valueField: 'recordId',

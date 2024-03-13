@@ -68,7 +68,6 @@ const Correspondent = () => {
 
    })
 
-console.log("label" , _labels)
   async function fetchGridData(options={}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -138,7 +137,7 @@ console.log("label" , _labels)
         labels: _labels,
         recordId: recordId? recordId : null,
       },
-      width: 1000,
+      width: 1200,
       height: 600,
       title: "Correspondent"
     })

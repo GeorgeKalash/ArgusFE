@@ -111,8 +111,10 @@ console.log('labels-cureency', labels)
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
-        ]
-      }
+        ],
+        displayFieldWidth: 3
+      },
+
     },
 
     {
@@ -126,7 +128,9 @@ console.log('labels-cureency', labels)
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
-        ]
+        ],
+        displayFieldWidth: 3
+
       }
     },
 
@@ -158,8 +162,10 @@ console.log('labels-cureency', labels)
     },
     {
       component: 'button',
+
       label: labels.exchange,
-      name: 'exchanges',
+
+      // name: 'exchanges',
       onClick:  async (e, row) => {
      row?.currency &&   stack({
           Component: ExchangeMapForm,

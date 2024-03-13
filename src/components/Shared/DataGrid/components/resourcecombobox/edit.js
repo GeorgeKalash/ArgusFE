@@ -1,7 +1,7 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ column: { props }, id, field, value , update}) {
+export default function ResourceComboBoxEdit({ column: { props }, id, field, value , displayFieldWidth, update}) {
   const api = useGridApiContext()
 
 return (
@@ -14,6 +14,7 @@ return (
       autoFocus
       columnsInDropDown={props.columnsInDropDown}
       displayField={props.displayField}
+      displayFieldWidth={props.displayFieldWidth}
       label={''}
       dataGrid={true}
       readOnly={props?.readOnly}
@@ -33,7 +34,6 @@ return (
               }
           }
         }
-
 
       }}
     />
