@@ -8,11 +8,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { CommonContext } from 'src/providers/CommonContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateToApi, formatDateToApiFunction, formatDateDefault } from 'src/lib/date-helper'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -24,36 +22,34 @@ import { useResourceQuery } from 'src/hooks/resource'
 
 const ClientsCorporateList = () => {
   const { stack } = useWindow()
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
 
   //control
-
   const [editMode, setEditMode] = useState(null)
-  const [referenceRequired, setReferenceRequired] = useState(true)
-
 
   //stores
   const [errorMessage, setErrorMessage] = useState(null)
 
-
   const {
     query: { data },
-    search,
-    clear,
+    filterBy,
+    clearFilter,
     labels: _labels,
     access
   } = useResourceQuery({
     endpointId: CTCLRepository.ClientCorporate.snapshot,
     datasetId: ResourceIds.ClientCorporate,
-    search: {
+    filter: {
       endpointId: CTCLRepository.ClientCorporate.snapshot,
-      searchFn: fetchWithSearch,
+      filterFn: fetchWithSearch,
+      default : {category : 2}
     }
   })
-  async function fetchWithSearch({options = {} , qry}) {
+
+  async function fetchWithSearch({options = {}, filters}) {
     return await getRequest({
           extension: CTCLRepository.ClientCorporate.snapshot,
-          parameters: `_filter=${qry}&_category=2`
+          parameters: `_filter=${filters.qry}&_category=2`
         })
   }
 
@@ -124,147 +120,6 @@ const ClientsCorporateList = () => {
 
   ]
 
-// const getPlantId = ()=>{
-
-//   const userData = window.sessionStorage.getItem('userData') ? JSON.parse( window.sessionStorage.getItem('userData')) : null
-//   var parameters = `_userId=${userData && userData.userId}&_key=plantId`
-//   getRequest({
-//     extension: SystemRepository.SystemPlant.get,
-//     parameters: parameters
-//   })
-//     .then(res => {
-
-
-//       clientCorporateFormValidation.setFieldValue('plantId', res.record.value)
-
-
-//     })
-//     .catch(error => {
-//       setErrorMessage(error)
-//     })
-
-// }
-
-
-
-  const clientCorporateFormValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: false,
-    validateOnBlur: true,
-
-    validationSchema: yup.object({
-       reference: referenceRequired && yup.string().required("This field is required"),
-
-
-      expiryDate: yup.string().required("This field is required"),
-      countryId: yup.string().required("This field is required"),
-      cityId: yup.string().required("This field is required"),
-      name1: yup.string().required("This field is required"),
-
-      name: yup.string().required("This field is required"),
-      nationalityId: yup.string().required("This field is required"),
-      cellPhone: yup.string().required("This field is required"),
-      capital: yup.string().required("This field is required"),
-      lgsId: yup.string().required("This field is required"),
-      industry: yup.string().required("This field is required"),
-      activityId: yup.string().required("This field is required"),
-
-      street1:  yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
-    }),
-    onSubmit: (values) => {
-      console.log("values" + values);
-       postRtDefault(values);
-    },
-  });
-
-      // console.log("values" + values);
-
-  const postRtDefault = (obj) => {
-
-     const date = new Date()
-
-    //ClientCorporate
-
-    const obj1 = {
-      clientId: 0,
-      lgsId: obj.lgsId,
-      industry: obj.industry,
-      activityId:obj.activityId,
-      capital:obj.capital,
-      trading:obj.trading,
-      outward:obj.outward,
-      inward:obj.inward,
-
-    };
-
-
-    //ClientMaster
-    const obj2 = {
-      category: 2,
-      reference : obj.reference,
-      name: obj.name1,
-      flName: obj.flName,
-      nationalityId : obj.nationalityId,
-      status: 1,
-      plantId: clientCorporateFormValidation.values.plantId ,
-      cellPhone : obj.cellPhone,
-      oldReference : obj.oldReference,
-      otp : obj.otpVerified,
-      ExpiryDate: formatDateToApiFunction(obj.expiryDate),
-      createdDate:  formatDateToApi(date.toISOString()),
-    };
-
-// Address
-     const obj3 = {
-      name: obj.name,
-      countryId: obj.countryId,
-      stateId: obj.stateId,
-      cityId: obj.cityId,
-      cityName: obj.cityName,
-      street1: obj.street1,
-      street2: obj.street2,
-      email1: obj.email1,
-      email2: obj.email2,
-      phone: obj.phone,
-      phone2: obj.phone2,
-      phone3: obj.phone3,
-      addressId: obj.addressId,
-      postalCode:obj.postalCode,
-      cityDistrictId: obj.cityDistrictId,
-      bldgNo: obj.bldgNo,
-      unitNo: obj.unitNo,
-      subNo: obj.subNo
-     }
-
-
-
-    const data = {
-      clientMaster: obj2,
-      clientCorporate: obj1,
-      address:obj3,
-
-
-    };
-
-    postRequest({
-      extension: CTCLRepository.ClientCorporate.set2,
-      record: JSON.stringify(data),
-    })
-      .then((res) => {
-        if (res){
-         toast.success("Record Successfully");
-         clientCorporateFormValidation.setFieldValue('clientId' , res.recordId)
-
-        setShowOtpVerification(true)
-        setEditMode(true)
-        getClient(res.recordId)
-        }
-      })
-      .catch((error) => {
-        setErrorMessage(error);
-      });
-  };
 
 
   const addClient = async (obj) => {
@@ -277,7 +132,6 @@ const ClientsCorporateList = () => {
 
         openForm('')
 
-        // setWindowOpen(true);
       } else {
         setErrorMessage({ error: 'The user does not have a default plant' });
       }
@@ -338,33 +192,6 @@ const ClientsCorporateList = () => {
 
 
 
-
-  // const search = inp => {
-  //   setGridData({count : 0, list: [] , message :"",  statusId:1})
-  //    const input = inp
-  //    console.log({list: []})
-
-  //    if(input){
-  //   var parameters = `_size=30&_startAt=0&_filter=${input}&_category=2`
-
-  //   getRequest({
-  //     extension: CTCLRepository.ClientCorporate.snapshot,
-  //     parameters: parameters
-  //   })
-  //     .then(res => {
-  //       setGridData(res)
-  //     })
-  //     .catch(error => {
-  //       setErrorMessage(error)
-  //     })
-
-  //   }else{
-
-  //     setGridData({count : 0, list: [] , message :"",  statusId:1})
-  //   }
-
-  // }
-
 return (
     <>
       <Box
@@ -376,7 +203,14 @@ return (
       >
 
 
-<GridToolbar onAdd={addClient} maxAccess={access}    onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}  />
+<GridToolbar onAdd={addClient} maxAccess={access}  onSearch={value => {
+              filterBy('qry', value)
+            }}
+            onSearchClear={() => {
+              clearFilter('qry')
+            }}
+
+            labels={_labels}  inputSearch={true}  />
 
 
         <Table
