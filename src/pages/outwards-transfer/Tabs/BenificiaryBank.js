@@ -10,7 +10,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
-export default function BenificiaryBank() {
+export default function BenificiaryBank({ maxAccess }) {
   const [initialValues, setInitialData] = useState({
     recordId: null,
     name: '',
@@ -29,7 +29,6 @@ export default function BenificiaryBank() {
     routingNumber: '',
     iban: '',
     isBlocked: false,
-    stopDate: '',
     stopReason: ''
   })
 
@@ -66,7 +65,8 @@ export default function BenificiaryBank() {
               required
               onChange={formik.handleChange}
               error={formik.touched.name && Boolean(formik.errors.name)}
-              helperText={formik.touched.name && formik.errors.name} // maxAccess={maxAccess}
+              helperText={formik.touched.name && formik.errors.name}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -76,6 +76,7 @@ export default function BenificiaryBank() {
               required
               valueField='recordId'
               values={formik.values}
+              maxAccess={maxAccess}
               onChange={(event, newValue) => {
                 formik.setFieldValue('serviceType', newValue?.recordId)
               }}
@@ -90,7 +91,8 @@ export default function BenificiaryBank() {
               required
               onChange={formik.handleChange}
               error={formik.touched.branchName && Boolean(formik.errors.branchName)}
-              helperText={formik.touched.branchName && formik.errors.branchName} // maxAccess={maxAccess}
+              helperText={formik.touched.branchName && formik.errors.branchName}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -99,7 +101,8 @@ export default function BenificiaryBank() {
               label='Address 1'
               value={formik.values.address1}
               rows={3}
-              maxLength='150' //maxAccess={maxAccess}
+              maxLength='150'
+              maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('address1', '')}
               error={formik.touched.address1 && Boolean(formik.errors.address1)}
@@ -112,7 +115,8 @@ export default function BenificiaryBank() {
               label='Address 2'
               value={formik.values.address2}
               rows={3}
-              maxLength='150' //maxAccess={maxAccess}
+              maxLength='150'
+              maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('address2', '')}
               error={formik.touched.address2 && Boolean(formik.errors.address2)}
@@ -131,6 +135,7 @@ export default function BenificiaryBank() {
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
+              maxAccess={maxAccess}
               values={formik.values}
               required
               onChange={(event, newValue) => {
@@ -164,8 +169,7 @@ export default function BenificiaryBank() {
               }}
               error={formik.touched.stateId && Boolean(formik.errors.stateId)}
               helperText={formik.touched.stateId && formik.errors.stateId}
-
-              // maxAccess={maxAccess}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -181,6 +185,7 @@ export default function BenificiaryBank() {
               label='City'
               readOnly={!formik.values.stateId}
               form={formik}
+              maxAccess={maxAccess}
               secondDisplayField={false}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -203,7 +208,8 @@ export default function BenificiaryBank() {
               value={formik.values.zipCode}
               onChange={formik.handleChange}
               error={formik.touched.zipCode && Boolean(formik.errors.zipCode)}
-              helperText={formik.touched.zipCode && formik.errors.zipCode} // maxAccess={maxAccess}
+              helperText={formik.touched.zipCode && formik.errors.zipCode}
+              maxAccess={maxAccess}
             />
           </Grid>
         </Grid>
@@ -217,7 +223,8 @@ export default function BenificiaryBank() {
               required
               onChange={formik.handleChange}
               error={formik.touched.branchNadrBankme && Boolean(formik.errors.drBank)}
-              helperText={formik.touched.drBank && formik.errors.drBank} // maxAccess={maxAccess}
+              helperText={formik.touched.drBank && formik.errors.drBank}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -237,7 +244,8 @@ export default function BenificiaryBank() {
               label='Remarks'
               value={formik.values.remarks}
               rows={3}
-              maxLength='150' //maxAccess={maxAccess}
+              maxLength='150'
+              maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('remarks', '')}
               error={formik.touched.remarks && Boolean(formik.errors.remarks)}
@@ -252,7 +260,8 @@ export default function BenificiaryBank() {
               required
               onChange={formik.handleChange}
               error={formik.touched.ifsc && Boolean(formik.errors.ifsc)}
-              helperText={formik.touched.ifsc && formik.errors.ifsc} // maxAccess={maxAccess}
+              helperText={formik.touched.ifsc && formik.errors.ifsc}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -263,7 +272,8 @@ export default function BenificiaryBank() {
               numberField={true}
               onChange={formik.handleChange}
               error={formik.touched.routingNumber && Boolean(formik.errors.routingNumber)}
-              helperText={formik.touched.routingNumber && formik.errors.routingNumber} // maxAccess={maxAccess}
+              helperText={formik.touched.routingNumber && formik.errors.routingNumber}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -273,7 +283,8 @@ export default function BenificiaryBank() {
               value={formik.values.iban}
               onChange={formik.handleChange}
               error={formik.touched.iban && Boolean(formik.errors.iban)}
-              helperText={formik.touched.iban && formik.errors.iban} // maxAccess={maxAccess}
+              helperText={formik.touched.iban && formik.errors.iban}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -282,22 +293,24 @@ export default function BenificiaryBank() {
                 <Checkbox
                   name='isBlocked'
                   readOnly
-                  checked={formik.values.isBlocked}
-                  onChange={formik.handleChange} //maxAccess={maxAccess}
+                  disabled={true}
+                  checked={formik.values?.isBlocked}
+                  onChange={formik.handleChange}
+                  maxAccess={maxAccess}
                 />
               }
               label='is Blocked'
             />
           </Grid>
-          <Grid item xs={7}>
+          <Grid item xs={12}>
             <CustomDatePicker
               name='stopDate'
-              label='Stop Date'
+              label={'stopDate'}
               value={formik.values?.stopDate}
-              onChange={formik.setFieldValue}
-              onClear={() => formik.setFieldValue('stopDate', '')}
               readOnly
-              error={formik.touched.stopDate && Boolean(formik.errors.stopDate)} //maxAccess={maxAccess}
+              error={formik.touched.stopDate && Boolean(formik.errors.stopDate)}
+              helperText={formik.touched.stopDate && formik.errors.stopDate}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -307,7 +320,8 @@ export default function BenificiaryBank() {
               readOnly
               value={formik.values.stopReason}
               rows={3}
-              maxLength='150' //maxAccess={maxAccess}
+              maxLength='150'
+              maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('stopReason', '')}
               error={formik.touched.stopReason && Boolean(formik.errors.stopReason)}
