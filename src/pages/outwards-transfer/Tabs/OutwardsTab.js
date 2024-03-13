@@ -137,7 +137,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
   const openReleaventWindow = formValues => {
     if (formValues.dispersalType === 1) {
       stack({
-        Component: BenificiaryBank,
+        Component: BenificiaryCash,
         props: {},
         width: 700,
         height: 400,
@@ -145,7 +145,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       })
     } else if (formValues.dispersalType === 2) {
       stack({
-        Component: BenificiaryCash,
+        Component: BenificiaryBank,
         props: {},
         width: 700,
         height: 400,
