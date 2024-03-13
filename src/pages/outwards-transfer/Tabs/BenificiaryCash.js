@@ -5,39 +5,22 @@ import { useEffect, useState, useContext } from 'react'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import toast from 'react-hot-toast'
 
 // ** Helpers
 
-import AddressTab from 'src/components/Shared/AddressTab'
-import FieldSet from 'src/components/Shared/FieldSet'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { TextFieldReference } from 'src/components/Shared/TextFieldReference'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import UseIdType from 'src/hooks/useIdType'
 import FormShell from 'src/components/Shared/FormShell'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-import { DataSets } from 'src/resources/DataSets'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
-import { formatDateToApi, formatDateToApiFunction, formatDateFromApi } from 'src/lib/date-helper'
-import { RTCLRepository } from 'src/repositories/RTCLRepository'
-import { useWindow } from 'src/windows'
-import Confirmation from 'src/components/Shared/Confirmation'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
-import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 const BenificiaryCash = ({ maxAccess }) => {
   const [initialValues, setInitialData] = useState({
+    name: '',
     firstName: '',
     lastName: '',
     middleName: '',
@@ -45,7 +28,14 @@ const BenificiaryCash = ({ maxAccess }) => {
     fl_firstName: '',
     fl_lastName: '',
     fl_middleName: '',
-    fl_familyName: ''
+    fl_familyName: '',
+    nationalityId: '',
+    cellPhone: '',
+    birthDate: null,
+    birthPlace: '',
+    isBlocked: '',
+    stoppedDate: null,
+    stoppedReason: ''
   })
 
   const formik = useFormik({
@@ -66,6 +56,12 @@ const BenificiaryCash = ({ maxAccess }) => {
     }),
     onSubmit: values => {}
   })
+
+  const constructNameField = formValues => {
+    var name =
+      formValues?.firstName + ' ' + formValues?.middleName + ' ' + formValues?.lastName + ' ' + formValues?.familyName
+    formik.setFieldValue('name', name)
+  }
 
   return (
     <FormShell resourceId={ResourceIds.ClientList} form={formik} maxAccess={maxAccess}>
@@ -92,6 +88,9 @@ const BenificiaryCash = ({ maxAccess }) => {
               value={formik.values?.firstName}
               required
               onChange={formik.handleChange}
+              onBlur={e => {
+                constructNameField(formik.values)
+              }}
               maxLength='20'
               onClear={() => formik.setFieldValue('firstName', '')}
               error={formik.touched.firstName && Boolean(formik.errors.firstName)}
@@ -105,6 +104,9 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'middle'}
               value={formik.values?.middleName}
               onChange={formik.handleChange}
+              onBlur={e => {
+                constructNameField(formik.values)
+              }}
               maxLength='20'
               onClear={() => formik.setFieldValue('middleName', '')}
               error={formik.touched.middleName && Boolean(formik.errors.middleName)}
@@ -119,6 +121,9 @@ const BenificiaryCash = ({ maxAccess }) => {
               value={formik.values?.lastName}
               required
               onChange={formik.handleChange}
+              onBlur={e => {
+                constructNameField(formik.values)
+              }}
               maxLength='20'
               onClear={() => formik.setFieldValue('lastName', '')}
               error={formik.touched.lastName && Boolean(formik.errors.lastName)}
@@ -132,6 +137,9 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'family'}
               value={formik.values?.familyName}
               onChange={formik.handleChange}
+              onBlur={e => {
+                constructNameField(formik.values)
+              }}
               maxLength='20'
               onClear={() => formik.setFieldValue('familyName', '')}
               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
