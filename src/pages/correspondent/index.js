@@ -24,6 +24,9 @@ import CorrespondentWindow from './Windows/CorrespondentWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ExchangeMapWindow from './Windows/ExchangeMapWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
@@ -32,12 +35,22 @@ const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
+  //stores
+  // const [gridData, setGridData] = useState(null)
+  const [corId, setCorId] = useState(null)
+
+  const [bpMasterDataStore, setBpMasterDataStore] = useState([])
   const [countryStore, setCountryStore] = useState([])
   const [currencyStore, setCurrencyStore] = useState([])
+  const [exchangeTableStore, setExchangeTableStore] = useState([])
+  const [exchangeTableStoreAll, setExchangeTableStoreAll] = useState([])
 
   //states
+  const [windowOpen, setWindowOpen] = useState(false)
   const [exchangeMapWindowOpen, setExchangeMapWindowOpen] = useState(false)
+  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [activeTab, setActiveTab] = useState(0)
 
   //control
 
@@ -55,7 +68,7 @@ const Correspondent = () => {
 
    })
 
-
+console.log("label" , _labels)
   async function fetchGridData(options={}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -70,13 +83,33 @@ const Correspondent = () => {
     return {...response,  _startAt: _startAt}
   }
 
-
-
-
-
-
-
-
+  const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'name',
+      headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'bpRef',
+      headerName: _labels.BusinessPartner,
+      flex: 1
+    },
+    {
+      field: 'currencyRef',
+      headerName: _labels.currency,
+      flex: 1
+    },
+    {
+      field: 'isInactive',
+      headerName: _labels.IsInactive,
+      flex: 1
+    }
+  ]
 
 
   const delCorrespondent = obj => {
@@ -136,44 +169,7 @@ const Correspondent = () => {
           maxAccess={access}
         />
       </Box>
-      {/* {windowOpen && (
-        <CorrespondentWindow
-          tabs={tabs}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onClose={() => setWindowOpen(false)}
-          width={1000}
-          height={350}
-          onSave={handleSubmit}
-          editMode={editMode}
-          lookupBpMasterData={lookupBpMasterData}
-          bpMasterDataStore={bpMasterDataStore}
-          setBpMasterDataStore={setBpMasterDataStore}
-          correspondentValidation={correspondentValidation}
-          countriesGridValidation={countriesGridValidation}
-          countriesInlineGridColumns={countriesInlineGridColumns}
-          currenciesGridValidation={currenciesGridValidation}
-          currenciesInlineGridColumns={currenciesInlineGridColumns}
-          labels={_labels}
-          maxAccess={access}
-          corId={corId}
-        />
-      )} */}
 
-      {exchangeMapWindowOpen && (
-        <ExchangeMapWindow
-          onClose={() => setExchangeMapWindowOpen(false)}
-          onSave={handleExchangeMapSubmit}
-          exchangeMapsGridValidation={exchangeMapsGridValidation}
-          exchangeMapsInlineGridColumns={exchangeMapsInlineGridColumns}
-          exchangeMapValidation={exchangeMapValidation}
-          currencyStore={currencyStore.list}
-          countryStore={countryStore.list}
-          getCurrenciesExchangeMaps={getCurrenciesExchangeMaps}
-          maxAccess={access}
-          labels={_labels}
-        />
-      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

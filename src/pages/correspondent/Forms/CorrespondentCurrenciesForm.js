@@ -103,7 +103,7 @@ console.log('labels-cureency', labels)
     {
       component: 'resourcecombobox',
       name: 'currency',
-      label: labels.Currency,
+      label: labels.currency,
       props: {
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
@@ -118,7 +118,7 @@ console.log('labels-cureency', labels)
     {
       component: 'resourcecombobox',
       name: 'exchange',
-      label: labels.Exchange,
+      label: labels.exchange,
       props: {
         endpointId: MultiCurrencyRepository.ExchangeTable.qry,
         valueField: 'recordId',
@@ -133,27 +133,27 @@ console.log('labels-cureency', labels)
     {
       component: 'checkbox',
        name: 'outward',
-      label: labels.Outwards
+      label: labels.outwards
     },
 
     {
       component: 'checkbox',
-      label: labels.Inward,
+      label: labels.inward,
       name: 'inward'
     },
     {
       component: 'checkbox',
-      label: labels.BankDeposit,
+      label: labels.bankDeposit,
       name: 'bankDeposit'
     },
     {
       component: 'checkbox',
-      label: labels.Deal,
+      label: labels.deal,
       name: 'deal'
     },
     {
       component: 'checkbox',
-      label: labels.IsInactive,
+      label: labels.isInActive,
       name: 'isInactive'
     },
     {
