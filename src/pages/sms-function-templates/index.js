@@ -1,8 +1,4 @@
-import { useEffect, useState, useContext } from 'react'
-
-// ** React ImportsCustomLookup
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
 import { Box, Grid } from '@mui/material'
@@ -10,16 +6,14 @@ import { Box, Grid } from '@mui/material'
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
+import FormShell from 'src/components/Shared/FormShell'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -27,107 +21,84 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
 
   //states
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [templateStore, setTemplateStore] = useState([])
 
-  const getGridData = () => {
-    try {
-      const parameters = ''
+  const [initialValues, setData] = useState({rows :[]})
 
-      const resSystemFunctionPromise = getRequest({
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues,
+    onSubmit:  values => {
+      postSmsFunctionTemplates(values.rows)
+    }
+  })
+
+
+  const getGridData = async () => {
+
+      const parameters = '';
+
+      const resSystemFunction = await getRequest({
         extension: SystemRepository.SystemFunction.qry,
         parameters: parameters
-      })
+      });
 
-      const resSmsFunctionTemplatePromise = getRequest({
+      const resSmsFunctionTemplate = await getRequest({
         extension: SystemRepository.SMSFunctionTemplate.qry,
         parameters: parameters
-      })
+      });
 
-      Promise.all([resSystemFunctionPromise, resSmsFunctionTemplatePromise]).then(
-        ([resSystemFunction, resSmsFunctionTemplate]) => {
-          const finalList = resSystemFunction.list.map(x => {
-            const n = {
-              functionId: parseInt(x.functionId),
-              templateId: null,
-              functionName: x.sfName,
-              templateName: null
-            }
+      const finalList = resSystemFunction.list.map(x => {
+        const n = {
+          functionId: parseInt(x.functionId),
+          templateId: null,
+          functionName: x.sfName,
+          templateName: null
+        };
 
-            const matchingTemplate = resSmsFunctionTemplate.list.find(y => n.functionId === y.functionId)
+        const matchingTemplate = resSmsFunctionTemplate.list.find(
+          y => n.functionId === y.functionId
+        );
 
-            if (matchingTemplate) {
-              n.templateId = matchingTemplate.templateId
-              n.templateName = matchingTemplate.templateName
-            }
-
-            return n
-          })
-        var count = 1
-          smsFunctionTemplatesValidation.setValues({
-            ...smsFunctionTemplatesValidation.values,
-            rows: finalList?.map(
-          ({ templateId, templateName,  ...rest }) => ({
-            id : count++,
-            template:{
-              recordId: templateId,
-              name: templateName
-            },
-           ...rest
-          })
-            )
-          })
+        if (matchingTemplate) {
+          n.templateId = matchingTemplate.templateId;
+          n.templateName = matchingTemplate.templateName;
         }
-      )
-    } catch (error) {
-      setErrorMessage(error.res)
 
-      return Promise.reject(error) // You can choose to reject the promise if an error occurs
-    }
-  }
+        return n;
+      });
 
+      formik.setValues({
+        ...formik.values,
+        rows: finalList.map(({ templateId, templateName, ...rest }, index) => ({
+          id: index + 1,
+          template: {
+            recordId: templateId,
+            name: templateName
+          },
+          ...rest
+        }))
+      });
+
+  };
 
   const {
-    query: { data },
     labels: _labels,
-    access
   } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SmsFunctionTemplates
   })
-
-
-  const lookupTemplate = searchQry => {
-    setTemplateStore([])
-
-    if (searchQry) {
-      var parameters = `_filter=${searchQry}`
-      getRequest({
-        extension: SystemRepository.SMSTemplate.snapshot,
-        parameters: parameters
-      })
-        .then(res => {
-          setTemplateStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  }
-
-
 
   const columns = [
     {
       component: 'textfield',
       label: _labels[1],
       name: 'functionId',
-      width: 150,
-        props: {
-   readOnly: true
+      props: {
+      readOnly: true
       }
     },
     {
@@ -135,10 +106,8 @@ const SmsFunctionTemplate = () => {
       label: _labels[2],
       name: 'functionName',
       props: {
-   readOnly: true
-      },
-      width: 400
-    },{
+      readOnly: true
+      }    },{
       component: 'resourcelookup',
       label: _labels[3],
       name: 'template',
@@ -150,37 +119,26 @@ const SmsFunctionTemplate = () => {
           { key: "reference", value: "Reference" },
           { key: "name", value: "Name" },
         ],
+      } ,
+       onChange({ row: { update, newRow } }) {
+
+        update({
+          recordId : newRow?.template?.recordId,
+          name:  newRow?.template?.name,
+        })
+
       },
-      width: 550
+
     },
+
 
   ]
 
-  const smsFunctionTemplatesValidation = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    validate: values => {},
-    initialValues: {
-      rows: [
-        { id: 1,
-          functionId: ''
-        }
-      ]
-    },
-    onSubmit: values => {
-      postSmsFunctionTemplates()
-    }
-  })
+  const postSmsFunctionTemplates = (values) => {
 
-  const handleSubmit = () => {
-    smsFunctionTemplatesValidation.handleSubmit()
-  }
-
-
-  const postSmsFunctionTemplates = () => {
     const obj = {
-      smsFunctionTemplates: smsFunctionTemplatesValidation.values.rows.map(({ functionId, template }) => ({ functionId,
-          templateId : template.recordId ,  templateName : template.name}))
+      smsFunctionTemplates: values.map(({ functionId, template }) => ({ functionId,
+          templateId : template?.recordId ,  templateName : template?.name}))
           .filter(row => row.templateId != null)
 
 
@@ -193,48 +151,32 @@ const SmsFunctionTemplate = () => {
         toast.success('Record Updated Successfully')
       })
       .catch(error => {
-        setErrorMessage(error)
       })
   }
 
   return (
     <>
-      <Box
-        sx={{
-          height: `${height - 80}px`
-        }}
-      >
-        <CustomTabPanel index={0} value={0}>
-          <Box>
+
+         <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
+          <FormShell form={formik} infoVisible={false} visibleClear={false}>
+
             <Grid container>
-              <Grid>
+              <Grid sx={{ width: '100%'  }}>
                 <Box sx={{ width: '100%'  }}>
                   <DataGrid
-                   height={height-150}
-                   onChange={value => smsFunctionTemplatesValidation.setFieldValue('rows', value)}
-                   value={smsFunctionTemplatesValidation.values.rows}
-                   error={smsFunctionTemplatesValidation.errors.rows}
+                   height={`calc(100vh - 150px)`}
+                   onChange={value => { formik.setFieldValue('rows', value)}}
+                   value={formik.values.rows}
+                   error={formik.errors.rows}
                    columns={columns}
+                   allowDelete={false}
+                   allowAddNewLine={false}
                   />
                 </Box>
               </Grid>
             </Grid>
+          </FormShell>
           </Box>
-
-          <Box
-            sx={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              margin: 0
-            }}
-          >
-            <WindowToolbar onSave={handleSubmit} />
-          </Box>
-        </CustomTabPanel>
-      </Box>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

@@ -52,8 +52,8 @@ const InlineEditGrid = ({
             sx={{
               height: '100%',
               display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'
+              justifyContent: 'right',
+              alignItems: 'right'
             }}
           >
             {row[column.name] === 0 ? row[column.name] : getFormattedNumber(row[column.name])}
@@ -211,7 +211,7 @@ const InlineEditGrid = ({
             fullWidth={true}
             inputProps={{
               readOnly: column?.readOnly,
-              disabled:column?.disabled,
+              disabled: column?.disabled,
               pattern: '[0-9]*',
               style: {
                 textAlign: 'right'
@@ -404,8 +404,8 @@ const InlineEditGrid = ({
                   </Box>
                 )
             }}
-
-            // onFocus={() => setOpen(true)}
+           
+           // onFocus={() => setOpen(true)}
 
             // getOptionLabel={option => {
 

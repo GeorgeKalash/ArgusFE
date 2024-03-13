@@ -200,7 +200,7 @@ const AddressTab = ({
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={12}>{}
 
             <ResourceLookup
              endpointId={SystemRepository.City.snapshot}

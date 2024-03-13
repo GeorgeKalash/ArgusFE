@@ -21,8 +21,9 @@ return (
         api.current.setEditCellValue({
           id,
           field,
-          value
+          value: value || ''
         })
+
       }}
     />
   )

@@ -30,24 +30,25 @@ const ClientsList = () => {
 
   const {
     query: { data },
-    search,
-    clear,
+    filterBy,
+    clearFilter,
     labels: _labels,
     access
   } = useResourceQuery({
     endpointId: CTCLRepository.CtClientIndividual.snapshot,
     datasetId: ResourceIds.ClientMaster,
-    search: {
+    filter: {
       endpointId: CTCLRepository.CtClientIndividual.snapshot,
-      searchFn: fetchWithSearch,
+      filterFn: fetchWithSearch,
+      default : {category : 1}
     }
   })
-  async function fetchWithSearch({options = {} , qry}) {
+  async function fetchWithSearch({options = {} , filters}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
           extension: CTCLRepository.CtClientIndividual.snapshot,
-          parameters: `_filter=${qry}&_category=1`
+          parameters: `_filter=${filters.qry}&_category=1`
         })
   }
 
@@ -196,7 +197,12 @@ const ClientsList = () => {
         }}
       >
 
-<GridToolbar onAdd={addClient} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
+<GridToolbar onAdd={addClient} maxAccess={access}  onSearch={value => {
+              filterBy('qry', value)
+            }}
+            onSearchClear={() => {
+              clearFilter('qry')
+            }} labels={_labels}  inputSearch={true}/>
 
  <Table
           columns={columns}

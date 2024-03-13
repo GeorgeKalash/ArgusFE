@@ -34,7 +34,6 @@ const Currencies = () => {
 
   async function fetchGridData() {
 
-
     return await getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: `_filter=`
