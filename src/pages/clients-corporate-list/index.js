@@ -28,9 +28,7 @@ const ClientsCorporateList = () => {
   const [editMode, setEditMode] = useState(null)
 
   //stores
-
   const [errorMessage, setErrorMessage] = useState(null)
-
 
   const {
     query: { data },
