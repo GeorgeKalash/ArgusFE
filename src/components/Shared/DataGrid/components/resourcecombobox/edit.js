@@ -16,7 +16,7 @@ return (
       displayField={props.displayField}
       displayFieldWidth={props.displayFieldWidth}
       label={''}
-      dataGrid={true}
+      hasBorder={false}
       readOnly={props?.readOnly}
       onChange={(e, value) => {
         api.current.setEditCellValue({

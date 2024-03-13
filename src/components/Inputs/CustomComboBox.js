@@ -29,7 +29,7 @@ const CustomComboBox = ({
   sx,
   columnsInDropDown,
   editMode = false,
-  dataGrid=false,
+  hasBorder=true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -165,7 +165,7 @@ const CustomComboBox = ({
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: dataGrid && 'none', // Hide border
+                border: !hasBorder && 'none', // Hide border
               },
             },
           }}
