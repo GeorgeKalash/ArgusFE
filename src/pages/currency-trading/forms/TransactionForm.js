@@ -452,9 +452,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }, 0)
 
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
-    const amountString = String(amount || 0).replaceAll(',', '')
 
-return acc + parseFloat(amountString) || 0
+return acc + amount
   }, 0)
 
   const Balance = total - receivedTotal
@@ -464,7 +463,6 @@ return acc + parseFloat(amountString) || 0
       (!values.idNoConfirm && values.clientId) ||
       (!values.confirmIdNo && !values.clientId && !values.cellPhoneConfirm)
     ) {
-      console.log('not comfirme')
       stack({
         Component: ConfirmationOnSubmit,
         props: {
