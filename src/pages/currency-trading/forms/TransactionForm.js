@@ -446,18 +446,16 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
 
+
+
   const total = formik.values.operations.reduce((acc, { lcAmount }) => {
 
-    const amountString = String(lcAmount || 0).replaceAll(',', '')
-
-    return acc + parseFloat(amountString) || 0
-  }, 0)
-
+    return acc + lcAmount
+ }, 0)
 
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
 
-return acc + amount
-
+     return acc + amount
 
   }, 0)
 
