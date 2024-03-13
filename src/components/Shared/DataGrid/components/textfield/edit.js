@@ -10,7 +10,7 @@ export default function TextFieldEdit({ column: { props }, id, field, value }) {
       label={''}
       readOnly={props?.readOnly}
       autoFocus
-      dataGrid={true}
+      hasBorder={false}
       onChange={e => {
         api.current.setEditCellValue({
           id,
