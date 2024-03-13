@@ -702,6 +702,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 label={labels[2]}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
+                editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -734,6 +735,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 name='reference'
                 label={labels[4]}
                 value={formik?.values?.reference}
+                editMode={editMode}
                 maxAccess={maxAccess}
                 maxLength='30'
                 readOnly={true}
@@ -761,6 +763,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   secondValueShow='corName'
                   readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
                   maxAccess={maxAccess}
+                  editMode={editMode}
                   onChange={async (event, newValue) => {
                     if (newValue) {
                       const baseCurrency = await getBaseCurrency()
@@ -787,6 +790,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   label={labels[18]}
                   value={formik?.values?.deliveryDate}
                   onChange={formik.setFieldValue}
+                  editMode={editMode}
                   maxAccess={maxAccess}
                   disabledRangeDate={{ date: formik.values.date, day: 30 }}
                   onClear={() => formik.setFieldValue('deliveryDate', '')}
@@ -863,6 +867,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 label={labels[11]}
                 value={formik.values.notes}
                 rows={3}
+                editMode={editMode}
                 maxAccess={maxAccess}
                 readOnly={isClosed}
                 onChange={formik.handleChange}
