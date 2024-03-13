@@ -147,8 +147,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       stack({
         Component: BenificiaryBank,
         props: {},
-        width: 700,
-        height: 400,
+        width: 900,
+        height: 650,
         title: 'Bank'
       })
     }
