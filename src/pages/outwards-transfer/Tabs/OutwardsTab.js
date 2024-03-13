@@ -140,7 +140,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
         Component: BenificiaryCash,
         props: {},
         width: 700,
-        height: 400,
+        height: 500,
         title: 'Cash'
       })
     } else if (formValues.dispersalType === 2) {
