@@ -118,7 +118,6 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
                     label={labels.name}
                     value={formik.values.name}
                     required
-                    rows={2}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
