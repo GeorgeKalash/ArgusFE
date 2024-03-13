@@ -1,8 +1,6 @@
-import { useGridApiContext } from '@mui/x-data-grid'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ResourceLookupEdit({ id, field, value, width , column: { props } }) {
-  const api = useGridApiContext()
+export default function ResourceLookupEdit({ id, field, value,  column: { props } , update }) {
 
 return (
     <ResourceLookup
@@ -10,7 +8,7 @@ return (
       label={''}
       endpointId={props.endpointId}
       parameters={props.parameters}
-      dataGrid={true}
+      hasBorder={false}
       firstFieldWidth='100%'
       valueField={props.displayField}
       displayField={props.valueField}
@@ -22,11 +20,10 @@ return (
       }}
       secondDisplayField={false}
       onChange={(event, newValue) => {
-        if (newValue)
-          api.current.setEditCellValue({
+          update({
             id,
             field,
-            value: newValue
+            value: newValue || ''
           })
       }}
     />
