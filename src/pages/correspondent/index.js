@@ -24,10 +24,6 @@ import CorrespondentWindow from './Windows/CorrespondentWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import ExchangeMapWindow from './Windows/ExchangeMapWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 
@@ -35,22 +31,7 @@ const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
-  //stores
-  // const [gridData, setGridData] = useState(null)
-  const [corId, setCorId] = useState(null)
-
-  const [bpMasterDataStore, setBpMasterDataStore] = useState([])
-  const [countryStore, setCountryStore] = useState([])
-  const [currencyStore, setCurrencyStore] = useState([])
-  const [exchangeTableStore, setExchangeTableStore] = useState([])
-  const [exchangeTableStoreAll, setExchangeTableStoreAll] = useState([])
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [exchangeMapWindowOpen, setExchangeMapWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [activeTab, setActiveTab] = useState(0)
 
   //control
 
@@ -95,7 +76,7 @@ const Correspondent = () => {
     },
     {
       field: 'bpRef',
-      headerName: _labels.BusinessPartner,
+      headerName: _labels.businessPartner,
       flex: 1
     },
     {
@@ -105,7 +86,7 @@ const Correspondent = () => {
     },
     {
       field: 'isInactive',
-      headerName: _labels.IsInactive,
+      headerName: _labels.isInActive,
       flex: 1
     }
   ]
@@ -117,8 +98,8 @@ const Correspondent = () => {
       record: JSON.stringify(obj)
     })
       .then(res => {
-        getGridData({})
         toast.success('Record Deleted Successfully')
+        invalidate()
       })
       .catch(error => {
         setErrorMessage(error)
@@ -126,7 +107,6 @@ const Correspondent = () => {
   }
 
   const addCorrespondent = () => {
-
     openForm('')
   }
 

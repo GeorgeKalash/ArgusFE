@@ -62,10 +62,10 @@ const CorrespondentForm = ({
       record: JSON.stringify(obj)
     })
       .then(res => {
-        // setEditMode(true)
         if (!recordId) {
           toast.success('Record Added Successfully')
           if (res.recordId) {
+            setEditMode(true)
             formik.setFieldValue('recordId',res.recordId )
             setStore(prevStore => ({
               ...prevStore,
@@ -82,7 +82,6 @@ const CorrespondentForm = ({
 
   useEffect(()=>{
     recordId  && getCorrespondentById(recordId)
-
   },[recordId])
 
   const getCorrespondentById =  recordId => {
@@ -141,7 +140,7 @@ return (
          endpointId={BusinessPartnerRepository.MasterData.snapshot}
           name='bpRef'
           required
-          label={labels.BusinessPartner}
+          label={labels.businessPartner}
           valueField='reference'
           displayField='name'
           valueShow='bpRef'
@@ -191,7 +190,7 @@ return (
               maxAccess={maxAccess}
             />
           }
-          label={labels.IsInactive}
+          label={labels.isInActive}
         />
       </Grid>
 

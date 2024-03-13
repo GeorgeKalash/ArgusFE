@@ -66,6 +66,7 @@ const CustomLookup = ({
         >
           <Autocomplete
             name={name}
+            key={firstValue}
             value={firstValue}
             size={size}
             options={store}

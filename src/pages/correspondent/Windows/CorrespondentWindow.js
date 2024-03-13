@@ -1,7 +1,5 @@
 // ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CorrespondentCountriesTab from '../Tabs/CorrespondentCountriesTab'
-import CorrespondentCurrenciesTab from '../Tabs/CorrespondentCurrenciesTab'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import CorrespondentForm from '../Forms/CorrespondentForm'
@@ -12,7 +10,6 @@ const CorrespondentWindow = ({
   height,
   recordId,
   labels,
-  props,
   maxAccess
 }) => {
   const [activeTab , setActiveTab] = useState(0)
@@ -24,9 +21,9 @@ const CorrespondentWindow = ({
   })
 
   const tabs = [
-    { label: 'Main' },
-    { label: 'Countries', disabled: !editMode },
-    { label: 'Currencies', disabled: !editMode }
+    { label: labels.main },
+    { label: labels.countries, disabled: !editMode },
+    { label: labels.currencies, disabled: !editMode }
   ]
 
   return (

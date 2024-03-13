@@ -21,13 +21,11 @@ const ExchangeMapForm= ({
   maxAccess,
   editMode,
   currency,
-  exchange,
   store,
   labels
 }) => {
 
   const {recordId :currencyId , name:currencyName } = currency
-  const {recordId :exchangeId  } = exchange
 
   const {recordId, countries} = store
   const { postRequest, getRequest} = useContext(RequestsContext)
@@ -47,15 +45,6 @@ const ExchangeMapForm= ({
             .required('exchange is required'),
         })
       ).required('Operations array is required') }),
-
-    // validate: values => {
-    //   const isValid = values.plants.every(row => !!row.plantId)
-    //   const isValidExchangeId = values.plants.every(row => !!row.exchangeId)
-
-    //   return isValid && isValidExchangeId
-    //     ? {}
-    //     : { plants: Array(values.plants.length).fill({ plantId: 'Plant is required' }) }
-    // },
     initialValues: {
       currencyId: currencyId ,
       countryId : '',
@@ -115,9 +104,9 @@ const columns=[
 ]
 
 const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
+console.log(corId, currencyId, countryId)
 
-  formik.setValues({ plants: formik.initialValues.plants })
-
+  formik.resetForm();
   const parameters = ''
   countryId && currencyId && getRequest({
     extension: SystemRepository.Plant.qry,
@@ -245,7 +234,7 @@ return (
 
                     getCurrenciesExchangeMaps(
                       recordId,
-                      formik.values.currencyId,
+                      currencyId,
                       selectedCountryId
                     ) // Fetch and update state data based on the selected country
                   }}

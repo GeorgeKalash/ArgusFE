@@ -1,7 +1,7 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ column: { props }, id, field, value , displayFieldWidth, update}) {
+export default function ResourceComboBoxEdit({ column: { props }, id, field, value , update}) {
   const api = useGridApiContext()
 
 return (

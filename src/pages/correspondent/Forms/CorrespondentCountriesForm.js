@@ -21,7 +21,6 @@ const CorrespondentCountriesForm = ({
   const {recordId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-    // COUNTRIES TAB
     const formik = useFormik({
       enableReinitialize: true,
       validateOnChange: true,
@@ -42,7 +41,7 @@ const CorrespondentCountriesForm = ({
         countries: [
           {
             id: 1,
-            corId: recordId,
+            corId: recordId || null,
             country: '',
             countryId: '',
             countryRef: '',
@@ -60,7 +59,7 @@ const CorrespondentCountriesForm = ({
 
     const correspondentCountries= obj?.countries?.map(
       ({ country }) => ({
-        corId : recordId,
+         corId : recordId,
          countryId: country.recordId,
          countryName: country.name,
          countryRef: country.reference,
@@ -105,7 +104,7 @@ const CorrespondentCountriesForm = ({
         parameters: parameters
       })
         .then(res => {
-          if (res.list.length > 0) {
+          if (res?.list?.length > 0) {
             const correspondentCountries = res.list
 
             formik.setValues({ countries: correspondentCountries.map(
@@ -124,9 +123,9 @@ const CorrespondentCountriesForm = ({
               }));
           } else {
             formik.setValues({
-              rows: [
-                {
-                  corId: recordId,
+              countries: [
+                { id: 1,
+                  corId: '',
                   countryId: '',
                   countryRef: '',
                   countryName: '',
@@ -144,7 +143,7 @@ const CorrespondentCountriesForm = ({
   },[recordId])
 
 return (
-    <>
+    <>ss{recordId}
         <FormShell
           form={formik}
           resourceId={ResourceIds.Correspondent}

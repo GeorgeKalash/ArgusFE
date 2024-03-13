@@ -26,7 +26,6 @@ console.log('labels-cureency', labels)
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-   // CURRENCIES TAB
    const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
@@ -42,14 +41,6 @@ console.log('labels-cureency', labels)
           .required('Currency is required'),
       })
     ).required('Operations array is required') }),
-
-    // validate: values => {
-    //   const isValid = values.currencies.every(row => !!row.currency?.recordId)
-
-    //   return isValid
-    //     ? {}
-    //     : { currencies: Array(values.currencies.length).fill({ currencyId: 'Currency is required' }) }
-    // },
     initialValues: {
       currencies: [
         { id: 1,
@@ -142,7 +133,7 @@ console.log('labels-cureency', labels)
 
     {
       component: 'checkbox',
-      label: labels.inward,
+      label: labels.inwards,
       name: 'inward'
     },
     {
@@ -162,12 +153,9 @@ console.log('labels-cureency', labels)
     },
     {
       component: 'button',
-
       label: labels.exchange,
-
-      // name: 'exchanges',
       onClick:  async (e, row) => {
-     row?.currency &&   stack({
+      row?.currency &&   stack({
           Component: ExchangeMapForm,
           props: {
             labels: labels,
