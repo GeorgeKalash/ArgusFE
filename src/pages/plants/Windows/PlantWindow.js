@@ -26,7 +26,7 @@ const PlantWindow = ({
   const tabs = [{ label: labels.plant }, { label: labels.address , disabled: !store.recordId }]
   const { postRequest } = useContext(RequestsContext)
 
-  async function onSubmit (address , recordId){
+  async function onSubmit (address){
 
     const addressId = address.recordId
     if(!store.plant.addressId){
