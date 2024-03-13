@@ -2,10 +2,10 @@ import edit from './edit'
 
 export default {
   view: props => {
-    const myArray = props?.column?.props?.displayField
+    const displayFields = props?.column?.props?.displayField
 
-    if (Array.isArray(myArray) && myArray.length > 1) {
-      const text = myArray
+    if (Array.isArray(displayFields) && displayFields.length > 1) {
+      const text = displayFields
         .filter((item) => props?.value?.[item])
         .map((item) => props?.value?.[item])
         .join(' ');
