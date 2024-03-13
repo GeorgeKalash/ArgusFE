@@ -143,7 +143,7 @@ const CorrespondentCountriesForm = ({
   },[recordId])
 
 return (
-    <>ss{recordId}
+    <>
         <FormShell
           form={formik}
           resourceId={ResourceIds.Correspondent}

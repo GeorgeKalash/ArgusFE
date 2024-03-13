@@ -46,7 +46,7 @@ const CustomLookup = ({
         height: '40px',
         mb: error && helperText ? 6 : 0
       }}
-    >
+    >{firstValue}
       <Box display={'flex'}>
         <Box
           sx={{
@@ -66,7 +66,7 @@ const CustomLookup = ({
         >
           <Autocomplete
             name={name}
-            key={firstValue}
+            key={value}
             value={firstValue}
             size={size}
             options={store}

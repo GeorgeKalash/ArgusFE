@@ -22,7 +22,7 @@ const CorrespondentWindow = ({
 
   const tabs = [
     { label: labels.main },
-    { label: labels.countries, disabled: !editMode },
+    { label: labels.countries, disabled: !store.recordId },
     { label: labels.currencies, disabled: !editMode }
   ]
 

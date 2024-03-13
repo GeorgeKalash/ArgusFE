@@ -19,7 +19,7 @@ return (
       hasBorder={false}
       readOnly={props?.readOnly}
       onChange={(e, value) => {
-        api.current.setEditCellValue({
+        update({
           id,
           field,
           value : value || ''

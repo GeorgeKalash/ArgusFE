@@ -56,22 +56,24 @@ const CorrespondentForm = ({
   })
 
   const postCorrespondent = obj => {
-    const recordId = obj?.recordId ||
+    const recordId = obj?.recordId || ''
     postRequest({
       extension: RemittanceSettingsRepository.Correspondent.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
         if (!recordId) {
-          toast.success('Record Added Successfully')
-          if (res.recordId) {
+
             setEditMode(true)
-            formik.setFieldValue('recordId',res.recordId )
             setStore(prevStore => ({
               ...prevStore,
               recordId: res.recordId
             }));
-          }
+            toast.success('Record Added Successfully')
+
+            formik.setFieldValue('recordId', res.recordId )
+
+
         } else {
           toast.success('Record Editted Successfully')
         }
