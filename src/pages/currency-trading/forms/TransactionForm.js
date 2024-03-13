@@ -82,7 +82,7 @@ function FormField({ type, name, Component, valueField, onFocus, language, ...re
         formik.setFieldValue(name, '')
       }}
 
-      // }}
+
       form={formik}
     />
   )
@@ -445,15 +445,20 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
   }
 
+
   const total = formik.values.operations.reduce((acc, { lcAmount }) => {
+
     const amountString = String(lcAmount || 0).replaceAll(',', '')
 
     return acc + parseFloat(amountString) || 0
   }, 0)
 
+
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
 
 return acc + amount
+
+
   }, 0)
 
   const Balance = total - receivedTotal
@@ -604,7 +609,6 @@ return acc + amount
         parameters: `_clientId=${clientId}`
       })
       setInfoAutoFilled(false)
-
       const clientInfo = response && response.record
       if (!!clientInfo) {
         formik.setFieldValue('firstName', clientInfo.firstName)
@@ -774,13 +778,7 @@ return acc + amount
                   formik.values.functionId && (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
 
-                // idName='seqNo'
                 columns={[
-                  // {
-                  //   component: 'id',
-                  //   name: 'id',
-                  //   width: 50
-                  // },
                   {
                     component: 'resourcecombobox',
                     label: labels.currency,
@@ -952,8 +950,6 @@ return acc + amount
                     onClear={() => formik.setFieldValue('birth_date', '')}
                     error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
                     readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
-
-                    // helperText={formik.touched.birth_date && formik.errors.birth_date}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -1008,8 +1004,6 @@ return acc + amount
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('expiry_date', '')}
                     error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
-
-                    // helperText={formik.touched.expiry_date && formik.errors.expiry_date}
                     readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
                     maxAccess={maxAccess}
                   />
@@ -1226,13 +1220,8 @@ return acc + amount
                 value={formik.values.amount}
                 error={formik.errors.amount}
 
-                // idName='seqNo'
                 columns={[
-                  // {
-                  //   component: 'id',
-                  //   name: 'id',
-                  //   width: 1
-                  // },
+
                   {
                     component: 'resourcecombobox',
                     label: labels.type,
