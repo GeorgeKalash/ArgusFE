@@ -17,6 +17,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AuthContext } from 'src/providers/AuthContext'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -76,7 +77,6 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
         fiscalYear: obj.fiscalYear,
         items: updatedRowsWithoutMonthId
       }
-      console.log('object test ', resultObject)
 
       const response = await postRequest({
         extension: SaleRepository.TargetMonth.set2,
@@ -218,7 +218,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
               <CustomTextField
                 name='targetAmount'
                 label={labels[9]}
-                value={formik.values.targetAmount}
+                value={getFormattedNumber(formik.values.targetAmount)}
                 maxAccess={maxAccess}
                 readOnly={true}
                 numberField={true}
@@ -251,7 +251,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
           <CustomTextField
             name='balance'
             label={labels[14]}
-            value={totalAmount - formik.values.targetAmount}
+            value={getFormattedNumber(totalAmount - formik.values.targetAmount)}
             maxAccess={maxAccess}
             readOnly={true}
             onChange={formik.handleChange}
