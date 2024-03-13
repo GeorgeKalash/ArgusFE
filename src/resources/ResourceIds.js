@@ -1,7 +1,7 @@
 export const ResourceIds = {
-  GeneralLedger:30303,
-  JournalVoucher : 30302,
-  FRT_DR_approvals :10302,
+  GeneralLedger: 30303,
+  JournalVoucher: 30302,
+  FRT_DR_approvals: 10302,
   DocumentTypes: 20104,
   DocumentTypeMaps: 20201,
   GeographicRegions: 20133,
@@ -23,7 +23,7 @@ export const ResourceIds = {
   Correspondent: 36101,
   RelationType: 35101,
   Profession: 36116,
-  FlAccountGroups:31101,
+  FlAccountGroups: 31101,
   IntegrationPostTypes: 30100,
   SalaryRange: 36118,
   CorrespondentAgents: 36102,
@@ -90,9 +90,12 @@ export const ResourceIds = {
   carrierSite: 40203,
   LoCollectors: 40202,
   LoCarriers: 40201,
-  Accounts:31201,
+  Accounts: 31201,
   Routings: 42105,
   CreditOrder: 35301,
   UndeliveredCreditOrder: 35302,
-  CreditInvoice: 35303
+  CreditInvoice: 35303,
+  SalesPerson: 51201,
+  SalesTarget: 51209,
+  SystemFunction: 20105
 }

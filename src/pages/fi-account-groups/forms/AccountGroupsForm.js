@@ -53,8 +53,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
           reference: yup.string().required('This field is required'),
           name: yup.string().required('This field is required'),
           type: yup.string().required('This field is required'),
-          nraRef: yup.string().required('This field is required'),
-          nraDescription: yup.string().required('This field is required'),
+        
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
@@ -67,7 +66,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
           if (!recordId) {
             toast.success('Record Added Successfully')
             setInitialData({
-              ...obj, // Spread the existing properties
+              ...obj, 
               recordId: response.recordId, // Update only the recordId field
             });
           }
@@ -157,9 +156,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
 
               }
             }}
-            helperText=""
-            error={Boolean(formik.touched.nraDescription && formik.errors.nraDescription)}
-       
+            
             /> 
   </Grid>
   <Grid item xs={12}>
