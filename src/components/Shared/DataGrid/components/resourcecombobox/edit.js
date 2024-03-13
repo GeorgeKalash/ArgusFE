@@ -18,13 +18,11 @@ return (
       dataGrid={true}
       readOnly={props?.readOnly}
       onChange={(e, value) => {
-        const newValue = value || ''
         api.current.setEditCellValue({
           id,
           field,
-          newValue
+          value: value || ''
         })
-
 
       }}
     />

@@ -25,10 +25,10 @@ const ClientsCorporateList = () => {
   const { getRequest } = useContext(RequestsContext)
 
   //control
-
   const [editMode, setEditMode] = useState(null)
 
   //stores
+
   const [errorMessage, setErrorMessage] = useState(null)
 
 
