@@ -22,7 +22,7 @@ return (
         api.current.setEditCellValue({
           id,
           field,
-          value
+          value : value || ''
         })
 
         const fieldsToUpdate  = props?.fieldsToUpdate
@@ -30,19 +30,12 @@ return (
           for (let updateObj of fieldsToUpdate) {
               const { from, to } = updateObj;
               if (value && value[from]) {
-                  console.log(id, to, value[from]);
-                  update({ id, field: to, value: value[from] });
+                  update({ id, field: to, value: value[from] || ''});
               }
           }
-      }
+        }
 
-        else
 
-        api.current.setEditCellValue({
-          id,
-          field,
-          value: ''
-        })
       }}
     />
   )
