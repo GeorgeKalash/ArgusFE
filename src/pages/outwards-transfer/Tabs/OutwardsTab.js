@@ -135,23 +135,21 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
   }
 
   const openReleaventWindow = formValues => {
-    console.log('check type ')
-    console.log(formValues.dispersalType)
-    if (formValues.dispersalType == '1') {
+    if (formValues.dispersalType === 1) {
       stack({
         Component: BenificiaryBank,
         props: {},
         width: 700,
         height: 400,
-        title: 'Bank'
+        title: 'Cash'
       })
-    } else if (formValues.dispersalType == '2') {
+    } else if (formValues.dispersalType === 2) {
       stack({
         Component: BenificiaryCash,
         props: {},
         width: 700,
         height: 400,
-        title: 'Cash'
+        title: 'Bank'
       })
     }
   }
