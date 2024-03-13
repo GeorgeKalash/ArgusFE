@@ -6,6 +6,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
+import { useWindow } from 'src/windows'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -18,6 +19,8 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
+import BenificiaryBank from './BenificiaryBank'
+import BenificiaryCash from './BenificiaryCash'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWindowOpen }) {
   const [position, setPosition] = useState()
@@ -29,6 +32,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
   const [currencyStore, setCurrencyStore] = useState([])
   const [editMode, setEditMode] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -78,9 +82,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       .then(res => {
         setDispersalTypeStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
+      .catch(error => {})
   }
 
   const onDispersalSelection = (countryId, dispersalType) => {
@@ -93,9 +95,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       .then(res => {
         setCurrencyStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const onCurrencySelection = (countryId, dispersalType, currencyId) => {
@@ -108,9 +108,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       .then(res => {
         setAgentsStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const onAmountDataFill = formFields => {
@@ -133,9 +131,29 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       .then(res => {
         setProductsStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
+      .catch(error => {})
+  }
+
+  const openReleaventWindow = formValues => {
+    console.log('check type ')
+    console.log(formValues.dispersalType)
+    if (formValues.dispersalType == '1') {
+      stack({
+        Component: BenificiaryBank,
+        props: {},
+        width: 700,
+        height: 400,
+        title: 'Bank'
       })
+    } else if (formValues.dispersalType == '2') {
+      stack({
+        Component: BenificiaryCash,
+        props: {},
+        width: 700,
+        height: 400,
+        title: 'Cash'
+      })
+    }
   }
 
   const onIdNoBlur = idNo => {
@@ -169,9 +187,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
           formik.setFieldValue('nationalityId', '')
         }
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const lookupCorrespondent = searchQry => {
@@ -185,9 +201,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
         .then(res => {
           setCorrespondentStore(res.list)
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch(error => {})
     }
   }
 
@@ -226,7 +240,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
                 { key: 'countryRef', value: 'Reference' },
                 { key: 'countryName', value: 'Name' }
               ]}
-              valueField='recordId'
+              valueField='countryId'
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('countryId', newValue?.countryId)
@@ -515,6 +529,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
               helperText={formik.touched.net && formik.errors.net}
             />
           </Grid>
+          <Button
+            onClick={() => {
+              openReleaventWindow(formik.values)
+            }}
+          >
+            Benificiary
+          </Button>
         </Grid>
       </Grid>
     </FormShell>
