@@ -33,6 +33,5 @@ export const FinancialRepository = {
     set: service + 'setGRP',
     del: service + 'delGRP',
     page: service + 'pageGRP',
-  },
-
+  }
 }

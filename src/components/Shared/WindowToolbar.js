@@ -33,6 +33,7 @@ const WindowToolbar = ({
   setSelectedReport,
   selectedReport,
   previewReport,
+  visibleClear=true,
   actions = []
 }) => {
     const functionMapping = {

@@ -69,7 +69,7 @@ const CustomLookup = ({
             value={firstValue}
             size={size}
             options={store}
-            getOptionLabel={option => (typeof option === 'object' ? `${option[valueField]}` : option)}
+            getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
             onChange={(event, newValue) => onChange(name, newValue)}
             PaperComponent={CustomPaper}

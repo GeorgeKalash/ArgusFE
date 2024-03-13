@@ -34,6 +34,7 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage,setSelectedRe
           ),
           }),
           initialValues:{
+            recordId:recordId,
             rows: [
               {
                 commissionScheduleId: recordId || '',
@@ -112,9 +113,10 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage,setSelectedRe
               })
 
               if (res.list.length > 0) {
-                formik.setValues({ rows: res.list })
+                formik.setValues({recordId: recordId, rows: res.list })
               } else {
                 formik.setValues({
+                  recordId: recordId,
                   rows: [
                     {
                       commissionScheduleId: recordId || '',
@@ -140,7 +142,7 @@ const BracketsTab = ({labels, maxAccess, recordId ,setErrorMessage,setSelectedRe
      <FormShell
       resourceId={ResourceIds.CommissionSchedule}
       form={formik}
-      height={300}
+      height={280}
       editMode={true}
       maxAccess={maxAccess}
     >
