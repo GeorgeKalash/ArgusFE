@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 
-export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange }) {
+export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=true, allowAddNewLine=true}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   async function processDependencies(newRow, oldRow, editCell) {
@@ -80,8 +80,8 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
     const currentCell = { ...nextCell }
 
 
-    if (nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
-      if (error){
+    if ((nextCell.columnIndex === visibleColumns.length - 2 && nextCell.rowIndex === rowIds.length - 1)) {
+      if (error || !allowAddNewLine){
       event.stopPropagation()
 
       return
@@ -176,6 +176,7 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
   const actionsColumn = {
     field: 'actions',
     editable: false,
+    flex: 0,
     width: '100',
     renderCell({ id }) {
       return (
@@ -223,7 +224,9 @@ return (
     <MUIDataGrid
       hideFooter
       autoHeight={height ? false : true}
-      autoWidth
+      columnResizable={false}
+
+      // autoWidth
       disableColumnFilter
       disableColumnMenu
       disableColumnSelector
@@ -268,7 +271,9 @@ return (
           field: column.name,
           headerName: column.label || column.name,
           editable: true,
-          width: column.width || 170,
+          flex: column.flex || 1,
+
+          // width: column.width || 170,
           sortable: false,
           renderCell(params) {
             const Component =
@@ -315,8 +320,8 @@ return (
             )
           }
         })),
-        actionsColumn
-      ]}
+     allowDelete ?   actionsColumn : null
+      ].filter(col=> col)}
     />
     <DeleteDialog
             open={deleteDialogOpen}

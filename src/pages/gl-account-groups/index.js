@@ -68,7 +68,8 @@ const AccountGroups = () => {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    }
+    },
+    
   ]
 
 

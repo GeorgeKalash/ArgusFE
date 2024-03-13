@@ -20,6 +20,7 @@ export default function FormShell({
   closeVisible = false,
   resourceId,
   functionId,
+  recordId,
   NewComponentVisible = false,
   maxAccess,
   isPosted = false,
@@ -32,6 +33,7 @@ export default function FormShell({
   initialValues,
   initialValues1,
   setIDInfoAutoFilled,
+  visibleClear,
   actions
 }) {
   const [windowInfo, setWindowInfo] = useState(null)
@@ -84,7 +86,7 @@ export default function FormShell({
                 setErrorMessage: setErrorMessage
               },
               width: 700,
-              height: 400,
+              height: 'auto',
               title: 'Transaction Log'
             })
           }
@@ -145,6 +147,7 @@ export default function FormShell({
           selectedReport={selectedReport}
           setSelectedReport={setSelectedReport}
           previewReport={previewReport}
+          visibleClear={visibleClear}
         />
       )}
       {windowInfo && (
