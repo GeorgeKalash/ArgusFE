@@ -51,7 +51,7 @@ const OutwardsTransfer = () => {
 
     return await getRequest({
       extension: SystemRepository.Currency.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
   }
 
