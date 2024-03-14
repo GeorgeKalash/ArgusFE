@@ -46,7 +46,7 @@ const CustomLookup = ({
         height: '40px',
         mb: error && helperText ? 6 : 0
       }}
-    >{firstValue}
+    >
       <Box display={'flex'}>
         <Box
           sx={{
@@ -71,17 +71,20 @@ const CustomLookup = ({
             size={size}
             options={store}
             getOptionLabel={option => {
-              if (typeof option === 'object' && Array.isArray(displayField)) {
-                const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space
+              const displayTextArray = store.map(option => Object.keys(option));
+              const displayText = displayTextArray.map(keys => keys.join(' - ')).join(', '); // Join keys with ' - ' and then join each set of keys with ', '
 
-                return `${displayText} - ${option[valueField]}`;
-              }
-              else if (typeof option === 'object') {
-                return `${option[displayField] || option[valueField]} - ${option[valueField]}`;
-              } else {
-                return option;
-              }
+              console.log(displayText);
+
+              return `${displayText}`;
             }}
+
+            //   else if (typeof option === 'objects') {
+            //     return `${option[displayField] || option[valueField]} - ${option[valueField]}`;
+            //   } else {
+            //     return option;
+            //   }
+            // }}
 
             // getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
