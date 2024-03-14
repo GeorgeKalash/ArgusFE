@@ -551,7 +551,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     {
       key:'GL',
       condition: editMode,
-      onClick: '() => newHandler(recordId)' ,
+      onClick: 'newHandler' ,
       disabled:!editMode,
     }
   ]
@@ -562,11 +562,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       resourceId={ResourceIds.CreditInvoice}
       form={formik}
       maxAccess={maxAccess}
-      editMode={editMode}
-      hiddenApprove={true}
-      hiddenPost={true}
-      hiddenClose={true}
-      hiddenReopen={true}
       previewReport={editMode}
       functionId={formik.values.functionId}
     >
