@@ -26,6 +26,7 @@ import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { AuthContext } from 'src/providers/AuthContext'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import toast from 'react-hot-toast'
 
 const ModuleDeactivation = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,7 +34,6 @@ const ModuleDeactivation = () => {
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRows, setSelectedRows] = useState({})
   const { user } = useContext(AuthContext)
 
   async function getGridData(options = {}) {
@@ -54,12 +54,14 @@ const ModuleDeactivation = () => {
       const n = {
         moduleId: x.key,
         moduleName: x.value,
-        isInactive: false
+        isInactive: false,
+        checked: false
       }
       const matchingTemplate = resCheckedModule.list.find(y => n.moduleId == y.moduleId)
 
       // set n.isInactive=true if matchingTemplate is truthy.
       matchingTemplate && (n.isInactive = true)
+      matchingTemplate && (n.checked = true)
 
       return n
     })
@@ -75,7 +77,6 @@ const ModuleDeactivation = () => {
     queryFn: getGridData,
     datasetId: ResourceIds.ModuleDeactivation
   })
-  console.log('dataa ', data)
 
   const columns = [
     {
@@ -94,7 +95,8 @@ const ModuleDeactivation = () => {
         {
           moduleId: '',
           moduleName: '',
-          isInactive: ''
+          isInactive: false,
+          checked: false
         }
       ]
     },
@@ -107,21 +109,21 @@ const ModuleDeactivation = () => {
     ModuleDeactivationValidation.handleSubmit()
   }
 
-  const handleCheckedRows = checkedRows => {
-    setSelectedRows(prevSelectedRows => [...prevSelectedRows, ...checkedRows])
-  }
-
-  useEffect(() => {}, [selectedRows])
-
   const postModule = () => {
     // Filter out objects where checked is truthy
+
     const checkedObjects = data.list
-      .filter(obj => obj.isInactive)
+      .filter(obj => obj.checked)
       .map(obj => {
-        const { moduleName, ...rest } = obj
+        const { moduleName, checked, ...rest } = obj
 
         return rest
       })
+    checkedObjects.forEach(obj => {
+      if (!obj.isIactive) {
+        obj.isInactive = true
+      }
+    })
 
     const resultObject = {
       modules: checkedObjects
@@ -132,17 +134,12 @@ const ModuleDeactivation = () => {
       record: JSON.stringify(resultObject)
     })
       .then(res => {
-        setSelectedRows([])
         toast.success('Record Generated Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
-
-  useEffect(() => {
-    setSelectedRows([])
-  }, [])
 
   return (
     <Box
@@ -159,7 +156,7 @@ const ModuleDeactivation = () => {
             isLoading={false}
             maxAccess={access}
             showCheckboxColumn={true}
-            handleCheckedRows={handleCheckedRows}
+            handleCheckedRows={() => {}}
             pagination={false}
           />
         </Box>
