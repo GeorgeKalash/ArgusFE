@@ -8,7 +8,6 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 const WindowToolbar = ({
   onSave,
   onPost,
-  onTFR,
   onClear,
   onInfo,
   onApply,
@@ -24,12 +23,10 @@ const WindowToolbar = ({
   smallBox = false,
   infoVisible = true,
   postVisible = false,
-  visibleTFR = false,
   isClosed = false,
   clientRelation,
   onClientRelation = false,
   isPosted = false,
-  isTFR = false,
   resourceId,
   setSelectedReport,
   selectedReport,
@@ -41,7 +38,6 @@ const WindowToolbar = ({
       actions,
       onSave,
       onPost,
-      onTFR,
       onClear,
       onInfo,
       onApply,
@@ -119,16 +115,16 @@ const WindowToolbar = ({
           <Box></Box>
         )}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {Buttons.filter(button => actions.some(action => action.title === button.title)).map((button, index) => {
+          {Buttons.filter(button => actions.some(action => action.key === button.key)).map((button, index) => {
 
-            const correspondingAction = actions.find(action => action.title === button.title);
+            const correspondingAction = actions.find(action => action.key === button.key);
             const isVisible = eval(correspondingAction.condition); 
             const isDisabled = eval(correspondingAction.disabled);
-            const handleClick = functionMapping[correspondingAction.onClick] || (() => {});
+            const handleClick = functionMapping[correspondingAction.onClick] || correspondingAction.onClick;
 
             return (
               isVisible && (
-                <Tooltip title={button.title} key={index}>
+                <Tooltip title={button.key} key={index}>
                   <Button
                     onClick={handleClick}
                     variant="contained"
@@ -146,7 +142,7 @@ const WindowToolbar = ({
                     }}
                     disabled={isDisabled}
                   >
-                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.title} />
+                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
                 </Tooltip>
               )
@@ -163,7 +159,7 @@ const WindowToolbar = ({
 
             return (
               isVisible && (
-                <Tooltip title={button.title} key={index}>
+                <Tooltip title={button.key} key={index}>
                   <Button
                     onClick={handleClick}
                     variant="contained"
@@ -181,7 +177,7 @@ const WindowToolbar = ({
                     }}
                     disabled={isDisabled}
                   >
-                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.title} />
+                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
                 </Tooltip>
               )

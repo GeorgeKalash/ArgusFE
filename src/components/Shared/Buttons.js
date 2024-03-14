@@ -1,6 +1,6 @@
 export const Buttons = [
     {
-        title:'Post',
+        key:'Post',
         condition:'visiblePost',
         onClick:'onPost',
         color:'#231f20',
@@ -9,36 +9,39 @@ export const Buttons = [
         main: false,
     },
     {
-        title: 'Close',
+        key: 'Close',
         color:'transparent',
         image: 'close.png',
         border: '1px solid #01a437',
         main: false,
     },
     {
-        title: 'Reopen',
+        key: 'Reopen',
         color:'transparent',
         image: 'reopen.png',
         border: '1px solid #000000',
         main: false,
     },
     {
-        title: 'Approval',
+        key: 'Approval',
         color: '#231f20',
         image: 'approval.png',
         main: false,
     },
     {
-        title:'Invoice',
-        condition:'onTFR && visibleTFR',
-        onClick:'onTFR',
-        color:'#231f20',
-        disabled:'!isTFR',
-        image:'invoice.png',
-        main: true,
+        key: 'Beneficiary',
+        color: '#231f20',
+        image: 'beneficiary.png',
+        main: false
     },
     {
-        title:'Clear',
+        key:'Invoice',
+        color:'#231f20',
+        image:'invoice.png',
+        main: false,
+    },
+    {
+        key:'Clear',
         condition:'onClear',
         onClick:'onClear',
         color:'#f44336',
@@ -46,7 +49,7 @@ export const Buttons = [
         main: true,
     },
     {
-        title:'Client Relation',
+        key:'Client Relation',
         condition:'clientRelation',
         onClick:'onClientRelation',
         color:'#AC48AE',
@@ -55,7 +58,7 @@ export const Buttons = [
         main: true,
     },
     {
-        title:'GL',
+        key:'GL',
         condition:'NewComponentVisible',
         onClick:'() => newHandler(recordId)',
         color:'#231f20',
@@ -64,7 +67,7 @@ export const Buttons = [
         main: true,
     },
     {
-        title:'Info',
+        key:'Info',
         condition:'onInfo && infoVisible',
         onClick:'onInfo',
         color:'#4355a5',
@@ -73,7 +76,7 @@ export const Buttons = [
         main: true,
     },
     {
-        title:'Post',
+        key:'Post',
         condition:'onPost && postVisible',
         onClick:'onPost',
         color:'#231f20',
@@ -82,7 +85,7 @@ export const Buttons = [
         main: true,
     },
     {
-        title:'Submit',
+        key:'Submit',
         condition:'onSave',
         onClick:'onSave',
         color:'#4eb558',
@@ -91,7 +94,7 @@ export const Buttons = [
         main: true,
     },
     {
-        title:'Apply',
+        key:'Apply',
         condition:'onApply',
         onClick:'onApply',
         color:'#4eb558',

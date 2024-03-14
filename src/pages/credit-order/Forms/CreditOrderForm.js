@@ -650,23 +650,30 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
 
   const actions = [
     {
-        title: 'Close',
-        condition: !isClosed,
-        onClick: onClose,
-        disabled: isClosed || !editMode,
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode,
     },
     {
-        title: 'Reopen',
-        condition: isClosed,
-        onClick: onReopen,
-        disabled: !isClosed || !editMode,
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode,
     },
     {
-        title: 'Approval',
-        condition: true,
-        onClick: 'onApproval',
-        disabled:!isClosed,
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled:!isClosed,
     },
+    {
+      key:'Invoice',
+      condition: onTFR,
+      onClick: onTFR,
+      disabled: !isTFR,
+      main: true,
+    }
   ]
 
   return (
@@ -688,9 +695,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         onReopen={onReopen}
         isClosed={isClosed}
         actions={actions}
-        visibleTFR={true}
-        onTFR={onTFR}
-        isTFR={isTFR}
         previewReport={editMode}
       >
         <Grid container>

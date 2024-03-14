@@ -24,12 +24,10 @@ export default function FormShell({
   NewComponentVisible = false,
   maxAccess,
   isPosted = false,
-  isTFR = false,
   isClosed = false,
   clientRelation = false,
   setErrorMessage,
   previewReport = false,
-  visibleTFR = false,
   initialValues,
   initialValues1,
   setIDInfoAutoFilled,
@@ -159,9 +157,7 @@ export default function FormShell({
           infoVisible={infoVisible}
           NewComponentVisible={NewComponentVisible}
           postVisible={postVisible}
-          visibleTFR={visibleTFR}
           isPosted={isPosted}
-          isTFR={isTFR}
           isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}
