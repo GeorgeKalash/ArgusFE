@@ -29,6 +29,7 @@ export default function FormShell({
   visibleReopen = false,
   visibleClose = false,
   visiblePost = false,
+  visibleApprove = false,
   isPosted = false,
   isTFR = false,
   isClosed = false,
@@ -163,6 +164,7 @@ export default function FormShell({
           visibleReopen={visibleReopen}
           visibleClose={visibleClose}
           visiblePost={visiblePost}
+          visibleApprove={visibleApprove}
           onApproval={onApproval}
           editMode={editMode}
           disabledSubmit={disabledSubmit}

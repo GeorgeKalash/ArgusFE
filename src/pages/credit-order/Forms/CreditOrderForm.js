@@ -647,7 +647,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
-  
+
   return (
     <>
       <ConfirmationDialog
@@ -668,6 +668,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         isClosed={isClosed}
         visibleReopen={isClosed}
         visibleClose={!isClosed}
+        visibleApprove={true}
         visibleTFR={true}
         onTFR={onTFR}
         isTFR={isTFR}
