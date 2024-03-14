@@ -97,5 +97,6 @@ export const ResourceIds = {
   CreditInvoice: 35303,
   SalesPerson: 51201,
   SalesTarget: 51209,
-  SystemFunction: 20105
+  SystemFunction: 20105,
+  ModuleDeactivation: 23107
 }

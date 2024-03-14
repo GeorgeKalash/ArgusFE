@@ -22,76 +22,65 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-
-
-  const [initialValues, setData] = useState({rows :[]})
-
+  const [initialValues, setData] = useState({ rows: [] })
 
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues,
-    onSubmit:  values => {
+    onSubmit: values => {
       postSmsFunctionTemplates(values.rows)
     }
   })
 
-
   const getGridData = async () => {
+    const parameters = ''
 
-      const parameters = '';
+    const resSystemFunction = await getRequest({
+      extension: SystemRepository.SystemFunction.qry,
+      parameters: parameters
+    })
 
-      const resSystemFunction = await getRequest({
-        extension: SystemRepository.SystemFunction.qry,
-        parameters: parameters
-      });
+    const resSmsFunctionTemplate = await getRequest({
+      extension: SystemRepository.SMSFunctionTemplate.qry,
+      parameters: parameters
+    })
 
-      const resSmsFunctionTemplate = await getRequest({
-        extension: SystemRepository.SMSFunctionTemplate.qry,
-        parameters: parameters
-      });
+    const finalList = resSystemFunction.list.map(x => {
+      const n = {
+        functionId: parseInt(x.functionId),
+        templateId: null,
+        functionName: x.sfName,
+        templateName: null
+      }
 
-      const finalList = resSystemFunction.list.map(x => {
-        const n = {
-          functionId: parseInt(x.functionId),
-          templateId: null,
-          functionName: x.sfName,
-          templateName: null
-        };
+      const matchingTemplate = resSmsFunctionTemplate.list.find(y => n.functionId === y.functionId)
 
-        const matchingTemplate = resSmsFunctionTemplate.list.find(
-          y => n.functionId === y.functionId
-        );
+      if (matchingTemplate) {
+        n.templateId = matchingTemplate.templateId
+        n.templateName = matchingTemplate.templateName
+      }
 
-        if (matchingTemplate) {
-          n.templateId = matchingTemplate.templateId;
-          n.templateName = matchingTemplate.templateName;
-        }
+      return n
+    })
 
-        return n;
-      });
+    formik.setValues({
+      ...formik.values,
+      rows: finalList.map(({ templateId, templateName, ...rest }, index) => ({
+        id: index + 1,
+        template: {
+          recordId: templateId,
+          name: templateName
+        },
+        ...rest
+      }))
+    })
+  }
 
-      formik.setValues({
-        ...formik.values,
-        rows: finalList.map(({ templateId, templateName, ...rest }, index) => ({
-          id: index + 1,
-          template: {
-            recordId: templateId,
-            name: templateName
-          },
-          ...rest
-        }))
-      });
-
-  };
-
-  const {
-    labels: _labels,
-  } = useResourceQuery({
+  const { labels: _labels } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SmsFunctionTemplates
   })
-
 
   const columns = [
     {
@@ -99,8 +88,7 @@ const SmsFunctionTemplate = () => {
       label: _labels[1],
       name: 'functionId',
       props: {
-      readOnly: true
-
+        readOnly: true
       }
     },
     {
@@ -108,8 +96,10 @@ const SmsFunctionTemplate = () => {
       label: _labels[2],
       name: 'functionName',
       props: {
-      readOnly: true
-      }    },{
+        readOnly: true
+      }
+    },
+    {
       component: 'resourcelookup',
       label: _labels[3],
       name: 'template',
@@ -118,36 +108,30 @@ const SmsFunctionTemplate = () => {
         displayField: 'name',
         valueField: 'name',
         columnsInDropDown: [
-          { key: "reference", value: "Reference" },
-          { key: "name", value: "Name" },
-        ],
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
 
-
-      // width: 50
-      } ,
-       onChange({ row: { update, newRow } }) {
-
-
-        update({
-          recordId : newRow?.template?.recordId,
-          name:  newRow?.template?.name,
-        })
-
+        // width: 50
       },
-
-    },
-
-
+      onChange({ row: { update, newRow } }) {
+        update({
+          recordId: newRow?.template?.recordId,
+          name: newRow?.template?.name
+        })
+      }
+    }
   ]
 
-  const postSmsFunctionTemplates = (values) => {
-
+  const postSmsFunctionTemplates = values => {
     const obj = {
-      smsFunctionTemplates: values.map(({ functionId, template }) => ({ functionId,
-          templateId : template?.recordId ,  templateName : template?.name}))
-          .filter(row => row.templateId != null)
-
-
+      smsFunctionTemplates: values
+        .map(({ functionId, template }) => ({
+          functionId,
+          templateId: template?.recordId,
+          templateName: template?.name
+        }))
+        .filter(row => row.templateId != null)
     }
     postRequest({
       extension: SystemRepository.SMSFunctionTemplate.set,
@@ -156,33 +140,32 @@ const SmsFunctionTemplate = () => {
       .then(res => {
         toast.success('Record Updated Successfully')
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
   return (
     <>
-
-         <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
-          <FormShell form={formik} infoVisible={false} visibleClear={false}>
-
-            <Grid container>
-              <Grid sx={{ width: '100%'  }}>
-                <Box sx={{ width: '100%'  }}>
-                  <DataGrid
-                   height={`calc(100vh - 150px)`}
-                   onChange={value => { formik.setFieldValue('rows', value)}}
-                   value={formik.values.rows}
-                   error={formik.errors.rows}
-                   columns={columns}
-                   allowDelete={false}
-                   allowAddNewLine={false}
-                  />
-                </Box>
-              </Grid>
+      <Box sx={{ height: `calc(100vh - 50px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
+        <FormShell form={formik} infoVisible={false} visibleClear={false}>
+          <Grid container>
+            <Grid sx={{ width: '100%' }}>
+              <Box sx={{ width: '100%' }}>
+                <DataGrid
+                  height={`calc(100vh - 150px)`}
+                  onChange={value => {
+                    formik.setFieldValue('rows', value)
+                  }}
+                  value={formik.values.rows}
+                  error={formik.errors.rows}
+                  columns={columns}
+                  allowDelete={false}
+                  allowAddNewLine={false}
+                />
+              </Box>
             </Grid>
-          </FormShell>
-          </Box>
+          </Grid>
+        </FormShell>
+      </Box>
     </>
   )
 }
