@@ -31,7 +31,7 @@ const CorrespondentForm = ({
   const {recordId} = store
 
   const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.GeneralLedger.qry
+    endpointId: RemittanceSettingsRepository.Correspondent.qry
   })
 
   const [initialValues , setInitialData] = useState({
