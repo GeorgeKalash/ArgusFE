@@ -16,6 +16,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { useInvalidate} from 'src/hooks/resource'
 
 const CorrespondentForm = ({
   labels,
@@ -28,6 +29,10 @@ const CorrespondentForm = ({
 
   const { postRequest, getRequest} = useContext(RequestsContext)
   const {recordId} = store
+
+  const invalidate = useInvalidate({
+    endpointId: GeneralLedgerRepository.GeneralLedger.qry
+  })
 
   const [initialValues , setInitialData] = useState({
     recordId: null,
@@ -72,7 +77,7 @@ const CorrespondentForm = ({
             toast.success('Record Added Successfully')
 
             formik.setFieldValue('recordId', res.recordId )
-
+            invalidate()
 
         } else {
           toast.success('Record Editted Successfully')
