@@ -632,7 +632,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
-          setIsTFR(res.record.releaseStatus === 3 ? true : false)
+          setIsTFR((res.record.releaseStatus===3 && res.record.status!==3 ) ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
