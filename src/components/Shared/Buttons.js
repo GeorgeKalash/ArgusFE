@@ -6,32 +6,27 @@ export const Buttons = [
         color:'#231f20',
         disabled:'!editMode',
         image:'post.png',
+        main: false,
     },
     {
         title: 'Close',
-        condition:'visibleClose',
-        onClick: 'onClose',
         color:'transparent',
-        disabled: 'isClosed || !editMode',
         image: 'close.png',
-        border: '1px solid #01a437'
+        border: '1px solid #01a437',
+        main: false,
     },
     {
         title: 'Reopen',
-        condition: 'visibleReopen',
-        onClick: 'onReopen',
         color:'transparent',
-        disabled:'!isClosed || !editMode',
         image: 'reopen.png',
-        border: '1px solid #000000'
+        border: '1px solid #000000',
+        main: false,
     },
     {
         title: 'Approval',
-        condition: 'visibleApprove',
-        onClick: 'onApproval',
         color: '#231f20',
-        disabled:'!isClosed',
-        image: 'approval.png'
+        image: 'approval.png',
+        main: false,
     },
     {
         title:'Invoice',
@@ -40,6 +35,7 @@ export const Buttons = [
         color:'#231f20',
         disabled:'!isTFR',
         image:'invoice.png',
+        main: true,
     },
     {
         title:'Clear',
@@ -47,6 +43,7 @@ export const Buttons = [
         onClick:'onClear',
         color:'#f44336',
         image:'clear.png',
+        main: true,
     },
     {
         title:'Client Relation',
@@ -55,6 +52,7 @@ export const Buttons = [
         color:'#AC48AE',
         disabled:'!editMode',
         image:'clientRelations.png',
+        main: true,
     },
     {
         title:'GL',
@@ -63,6 +61,7 @@ export const Buttons = [
         color:'#231f20',
         disabled:'!editMode',
         image:'gl.png',
+        main: true,
     },
     {
         title:'Info',
@@ -71,6 +70,7 @@ export const Buttons = [
         color:'#4355a5',
         disabled:'!editMode',
         image:'info.png',
+        main: true,
     },
     {
         title:'Post',
@@ -79,6 +79,7 @@ export const Buttons = [
         color:'#231f20',
         disabled:'isPosted || !editMode',
         image:'post.png',
+        main: true,
     },
     {
         title:'Submit',
@@ -87,6 +88,7 @@ export const Buttons = [
         color:'#4eb558',
         disabled:'disabledSubmit || isPosted || isClosed',
         image:'save.png',
+        main: true,
     },
     {
         title:'Apply',
@@ -95,5 +97,6 @@ export const Buttons = [
         color:'#4eb558',
         disabled:'disabledApply',
         image:'apply.png',
+        main: true,
     },
 ]

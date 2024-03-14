@@ -13,17 +13,11 @@ const WindowToolbar = ({
   onInfo,
   onApply,
   recordId,
-  onClose,
-  onReopen,
   onApproval,
   newHandler,
   onGenerateReport,
   NewComponentVisible = false,
   functionId,
-  visibleClose,
-  visibleApprove,
-  visibleReopen,
-  visiblePost,
   disabledSubmit,
   disabledApply,
   editMode = false,
@@ -44,20 +38,15 @@ const WindowToolbar = ({
   actions = []
 }) => {
     const functionMapping = {
+      actions,
       onSave,
       onPost,
       onTFR,
       onClear,
       onInfo,
       onApply,
-      onClose,
-      onReopen,
       onApproval,
       onClientRelation,
-      visibleClose,
-      visibleApprove,
-      visibleReopen,
-      visiblePost,
       newHandler: () => newHandler(recordId),
     };
   const { getRequest } = useContext(RequestsContext)
@@ -130,7 +119,44 @@ const WindowToolbar = ({
           <Box></Box>
         )}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {Buttons.filter(button => actions.some(action => action.title === button.title)).map((button, index) => {
+
+            const correspondingAction = actions.find(action => action.title === button.title);
+            const isVisible = eval(correspondingAction.condition); 
+            const isDisabled = eval(correspondingAction.disabled);
+            const handleClick = functionMapping[correspondingAction.onClick] || (() => {});
+
+            return (
+              isVisible && (
+                <Tooltip title={button.title} key={index}>
+                  <Button
+                    onClick={handleClick}
+                    variant="contained"
+                    sx={{
+                      mr: 1,
+                      backgroundColor: button.color,
+                      '&:hover': {
+                        backgroundColor: button.color,
+                        opacity: 0.8,
+                      },
+                      border: button.border,
+                      width: 20,
+                      height: 35,
+                      objectFit: 'contain'
+                    }}
+                    disabled={isDisabled}
+                  >
+                    <img src={`/images/buttonsIcons/${button.image}`} alt={button.title} />
+                  </Button>
+                </Tooltip>
+              )
+            );
+          })}
           {Buttons.map((button, index) => {
+            if (!button.main) {
+              return null; // Skip this iteration if button.main is not true
+            }
+
             const isVisible = eval(button.condition); 
             const isDisabled = eval(button.disabled);
             const handleClick = functionMapping[button.onClick];
@@ -161,6 +187,7 @@ const WindowToolbar = ({
               )
             );
           })}
+
         </Box>{' '}
       </Box>
     </DialogActions>

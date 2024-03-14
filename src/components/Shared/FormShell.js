@@ -18,18 +18,11 @@ export default function FormShell({
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
-  closeVisible = false,
   resourceId,
   functionId,
   recordId,
   NewComponentVisible = false,
   maxAccess,
-  onClose,
-  onReopen,
-  visibleReopen = false,
-  visibleClose = false,
-  visiblePost = false,
-  visibleApprove = false,
   isPosted = false,
   isTFR = false,
   isClosed = false,
@@ -159,19 +152,13 @@ export default function FormShell({
               title: 'Preview Report'
             })
           }
-          onClose={onClose}
-          onReopen={onReopen}
-          visibleReopen={visibleReopen}
-          visibleClose={visibleClose}
-          visiblePost={visiblePost}
-          visibleApprove={visibleApprove}
+          actions={actions}
           onApproval={onApproval}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
           NewComponentVisible={NewComponentVisible}
           postVisible={postVisible}
-          closeVisible={closeVisible}
           visibleTFR={visibleTFR}
           isPosted={isPosted}
           isTFR={isTFR}

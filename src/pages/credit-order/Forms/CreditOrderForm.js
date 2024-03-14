@@ -648,6 +648,27 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
 
+  const actions = [
+    {
+        title: 'Close',
+        condition: !isClosed,
+        onClick: onClose,
+        disabled: isClosed || !editMode,
+    },
+    {
+        title: 'Reopen',
+        condition: isClosed,
+        onClick: onReopen,
+        disabled: !isClosed || !editMode,
+    },
+    {
+        title: 'Approval',
+        condition: true,
+        onClick: 'onApproval',
+        disabled:!isClosed,
+    },
+  ]
+
   return (
     <>
       <ConfirmationDialog
@@ -666,9 +687,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         onClose={onClose}
         onReopen={onReopen}
         isClosed={isClosed}
-        visibleReopen={isClosed}
-        visibleClose={!isClosed}
-        visibleApprove={true}
+        actions={actions}
         visibleTFR={true}
         onTFR={onTFR}
         isTFR={isTFR}
