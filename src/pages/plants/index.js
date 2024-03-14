@@ -128,7 +128,7 @@ return {...response,  _startAt: _startAt}
       },
       width: 1000,
       height: 600,
-      title: "Plant"
+      title: _labels.plant
     })
   }
 
