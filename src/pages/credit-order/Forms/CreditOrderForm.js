@@ -668,7 +668,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         isClosed={isClosed}
         visibleReopen={isClosed}
         visibleClose={!isClosed}
-        visibleApprove={isClosed}
+        visibleApprove={true}
         visibleTFR={true}
         onTFR={onTFR}
         isTFR={isTFR}

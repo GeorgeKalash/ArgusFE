@@ -30,7 +30,7 @@ export const Buttons = [
         condition: 'visibleApprove',
         onClick: 'onApproval',
         color: '#231f20',
-        disabled:'isClosed',
+        disabled:'!isClosed',
         image: 'approval.png'
     },
     {

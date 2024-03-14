@@ -147,8 +147,8 @@ const WindowToolbar = ({
                       '&:hover': {
                         backgroundColor: button.color,
                         opacity: 0.8,
-                        border: button.border
                       },
+                      border: button.border,
                       width: 20,
                       height: 35,
                       objectFit: 'contain'
