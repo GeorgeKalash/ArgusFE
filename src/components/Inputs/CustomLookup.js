@@ -32,7 +32,7 @@ const CustomLookup = ({
   disabled = false,
   readOnly = false,
   editMode,
-  dataGrid = false,
+  hasBorder=true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -58,7 +58,7 @@ const CustomLookup = ({
             }),
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: dataGrid && 'none' // Hide border
+                border: !hasBorder && 'none' // Hide border
               }
             },
             width: firstFieldWidth
@@ -69,7 +69,7 @@ const CustomLookup = ({
             value={firstValue}
             size={size}
             options={store}
-            getOptionLabel={option => (typeof option === 'object' ? `${option[valueField]}` : option)}
+            getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
             onChange={(event, newValue) => onChange(name, newValue)}
             PaperComponent={CustomPaper}

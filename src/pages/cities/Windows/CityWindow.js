@@ -23,12 +23,14 @@ const CityWindow = ({
         width={600}
         height={400}
         >
-            <CityForm
-                labels={labels}
-                maxAccess={maxAccess}
-                recordId={recordId}                
-            />
-        </Window>
+            <CustomTabPanel>
+               <CityForm
+                   labels={labels}
+                  maxAccess={maxAccess}
+                  recordId={recordId}               
+               />
+            </CustomTabPanel>
+            </Window>
     </>
   )
 }

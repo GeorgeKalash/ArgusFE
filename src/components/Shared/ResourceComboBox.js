@@ -28,12 +28,13 @@ export default function ResourceComboBox({
           callback: setStore
         })
       else
-      endpointId &&   getRequest({
-          extension: endpointId,
-          parameters
-        }).then(res => {
-          setStore(res.list)
-        })
+        endpointId &&
+          getRequest({
+            extension: endpointId,
+            parameters
+          }).then(res => {
+            setStore(res.list)
+          })
   }, [parameters])
 
   const filteredStore = store.filter(filter)

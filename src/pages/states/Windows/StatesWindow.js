@@ -1,55 +1,28 @@
-// ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import StatesTab from 'src/pages/states/Tabs/StatesTab'
-import TransactionLog from 'src/components/Shared/TransactionLog'
-import { useState } from 'react'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import StatesForm from '../forms/StatesForm'
 
 const StatesWindow = ({
   onClose,
-  width,
-  height,
-  onSave,
-  statesValidation,
   labels,
   maxAccess,
-  countryStore,
-  editMode
+  recordId
 }) => {
-  const [windowInfo, setWindowInfo] = useState(null)
-
+  
   return (
-    <>
     <Window
       id='StatesWindow'
-      Title={labels.states}
+      Title={labels.State}
+      controlled={true}
       onClose={onClose}
-      width={width}
-      height={height}
-      onSave={onSave}
-      onInfo={() => setWindowInfo(true)}
-      disabledInfo={!editMode && true}
-      onInfoClose={() => setWindowInfo(false)}
+      width={500}
+      height={300}
     >
-      <CustomTabPanel>
-        <StatesTab
-          labels={labels}
-          statesValidation={statesValidation}
-          maxAccess={maxAccess}
-          countryStore={countryStore}
-          editMode={editMode}
-        />
-      </CustomTabPanel>
-      </Window>
-        {windowInfo && (
-        <TransactionLog
-          resourceId={ResourceIds && ResourceIds.States}
-          recordId={statesValidation.values.recordId}
-          onInfoClose={() => setWindowInfo(false)}
-        />
-      )}
-    </>
+      <StatesForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+      />
+    </Window>
   )
 }
 

@@ -2,18 +2,27 @@ import React, {useState, useEffect} from 'react'
 import FormShell from './FormShell'
 import AddressTab from './AddressTab'
 import { useFormik } from 'formik'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-export const AddressFormShell = ({setAddress , address, labels , maxAccess , editMode , window}) => {
+export const AddressFormShell = ({setAddress , address , maxAccess , editMode , window, readOnly , allowPost, setPost , onSubmit}) => {
   const [requiredOptional, setRequiredOptional] = useState(true)
 
 
+  const {
+    labels: labels,
+    access
+  } = useResourceParams({
+    datasetId: ResourceIds.ClientMaster
+  })
 
-  const [initialValues, setInitialData] = useState({
+  const initialValues= {
+    recordId: address?.recordId || null,
     name: address?.name,
-    countryId: address?.countryId || 0,
-    stateId: address?.stateId || 0,
-    cityId: address?.cityId,
-    city: address?.city,
+    countryId: address?.countryId || '',
+    stateId: address?.stateId || '',
+    cityId: address?.cityId || '',
+    city: address?.city || '' ,
     street1: address?.street1,
     street2: address?.street2,
     email1: address?.email1,
@@ -23,12 +32,19 @@ export const AddressFormShell = ({setAddress , address, labels , maxAccess , edi
     phone3: address?.phone3,
     addressId: address?.addressId,
     postalCode:address?.postalCode,
-    cityDistrictId: address?.cityDistrictId,
-    cityDistrict: address?.cityDistrict,
+    cityDistrictId: address?.cityDistrictId || '',
+    cityDistrict: address?.cityDistrict || '',
     bldgNo: address?.bldgNo,
     unitNo: address?.unitNo,
     subNo: address?.subNo
-  });
+  };
+
+
+  function areAllNullOrZero(obj) {
+    // Check if every value is either null or 0
+    return Object.values(obj).every(value => value === null || value === 0 || value === '' || value === undefined);
+  }
+
 
   const WorkAddressFormik = useFormik({
 
@@ -52,7 +68,7 @@ export const AddressFormShell = ({setAddress , address, labels , maxAccess , edi
         if (!values.cityId ) {
           errors.cityId = 'This field is required';
         }
-        if (!values.cityId ) {
+        if (!values.phone ) {
           errors.phone = 'This field is required';
         }
 
@@ -71,13 +87,18 @@ export const AddressFormShell = ({setAddress , address, labels , maxAccess , edi
 
     },
     initialValues,
-
     onSubmit: values => {
-        setAddress(values)
-        window.close()
+
+          setAddress(values)
+
+      if(allowPost){
+        onSubmit(values)
+      }else{
+          window.close()
+
+      }
     }
   })
-
   useEffect(()=>{
     if((WorkAddressFormik.values.name || WorkAddressFormik.values.street1 || WorkAddressFormik.values.phone || WorkAddressFormik.values.countryId ||  WorkAddressFormik.values.cityId) && requiredOptional){
       setRequiredOptional(false)
@@ -88,9 +109,12 @@ export const AddressFormShell = ({setAddress , address, labels , maxAccess , edi
      }
   }, [WorkAddressFormik.values])
 
+
+
+
 return (
-    <FormShell  form={WorkAddressFormik} maxAccess={maxAccess}  infoVisible={false} readOnly={editMode} editMode={editMode}>
-      <AddressTab  addressValidation={WorkAddressFormik} maxAccess={maxAccess} labels={labels} requiredOptional={requiredOptional} readOnly={editMode}  />
+    <FormShell  form={WorkAddressFormik} maxAccess={maxAccess}  infoVisible={false} readOnly={readOnly} editMode={editMode}>
+      <AddressTab  addressValidation={WorkAddressFormik} maxAccess={maxAccess} labels={labels} requiredOptional={requiredOptional}  readOnly={readOnly} />
     </FormShell>
   )
 }

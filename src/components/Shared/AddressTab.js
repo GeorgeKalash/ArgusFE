@@ -179,7 +179,7 @@ const AddressTab = ({
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={addressValidation.values.countryId && SystemRepository.State.qry}
-              parameters={addressValidation.values.countryId && `_countryId=${addressValidation.values.countryId}`}
+              parameters={addressValidation.values.countryId && `_countryId=${addressValidation.values.countryId || 0}`}
               name='stateId'
               label={labels.state}
               valueField='recordId'
@@ -200,13 +200,13 @@ const AddressTab = ({
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={12}>{}
 
             <ResourceLookup
              endpointId={SystemRepository.City.snapshot}
              parameters={{
               _countryId: addressValidation.values.countryId,
-              _stateId: addressValidation.values.stateId ?? 0
+              _stateId: addressValidation.values.stateId ? addressValidation.values.stateId : 0
              }}
 
              valueField='name'
