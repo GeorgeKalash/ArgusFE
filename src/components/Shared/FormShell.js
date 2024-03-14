@@ -7,6 +7,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
+import Approvals from './Approvals'
 
 export default function FormShell({
   form,
@@ -23,6 +24,11 @@ export default function FormShell({
   recordId,
   NewComponentVisible = false,
   maxAccess,
+  onClose,
+  onReopen,
+  visibleReopen = false,
+  visibleClose = false,
+  visiblePost = false,
   isPosted = false,
   isTFR = false,
   isClosed = false,
@@ -68,6 +74,19 @@ export default function FormShell({
       }
     }
 
+    function onApproval() {
+      stack({
+        Component: Approvals,
+        props: {
+          recordId: form.values.recordId,
+          functionId: form.values.functionId
+        },
+        width: 1000,
+        height: 500,
+        title: 'Approvals'
+      })
+    }
+    
   return (
     <>
       <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>{children}</DialogContent>
@@ -139,7 +158,12 @@ export default function FormShell({
               title: 'Preview Report'
             })
           }
-          actions={actions}
+          onClose={onClose}
+          onReopen={onReopen}
+          visibleReopen={visibleReopen}
+          visibleClose={visibleClose}
+          visiblePost={visiblePost}
+          onApproval={onApproval}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}

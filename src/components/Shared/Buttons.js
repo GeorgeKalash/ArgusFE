@@ -1,5 +1,38 @@
 export const Buttons = [
-
+    {
+        title:'Post',
+        condition:'visiblePost',
+        onClick:'onPost',
+        color:'#231f20',
+        disabled:'!editMode',
+        image:'post.png',
+    },
+    {
+        title: 'Close',
+        condition:'visibleClose',
+        onClick: 'onClose',
+        color:'transparent',
+        disabled: 'isClosed || !editMode',
+        image: 'close.png',
+        border: '1px solid #01a437'
+    },
+    {
+        title: 'Reopen',
+        condition: 'visibleReopen',
+        onClick: 'onReopen',
+        color:'transparent',
+        disabled:'!isClosed || !editMode',
+        image: 'reopen.png',
+        border: '1px solid #000000'
+    },
+    {
+        title: 'Approval',
+        condition: 'visibleApprove',
+        onClick: 'onApproval',
+        color: '#231f20',
+        disabled:'isClosed',
+        image: 'approval.png'
+    },
     {
         title:'Invoice',
         condition:'onTFR && visibleTFR',
@@ -63,5 +96,4 @@ export const Buttons = [
         disabled:'disabledApply',
         image:'apply.png',
     },
-
 ]

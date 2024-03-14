@@ -648,49 +648,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
   
-  function onApproval() {
-    stack({
-      Component: Approvals,
-      props: {
-        recordId: formik.values.recordId,
-        functionId: formik.values.functionId
-      },
-      width: 1000,
-      height: 500,
-      title: 'Approvals'
-    })
-  }
-
-  const actions = [
-    {
-      action: onClose,
-      title: 'close',
-      isDisabled: isClosed || !editMode,
-      isHidden: isClosed,
-      color: 'transparent',
-      colorHover: 'transparent',
-      border: '1px solid #01a437'
-    },
-    {
-      action: onReopen,
-      title: 'reopen',
-      isDisabled: !isClosed || !editMode,
-      isHidden: !isClosed,
-      color: 'transparent',
-      colorHover: 'transparent',
-      border: '1px solid #000000'
-    },
-    {
-      action: onApproval,
-      title: 'approval',
-      isDisabled: !isClosed,
-      isHidden: !isClosed,
-      color: '#231f20',
-      colorHover: '#080707'
-    }
-  ]
-
-
   return (
     <>
       <ConfirmationDialog
@@ -702,12 +659,15 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         }}
       />
       <FormShell
-        actions={actions}
         resourceId={ResourceIds.CreditOrder}
         form={formik}
         maxAccess={maxAccess}
         editMode={editMode}
-        hiddenPost={true}
+        onClose={onClose}
+        onReopen={onReopen}
+        isClosed={isClosed}
+        visibleReopen={isClosed}
+        visibleClose={!isClosed}
         visibleTFR={true}
         onTFR={onTFR}
         isTFR={isTFR}

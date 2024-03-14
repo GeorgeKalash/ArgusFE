@@ -14,14 +14,20 @@ const WindowToolbar = ({
   onApply,
   recordId,
   onClose,
+  onReopen,
+  onApproval,
   newHandler,
   onGenerateReport,
+  functionId,
+  visibleClose,
+  visibleApprove,
+  visibleReopen,
+  visiblePost,
   disabledSubmit,
   disabledApply,
   editMode = false,
   smallBox = false,
   infoVisible = true,
-  NewComponentVisible,
   postVisible = false,
   visibleTFR = false,
   isClosed = false,
@@ -43,7 +49,14 @@ const WindowToolbar = ({
       onClear,
       onInfo,
       onApply,
+      onClose,
+      onReopen,
+      onApproval,
       onClientRelation,
+      visibleClose,
+      visibleApprove,
+      visibleReopen,
+      visiblePost,
       newHandler: () => newHandler(recordId),
     };
   const { getRequest } = useContext(RequestsContext)
@@ -116,27 +129,6 @@ const WindowToolbar = ({
           <Box></Box>
         )}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {actions.map((actionObj, index) => (
-            <Tooltip title={`${actionObj.title}`} key={`${actionObj.title}`}>
-              <Button
-                onClick={actionObj.action}
-                variant='contained'
-                sx={{
-                  mr: 1,
-                  backgroundColor: actionObj.color,
-                  '&:hover': { backgroundColor: actionObj.colorHover },
-                  width: 20,
-                  height: 35,
-                  objectFit: 'contain',
-                  border: actionObj.border
-                }}
-                style={{ display: actionObj.isHidden ? 'none' : 'block' }}
-                disabled={actionObj.isDisabled}
-              >
-                <img src={`/images/buttonsIcons/${actionObj.title}.png`} alt={`${actionObj.title}`} />
-              </Button>
-            </Tooltip>
-          ))}
           {Buttons.map((button, index) => {
             const isVisible = eval(button.condition); 
             const isDisabled = eval(button.disabled);
@@ -154,6 +146,7 @@ const WindowToolbar = ({
                       '&:hover': {
                         backgroundColor: button.color,
                         opacity: 0.8,
+                        border: button.border
                       },
                       width: 20,
                       height: 35,
