@@ -71,15 +71,25 @@ const CustomLookup = ({
             size={size}
             options={store}
             getOptionLabel={option => {
-              const displayTextArray = store.map(option => Object.keys(option));
-              const displayText = displayTextArray.map(keys => keys.join(' - ')).join(', '); // Join keys with ' - ' and then join each set of keys with ', '
+              if(typeof option === 'object'){
+              const displayTextArray = Object.keys(option);
+              const displayText = displayTextArray.map(keys => option[keys]).join(' || ');
 
-              console.log(displayText);
+              return `${displayText} - ${option[valueField]}`;
+              }
+              else{
 
-              return `${displayText}`;
+                return option
+              }
             }}
 
-            //   else if (typeof option === 'objects') {
+            // getOptionLabel={option => {
+            //   if (typeof option === 'object' && Array.isArray(displayField)) {
+            //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space
+
+            //     return `${displayText} - ${option[valueField]}`;
+            //   }
+            //   else if (typeof option === 'object') {
             //     return `${option[displayField] || option[valueField]} - ${option[valueField]}`;
             //   } else {
             //     return option;

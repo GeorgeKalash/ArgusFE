@@ -36,7 +36,7 @@ export const ResourceLookup = ({
       })
   }
   const check = errorCheck ? errorCheck : name
-  const firstValue = valueShow ? form.values[secondValueShow] : form.values[name]
+  const firstValue = valueShow ? form.values[valueShow] : form.values[name]
   const secondValue = secondValueShow ? form.values[secondValueShow] : form.values[name]
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])

@@ -55,7 +55,8 @@ console.log('labels-cureency', labels)
           inward: false,
           bankDeposit: false,
           deal: false,
-          isInactive: false
+          isInactive: false,
+          saved: false
         }
       ]
     },
@@ -71,6 +72,7 @@ console.log('labels-cureency', labels)
       ({ currency,  exchange, currencyId ,exchangeId,  ...rest }) => ({
          currencyId: currency?.recordId,
          exchangeId: exchange?.recordId,
+         corId : recordId,
          ...rest
       }))
 
@@ -83,8 +85,8 @@ console.log('labels-cureency', labels)
       record: JSON.stringify(data)
     })
       .then(res => {
-        if (!res.recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
+      toast.success('Record Edited Successfully')
+      if(res) getData()
       })
       .catch(error => {
       })
@@ -153,16 +155,18 @@ console.log('labels-cureency', labels)
     },
     {
       component: 'button',
+      name:"saved",
       label: labels.exchange,
       onClick:  async (e, row) => {
-      row?.currency &&   stack({
+
+       stack({
           Component: ExchangeMapForm,
           props: {
             labels: labels,
             recordId: recordId? recordId : null,
             store: store,
             currency: row?.currency,
-            exchange :  row?.exchange
+            exchange :  row?.exchange,
           },
           width: 700,
           height: 600,
@@ -172,7 +176,7 @@ console.log('labels-cureency', labels)
     },
   ]
 
-  useEffect(()=>{
+  function getData(){
     const defaultParams = `_corId=${recordId}`
     var parameters = defaultParams
     recordId && getRequest({
@@ -192,8 +196,11 @@ console.log('labels-cureency', labels)
                 recordId: exchangeId,
                 reference: exchangeRef,
                 name: exchangeName,
-              },  ...rest
-}))})
+
+              },
+               saved: true,
+                ...rest
+          }))})
         } else {
           formik.setValues({
             currencies: [
@@ -209,7 +216,8 @@ console.log('labels-cureency', labels)
                 inward: false,
                 bankDeposit: false,
                 deal: false,
-                isInactive: false
+                isInactive: false,
+                saved: false
               }
             ]
           })
@@ -218,6 +226,10 @@ console.log('labels-cureency', labels)
       .catch(error => {
       })
 
+
+  }
+  useEffect(()=>{
+ getData()
 
 },[recordId])
 

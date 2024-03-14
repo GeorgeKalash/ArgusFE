@@ -119,7 +119,7 @@ const Correspondent = () => {
       },
       width: 1200,
       height: 600,
-      title: "Correspondent"
+      title: _labels.correspondent
     })
   }
 

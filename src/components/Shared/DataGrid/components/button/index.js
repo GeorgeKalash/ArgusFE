@@ -3,7 +3,7 @@ import { Button } from '@mui/material'
 
 export default {
   view({ row , column, field}) {
-  console.log(column)
+  console.log(column , row , field)
 
 return (
       <Button
@@ -11,6 +11,7 @@ return (
         autoFocus
         onClick={(e) => column.onClick(e, row)}
         variant='contained'
+        disabled={!row[field]}
       >
          {column?.label}
       </Button>

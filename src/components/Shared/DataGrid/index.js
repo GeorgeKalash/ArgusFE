@@ -274,8 +274,6 @@ return (
           headerName: column.label || column.name,
           editable: true,
           flex: column.flex || 1,
-
-          // width: column.width || 170,
           sortable: false,
           renderCell(params) {
             const Component =
@@ -313,7 +311,7 @@ return (
                   padding: '0 0px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: column.component === 'checkbox' && 'center',
+                  justifyContent: column.component === 'checkbox'|| column.component === 'button' && 'center',
 
                 }}
               >

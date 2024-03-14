@@ -83,12 +83,7 @@ const CorrespondentCountriesForm = ({
           ...prevStore,
             countries: correspondentCountries
         }));
-
-        if (!res.recordId) {
-          toast.success('Record Added Successfully')
-        } else {
           toast.success('Record Edited Successfully')
-        }
       })
       .catch(error => {
 
@@ -111,7 +106,6 @@ const CorrespondentCountriesForm = ({
               ({ countryId,  countryRef, ...rest } , index) => ({
                  id : index,
                  country : { recordId: countryId,
-                //  name: countryName,
                  reference: countryRef,
                 },  ...rest
 

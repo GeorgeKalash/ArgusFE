@@ -2,7 +2,7 @@
 import { Checkbox } from '@mui/material'
 import { useGridApiContext } from '@mui/x-data-grid'
 
-export default function TextFieldEdit({ id, field, value }) {
+export default function TextFieldEdit({ id, field, value, update }) {
   const api = useGridApiContext()
 
   return (
@@ -14,7 +14,7 @@ export default function TextFieldEdit({ id, field, value }) {
     checked={value}
     value={value}
     onChange={e => {
-      api.current.setEditCellValue({
+      update({
         id,
         field,
         value: e.target.checked
