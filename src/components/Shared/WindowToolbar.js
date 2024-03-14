@@ -18,6 +18,7 @@ const WindowToolbar = ({
   onApproval,
   newHandler,
   onGenerateReport,
+  NewComponentVisible = false,
   functionId,
   visibleClose,
   visibleApprove,
