@@ -11,11 +11,9 @@ import FormShell from 'src/components/Shared/FormShell'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -23,9 +21,8 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
 
-  //states
+
 
   const [initialValues, setData] = useState({rows :[]})
 
@@ -35,32 +32,24 @@ const SmsFunctionTemplate = () => {
     validateOnChange: true,
     initialValues,
     onSubmit:  values => {
-      // alert(JSON.stringify(values.rows, null, 2));
-      console.log("values----1" , values) // no get  update value
-
       postSmsFunctionTemplates(values.rows)
     }
   })
 
 
   const getGridData = async () => {
-    try {
+
       const parameters = '';
 
-      const resSystemFunctionPromise = await getRequest({
+      const resSystemFunction = await getRequest({
         extension: SystemRepository.SystemFunction.qry,
         parameters: parameters
       });
 
-      const resSmsFunctionTemplatePromise = await getRequest({
+      const resSmsFunctionTemplate = await getRequest({
         extension: SystemRepository.SMSFunctionTemplate.qry,
         parameters: parameters
       });
-
-      const [resSystemFunction, resSmsFunctionTemplate] = await Promise.all([
-        resSystemFunctionPromise,
-        resSmsFunctionTemplatePromise
-      ]);
 
       const finalList = resSystemFunction.list.map(x => {
         const n = {
@@ -93,10 +82,7 @@ const SmsFunctionTemplate = () => {
           ...rest
         }))
       });
-    } catch (error) {
 
-return Promise.reject(error);
-    }
   };
 
   const {
@@ -106,15 +92,15 @@ return Promise.reject(error);
     datasetId: ResourceIds.SmsFunctionTemplates
   })
 
+
   const columns = [
     {
       component: 'textfield',
       label: _labels[1],
       name: 'functionId',
-
-      // width: 200,
       props: {
       readOnly: true
+
       }
     },
     {
@@ -123,10 +109,7 @@ return Promise.reject(error);
       name: 'functionName',
       props: {
       readOnly: true
-      },
-
-      // width: 300
-    },{
+      }    },{
       component: 'resourcelookup',
       label: _labels[3],
       name: 'template',
@@ -138,8 +121,12 @@ return Promise.reject(error);
           { key: "reference", value: "Reference" },
           { key: "name", value: "Name" },
         ],
+
+
+      // width: 50
       } ,
        onChange({ row: { update, newRow } }) {
+
 
         update({
           recordId : newRow?.template?.recordId,
@@ -154,7 +141,6 @@ return Promise.reject(error);
   ]
 
   const postSmsFunctionTemplates = (values) => {
-    console.log(initialValues)
 
     const obj = {
       smsFunctionTemplates: values.map(({ functionId, template }) => ({ functionId,
@@ -185,8 +171,7 @@ return Promise.reject(error);
                 <Box sx={{ width: '100%'  }}>
                   <DataGrid
                    height={`calc(100vh - 150px)`}
-                   onChange={value => { console.log(value); formik.setFieldValue('rows', value)}}
-                   onCellEditStop={value => console.log(value, 'sms')}
+                   onChange={value => { formik.setFieldValue('rows', value)}}
                    value={formik.values.rows}
                    error={formik.errors.rows}
                    columns={columns}
@@ -198,7 +183,6 @@ return Promise.reject(error);
             </Grid>
           </FormShell>
           </Box>
-
     </>
   )
 }

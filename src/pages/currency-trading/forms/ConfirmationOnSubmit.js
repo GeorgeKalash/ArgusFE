@@ -3,7 +3,6 @@ import { useFormik } from 'formik'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
-import * as yup from 'yup'
 
 export default function ConfirmationOnSubmit({ formik, labels , window }) {
   const fetchFormik = useFormik({
@@ -16,7 +15,6 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
       cellPhoneRepeat: ''
     },
     validate: values => {
-      console.log(values)
       const errors = {}
 
       if (!formik.values.clientId && !values.cellPhoneRepeat) {
