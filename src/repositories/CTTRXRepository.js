@@ -4,6 +4,7 @@ export const CTTRXrepository = {
   CurrencyTrading: {
     snapshot: service + 'snapshotCIV',
     close: service + 'closeCIV',
+    reopen: service + 'reopenCIV'
   },
   CreditOrder: {
     page: service + 'pageORD',

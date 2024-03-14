@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 
-export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=true, allowAddNewLine=true}) {
+export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=true, allowAddNewLine=true, disabled=false}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
 
@@ -272,7 +272,7 @@ return (
         ...columns.map(column => ({
           field: column.name,
           headerName: column.label || column.name,
-          editable: true,
+          editable: !disabled,
           flex: column.flex || 1,
 
           // width: column.width || 170,

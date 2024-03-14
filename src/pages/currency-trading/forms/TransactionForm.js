@@ -27,6 +27,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 
 const FormContext = React.createContext(null)
 
@@ -92,29 +93,6 @@ function FormProvider({ formik, maxAccess, labels, children }) {
   return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
 }
 
-function useLookup({ endpointId, parameters }) {
-  const [store, setStore] = useState([])
-
-  const { getRequest } = useContext(RequestsContext)
-
-  return {
-    store,
-    lookup(searchQry) {
-      getRequest({
-        extension: endpointId,
-        parameters: new URLSearchParams({ ...parameters, _filter: searchQry })
-      }).then(res => {
-        setStore(res.list)
-      })
-    },
-    valueOf(id) {
-      return store.find(({ recordId }) => recordId === id)
-    },
-    clear() {
-      setStore([])
-    }
-  }
-}
 
 export default function TransactionForm({ recordId, labels, maxAccess, plantId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -132,6 +110,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [rateType, setRateType] = useState(null)
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
+  const [isClosed, setIsClosed] = useState(false)
 
   async function checkTypes(value) {
     if (!value) {
@@ -424,6 +403,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       })
 
     }
+    setIsClosed(record.headerView.wip === 2 ? true : false)
+
   }
 
 
@@ -445,6 +426,79 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
   }
 
+  const onClose = async () => {
+
+ const values= formik.values
+
+ const { record: cashAccountRecord } = await getRequest({
+  extension: `SY.asmx/getUD`,
+  parameters: `_userId=${userId}&_key=cashAccountId`
+})
+
+  const data =  {
+    recordId: values?.recordId || null,
+    status: values.status,
+    functionId: values.functionId,
+    plantId: plantId ? plantId : values.plantId,
+    clientId: values.clientId,
+    cashAccountId: cashAccountRecord.value,
+    poeId: values.purpose_of_exchange,
+    wip: values.wip,
+    otpVerified: values.otp,
+    amount: String(total || '').replaceAll(',', ''),
+    notes: values.remarks
+  }
+
+
+      const res = await postRequest({
+        extension: CTTRXrepository.CurrencyTrading.close,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        invalidate()
+        setIsClosed(true)
+      }
+
+  }
+
+  const onReopen = async () => {
+
+ const values= formik.values
+
+ const { record: cashAccountRecord } = await getRequest({
+  extension: `SY.asmx/getUD`,
+  parameters: `_userId=${userId}&_key=cashAccountId`
+})
+
+  const data =  {
+    recordId: values?.recordId || null,
+    date: formatDateToApiFunction(values.date),
+    reference: values.reference,
+    status: values.status,
+    functionId: values.functionId,
+    plantId: plantId ? plantId : values.plantId,
+    clientId: values.clientId,
+    cashAccountId: cashAccountRecord.value,
+    poeId: values.purpose_of_exchange,
+    wip: values.wip,
+    otpVerified: values.otp,
+    amount: String(total || '').replaceAll(',', ''),
+    notes: values.remarks
+  }
+
+
+      const res = await postRequest({
+        extension: CTTRXrepository.CurrencyTrading.reopen,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        invalidate()
+        setIsClosed(false)
+      }
+
+  }
 
 
 
@@ -660,6 +714,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       editMode={editMode}
       disabledSubmit={Balance && true}
       previewReport={editMode}
+      onClose={onClose}
+      isClosed={isClosed}
+      onReopen={onReopen}
+      hiddenReopen={!isClosed}
+      hiddenClose={isClosed}
     >
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
@@ -772,6 +831,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 value={formik.values.operations}
                 error={formik.errors.operations}
                 height={300}
+                disabled={isClosed}
                 bg={
                   formik.values.functionId && (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
@@ -1217,9 +1277,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 onChange={value => formik.setFieldValue('amount', value)}
                 value={formik.values.amount}
                 error={formik.errors.amount}
-
+                disabled={isClosed}
                 columns={[
-
                   {
                     component: 'resourcecombobox',
                     label: labels.type,
@@ -1245,6 +1304,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   {
                     component: 'resourcecombobox',
                     name: 'creditCards',
+                    editable: false,
                     label: labels.creditCard,
                     props: {
                       endpointId: CashBankRepository.CreditCard.qry,
