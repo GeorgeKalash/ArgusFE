@@ -27,7 +27,6 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { FormatLineSpacing } from '@mui/icons-material'
-import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
@@ -548,8 +547,18 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
   }, [height])
   console.log('editMode ', editMode)
 
+  const actions = [
+    {
+      key:'GL',
+      condition: editMode,
+      onClick: '() => newHandler(recordId)' ,
+      disabled:!editMode,
+    }
+  ]
+
   return (
-    <ApprovalFormShell
+    <FormShell
+      actions={actions}
       resourceId={ResourceIds.CreditInvoice}
       form={formik}
       maxAccess={maxAccess}
@@ -560,7 +569,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       hiddenReopen={true}
       previewReport={editMode}
       functionId={formik.values.functionId}
-      NewComponentVisible={editMode}
     >
       <Grid container>
         <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
@@ -773,6 +781,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           </Grid>
         </Grid>
       </Grid>
-    </ApprovalFormShell>
+    </FormShell>
   )
 }

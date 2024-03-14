@@ -59,12 +59,9 @@ export const Buttons = [
     },
     {
         key:'GL',
-        condition:'NewComponentVisible',
-        onClick:'() => newHandler(recordId)',
         color:'#231f20',
-        disabled:'!editMode',
         image:'gl.png',
-        main: true,
+        main: false,
     },
     {
         key:'Info',

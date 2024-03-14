@@ -672,7 +672,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       condition: onTFR,
       onClick: onTFR,
       disabled: !isTFR,
-      main: true,
     }
   ]
 
