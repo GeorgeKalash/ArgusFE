@@ -25,7 +25,7 @@ const AddressForm = ({
         record: JSON.stringify(data)
       })
         .then(res => {
-          onSubmit(res , recordId)
+          onSubmit(res)
         })
 
   }
