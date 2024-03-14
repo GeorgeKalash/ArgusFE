@@ -12,10 +12,6 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
       const _newValue = getNumberWithoutCommas(newValue)
 
       return _newValue;
-
-      // console.log(_newValue)
-      // if ((min && _newValue < min) || (max && _newValue > max)) return oldValue
-      // else return getFormattedNumber(newValue)
     }
   }
 
@@ -26,7 +22,7 @@ return (
       language={'number'}
       readOnly={props?.readOnly}
       autoFocus
-      dataGrid={true}
+      hasBorder={false}
       onChange={e => {
         update({
           id,

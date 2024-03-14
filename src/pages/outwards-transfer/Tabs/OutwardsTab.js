@@ -6,6 +6,7 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { getFormattedNumberMax } from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
+import { useWindow } from 'src/windows'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -18,6 +19,10 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
+import BenificiaryBank from './BenificiaryBank'
+import BenificiaryCash from './BenificiaryCash'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWindowOpen }) {
   const [position, setPosition] = useState()
@@ -29,12 +34,14 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
   const [currencyStore, setCurrencyStore] = useState([])
   const [editMode, setEditMode] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
     plantId: '',
     countryId: '',
     dispersalType: '',
+    dispersalTypeName: '',
     currencyId: '',
     agentId: '',
     idNo: '',
@@ -68,51 +75,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
     onSubmit: values => {}
   })
 
-  const onCountrySelection = countryId => {
-    //get dispersals list
-    var parameters = `_countryId=${countryId}`
-    getRequest({
-      extension: RemittanceOutwardsRepository.DispersalType.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setDispersalTypeStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data)
-      })
-  }
-
-  const onDispersalSelection = (countryId, dispersalType) => {
-    //get currencies list
-    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}`
-    getRequest({
-      extension: RemittanceOutwardsRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const onCurrencySelection = (countryId, dispersalType, currencyId) => {
-    //get agents list
-    var parameters = `_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}`
-    getRequest({
-      extension: RemittanceOutwardsRepository.Agent.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setAgentsStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   const onAmountDataFill = formFields => {
     //get products list
     var type = 2
@@ -133,9 +95,27 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       .then(res => {
         setProductsStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
+      .catch(error => {})
+  }
+
+  const openReleaventWindow = formValues => {
+    if (formValues.dispersalType === 1) {
+      stack({
+        Component: BenificiaryCash,
+        props: {},
+        width: 700,
+        height: 500,
+        title: 'Cash'
       })
+    } else if (formValues.dispersalType === 2) {
+      stack({
+        Component: BenificiaryBank,
+        props: {},
+        width: 900,
+        height: 650,
+        title: 'Bank'
+      })
+    }
   }
 
   const onIdNoBlur = idNo => {
@@ -169,9 +149,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
           formik.setFieldValue('nationalityId', '')
         }
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const lookupCorrespondent = searchQry => {
@@ -185,9 +163,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
         .then(res => {
           setCorrespondentStore(res.list)
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch(error => {})
     }
   }
 
@@ -226,72 +202,75 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
                 { key: 'countryRef', value: 'Reference' },
                 { key: 'countryName', value: 'Name' }
               ]}
-              valueField='recordId'
+              valueField='countryId'
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('countryId', newValue?.countryId)
-                if (newValue) onCountrySelection(newValue?.countryId)
               }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
-              name='dispersalType'
-              label='dispersal type'
-              valueField='dispersalType'
-              displayField='dispersalTypeName'
+            <ResourceComboBox
+              endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
+              parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
+              label='Dispersal Type'
               required
-              readOnly={formik.values.countryId == ''}
-              store={dispersalTypeStore}
-              value={dispersalTypeStore?.filter(item => item.dispersalType === formik.values.dispersalType)[0]}
+              name='dispersalType'
+              displayField='dispersalTypeName'
+              valueField='dispersalType'
+              values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('dispersalType', newValue?.dispersalType)
-                if (newValue) onDispersalSelection(formik.values.countryId, newValue?.dispersalType)
+                formik.setFieldValue('dispersalTypeName', newValue?.dispersalTypeName)
               }}
               error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
-              helperText={formik.touched.dispersalType && formik.errors.dispersalType}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
-              name='currencyId'
+            <ResourceComboBox
+              endpointId={
+                formik.values.countryId && formik.values.dispersalType && RemittanceOutwardsRepository.Currency.qry
+              }
+              parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
               label='Currency'
-              valueField='currencyId'
+              required
+              name='currencyId'
               displayField={['currencyRef', 'currencyName']}
               columnsInDropDown={[
                 { key: 'currencyRef', value: 'Reference' },
                 { key: 'currencyName', value: 'Name' }
               ]}
-              required
+              valueField='currencyId'
+              values={formik.values}
               readOnly={formik.values.dispersalType == ''}
-              store={currencyStore}
-              value={currencyStore?.filter(item => item.currencyId === formik.values.currencyId)[0]}
               onChange={(event, newValue) => {
                 formik.setFieldValue('currencyId', newValue?.currencyId)
-                if (newValue)
-                  onCurrencySelection(formik.values.countryId, formik.values.dispersalType, newValue?.currencyId)
               }}
-              error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              helperText={formik.touched.currencyId && formik.errors.currencyId}
+              error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
             />
           </Grid>
 
           <Grid item xs={12}>
-            <CustomComboBox
-              name='agentId'
+            <ResourceComboBox
+              endpointId={
+                formik.values.countryId &&
+                formik.values.dispersalType &&
+                formik.values.currencyId &&
+                RemittanceOutwardsRepository.Agent.qry
+              }
+              parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId}`}
               label='Agent'
-              valueField='agentId'
-              displayField='agentName'
               required={formik.values.dispersalType === 2}
               readOnly={formik.values.dispersalType !== 2}
-              store={agentsStore}
-              value={agentsStore?.filter(item => item.agentId === formik.values.agentId)[0]}
+              name='agentId'
+              displayField='agentName'
+              valueField='agentId'
+              values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('agentId', newValue?.agentId)
               }}
               error={formik.touched.agentId && Boolean(formik.errors.agentId)}
-              helperText={formik.touched.agentId && formik.errors.agentId}
             />
           </Grid>
 
@@ -404,33 +383,30 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomLookup
-              name='corId'
-              label='Correspondent'
-              value={formik.values.corId}
-              required={false}
+            <ResourceLookup
+              endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
               valueField='reference'
               displayField='name'
-              firstFieldWidth='150px'
-              store={correspondentStore}
-              firstValue={formik.values.corRef}
-              secondValue={formik.values.corName}
-              setStore={setCorrespondentStore}
-              onLookup={lookupCorrespondent}
-              onChange={(event, newValue) => {
+              name='corId'
+              label='Correspondant'
+              form={formik}
+              required
+              valueShow='corRef'
+              secondValueShow='corName'
+              maxAccess={maxAccess}
+              editMode={editMode}
+              onChange={async (event, newValue) => {
                 if (newValue) {
                   formik.setFieldValue('corId', newValue?.recordId)
-                  formik.setFieldValue('corRef', newValue?.reference)
-                  formik.setFieldValue('corName', newValue?.name)
+                  formik.setFieldValue('corName', newValue?.name || '')
+                  formik.setFieldValue('corRef', newValue?.reference || '')
                 } else {
                   formik.setFieldValue('corId', null)
-                  formik.setFieldValue('corRef', null)
                   formik.setFieldValue('corName', null)
+                  formik.setFieldValue('corRef', null)
                 }
               }}
-              error={formik.touched.corId && Boolean(formik.errors.corId)}
-              helperText={formik.touched.corId && formik.errors.corId}
-              maxAccess={maxAccess}
+              errorCheck={'corId'}
             />
           </Grid>
           <Button onClick={() => setProductsWindowOpen(true)}>Open Popup</Button>
@@ -515,6 +491,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
               helperText={formik.touched.net && formik.errors.net}
             />
           </Grid>
+          <Button
+            onClick={() => {
+              openReleaventWindow(formik.values)
+            }}
+          >
+            Benificiary
+          </Button>
         </Grid>
       </Grid>
     </FormShell>

@@ -32,7 +32,7 @@ const CustomLookup = ({
   disabled = false,
   readOnly = false,
   editMode,
-  dataGrid = false,
+  hasBorder=true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -58,7 +58,7 @@ const CustomLookup = ({
             }),
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: dataGrid && 'none' // Hide border
+                border: !hasBorder && 'none' // Hide border
               }
             },
             width: firstFieldWidth

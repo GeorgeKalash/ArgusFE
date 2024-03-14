@@ -18,24 +18,22 @@ const PlantWindow = ({
 
   const [store , setStore] = useState({
     recordId : recordId || null,
-    plant: [],
-    address: [],
+    plant: null,
+    address: null,
   })
 
   const [activeTab , setActiveTab] = useState(0)
-  const tabs = [{ label: labels.plant }, { label: labels.address , disabled: !store.editMode }]
+  const tabs = [{ label: labels.plant }, { label: labels.address , disabled: !store.recordId }]
   const { postRequest } = useContext(RequestsContext)
 
   async function onSubmit (address){
+
     const addressId = address.recordId
     if(!store.plant.addressId){
-      setStore(prevStore => ({
-        ...prevStore,
-        plant:{ ...store.plant , addressId :address.recordId}
-      }));
-    const res = store.plant
+
+    const res = { ...store.plant , addressId :address?.recordId}
     if(res){
-    const data = {...res , addressId: addressId || store.plant.addressId , recordId: store.recordId}
+    const data = {...res  , recordId:  store?.recordId}
      await  postRequest({
       extension: SystemRepository.Plant.set,
       record: JSON.stringify(data)
@@ -70,16 +68,16 @@ return (
           maxAccess={maxAccess}
           store={store}
           setStore={setStore}
-          editMode={editMode}
+          editMode={store.recordId}
 
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
         <AddressForm
-           _labels={labels}
+          _labels={labels}
           maxAccess={maxAccess}
           editMode={editMode}
-          recordId={store.plant.addressId}
+          recordId={store?.plant?.addressId}
           address={store.address}
           setAddress={setAddress}
           onSubmit={onSubmit}

@@ -22,7 +22,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  //states
+
 
   const [initialValues, setData] = useState({rows :[]})
 
@@ -92,6 +92,7 @@ const SmsFunctionTemplate = () => {
     datasetId: ResourceIds.SmsFunctionTemplates
   })
 
+
   const columns = [
     {
       component: 'textfield',
@@ -99,6 +100,7 @@ const SmsFunctionTemplate = () => {
       name: 'functionId',
       props: {
       readOnly: true
+
       }
     },
     {
@@ -119,8 +121,12 @@ const SmsFunctionTemplate = () => {
           { key: "reference", value: "Reference" },
           { key: "name", value: "Name" },
         ],
+
+
+      // width: 50
       } ,
        onChange({ row: { update, newRow } }) {
+
 
         update({
           recordId : newRow?.template?.recordId,

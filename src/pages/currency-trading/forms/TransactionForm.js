@@ -4,20 +4,16 @@ import { useFormik } from 'formik'
 import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Confirmation from 'src/components/Shared/Confirmation'
 import FieldSet from 'src/components/Shared/FieldSet'
-import FormShell from 'src/components/Shared/FormShell'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { CommonContext } from 'src/providers/CommonContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -31,7 +27,6 @@ import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
 import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { Box } from '@mui/system'
 
 const FormContext = React.createContext(null)
 
@@ -164,7 +159,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const initial = {
     recordId: null,
     reference: null,
-    rows: [
+    operations: [
        {
         id: 1,
         currencyId: '',
@@ -176,7 +171,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         maxRate: ''
       }
     ],
-    rows2: [
+    amount: [
       {
         id: 1,
         cashAccountId: '',
@@ -242,7 +237,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       nationality: yup.string().required(),
       cell_phone: yup.string().required(),
       profession: yup.string().required(),
-      rows: yup
+      operations: yup
       .array()
       .of(
         yup.object().shape({
@@ -258,7 +253,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         })
       )
       .required('Operations array is required'),
-      rows2: yup
+      amount: yup
       .array()
       .of(
         yup.object().shape({
@@ -356,6 +351,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }, [])
 
   async function getData(id) {
+
     const _recordId = recordId ? recordId : id
 
     const { record } = await getRequest({
@@ -368,9 +364,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       setOperationType(record.headerView.functionId)
 
       formik.setValues({
-        recordId: recordId,
+        recordId: _recordId,
         reference: record.headerView.reference,
-        rows: record.items.map(
+        operations: record.items.map(
           ({ seqNo, currencyId, currencyName, currencyRef, lcAmount, fcAmount, minRate, maxRate, ...rest }) => ({
             id : seqNo,
             currencyId: currencyId,
@@ -383,7 +379,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
            ...rest
           })
         ),
-        rows2: record.cash.map(
+        amount: record.cash.map(
           ({ seqNo,amount,type, typeName, ccId, ccName, ...rest }) => ({
             id : seqNo,
             types :{
@@ -449,21 +445,23 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
   }
 
-  const total = formik.values.rows.reduce((acc, { lcAmount }) => {
-    const amountString = String(lcAmount || 0).replaceAll(',', '')
 
-    return acc + parseFloat(amountString) || 0
-  }, 0)
 
-  const receivedTotal = formik.values.rows2.reduce((acc, { amount }) => {
-    const amountString = String(amount || 0).replaceAll(',', '')
 
-    return acc + parseFloat(amountString) || 0
+  const total = formik.values.operations.reduce((acc, { lcAmount }) => {
+
+    return acc + lcAmount
+ }, 0)
+
+  const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
+
+     return acc + amount
+
   }, 0)
 
   const Balance = total - receivedTotal
-
   async function onSubmit(values) {
+
     if (
       (!values.idNoConfirm && values.clientId) ||
       (!values.confirmIdNo && !values.clientId && !values.cellPhoneConfirm)
@@ -496,7 +494,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
       const payload = {
         header: {
-          recordId: values.recordId,
+          recordId: values?.recordId || null,
           dtId,
           reference: values.reference,
           status: values.status,
@@ -510,7 +508,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           amount: String(total || '').replaceAll(',', ''),
           notes: values.remarks
         },
-        items: values.rows.map(
+        items: values.operations.map(
           ({ id, currencyId, exRate, defaultRate, minRate, maxRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
             seqNo: id,
             currencyId,
@@ -566,11 +564,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         },
 
         cash:
-          formik.values.rows2.length > 0 &&
-          formik.values.rows2.map(({ id, type, ccId, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
+          formik.values.amount.length > 0 &&
+          formik.values.amount.map(({ id, types, creditCards, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
             seqNo: id,
-            type,
-            ccId,
+
+            type : types.key,
+
+            ccId : creditCards.recordId,
             bankFees,
             amount: String(amount || '').replaceAll(',', ''),
             receiptRef,
@@ -699,13 +699,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     value={'3502'}
                     control={<Radio />}
                     label={labels.purchase}
-                    disabled={formik?.values?.rows[0]?.currencyId != '' ? true : false}
+                    disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
                   />
                   <FormControlLabel
                     value={'3503'}
                     control={<Radio />}
                     label={labels.sale}
-                    disabled={formik?.values?.rows[0]?.currencyId != '' ? true : false}
+                    disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
                   />
                 </RadioGroup>
               </Grid>
@@ -768,9 +768,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           <FieldSet title='Operations'>
             <Grid width={"100%"}>
                <DataGrid
-                onChange={value => formik.setFieldValue('rows', value)}
-                value={formik.values.rows}
-                error={formik.errors.rows}
+                onChange={value => formik.setFieldValue('operations', value)}
+                value={formik.values.operations}
+                error={formik.errors.operations}
                 height={300}
                 bg={
                   formik.values.functionId && (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
@@ -1214,9 +1214,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
 
             <DataGrid
-                onChange={value => formik.setFieldValue('rows2', value)}
-                value={formik.values.rows2}
-                error={formik.errors.rows2}
+                onChange={value => formik.setFieldValue('amount', value)}
+                value={formik.values.amount}
+                error={formik.errors.amount}
 
                 columns={[
 
@@ -1229,12 +1229,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       displayField: 'value',
                       valueField: 'key',
                       filter:  (item) =>  formik.values.functionId === '3502' ? (item.key === '2') : true
-                    },
-                    async onChange({ row: { update, newRow } }) {
-                      update({
-                        type : newRow.types.key
-                      })
-                    },
+                    }
 
                   },
                   {
@@ -1249,13 +1244,15 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   },
                   {
                     component: 'resourcecombobox',
-                    name: 'creditCard',
+                    name: 'creditCards',
                     label: labels.creditCard,
                     props: {
                       endpointId: CashBankRepository.CreditCard.qry,
                       valueField: 'recordId',
                       displayField: 'name',
-                    },
+
+                    }
+
                   },
                   {
                     component: 'numberfield',
