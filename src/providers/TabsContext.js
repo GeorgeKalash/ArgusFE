@@ -116,36 +116,23 @@ const TabsProvider = ({ children }) => {
   const closeTab = (tabRoute) => {
     setClosing(true);
     const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
-    const lastValue = activeTabs.length;
+    const tabsLength = activeTabs.length;
     
-    if(router.asPath!=tabRoute){
-
-    }
-    if (lastValue === 1) {
-      setLength(0);
+    if (tabsLength === 1) {
       router.push('/default');
       setActiveTabs([]);
     } else {
-      if (index === lastValue - 1) {
-        const newValue = index > 0 ? index - 1 : 0;
-        if (activeTabs[newValue]) {
-          router.push(activeTabs[newValue].route);
-        }
+      if (index < value) {
+        setValue(value - 1);
+      } else if (index === value) {
+        const newValue = index === tabsLength - 1 ? index - 1 : index + 1;
+        router.push(activeTabs[newValue].route);
         setValue(newValue);
-      } else if (value === lastValue - 1) {
-        setValue(lastValue - 2);
       }
-      
-      setActiveTabs((prevState) => {
-        const newTabs = prevState.filter((tab) => tab.route !== tabRoute);
-
-        if (newTabs.length === 1 && index === 0) {
-          router.push(newTabs[0].route);
-
-          return newTabs;
-        }else return prevState.filter((tab) => tab.route !== tabRoute);
-      });
+      setActiveTabs(prevState => prevState.filter((tab, i) => i !== index));
     }
+  
+    setClosing(false);
   };
 
   useEffect(() => {
