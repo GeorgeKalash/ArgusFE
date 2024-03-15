@@ -15,7 +15,6 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import FormShellDocument from 'src/components/Shared/formShellDocument'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import {
   formatDateToApi,
@@ -129,6 +128,27 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
     })()
   }, [])
 
+  const actions = [
+    {
+      key:'Approve all',
+      condition: true,
+      onClick:() => {
+        setConfirmationWindowOpen(true)
+        setResponseValue(2)
+      },
+      disabled: false
+    },
+    {
+      key:'Dismiss all',
+      condition: true,
+      onClick:() => {
+        setConfirmationWindowOpen(true)
+        setResponseValue(-1)
+      },
+      disabled: false
+    }
+  ]
+
   return (
     <>
       <ConfirmationDialog
@@ -140,19 +160,16 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
           setConfirmationWindowOpen(false)
         }}
       />
-      <FormShellDocument
+      <FormShell
+        actions={actions}
         resourceId={ResourceIds.DocumentsOnHold}
         form={formik}
         height={300}
         maxAccess={maxAccess}
-        onReject={() => {
-          setConfirmationWindowOpen(true)
-          setResponseValue(-1)
-        }}
-        onApprove={() => {
-          setConfirmationWindowOpen(true)
-          setResponseValue(2)
-        }}
+        isCleared={false}
+        isInfo={false}
+        isSaved={false}
+       
       >
         <Grid container spacing={4}>
           <Grid item xs={12}>
@@ -198,7 +215,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
             />
           </Grid>
         </Grid>
-      </FormShellDocument>
+      </FormShell>
     </>
   )
 }

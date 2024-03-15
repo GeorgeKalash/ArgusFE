@@ -25,7 +25,7 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
-import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
+import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 
@@ -701,10 +701,44 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     return response.record
   }
 
+  function onClose (){
+   
+  }
 
+  function onReopen() {
+   
+  }
+
+  const actions = [
+    {
+      key:'Post',
+      condition: true,
+      onClick: 'onPost',
+      disabled: !editMode,
+    },
+    {
+      key: 'Close',
+      condition: true,
+      onClick: onClose,
+      disabled: !editMode,
+    },
+    {
+      key: 'Reopen',
+      condition: true,
+      onClick: onReopen,
+      disabled: !editMode,
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: false,
+    }
+  ]
 
   return (
-    <ApprovalFormShell
+    <FormShell
+      actions={actions}
       height={400}
       form={formik}
       initialValues={initial}
@@ -1349,6 +1383,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           </FieldSet>
         </Grid>
       </FormProvider>
-    </ApprovalFormShell>
+    </FormShell>
   )
 }
