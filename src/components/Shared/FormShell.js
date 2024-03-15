@@ -31,8 +31,6 @@ export default function FormShell({
   clientRelation = false,
   setErrorMessage,
   previewReport = false,
-  initialValues,
-  initialValues1,
   setIDInfoAutoFilled,
   visibleClear,
   actions
@@ -49,17 +47,11 @@ export default function FormShell({
     ? false
     : true
 
-    function handleReset() {
-      const resetValues = {}; 
+    function handleReset() { 
       form.resetForm({
-        values: resetValues,
+        values: form.initialValues,
       });
-      if (form1) {
-        const resetValues1 = {}; 
-        form1.resetForm({
-          values: resetValues1,
-        });
-      }
+
       if (setIDInfoAutoFilled) {
         setIDInfoAutoFilled(false);
       }
