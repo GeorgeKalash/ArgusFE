@@ -166,7 +166,8 @@ return (
               {
                 component: 'textfield',
                 label: labels?.name,
-                name: 'countryName'
+                name: 'countryName',
+                props:{readOnly: true}
               }
 
             ]}

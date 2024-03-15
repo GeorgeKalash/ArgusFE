@@ -71,12 +71,14 @@ const columns=[
     component: 'textfield',
     label: labels?.plantName,
     name: 'plantName',
+    props:{readOnly:true}
   },
 
   {
     component: 'textfield',
     label: labels?.name,
     name: 'plantRef',
+    props:{readOnly:true}
   },
 
   {
@@ -92,13 +94,15 @@ const columns=[
       columnsInDropDown: [
         { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
-      ]
+      ],
+      displayFieldWidth: 3
     }
   },
   {
     component: 'textfield',
     label: labels?.name,
     name: 'exchangeName',
+    props:{readOnly:true}
   }
 
 ]
@@ -193,17 +197,10 @@ return (
     resourceId={ResourceIds.Correspondent}
     maxAccess={maxAccess}
     editMode={editMode} >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
 
-          }}
-        >
-          <Grid container gap={2}>
-            <Grid container xs={12} spacing={2}>
-              <Grid item xs={6}>
+
+<Grid container spacing={4} sx={{pt:2}}>
+      <Grid item xs={6}  >
                 <CustomTextField
                   name='currency'
                   label={labels.currency}
@@ -211,10 +208,10 @@ return (
                   value={currencyName}
                   required
                   maxAccess={maxAccess}
-
+                  sx={{m:1}}
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={6}  sx={{mt:1}}>
                 <CustomComboBox
                   name='countryId'
                   label={labels.country}
@@ -243,8 +240,8 @@ return (
                   helperText={formik.touched.countryId && formik.errors.countryId}
                 />
               </Grid>
-            </Grid>
-            <Grid xs={12}>
+
+            <Grid item xs={12} >
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
                   <DataGrid
                     onChange={value => formik.setFieldValue('plants', value)}
@@ -258,7 +255,6 @@ return (
               </Box>
             </Grid>
           </Grid>
-        </Box>
 
     </FormShell>
   )

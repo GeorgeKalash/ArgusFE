@@ -173,10 +173,11 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
   }
 
   const actionsColumn = {
-    field: 'actions',
+    // field: 'actions',
     editable: false,
     flex: 0,
-    width: '100',
+    width: 1,
+    sortable: false,
     renderCell({ id }) {
       return (
           <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
@@ -286,7 +287,7 @@ return (
                 sx={{
                   width: '100%',
                   height: '100%',
-                  padding: '0 20px',
+                  padding: '0 10px',
                   backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
@@ -311,7 +312,7 @@ return (
                   padding: '0 0px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: column.component === 'checkbox'|| column.component === 'button' && 'center',
+                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
 
                 }}
               >

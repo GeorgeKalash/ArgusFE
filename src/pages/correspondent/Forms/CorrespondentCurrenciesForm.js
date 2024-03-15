@@ -170,7 +170,7 @@ console.log('labels-cureency', labels)
           },
           width: 700,
           height: 600,
-          title: labels.SellingPriceExchangeMap
+          title: labels.sellingPriceExchangeMap
         })
       }
     },
