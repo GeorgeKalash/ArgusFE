@@ -701,13 +701,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     return response.record
   }
 
-  function onClose (){
-   
-  }
+  // function onClose (){
 
-  function onReopen() {
-   
-  }
+  // }
+
+  // function onReopen() {
+
+  // }
 
   const actions = [
     {
