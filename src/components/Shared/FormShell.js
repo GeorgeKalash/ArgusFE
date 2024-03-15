@@ -12,6 +12,9 @@ import Approvals from './Approvals'
 export default function FormShell({
   form,
   form1,
+  isSaved = true,
+  isInfo = true,
+  isCleared = true,
   children,
   editMode,
   setEditMode,
@@ -150,6 +153,9 @@ export default function FormShell({
               title: 'Preview Report'
             })
           }
+          isSaved = {isSaved}
+          isInfo = {isInfo}
+          isCleared = {isCleared}
           actions={actions}
           onApproval={onApproval}
           editMode={editMode}

@@ -11,6 +11,9 @@ const WindowToolbar = ({
   onClear,
   onInfo,
   onApply,
+  isSaved,
+  isInfo,
+  isCleared,
   recordId,
   onApproval,
   newHandler,
@@ -36,6 +39,9 @@ const WindowToolbar = ({
 }) => {
     const functionMapping = {
       actions,
+      isSaved,
+      isInfo,
+      isCleared,
       onSave,
       onPost,
       onClear,
