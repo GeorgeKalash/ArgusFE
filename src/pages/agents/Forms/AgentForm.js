@@ -20,10 +20,10 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
   const [editMode, setEditMode] = useState(!!recordId)
 
   const [initialValues, setInitialData] = useState({
-      recordId: null,
-      name: '',
-      countryId: '',
-    })
+    recordId: null,
+    name: '',
+    countryId: ''
+  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -31,13 +31,13 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
     endpointId: RemittanceSettingsRepository.CorrespondentAgents.page
   })
 
-   const formik = useFormik({
+  const formik = useFormik({
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required')
+      name: yup.string().required(' '),
+      countryId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -46,15 +46,14 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
         extension: RemittanceSettingsRepository.CorrespondentAgents.set,
         record: JSON.stringify(obj)
       })
-      
+
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
           ...obj, // Spread the existing properties
-          recordId: response.recordId, // Update only the recordId field
-        });
-      }
-      else toast.success('Record Edited Successfully')
+          recordId: response.recordId // Update only the recordId field
+        })
+      } else toast.success('Record Edited Successfully')
       setEditMode(true)
 
       invalidate()
@@ -71,7 +70,7 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
             extension: RemittanceSettingsRepository.CorrespondentAgents.get,
             parameters: `_recordId=${recordId}`
           })
-          
+
           setInitialData(res.record)
         }
       } catch (exception) {
@@ -79,15 +78,14 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
       }
       setIsLoading(false)
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
-
     <FormShell
       resourceId={ResourceIds.CorrespondentAgents}
-      form={formik} 
-      height={300} 
-      maxAccess={maxAccess} 
+      form={formik}
+      maxAccess={maxAccess}
       editMode={editMode}
     >
       <Grid container spacing={4}>
@@ -102,7 +100,8 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
+
+            // helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
@@ -123,7 +122,8 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
               formik.setFieldValue('countryId', newValue?.recordId)
             }}
             error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-            helperText={formik.touched.countryId && formik.errors.countryId}
+
+            // helperText={formik.touched.countryId && formik.errors.countryId}
           />
         </Grid>
       </Grid>

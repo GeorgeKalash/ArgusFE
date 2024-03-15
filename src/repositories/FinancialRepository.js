@@ -20,6 +20,18 @@ export const FinancialRepository = {
     del: service + 'delET',
     page: service + 'pageET',
   },
-  
-
+  Account:{
+    qry: service + 'qryACC',
+    get: service + 'getACC',
+    set: service + 'setACC',
+    del: service + 'delACC',
+    page: service + 'pageACC',
+  },
+  Group:{
+    qry: service + 'qryGRP',
+    get: service + 'getGRP',
+    set: service + 'setGRP',
+    del: service + 'delGRP',
+    page: service + 'pageGRP',
+  }
 }

@@ -31,7 +31,6 @@ export const SystemRepository = {
     get: service + 'getNRA',
     set: service + 'setNRA',
     del: service + 'delNRA'
-
   },
   GeographicRegion: {
     qry: service + 'qryRGN',
@@ -69,6 +68,7 @@ export const SystemRepository = {
     del: service + 'delST'
   },
   Plant: {
+    snapshot: service + 'snapshotPLT',
     qry: service + 'qryPLT',
     get: service + 'getPLT',
     set: service + 'setPLT',
@@ -92,7 +92,7 @@ export const SystemRepository = {
   PlantGroup: {
     qry: service + 'qryPLG'
   },
-  SMSTemplate:{
+  SMSTemplate: {
     qry: service + 'qrySMT',
     get: service + 'getSMT',
     set: service + 'setSMT',
@@ -100,44 +100,49 @@ export const SystemRepository = {
     page: service + 'pageSMT',
     snapshot: service + 'snapshotSMT'
   },
-  SystemFunction:{
+  SystemFunction: {
     qry: service + 'qryFUN',
     get: service + 'getFUN',
     set: service + 'setFUN',
-    set2: service + 'set2FUN'
+    set2: service + 'set2FUN' // SystemFunctionPack ehich contains list of SystemFunction class items
   },
-  SMSFunctionTemplate:{
-    qry: service + 'qrySFT'
+  SMSFunctionTemplate: {
+    qry: service + 'qrySFT',
+    set: service + 'set2SFT'
   },
   Users: {
     qry: service + 'qryUS',
     get: service + 'getUS',
     set: service + 'setUS',
     del: service + 'delUS',
-    page: service + 'pageUS'
+    page: service + 'pageUS',
+    snapshot: service + 'snapshotUS'
   },
-  SystemPlant:{
-    get: service + 'getUD'
-  },
-  UserDocument: {
+  UserDefaults: {
     qry: service + 'qryUD',
     get: service + 'getUD',
     set: service + 'setUD'
   },
   TransactionLog: {
     qry: service + 'qryTL',
-    get: service + 'getTL',
+    get: service + 'getTL'
   },
-  State:{
+  State: {
     qry: service + 'qryST',
+    page: service + 'pageST',
     get: service + 'getST',
     set: service + 'setST',
-    del: service + 'delST',
-    page: service + 'pageST'
+    del: service + 'delST'
   },
-  Defaults:{
+  Default: {
+    get: service + 'getDE'
+  },
+  Defaults: {
     qry: service + 'qryDE',
     get: service + 'getDE',
-    set: service + 'set2DE',
+    set: service + 'set2DE'
+  },
+  FiscalYears: {
+    qry: service + 'qryFY'
   }
 }

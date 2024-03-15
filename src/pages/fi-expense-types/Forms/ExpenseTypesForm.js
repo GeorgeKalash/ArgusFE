@@ -40,9 +40,9 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
-          name: yup.string().required('This field is required'),
-          reference: yup.string().required('This field is required'),
-          description: yup.string().required('This field is required'),
+          name: yup.string().required(' '),
+          reference: yup.string().required(' '),
+          description: yup.string().required(' '),
         }),
         onSubmit: async obj => {
           const recordId = obj.recordId
@@ -106,7 +106,8 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    helperText={formik.touched.reference && formik.errors.reference}
+
+                    // helperText={formik.touched.reference && formik.errors.reference}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -120,7 +121,8 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
                     error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
+
+                    // helperText={formik.touched.name && formik.errors.name}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -135,7 +137,8 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('description', '')}
                     error={formik.touched.description && Boolean(formik.errors.description)}
-                    helperText={formik.touched.description && formik.errors.description}
+
+                    // helperText={formik.touched.description && formik.errors.description}
                     />
                 </Grid>
             </Grid>

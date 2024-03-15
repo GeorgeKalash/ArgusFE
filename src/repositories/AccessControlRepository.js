@@ -25,5 +25,8 @@ export const AccessControlRepository = {
     set: service + 'setGRP',
     del: service + 'delGRP',
     snapshotGRP: service + 'snapshotGRP'
+  },
+  RowAccessUserView: {
+    qry: service + 'qryROU'
   }
 }

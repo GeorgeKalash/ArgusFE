@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 // ** MUI Imports
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
@@ -22,7 +22,7 @@ const Window = ({
   onClose,
   tabs,
   width = 800,
-  height = 400,
+  height = 600,
   activeTab,
   setActiveTab,
   Title,
@@ -33,6 +33,8 @@ const Window = ({
   editMode = false,
   disabledSubmit,
   disabledInfo,
+  onApply,
+  disabledApply,
   ...props
 }) => {
   const { settings } = useSettings()
@@ -58,8 +60,10 @@ const Window = ({
 
   const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
   const containerHeight = `calc(100vh - 48px)`
+  const containerHeightPanel = `calc(100vh - 180px)`
+  const heightPanel = height- 120
 
-  return (
+return (
     <Box
       id='parent'
       sx={{
@@ -85,14 +89,27 @@ const Window = ({
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
+                 sx={{
+                  ...(controlled
+                    ? {
+                         height: expanded ? containerHeight : height // Expand height to 100% when expanded
+                      }
+                    : {
+                        minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
+                      }),
+                  width: expanded ? containerWidth : width // Expand width to 100% when expanded
+                  // ... (other styles)
+                }}
+                style={
+                  controlled
+                    ? {
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }
+                    : {}
+                }
+              >
 
-            //onKeyDown={handleKeyDown}
-            sx={{
-              width: expanded ? containerWidth : width, // Expand width to 100% when expanded
-              minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
-              // ... (other styles)
-            }}
-          >
             <DialogTitle
               id='draggable-dialog-title'
               sx={{
@@ -132,13 +149,17 @@ const Window = ({
                     onSave={onSave}
                     onClear={onClear}
                     onInfo={onInfo}
+                    onApply={onApply}
                     disabledSubmit={disabledSubmit}
                     disabledInfo={disabledInfo}
+                    disabledApply={disabledApply}
                   />
                 )}
               </>
             ) : (
-              children
+              React.Children.map(children, child => {
+                return React.cloneElement(child, { expanded: expanded, height : expanded ? containerHeightPanel : heightPanel}); // Pass containerHeight as prop to children
+              })
             )}
           </Paper>
         </Box>

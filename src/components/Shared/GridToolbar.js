@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Box, Button, Grid, Typography } from '@mui/material'
+import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState } from 'react'
@@ -7,22 +7,40 @@ import { useState } from 'react'
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
 
-const GridToolbar = ({ initialLoad, onAdd, openRPB, disableRPB = false, onGo, paramsArray, children , labels, inputSearch,search , onSearch, ...props }) => {
+const GridToolbar = ({
+  initialLoad,
+  onAdd,
+  openRPB,
+  disableRPB = false,
+  onGo,
+  paramsArray,
+  children,
+  labels,
+  onClear,
+  inputSearch,
+  search,
+  onSearch,
+  onSearchClear,
+  ...props
+}) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const addBtnVisible = onAdd && maxAccess > TrxType.NOACCESS
-const [searchValue , setSearchValue] = useState('')
+  const addBtnVisible = onAdd && maxAccess > TrxType.GET
+  const [searchValue, setSearchValue] = useState('')
 
   const formatDataForApi = paramsArray => {
     const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
 
     return formattedData
   }
+  function clear() {
+    setSearchValue('')
+    onSearch('')
+  }
 
   return (
     <Box display={'flex'} sx={{ justifyContent: 'space-between' }}>
       {children && children}
       <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
-
         {initialLoad && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
             <Button onClick={initialLoad} variant='contained'>
@@ -32,24 +50,30 @@ const [searchValue , setSearchValue] = useState('')
         )}
         {onAdd && addBtnVisible && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Button onClick={onAdd} variant='contained'>
-              Add
-            </Button>
+            <Tooltip title='Add'>
+              <Button
+                onClick={onAdd}
+                variant='contained'
+                style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+              >
+                <img src='/images/buttonsIcons/add.png' alt='Add' />
+              </Button>
+            </Tooltip>
           </Box>
         )}
-        {inputSearch && <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+        {inputSearch && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
             <CustomTextField
               name='search'
               value={searchValue}
               label={labels.search}
-              onClear={() =>setSearchValue('')}
-              onChange={(e)=>setSearchValue(e.target.value)}
+              onClear={clear}
+              onChange={e => setSearchValue(e.target.value)}
               onSearch={onSearch}
               search={true}
             />
-
           </Box>
-          }
+        )}
         {openRPB && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
             <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
@@ -82,8 +106,6 @@ const [searchValue , setSearchValue] = useState('')
           </Grid>
         </Box>
       )}
-
-
     </Box>
   )
 }
