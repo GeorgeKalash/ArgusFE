@@ -462,7 +462,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
   }
 
-  const onReopen = async () => {
+ async function onReopen () {
 
  const values= formik.values
 
@@ -487,13 +487,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     notes: values.remarks
   }
 
-
       const res = await postRequest({
         extension: CTTRXrepository.CurrencyTrading.reopen,
         record: JSON.stringify(data)
       })
       if (res.recordId) {
-        toast.success('Record Closed Successfully')
+        toast.success('Record Reopened Successfully')
         invalidate()
         setIsClosed(false)
       }
@@ -718,13 +717,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     },
     {
       key: 'Close',
-      condition: true,
+      condition: !isClosed,
       onClick: onClose,
       disabled: !editMode,
     },
     {
       key: 'Reopen',
-      condition: true,
+      condition: isClosed,
       onClick: onReopen,
       disabled: !editMode,
     },
@@ -748,11 +747,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       editMode={editMode}
       disabledSubmit={Balance && true}
       previewReport={editMode}
-      onClose={onClose}
-      isClosed={isClosed}
-      onReopen={onReopen}
-      hiddenReopen={!isClosed}
-      hiddenClose={isClosed}
     >
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
         <Grid container sx={{ px: 2 }} gap={3}>
