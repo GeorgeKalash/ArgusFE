@@ -95,7 +95,6 @@ export default function FormShell({
               Component: GeneralLedger,
               props: {
                 formValues: form.values,
-
                 recordId: form.values?.recordId,
                 functionId: functionId
               },

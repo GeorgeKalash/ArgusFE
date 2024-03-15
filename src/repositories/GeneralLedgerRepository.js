@@ -48,7 +48,8 @@ export const GeneralLedgerRepository = {
       get: service + 'getTRX',
       set: service + 'setTRX',
       del: service + 'delTRX',
-    }
+    },Account:{
+    snapshot:service + "snapshotAC"}
 
 
 }

@@ -28,6 +28,15 @@ return (
             field,
             value: newValue || ''
           })
+          const fieldsToUpdate  = props?.fieldsToUpdate
+        if (fieldsToUpdate && fieldsToUpdate.length > 0) {
+          for (let updateObj of fieldsToUpdate) {
+              const { from, to } = updateObj;
+              if (newValue && newValue[from]) {
+                  update({ id, field: to, value: newValue[from] || ''});
+              }
+          }
+        }
       }}
     />
   )
