@@ -179,7 +179,7 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
     width: '100',
     renderCell({ id }) {
       return (
-          <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
+          <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
             <GridDeleteIcon />
           </IconButton>
       )
