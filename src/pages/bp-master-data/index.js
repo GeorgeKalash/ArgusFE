@@ -72,6 +72,7 @@ function WindowConsumer() {
 
 const BPMasterData = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
   //What should be placed for most pages
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -139,12 +140,27 @@ const BPMasterData = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm('')
   }
 
+  function openForm (recordId){
+    stack({
+      Component: BPMasterDataWindow,
+      props: {
+        labels: _labels,
+
+      recordId: recordId? recordId : null,
+      },
+      width: 1200,
+      height: 600,
+      title: _labels.masterData
+    })
+  }
+
+
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj.recordId)
+
   }
 
   const del = async obj => {
@@ -210,110 +226,9 @@ const BPMasterData = () => {
       })
   }
 
-  // IDNumber TAB
-  const idNumberGridColumn = [
-    {
-      field: 'textfield',
-      header: _labels.idCategory,
-      name: 'incName',
-      readOnly: true
-    },
-    {
-      id: 1,
-      field: 'textfield',
-      header: _labels.idNumber,
-      name: 'idNum'
-    }
-  ]
 
-  const idNumberValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues: {
-      rows: [
-        {
-          bpId: selectedRecordId || '',
-          incId: '',
-          idNum: '',
-          incName: ''
-        }
-      ]
-    },
-    onSubmit: values => {
-      postIdNumber(values.rows)
-    }
-  })
 
-  const postIdNumber = obj => {
-    const recordId = bpMasterDataValidation.values.recordId
 
-    const postBody = Object.entries(obj).map(([key, value]) => {
-      return postRequest({
-        extension: BusinessPartnerRepository.MasterIDNum.set,
-        record: JSON.stringify(value)
-      })
-    })
-    Promise.all(postBody)
-      .then(() => {
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-        } else {
-          toast.success('Record Edited Successfully')
-        }
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const resetIdNumber = id => {
-    idNumberValidation.resetForm()
-    idNumberValidation.setValues({
-      rows: [
-        {
-          bpId: id ? id : bpMasterDataValidation.values ? bpMasterDataValidation.values.recordId : '',
-          incId: '',
-          incName: '',
-          idNum: ''
-        }
-      ]
-    })
-  }
-
-  const fillIdNumberStore = async obj => {
-    try {
-      const _recordId = obj.recordId
-      const defaultParams = `_bpId=${_recordId}`
-      var parameters = defaultParams
-
-      const res = await getRequest({
-        extension: BusinessPartnerRepository.MasterIDNum.qry,
-        parameters: parameters
-      })
-      const list = await filterIdCategory(obj.category)
-
-      var listMIN = res.list.filter(y => {
-        return list.some(x => x.name === y.incName)
-      })
-
-      if (listMIN.length > 0) {
-        idNumberValidation.setValues({ rows: listMIN })
-      } else {
-        idNumberValidation.setValues({
-          rows: [
-            {
-              bpId: _recordId,
-              incId: '',
-              incName: '',
-              idNum: ''
-            }
-          ]
-        })
-      }
-    } catch (error) {
-      setErrorMessage(error)
-    }
-  }
 
   //Relation Tab
   const relationValidation = useFormik({
@@ -329,14 +244,7 @@ const BPMasterData = () => {
     }
   })
 
-  const addRelation = () => {
-    relationValidation.setValues(getNewRelation(bpMasterDataValidation.values.recordId))
-    setRelationWindowOpen(true)
-  }
 
-  const popupRelation = obj => {
-    getRelationById(obj)
-  }
 
   const getRelationGridData = bpId => {
     setRelationGridData([])
@@ -598,40 +506,9 @@ const BPMasterData = () => {
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
-        <BPMasterDataWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          recordId={selectedRecordId}
-          labels={_labels}
-          maxAccess={access}
-          defaultValue={defaultValue}
-          idNumberGridColumn={idNumberGridColumn}
-          idNumberValidation={idNumberValidation}
-          relationGridData={relationGridData}
-          getRelationGridData={getRelationGridData}
-          delRelation={delRelation}
-          addRelation={addRelation}
-          popupRelation={popupRelation}
-          addressGridData={addressGridData}
-          getAddressGridData={getAddressGridData}
-          addAddress={addAddress}
-          delAddress={delAddress}
-          editAddress={editAddress}
-        />
-      )}
 
-      {relationWindowOpen && (
-        <BPRelationWindow
-          onClose={() => setRelationWindowOpen(false)}
-          onSave={handleRelationSubmit}
-          relationValidation={relationValidation}
-          labels={_labels}
-          maxAccess={access}
-        />
-      )}
+
+
       {addressWindowOpen && (
         <AddressWindow
           onClose={() => setAddressWindowOpen(false)}

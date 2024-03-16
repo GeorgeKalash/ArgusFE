@@ -16,10 +16,10 @@ import { DataSets } from 'src/resources/DataSets'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId, height }) {
-  const [idCategoryStore, setIDCategoryStore] = useState([])
+export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId, height , store, setStore}) {
   const [isLoading, setIsLoading] = useState(false)
-console.log(height)
+console.log(store)
+
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -48,7 +48,7 @@ console.log(height)
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const {category} = store
   const editMode = !!recordId
 
   const filterIdCategory = async categId => {
@@ -58,13 +58,16 @@ console.log(height)
         parameters: `_startAt=0&_pageSize=1000`
       })
 
-      return categId
+     return  categId
         ? res.list.filter(
             item => (categId === 1 && item.person) || (categId === 2 && item.org) || (categId === 3 && item.group)
           )
+
         : []
+
+
+
     } catch (error) {
-      setErrorMessage(error.res)
 
       return []
     }
@@ -113,7 +116,6 @@ console.log(height)
           setInitialData(res.record)
         }
       } catch (exception) {
-        setErrorMessage(error)
       }
       setIsLoading(false)
     })()
@@ -121,7 +123,16 @@ console.log(height)
 
   useEffect(() => {
     ;(async function () {
-      if (formik?.values?.category) setIDCategoryStore(await filterIdCategory(formik.values.category))
+      if (formik?.values?.category){
+
+     const _category = await filterIdCategory(formik.values.category)
+
+
+        setStore(prevStore => ({
+          ...prevStore,
+          category: _category
+        }));
+}
     })()
   }, [formik?.values?.category])
 
@@ -129,7 +140,6 @@ console.log(height)
     <FormShell
       resourceId={ResourceIds.BPMasterData}
       form={formik}
-      height={height}
       maxAccess={maxAccess}
       editMode={editMode}
     >
@@ -256,14 +266,14 @@ console.log(height)
             />
           </Grid>
           <Grid item xs={12}>
-            {idCategoryStore && (
+            {category && (
               <CustomComboBox
                 name='defaultInc'
                 label={labels.idCategory}
                 valueField='recordId'
                 displayField='name'
-                store={idCategoryStore}
-                value={idCategoryStore.filter(item => item.recordId === formik.values.defaultInc)[0]}
+                store={category}
+                value={category.filter(item => item.recordId === formik.values.defaultInc)[0]}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('defaultInc', newValue?.recordId)
