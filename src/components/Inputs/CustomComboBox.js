@@ -4,6 +4,8 @@ import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import Paper from '@mui/material/Paper'
 
+
+
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
   name,
@@ -27,6 +29,7 @@ const CustomComboBox = ({
   sx,
   columnsInDropDown,
   editMode = false,
+  hasBorder=true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -48,65 +51,16 @@ const CustomComboBox = ({
       value={value}
       size={size}
       options={store}
+
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
-      getOptionLabel={option => {
-        if (columnsInDropDown || typeof displayField == 'object') {
-          if (value) {
-            const selectedOption = store.find(item => item[valueField] === option[valueField])
-            if (selectedOption) var text = ''
-
-            if (typeof displayField == 'object') {
-              displayField.forEach(header => {
-                if (option[header]) {
-                  text += `${option[header]} `
-                } else {
-                  text += `${header} `
-                }
-              })
-
-              return text
-            }
-
-            if (selectedOption) return selectedOption[displayField]
-            else return ''
-          }
-          if (typeof option === 'object') {
-            // Check if the option is an object and has multiple fields
-            if (columnsInDropDown && columnsInDropDown.length > 0) {
-              let search = ''
-              columnsInDropDown.forEach(header => {
-                search += `${option[header.key]} `
-              })
-
-              return search.trim() // Trim to remove extra spaces
-            } else {
-              // If no multiple fields, use the specified displayField
-              return `${option[displayField]}`
-            }
-          } else {
-            // If the option is not an object, find the selected option in the store
-            const selectedOption = store.find(item => item[valueField] === option)
-            if (selectedOption) return selectedOption[displayField]
-            else return ''
-          }
-        } else {
-          if (typeof option === 'object') return option[displayField]
-          else return option
-        }
-      }}
-      getOptionLabels={option => {
-        if (option.length == 1) {
-        }
+      getOptionLabel={(option , value )=> {
         if (typeof option === 'object') {
           if (columnsInDropDown && columnsInDropDown.length > 0) {
-            let search = ''
-            {
-              columnsInDropDown.map((header, i) => {
-                search += `${option[header.key]} `
-              })
-            }
+            const search = columnsInDropDown.map(header => option[header.key]).join(' ');
 
-            return search
+
+            return search  || option[displayField];
+
           }
 
           return `${option[displayField]}`
@@ -172,6 +126,20 @@ const CustomComboBox = ({
           autoFocus={autoFocus}
           error={error}
           helperText={helperText}
+          InputProps={{
+            ...params.InputProps,
+            style: {
+              border: 'none', // Set width to 100%
+            },
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                border: !hasBorder && 'none', // Hide border
+              },
+            },
+          }}
+
         />
       )}
     />

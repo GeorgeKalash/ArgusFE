@@ -16,6 +16,7 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { useResourceQuery } from 'src/hooks/resource'
 
 const ClientsList = () => {
 
@@ -24,19 +25,32 @@ const ClientsList = () => {
   //control
   const { getRequest } = useContext(RequestsContext)
 
-  //stores
-  const [gridData, setGridData] = useState([])
-
   //error
   const [errorMessage, setErrorMessage] = useState(null)
 
-
   const {
+    query: { data },
+    filterBy,
+    clearFilter,
     labels: _labels,
     access
-  } = useResourceParams({
-    datasetId: ResourceIds.ClientMaster
+  } = useResourceQuery({
+    endpointId: CTCLRepository.CtClientIndividual.snapshot,
+    datasetId: ResourceIds.ClientMaster,
+    filter: {
+      endpointId: CTCLRepository.CtClientIndividual.snapshot,
+      filterFn: fetchWithSearch,
+      default : {category : 1}
+    }
   })
+  async function fetchWithSearch({options = {} , filters}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+          extension: CTCLRepository.CtClientIndividual.snapshot,
+          parameters: `_filter=${filters.qry}&_category=1`
+        })
+  }
 
   const columns = [
     {
@@ -82,14 +96,6 @@ const ClientsList = () => {
       flex: 1,
       editable: false
     },
-
-    // {
-    //   field: 'keyword',
-    //   headerName: _labels.keyword,
-    //   flex: 1,
-    //   editable: false
-    // },
-
     {
       field: 'statusName',
       headerName: _labels.status,
@@ -122,32 +128,7 @@ const ClientsList = () => {
     }
   ]
 
-  const search = inp => {
-    setGridData({count : 0, list: [] , message :"",  statusId:1})
-     const input = inp
-
-     if(input){
-      var parameters = `_size=30&_startAt=0&_filter=${input}&_category=1`
-
-    getRequest({
-      extension: CTCLRepository.CtClientIndividual.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-
-    }else{
-
-      setGridData({count : 0, list: [] , message :"",  statusId:1})
-    }
-
-  }
-
-  function openForm (recordId){
+  function openForm (recordId, _plantId){
     stack({
       Component: ClientTemplateForm,
       props: {
@@ -155,6 +136,7 @@ const ClientsList = () => {
         _labels : _labels,
         maxAccess: access,
         recordId: recordId ? recordId : null ,
+        plantId: _plantId,
         maxAccess: access
       },
       width: 1100,
@@ -167,7 +149,7 @@ const ClientsList = () => {
     try {
       const plantId = await getPlantId();
       if (plantId !== '') {
-        openForm('')
+        openForm('' , plantId)
       } else {
         setErrorMessage({ error: 'The user does not have a default plant' });
       }
@@ -202,7 +184,7 @@ const ClientsList = () => {
 
   const editClient= obj => {
     const _recordId = obj.recordId
-    openForm(_recordId)
+    openForm(_recordId, '')
   }
 
   return (
@@ -215,19 +197,23 @@ const ClientsList = () => {
         }}
       >
 
-<GridToolbar onAdd={addClient} maxAccess={access}    onSearch={search} labels={_labels}  inputSearch={true}/>
+<GridToolbar onAdd={addClient} maxAccess={access}  onSearch={value => {
+              filterBy('qry', value)
+            }}
+            onSearchClear={() => {
+              clearFilter('qry')
+            }} labels={_labels}  inputSearch={true}/>
 
-{gridData &&
-        <Table
+ <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data ? data : {list: []}}
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}
           onEdit={editClient}
           pageSize={50}
           paginationType='client'
-        />}
+        />
 
 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
 

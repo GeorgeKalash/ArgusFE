@@ -10,6 +10,9 @@ import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 
+// ** Resources
+import { TrxType } from 'src/resources/AccessLevels'
+
 const CustomDatePicker = ({
   name,
   label,
@@ -36,7 +39,9 @@ const CustomDatePicker = ({
   const [openDatePicker, setOpenDatePicker] = useState(false)
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
-  const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
+
+  console.log('_readOnly ', _readOnly)
 
   // Function to check if a date should be disabled
   const shouldDisableDate = dates => {
@@ -58,7 +63,8 @@ const CustomDatePicker = ({
   }
   const newDate = new Date(disabledRangeDate.date) // Create a new Date object to avoid mutating the initialDate
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
-  console.log('newDate ', disabledRangeDate.date, ' new ', newDate)
+
+  // console.log('newDate ', disabledRangeDate.date, ' new ', newDate)
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>

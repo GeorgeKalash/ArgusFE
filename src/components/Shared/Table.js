@@ -127,7 +127,7 @@ const Table = ({
   const CustomPagination = () => {
     if (pagination) {
       if (paginationType === 'api' && gridData) {
-        const startAt = gridData._startAt
+        const startAt = gridData._startAt ?? 0
         const totalRecords = gridData?.count ? gridData?.count : 0
 
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
@@ -169,11 +169,11 @@ const Table = ({
             <IconButton onClick={goToLastPage} disabled={page === pageCount}>
               <LastPageIcon />
             </IconButton>
-            {api && (
-              <IconButton onClick={goToFirstPage}>
-                <RefreshIcon />
-              </IconButton>
-            )}
+            {/* {api && ( */}
+            <IconButton onClick={refetch}>
+              <RefreshIcon />
+            </IconButton>
+            {/* )} */}
             Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
             {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
             {totalRecords}
@@ -307,7 +307,6 @@ const Table = ({
 
   if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
-
     filteredColumns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,

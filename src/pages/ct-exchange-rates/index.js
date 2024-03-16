@@ -1,6 +1,6 @@
 import React from 'react'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import { Grid, Box } from '@mui/material'
+import { Grid, Box, Button } from '@mui/material'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -272,6 +272,23 @@ const CTExchangeRates = () => {
     if (formik.values.currencyId != null && formik.values.saRateTypeId != null) saFormik.handleSubmit()
   }
 
+  const copyRowValues = formik => {
+    const firstRow = formik.values.rows[0]
+
+    const rows = formik.values.rows.map(row => {
+      return {
+        ...row,
+        minRate: firstRow.minRate,
+        maxRate: firstRow.maxRate,
+        rate: firstRow.rate,
+        rateCalcMethod: firstRow.rateCalcMethod,
+        rateCalcMethodName: firstRow.rateCalcMethodName
+      }
+    })
+
+    formik.setValues({ rows })
+  }
+
   return (
     <Box
       sx={{
@@ -348,7 +365,7 @@ const CTExchangeRates = () => {
               </Grid>
               <Grid item xs={6}>
                 <FieldSet>
-                  <Grid item xs={12}>
+                  <Grid item xs={9}>
                     <ResourceComboBox
                       endpointId={MultiCurrencyRepository.RateType.qry}
                       name='puRateTypeId'
@@ -369,6 +386,22 @@ const CTExchangeRates = () => {
                       helperText={formik.touched.puRateTypeId && formik.errors.puRateTypeId}
                     />
                   </Grid>
+                  <Grid item xs={3}>
+                    <Button
+                      onClick={() => copyRowValues(puFormik)}
+                      variant='contained'
+                      disabled={
+                        !puFormik?.values?.rows ||
+                        !formik.values.puRateTypeId ||
+                        !puFormik?.values?.rows[0]?.rateCalcMethod ||
+                        !puFormik?.values?.rows[0]?.rate ||
+                        !puFormik?.values?.rows[0]?.minRate ||
+                        !puFormik?.values?.rows[0]?.maxRate
+                      }
+                    >
+                      Copy
+                    </Button>
+                  </Grid>
                   {formik.values.currencyId != null && formik.values.puRateTypeId != null && (
                     <Grid xs={12} sx={{ pt: 2 }}>
                       <Box>
@@ -388,7 +421,7 @@ const CTExchangeRates = () => {
               </Grid>
               <Grid item xs={6}>
                 <FieldSet>
-                  <Grid item xs={12}>
+                  <Grid item xs={9}>
                     <ResourceComboBox
                       endpointId={MultiCurrencyRepository.RateType.qry}
                       name='saRateTypeId'
@@ -408,6 +441,22 @@ const CTExchangeRates = () => {
                       error={formik.touched.saRateTypeId && Boolean(formik.errors.saRateTypeId)}
                       helperText={formik.touched.saRateTypeId && formik.errors.saRateTypeId}
                     />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <Button
+                      onClick={() => copyRowValues(saFormik)}
+                      variant='contained'
+                      disabled={
+                        !saFormik?.values?.rows ||
+                        !formik.values.saRateTypeId ||
+                        !saFormik?.values?.rows[0]?.rateCalcMethod ||
+                        !saFormik?.values?.rows[0]?.rate ||
+                        !saFormik?.values?.rows[0]?.minRate ||
+                        !saFormik?.values?.rows[0]?.maxRate
+                      }
+                    >
+                      Copy
+                    </Button>
                   </Grid>
                   {formik.values.currencyId != null && formik.values.saRateTypeId != null && (
                     <Grid xs={12} sx={{ pt: 2 }}>

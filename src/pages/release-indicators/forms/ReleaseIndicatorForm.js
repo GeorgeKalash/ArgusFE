@@ -72,7 +72,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
   useEffect(() => {
     ;(async function () {
       try {
-        if (recordId) {
+        if (recordId >= 0 ) {
           setIsLoading(true)
 
           const res = await getRequest({

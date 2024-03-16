@@ -90,5 +90,7 @@ export const SystemFunction = {
   JobInfo: Module.EmployeeProfile * 100 + 4,
   PaymentOrder: Module.Financials * 100 + 12,
   CurrencyCreditOrderPurchase: Module.CurrencyTrading * 100 + 4,
-  CurrencyCreditOrderSale: Module.CurrencyTrading * 100 + 5
+  CurrencyCreditOrderSale: Module.CurrencyTrading * 100 + 5,
+  CreditInvoicePurchase: Module.CurrencyTrading * 100 + 6,
+  CreditInvoiceSales: Module.CurrencyTrading * 100 + 7
 }

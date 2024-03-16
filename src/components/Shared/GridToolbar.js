@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Box, Button, Grid, Typography } from '@mui/material'
+import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useState } from 'react'
@@ -24,7 +24,7 @@ const GridToolbar = ({
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const addBtnVisible = onAdd && maxAccess > TrxType.NOACCESS
+  const addBtnVisible = onAdd && maxAccess > TrxType.GET
   const [searchValue, setSearchValue] = useState('')
 
   const formatDataForApi = paramsArray => {
@@ -50,9 +50,15 @@ const GridToolbar = ({
         )}
         {onAdd && addBtnVisible && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-            <Button onClick={onAdd} variant='contained'>
-              Add
-            </Button>
+            <Tooltip title='Add'>
+              <Button
+                onClick={onAdd}
+                variant='contained'
+                style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
+              >
+                <img src='/images/buttonsIcons/add.png' alt='Add' />
+              </Button>
+            </Tooltip>
           </Box>
         )}
         {inputSearch && (

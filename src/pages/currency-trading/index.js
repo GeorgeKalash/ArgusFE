@@ -19,14 +19,12 @@ export default function CurrencyTrading() {
 
  //error
  const [errorMessage, setErrorMessage] = useState(null)
- const [data , setData] = useState(null)
 
  const getPlantId = async () => {
   const userData = window.sessionStorage.getItem('userData')
     ? JSON.parse(window.sessionStorage.getItem('userData'))
     : null;
 
-    console.log(userData)
   const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
 
   try {
@@ -56,7 +54,6 @@ export default function CurrencyTrading() {
         setErrorMessage({ error: 'The user does not have a default plant' });
       }
     } catch (error) {
-      console.error(error);
     }}else{
       openForm(recordId)
     }
@@ -77,40 +74,36 @@ function openForm(recordId,plantId ){
   })
 }
 
-  const { labels: labels, access: access } = useResourceParams({
-    datasetId: 35208
-  })
 
-  const search = inp => {
-    setData({count : 0, list: [] , message :"",  statusId:1})
-     const input = inp
-     if(input){
-      var parameters = `_filter=${input}`
 
-    getRequest({
-      extension: CTTRXrepository.CurrencyTrading.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setData(res)
+const {
+  query: { data },
+  search,
+  clear,
+  labels: labels,
+  access
+} = useResourceQuery({
+  endpointId: CTTRXrepository.CurrencyTrading.snapshot,
+  datasetId: 35208,
+  search: {
+    endpointId: CTTRXrepository.CurrencyTrading.snapshot,
+    searchFn: fetchWithSearch,
+  }
+})
+async function fetchWithSearch({options = {} , qry}) {
+  const { _startAt = 0, _pageSize = 50 } = options
+
+  return await getRequest({
+        extension: CTTRXrepository.CurrencyTrading.snapshot,
+        parameters: `_filter=${qry}&_category=1`
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-
-    }else{
-
-      setData({count : 0, list: [] , message :"",  statusId:1})
     }
 
-  }
-
-
-  return (
+return (
     <Box>
       { labels && access && (
         <>
-          <GridToolbar maxAccess={access}  onSearch={search}  labels={labels} inputSearch={true}/>
+          <GridToolbar maxAccess={access}  onSearch={search} onSearchClear={clear}  labels={labels} inputSearch={true}/>
           <Table
             columns={[
               {
@@ -153,7 +146,7 @@ function openForm(recordId,plantId ){
             onEdit={obj => {
               openFormWindow(obj.recordId)
             }}
-            gridData={data}
+            gridData={data ? data : {list: []}}
             rowId={['recordId']}
             isLoading={false}
             pageSize={50}

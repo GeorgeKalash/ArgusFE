@@ -37,7 +37,26 @@ export const GeneralLedgerRepository = {
       set: service + 'setCCG',
       del: service + 'delCCG',
       
-    },
+    },ChartOfAccounts:{
+      snapshot:service + 'snapshotAC',
+      page:service + 'pageAC', 
+      qry: service + 'qryAC',
+      get: service + 'getAC',
+      set: service + 'setAC',
+      del: service + 'delAC',
+      
+    },JournalVoucher: {
+      page:   service + 'pageJV', 
+      qry: service + 'qryJV',
+      get: service + 'getJV',
+      set: service + 'setJV',
+      del: service + 'delJV',
+    },GeneralLedger:{
+      qry: service + 'qryTRX',
+      get: service + 'getTRX',
+      set: service + 'setTRX',
+      del: service + 'delTRX',
+    }
 
 
 }
