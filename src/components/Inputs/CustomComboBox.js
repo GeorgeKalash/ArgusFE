@@ -54,9 +54,6 @@ const CustomComboBox = ({
 
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={(option , value )=> {
-
-        console.log(option, value)
-
         if (typeof option === 'object') {
           if (columnsInDropDown && columnsInDropDown.length > 0) {
             const search = columnsInDropDown.map(header => option[header.key]).join(' ');
