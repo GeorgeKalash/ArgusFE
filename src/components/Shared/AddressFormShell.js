@@ -68,7 +68,7 @@ export const AddressFormShell = ({setAddress , address , maxAccess , editMode , 
         if (!values.cityId ) {
           errors.cityId = 'This field is required';
         }
-        if (!values.cityId ) {
+        if (!values.phone ) {
           errors.phone = 'This field is required';
         }
 

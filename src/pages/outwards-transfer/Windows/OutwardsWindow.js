@@ -5,7 +5,7 @@ import OutwardsTab from '../Tabs/OutwardsTab'
 
 export default function OutwardsWindow({ onClose, labels, recordId, maxAccess, setProductsWindowOpen }) {
   return (
-    <Window id='OutwardsWindow' Title='outwards' onClose={onClose} controlled={true} width='700px' height='480px'>
+    <Window id='OutwardsWindow' Title='outwards' onClose={onClose} controlled={true} width='750px' height='600px'>
       <OutwardsTab labels={labels} maxAccess={maxAccess} setProductsWindowOpen={setProductsWindowOpen} />
     </Window>
   )

@@ -14,15 +14,21 @@ import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
+import { useInvalidate } from 'src/hooks/resource'
 
 const PlantForm = ({
   _labels,
   maxAccess,
   store,
+  setStore,
   editMode
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const {recordId } = store
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.Plant.page
+  })
 
  const[initialValues , setInitialData] = useState({
     recordId: recordId || null,
@@ -53,22 +59,22 @@ const PlantForm = ({
     }
   })
 
-  const postPlant = obj => {
-    const recordId = obj.recordId
-    postRequest({
+  const postPlant  = async obj => {
+  await  postRequest({
       extension: SystemRepository.Plant.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
 
-        if (res.recordId) {
+      if (res.recordId) {
           toast.success('Record Added Successfully')
 
           setStore(prevStore => ({
             ...prevStore,
-            plant: obj ,  editMode: true, recordId: res.recordId
+              plant: obj,
+              recordId: res.recordId
           }));
-
+          invalidate()
         }
         else toast.success('Record Edited Successfully')
       })
@@ -193,26 +199,7 @@ return (
             maxAccess={maxAccess}
           />
         </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            name='segmentRef'
-            label={_labels.segment}
-            valueField='reference'
-            displayField='reference'
-            endpointId={FinancialRepository.Segment.qry}
-            values={ formik.values}
-            columnsInDropDown= {[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' },
-            ]}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('segmentRef', newValue?.reference)
-            }}
-            error={formik.touched.segmentRef && Boolean(formik.errors.segmentRef)}
-            helperText={formik.touched.segmentRef && formik.errors.segmentRef}
-            maxAccess={maxAccess}
-          />
-        </Grid>
+
       </Grid>
     </FormShell>
   )

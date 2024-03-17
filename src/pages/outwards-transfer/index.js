@@ -47,12 +47,7 @@ const OutwardsTransfer = () => {
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
+    return
   }
 
   const {
@@ -61,13 +56,14 @@ const OutwardsTransfer = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Currency.qry,
+
+    //endpointId: SystemRepository.Currency.qry,
     datasetId: ResourceIds.Currencies
   })
 
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.SMSTemplate.page
-  })
+  /*const invalidate = useInvalidate({
+    endpointId: 
+  })*/
 
   const columns = [
     {
