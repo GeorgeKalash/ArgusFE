@@ -65,19 +65,25 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       notes: '',
       generalAccount: [{
           id: 1,
-          accountRef: '',
+          accountRef: {
+            accountRef: ""
+          },
           accountName: '',
-          tpAccountRef: '',
+          tpAccountRef: {
+            reference: ""
+          },
           tpAccountName: '',
-          currencyRef: '',
-          sign: '',
+          currencyRef: {
+            reference: ""
+          },
+          sign: {
+            key: ""
+          },
           notes: '',
           exRate: '',
           amount: '',
           baseAmount: ''
       }]
-  
-
   
     })
   
@@ -92,14 +98,13 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
 
       }
     })
-    
 
     
-    // useEffect(() => {
-    //   if (formValues) {
-    //     setformik(formValues);
-    //   }
-    // }, [formValues]);
+    useEffect(() => {
+      if (formValues) {
+        setformik(formValues);
+      }
+    }, [formValues]);
 
     
 
@@ -114,6 +119,34 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       datasetId: ResourceIds.GeneralLedger
     })
 
+    // useEffect(() => {
+    //   const row = data.list[0];
+    //   if(data && data.list && Array.isArray(data.list)) {
+    //     const generalAccount=  data.list.map(row => ({
+    //       id: 1,
+    //       accountRef: row.accountRef,
+    //       accountName: row.accountName,
+    //       tpAccountRef: row.tpAccountRef,
+    //       tpAccountName: row.accountName,
+    //       currencyRef: row.currencyRef,
+    //       sign: {
+    //         "dataset": 157,
+    //         "language": 1,
+    //         "key": row.sign,
+    //         "value": row.sign == 1 ? "D" : "C"
+
+    //       },
+    //       notes: row.notes,
+    //       exRate: row.exRate,
+    //       amount: row.amount,
+    //       baseAmount: row.baseAmount
+    //   }));
+
+    //   formik2.setFieldValue("generalAccount", generalAccount);
+        
+    //   }
+    // }, [data])
+    
 
   
     const invalidate = useInvalidate({
@@ -179,14 +212,15 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
     useEffect(() => {
       if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
         const generalAccountData = formik2.values.generalAccount;
+
         console.log(generalAccountData)
 
         const baseCredit = generalAccountData.reduce((acc, curr) => {
-          return curr.sign?.key === '2' ? acc + parseFloat(curr.baseAmount || 0) : acc;
+          return curr.sign?.key == '2' ? acc + parseFloat(curr.baseAmount || 0) : acc;
         }, 0);
     
         const baseDebit = generalAccountData.reduce((acc, curr) => {
-          return curr.sign?.key === "1" ? acc + parseFloat(curr.baseAmount || 0) : acc;
+          return curr.sign?.key == "1" ? acc + parseFloat(curr.baseAmount || 0) : acc;
         }, 0);
     
         const baseBalance = baseDebit - baseCredit;
@@ -194,13 +228,13 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
         setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
     
         const currencyTotals = generalAccountData.reduce((acc, curr) => {
-          const currency = curr.currencyRef.reference;
+          const currency = curr.currencyRef?.reference;
           if (!acc[currency]) {
             acc[currency] = { credit: 0, debit: 0 };
           }
-          if (curr.sign?.key === '2') {
+          if (curr.sign?.key == '2') {
             acc[currency].credit += parseFloat(curr.amount || 0);
-          } else if (curr.sign?.key === '1') {
+          } else if (curr.sign?.key == '1') {
             acc[currency].debit += parseFloat(curr.amount || 0);
           }
           
@@ -217,55 +251,73 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
     
         setCurrencyGridData(currencyData);
 
-        console.log(baseGridData, currencyGridData, currencyTotals)
       }
     }, [formik2.values]);
 
 
     useEffect(() => {
       if (data && data.list && Array.isArray(data.list)) {
-        const baseCredit = data.list.reduce((acc, curr) => curr.sign !== 1 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
-        const baseDebit = data.list.reduce((acc, curr) => curr.sign === 1 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
-        const baseBalance = baseDebit - baseCredit;
+        // const baseCredit = data.list.reduce((acc, curr) => curr.sign !== 1 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
+        // const baseDebit = data.list.reduce((acc, curr) => curr.sign === 1 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
+        // const baseBalance = baseDebit - baseCredit;
         
-        setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
-      }
-    }, []);
+        // setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
+        
+        // const currencyTotals = data.list.reduce((acc, curr) => {
+        //   const currency = curr.currencyRef;
+        //   if (!acc[currency]) {
+        //     acc[currency] = { credit: 0, debit: 0 };
+        //   }
+        //   if (curr.sign === 2) { // Assuming sign 2 represents credit
+        //     acc[currency].credit += parseFloat(curr.amount || 0);
+        //   } else if (curr.sign === 1) { // Assuming sign 1 represents debit
+        //     acc[currency].debit += parseFloat(curr.amount || 0);
+        //   }
+    
+        //   return acc;
+        // }, {});
+    
+        // const currencyData = Object.entries(currencyTotals).map(([currency, { credit, debit }]) => ({
+        //   currency,
+        //   credit,
+        //   debit,
+        //   balance: debit - credit
+        // }));
+        
+        // setCurrencyGridData(currencyData);
+          console.log(data);
 
-    useEffect(() => {
-      if (data && data.list && Array.isArray(data.list)) {
-        const currencyTotals = data.list.reduce((acc, curr) => {
-          const currency = curr.currencyRef;
-          if (!acc[currency]) {
-            acc[currency] = { credit: 0, debit: 0 };
-          }
-          if (curr.sign === 2) { // Assuming sign 2 represents credit
-            acc[currency].credit += parseFloat(curr.amount || 0);
-          } else if (curr.sign === 1) { // Assuming sign 1 represents debit
-            acc[currency].debit += parseFloat(curr.amount || 0);
-          }
-    
-          return acc;
-        }, {});
-    
-        const currencyData = Object.entries(currencyTotals).map(([currency, { credit, debit }]) => ({
-          currency,
-          credit,
-          debit,
-          balance: debit - credit
-        }));
-        
-        setCurrencyGridData(currencyData);
+        const generalAccount=  data.list.map((row, idx) => ({
+          id: idx,
+          accountRef: {accountRef: row.accountRef},
+          accountName: row.accountName,
+          tpAccountRef: {reference: row.tpAccountRef},
+          tpAccountName: row.tpAccountName,
+          currencyRef:{
+            "reference": row.currencyRef,
+          },
+          sign: {
+            "dataset": 157,
+            "language": 1,
+            "key": row.sign,
+            "value": row.sign == 1 ? "D" : "C"
+
+          },
+          notes: row.notes,
+          exRate: row.exRate,
+          amount: row.amount,
+          baseAmount: row.baseAmount
+      }));
+
+      formik2.setFieldValue("generalAccount", generalAccount);
       }
     }, [data]);
-
-   
 
 
     return (
       <>
         <Box>
-          {formik2 && (
+          {formik && (
             <Grid container spacing={2} padding={1}>
               <Grid item xs={12} sm={6}>
                 <CustomTextField
@@ -439,7 +491,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
             pagination={false}
             gridData={{count: currencyGridData.length, list: currencyGridData}}
             columns={[
-              { field: 'currency.name', headerName: 'Currency' },
+              { field: 'currency', headerName: 'Currency' },
               { field: 'debit', headerName: 'Debit',align: 'right', },
               { field: 'credit', headerName: 'Credit',align: 'right', },
               { field: 'balance', headerName: 'Balance',align: 'right', }
