@@ -218,29 +218,42 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
     }, [formik2]);
 
 
-      
-const generalAccountData = formik2.values.generalAccount;
+    useEffect(() => {
+      if (data && data.list && Array.isArray(data.list)) {
+        const baseCredit = data.list.reduce((acc, curr) => curr.sign !== 1 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
+        const baseDebit = data.list.reduce((acc, curr) => curr.sign === 1 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
+        const baseBalance = baseDebit - baseCredit;
+        
+        setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
+      }
+    }, [data]);
 
-console.log('aaa',generalAccountData)
-
-const baseCredit = generalAccountData.reduce((acc,{amount},curr) => {
-  return curr.sign !== 1 ? parseInt(amount)+parseInt(acc) : acc;
-}, 0);
-
-console.log('basecrwedi',baseCredit)
-
-const baseDebit = generalAccountData.reduce((acc, curr) => {
-  
-  return curr.sign === 1 ? acc + parseFloat(curr.baseAmount || 0) : acc;
-}, 0);
-
-
-const baseBalance = baseDebit - baseCredit;
-
-const dataTotal={ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance }
-
-console.log('data',dataTotal)
-
+    useEffect(() => {
+      if (data && data.list && Array.isArray(data.list)) {
+        const currencyTotals = data.list.reduce((acc, curr) => {
+          const currency = curr.currencyRef;
+          if (!acc[currency]) {
+            acc[currency] = { credit: 0, debit: 0 };
+          }
+          if (curr.sign === 2) { // Assuming sign 2 represents credit
+            acc[currency].credit += parseFloat(curr.amount || 0);
+          } else if (curr.sign === 1) { // Assuming sign 1 represents debit
+            acc[currency].debit += parseFloat(curr.amount || 0);
+          }
+    
+          return acc;
+        }, {});
+    
+        const currencyData = Object.entries(currencyTotals).map(([currency, { credit, debit }]) => ({
+          currency,
+          credit,
+          debit,
+          balance: debit - credit
+        }));
+        
+        setCurrencyGridData(currencyData);
+      }
+    }, [data]);
 
    
 
@@ -394,7 +407,7 @@ console.log('data',dataTotal)
             }}>
                
                 <Table
-                  gridData={{count: 1, list: [dataTotal]}}
+                  gridData={{count: 1, list: [baseGridData]}}
                   maxAccess={access}
              
                   height={"150"}
@@ -441,3 +454,6 @@ console.log('data',dataTotal)
   };
 
 export default GeneralLedger;
+
+
+
