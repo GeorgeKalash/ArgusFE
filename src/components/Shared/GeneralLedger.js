@@ -36,6 +36,7 @@ import { DataGrid } from './DataGrid';
 import { column } from 'stylis';
 import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
+import { getNewProductMaster } from 'src/Models/RemittanceSettings/ProductMaster';
 
 const GeneralLedger =({ labels,recordId ,functionId,formValues}) => {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -178,13 +179,14 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
     useEffect(() => {
       if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
         const generalAccountData = formik2.values.generalAccount;
-    
+        console.log(generalAccountData)
+
         const baseCredit = generalAccountData.reduce((acc, curr) => {
-          return curr.sign === 2 ? acc + parseFloat(curr.baseAmount || 0) : acc;
+          return curr.sign?.key === '2' ? acc + parseFloat(curr.baseAmount || 0) : acc;
         }, 0);
     
         const baseDebit = generalAccountData.reduce((acc, curr) => {
-          return curr.sign === 1 ? acc + parseFloat(curr.baseAmount || 0) : acc;
+          return curr.sign?.key === "1" ? acc + parseFloat(curr.baseAmount || 0) : acc;
         }, 0);
     
         const baseBalance = baseDebit - baseCredit;
@@ -192,13 +194,13 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
         setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
     
         const currencyTotals = generalAccountData.reduce((acc, curr) => {
-          const currency = curr.currencyRef;
+          const currency = curr.currencyRef.reference;
           if (!acc[currency]) {
             acc[currency] = { credit: 0, debit: 0 };
           }
-          if (curr.sign === 2) {
+          if (curr.sign?.key === '2') {
             acc[currency].credit += parseFloat(curr.amount || 0);
-          } else if (curr.sign === 1) {
+          } else if (curr.sign?.key === '1') {
             acc[currency].debit += parseFloat(curr.amount || 0);
           }
           
@@ -214,8 +216,10 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
         }));
     
         setCurrencyGridData(currencyData);
+
+        console.log(baseGridData, currencyGridData, currencyTotals)
       }
-    }, [formik2]);
+    }, [formik2.values]);
 
 
     useEffect(() => {
@@ -226,7 +230,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
         
         setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
       }
-    }, [data]);
+    }, []);
 
     useEffect(() => {
       if (data && data.list && Array.isArray(data.list)) {
@@ -261,7 +265,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
     return (
       <>
         <Box>
-          {formik && (
+          {formik2 && (
             <Grid container spacing={2} padding={1}>
               <Grid item xs={12} sm={6}>
                 <CustomTextField
