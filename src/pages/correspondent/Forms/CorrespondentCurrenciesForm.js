@@ -14,16 +14,19 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const CorrespondentCurrenciesForm = ({
   store,
   labels,
   maxAccess,
+  expanded,
   editMode
 }) => {
   const {recordId , counties} = store
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { height } = useWindowDimensions()
 
    const formik = useFormik({
     enableReinitialize: true,
@@ -243,6 +246,8 @@ return (
           value={formik.values.currencies}
           error={formik.errors.currencies}
           columns={columns}
+          height={`${expanded ? height-300 : 350}px`}
+
         />
       </Box>
     </FormShell>

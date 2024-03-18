@@ -10,20 +10,24 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const CorrespondentCountriesForm = ({
   store,
   setStore,
   maxAccess,
   labels,
+  expanded,
   editMode
 }) => {
   const {recordId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { height } = useWindowDimensions()
 
     const formik = useFormik({
       enableReinitialize: true,
       validateOnChange: true,
+
       validationSchema: yup.object({ countries: yup
         .array()
         .of(
@@ -57,16 +61,7 @@ const CorrespondentCountriesForm = ({
 
  const postCorrespondentCountries = obj => {
 
-    const correspondentCountries= obj?.countries?.map(
-      ({ country }) => ({
-         corId : recordId,
-         countryId: country.recordId,
-         countryName: country.name,
-         countryRef: country.reference,
-         flName: country.flName
-      })
-    )
-
+    const correspondentCountries= obj?.countries
 
     const data = {
       corId: recordId,
@@ -102,11 +97,14 @@ const CorrespondentCountriesForm = ({
             const correspondentCountries = res.list
 
             formik.setValues({ countries: correspondentCountries.map(
-              ({ countryId,  countryRef, ...rest } , index) => ({
+              ({ countryId,  countryRef, countryName, ...rest } , index) => ({
                  id : index,
                  country : { recordId: countryId,
-                 reference: countryRef,
-                },  ...rest
+                 name: countryName,
+                 reference: countryRef
+                },
+                countryName: countryName,
+                 ...rest
 
 
               }) )})
@@ -129,7 +127,6 @@ const CorrespondentCountriesForm = ({
           }
         })
         .catch(error => {
-          setErrorMessage(error)
         })
 
 
@@ -155,11 +152,26 @@ return (
                   endpointId: SystemRepository.Country.qry,
                   valueField: 'recordId',
                   displayField: 'reference',
-                  fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
+                  fieldsToUpdate: [ { from: 'name', to: 'countryName' } ],
                   columnsInDropDown: [
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
                   ]
+                },
+                async onChange({ row: { update, newRow } }) {
+
+                  console.log(newRow)
+                  if(!newRow?.country?.recordId){
+                  return;
+                  }else{
+                       update({'countryName':newRow.country?.name,
+                               'countryRef': newRow.country?.reference,
+                               'countryId': newRow.country?.recordId })
+
+                  }
+
+
+
                 }
               },
               {
@@ -167,9 +179,11 @@ return (
                 label: labels?.name,
                 name: 'countryName',
                 props:{readOnly: true}
-              }
-
+              },
             ]}
+
+            height={`${expanded ? height-300 : 350}px`}
+
 
         />
       </FormShell>

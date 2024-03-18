@@ -1,3 +1,5 @@
 export default function TextFieldView({ value }) {
-  return value
+  console.log("value", value)
+  
+return value
 }

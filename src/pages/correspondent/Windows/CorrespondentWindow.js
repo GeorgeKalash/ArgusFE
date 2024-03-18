@@ -10,7 +10,8 @@ const CorrespondentWindow = ({
   height,
   recordId,
   labels,
-  maxAccess
+  maxAccess,
+  expanded
 }) => {
   const [activeTab , setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
@@ -47,6 +48,7 @@ const CorrespondentWindow = ({
           setStore={setStore}
           maxAccess={maxAccess}
           store={store}
+          expanded={expanded}
 
         />
       </CustomTabPanel>
@@ -56,6 +58,7 @@ const CorrespondentWindow = ({
           setEditMode={setEditMode}
           setStore={setStore}
           maxAccess={maxAccess}
+          expanded={expanded}
           store={store}
         />
       </CustomTabPanel>

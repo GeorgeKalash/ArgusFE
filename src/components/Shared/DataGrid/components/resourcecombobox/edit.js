@@ -18,6 +18,7 @@ return (
       hasBorder={false}
       readOnly={props?.readOnly}
       onChange={(e, value) => {
+        console.log(value)
         update({
           id,
           field,
