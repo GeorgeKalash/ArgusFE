@@ -414,7 +414,14 @@ const Table = ({
                         field: 'checkbox',
                         headerName: checkTitle,
                         renderCell: params => (
-                          <TableCell padding='checkbox'>
+                          <TableCell
+                            padding='checkbox'
+                            sx={{
+                              whiteSpace: 'normal',
+                              wordWrap: 'break-word',
+                              maxWidth: '10px' // Adjust this value as needed
+                            }}
+                          >
                             <Checkbox
                               checked={params.row.checked || false}
                               onChange={() => {

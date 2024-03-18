@@ -40,12 +40,17 @@ const SmsRequestLog = () => {
   })
 
   async function fetchWithFilter({ filters }) {
-    const resourceId = filters?.resourceId || '0'
+    const resourceId = filters?.resourceId
+    if (!filters || !filters?.resourceId) {
+      console.log('enter undefined')
 
-    return await getRequest({
-      extension: SystemRepository.SMSRequest.qry,
-      parameters: `_filter=&_resourceId=${resourceId}`
-    })
+      return { list: [] }
+    } else {
+      return await getRequest({
+        extension: SystemRepository.SMSRequest.qry,
+        parameters: `_filter=&_resourceId=${resourceId}`
+      })
+    }
   }
 
   const {
@@ -86,7 +91,7 @@ const SmsRequestLog = () => {
               <ResourceComboBox
                 endpointId={SystemRepository.KeyValueStore}
                 parameters={`_dataset=${datasetId}&_language=${languageId}`}
-                labels={labels[2]}
+                label={labels['Module']}
                 name='moduleId'
                 values={formik.values}
                 valueField='key'
@@ -94,13 +99,16 @@ const SmsRequestLog = () => {
                 required
                 onChange={(event, newValue) => {
                   if (newValue) formik.setFieldValue('moduleId', newValue?.key)
+                  formik.setFieldValue('resourceId', '')
+                  filters.resourceId = ''
+                  fetchWithFilter(filters)
                 }}
                 sx={{ pr: 2 }}
               />
               <ResourceComboBox
                 endpointId={SystemRepository.ModuleResources.qry}
                 parameters={`_moduleId=${formik.values.moduleId}&_filter=`}
-                labels={labels[2]}
+                label={labels['ResourceId']}
                 name='resourceId'
                 values={formik.values}
                 required
@@ -120,36 +128,36 @@ const SmsRequestLog = () => {
           columns={[
             {
               field: 'masterRef',
-              headerName: labels[4],
+              headerName: labels['MasterRef'],
               flex: 1
             },
             {
               field: 'smsRequestDate',
-              headerName: labels[5],
+              headerName: labels['SmsRequestDate'],
               flex: 1
             },
             {
               field: 'reference',
-              headerName: labels[6],
+              headerName: labels['Reference'],
               flex: 1
             },
             {
               field: 'mobileNo',
-              headerName: labels[7],
+              headerName: labels['MobileNo'],
               flex: 1
             },
             {
               field: 'smsBody',
-              headerName: labels[8],
+              headerName: labels['SmsBody'],
               flex: 2
             },
             {
               field: 'smsStatusName',
-              headerName: labels[9],
+              headerName: labels['SmsStatus'],
               flex: 1
             }
           ]}
-          gridData={data ?? { list: [] }}
+          gridData={data && filters?.resourceId ? data : { list: [] }}
           rowId={['recordId']}
           isLoading={false}
           pageSize={50}
