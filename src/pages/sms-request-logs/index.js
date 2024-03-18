@@ -3,11 +3,8 @@ import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { AuthContext } from 'src/providers/AuthContext'
@@ -18,8 +15,6 @@ import * as yup from 'yup'
 
 const SmsRequestLog = () => {
   const { getRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
-  const [errorMessage, setErrorMessage] = useState(null)
   const { user } = useContext(AuthContext)
   const languageId = user.languageId
   const datasetId = DataSets.MODULE
@@ -82,16 +77,13 @@ const SmsRequestLog = () => {
             onSearch={value => {
               filterBy('qry', value)
             }}
-            onSearchClear={() => {
-              clearFilter('qry')
-            }}
             labels={labels}
           >
             <Box sx={{ display: 'flex', width: '700px', justifyContent: 'flex-start', pt: 2, pl: 2, pb: 2 }}>
               <ResourceComboBox
                 endpointId={SystemRepository.KeyValueStore}
                 parameters={`_dataset=${datasetId}&_language=${languageId}`}
-                label={labels['Module']}
+                label={labels.Module}
                 name='moduleId'
                 values={formik.values}
                 valueField='key'
@@ -108,7 +100,7 @@ const SmsRequestLog = () => {
               <ResourceComboBox
                 endpointId={SystemRepository.ModuleResources.qry}
                 parameters={`_moduleId=${formik.values.moduleId}&_filter=`}
-                label={labels['ResourceId']}
+                label={labels.ResourceId}
                 name='resourceId'
                 values={formik.values}
                 required
@@ -128,32 +120,38 @@ const SmsRequestLog = () => {
           columns={[
             {
               field: 'masterRef',
-              headerName: labels['MasterRef'],
+              headerName: labels.MasterRef,
               flex: 1
             },
             {
               field: 'smsRequestDate',
-              headerName: labels['SmsRequestDate'],
+              headerName: labels.SmsRequestDate,
               flex: 1
             },
             {
               field: 'reference',
-              headerName: labels['Reference'],
+              headerName: labels.Reference,
               flex: 1
             },
             {
               field: 'mobileNo',
-              headerName: labels['MobileNo'],
+              headerName: labels.MobileNo,
               flex: 1
             },
             {
               field: 'smsBody',
-              headerName: labels['SmsBody'],
-              flex: 2
+              headerName: labels.SmsBody,
+              flex: 2,
+              cellClassName: 'wrap-cell',
+              renderCell: params => (
+                <div style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', minHeight: '50px', height: 'auto' }}>
+                  {params.value}
+                </div>
+              )
             },
             {
               field: 'smsStatusName',
-              headerName: labels['SmsStatus'],
+              headerName: labels.SmsStatus,
               flex: 1
             }
           ]}
@@ -167,8 +165,6 @@ const SmsRequestLog = () => {
           paginationType='client'
         />
       </Box>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
