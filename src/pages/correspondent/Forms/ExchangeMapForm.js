@@ -108,7 +108,6 @@ const columns=[
 ]
 
 const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
-console.log(corId, currencyId, countryId)
 
   formik.resetForm();
   const parameters = ''
@@ -165,7 +164,6 @@ console.log(corId, currencyId, countryId)
 }
 
 const postExchangeMaps = obj => {
-  console.log(obj)
 
   const data = {
     corId: recordId,

@@ -91,7 +91,6 @@ const CorrespondentCountriesForm = ({
   }
 
   useEffect(()=>{
-      console.log('obj.recordId')
       const defaultParams = `_corId=${recordId}`
       var parameters = defaultParams
       recordId &&   getRequest({

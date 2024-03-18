@@ -21,7 +21,6 @@ const CorrespondentCurrenciesForm = ({
   maxAccess,
   editMode
 }) => {
-console.log('labels-cureency', labels)
   const {recordId , counties} = store
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -61,7 +60,6 @@ console.log('labels-cureency', labels)
       ]
     },
     onSubmit: values => {
-      console.log(values)
       postCorrespondentCurrencies(values)
     }
   })
