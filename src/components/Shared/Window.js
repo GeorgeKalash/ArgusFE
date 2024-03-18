@@ -61,17 +61,24 @@ const Window = ({
   const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
   const containerHeight = `calc(100vh - 48px)`
   const containerHeightPanel = `calc(100vh - 180px)`
-  const heightPanel = height - 120
+  const heightPanel = height- 120
 
-  useEffect(() => {
-    const transactionLogInfo = document.querySelector('[data-unique-id]')
 
-    if (transactionLogInfo) {
-      transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
-    }
-  }, [expanded])
 
-  return (
+
+useEffect(() => {
+  const transactionLogInfo = document.querySelector("[data-unique-id]");
+
+  if (transactionLogInfo) {
+    transactionLogInfo.style.height = expanded ? "30vh" : "18vh"
+  }
+}, [expanded]);
+
+
+
+
+return (
+
     <Box
       id='parent'
       sx={{
