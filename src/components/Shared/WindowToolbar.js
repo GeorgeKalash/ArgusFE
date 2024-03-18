@@ -1,9 +1,8 @@
-import { DialogActions, Button, Box, Autocomplete, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, Box, Button, DialogActions, TextField, Tooltip } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { Buttons } from './Buttons' 
-import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
+import { Buttons } from './Buttons'
 
 const WindowToolbar = ({
   onSave,
@@ -18,23 +17,17 @@ const WindowToolbar = ({
   onApproval,
   newHandler,
   onGenerateReport,
-  NewComponentVisible = false,
-  functionId,
   disabledSubmit,
   disabledApply,
   editMode = false,
-  smallBox = false,
   infoVisible = true,
-  postVisible = false,
   isClosed = false,
-  clientRelation,
   onClientRelation = false,
   isPosted = false,
   resourceId,
   setSelectedReport,
   selectedReport,
   previewReport,
-  visibleClear=true,
   actions = []
 }) => {
     const functionMapping = {
@@ -42,6 +35,12 @@ const WindowToolbar = ({
       isSaved,
       isInfo,
       isCleared,
+      disabledSubmit,
+      disabledApply,
+      infoVisible,
+      isPosted,
+      isClosed,
+      editMode,
       onSave,
       onPost,
       onClear,
@@ -53,10 +52,7 @@ const WindowToolbar = ({
     };
   const { getRequest } = useContext(RequestsContext)
 
-  const [showGLC, setShowGLC] = useState(false)
-
   const [reportStore, setReportStore] = useState([])
-  const [buttonIcons, setButtonIcons] = useState({})
 
   const getReportLayout = () => {
     setReportStore([])

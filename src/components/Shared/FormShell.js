@@ -11,7 +11,6 @@ import Approvals from './Approvals'
 
 export default function FormShell({
   form,
-  form1,
   isSaved = true,
   isInfo = true,
   isCleared = true,
@@ -23,7 +22,6 @@ export default function FormShell({
   postVisible = false,
   resourceId,
   functionId,
-  recordId,
   NewComponentVisible = false,
   maxAccess,
   isPosted = false,
