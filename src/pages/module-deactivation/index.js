@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
 import { Box } from '@mui/material'
@@ -10,47 +10,41 @@ import { useFormik } from 'formik'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
-import { AuthContext } from 'src/providers/AuthContext'
 import { DataSets } from 'src/resources/DataSets'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import toast from 'react-hot-toast'
+import { CommonContext } from 'src/providers/CommonContext'
 
 const ModuleDeactivation = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { height } = useWindowDimensions()
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   //states
-  const [errorMessage, setErrorMessage] = useState(null)
-  const { user } = useContext(AuthContext)
+  const [moduleStore, setModuleStore] = useState([])
+
+  const resModule = getAllKvsByDataset({
+    _dataset: DataSets.MODULE,
+    callback: setModuleStore
+  })
 
   async function getGridData(options = {}) {
-    const languageId = user.languageId
-    const datasetId = DataSets.MODULE
-
-    const resModule = await getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: `_dataset=${datasetId}&_language=${languageId}`
-    })
-
     const resCheckedModule = await getRequest({
       extension: AccessControlRepository.ModuleDeactivation.qry,
       parameters: `_filter=`
     })
 
-    const finalList = resModule.list.map(x => {
+    const finalList = moduleStore.map(x => {
       const n = {
         moduleId: x.key,
         moduleName: x.value,
@@ -81,7 +75,7 @@ const ModuleDeactivation = () => {
   const columns = [
     {
       field: 'moduleName',
-      headerName: _labels[2],
+      headerName: _labels.ModuleName,
       flex: 1
     }
   ]
@@ -136,9 +130,7 @@ const ModuleDeactivation = () => {
       .then(res => {
         toast.success('Record Generated Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   return (
@@ -147,33 +139,29 @@ const ModuleDeactivation = () => {
         height: `${height - 80}px`
       }}
     >
-      <CustomTabPanel index={0} value={0}>
-        <Box sx={{ width: '100%' }}>
-          <Table
-            columns={columns}
-            gridData={data}
-            rowId={['moduleId']}
-            isLoading={false}
-            maxAccess={access}
-            showCheckboxColumn={true}
-            handleCheckedRows={() => {}}
-            pagination={false}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: -20,
-            left: 0,
-            width: '100%',
-            margin: 0
-          }}
-        >
-          <WindowToolbar onSave={handleSubmit} smallBox={true} />
-        </Box>
-      </CustomTabPanel>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+      <Box sx={{ width: '100%' }}>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['moduleId']}
+          isLoading={false}
+          maxAccess={access}
+          showCheckboxColumn={true}
+          handleCheckedRows={() => {}}
+          pagination={false}
+        />
+      </Box>
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: -20,
+          left: 0,
+          width: '100%',
+          margin: 0
+        }}
+      >
+        <WindowToolbar onSave={handleSubmit} smallBox={true} />
+      </Box>
     </Box>
   )
 }

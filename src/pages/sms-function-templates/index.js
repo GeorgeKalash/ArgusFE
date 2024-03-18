@@ -85,7 +85,7 @@ const SmsFunctionTemplate = () => {
   const columns = [
     {
       component: 'textfield',
-      label: _labels[1],
+      label: _labels.FunctionId,
       name: 'functionId',
       props: {
         readOnly: true
@@ -93,7 +93,7 @@ const SmsFunctionTemplate = () => {
     },
     {
       component: 'textfield',
-      label: _labels[2],
+      label: _labels.Name,
       name: 'functionName',
       props: {
         readOnly: true
@@ -101,7 +101,7 @@ const SmsFunctionTemplate = () => {
     },
     {
       component: 'resourcelookup',
-      label: _labels[3],
+      label: _labels.SmsTemplates,
       name: 'template',
       props: {
         endpointId: SystemRepository.SMSTemplate.snapshot,
