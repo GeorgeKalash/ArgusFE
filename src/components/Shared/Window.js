@@ -62,6 +62,9 @@ const Window = ({
   const containerHeight = `calc(100vh - 48px)`
   const containerHeightPanel = `calc(100vh - 180px)`
   const heightPanel = height- 120
+
+
+
   
 useEffect(() => {
   const transactionLogInfo = document.querySelector("[data-unique-id]");
@@ -73,7 +76,6 @@ useEffect(() => {
 
 
 
-  return (
 
 return (
 
