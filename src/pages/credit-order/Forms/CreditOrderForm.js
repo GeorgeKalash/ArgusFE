@@ -636,7 +636,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
-          setInitialData(res.record)
+          formik.setValues(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
         }
@@ -659,7 +659,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode,
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus===3 && formik.values.status===3),
     },
     {
       key: 'Approval',
