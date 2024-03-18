@@ -79,23 +79,9 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         if (!functionId && !seqNo && !recordId && responseValue !== null) {
           toast.success('Record Added Successfully')
 
-          // setInitialData({
-          //   ...obj, // Spread the existing properties
-          //   recordId: response.recordId, // Update only the recordId field
-          //   response: responseValue,
-
-          //    date:formatDateDefault(obj.date)
-          // });
+       
         } else {
-          //  setInitialData({
-          //    ...obj, // Spread the existing properties
-          //    recordId: response.recordId, // Update only the recordId field
-          //    response: responseValue,
-          //     date:formatDateDefault(obj.date)
-
-          //  });
-          console.log(obj)
-
+      
           toast.success('Record Edited Successfully')
         }
         setWindowOpen(false)
