@@ -90,7 +90,7 @@ useEffect(()=>{
     stack({
       Component:  RelationForm,
       props: {
-            _labels: labels,
+            labels: labels,
             maxAccess: maxAccess,
             editMode : editMode,
             recordId :  null,
