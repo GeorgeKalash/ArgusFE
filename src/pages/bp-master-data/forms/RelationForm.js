@@ -1,26 +1,45 @@
-
 // ** MUI Imports
-import {Box} from '@mui/material'
+import { Grid, Box} from '@mui/material'
 
 // ** Custom Imports
-import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
-import { RequestsContext } from 'src/providers/RequestsContext'
+
+import CustomLookup from 'src/components/Inputs/CustomLookup'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { useContext, useState } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import FormShell from 'src/components/Shared/FormShell'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useFormik } from 'formik'
 
-const RelationForm = ({ store , popupRelation, labels, maxAccess }) => {
 
-const { recordId } = store
-const [relationGridData, setRelationGridData] = useState([])
-const { getRequest, postRequest } = useContext(RequestsContext)
+const RelationForm = ({
+  bpId,
+  _labels,
+  maxAccess,
+  editMode
+}) => {
 
+  const [businessPartnerStore, setBusinessPartnerStore] = useState([])
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+const [initialValues , setvalues] = ({
+  recordId: null,
+
+  // toBPId: bpId ,
+  relationId: null ,
+  relationName: null  ,
+  startDate: null ,
+  endDate: null ,
+  toBPName: null,
+  toBPRef: null,
+  fromBPId: null
+})
 
   //Relation Tab
   const formik = useFormik({
+    initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -33,134 +52,160 @@ const { getRequest, postRequest } = useContext(RequestsContext)
     }
   })
 
-useEffect(()=>{
-  getRelationGridData(recordId)
-},[recordId])
+  // const postRelation = obj => {
+  //   const bpId = recordId
+  //   obj.fromBPId = bpId
+  //   postRequest({
+  //     extension: BusinessPartnerRepository.Relation.set,
+  //     record: JSON.stringify(obj)
+  //   })
+  //     .then(res => {
+  //       if (!recordId) {
+  //         toast.success('Record Added Successfully')
+  //       } else toast.success('Record Editted Successfully')
 
-  const getRelationGridData = bpId => {
-    setRelationGridData([])
-    const defaultParams = `_bpId=${bpId}`
-    var parameters = defaultParams
+  //       // setRelationWindowOpen(false)
+  //       getRelationGridData(bpId)
+  //     })
+  //     .catch(error => {
+  //     })
+  // }
 
-    getRequest({
-      extension: BusinessPartnerRepository.Relation.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setRelationGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
+    // useEffect(()=>{
+    //   getRelationById(recordId)
+    // },[recordId])
 
-  const postRelation = obj => {
-    const bpId = recordId
-    obj.fromBPId = bpId
-    postRequest({
-      extension: BusinessPartnerRepository.Relation.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Editted Successfully')
+    // const getRelationById = recordId => {
 
-        setRelationWindowOpen(false)
-        getRelationGridData(bpId)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const getRelationById = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: BusinessPartnerRepository.Relation.get,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log('get ' + JSON.stringify())
-        relationValidation.setValues(populateRelation(res.record))
-        setRelationWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-
-
-  const delRelation = obj => {
-    const bpId = recordId
-    postRequest({
-      extension: BusinessPartnerRepository.Relation.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        getRelationGridData(bpId)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const columns = [
-    {
-      field: 'relationName',
-      headerName: labels.relation,
-      flex: 1
-    },
-    {
-      field: 'toBPName',
-      headerName: labels.businessPartner,
-      flex: 1
-    },
-    {
-      field: 'startDate',
-      headerName: labels.from,
-      flex: 1
-    },
-    {
-      field: 'endDate',
-      headerName: labels.to,
-      flex: 1
-    }
-  ]
-
-  const addRelation = () => {
-    relationValidation.setValues(getNewRelation(bpMasterDataValidation.values.recordId))
-
-  }
+    //   const defaultParams = `_recordId=${recordId}`
+    //   var parameters = defaultParams
+    //   getRequest({
+    //     extension: BusinessPartnerRepository.Relation.get,
+    //     parameters: parameters
+    //   })
+    //     .then(res => {
+    //       console.log('get ' + JSON.stringify())
+    //       formik.setValues(populateRelation(res.record))
+    //       setRelationWindowOpen(true)
+    //     })
+    //     .catch(error => {
+    //     })
+    // }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addRelation} maxAccess={maxAccess} />
-        <Table
-          columns={columns}
-          gridData={relationGridData}
-          rowId={['recordId']}
-          api={getRelationGridData}
-          onEdit={popupRelation}
-          onDelete={delRelation}
-          isLoading={false}
-          maxAccess={maxAccess}
-          pagination={false}
-          height={200}
-        />
-      </Box>
-    </>
+    <></>
+
+  //     <FormShell
+  //      resourceId={ResourceIds.BPMasterData}
+  //      form={formik}
+  //      maxAccess={maxAccess}
+  //      editMode={editMode}>
+  //       {/* <Box
+  //         sx={{
+  //           display: 'flex',
+  //           flexDirection: 'column',
+  //           height: '100%'
+  //         }}
+  //       >
+  //         <Grid container gap={2}>
+  //           <Grid container xs={12} spacing={2}>
+  //           <Grid item xs={12}>
+  //           <CustomLookup
+  //             name='toBPId'
+  //             label= {labels.businessPartner}
+  //             value={formik.values.toBPId}
+  //             required
+  //             valueField='reference'
+  //             displayField='name'
+  //             store={businessPartnerStore}
+  //             firstValue={formik.values.toBPRef}
+  //             secondValue={formik.values.toBPName}
+  //             setStore={setBusinessPartnerStore}
+  //             onLookup={searchQry => {
+  //   setBusinessPartnerStore([])
+  //   if(searchQry){
+  //   var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
+  //   getRequest({
+  //     extension: BusinessPartnerRepository.MasterData.snapshot,
+  //     parameters: parameters
+  //   })
+  //     .then(res => {
+  //       setBusinessPartnerStore(res.list)
+  //     })
+  //     .catch(error => {
+  //        setErrorMessage(error)
+  //     })}
+  // }}
+  //             onChange={(event, newValue) => {
+  //               if (newValue) {
+  //                 formik.setFieldValue('toBPId', newValue?.recordId)
+  //                 formik.setFieldValue('toBPRef', newValue?.reference)
+  //                 formik.setFieldValue('toBPName', newValue?.name)
+  //               } else {
+  //                 formik.setFieldValue('toBPId', null)
+  //                 formik.setFieldValue('toBPRef', null)
+  //                 formik.setFieldValue('toBPName', null)
+  //               }
+  //             }}
+  //             error={
+  //               formik.touched.toBPId &&
+  //               Boolean(formik.errors.toBPId)
+  //             }
+  //             helperText={
+  //               formik.touched.toBPId && formik.errors.toBPId
+  //             }
+  //             maxAccess={maxAccess}
+  //           />
+  //         </Grid>
+  //         <Grid item xs={12}>
+  //           <ResourceComboBox
+  //           endpointId={BusinessPartnerRepository.RelationTypes.qry}
+  //             name='relationId'
+  //             label={labels.relation}
+  //             columnsInDropDown= {[
+  //               { key: 'reference', value: 'Reference' },
+  //               { key: 'name', value: 'Name' }
+  //             ]}
+  //             valueField='recordId'
+  //             displayField='name'
+  //             values={formik.values}
+  //             required
+  //             onChange={(event, newValue) => {
+  //               formik && formik.setFieldValue('relationId', newValue?.recordId);
+  //             }}
+  //             error={formik.touched.relationId && Boolean(formik.errors.relationId)}
+  //             helperText={formik.touched.relationId && formik.errors.relationId}
+  //           />
+  //         </Grid>
+  //         <Grid item xs={12}>
+  //           <CustomDatePicker
+  //             name='startDate'
+  //             label={labels.from}
+  //             value={formik.values.startDate}
+  //             onChange={formik.handleChange}
+  //             maxAccess={maxAccess}
+  //             onClear={() => formik.setFieldValue('startDate', '')}
+  //             error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+  //             helperText={formik.touched.startDate && formik.errors.startDate}
+  //           />
+  //         </Grid>
+  //         <Grid item xs={12}>
+  //           <CustomDatePicker
+  //             name='endDate'
+  //             label={labels.to}
+  //             value={formik.values.endDate}
+  //             onChange={formik.handleChange}
+  //             maxAccess={maxAccess}
+  //             onClear={() => formik.setFieldValue('endDate', '')}
+  //             error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+  //             helperText={formik.touched.endDate && formik.errors.endDate}
+  //           />
+  //         </Grid>
+
+  //            </Grid>
+  //         </Grid>
+  //       </Box> */}
+  //     </FormShell>
   )
 }
 

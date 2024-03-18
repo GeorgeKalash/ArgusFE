@@ -148,8 +148,8 @@ const BPMasterData = () => {
       Component: BPMasterDataWindow,
       props: {
         labels: _labels,
-
-      recordId: recordId? recordId : null,
+        maxAccess: access,
+        recordId: recordId? recordId : null,
       },
       width: 1200,
       height: 600,

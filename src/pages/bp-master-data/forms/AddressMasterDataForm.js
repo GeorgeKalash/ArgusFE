@@ -5,65 +5,41 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect, useState } from 'react'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { DataGrid } from 'src/components/Shared/DataGrid'
+
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
+import AddressForm from 'src/pages/plants/Forms/AddressForm'
+import { useWindow } from 'src/windows'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const AddressMasterDataForm = ({ store, maxAccess, labels , editMode }) => {
   const {recordId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
+  const [address, setAddress] = useState([]) //for address tab
 
+  const { stack } = useWindow()
 
-
-
-
-  const postIdNumber = obj => {
-
-    const postBody = Object.entries(obj).map(([key, value]) => {
-      return postRequest({
-        extension: BusinessPartnerRepository.MasterIDNum.set,
-        record: JSON.stringify(value)
-      })
-    })
-    Promise.all(postBody)
-      .then(() => {
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-        } else {
-          toast.success('Record Edited Successfully')
-        }
-      })
-      .catch(error => {
-      })
-  }
-
-
-
-
-
-
-const postAddress = obj => {
+const onSubmit = obj => {
   console.log(obj)
-  const bpId = bpMasterDataValidation.values.recordId
+  const bpId = recordId
   postRequest({
     extension: SystemRepository.Address.set,
     record: JSON.stringify(obj)
   })
     .then(res => {
-      console.log(res.recordId)
+
       obj.recordId = res.recordId
-      addressValidation.setFieldValue('recordId', obj.recordId)
-      setAddressWindowOpen(false)
+
+      // addressValidation.setFieldValue('recordId', obj.recordId)
+      // setAddressWindowOpen(false)
 
       //post BPAddress
       const object = obj //we add bill to and ship to to validation
-      object.addressId = addressValidation.values.recordId
-      object.bpId = bpId
+      object.addressId = res.recordId
+      object.bpId = recordId
       console.log('object')
       console.log(object)
       postRequest({
@@ -74,13 +50,13 @@ const postAddress = obj => {
           getAddressGridData(bpId)
         })
         .catch(error => {
-          setErrorMessage(error)
+          // setErrorMessage(error)
         })
 
       //bill to and ship to are with formik (hidden or not from security grps)
     })
     .catch(error => {
-      setErrorMessage(error)
+      // setErrorMessage(error)
     })
 }
 
@@ -100,14 +76,14 @@ const getAddressGridData = bpId => {
       setAddressGridData(res)
     })
     .catch(error => {
-      setErrorMessage(error)
+      // setErrorMessage(error)
     })
 }
 
 const delAddress = obj => {
   //talk about problem of getting only address body: create empty object or keep this full body??
   console.log(obj)
-  const bpId = bpMasterDataValidation.values.recordId
+  const bpId = recordId
   obj.bpId = bpId
   obj.addressId = obj.recordId
   console.log(obj)
@@ -120,22 +96,45 @@ const delAddress = obj => {
       getAddressGridData(bpId)
     })
     .catch(error => {
-      setErrorMessage(error)
+      // setErrorMessage(error)
     })
 }
 
-const addAddress = () => {
-  addressValidation.setValues(getNewAddress) //bpId is then added to object on save..
-  setAddressWindowOpen(true)
+function addAddress (){
+openForm('')
 }
 
+
+function openForm(recordId){
+  stack({
+    Component:  AddressForm,
+    props: {
+          _labels: labels,
+          maxAccess:maxAccess,
+          editMode : editMode,
+          recordId :  recordId,
+          address : address,
+          setAddress : setAddress,
+          onSubmit: onSubmit
+    },
+    width: 600,
+    height: 600,
+    title: labels.address
+  })
+
+}
+
+// const addAddress = () => {
+//   addressValidation.setValues(getNewAddress) //bpId is then added to object on save..
+//   setAddressWindowOpen(true)
+// }
+
 const editAddress = obj => {
-  console.log(obj)
-  getAddressById(obj)
+  openForm(obj.recordId)
 }
 
 const getAddressById = obj => {
-  const _bpId = bpMasterDataValidation.values.recordId
+  const _bpId = recordId
 
   const defaultParams = `_recordId=${obj.recordId}` //addressId the object i am getting was the bpAddress
   // after modifying list it is normal address so i send obj.recordId
@@ -160,11 +159,11 @@ const getAddressById = obj => {
 
         })
         .catch(error => {
-          setErrorMessage(error)
+          // setErrorMessage(error)
         })
     })
     .catch(error => {
-      setErrorMessage(error)
+      // setErrorMessage(error)
     })
 }
 
@@ -175,10 +174,18 @@ useEffect(()=>{
 
 return (
 
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-      <AddressGridTab
+  <Box
+  sx={{
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%'
+  }}
+>
+
+  <AddressGridTab
         addressGridData={addressGridData}
-        getAddressGridData={getAddressGridData}
+
+        // getAddressGridData={getAddressGridData}
         addAddress={addAddress}
         delAddress={delAddress}
         editAddress={editAddress}

@@ -19,6 +19,8 @@ const AddressForm = ({
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   function onAddressSubmit(post){
+
+    console.log(post)
      const data = {...post ,  recordId: recordId}
       postRequest({
         extension: SystemRepository.Address.set,
