@@ -68,6 +68,7 @@ export const SystemRepository = {
     del: service + 'delST'
   },
   Plant: {
+    snapshot: service + 'snapshotPLT',
     qry: service + 'qryPLT',
     get: service + 'getPLT',
     set: service + 'setPLT',
@@ -103,7 +104,7 @@ export const SystemRepository = {
     qry: service + 'qryFUN',
     get: service + 'getFUN',
     set: service + 'setFUN',
-    set2: service + 'set2FUN'
+    set2: service + 'set2FUN' // SystemFunctionPack ehich contains list of SystemFunction class items
   },
   SMSFunctionTemplate: {
     qry: service + 'qrySFT',
@@ -114,7 +115,8 @@ export const SystemRepository = {
     get: service + 'getUS',
     set: service + 'setUS',
     del: service + 'delUS',
-    page: service + 'pageUS'
+    page: service + 'pageUS',
+    snapshot: service + 'snapshotUS'
   },
   UserDefaults: {
     qry: service + 'qryUD',
@@ -127,10 +129,10 @@ export const SystemRepository = {
   },
   State: {
     qry: service + 'qryST',
+    page: service + 'pageST',
     get: service + 'getST',
     set: service + 'setST',
-    del: service + 'delST',
-    page: service + 'pageST'
+    del: service + 'delST'
   },
   Default: {
     get: service + 'getDE'
@@ -139,5 +141,8 @@ export const SystemRepository = {
     qry: service + 'qryDE',
     get: service + 'getDE',
     set: service + 'set2DE'
+  },
+  FiscalYears: {
+    qry: service + 'qryFY'
   }
 }

@@ -15,14 +15,15 @@ return (
       columnsInDropDown={props.columnsInDropDown}
       displayField={props.displayField}
       label={''}
-      dataGrid={true}
+      hasBorder={false}
       readOnly={props?.readOnly}
       onChange={(e, value) => {
         api.current.setEditCellValue({
           id,
           field,
-          value
+          value: value || ''
         })
+
       }}
     />
   )

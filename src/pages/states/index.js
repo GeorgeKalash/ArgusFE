@@ -1,12 +1,8 @@
 // ** React Imports
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -15,41 +11,55 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
+
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import { getNewState, populateState } from 'src/Models/System/States'
 
 // ** Windows
 import StatesWindow from './Windows/StatesWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 const States = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
-
-  //stores
-  const [gridData, setGridData] = useState([])
-  const [countryStore, setCountryStore] = useState([])
+ 
+  const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  //control
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, _countryId = 0 } = options
 
-  const _labels = {
-    states: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    country: labels && labels.find(item => item.key === "3").value
+    const response = await getRequest({
+      extension: SystemRepository.State.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_countryId=${_countryId}&filter=`
+    })
+
+    return {...response,  _startAt: _startAt}
+
   }
+
+  const {
+    query: { data },
+    labels: _labels,
+    refetch,
+    paginationParameters,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.State.page,
+    datasetId: ResourceIds.States
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.State.page
+  })
 
   const columns = [
     {
@@ -59,163 +69,58 @@ const States = () => {
     },
     {
       field: 'countryName',
-      headerName: _labels.country,
+      headerName: _labels.countryId,
       flex: 1
     }
   ]
 
-  const statesValidation = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      countryId: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required')
-    }),
-    onSubmit: values => {
-      postStates(values)
-    }
-  })
-
-  const handleSubmit = () => {
-    statesValidation.handleSubmit()
-  }
-
-  const getGridData = () => {
-    const defaultParams = `_countryId=0&_startAt=0&_pageSize=50&filter=`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: SystemRepository.State.page,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const postStates = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: SystemRepository.State.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData()
-        setWindowOpen(false)
-        if (!recordId) toast.success('Record Added Successfully')
-        else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const delState = obj => {
-    postRequest({
-      extension: SystemRepository.State.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        getGridData()
-        toast.success('Record Deleted Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const addState = () => {
-    statesValidation.setValues(getNewState())
-    fillCountryStore()
-    setEditMode(false)
+  const add = () => {
     setWindowOpen(true)
   }
 
-  const editState = obj => {
-    const _recordId = obj.recordId
-    const defaultParams = `_recordId=${_recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: SystemRepository.State.get,
-      parameters: parameters
-    })
-      .then(res => {
-        statesValidation.setValues(populateState(res.record))
-        fillCountryStore()
-        setEditMode(true)
-        setWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const edit = obj => {
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
   }
 
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
+  const del = async obj => {
+    await postRequest({
+      extension: SystemRepository.State.del,
+      record: JSON.stringify(obj)
     })
-      .then(res => {
-        setCountryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.States, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getGridData()
-        getLabels(ResourceIds.States, setLabels)
-        fillCountryStore()
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [access])
+  
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addState} maxAccess={access} />
+      <Box>
+        <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editState}
-          onDelete={delState}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
-          paginationType='client'
+          refetch={refetch}
+          pageSize={50}
+          paginationParameters={paginationParameters}
           maxAccess={access}
+          paginationType='api'
         />
       </Box>
       {windowOpen && (
         <StatesWindow
-          onClose={() => setWindowOpen(false)}
-          width={500}
-          height={300}
-          onSave={handleSubmit}
-          statesValidation={statesValidation}
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
           labels={_labels}
           maxAccess={access}
-          countryStore={countryStore}
-          editMode={editMode}
-          onInfo={() => setWindowInfo(true)}
-
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

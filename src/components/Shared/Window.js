@@ -22,7 +22,7 @@ const Window = ({
   onClose,
   tabs,
   width = 800,
-  height = 400,
+  height = 600,
   activeTab,
   setActiveTab,
   Title,
@@ -60,8 +60,8 @@ const Window = ({
 
   const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
   const containerHeight = `calc(100vh - 48px)`
-
-
+  const containerHeightPanel = `calc(100vh - 180px)`
+  const heightPanel = height- 120
   
 useEffect(() => {
   const transactionLogInfo = document.querySelector("[data-unique-id]");
@@ -74,6 +74,9 @@ useEffect(() => {
 
 
   return (
+
+return (
+
     <Box
       id='parent'
       sx={{
@@ -168,7 +171,7 @@ useEffect(() => {
               </>
             ) : (
               React.Children.map(children, child => {
-                return React.cloneElement(child, { expanded: expanded, height : height }); // Pass containerHeight as prop to children
+                return React.cloneElement(child, { expanded: expanded, height : expanded ? containerHeightPanel : heightPanel}); // Pass containerHeight as prop to children
               })
             )}
           </Paper>
