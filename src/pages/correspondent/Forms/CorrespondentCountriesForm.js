@@ -65,7 +65,11 @@ const CorrespondentCountriesForm = ({
 
     const data = {
       corId: recordId,
-       correspondentCountries
+       correspondentCountries : correspondentCountries.map(
+              ({ country,corId, ...rest } ) => ({
+                 corId: recordId,
+                 ...rest
+              }))
     }
 
     postRequest({
