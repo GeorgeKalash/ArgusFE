@@ -96,7 +96,7 @@ export default function FormShell({
               props: {
                 formValues: form.values,
                 recordId: form.values?.recordId,
-                functionId: functionId
+                functionId: form.values.functionId
               },
               width: 1000,
               height: 600,
@@ -147,6 +147,7 @@ export default function FormShell({
           setSelectedReport={setSelectedReport}
           previewReport={previewReport}
           visibleClear={visibleClear}
+          functionId={functionId}
         />
       )}
       {windowInfo && (
