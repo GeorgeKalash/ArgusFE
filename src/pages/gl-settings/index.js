@@ -335,7 +335,10 @@ const GLSettings = () => {
                         padding: 3,
                         textAlign: 'center',
                     }}>
-                        <WindowToolbar onSave={handleSubmit}  />
+                        <WindowToolbar 
+                            onSave={handleSubmit}
+                            isSaved={true}
+                        />
                     </Grid>
                     
                 
