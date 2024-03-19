@@ -12,7 +12,9 @@ const AddressGridTab = ({
   delAddress,
   editAddress,
   maxAccess,
-  labels
+  labels,
+ height
+
 }) => {
 
   const columns = [
@@ -73,7 +75,7 @@ const AddressGridTab = ({
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={300}
+          height={height}
         />
       </Box>
     </>

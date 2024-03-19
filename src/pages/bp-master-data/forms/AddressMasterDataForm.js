@@ -10,29 +10,11 @@ import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import { BPAddressForm } from './BPAddressForm'
 
-const AddressMasterDataForm = ({ store, maxAccess, labels , editMode  }) => {
+const AddressMasterDataForm = ({ store, maxAccess, labels , editMode , ...props }) => {
   const {recordId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
   const { stack } = useWindow()
-
-const onSubmit =  (obj) => {
-       const bpId = recordId
-       obj.bpId= bpId
-      postRequest({
-        extension: BusinessPartnerRepository.BPAddress.set,
-        record: JSON.stringify(obj)
-      }).then(res => {
-          if (!recordId)
-            toast.success('Record Added Successfully')
-           else
-          toast.success('Record Edited Successfully')
-
-          getAddressGridData(bpId)
-        }).catch(error => {
-        })
-
-}
 
 const getAddressGridData = bpId => {
   setAddressGridData([])
@@ -82,7 +64,8 @@ function openForm(id){
           maxAccess:maxAccess,
           editMode : editMode,
           recordId :  id,
-          onSubmit: onSubmit
+          bpId: recordId,
+          getAddressGridData: getAddressGridData
 
     },
     width: 600,
@@ -117,6 +100,7 @@ return (
         editAddress={editAddress}
         labels={labels}
         maxAccess={maxAccess}
+        {...props}
 
       />
       </Box>

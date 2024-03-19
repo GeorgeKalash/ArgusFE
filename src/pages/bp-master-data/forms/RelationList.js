@@ -16,7 +16,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateDefault } from 'src/lib/date-helper'
 
-const RelationList = ({ store , popupRelation, labels, editMode, maxAccess }) => {
+const RelationList = ({ store , height, labels, editMode, maxAccess }) => {
 
 const { recordId } = store
 const [relationGridData, setRelationGridData] = useState([])
@@ -130,6 +130,7 @@ useEffect(()=>{
           onEdit={editRelation}
           onDelete={delRelation}
           isLoading={false}
+          height={height}
           maxAccess={maxAccess}
           pagination={false}
         />

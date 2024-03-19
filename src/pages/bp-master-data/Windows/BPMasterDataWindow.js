@@ -54,6 +54,7 @@ return (
             store={store}
             labels={labels}
             maxAccess={maxAccess}
+            height={height-100}
           />
         </CustomTabPanel>
         <CustomTabPanel index={3} height={height}  value={activeTab}>
@@ -62,6 +63,7 @@ return (
             setStore={setStore}
             labels={labels}
             maxAccess={maxAccess}
+            height={height-100}
           />
         </CustomTabPanel>
     </>
