@@ -25,7 +25,7 @@ const { stack } = useWindow()
 
 
 useEffect(()=>{
-  getRelationGridData(recordId)
+  recordId && getRelationGridData(recordId)
 },[recordId])
 
   const getRelationGridData = bpId => {
@@ -87,12 +87,12 @@ useEffect(()=>{
     }
   ]
 
-  const addRelation = (id) => {
-    openForm(id)
+  const addRelation = () => {
+    openForm('')
   }
 
   const editRelation = (obj) => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId)
   }
 
   const openForm = (id) => {

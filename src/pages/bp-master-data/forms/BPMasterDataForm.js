@@ -16,7 +16,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId, height , store, setStore}) {
+export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId, setEditMode , store, setStore}) {
   const [isLoading, setIsLoading] = useState(false)
 
 
@@ -89,14 +89,22 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
     onSubmit: async obj => {
       const recordId = obj.recordId
 
-      await postRequest({
+     const res = await postRequest({
         extension: BusinessPartnerRepository.MasterData.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) toast.success('Record Added Successfully')
-      else toast.success('Record Edited Successfully')
+      if (!recordId){ toast.success('Record Added Successfully')
+        setEditMode(true)
 
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: res.recordId
+          }));
+
+      }
+      else toast.success('Record Edited Successfully')
+setEditMode(true)
       invalidate()
     }
   })
@@ -167,7 +175,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
             <ResourceComboBox
               endpointId={BusinessPartnerRepository.Group.qry}
               name='groupId'
-              label={labels.group}
+              label={labels.groupName}
               valueField='recordId'
               displayField='name'
               values={formik.values}
@@ -238,7 +246,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
           <Grid item xs={12}>
             <CustomTextField
               name='flName'
-              label={labels.foreignLanguage}
+              label={labels.flName}
               value={formik.values.flName}
               maxLength='70'
               maxAccess={maxAccess}

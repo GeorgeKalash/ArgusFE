@@ -67,6 +67,7 @@ const CustomLookup = ({
           <Autocomplete
             name={name}
             key={firstValue}
+            defaultValue={firstValue}
             value={firstValue}
             size={size}
             options={store}
@@ -95,6 +96,9 @@ const CustomLookup = ({
             //     return option;
             //   }
             // }}
+            // getOptionDisabled={(option) =>
+            //  firstValue === option[valueField]
+            // }
 
             // getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}

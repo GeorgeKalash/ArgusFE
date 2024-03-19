@@ -1,7 +1,6 @@
 import { Box } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -78,7 +77,6 @@ async function  getIdNumber(recordId) {
       parameters: parameters
     })
     const list =  store.category
-console.log(list)
 
     var listMIN =  res.list?.filter(y => {
       return list?.some(x => x.name === y.incName)

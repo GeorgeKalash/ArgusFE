@@ -15,6 +15,7 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
 
 const RelationForm = ({
@@ -29,7 +30,7 @@ const RelationForm = ({
   const [businessPartnerStore, setBusinessPartnerStore] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-const [initialValues , setvalues] = useState({
+const [initialValues , setValues] = useState({
   recordId: null,
   toBPId: null ,
   relationId: null ,
@@ -50,7 +51,6 @@ const [initialValues , setvalues] = useState({
       relationId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
-      console.log('relation values ' + JSON.stringify(values))
       postRelation(values)
     }
   })
@@ -78,7 +78,7 @@ const [initialValues , setvalues] = useState({
   }
 
     useEffect(()=>{
-      getRelationById(recordId)
+      recordId &&  getRelationById(recordId)
     },[recordId])
 
     const getRelationById = recordId => {
@@ -90,6 +90,7 @@ const [initialValues , setvalues] = useState({
         parameters: parameters
       })
         .then(res => {
+
           res.record.startDate = formatDateFromApi(res.record.startDate)
           res.record.endDate = formatDateFromApi(res.record.endDate)
           formik.setValues(res.record)
@@ -113,34 +114,18 @@ const [initialValues , setvalues] = useState({
           }}
         >
           <Grid container gap={2}>
-            <Grid container xs={12} spacing={2}>
+            <Grid container xs={12} spacing={2} sx={{mt:1}}>
             <Grid item xs={12}>
-            <CustomLookup
+            <ResourceLookup
+             endpointId={BusinessPartnerRepository.MasterData.snapshot}
               name='toBPId'
               label= {labels.businessPartner}
-              value={formik.values.toBPId}
+              form={formik}
               required
               valueField='reference'
               displayField='name'
-              store={businessPartnerStore}
               firstValue={formik.values.toBPRef}
               secondValue={formik.values.toBPName}
-              setStore={setBusinessPartnerStore}
-              onLookup={searchQry => {
-    setBusinessPartnerStore([])
-    if(searchQry){
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
-    getRequest({
-      extension: BusinessPartnerRepository.MasterData.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setBusinessPartnerStore(res.list)
-      })
-      .catch(error => {
-         setErrorMessage(error)
-      })}
-  }}
               onChange={(event, newValue) => {
                 if (newValue) {
                   formik.setFieldValue('toBPId', newValue?.recordId)

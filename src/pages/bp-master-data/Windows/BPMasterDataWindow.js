@@ -17,7 +17,12 @@ const BPMasterDataWindow = ({
 }) => {
   const [activeTab, setActiveTab] = useState(0)
 
-  const editMode = !!recordId
+  const [store , setStore] = useState({
+    recordId : recordId || null,
+    category: null
+  })
+  const [editMode, setEditMode] = useState(!!recordId)
+
 
   const tabs=[
     { label: labels.general },
@@ -26,10 +31,7 @@ const BPMasterDataWindow = ({
     { label: labels.address, disabled: !editMode }
   ]
 
-  const [store , setStore] = useState({
-    recordId : recordId || null,
-    category: null
-  })
+
 
 return (
     <>
@@ -37,7 +39,7 @@ return (
 
         <CustomTabPanel index={0}   height={height} value={activeTab}>
           <BPMasterDataForm labels={labels} maxAccess={maxAccess} defaultValue={defaultValue}
-           store={store} setStore={setStore} recordId={recordId} />
+           store={store} setStore={setStore} setEditMode={setEditMode} recordId={recordId} />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={1} value={activeTab}>

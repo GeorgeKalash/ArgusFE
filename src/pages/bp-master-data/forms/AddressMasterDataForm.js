@@ -8,10 +8,9 @@ import { useContext, useEffect, useState } from 'react'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BPAddressForm } from './BPAddressForm'
 
-const AddressMasterDataForm = ({ store, maxAccess, labels , editMode }) => {
+const AddressMasterDataForm = ({ store, maxAccess, labels , editMode  }) => {
   const {recordId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [addressGridData, setAddressGridData] = useState([]) //for address tab
@@ -28,6 +27,8 @@ const onSubmit =  (obj) => {
             toast.success('Record Added Successfully')
            else
           toast.success('Record Edited Successfully')
+
+          getAddressGridData(bpId)
         }).catch(error => {
         })
 
@@ -82,6 +83,7 @@ function openForm(id){
           editMode : editMode,
           recordId :  id,
           onSubmit: onSubmit
+
     },
     width: 600,
     height: 600,
@@ -95,7 +97,7 @@ const editAddress = obj => {
 }
 
 useEffect(()=>{
-  getAddressGridData(recordId)
+  recordId && getAddressGridData(recordId)
 },[recordId])
 
 return (
