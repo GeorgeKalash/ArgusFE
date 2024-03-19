@@ -19,17 +19,13 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
 
-// ** Windows
-import OutwardsWindow from './Windows/OutwardsWindow'
-
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { getNewOutwards, populateOutwards } from 'src/Models/RemittanceActivities/Outwards'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import ProductsWindow from './Windows/ProductsWindow'
-import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+
+import { useWindow } from 'src/windows'
+import OutwardsTab from './Tabs/OutwardsTab'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 
 const OutwardsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -37,17 +33,20 @@ const OutwardsTransfer = () => {
 
   //stores
   const [gridData, setGridData] = useState(null)
-  const [productsStore, setProductsStore] = useState([])
 
   //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [productsWindowOpen, setProductsWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRow, setSelectedRow] = useState(null)
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
+  const [plantId, setPlantId] = useState(null)
+  const [cashAccountId, setCashAccountId] = useState(null)
+  const { stack } = useWindow()
   async function fetchGridData(options = {}) {
-    return
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.qry,
+      parameters: `_filter`
+    })
   }
 
   const {
@@ -56,14 +55,85 @@ const OutwardsTransfer = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-
-    //endpointId: SystemRepository.Currency.qry,
-    datasetId: ResourceIds.Currencies
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.qry,
+    datasetId: ResourceIds.OutwardsTransfer
   })
 
-  /*const invalidate = useInvalidate({
-    endpointId: 
-  })*/
+  const invalidate = useInvalidate({
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.qry
+  })
+
+  const getPlantId = async () => {
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null
+
+    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: parameters
+      })
+
+      if (res.record.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      setErrorMessage(error)
+
+      return ''
+    }
+  }
+
+  const getCashAccountId = async () => {
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null
+
+    const parameters = `_userId=${userData && userData.userId}&_key=cashAccountId`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: parameters
+      })
+
+      if (res.record.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      setErrorMessage(error)
+
+      return ''
+    }
+  }
+  async function openForm() {
+    try {
+      const plantId = await getPlantId()
+      const cashAccountId = await getCashAccountId()
+
+      if (plantId !== '' && cashAccountId !== '') {
+        setPlantId(plantId)
+        setCashAccountId(cashAccountId)
+        openOutWardsWindow()
+      } else {
+        if (plantId === '') {
+          setErrorMessage({ error: 'The user does not have a default plant' })
+        }
+        if (cashAccountId === '') {
+          setErrorMessage({ error: 'The user does not have a default cash account' })
+        }
+        setWindowOpen(false)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const columns = [
     {
@@ -92,21 +162,27 @@ const OutwardsTransfer = () => {
   const delOutwards = obj => {}
 
   const addOutwards = () => {
-    setWindowOpen(true)
+    openForm()
+  }
+
+  function openOutWardsWindow() {
+    stack({
+      Component: OutwardsTab,
+      props: {
+        plantId: plantId,
+        cashAccountId: cashAccountId,
+        maxAccess: access,
+        recordId: selectedRecordId
+      },
+      width: 800,
+      height: 500,
+      title: 'Outwards'
+    })
   }
 
   const editOutwards = obj => {
-    setWindowOpen(true)
+    openForm()
     setSelectedRecordId(obj.recordId)
-  }
-
-  const handleProductSelection = () => {
-    const selectedRowData = productsStore?.list.find(row => row.productId === selectedRow)
-    formik.setFieldValue('productId', selectedRowData?.productId)
-    formik.setFieldValue('fees', selectedRowData?.fees)
-    formik.setFieldValue('baseAmount', selectedRowData?.baseAmount)
-    formik.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount)
-    setProductsWindowOpen(false)
   }
 
   return (
@@ -125,29 +201,7 @@ const OutwardsTransfer = () => {
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
-        <OutwardsWindow
-          onClose={() => setWindowOpen(false)}
-          labels={_labels}
-          setProductsWindowOpen={setProductsWindowOpen}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
 
-      {productsWindowOpen && (
-        <ProductsWindow
-          onClose={() => setProductsWindowOpen(false)}
-          width={700}
-          height={200}
-          onSave={handleProductSelection}
-          gridData={productsStore}
-          setSelectedRow={setSelectedRow}
-          selectedRow={selectedRow}
-          maxAccess={access}
-        />
-      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
