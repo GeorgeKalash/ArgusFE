@@ -653,14 +653,23 @@ const ClientTemplateForm = ({
     }
   };
 
+  const actions = [
+    {
+      key:'Client Relation',
+      condition: true,
+      onClick:'onClientRelation',
+      disabled:!editMode
+    }
+  ]
+
   return (
     <FormShell
+      actions={actions}
       resourceId={ResourceIds.ClientList}
       form={clientIndividualFormik}
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={editMode}
-      clientRelation={true}
     >
       <Grid container spacing={4}>
         <Grid container xs={12} spacing={2} sx={{ padding: "20px" }}>
