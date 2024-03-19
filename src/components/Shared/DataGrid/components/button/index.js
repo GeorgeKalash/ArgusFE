@@ -7,13 +7,15 @@ export default {
 
 return (
       <Button
-        sx={{ height: '30px' }}
+
+        // sx={{ p:1 }}
         autoFocus
         onClick={(e) => column.onClick(e, row)}
         variant='contained'
         disabled={!row[field]}
       >
-         {column?.label}
+         {/* {column?.label} */}
+         <img src='/images/buttonsIcons/popup.png' alt='popup' />
       </Button>
     );
   },
