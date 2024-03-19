@@ -16,12 +16,13 @@ import { DataSets } from 'src/resources/DataSets'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId, setEditMode , store, setStore}) {
+export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setEditMode , store, setStore}) {
   const [isLoading, setIsLoading] = useState(false)
 
+  const {category, recordId} = store
 
   const [initialValues, setInitialData] = useState({
-    recordId: null,
+    recordId: recordId,
     reference: '',
     name: '',
     category: null,
@@ -47,7 +48,6 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const {category} = store
   const editMode = !!recordId
 
   const filterIdCategory = async categId => {
@@ -87,7 +87,8 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
       name: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      // const recordId = obj.recordId
+      obj.recordId=recordId
 
      const res = await postRequest({
         extension: BusinessPartnerRepository.MasterData.set,
@@ -101,6 +102,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
             ...prevStore,
             recordId: res.recordId
           }));
+
 
       }
       else toast.success('Record Edited Successfully')

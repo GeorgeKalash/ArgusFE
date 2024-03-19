@@ -39,7 +39,7 @@ return (
 
         <CustomTabPanel index={0}   height={height} value={activeTab}>
           <BPMasterDataForm labels={labels} maxAccess={maxAccess} defaultValue={defaultValue}
-           store={store} setStore={setStore} setEditMode={setEditMode} recordId={recordId} />
+           store={store} setStore={setStore} setEditMode={setEditMode}  />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={1} value={activeTab}>

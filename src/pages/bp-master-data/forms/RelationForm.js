@@ -24,6 +24,7 @@ const RelationForm = ({
   labels,
   maxAccess,
   getRelationGridData,
+  window,
   editMode
 }) => {
 
@@ -70,6 +71,7 @@ const [initialValues , setValues] = useState({
         } else toast.success('Record Editted Successfully')
 
         getRelationGridData(bpId)
+        window.close()
       })
 
 
