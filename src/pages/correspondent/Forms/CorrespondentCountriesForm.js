@@ -164,8 +164,6 @@ return (
                   ]
                 },
                 async onChange({ row: { update, newRow } }) {
-
-                  console.log(newRow)
                   if(!newRow?.country?.recordId){
                   return;
                   }else{
