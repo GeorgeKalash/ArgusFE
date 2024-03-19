@@ -3,7 +3,6 @@ import { Button } from '@mui/material'
 
 export default {
   view({ row , column, field}) {
-  console.log(column , row , field)
 
 return (
       <Button
