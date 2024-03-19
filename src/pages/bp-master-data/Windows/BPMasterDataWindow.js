@@ -1,28 +1,17 @@
 // ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import IDNumberTab from 'src/pages/bp-master-data/Tabs/IDNumberTab'
-import RelationTab from 'src/pages/bp-master-data/forms/RelationList'
-import AddressGridTab from 'src/components/Shared/AddressGridTab'
-import FormShell from 'src/components/Shared/FormShell'
+
 import BPMasterDataForm from '../forms/BPMasterDataForm'
 import { useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import IDNumberForm from '../forms/IDNumberForm'
-import RelationForm from 'src/pages/bp-master-data/forms/RelationList'
-import AddressForm from 'src/pages/plants/Forms/AddressForm'
 import AddressMasterDataForm from '../forms/AddressMasterDataForm'
 import RelationList from 'src/pages/bp-master-data/forms/RelationList'
 
 const BPMasterDataWindow = ({
   labels,
   maxAccess,
-  relationGridData,
-  getRelationGridData,
-  addRelation,
-  delRelation,
   defaultValue,
-  popupRelation,
   recordId,
   height
 }) => {

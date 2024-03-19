@@ -8,7 +8,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 export const AddressFormShell = ({setAddress , address , maxAccess , editMode , window, readOnly , allowPost, setPost , onSubmit}) => {
   const [requiredOptional, setRequiredOptional] = useState(true)
 
-
   const {
     labels: labels,
     access
@@ -18,33 +17,26 @@ export const AddressFormShell = ({setAddress , address , maxAccess , editMode , 
 
   const initialValues= {
     recordId: address?.recordId || null,
-    name: address?.name,
+    name: address?.name || '',
     countryId: address?.countryId || '',
     stateId: address?.stateId || '',
     cityId: address?.cityId || '',
     city: address?.city || '' ,
-    street1: address?.street1,
-    street2: address?.street2,
-    email1: address?.email1,
-    email2: address?.email2,
-    phone: address?.phone,
-    phone2: address?.phone2,
-    phone3: address?.phone3,
-    addressId: address?.addressId,
-    postalCode:address?.postalCode,
+    street1: address?.street1 || '',
+    street2: address?.street2 || '',
+    email1: address?.email1 || '',
+    email2: address?.email2 || '',
+    phone: address?.phone || '',
+    phone2: address?.phone2 || '',
+    phone3: address?.phone3 || '',
+    addressId: address?.addressId || '',
+    postalCode:address?.postalCode || '',
     cityDistrictId: address?.cityDistrictId || '',
     cityDistrict: address?.cityDistrict || '',
-    bldgNo: address?.bldgNo,
-    unitNo: address?.unitNo,
-    subNo: address?.subNo
+    bldgNo: address?.bldgNo || '',
+    unitNo: address?.unitNo || '',
+    subNo: address?.subNo || ''
   };
-
-
-  function areAllNullOrZero(obj) {
-    // Check if every value is either null or 0
-    return Object.values(obj).every(value => value === null || value === 0 || value === '' || value === undefined);
-  }
-
 
   const WorkAddressFormik = useFormik({
 

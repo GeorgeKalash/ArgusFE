@@ -146,9 +146,10 @@ return (
            value={formik.values.rows}
            error={formik.errors.rows}
            columns={columns}
-          scrollHeight={350}
-          width={750}
-          allowDelete={false}
+           scrollHeight={350}
+           width={750}
+           allowDelete={false}
+           allowAddNewLine={false}
         />
       </Box>
     </FormShell>

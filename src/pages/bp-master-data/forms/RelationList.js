@@ -12,6 +12,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useWindow } from 'src/windows'
 import RelationForm from './RelationForm'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const RelationList = ({ store , popupRelation, labels, editMode, maxAccess }) => {
 
@@ -44,7 +47,26 @@ useEffect(()=>{
   }
 
 
+  // const {
+  //   query: { data },
 
+  //   // labels: _labels,
+  //   access
+  // } = useResourceQuery({
+  //   queryFn: fetchGridData,
+  //   endpointId: BusinessPartnerRepository.Relation.qry,
+
+  //   datasetId: ResourceIds.BPMasterData
+  // })
+
+  // async function fetchGridData(options = {}) {
+  //   const defaultParams = `_bpId=${bpId}`
+
+  //   return await getRequest({
+  //     extension:  BusinessPartnerRepository.Relation.qry,
+  //     parameters: defaultParams
+  //   })
+  // }
 
 
 
@@ -77,12 +99,17 @@ useEffect(()=>{
     {
       field: 'startDate',
       headerName: labels.from,
-      flex: 1
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.startDate)
+
     },
     {
       field: 'endDate',
       headerName: labels.to,
-      flex: 1
+      flex: 1,
+
+      valueGetter: ({ row }) =>  formatDateDefault(row?.endDate)
+
     }
   ]
 
@@ -95,11 +122,11 @@ useEffect(()=>{
             editMode : editMode,
             recordId :  null,
             bpId : recordId,
-
+            getRelationGridData : getRelationGridData
       },
       width: 600,
       height: 600,
-      title: labels.masterData
+      title: labels.relation
     })
   }
 
@@ -123,8 +150,22 @@ useEffect(()=>{
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={200}
+
+          // height={600}
         />
+        {/* <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+
+          // onEdit={edit}
+          // onDelete={del}
+          isLoading={false}
+          pageSize={50}
+          paginationType='client'
+          maxAccess={maxAccess}
+        /> */}
+
       </Box>
     </>
   )

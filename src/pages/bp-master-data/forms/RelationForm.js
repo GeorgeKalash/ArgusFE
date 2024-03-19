@@ -13,6 +13,8 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
+import toast from 'react-hot-toast'
+import { formatDateToApi } from 'src/lib/date-helper'
 
 
 const RelationForm = ({
@@ -20,6 +22,7 @@ const RelationForm = ({
   recordId,
   labels,
   maxAccess,
+  getRelationGridData,
   editMode
 }) => {
 
@@ -28,14 +31,14 @@ const RelationForm = ({
 
 const [initialValues , setvalues] = useState({
   recordId: null,
-  toBPId: bpId ,
+  toBPId: null ,
   relationId: null ,
   relationName: null  ,
   startDate: null ,
   endDate: null ,
   toBPName: null,
   toBPRef: null,
-  fromBPId: null
+  fromBPId: bpId
 })
 
   //Relation Tab
@@ -54,8 +57,10 @@ const [initialValues , setvalues] = useState({
   })
 
   const postRelation = obj => {
-    const bpId = recordId
-    obj.fromBPId = bpId
+
+         obj.startDate = formatDateToApi(obj.startDate)
+         obj.endDate = formatDateToApi(obj.endDate)
+
     postRequest({
       extension: BusinessPartnerRepository.Relation.set,
       record: JSON.stringify(obj)
@@ -65,16 +70,17 @@ const [initialValues , setvalues] = useState({
           toast.success('Record Added Successfully')
         } else toast.success('Record Editted Successfully')
 
-        // setRelationWindowOpen(false)
         getRelationGridData(bpId)
       })
+
+
       .catch(error => {
       })
   }
 
     useEffect(()=>{
-      getRelationById(recordId)
-    },[recordId])
+      getRelationById(bpId)
+    },[bpId])
 
     const getRelationById = recordId => {
 
@@ -158,7 +164,7 @@ const [initialValues , setvalues] = useState({
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-            endpointId={BusinessPartnerRepository.RelationTypes.qry}
+              endpointId={BusinessPartnerRepository.RelationTypes.qry}
               name='relationId'
               label={labels.relation}
               columnsInDropDown= {[
@@ -181,7 +187,7 @@ const [initialValues , setvalues] = useState({
               name='startDate'
               label={labels.from}
               value={formik.values.startDate}
-              onChange={formik.handleChange}
+              onChange={formik.setFieldValue}
               maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('startDate', '')}
               error={formik.touched.startDate && Boolean(formik.errors.startDate)}
@@ -193,7 +199,7 @@ const [initialValues , setvalues] = useState({
               name='endDate'
               label={labels.to}
               value={formik.values.endDate}
-              onChange={formik.handleChange}
+              onChange={formik.setFieldValue}
               maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('endDate', '')}
               error={formik.touched.endDate && Boolean(formik.errors.endDate)}

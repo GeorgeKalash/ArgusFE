@@ -1,11 +1,9 @@
 // ** MUI Imports
 
 // ** Custom Imports
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 
@@ -27,28 +25,26 @@ const AddressForm = ({
         record: JSON.stringify(data)
       })
         .then(res => {
-          onSubmit(res)
+          data.addressId = res.recordId
+          onSubmit(data)
         })
 
   }
-
   useEffect(()=>{
-    var parameters = `_filter=` + '&_recordId=' + recordId
-      if (recordId) {
+    setAddress([])
+      if (recordId ) {
+        var parameters = `_filter=` + '&_recordId=' + recordId
         getRequest({
           extension: SystemRepository.Address.get,
           parameters: parameters
         })
           .then(res => {
             var result = res.record
-
-
             setAddress(result)
           })
           .catch(error => {})
         }
     },[recordId])
-
 
 
 return (
