@@ -163,13 +163,12 @@ const SmsFunctionTemplate = () => {
   return (
     <>
 
-         <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
-          <FormShell 
+         <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}> 
+         <FormShell 
             form={formik} 
             isCleared={false}
             isInfo={false}
-            >
-
+         >
             <Grid container>
               <Grid sx={{ width: '100%'  }}>
                 <Box sx={{ width: '100%'  }}>
