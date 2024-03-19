@@ -164,7 +164,11 @@ const SmsFunctionTemplate = () => {
     <>
 
          <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
-          <FormShell form={formik} infoVisible={false} visibleClear={false}>
+          <FormShell 
+            form={formik} 
+            isCleared={false}
+            isInfo={false}
+            >
 
             <Grid container>
               <Grid sx={{ width: '100%'  }}>
