@@ -18,7 +18,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId, height , store, setStore}) {
   const [isLoading, setIsLoading] = useState(false)
-console.log(store)
 
 
   const [initialValues, setInitialData] = useState({

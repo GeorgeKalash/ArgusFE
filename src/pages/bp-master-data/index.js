@@ -16,13 +16,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewAddress, populateAddress } from 'src/Models/System/Address'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
-import AddressWindow from 'src/components/Shared/AddressWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -167,22 +164,12 @@ const BPMasterData = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  // End
-
 
   const [errorMessage, setErrorMessage] = useState(null)
-
-
-
-
-
-
-
 
   return (
     <>
       <Box>
-        {/* <WindowConsumer /> */}
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}

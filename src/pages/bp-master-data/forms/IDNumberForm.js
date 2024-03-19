@@ -5,7 +5,6 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect } from 'react'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -21,12 +20,7 @@ const IDNumberForm = ({ store, maxAccess, labels , editMode }) => {
     validateOnChange: true,
     initialValues: {
       rows: [
-        { id: 1,
-          bpId:  recordId,
-          incId: '',
-          idNum: '',
-          incName: ''
-        }
+
       ]
     },
     onSubmit: values => {
@@ -69,31 +63,13 @@ const IDNumberForm = ({ store, maxAccess, labels , editMode }) => {
       })
   }
 
-//   const filterIdCategory = async categId => {
-//     console.log("res")
-//     try {
-//       console.log("res")
+  useEffect(()=>{
+     getIdNumber(recordId)
+   },[store.category])
 
-//       const res = await getRequest({
-//         extension: BusinessPartnerRepository.CategoryID.qry,
-//         parameters: `_startAt=0&_pageSize=1000`
-//       })
-// console.log(res)
+async function  getIdNumber(recordId) {
 
-// return categId
-//         ? res.list.filter(
-//             item => (categId === 1 && item.person) || (categId === 2 && item.org) || (categId === 3 && item.group)
-//           )
-//         : []
-//     } catch (error) {
-
-//       return []
-//     }
-//   }
-useEffect(()=>{
-  console.log("list")
-  ;(async function () {
-
+    if(recordId){
     const defaultParams = `_bpId=${recordId}`
     var parameters = defaultParams
 
@@ -101,15 +77,13 @@ useEffect(()=>{
       extension: BusinessPartnerRepository.MasterIDNum.qry,
       parameters: parameters
     })
-    console.log("list" , res)
-    const list = await store.category
-console.log("list" , list, res.list )
+    const list =  store.category
+console.log(list)
 
     var listMIN =  res.list?.filter(y => {
       return list?.some(x => x.name === y.incName)
     })
 
-    console.log('some', listMIN)
     if (listMIN?.length > 0) {
 
       const result =    listMIN.map(
@@ -122,17 +96,12 @@ console.log("list" , list, res.list )
     } else {
       formik.setValues({
         rows: [
-          { id : 1,
-            bpId: recordId,
-            incId: '',
-            incName: '',
-            idNum: ''
-          }
+
         ]
       })
     }
-  })()
-},[recordId])
+  }
+  }
 
 return (
     <FormShell

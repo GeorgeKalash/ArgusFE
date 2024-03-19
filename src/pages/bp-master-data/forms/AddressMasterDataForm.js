@@ -1,5 +1,4 @@
 import { Box } from '@mui/material'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -92,39 +91,7 @@ function openForm(id){
 }
 
 const editAddress = obj => {
-
   openForm(obj.recordId)
-}
-
-const getAddressById = obj => {
-  const _bpId = recordId
-
-  const defaultParams = `_recordId=${obj.recordId}`
-  const bpAddressDefaultParams = `_addressId=${obj.recordId}&_bpId=${_bpId}`
-  var parameters = defaultParams
-  getRequest({
-    extension: SystemRepository.Address.get,
-    parameters: parameters
-  })
-    .then(res => {
-      console.log(res.record)
-      addressValidation.setValues(populateAddress(res.record))
-      setAddressEditMode(true)
-      setAddressWindowOpen(true)
-
-      getRequest({
-        extension: BusinessPartnerRepository.BPAddress.get,
-        parameters: bpAddressDefaultParams
-      })
-        .then(res => {
-          console.log(res.record)
-
-        })
-        .catch(error => {
-        })
-    })
-    .catch(error => {
-    })
 }
 
 useEffect(()=>{
@@ -141,7 +108,7 @@ return (
   }}
 >
 
-  <AddressGridTab
+      <AddressGridTab
         addressGridData={addressGridData}
         addAddress={addAddress}
         delAddress={delAddress}

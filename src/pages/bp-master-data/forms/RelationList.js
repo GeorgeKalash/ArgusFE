@@ -24,8 +24,6 @@ const { getRequest, postRequest } = useContext(RequestsContext)
 const { stack } = useWindow()
 
 
-
-
 useEffect(()=>{
   getRelationGridData(recordId)
 },[recordId])
@@ -45,30 +43,6 @@ useEffect(()=>{
       .catch(error => {
       })
   }
-
-
-  // const {
-  //   query: { data },
-
-  //   // labels: _labels,
-  //   access
-  // } = useResourceQuery({
-  //   queryFn: fetchGridData,
-  //   endpointId: BusinessPartnerRepository.Relation.qry,
-
-  //   datasetId: ResourceIds.BPMasterData
-  // })
-
-  // async function fetchGridData(options = {}) {
-  //   const defaultParams = `_bpId=${bpId}`
-
-  //   return await getRequest({
-  //     extension:  BusinessPartnerRepository.Relation.qry,
-  //     parameters: defaultParams
-  //   })
-  // }
-
-
 
   const delRelation = obj => {
     const bpId = recordId
@@ -113,14 +87,22 @@ useEffect(()=>{
     }
   ]
 
-  const addRelation = () => {
+  const addRelation = (id) => {
+    openForm(id)
+  }
+
+  const editRelation = (obj) => {
+    openForm(obj.recordId)
+  }
+
+  const openForm = (id) => {
     stack({
       Component:  RelationForm,
       props: {
             labels: labels,
             maxAccess: maxAccess,
             editMode : editMode,
-            recordId :  null,
+            recordId :  id,
             bpId : recordId,
             getRelationGridData : getRelationGridData
       },
@@ -145,26 +127,12 @@ useEffect(()=>{
           gridData={relationGridData}
           rowId={['recordId']}
           api={getRelationGridData}
-          onEdit={popupRelation}
+          onEdit={editRelation}
           onDelete={delRelation}
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-
-          // height={600}
         />
-        {/* <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-
-          // onEdit={edit}
-          // onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          paginationType='client'
-          maxAccess={maxAccess}
-        /> */}
 
       </Box>
     </>

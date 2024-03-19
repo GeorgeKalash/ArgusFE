@@ -14,7 +14,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 
 const RelationForm = ({
@@ -41,7 +41,6 @@ const [initialValues , setvalues] = useState({
   fromBPId: bpId
 })
 
-  //Relation Tab
   const formik = useFormik({
     initialValues,
     enableReinitialize: true,
@@ -79,8 +78,8 @@ const [initialValues , setvalues] = useState({
   }
 
     useEffect(()=>{
-      getRelationById(bpId)
-    },[bpId])
+      getRelationById(recordId)
+    },[recordId])
 
     const getRelationById = recordId => {
 
@@ -91,8 +90,9 @@ const [initialValues , setvalues] = useState({
         parameters: parameters
       })
         .then(res => {
-          console.log('get ' + JSON.stringify())
-          formik.setValues(populateRelation(res.record))
+          res.record.startDate = formatDateFromApi(res.record.startDate)
+          res.record.endDate = formatDateFromApi(res.record.endDate)
+          formik.setValues(res.record)
         })
         .catch(error => {
         })
