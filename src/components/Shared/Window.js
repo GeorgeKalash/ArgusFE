@@ -65,10 +65,10 @@ const Window = ({
 
 
 
-  
+
 useEffect(() => {
   const transactionLogInfo = document.querySelector("[data-unique-id]");
-  
+
   if (transactionLogInfo) {
     transactionLogInfo.style.height = expanded ? "30vh" : "18vh"
   }
@@ -104,27 +104,26 @@ return (
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
-                 sx={{
-                  ...(controlled
-                    ? {
-                         height: expanded ? containerHeight : height // Expand height to 100% when expanded
-                      }
-                    : {
-                        minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
-                      }),
-                  width: expanded ? containerWidth : width // Expand width to 100% when expanded
-                  // ... (other styles)
-                }}
-                style={
-                  controlled
-                    ? {
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }
-                    : {}
-                }
-              >
-
+            sx={{
+              ...(controlled
+                ? {
+                    height: expanded ? containerHeight : height // Expand height to 100% when expanded
+                  }
+                : {
+                    minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
+                  }),
+              width: expanded ? containerWidth : width // Expand width to 100% when expanded
+              // ... (other styles)
+            }}
+            style={
+              controlled
+                ? {
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }
+                : {}
+            }
+          >
             <DialogTitle
               id='draggable-dialog-title'
               sx={{
@@ -139,7 +138,13 @@ return (
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>{Title}</Typography>
               </Box>
               <Box>
-                <IconButton tabIndex={-1} edge='end' onClick={() => setExpanded(!expanded)} data-is-expanded={expanded} aria-label='expand'>
+                <IconButton
+                  tabIndex={-1}
+                  edge='end'
+                  onClick={() => setExpanded(!expanded)}
+                  data-is-expanded={expanded}
+                  aria-label='expand'
+                >
                   <OpenInFullIcon /> {/* Add the icon for expanding */}
                 </IconButton>
                 <IconButton tabIndex={-1} edge='end' onClick={onClose} aria-label='clear input'>
@@ -173,7 +178,10 @@ return (
               </>
             ) : (
               React.Children.map(children, child => {
-                return React.cloneElement(child, { expanded: expanded, height : expanded ? containerHeightPanel : heightPanel}); // Pass containerHeight as prop to children
+                return React.cloneElement(child, {
+                  expanded: expanded,
+                  height: expanded ? containerHeightPanel : heightPanel
+                }) // Pass containerHeight as prop to children
               })
             )}
           </Paper>

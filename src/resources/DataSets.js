@@ -2,7 +2,7 @@ export const DataSets = {
     UNSUED: 0,
     USER_TYPE: 4,
     STRING: 5,
-    CURRENCY_PROFILE: 6,    
+    CURRENCY_PROFILE: 6,
     MODULE: 1,
     ERROR: 2,
     ACCESS_LEVEL: 3,
@@ -156,4 +156,3 @@ export const DataSets = {
     TARGET_TYPE: 160,
 
   };
- 

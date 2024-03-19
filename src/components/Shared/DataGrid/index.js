@@ -173,10 +173,11 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
   }
 
   const actionsColumn = {
-    field: 'actions',
+    field:  !allowDelete && 'actions',
     editable: false,
     flex: 0,
-    width: '100',
+    width: 1,
+    sortable: false,
     renderCell({ id }) {
       return (
           <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
@@ -274,8 +275,6 @@ return (
           headerName: column.label || column.name,
           editable: true,
           flex: column.flex || 1,
-
-          // width: column.width || 170,
           sortable: false,
           renderCell(params) {
             const Component =
@@ -288,10 +287,11 @@ return (
                 sx={{
                   width: '100%',
                   height: '100%',
-                  padding: '0 20px',
+                  padding: '0 10px',
                   backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
                   border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
 
                 }}
@@ -311,7 +311,9 @@ return (
                   height: '100%',
                   padding: '0 0px',
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
+
                 }}
               >
                 <Component {...params} column={column} update={update} isLoading={isUpdatingField} />

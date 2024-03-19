@@ -4,6 +4,9 @@ import id from './id'
 import resourcelookup from './resourcelookup'
 import date from './date'
 import numberfield from './numberfield'
+import checkbox from './checkbox'
+import button from './button'
+
 
 export default {
   textfield,
@@ -11,5 +14,7 @@ export default {
   id,
   resourcelookup,
   date,
-  numberfield
+  numberfield,
+  checkbox,
+  button
 }

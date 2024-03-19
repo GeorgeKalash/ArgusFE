@@ -66,10 +66,37 @@ const CustomLookup = ({
         >
           <Autocomplete
             name={name}
+            key={firstValue}
             value={firstValue}
             size={size}
             options={store}
-            getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
+            getOptionLabel={option => {
+              if(typeof option === 'object'){
+              const displayTextArray = Object.keys(option);
+              const displayText = displayTextArray.map(keys => option[keys]).join(' || ');
+
+              return `${displayText} - ${option[valueField]}`;
+              }
+              else{
+
+                return option
+              }
+            }}
+
+            // getOptionLabel={option => {
+            //   if (typeof option === 'object' && Array.isArray(displayField)) {
+            //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space
+
+            //     return `${displayText} - ${option[valueField]}`;
+            //   }
+            //   else if (typeof option === 'object') {
+            //     return `${option[displayField] || option[valueField]} - ${option[valueField]}`;
+            //   } else {
+            //     return option;
+            //   }
+            // }}
+
+            // getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
             onChange={(event, newValue) => onChange(name, newValue)}
             PaperComponent={CustomPaper}
