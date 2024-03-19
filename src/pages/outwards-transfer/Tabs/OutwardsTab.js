@@ -98,7 +98,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
       .catch(error => {})
   }
 
-  const openReleaventWindow = formValues => {
+  function openReleaventWindow (formValues) {
     if (formValues.dispersalType === 1) {
       stack({
         Component: BenificiaryCash,
@@ -167,8 +167,23 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
     }
   }
 
+  const actions = [
+    {
+        key: 'Beneficiary',
+        condition: true,
+        onClick: () => openReleaventWindow(formik.values),
+        disabled: false,
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.Currencies} form={formik} height={480} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell 
+      resourceId={ResourceIds.Currencies} 
+      form={formik} height={480} 
+      maxAccess={maxAccess} 
+      editMode={editMode}
+      actions={actions}
+    >
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
@@ -374,9 +389,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
 
                 setPosition(newCursorPosition)
               }}
-              onBlur={() => {
-                if (formik.values.amount) onAmountDataFill(formik.values)
-              }}
+
+              // onBlur={() => {
+              //   if (formik.values.amount) onAmountDataFill(formik.values)
+              // }}
               onClear={() => formik.setFieldValue('amount', '')}
               error={formik.touched.amount && Boolean(formik.errors.amount)}
               helperText={formik.touched.amount && formik.errors.amount}
@@ -491,13 +507,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, setProductsWi
               helperText={formik.touched.net && formik.errors.net}
             />
           </Grid>
-          <Button
-            onClick={() => {
-              openReleaventWindow(formik.values)
-            }}
-          >
-            Benificiary
-          </Button>
         </Grid>
       </Grid>
     </FormShell>
