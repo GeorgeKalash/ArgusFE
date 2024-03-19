@@ -22,116 +22,132 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [initialValues, setData] = useState({ rows: [] })
+
+
+  const [initialValues, setData] = useState({rows :[]})
+
 
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues,
-    onSubmit: values => {
+    onSubmit:  values => {
       postSmsFunctionTemplates(values.rows)
     }
   })
 
+
   const getGridData = async () => {
-    const parameters = ''
 
-    const resSystemFunction = await getRequest({
-      extension: SystemRepository.SystemFunction.qry,
-      parameters: parameters
-    })
+      const parameters = '';
 
-    const resSmsFunctionTemplate = await getRequest({
-      extension: SystemRepository.SMSFunctionTemplate.qry,
-      parameters: parameters
-    })
+      const resSystemFunction = await getRequest({
+        extension: SystemRepository.SystemFunction.qry,
+        parameters: parameters
+      });
 
-    const finalList = resSystemFunction.list.map(x => {
-      const n = {
-        functionId: parseInt(x.functionId),
-        templateId: null,
-        functionName: x.sfName,
-        templateName: null
-      }
+      const resSmsFunctionTemplate = await getRequest({
+        extension: SystemRepository.SMSFunctionTemplate.qry,
+        parameters: parameters
+      });
 
-      const matchingTemplate = resSmsFunctionTemplate.list.find(y => n.functionId === y.functionId)
+      const finalList = resSystemFunction.list.map(x => {
+        const n = {
+          functionId: parseInt(x.functionId),
+          templateId: null,
+          functionName: x.sfName,
+          templateName: null
+        };
 
-      if (matchingTemplate) {
-        n.templateId = matchingTemplate.templateId
-        n.templateName = matchingTemplate.templateName
-      }
+        const matchingTemplate = resSmsFunctionTemplate.list.find(
+          y => n.functionId === y.functionId
+        );
 
-      return n
-    })
+        if (matchingTemplate) {
+          n.templateId = matchingTemplate.templateId;
+          n.templateName = matchingTemplate.templateName;
+        }
 
-    formik.setValues({
-      ...formik.values,
-      rows: finalList.map(({ templateId, templateName, ...rest }, index) => ({
-        id: index + 1,
-        template: {
-          recordId: templateId,
-          name: templateName
-        },
-        ...rest
-      }))
-    })
-  }
+        return n;
+      });
 
-  const { labels: _labels } = useResourceQuery({
+      formik.setValues({
+        ...formik.values,
+        rows: finalList.map(({ templateId, templateName, ...rest }, index) => ({
+          id: index + 1,
+          template: {
+            recordId: templateId,
+            name: templateName
+          },
+          ...rest
+        }))
+      });
+
+  };
+
+  const {
+    labels: _labels,
+  } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SmsFunctionTemplates
   })
 
+
   const columns = [
     {
       component: 'textfield',
-      label: _labels.FunctionId,
+      label: _labels[1],
       name: 'functionId',
       props: {
-        readOnly: true
+      readOnly: true
+
       }
     },
     {
       component: 'textfield',
-      label: _labels.Name,
+      label: _labels[2],
       name: 'functionName',
       props: {
-        readOnly: true
-      }
-    },
-    {
+      readOnly: true
+      }    },{
       component: 'resourcelookup',
-      label: _labels.SmsTemplates,
+      label: _labels[3],
       name: 'template',
       props: {
         endpointId: SystemRepository.SMSTemplate.snapshot,
         displayField: 'name',
         valueField: 'name',
         columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
-        ]
+          { key: "reference", value: "Reference" },
+          { key: "name", value: "Name" },
+        ],
 
-        // width: 50
-      },
-      onChange({ row: { update, newRow } }) {
+
+      // width: 50
+      } ,
+       onChange({ row: { update, newRow } }) {
+
+
         update({
-          recordId: newRow?.template?.recordId,
-          name: newRow?.template?.name
+          recordId : newRow?.template?.recordId,
+          name:  newRow?.template?.name,
         })
-      }
-    }
+
+      },
+
+    },
+
+
   ]
 
-  const postSmsFunctionTemplates = values => {
+  const postSmsFunctionTemplates = (values) => {
+
     const obj = {
-      smsFunctionTemplates: values
-        .map(({ functionId, template }) => ({
-          functionId,
-          templateId: template?.recordId,
-          templateName: template?.name
-        }))
-        .filter(row => row.templateId != null)
+      smsFunctionTemplates: values.map(({ functionId, template }) => ({ functionId,
+          templateId : template?.recordId ,  templateName : template?.name}))
+          .filter(row => row.templateId != null)
+
+
     }
     postRequest({
       extension: SystemRepository.SMSFunctionTemplate.set,
@@ -140,13 +156,19 @@ const SmsFunctionTemplate = () => {
       .then(res => {
         toast.success('Record Updated Successfully')
       })
-      .catch(error => {})
+      .catch(error => {
+      })
   }
 
   return (
     <>
-      <Box sx={{ height: `calc(100vh - 50px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-        <FormShell form={formik} infoVisible={false} visibleClear={false}>
+
+         <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}> 
+         <FormShell 
+            form={formik} 
+            isCleared={false}
+            isInfo={false}
+         >
           <Grid container>
             <Grid sx={{ width: '100%' }}>
               <Box sx={{ width: '100%' }}>
@@ -162,10 +184,10 @@ const SmsFunctionTemplate = () => {
                   allowAddNewLine={false}
                 />
               </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </FormShell>
-      </Box>
+          </FormShell>
+          </Box>
     </>
   )
 }

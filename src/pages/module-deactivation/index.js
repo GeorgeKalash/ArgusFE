@@ -160,7 +160,11 @@ const ModuleDeactivation = () => {
           margin: 0
         }}
       >
-        <WindowToolbar onSave={handleSubmit} smallBox={true} />
+        <WindowToolbar 
+          isSaved={true}
+          onSave={handleSubmit} 
+          smallBox={true} 
+        />
       </Box>
     </Box>
   )

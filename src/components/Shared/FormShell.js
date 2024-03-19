@@ -7,31 +7,28 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
+import Approvals from './Approvals'
 
 export default function FormShell({
   form,
-  form1,
+  isSaved = true,
+  isInfo = true,
+  isCleared = true,
   children,
   editMode,
   setEditMode,
   disabledSubmit,
   infoVisible = true,
   postVisible = false,
-  closeVisible = false,
   resourceId,
   functionId,
-  recordId,
   NewComponentVisible = false,
   maxAccess,
   isPosted = false,
-  isTFR = false,
   isClosed = false,
   clientRelation = false,
   setErrorMessage,
   previewReport = false,
-  visibleTFR = false,
-  initialValues,
-  initialValues1,
   setIDInfoAutoFilled,
   visibleClear,
   actions
@@ -48,17 +45,33 @@ export default function FormShell({
     ? false
     : true
 
-  function handleReset() {
-    initialValues && form.setValues(initialValues)
-    if (form1) {
-      form1.setValues(initialValues1)
-    }
-    if (setIDInfoAutoFilled) {
-      setIDInfoAutoFilled(false)
-    }
-    setEditMode(false)
-  }
+    function handleReset() { 
+      form.resetForm({
+        values: form.initialValues,
+      });
 
+      if (setIDInfoAutoFilled) {
+        setIDInfoAutoFilled(false);
+      }
+    
+      if (typeof setEditMode === 'function') {
+        setEditMode(false);
+      }
+    }
+
+    function onApproval() {
+      stack({
+        Component: Approvals,
+        props: {
+          recordId: form.values.recordId,
+          functionId: form.values.functionId
+        },
+        width: 1000,
+        height: 500,
+        title: 'Approvals'
+      })
+    }
+    
   return (
     <>
       <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>{children}</DialogContent>
@@ -66,7 +79,7 @@ export default function FormShell({
         <WindowToolbar
           print={print}
           onSave={() => form.handleSubmit()}
-          onClear={() => (initialValues ? handleReset() : false)}
+          onClear={() => handleReset()}
           onPost={() => {
             // Set a flag in the Formik state before calling handleSubmit
             form.setFieldValue('isOnPostClicked', true)
@@ -130,16 +143,17 @@ export default function FormShell({
               title: 'Preview Report'
             })
           }
+          isSaved = {isSaved}
+          isInfo = {isInfo}
+          isCleared = {isCleared}
           actions={actions}
+          onApproval={onApproval}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
           NewComponentVisible={NewComponentVisible}
           postVisible={postVisible}
-          closeVisible={closeVisible}
-          visibleTFR={visibleTFR}
           isPosted={isPosted}
-          isTFR={isTFR}
           isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}
