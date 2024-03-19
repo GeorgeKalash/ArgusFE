@@ -45,16 +45,29 @@ const DocumentTypes = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: SystemRepository.DocumentType.snapshot,
+      parameters: `_filter=${qry}`
+    })
+  }
+
   const {
     query: { data },
     labels: _labels,
     refetch,
+    search,
+    clear,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.DocumentType.qry,
-    datasetId: ResourceIds.DocumentTypes
+    datasetId: ResourceIds.DocumentTypes,
+    search: {
+      endpointId: SystemRepository.DocumentType.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
   const invalidate = useInvalidate({
@@ -115,7 +128,14 @@ const DocumentTypes = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar 
+          onAdd={add} 
+          maxAccess={access} 
+          onSearch={search}
+          onSearchClear={clear}
+          inputSearch={true}
+          labels={_labels}
+        />
         <Table
           columns={columns}
           gridData={data}
