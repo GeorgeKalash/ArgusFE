@@ -49,7 +49,7 @@ const DRGroupWindow = ({
           setStore={setStore}
           maxAccess={maxAccess}
           store={store}
-          expanded={expanded}
+         
 
         />
       </CustomTabPanel>
