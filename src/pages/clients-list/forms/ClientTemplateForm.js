@@ -339,15 +339,10 @@ const ClientTemplateForm = ({
           dtId: obj.clientRemittance?.dtId,
           educationLevel: obj.clientRemittance?.educationLevel,
           gender: obj.clientRemittance?.gender,
-          idNo: obj.clientRemittance?.idNo,
-
-          // isDiplomat: obj.clientRemittance?.isDiplomat,
           isEmployee: obj.clientRemittance?.isEmployee,
           relativeDiplomatInfo: obj.clientRemittance?.relativeDiplomatInfo,
           releaseStatus: obj.clientRemittance?.releaseStatus,
           riskLevel: obj.clientRemittance?.riskLevel,
-
-          // salary: obj.clientRemittance?.salary,
           salaryRangeId: obj.clientRemittance?.salaryRangeId,
           smsLanguage: obj.clientRemittance?.smsLanguage,
           status: obj.clientRemittance?.status,
@@ -755,7 +750,8 @@ const ClientTemplateForm = ({
                         setShowAsPassword(true);
                        !editMode && checkIdNumber(e.target.value)
                       }}
-                      readOnly={editMode && true}
+
+                      // readOnly={editMode && true}
                       maxLength="15"
                       onFocus={(e) => {
                         setShowAsPassword(false);
