@@ -27,6 +27,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
 import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 
 const FormContext = React.createContext(null)
 
@@ -92,29 +93,6 @@ function FormProvider({ formik, maxAccess, labels, children }) {
   return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
 }
 
-function useLookup({ endpointId, parameters }) {
-  const [store, setStore] = useState([])
-
-  const { getRequest } = useContext(RequestsContext)
-
-  return {
-    store,
-    lookup(searchQry) {
-      getRequest({
-        extension: endpointId,
-        parameters: new URLSearchParams({ ...parameters, _filter: searchQry })
-      }).then(res => {
-        setStore(res.list)
-      })
-    },
-    valueOf(id) {
-      return store.find(({ recordId }) => recordId === id)
-    },
-    clear() {
-      setStore([])
-    }
-  }
-}
 
 export default function TransactionForm({ recordId, labels, maxAccess, plantId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -132,6 +110,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [rateType, setRateType] = useState(null)
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
+  const [isClosed, setIsClosed] = useState(false)
 
   async function checkTypes(value) {
     if (!value) {
@@ -151,10 +130,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   const invalidate = useInvalidate({
-    endpointId: 'CTTRX.asmx/pageCIV'
+    endpointId: CTTRXrepository.CurrencyTrading.snapshot,
   })
-
-
 
   const initial = {
     recordId: null,
@@ -424,6 +401,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       })
 
     }
+    setIsClosed(record.headerView.wip === 2 ? true : false)
+
   }
 
 
@@ -445,6 +424,79 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
   }
 
+  const onClose = async () => {
+
+ const values= formik.values
+
+ const { record: cashAccountRecord } = await getRequest({
+  extension: `SY.asmx/getUD`,
+  parameters: `_userId=${userId}&_key=cashAccountId`
+})
+
+  const data =  {
+    recordId: values?.recordId || null,
+    status: values.status,
+    functionId: values.functionId,
+    plantId: plantId ? plantId : values.plantId,
+    clientId: values.clientId,
+    cashAccountId: cashAccountRecord.value,
+    poeId: values.purpose_of_exchange,
+    wip: values.wip,
+    otpVerified: values.otp,
+    amount: String(total || '').replaceAll(',', ''),
+    notes: values.remarks
+  }
+
+
+      const res = await postRequest({
+        extension: CTTRXrepository.CurrencyTrading.close,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        invalidate()
+        setIsClosed(true)
+
+      }
+
+  }
+
+ async function onReopen () {
+
+ const values= formik.values
+
+ const { record: cashAccountRecord } = await getRequest({
+  extension: `SY.asmx/getUD`,
+  parameters: `_userId=${userId}&_key=cashAccountId`
+})
+
+  const data =  {
+    recordId: values?.recordId || null,
+    date: formatDateToApiFunction(values.date),
+    reference: values.reference,
+    status: values.status,
+    functionId: values.functionId,
+    plantId: plantId ? plantId : values.plantId,
+    clientId: values.clientId,
+    cashAccountId: cashAccountRecord.value,
+    poeId: values.purpose_of_exchange,
+    wip: values.wip,
+    otpVerified: values.otp,
+    amount: String(total || '').replaceAll(',', ''),
+    notes: values.remarks
+  }
+
+      const res = await postRequest({
+        extension: CTTRXrepository.CurrencyTrading.reopen,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Reopened Successfully')
+        invalidate()
+        setIsClosed(false)
+      }
+
+  }
 
 
 
@@ -647,30 +699,25 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     return response.record
   }
 
-  function onClose (){
-   
-  }
+  // function onClose (){
 
-  function onReopen() {
-   
-  }
+  // }
+
+  // function onReopen() {
+
+  // }
 
   const actions = [
-    {
-      key:'Post',
-      condition: true,
-      onClick: 'onPost',
-      disabled: !editMode,
-    },
+
     {
       key: 'Close',
-      condition: true,
+      condition: !isClosed,
       onClick: onClose,
       disabled: !editMode,
     },
     {
       key: 'Reopen',
-      condition: true,
+      condition: isClosed,
       onClick: onReopen,
       disabled: !editMode,
     },
@@ -678,7 +725,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: false,
+      disabled: formik.values.wip !=2,
     }
   ]
 
@@ -710,7 +757,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   required={true}
                   onChange={formik.setFieldValue}
                   onClear={() => formik.setFieldValue('date', '')}
-                  readOnly={editMode}
+                  readOnly={editMode || isClosed}
                   error={formik.touched.date && Boolean(formik.errors.date)}
                   helperText={formik.touched.date && formik.errors.date}
                   maxAccess={maxAccess}
@@ -790,7 +837,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           console.error('Error fetching ID info:', error)
                         })
                   }}
-                  readOnly={editMode}
+                  readOnly={editMode || isClosed}
                   onFocus={value => {
                     setSearch(value)
                   }}
@@ -806,6 +853,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 value={formik.values.operations}
                 error={formik.errors.operations}
                 height={300}
+                disabled={isClosed}
                 bg={
                   formik.values.functionId && (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
@@ -968,7 +1016,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       setShowAsPasswordIDNumber(false)
                       value && setIdNumber(value)
                     }}
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled}
                     required
                   />
                 </Grid>
@@ -981,7 +1029,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('birth_date', '')}
                     error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
-                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -994,7 +1042,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                       valueField='recordId'
                       displayField='name'
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       required
                     />
                   </Grid>
@@ -1016,7 +1064,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         })
                       }
                       disabled={
-                        !formik?.values?.id_type || !formik?.values?.birth_date || !formik.values?.id_number || editMode
+                        !formik?.values?.id_type || !formik?.values?.birth_date || !formik.values?.id_number || editMode || isClosed
                           ? true
                           : false
                       }
@@ -1036,7 +1084,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('expiry_date', '')}
                     error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
-                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -1052,7 +1100,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    readOnly={editMode|| isClosed || idInfoAutoFilled || infoAutoFilled}
                     required
                   />
                 </Grid>
@@ -1068,7 +1116,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled}
                     required
                   />
                 </Grid>
@@ -1079,7 +1127,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     name='cell_phone'
                     Component={CustomTextField}
                     required
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled}
                     onBlur={e => {
                       setShowAsPasswordPhone(true)
                     }}
@@ -1095,7 +1143,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     onChange={formik.handleChange}
                     control={<Checkbox defaultChecked />}
                     label='Resident'
-                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    disabled={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1116,7 +1164,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='firstName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed|| idInfoAutoFilled || infoAutoFilled}
                       required
                       language='english'
                     />
@@ -1126,14 +1174,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       name='middleName'
                       language='english'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed|| idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
                       name='lastName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       required
                       language='english'
                     />
@@ -1143,7 +1191,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       name='familyName'
                       language='english'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
                 </Grid>
@@ -1152,7 +1200,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='fl_firstName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
                     />
                   </Grid>
@@ -1160,7 +1208,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='fl_middleName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed|| idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
                     />
                   </Grid>
@@ -1168,14 +1216,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='fl_lastName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
                       name='fl_familyName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
                     />
                   </Grid>
@@ -1184,7 +1232,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
                 <Grid container rowGap={3} xs={8}>
                   <Grid item xs={12}>
-                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode} />
+                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || isClosed} />
                   </Grid>
 
                   <Grid item xs={12}>
@@ -1198,7 +1246,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode}
+                      readOnly={editMode || isClosed}
                     />
                   </Grid>
 
@@ -1213,7 +1261,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
 
@@ -1229,12 +1277,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
 
                   <Grid item xs={12}>
-                    <FormField name='remarks' Component={CustomTextField} readOnly={editMode} />
+                    <FormField name='remarks' Component={CustomTextField} readOnly={editMode || isClosed} />
                   </Grid>
                 </Grid>
               </Grid>
@@ -1251,9 +1299,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 onChange={value => formik.setFieldValue('amount', value)}
                 value={formik.values.amount}
                 error={formik.errors.amount}
-
+                disabled={isClosed}
                 columns={[
-
                   {
                     component: 'resourcecombobox',
                     label: labels.type,
@@ -1279,6 +1326,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   {
                     component: 'resourcecombobox',
                     name: 'creditCards',
+                    editable: false,
                     label: labels.creditCard,
                     props: {
                       endpointId: CashBankRepository.CreditCard.qry,
