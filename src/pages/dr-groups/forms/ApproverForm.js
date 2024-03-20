@@ -1,224 +1,149 @@
 
 // ** MUI Imports
-import { Grid, FormControlLabel,Table, Checkbox } from '@mui/material'
-
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { useContext, useEffect, useState } from 'react'
+import { useFormik } from 'formik'
 import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
+import { SystemFunction } from 'src/resources/SystemFunction'
+
 
 // ** Custom Imports
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-import FormShell from 'src/components/Shared/FormShell'
-import { useFormik } from 'formik'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { DocumentReleaseRepository} from 'src/repositories/DocumentReleaseRepository'
-import { useInvalidate} from 'src/hooks/resource'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 
-const ApproverForm = ({
+export default function ApproverForm ({
   labels,
-  editMode,
   maxAccess,
-  setEditMode,
-  setStore,
-  store
-}) => {
- const [approverGridData,setApproverGridData]=useState(null)
-  const { postRequest, getRequest} = useContext(RequestsContext)
-  const {recordId} = store
+  recordId,
 
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.GroupCode.qry
-  })
 
-  const [initialValues , setInitialData] = useState({
-    recordId: null,
-    codeId:''
- 
-  })
+})
+{
 
-  const formik = useFormik({
-    enableReinitialize: false,
-    validateOnChange: true,
-    initialValues,
-    validationSchema: yup.object({
-      reference: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-     
-    }),
-    onSubmit: values => {
-      postApprover(values)
-    }
-  })
+    const [isLoading, setIsLoading] = useState(false)
+    const [editMode, setEditMode] = useState(!!recordId)
+    const [groupId, setGroupId] = useState(null);
 
-  const postApprover = obj => {
-    const codeId = obj.codeId
-    const groupId = obj.groupId ? obj.groupId : drGroupValidation.values.recordId
-    postRequest({
-      extension: DocumentReleaseRepository.GroupCode.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        if (!codeId) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Editted Successfully')
 
-        setApproverWindowOpen(false)
-        getApproverGridData(groupId)
+    const [initialValues, setInitialData] = useState({
+        recordId: null,
+        codeId:'',
+        groupId:''
+        
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
+    const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const getApproverGridData = groupId => {
-    setApproverGridData([])
-    const defaultParams = `_groupId=${groupId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.GroupCode.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res)
-        setApproverGridData(res)
+    const invalidate = useInvalidate({
+        endpointId:DocumentReleaseRepository.GroupCode.qry
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
+
+    const formik = useFormik({
+        initialValues,
+        enableReinitialize: true,
+        validateOnChange: true,
+        validationSchema: yup.object({
+          codeId: yup.string().required('This field is required'),
+       
+          }),
+          onSubmit: async obj => {
+            
+            const recordId = obj.recordId
+      
+            const response = await postRequest({
+              extension: DocumentReleaseRepository.GroupCode.set,
+              record: JSON.stringify(obj)
+              
+            })
+           
+            if (!recordId) {
+              toast.success('Record Added Successfully')
+              setInitialData({
+                ...obj, // Spread the existing properties
+                groupId:obj.groupId,
+                recordId: response.recordId // Update only the recordId field
+              })
+            } else toast.success('Record Edited Successfully')
+            setEditMode(true)
+      
+            invalidate()
+          }
+        })
+      console.log(formik)
+        useEffect(() => {
+          ;(async function () {
+            try {
+              if (recordId) {
+                setIsLoading(true)
+      
+                const res = await getRequest({
+                  extension: DocumentReleaseRepository.GroupCode.get,
+                  parameters: `_recordId=${recordId}&_groupId=${groupId}`
+                })
+      
+                setInitialData(res.record)
+              }
+            } catch (exception) {
+              setErrorMessage(error)
+            }
+            setIsLoading(false)
+          })()
+        }, [])
+
   
 
-  const delApprover = obj => {
-    postRequest({
-      extension: DocumentReleaseRepository.GroupCode.del,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        getApproverGridData(obj.groupId)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const addApprover = () => {
-    approverValidation.setValues(getNewGroupCode(drGroupValidation.values.recordId))
-    setApproverWindowOpen(true)
-  }
-
-  const editApprover = obj => {
-    console.log(obj)
-    getApproverById(obj)
-  }
-
-   const getApproverById = obj => {
-    const _codeId = obj.codeId
-    const _groupId = obj.groupId
-    console.log(obj.groupId)
-    const defaultParams = `_codeId=${_codeId}&_groupId=${_groupId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.GroupCode.get,
-      parameters: parameters
-    })
-      .then(res => {
-        approverValidation.setValues(populateGroupCode(res.record))
-        setApproverEditMode(true)
-        setApproverWindowOpen(true)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  } 
-
-  const handleApproverSubmit = () => {
-    approverValidation.handleSubmit()
-  }
-
-
-  useEffect(()=>{
-    recordId  && getGroupId(recordId)
-  },[recordId])
-
-  const getGroupId =  recordId => {
-    const defaultParams = `_recordId=${recordId}`
-    var parameters = defaultParams
-     getRequest({
-      extension: DocumentReleaseRepository.GroupCode.get,
-      parameters: parameters
-    })
-      .then(res => {
-        formik.setValues(res.record)
-        setEditMode(true)
-      })
-      .catch(error => {
-      })
-  }
-  
-  const columns = [
-    {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'name',
-      headerName: _labels.name,
-      flex: 1
-    }
-  ]
-
-return (
+  return (
     <FormShell
-    form={formik}
     resourceId={ResourceIds.DRGroups}
+    form={formik}
+    height={400}
     maxAccess={maxAccess}
-    editMode={editMode} >
-     <Grid container spacing={4}>
-      <Grid item xs={12}>
-      <ResourceComboBox
+    editMode={editMode}
+
+    >
+    <Grid container spacing={4} sx={{ px: 4 }}>
+          
+            <Grid item xs={12}>
+              <ResourceComboBox
               endpointId={DocumentReleaseRepository.GroupCode.qry}
-              name='codeId'
-              label={labels.group}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              required
-              readOnly={editMode}
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik && formik.setFieldValue('groupId', newValue?.recordId)
-              }}
-        
-            />
-      </Grid>
+                name='codeId'
+                label={labels.fromDocument}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                parameters={`_groupId=${groupId}`}
+               
+                maxAccess={maxAccess}
+                
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('codeId', newValue?.recordId)
 
-      </Grid>
-      <Table
-  columns={columns}
-  gridData={approverGridData}
-  rowId={['codeId']}
-  api={getApproverGridData}
-  onEdit={editApprover}
-  onDelete={delApprover}
-  isLoading={false}
-  maxAccess={maxAccess}
-  pagination={false}
-  height={300}
-/> 
+                }}
+                error={
+                    formik.touched.codeId && Boolean(formik.errors.codeId)
+                }
+                helperText={formik.touched.codeId && formik.errors.codeId}
+ 
+              />
+ 
+            </Grid>
 
-        
+          </Grid>
     </FormShell>
   )
 }
 
-export default ApproverForm
+
 
 
 {/* <Grid container xs={12} spacing={2}>
@@ -276,3 +201,4 @@ export default ApproverForm
 //   console.log(obj)
 //   getApproverById(obj)
 // }
+
