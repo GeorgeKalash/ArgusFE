@@ -5,8 +5,6 @@ import { useState, useContext } from 'react'
 import { Box } from '@mui/material'
 
 // ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -15,7 +13,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { getNewCorrespondent, populateCorrespondent } from 'src/Models/RemittanceSettings/Correspondent'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows

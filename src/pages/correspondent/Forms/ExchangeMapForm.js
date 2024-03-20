@@ -48,18 +48,7 @@ const ExchangeMapForm= ({
     initialValues: {
       currencyId: currencyId ,
       countryId : '',
-      plants: [
-        { id: 1,
-          corId: recordId,
-          currencyId: currencyId,
-          countryId: '',
-          plantId: '',
-          plantRef: '',
-          exchangeId: '',
-          exchangeRef: '',
-          exchangeName: ''
-        }
-      ]
+      plants: []
     },
     onSubmit: values => {
       postExchangeMaps(values)
@@ -96,6 +85,20 @@ const columns=[
         { key: 'name', value: 'Name' },
       ],
       displayFieldWidth: 3
+    },
+    async onChange({ row: { update, newRow } }) {
+
+      if(!newRow?.exchange?.recordId){
+      return;
+      }else{
+           update({'exchangeName':newRow.exchange?.name,
+                   'exchangeRef': newRow.exchange?.reference,
+                   'exchangeId': newRow.exchange?.recordId })
+
+      }
+
+
+
     }
   },
   {
@@ -108,7 +111,6 @@ const columns=[
 ]
 
 const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
-console.log(corId, currencyId, countryId)
 
   formik.resetForm();
   const parameters = ''
@@ -147,6 +149,7 @@ console.log(corId, currencyId, countryId)
                 reference: value.exchangeRef ? value.exchangeRef : '',
                 name: value.exchangeName
               },
+              exchangeName: value.exchangeName,
 
               // exchangeId: value.exchangeId,
               plantRef: plant.reference
@@ -165,17 +168,12 @@ console.log(corId, currencyId, countryId)
 }
 
 const postExchangeMaps = obj => {
-  console.log(obj)
 
   const data = {
     corId: recordId,
     countryId: formik.values.countryId,
     currencyId: currencyId,
-    correspondentExchangeMaps: obj.plants?.map(
-      ({ exchange, ...rest }) => ({
-         exchangeId: exchange?.recordId,
-         ...rest
-      }))
+    correspondentExchangeMaps: obj.plants
   }
 
   postRequest({

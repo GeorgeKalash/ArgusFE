@@ -173,7 +173,7 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
   }
 
   const actionsColumn = {
-    field: 'actions',
+    field:  !allowDelete && 'actions',
     editable: false,
     flex: 0,
     width: '100',
@@ -292,6 +292,7 @@ return (
                   backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
                   border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
 
                 }}
