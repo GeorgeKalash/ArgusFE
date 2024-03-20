@@ -14,7 +14,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi,  formatDateToApiFunction } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
 
@@ -58,8 +58,8 @@ const [initialValues , setValues] = useState({
 
   const postRelation = obj => {
 
-         obj.startDate = formatDateToApi(obj.startDate)
-         obj.endDate = formatDateToApi(obj.endDate)
+         obj.startDate =  obj.startDate ?   formatDateToApiFunction(obj.startDate) : ''
+         obj.endDate = obj.endDate ? formatDateToApiFunction(obj.endDate) : ''
 
     postRequest({
       extension: BusinessPartnerRepository.Relation.set,
@@ -107,6 +107,7 @@ const [initialValues , setValues] = useState({
        resourceId={ResourceIds.BPMasterData}
        form={formik}
        maxAccess={maxAccess}
+       infoVisible={false}
        editMode={editMode}>
         <Box
           sx={{
@@ -124,6 +125,7 @@ const [initialValues , setValues] = useState({
               label= {labels.businessPartner}
               form={formik}
               required
+              displayFieldWidth={2}
               valueField='reference'
               displayField='name'
               firstValue={formik.values.toBPRef}

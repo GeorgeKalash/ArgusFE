@@ -51,25 +51,22 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
   const editMode = !!recordId
 
   const filterIdCategory = async categId => {
-    try {
+
       const res = await getRequest({
         extension: BusinessPartnerRepository.CategoryID.qry,
         parameters: `_startAt=0&_pageSize=1000`
       })
 
-     return  categId
-        ? res.list.filter(
-            item => (categId === 1 && item.person) || (categId === 2 && item.org) || (categId === 3 && item.group)
+
+return  categId  ? res.list.filter(
+            item => (parseInt(categId) === 1 && item.person) || (parseInt(categId) === 2 && item.org) || (parseInt(categId) === 3 && item.group)
           )
 
         : []
 
 
 
-    } catch (error) {
 
-      return []
-    }
   }
 
   const invalidate = useInvalidate({
@@ -96,8 +93,8 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setE
       })
 
       if (!recordId){ toast.success('Record Added Successfully')
-        setEditMode(true)
-
+           setEditMode(true)
+          formik.setFieldValue('recordId' , res.recordId )
           setStore(prevStore => ({
             ...prevStore,
             recordId: res.recordId
@@ -133,9 +130,7 @@ setEditMode(true)
   useEffect(() => {
     ;(async function () {
       if (formik?.values?.category){
-
-     const _category = await filterIdCategory(formik.values.category)
-
+     const _category = await filterIdCategory(formik?.values?.category)
 
         setStore(prevStore => ({
           ...prevStore,
@@ -275,14 +270,14 @@ setEditMode(true)
             />
           </Grid>
           <Grid item xs={12}>
-            {category && (
+
               <CustomComboBox
                 name='defaultInc'
                 label={labels.idCategory}
                 valueField='recordId'
                 displayField='name'
-                store={category}
-                value={category.filter(item => item.recordId === formik.values.defaultInc)[0]}
+                store={store.category}
+                value={store.category?.filter(item => item.recordId === formik.values.defaultInc)[0]}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('defaultInc', newValue?.recordId)
@@ -290,7 +285,7 @@ setEditMode(true)
                 error={formik.touched.defaultInc && Boolean(formik.errors.defaultInc)}
                 helperText={formik.touched.defaultInc && formik.errors.defaultInc}
               />
-            )}
+
           </Grid>
           <Grid item xs={12}>
             <CustomTextField

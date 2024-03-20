@@ -46,6 +46,7 @@ return (
             <IDNumberForm
               store={store}
               maxAccess={maxAccess}
+              labels={labels}
 
             />
         </CustomTabPanel>
