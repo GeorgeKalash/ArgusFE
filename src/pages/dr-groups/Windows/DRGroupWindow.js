@@ -1,50 +1,60 @@
 // ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import { useState } from 'react'
+import DRGroupForm from '../forms/DRGroupForm'
+import ApproverForm from '../forms/ApproverForm'
 
-// **Tabs
-import DRGroupTab from 'src/pages/dr-groups/Tabs/DRGroupTab'
-import ApproverTab from 'src/pages/dr-groups/Tabs/ApproverTab'
+
 
 const DRGroupWindow = ({
-  onClose,
-  onSave,
-  drGroupValidation,
-  width,
   height,
-  _labels,
-  editMode,
+  recordId,
+  labels,
   maxAccess,
-  tabs,
-  activeTab,
-  setActiveTab,
-
-  //approver tab
-  approverGridData,
-  getApproverGridData,
-  addApprover,
-  delApprover,
-  editApprover
+  approver,
 }) => {
+  const [activeTab , setActiveTab] = useState(0)
+  const [editMode, setEditMode] = useState(recordId)
+
+  const [store , setStore] = useState({
+    recordId : recordId || null,
+    
+  })
+
+  const tabs = [
+    { label: labels.group },
+    { label: labels.approver, disabled: !store.recordId },
+  
+  ]
+
   return (
-    <Window id='DRGroupWindow' Title={_labels.group} onClose={onClose} width={width} height={height} onSave={onSave} tabs={tabs}
-    activeTab={activeTab}
-    setActiveTab={setActiveTab}>
-      <CustomTabPanel index={0} value={activeTab}>
-        <DRGroupTab drGroupValidation={drGroupValidation} _labels={_labels} maxAccess={maxAccess} editMode={editMode} />
-      </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-       <ApproverTab
-          approverGridData={approverGridData}
-          getApproverGridData={getApproverGridData}
-          addApprover={addApprover}
-          delApprover={delApprover}
-          editApprover={editApprover}
+    <>
+    <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <CustomTabPanel height={height} index={0} value={activeTab}>
+        <DRGroupForm
+          labels={labels}
+          setEditMode={setEditMode}
+          setStore={setStore}
+          store={store}
+          editMode={editMode}
           maxAccess={maxAccess}
-          _labels={_labels}
         />
       </CustomTabPanel>
-    </Window>
+      <CustomTabPanel height={height} index={1} value={activeTab}>
+        <ApproverForm
+          labels={labels}
+          setEditMode={setEditMode}
+          setStore={setStore}
+          maxAccess={maxAccess}
+          store={store}
+          expanded={expanded}
+
+        />
+      </CustomTabPanel>
+
+    </>
   )
 }
 
