@@ -1,6 +1,6 @@
 
 // ** MUI Imports
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid, FormControlLabel,Table, Checkbox } from '@mui/material'
 
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -17,6 +17,7 @@ import { DocumentReleaseRepository} from 'src/repositories/DocumentReleaseReposi
 import { useInvalidate} from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
+
 const ApproverForm = ({
   labels,
   editMode,
@@ -25,7 +26,7 @@ const ApproverForm = ({
   setStore,
   store
 }) => {
-
+ const [approverGridData,setApproverGridData]=useState(null)
   const { postRequest, getRequest} = useContext(RequestsContext)
   const {recordId} = store
 
@@ -44,41 +45,102 @@ const ApproverForm = ({
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      codeId: yup.string().required('This field is required'),
-      
-  
+      reference: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required'),
+     
     }),
     onSubmit: values => {
-      postGroups(values)
+      postApprover(values)
     }
   })
 
-  const postGroups = obj => {
-    const recordId = obj?.recordId || ''
+  const postApprover = obj => {
+    const codeId = obj.codeId
+    const groupId = obj.groupId ? obj.groupId : drGroupValidation.values.recordId
     postRequest({
-      extension:  DocumentReleaseRepository.GroupCode.set,
+      extension: DocumentReleaseRepository.GroupCode.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
-        if (!recordId) {
+        if (!codeId) {
+          toast.success('Record Added Successfully')
+        } else toast.success('Record Editted Successfully')
 
-            setEditMode(true)
-            setStore(prevStore => ({
-              ...prevStore,
-              recordId: res.recordId
-            }));
-            toast.success('Record Added Successfully')
-
-            formik.setFieldValue('recordId', res.recordId )
-            invalidate()
-
-        } else {
-          toast.success('Record Editted Successfully')
-        }
+        setApproverWindowOpen(false)
+        getApproverGridData(groupId)
       })
       .catch(error => {
+        setErrorMessage(error)
       })
   }
+
+
+  const getApproverGridData = groupId => {
+    setApproverGridData([])
+    const defaultParams = `_groupId=${groupId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: DocumentReleaseRepository.GroupCode.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res)
+        setApproverGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+  
+
+  const delApprover = obj => {
+    postRequest({
+      extension: DocumentReleaseRepository.GroupCode.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        toast.success('Record Deleted Successfully')
+        getApproverGridData(obj.groupId)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const addApprover = () => {
+    approverValidation.setValues(getNewGroupCode(drGroupValidation.values.recordId))
+    setApproverWindowOpen(true)
+  }
+
+  const editApprover = obj => {
+    console.log(obj)
+    getApproverById(obj)
+  }
+
+   const getApproverById = obj => {
+    const _codeId = obj.codeId
+    const _groupId = obj.groupId
+    console.log(obj.groupId)
+    const defaultParams = `_codeId=${_codeId}&_groupId=${_groupId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: DocumentReleaseRepository.GroupCode.get,
+      parameters: parameters
+    })
+      .then(res => {
+        approverValidation.setValues(populateGroupCode(res.record))
+        setApproverEditMode(true)
+        setApproverWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  } 
+
+  const handleApproverSubmit = () => {
+    approverValidation.handleSubmit()
+  }
+
 
   useEffect(()=>{
     recordId  && getGroupId(recordId)
@@ -98,6 +160,19 @@ const ApproverForm = ({
       .catch(error => {
       })
   }
+  
+  const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'name',
+      headerName: _labels.name,
+      flex: 1
+    }
+  ]
 
 return (
     <FormShell
@@ -125,6 +200,18 @@ return (
       </Grid>
 
       </Grid>
+      <Table
+  columns={columns}
+  gridData={approverGridData}
+  rowId={['codeId']}
+  api={getApproverGridData}
+  onEdit={editApprover}
+  onDelete={delApprover}
+  isLoading={false}
+  maxAccess={maxAccess}
+  pagination={false}
+  height={300}
+/> 
 
         
     </FormShell>
