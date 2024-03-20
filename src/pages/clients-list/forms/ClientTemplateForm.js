@@ -751,7 +751,7 @@ const ClientTemplateForm = ({
                        !editMode && checkIdNumber(e.target.value)
                       }}
 
-                      // readOnly={editMode && true}
+                      readOnly={editMode && true}
                       maxLength="15"
                       onFocus={(e) => {
                         setShowAsPassword(false);
