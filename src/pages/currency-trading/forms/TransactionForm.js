@@ -130,10 +130,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   const invalidate = useInvalidate({
-    endpointId: 'CTTRX.asmx/pageCIV'
+    endpointId: CTTRXrepository.CurrencyTrading.snapshot,
   })
-
-
 
   const initial = {
     recordId: null,
@@ -458,6 +456,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         toast.success('Record Closed Successfully')
         invalidate()
         setIsClosed(true)
+
       }
 
   }
@@ -709,12 +708,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   // }
 
   const actions = [
-    {
-      key:'Post',
-      condition: true,
-      onClick: 'onPost',
-      disabled: !editMode,
-    },
+
     {
       key: 'Close',
       condition: !isClosed,
@@ -731,7 +725,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: false,
+      disabled: formik.values.wip !=2,
     }
   ]
 
