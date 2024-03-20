@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from 'react'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
-import { BPAddressForm } from './BPAddressForm'
+import BPAddressForm from './BPAddressForm'
 
 const AddressMasterDataForm = ({ store, maxAccess, labels , editMode , ...props }) => {
   const {recordId} = store
