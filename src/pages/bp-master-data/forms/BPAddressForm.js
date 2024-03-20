@@ -4,7 +4,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import toast from 'react-hot-toast'
 
-export const BPAddressForm = ({getAddressGridData ,recordId , bpId ,window ,props}) => {
+const BPAddressForm = ({getAddressGridData ,recordId , bpId ,window ,props}) => {
   const [address , setAddress] = useState()
   const {  postRequest } = useContext(RequestsContext)
 
@@ -30,3 +30,5 @@ return (
     <AddressForm  {...{ ...props, address, setAddress , recordId, onSubmit}}  />
   )
 }
+
+export default BPAddressForm
