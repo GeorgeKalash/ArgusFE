@@ -24,20 +24,28 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import ProductsWindow from '../Windows/ProductsWindow'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useInvalidate } from 'src/hooks/resource'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
-export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, window }) {
+export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [position, setPosition] = useState()
   const [productsStore, setProductsStore] = useState([])
   const [editMode, setEditMode] = useState([])
-  const [selectedRow, setSelectedRow] = useState(null)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  console.log('plantId ', plantId)
+
+  const invalidate = useInvalidate({
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.page
+  })
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
     plantId: plantId,
     cashAccountId: cashAccountId,
+    userId: userId,
+    productId: '',
+    dispersalId: '',
     countryId: '',
     dispersalType: '',
     dispersalTypeName: '',
@@ -45,15 +53,27 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     agentId: '',
     idNo: '',
     clientId: '',
-    cl_reference: '',
-    cl_name: '',
+    clientRef: '',
+    clientName: '',
     idType: '',
     nationalityId: '',
-    amount: '',
+    fcAmount: '',
     corId: '',
-    fees: '',
-    baseAmount: '',
-    net: ''
+    corRef: '',
+    corName: '',
+    commission: '',
+    lcAmount: '',
+    net: '',
+    exRate: '',
+    rateCalcMethod: '',
+    wip: '',
+    status: '',
+    statusName: '',
+    releaseStatus: '',
+    rsName: '',
+    wipName: '',
+    reference: '',
+    date: new Date()
   })
 
   const [initialValues2, setInitialData2] = useState({
@@ -68,7 +88,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     corId: '',
     fees: '',
     baseAmount: '',
-    rateCalcMethod: ''
+    rateCalcMethod: '',
+    checked: 'false'
   })
 
   const formik = useFormik({
@@ -81,13 +102,36 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       currencyId: yup.string().required('This field is required'),
       agentId: yup.string().required('This field is required'),
       idNo: yup.string().required('This field is required'),
-      amount: yup.string().required('This field is required'),
+      fcAmount: yup.string().required('This field is required'),
       productId: yup.string().required('This field is required'),
-      fees: yup.string().required('This field is required'),
-      baseAmount: yup.string().required('This field is required')
+      commission: yup.string().required('This field is required'),
+      lcAmount: yup.string().required('This field is required')
     }),
-    onSubmit: values => {
-      console.log('enter submit out')
+    onSubmit: async values => {
+      const copy = { ...values }
+      copy.date = formatDateToApi(copy.date)
+
+      // Default values for properties if they are empty
+      copy.wip = copy.wip === '' ? 1 : copy.wip
+      copy.status = copy.status === '' ? 1 : copy.status
+      copy.beneficiaryId = 1
+
+      const res = await postRequest({
+        extension: RemittanceOutwardsRepository.OutwardsTransfer.set,
+        record: JSON.stringify(copy)
+      })
+
+      if (res.recordId) {
+        toast.success('Record Updated Successfully')
+        formik.setFieldValue('recordId', res.recordId)
+
+        const res2 = await getRequest({
+          extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
+          parameters: `_recordId=${res.recordId}`
+        })
+        formik.setFieldValue('reference', res2.record.reference)
+        invalidate()
+      }
     }
   })
 
@@ -96,16 +140,18 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: values => {
-      console.log('productsStore ', productsStore)
-      const selectedRowData = productsStore?.list?.find(row => row.productId === selectedRow)
+      const selectedRowData = productsStore?.list?.find(row => row.checked)
       formik.setFieldValue('productId', selectedRowData?.productId)
-      formik.setFieldValue('fees', selectedRowData?.fees)
-      formik.setFieldValue('baseAmount', selectedRowData?.baseAmount)
-      formik.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount)
+      formik.setFieldValue('commission', selectedRowData?.fees)
+      formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
+      formik.setFieldValue('productId', selectedRowData?.productId)
+      formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
+      formik.setFieldValue('exRate', selectedRowData?.exRate)
+      formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
+      formik.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount || '')
       window.close()
     }
   })
-  console.log('formik ', productFormik)
 
   const productDataFill = formFields => {
     //get products list
@@ -116,7 +162,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     var currencyId = formFields?.currencyId
     var dispersalType = formFields?.dispersalType
     var agentId = formFields?.agentId ?? 0
-    var amount = formFields?.amount ?? 0
+    var amount = formFields?.fcAmount ?? 0
 
     var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_agentId=${agentId}&_amount=${amount}`
 
@@ -161,7 +207,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     formik.setFieldValue('nationalityId', res?.record?.idCountryId)
   }
 
-  const onIdNoBlur = idNo => {
+  /* const onIdNoBlur = idNo => {
     var parameters = `_idNo=${idNo}`
 
     getRequest({
@@ -193,7 +239,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         }
       })
       .catch(error => {})
-  }
+  }*/
 
   const actions = [
     {
@@ -209,9 +255,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       props: {
         gridData: productsStore,
         maxAccess: maxAccess,
-        setSelectedRow: setSelectedRow,
-        selectedRow: selectedRow,
-        form: productFormik
+        form: productFormik,
+        _labels: _labels
       },
       width: 800,
       height: 400
@@ -219,18 +264,58 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       //title: labels[1]
     })
   }
+  console.log('formik ', formik.values)
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
+            parameters: `_recordId=${recordId}`
+          })
+          res.record.date = formatDateFromApi(res.record.date)
+          formik.setValues(res.record)
+          formik.setFieldValue('net', parseInt(res.record.commission) + parseInt(res.record.lcAmount))
+          res.record.checked = true
+          productDataFill(res.record)
+          getIDinfo(res.record.clientId)
+        }
+      } catch (error) {}
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <>
-      <FormShell resourceId={ResourceIds.Currencies} form={formik} height={480} maxAccess={maxAccess} actions={actions}>
+      <FormShell
+        resourceId={ResourceIds.OutwardsTransfer}
+        form={formik}
+        height={480}
+        maxAccess={maxAccess}
+        actions={actions}
+      >
         <Grid container sx={{ pt: 2 }}>
           {/* First Column */}
           <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
+              <CustomDatePicker
+                name='date'
+                required
+                label={_labels.date}
+                value={formik?.values?.date}
+                onChange={formik.setFieldValue}
+                editMode={editMode}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('date', '')}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+                helperText={formik.touched.date && formik.errors.date}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={RemittanceOutwardsRepository.Country.qry}
                 name='countryId'
-                label='Country'
+                label={_labels.Country}
                 required
                 displayField={['countryRef', 'countryName']}
                 columnsInDropDown={[
@@ -249,7 +334,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               <ResourceComboBox
                 endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
                 parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
-                label='Dispersal Type'
+                label={_labels.DispersalType}
                 required
                 name='dispersalType'
                 displayField='dispersalTypeName'
@@ -268,7 +353,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   formik.values.countryId && formik.values.dispersalType && RemittanceOutwardsRepository.Currency.qry
                 }
                 parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
-                label='Currency'
+                label={_labels.Currency}
                 required
                 name='currencyId'
                 displayField={['currencyRef', 'currencyName']}
@@ -295,7 +380,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   RemittanceOutwardsRepository.Agent.qry
                 }
                 parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId}`}
-                label='Agent'
+                label={_labels.Agent}
                 required={formik.values.dispersalType === 2}
                 readOnly={formik.values.dispersalType !== 2}
                 name='agentId'
@@ -317,24 +402,24 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 valueField='reference'
                 displayField='name'
                 name='clientId'
-                label='Client'
+                label={_labels.Client}
                 form={formik}
                 required
                 displayFieldWidth={2}
-                valueShow='cl_reference'
-                secondValueShow='cl_name'
+                valueShow='clientRef'
+                secondValueShow='clientName'
                 maxAccess={maxAccess}
                 editMode={editMode}
                 onChange={async (event, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('clientId', newValue?.recordId)
-                    formik.setFieldValue('cl_name', newValue?.name || '')
-                    formik.setFieldValue('cl_reference', newValue?.reference || '')
+                    formik.setFieldValue('clientName', newValue?.name || '')
+                    formik.setFieldValue('clientRef', newValue?.reference || '')
                     await getIDinfo(newValue?.recordId)
                   } else {
                     formik.setFieldValue('clientId', null)
-                    formik.setFieldValue('cl_name', null)
-                    formik.setFieldValue('cl_reference', null)
+                    formik.setFieldValue('clientName', null)
+                    formik.setFieldValue('clientRef', null)
                   }
                 }}
                 errorCheck={'clientId'}
@@ -343,13 +428,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             <Grid item xs={12}>
               <CustomTextField
                 name='idNo'
-                label='Id No'
+                label={_labels.IdNo}
                 value={formik.values.idNo}
                 readOnly={editMode}
                 required
                 onChange={formik.handleChange}
                 onBlur={() => {
-                  if (formik.values.idNo) onIdNoBlur(formik.values.idNo)
+                  //if (formik.values.idNo) onIdNoBlur(formik.values.idNo)
                 }}
                 onClear={() => formik.setFieldValue('idNo', '')}
                 error={formik.touched.idNo && Boolean(formik.errors.idNo)}
@@ -361,7 +446,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
-                label='Id Type'
+                label={_labels.IdType}
                 required
                 name='idType'
                 displayField='name'
@@ -377,7 +462,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
-                label='Nationality'
+                label={_labels.Nationality}
                 required
                 name='nationalityId'
                 displayField={['reference', 'name']}
@@ -399,11 +484,25 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <CustomTextField
+                name='reference'
+                label={_labels.Reference}
+                value={formik?.values?.reference}
+                editMode={editMode}
+                maxAccess={maxAccess}
+                maxLength='30'
+                readOnly={true}
+                required
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                helperText={formik.touched.reference && formik.errors.reference}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
                 position={position}
-                name='amount'
+                name='fcAmount'
                 type='text'
-                label='amount'
-                value={formik.values.amount}
+                label={_labels.Amount}
+                value={formik.values.fcAmount}
                 required
                 readOnly={
                   (formik.values.dispersalType == 2 && formik.values.agentId != null) ||
@@ -420,7 +519,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   const currentPosition = input.selectionStart
 
                   // Update field value
-                  formik.setFieldValue('amount', formattedValue)
+                  formik.setFieldValue('fcAmount', formattedValue)
 
                   // Calculate the new cursor position based on the formatted value
                   const newCursorPosition =
@@ -429,11 +528,11 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   setPosition(newCursorPosition)
                 }}
                 onBlur={() => {
-                  if (formik.values.amount) productDataFill(formik.values)
+                  if (formik.values.fcAmount) productDataFill(formik.values)
                 }}
-                onClear={() => formik.setFieldValue('amount', '')}
-                error={formik.touched.amount && Boolean(formik.errors.amount)}
-                helperText={formik.touched.amount && formik.errors.amount}
+                onClear={() => formik.setFieldValue('fcAmount', '')}
+                error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
+                helperText={formik.touched.fcAmount && formik.errors.fcAmount}
               />
             </Grid>
             <Grid item xs={12}>
@@ -442,7 +541,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 valueField='reference'
                 displayField='name'
                 name='corId'
-                label='Correspondant'
+                label={_labels.Correspondant}
                 form={formik}
                 required
                 displayFieldWidth={2}
@@ -468,10 +567,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             <Grid item xs={12}>
               <CustomTextField
                 position={position}
-                name='fees'
+                name='commission'
                 type='text'
-                label='fees'
-                value={formik.values.fees}
+                label={_labels.Fees}
+                value={formik.values.commission}
                 required
                 readOnly
                 maxAccess={maxAccess}
@@ -488,17 +587,17 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
                   setPosition(newCursorPosition)
                 }}
-                error={formik.touched.fees && Boolean(formik.errors.fees)}
-                helperText={formik.touched.fees && formik.errors.fees}
+                error={formik.touched.commission && Boolean(formik.errors.commission)}
+                helperText={formik.touched.commission && formik.errors.commission}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 position={position}
-                name='baseAmount'
+                name='lcAmount'
                 type='text'
-                label='Base Amount'
-                value={formik.values.baseAmount}
+                label={_labels.BaseAmount}
+                value={formik.values.lcAmount}
                 required
                 readOnly
                 maxAccess={maxAccess}
@@ -515,8 +614,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
                   setPosition(newCursorPosition)
                 }}
-                error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
-                helperText={formik.touched.baseAmount && formik.errors.baseAmount}
+                error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
+                helperText={formik.touched.lcAmount && formik.errors.lcAmount}
               />
             </Grid>
             <Grid item xs={12}>
@@ -524,7 +623,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 position={position}
                 name='net'
                 type='text'
-                label='net to pay'
+                label={_labels.NetToPay}
                 value={formik.values.net}
                 required
                 readOnly

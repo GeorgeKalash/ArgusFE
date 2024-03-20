@@ -1,13 +1,8 @@
 // ** React Importsport
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
+import { Box } from '@mui/material'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
@@ -28,24 +23,18 @@ import OutwardsTab from './Tabs/OutwardsTab'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 
 const OutwardsTransfer = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
-
-  //stores
-  const [gridData, setGridData] = useState(null)
+  const { getRequest } = useContext(RequestsContext)
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [plantId, setPlantId] = useState(null)
-  const [cashAccountId, setCashAccountId] = useState(null)
   const { stack } = useWindow()
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.qry,
-      parameters: `_filter`
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter`
     })
   }
 
@@ -55,19 +44,19 @@ const OutwardsTransfer = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.qry,
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.page,
     datasetId: ResourceIds.OutwardsTransfer
   })
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.qry
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.page
   })
 
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
+  const userData = window.sessionStorage.getItem('userData')
+    ? JSON.parse(window.sessionStorage.getItem('userData'))
+    : null
 
+  const getPlantId = async () => {
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
     try {
@@ -118,9 +107,7 @@ const OutwardsTransfer = () => {
       const cashAccountId = await getCashAccountId()
 
       if (plantId !== '' && cashAccountId !== '') {
-        setPlantId(plantId)
-        setCashAccountId(cashAccountId)
-        openOutWardsWindow()
+        openOutWardsWindow(plantId, cashAccountId)
       } else {
         if (plantId === '') {
           setErrorMessage({ error: 'The user does not have a default plant' })
@@ -138,51 +125,60 @@ const OutwardsTransfer = () => {
   const columns = [
     {
       field: 'countryRef',
-      headerName: 'countryRef',
+      headerName: _labels.CountryRef,
       flex: 1
     },
     {
       field: 'dispersalName',
-      headerName: 'dispersalName',
+      headerName: _labels.DispersalName,
       flex: 1
     },
     ,
     {
       field: 'currencyRef',
-      headerName: 'currencyRef',
+      headerName: _labels.Currency,
       flex: 1
     },
     {
-      field: 'agent',
-      headerName: 'agent',
+      field: 'agentName',
+      headerName: _labels.Agents,
       flex: 1
     }
   ]
 
-  const delOutwards = obj => {}
+  const delOutwards = async obj => {
+    await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
+  }
 
   const addOutwards = () => {
     openForm()
   }
 
-  function openOutWardsWindow() {
+  const editOutwards = obj => {
+    openForm()
+    setSelectedRecordId(obj.recordId)
+  }
+
+  function openOutWardsWindow(plantId, cashAccountId) {
     stack({
       Component: OutwardsTab,
       props: {
         plantId: plantId,
         cashAccountId: cashAccountId,
+        userId: userData && userData.userId,
         maxAccess: access,
+        _labels: _labels,
         recordId: selectedRecordId
       },
       width: 800,
-      height: 500,
+      height: 550,
       title: 'Outwards'
     })
-  }
-
-  const editOutwards = obj => {
-    openForm()
-    setSelectedRecordId(obj.recordId)
   }
 
   return (
@@ -191,7 +187,7 @@ const OutwardsTransfer = () => {
         <GridToolbar onAdd={addOutwards} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
           onEdit={editOutwards}
           onDelete={delOutwards}

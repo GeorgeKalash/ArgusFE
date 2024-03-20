@@ -33,7 +33,6 @@ export default function FormShell({
   visibleClear,
   actions
 }) {
-  console.log('form test chek', form)
   const [windowInfo, setWindowInfo] = useState(null)
   const { stack } = useWindow()
   const [selectedReport, setSelectedReport] = useState(null)
