@@ -48,8 +48,7 @@ const GeneralLedger =({ labels,recordId ,functionId,formValues,maxAccess}) => {
 const [currencyGridData, setCurrencyGridData] = useState([]);
   
     //states
-    const [windowOpen, setWindowOpen] = useState(false)
-    const [errorMessage, setErrorMessage] = useState(null)
+  
   
     async function fetchGridData(options = {}) {
       const { _startAt = 0, _pageSize = 50 } = options
@@ -65,7 +64,8 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       recordId:formValues.recordId,
       reference:formValues.reference,
        date:formValues.date,
-       functionId:1,
+       functionId:functionId,
+       seqNo:'',
       
     
       generalAccount: [{
@@ -75,7 +75,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
           },
           accountName: '',
           
-          tpAccountRef: {
+          tpAccount: {
             reference: ""
           },
           
@@ -87,9 +87,11 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
             key: ""
           },
           notes: '',
+          functionId:functionId,
           exRate: '',
           amount: '',
-          baseAmount: ''
+          baseAmount: '',
+          
       }]
   
     })
@@ -109,21 +111,24 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
           
           const data = {
             transactions: obj.generalAccount.map(
-              ({ id, exRate, account, sign, tpAccountRef, functionId, ...rest }) => ({
+              ({ id, exRate,currency, account, sign, tpAccount, functionId, ...rest }) => ({
                 seqNo: id,
                 accountId: account.recordId,
                 exRate,
                 sign: sign.key,
-                tpAccountRef: tpAccountRef.reference,
+                tpAccountId: tpAccount.recordId,
                 functionId,
+                rateCalcMethod:1,
+                currencyId:currency.recordId,
                 ...rest
               })
             ),
             date: formatDateToApi(obj.date),
             functionId:obj.functionId,
             recordId:obj.recordId,
-            seqNo:obj.generalAccount[0].id,
+    
             reference:obj.reference
+            
             
           }
           console.log(data)
@@ -132,21 +137,18 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
           console.log(recordId)
       
           const response = await postRequest({
-            extension: GeneralLedgerRepository.GeneralLedger.set,
+            extension: GeneralLedgerRepository.GeneralLedger.set2,
             record: JSON.stringify(data)
           });
+          console.log(response.recordId)
       
           if (!recordId) {
             toast.success('Record Added Successfully');
-            setInitialData({
-              ...obj,
-              recordId: response.recordId
-            });
-     
+
 
           } else {
             toast.success('Record Edited Successfully');
-            
+    
           }
           
           setEditMode(true);
@@ -154,7 +156,26 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
         }
       });
 
+async function getData(id){
+
+  const res = await getRequest({
+    extension: GeneralLedgerRepository.GeneralLedger.get,
+    parameters: `_recordId=${id}`
+
+  })
+  formik2.setValues(res.record)
+}
+
     
+    useEffect(() => {
+      if (formValues.recordId) {
+        getData(formValues.recordId);
+      }
+    }, [formValues.recordId]);
+    
+
+
+
     useEffect(() => {
       if (formValues) {
         setformik(formValues);
@@ -184,83 +205,83 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
 
     
 
-    // useEffect(() => {
-    //   if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
-    //     const generalAccountData = formik2.values.generalAccount;
+    useEffect(() => {
+      if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
+        const generalAccountData = formik2.values.generalAccount;
 
-    //     console.log(generalAccountData)
+        console.log(generalAccountData)
 
-    //     const baseCredit = generalAccountData.reduce((acc, curr) => {
-    //       return curr.sign?.key == '2' ? acc + parseFloat(curr.baseAmount || 0) : acc;
-    //     }, 0);
+        const baseCredit = generalAccountData.reduce((acc, curr) => {
+          return curr.sign?.key == '2' ? acc + parseFloat(curr.baseAmount || 0) : acc;
+        }, 0);
     
-    //     const baseDebit = generalAccountData.reduce((acc, curr) => {
-    //       return curr.sign?.key == "1" ? acc + parseFloat(curr.baseAmount || 0) : acc;
-    //     }, 0);
+        const baseDebit = generalAccountData.reduce((acc, curr) => {
+          return curr.sign?.key == "1" ? acc + parseFloat(curr.baseAmount || 0) : acc;
+        }, 0);
     
-    //     const baseBalance = baseDebit - baseCredit;
+        const baseBalance = baseDebit - baseCredit;
     
-    //     setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
+        setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
     
-    //     const currencyTotals = generalAccountData.reduce((acc, curr) => {
-    //       const currency = curr.currencyRef?.reference;
-    //       if (!acc[currency]) {
-    //         acc[currency] = { credit: 0, debit: 0 };
-    //       }
-    //       if (curr.sign?.key == '2') {
-    //         acc[currency].credit += parseFloat(curr.amount || 0);
-    //       } else if (curr.sign?.key == '1') {
-    //         acc[currency].debit += parseFloat(curr.amount || 0);
-    //       }
-    //       console.log(formik2)
+        const currencyTotals = generalAccountData.reduce((acc, curr) => {
+          const currency = curr.currency?.reference;
+          if (!acc[currency]) {
+            acc[currency] = { credit: 0, debit: 0 };
+          }
+          if (curr.sign?.key == '2') {
+            acc[currency].credit += parseFloat(curr.amount || 0);
+          } else if (curr.sign?.key == '1') {
+            acc[currency].debit += parseFloat(curr.amount || 0);
+          }
+          console.log(formik2)
 
-    //       return acc;
+          return acc;
           
-    //     }, {});
+        }, {});
     
-    //     const currencyData = Object.entries(currencyTotals).map(([currency, { credit, debit }]) => ({
-    //       currency,
-    //       credit,
-    //       debit,
-    //       balance: debit - credit
-    //     }));
+        const currencyData = Object.entries(currencyTotals).map(([currency, { credit, debit }]) => ({
+          currency,
+          credit,
+          debit,
+          balance: debit - credit
+        }));
     
-    //     setCurrencyGridData(currencyData);
+        setCurrencyGridData(currencyData);
 
-    //   }
-    // }, [formik2.values]);
+      }
+    }, [formik2.values]);
 
 
-    // useEffect(() => {
-    //   if (data && data.list.length>0 && Array.isArray(data.list)) {
+    useEffect(() => {
+      if (data && data.list.length>0 && Array.isArray(data.list)) {
 
-    //       console.log(data);
+          console.log(data);
 
-    //     const generalAccount=  data.list.map((row, idx) => ({
-    //       id: idx,
-    //       accountRef: {accountRef: row.accountRef},
-    //       accountName: row.accountName,
-    //       tpAccountRef: {reference: row.tpAccountRef},
-    //       tpAccountName: row.tpAccountName,
-    //       currencyRef:{
-    //         "reference": row.currencyRef,
-    //       },
-    //       sign: {
-    //         "dataset": 157,
-    //         "language": 1,
-    //         "key": row.sign,
-    //         "value": row.sign == 1 ? "D" : "C"
+        const generalAccount=  data.list.map((row, idx) => ({
+          id: idx,
+          accountRef: {accountRef: row.accountRef},
+          accountName: row.accountName,
+          tpAccountRef: {reference: row.tpAccountRef},
+          tpAccountName: row.tpAccountName,
+          currency:{
+            "reference": row.currency,
+          },
+          sign: {
+            "dataset": 157,
+            "language": 1,
+            "key": row.sign,
+            "value": row.sign == 1 ? "D" : "C"
 
-    //       },
-    //       notes: row.notes,
-    //       exRate: row.exRate,
-    //       amount: row.amount,
-    //       baseAmount: row.baseAmount
-    //   }));
+          },
+          notes: row.notes,
+          exRate: row.exRate,
+          amount: row.amount,
+          baseAmount: row.baseAmount
+      }));
 
-    //   formik2.setFieldValue("generalAccount", generalAccount);
-    //   }
-    // }, [data]);
+      formik2.setFieldValue("generalAccount", generalAccount);
+      }
+    }, [data]);
 
 
     return (
@@ -290,7 +311,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomTextField
-                  name="currencyRef"
+                  name="currency"
                   label={_labels.currency}
                   value={formik.currencyRef}
                   readOnly={true}
@@ -325,7 +346,9 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
   height={300}
   columns={[
     {
+
       component: 'resourcelookup',
+      
       label: _labels.accountRef,
       name: 'account',
       props: {
