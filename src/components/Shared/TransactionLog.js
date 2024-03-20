@@ -135,54 +135,41 @@ const columns = [
 
 ]
 
-
-
   return (
 
   <div onClose={onInfoClose} Title={_labels.title} >
-  <CustomTabPanel>
+    <CustomTabPanel>
+      <Grid container xs={12} sx={{paddingBottom:'25px'}} >
+        <Grid item xs={6} >
+          <CustomComboBox
+            name="idtId"
 
+            label={_labels.trxType}
+            valueField="key"
+            displayField="value"
 
-  <Grid container xs={12} sx={{paddingBottom:'25px'}} >
-      <Grid item xs={6} >
-                      <CustomComboBox
-                        name="idtId"
-
-                        label={_labels.trxType}
-                        valueField="key"
-                        displayField="value"
-
-                        store={transactionTypeStore}
-                        value={
-                          transactionTypeStore?.filter(
-                            (item) =>
-                              item.recordId ===
-                              transactionType,
-                          )[0]
-                        }
-                        required
-                        onChange={(event, newValue) => {
-                          if(newValue){
-
-
-                        setTransactionType(newValue.key)
-                      }else{
-                        setTransactionType(0)
-
-
-                        }}}
-
-                      />
+            store={transactionTypeStore}
+            value={
+              transactionTypeStore?.filter(
+                (item) =>
+                  item.recordId ===
+                  transactionType,
+              )[0]
+            }
+            required
+            onChange={(event, newValue) => {
+              if(newValue){
+            setTransactionType(newValue.key)
+          }else{
+            setTransactionType(0)
+            }}}
+          />
         </Grid>
         <Grid container xs={6} spacing={4} sx={{paddingLeft:'40px'}} >
-
           <Grid item xs={4}>{_labels.recordId}</Grid> <Grid item xs={6}>{recordId}</Grid>
           <Grid  item xs={4}>{_labels.resourceId}</Grid> <Grid  tem xs={6}>{resourceId}</Grid>
-          </Grid>
-
-    </Grid>
-
-
+        </Grid>
+      </Grid>      
         <Table
           height={200}
           columns={columns}
@@ -193,22 +180,15 @@ const columns = [
           onEdit={showInfo}
           pagination={false}
         />
-
-
-
-
-<Grid item xs={4} sx={{paddingBottom: '15px'}}>
-{Object.entries(info).map(([key, value]) => (
-        <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
-          <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
-          <Grid>{value}</Grid>
-        </Grid>
-      ))}
-</Grid>
-
-
-
-  </CustomTabPanel>
+      <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px',height: "18vh",overflow:'auto'}}>
+      {Object.entries(info).map(([key, value]) => (
+              <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
+                <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
+                <Grid>{value}</Grid>
+              </Grid>
+            ))}
+      </Grid>
+    </CustomTabPanel>
 
   </div>
   )

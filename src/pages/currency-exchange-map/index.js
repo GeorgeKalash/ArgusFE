@@ -417,7 +417,11 @@ const NumberRange = () => {
                   textAlign: 'center',
                 }}
                 >
-              <WindowToolbar onSave={handleSubmit} smallBox={true} />
+              <WindowToolbar 
+                  onSave={handleSubmit}
+                  isSaved={true}
+                  smallBox={true}
+              />
               </Grid>
       </CustomTabPanel>
 

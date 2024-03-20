@@ -1,33 +1,27 @@
 // ** React Imports
-import { useEffect, useState, useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
-import Table from 'src/components/Shared/Table'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import Window from 'src/components/Shared/Window'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 // ** API
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { ControlContext } from 'src/providers/ControlContext'
-import { CommonContext } from 'src/providers/CommonContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { getNewDocumentTypeMaps, populateDocumentTypeMaps } from 'src/Models/System/DocumentTypeMaps'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import { CommonContext } from 'src/providers/CommonContext'
+import { ControlContext } from 'src/providers/ControlContext'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 // ** Resources
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const DocumentTypeMaps = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -242,14 +236,17 @@ return (
 
               </Grid>
               <Grid sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          padding: 3,
-          textAlign: 'center',
-        }}>
-              <WindowToolbar onSave={handleSubmit}  />
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                width: '100%',
+                padding: 3,
+                textAlign: 'center',
+              }}>
+                <WindowToolbar 
+                    onSave={handleSubmit}
+                    isSaved={true}
+                />
               </Grid>
       </Box>
 
