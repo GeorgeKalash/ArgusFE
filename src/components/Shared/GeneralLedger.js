@@ -105,7 +105,6 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       initialValues,
       enableReinitialize: true,
       validateOnChange: true,
-
       
 
       
@@ -156,7 +155,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
           }
           
           setEditMode(true);
-          invalidate();
+        ;
         }
       });
 
@@ -170,15 +169,13 @@ async function getData(id){
      formik.setValues({
         
       generalAccount: res.list.map(
-          ({ seqNo, currencyId, currencyName, currencyRef, lcAmount, fcAmount, minRate, maxRate, ...rest }) => ({
+          ({ seqNo, currencyId, currencyName, currencyRef,  ...rest }) => ({
             id : seqNo,
             currencyId: currencyId,
             currency :{
              recordId: currencyId, name :currencyName, reference :currencyRef
             },
-            lcAmount: getFormattedNumber(lcAmount),
-            fcAmount: getFormattedNumber(fcAmount),
-            minRate, maxRate,
+   
            ...rest
           })
         )
@@ -275,10 +272,10 @@ async function getData(id){
 
         const generalAccount=  data.list.map((row, idx) => ({
           id: idx,
-          account: {reference: row.accountRef,
+          account: {accountRef: row.accountRef,
             recordId:row.accountId},
           accountName: row.accountName,
-          tpAccountRef: {reference: row.tpAccountRef},
+          tpAccount: {reference: row.tpAccountRef},
           tpAccountName: row.tpAccountName,
           currency:{
             reference: row.currencyRef,
@@ -430,7 +427,7 @@ async function getData(id){
       props: {
         endpointId: GeneralLedgerRepository.Account.snapshot,
         parameters: '_type=',
-        displayField: 'reference',
+        displayField: 'accountRef',
         valueField: 'recordId',
         fieldsToUpdate: [{ from: 'name', to: 'accountName' }],
       },
