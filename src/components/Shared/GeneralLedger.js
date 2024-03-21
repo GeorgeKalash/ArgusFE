@@ -6,8 +6,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import {Box } from '@mui/material'
 import { styled } from '@mui/material/styles';
 import FormShell from "src/components/Shared/FormShell";
-
-
+import * as yup from 'yup';
+import toast from 'react-hot-toast';
 
 import { Module } from 'src/resources/Module'
 
@@ -61,6 +61,8 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
     }
     
 
+
+
     const [initialValues, setInitialData] = useState({
       recordId:formValues.recordId,
       reference:formValues.reference,
@@ -97,67 +99,68 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
   
     })
   
-    
+    const generalAccountItemSchema = yup.object().shape({
+      account: yup.object().shape({
+        recordId: yup.string().required('Account ID is required'),
+      }).required('Account is required'),
+      accountName: yup.string().required('Account name is required'),
+      currency: yup.object().shape({
+        recordId: yup.string().required('Currency ID is required'),
+      }).required('Currency is required'),
+      sign: yup.object().shape({
+        key: yup.string().required('Sign key is required'),
+      }).required('Sign is required'),
+      exRate: yup.number().positive('Exchange rate must be positive').required('Exchange rate is required'),
+      amount: yup.number().positive('Amount must be positive').required('Amount is required'),
+      baseAmount: yup.number().positive('Base amount must be positive').required('Base amount is required'),
+    });
+  
+    const formikValidationSchema = yup.object().shape({
+      generalAccount: yup.array().of(generalAccountItemSchema).required('General account entries are required'),
+    });
 
  
 
     const formik2 = useFormik({
       initialValues,
       enableReinitialize: true,
+      validationSchema:formikValidationSchema,
       validateOnChange: true,
-      
-
-      
-        onSubmit: async obj => {
-          
-          
+      onSubmit: async (values) => {{
           const data = {
-            transactions: obj.generalAccount.map(
-              ({ id, exRate, account, sign, tpAccount, functionId, ...rest }) => ({
-                seqNo: id,
-                
-                accountId: account.recordId,
-                exRate,
-                sign: sign.key,
-                tpAccountId: tpAccount.recordId,
-                functionId,
-                rateCalcMethod:1,
-                currencyId:currency.recordId,
-                ...rest
-              })
-            ),
-            date: formatDateToApi(obj.date),
-            functionId:obj.functionId,
-            recordId:obj.recordId,
-    
-            reference:obj.reference
-            
-            
-          }
-          console.log(data)
-
-         
-          console.log(recordId)
+            transactions: values.generalAccount.map(({ id, exRate, account, sign, tpAccount, functionId, currency, ...rest }) => ({
+              seqNo: id,
+              accountId: account.recordId,
+              exRate,
+              sign: sign.key,
+              tpAccountId: tpAccount.recordId,
+              functionId,
+              rateCalcMethod: 1,
+              currencyId: currency.recordId, 
+              ...rest,
+            })),
+            date: formatDateToApi(values.date),
+            functionId: values.functionId,
+            recordId: values.recordId,
+            reference: values.reference,
+          };
       
+          console.log('Submitting data:', data);
+      
+          
           const response = await postRequest({
             extension: GeneralLedgerRepository.GeneralLedger.set2,
-            record: JSON.stringify(data)
+            record: JSON.stringify(data),
           });
-          console.log(response.recordId)
       
-          if (!recordId) {
+          console.log('Submission response:', response);
+      
+       
             toast.success('Record Added Successfully');
-
-
-          } else {
-            toast.success('Record Edited Successfully');
-    
-          }
-          
-          setEditMode(true);
-        ;
-        }
-      });
+       
+        } 
+      },
+    });
 
 async function getData(id){
 
@@ -264,7 +267,7 @@ async function getData(id){
       }
     }, [formik2.values]);
 
-
+    console.log('formik2',formik2)
     useEffect(() => {
       if (data && data.list.length>0 && Array.isArray(data.list)) {
 
@@ -464,7 +467,7 @@ async function getData(id){
       },
 
       async onChange({ row: { update, oldRow, newRow } }) {
-       
+        console.log('newRow',newRow)
         if(!newRow?.currency?.recordId){
         return;
         }
@@ -476,48 +479,34 @@ async function getData(id){
         const exRate = result2.exRate
         const rateCalcMethod = result2.rateCalcMethod
 
-        const amount =
-          rateCalcMethod === 1
-            ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
-            : rateCalcMethod === 2
-            ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
-            : 0
+// account amount base amount sign curency 
+
+       
+            if(newRow?.amount){
+              const amount =
+              rateCalcMethod === 1
+                ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
+                : rateCalcMethod === 2
+                ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
+                : 0
+                update({
+                  baseAmount:amount,
+                })
+            }
 
         
 
         update({
-          baseAmount:amount,
+         
+
           currencyId: newRow.currency.recordId,
           exRate:exRate,
           rateCalcMethod :rateCalcMethod,
 
      
         })
+
         
-        // if (!exchange?.rate){
-        //   stackError({
-        //     message: `Rate not defined for ${newRow.currency.name}.`
-        //   })
-
-        // return;
-
-        // }
-        // if (exchange && newRow.fcAmount ) {
-        //   const exRate = exchange.rate
-        //   const rateCalcMethod = exchange.rateCalcMethod
-
-        //   const lcAmount =
-        //     rateCalcMethod === 1
-        //       ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) * exRate
-        //       : rateCalcMethod === 2
-        //       ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) / exRate
-        //       : 0
-
-        //       exchange.rate &&  update({lcAmount :  lcAmount})
-
-        //  }
-
-       
 
     },
     },
@@ -530,7 +519,7 @@ async function getData(id){
         _language: user.languageId,
         parameters: `_dataset=${157}&_language=${1}`,
         displayField: 'value',
-        valueField: 'recordId',
+        valueField: 'key',
       },
     },
     {
@@ -547,6 +536,33 @@ async function getData(id){
       component: 'numberfield',
       label: _labels.amount,
       name: 'amount',
+
+      async onChange({ row: { update, oldRow, newRow } }) {
+        console.log('newRow222',newRow)
+        if(!newRow?.amount){
+        return;
+        }
+       
+       
+            if(newRow?.amount&&newRow?.exRate){
+              const amount =
+              newRow.rateCalcMethod === 1
+                ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / newRow?.exRate
+                : newRow.rateCalcMethod === 2
+                ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * newRow?.exRate
+                : 0
+                update({
+                  baseAmount:amount,
+                })
+            }
+
+        
+
+        
+
+     },
+
+
     },
     {
       component: 'numberfield',
