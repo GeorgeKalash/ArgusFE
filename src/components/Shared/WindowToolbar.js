@@ -30,26 +30,26 @@ const WindowToolbar = ({
   previewReport,
   actions = []
 }) => {
-    const functionMapping = {
-      actions,
-      isSaved,
-      isInfo,
-      isCleared,
-      disabledSubmit,
-      disabledApply,
-      infoVisible,
-      isPosted,
-      isClosed,
-      editMode,
-      onSave,
-      onPost,
-      onClear,
-      onInfo,
-      onApply,
-      onApproval,
-      onClientRelation,
-      newHandler: () => newHandler(recordId),
-    };
+  const functionMapping = {
+    actions,
+    isSaved,
+    isInfo,
+    isCleared,
+    disabledSubmit,
+    disabledApply,
+    infoVisible,
+    isPosted,
+    isClosed,
+    editMode,
+    onSave,
+    onPost,
+    onClear,
+    onInfo,
+    onApply,
+    onApproval,
+    onClientRelation,
+    newHandler: () => newHandler(recordId)
+  }
   const { getRequest } = useContext(RequestsContext)
 
   const [reportStore, setReportStore] = useState([])
@@ -118,24 +118,23 @@ const WindowToolbar = ({
         )}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {Buttons.filter(button => actions.some(action => action.key === button.key)).map((button, index) => {
-
-            const correspondingAction = actions.find(action => action.key === button.key);
-            const isVisible = eval(correspondingAction.condition); 
-            const isDisabled = eval(correspondingAction.disabled);
-            const handleClick = functionMapping[correspondingAction.onClick] || correspondingAction.onClick;
+            const correspondingAction = actions.find(action => action.key === button.key)
+            const isVisible = eval(correspondingAction.condition)
+            const isDisabled = eval(correspondingAction.disabled)
+            const handleClick = functionMapping[correspondingAction.onClick] || correspondingAction.onClick
 
             return (
               isVisible && (
                 <Tooltip title={button.key} key={index}>
                   <Button
                     onClick={handleClick}
-                    variant="contained"
+                    variant='contained'
                     sx={{
                       mr: 1,
                       backgroundColor: button.color,
                       '&:hover': {
                         backgroundColor: button.color,
-                        opacity: 0.8,
+                        opacity: 0.8
                       },
                       border: button.border,
                       width: 20,
@@ -148,29 +147,29 @@ const WindowToolbar = ({
                   </Button>
                 </Tooltip>
               )
-            );
+            )
           })}
           {Buttons.map((button, index) => {
             if (!button.main) {
-              return null; // Skip this iteration if button.main is not true
+              return null // Skip this iteration if button.main is not true
             }
 
-            const isVisible = eval(button.condition); 
-            const isDisabled = eval(button.disabled);
-            const handleClick = functionMapping[button.onClick];
+            const isVisible = eval(button.condition)
+            const isDisabled = eval(button.disabled)
+            const handleClick = functionMapping[button.onClick]
 
             return (
               isVisible && (
                 <Tooltip title={button.key} key={index}>
                   <Button
                     onClick={handleClick}
-                    variant="contained"
+                    variant='contained'
                     sx={{
                       mr: 1,
                       backgroundColor: button.color,
                       '&:hover': {
                         backgroundColor: button.color,
-                        opacity: 0.8,
+                        opacity: 0.8
                       },
                       border: button.border,
                       width: 20,
@@ -183,9 +182,8 @@ const WindowToolbar = ({
                   </Button>
                 </Tooltip>
               )
-            );
+            )
           })}
-
         </Box>{' '}
       </Box>
     </DialogActions>

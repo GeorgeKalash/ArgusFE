@@ -16,5 +16,13 @@ export const RemittanceOutwardsRepository = {
   ProductDispersalEngine: {
     qry: service + 'qryPDE'
   },
-  
+  OutwardsTransfer: {
+    qry: service + 'qryOW',
+    page: service + 'pageOW',
+    get: service + 'getOW',
+    set: service + 'setOW',
+    del: service + 'delOW',
+    close: service + 'closeOW',
+    reopen: service + 'reopenOW'
+  }
 }
