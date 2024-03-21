@@ -165,11 +165,11 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
 async function getData(id){
 
   const res = await getRequest({
-    extension: GeneralLedgerRepository.GeneralLedger.get,
+    extension: GeneralLedgerRepository.GeneralLedger.qry,
     parameters: `_recordId=${id}&_functionId=${functionId}`
 
   })
-     formik.setValues({
+     formik2.setValues({
         
       generalAccount: res.list.map(
           ({ seqNo, currencyId, currencyName, currencyRef,  ...rest }) => ({
