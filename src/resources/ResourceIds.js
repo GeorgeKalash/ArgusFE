@@ -95,5 +95,6 @@ export const ResourceIds = {
   CreditOrder: 35301,
   UndeliveredCreditOrder: 35302,
   CreditInvoice: 35303,
-  SystemFunction: 20105
+  SystemFunction: 20105,
+  GlobalAuthorization: 23105,
 }
