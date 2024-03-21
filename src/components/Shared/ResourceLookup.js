@@ -5,12 +5,12 @@ import ErrorWindow from './ErrorWindow'
 
 export const ResourceLookup = ({
   endpointId,
-  name,
-  form,
   parameters,
+  form,
+  name,
+  valueShow,
   secondValueShow,
   errorCheck,
-  valueShow,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -41,7 +41,6 @@ export const ResourceLookup = ({
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
   const helperText = form?.touched && form.touched[check] && form.errors[check]
-  console.log('value' , firstValue)
 
   useEffect(() => {
     setStore([])

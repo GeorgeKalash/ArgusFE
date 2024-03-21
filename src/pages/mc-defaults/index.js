@@ -21,6 +21,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import TreeViewMultiSelection from 'src/views/components/tree-view/TreeViewMultiSelection'
 
 const MCDefault = () => {
     const [errorMessage, setErrorMessage] = useState(null)
@@ -191,7 +192,10 @@ const MCDefault = () => {
                         padding: 3,
                         textAlign: 'center',
                     }}>
-                        <WindowToolbar onSave={handleSubmit}  />
+                        <WindowToolbar 
+                            onSave={handleSubmit}
+                            isSaved={true}
+                        />
                     </Grid>
                 </Grid>
                 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

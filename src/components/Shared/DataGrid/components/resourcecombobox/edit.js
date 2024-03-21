@@ -1,8 +1,7 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ column: { props }, id, field, value }) {
-  const api = useGridApiContext()
+export default function ResourceComboBoxEdit({ column: { props }, id, field, value , update}) {
 
 return (
     <ResourceComboBox
@@ -14,24 +13,28 @@ return (
       autoFocus
       columnsInDropDown={props.columnsInDropDown}
       displayField={props.displayField}
+      displayFieldWidth={props.displayFieldWidth}
       label={''}
-      dataGrid={true}
+      hasBorder={false}
       readOnly={props?.readOnly}
       onChange={(e, value) => {
-        if(value)
-        api.current.setEditCellValue({
+        update({
           id,
           field,
-          value
+          value : value || ''
         })
 
-        else
+        const fieldsToUpdate  = props?.fieldsToUpdate
+        if (fieldsToUpdate && fieldsToUpdate.length > 0) {
+          for (let updateObj of fieldsToUpdate) {
+              const { from, to } = updateObj;
 
-        api.current.setEditCellValue({
-          id,
-          field,
-          value: ''
-        })
+              if (value && value[from]) {
+                  update({ id, field: to, value: value[from] || ''});
+              }
+          }
+        }
+
       }}
     />
   )

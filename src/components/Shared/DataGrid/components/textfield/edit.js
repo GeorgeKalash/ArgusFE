@@ -1,7 +1,7 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function TextFieldEdit({ column: { props }, id, field, value }) {
+export default function TextFieldEdit({ column: { props }, id, field, value , update}) {
   const api = useGridApiContext()
 
   return (
@@ -10,9 +10,9 @@ export default function TextFieldEdit({ column: { props }, id, field, value }) {
       label={''}
       readOnly={props?.readOnly}
       autoFocus
-      dataGrid={true}
+      hasBorder={false}
       onChange={e => {
-        api.current.setEditCellValue({
+        update({
           id,
           field,
           value: e.target.value

@@ -11,6 +11,7 @@ export const SystemRepository = {
     qry: service + 'qryDT',
     get: service + 'getDT',
     set: service + 'setDT',
+    snapshot: service + 'snapshotDT',
     del: service + 'delDT'
   },
   DocumentTypeMap: {
@@ -68,6 +69,7 @@ export const SystemRepository = {
     del: service + 'delST'
   },
   Plant: {
+    snapshot: service + 'snapshotPLT',
     qry: service + 'qryPLT',
     get: service + 'getPLT',
     set: service + 'setPLT',
@@ -114,7 +116,8 @@ export const SystemRepository = {
     get: service + 'getUS',
     set: service + 'setUS',
     del: service + 'delUS',
-    page: service + 'pageUS'
+    page: service + 'pageUS',
+    snapshot: service + 'snapshotUS'
   },
   UserDefaults: {
     qry: service + 'qryUD',
@@ -139,6 +142,9 @@ export const SystemRepository = {
     qry: service + 'qryDE',
     get: service + 'getDE',
     set: service + 'set2DE'
+  },
+  FiscalYears: {
+    qry: service + 'qryFY'
   },
   ModuleClassRES: {
     qry: service + 'qryRES'

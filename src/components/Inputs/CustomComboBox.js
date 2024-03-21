@@ -29,7 +29,7 @@ const CustomComboBox = ({
   sx,
   columnsInDropDown,
   editMode = false,
-  dataGrid=false,
+  hasBorder=true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -51,46 +51,16 @@ const CustomComboBox = ({
       value={value}
       size={size}
       options={store}
-
+      key={value}
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
-      getOptionLabel={option => {
-        if (typeof option === 'object') {
-          // Check if the option is an object
-          if (Array.isArray(displayField)) {
-            // Check if displayField is an array
-            let text = '';
-            displayField.forEach(header => {
-              if (option[header]) {
-                text += `${option[header]} `;
-              } else {
-                text += `${header} `;
-              }
-            });
-
-            return text.trim(); // Trim to remove extra spaces
-          } else {
-            // If displayField is not an array, use it directly
-            return option[displayField] || '';
-          }
-        } else {
-          // If the option is not an object, return the option itself
-          return option;
-        }
-      }}
-
-      getOptionLabels={option => {
-        if (option.length == 1) {
-        }
+      getOptionLabel={(option , value )=> {
         if (typeof option === 'object') {
           if (columnsInDropDown && columnsInDropDown.length > 0) {
-            let search = ''
-            {
-              columnsInDropDown.map((header, i) => {
-                search += `${option[header.key]} `
-              })
-            }
+            const search = columnsInDropDown.map(header => option[header.key]).join(' ');
 
-            return search
+
+            return search  || option[displayField];
+
           }
 
           return `${option[displayField]}`
@@ -165,7 +135,7 @@ const CustomComboBox = ({
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: dataGrid && 'none', // Hide border
+                border: !hasBorder && 'none', // Hide border
               },
             },
           }}

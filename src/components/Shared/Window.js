@@ -1,5 +1,5 @@
 // ** React Imports
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 // ** MUI Imports
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
@@ -22,7 +22,7 @@ const Window = ({
   onClose,
   tabs,
   width = 800,
-  height = 400,
+  height = 600,
   activeTab,
   setActiveTab,
   Title,
@@ -60,8 +60,25 @@ const Window = ({
 
   const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
   const containerHeight = `calc(100vh - 48px)`
+  const containerHeightPanel = `calc(100vh - 180px)`
+  const heightPanel = height- 120
 
-  return (
+
+
+
+useEffect(() => {
+  const transactionLogInfo = document.querySelector("[data-unique-id]");
+
+  if (transactionLogInfo) {
+    transactionLogInfo.style.height = expanded ? "30vh" : "18vh"
+  }
+}, [expanded]);
+
+
+
+
+return (
+
     <Box
       id='parent'
       sx={{
@@ -87,27 +104,26 @@ const Window = ({
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
-                 sx={{
-                  ...(controlled
-                    ? {
-                         height: expanded ? containerHeight : height // Expand height to 100% when expanded
-                      }
-                    : {
-                        minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
-                      }),
-                  width: expanded ? containerWidth : width // Expand width to 100% when expanded
-                  // ... (other styles)
-                }}
-                style={
-                  controlled
-                    ? {
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }
-                    : {}
-                }
-              >
-
+            sx={{
+              ...(controlled
+                ? {
+                    height: expanded ? containerHeight : height // Expand height to 100% when expanded
+                  }
+                : {
+                    minHeight: expanded ? containerHeight : height // Expand height to 100% when expanded
+                  }),
+              width: expanded ? containerWidth : width // Expand width to 100% when expanded
+              // ... (other styles)
+            }}
+            style={
+              controlled
+                ? {
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }
+                : {}
+            }
+          >
             <DialogTitle
               id='draggable-dialog-title'
               sx={{
@@ -122,7 +138,13 @@ const Window = ({
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>{Title}</Typography>
               </Box>
               <Box>
-                <IconButton tabIndex={-1} edge='end' onClick={() => setExpanded(!expanded)} aria-label='expand'>
+                <IconButton
+                  tabIndex={-1}
+                  edge='end'
+                  onClick={() => setExpanded(!expanded)}
+                  data-is-expanded={expanded}
+                  aria-label='expand'
+                >
                   <OpenInFullIcon /> {/* Add the icon for expanding */}
                 </IconButton>
                 <IconButton tabIndex={-1} edge='end' onClick={onClose} aria-label='clear input'>
@@ -156,7 +178,10 @@ const Window = ({
               </>
             ) : (
               React.Children.map(children, child => {
-                return React.cloneElement(child, { expanded: expanded, height : height }); // Pass containerHeight as prop to children
+                return React.cloneElement(child, {
+                  expanded: expanded,
+                  height: expanded ? containerHeightPanel : heightPanel
+                }) // Pass containerHeight as prop to children
               })
             )}
           </Paper>

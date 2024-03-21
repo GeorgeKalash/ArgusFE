@@ -274,25 +274,18 @@ const Table = ({
 
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
-      // Create a new object with all the previous checked rows
       const newCheckedRows = { ...prevCheckedRows }
 
-      // Create the key based on the presence of seqNo
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
 
-      // Update the newCheckedRows object with the current row
       newCheckedRows[key] = row
 
-      // Check if newCheckedRows[key] is defined and has checked property
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
 
-      // Pass the entire updated rows in the callback
       handleCheckedRows(filteredRows)
 
-      // Log the updated checkedRows after the state has been updated
       console.log('checkedRows 4 ', newCheckedRows)
 
-      // Return the updated state for the next render
       return filteredRows
     })
   }
@@ -307,7 +300,6 @@ const Table = ({
 
   if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
-
     filteredColumns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,

@@ -1,11 +1,11 @@
 export const DataSets = {
     UNSUED: 0,
-    MODULE: 1,
-    ERROR: 2,
-    ACCESS_LEVEL: 3,
     USER_TYPE: 4,
     STRING: 5,
     CURRENCY_PROFILE: 6,
+    MODULE: 1,
+    ERROR: 2,
+    ACCESS_LEVEL: 3,
     DOCUMENT_STATUS: 7,
     APPROVAL_STATUS: 8,
     GENDER: 9,
@@ -16,6 +16,7 @@ export const DataSets = {
     APPROVAL_TYPE: 14,
     PAYMENT_TERM_TYPE: 15,
     UNUSED2: 16,
+    Sign : 157,
     PRICE_TYPE: 17,
     RX_FREQUENCY: 18,
     MC_RATE_CALC_METHOD: 19,
@@ -152,5 +153,6 @@ export const DataSets = {
     CURRENCY_DECIMALS:153,
     DateFormat:155,
     TimeZone:154,
+    TARGET_TYPE: 160,
 
   };
