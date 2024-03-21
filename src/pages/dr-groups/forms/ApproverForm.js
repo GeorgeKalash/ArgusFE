@@ -13,6 +13,8 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import { ResourceIds } from 'src/resources/ResourceIds';
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
+
+
 const validationSchema = yup.object({
   codeId: yup.string().required('This field is required'),
 });
@@ -20,6 +22,12 @@ const validationSchema = yup.object({
 const ApproverForm = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext);
   const invalidate = useInvalidate({ endpointId: DocumentReleaseRepository.GroupCode.qry });
+
+  
+  const [approverWindowOpen, setApproverWindowOpen] = useState(false)
+  const [approverEditMode, setApproverEditMode] = useState(false)
+  const [approverGridData, setApproverGridData] = useState([]) 
+  const [approverComboStore, setApproverComboStore] = useState([]) 
 
   const formik = useFormik({
     initialValues: {
@@ -65,12 +73,12 @@ const ApproverForm = ({ labels, maxAccess, recordId }) => {
   const columns = [
     {
       field: 'codeRef',
-      headerName: _labels.reference,
+      headerName: "_labels.reference",
       flex: 1
     },
     {
       field: 'codeName',
-      headerName: _labels.name,
+      headerName: "_labels.nam",
       flex: 1
     }
   ]
@@ -244,6 +252,6 @@ export default ApproverForm;
 
 
 
-const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {}
+// const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {}
 
   
