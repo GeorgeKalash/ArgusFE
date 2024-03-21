@@ -4,6 +4,8 @@ import { Box } from '@mui/material'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const AddressGridTab = ({
   addressGridData,
@@ -12,10 +14,18 @@ const AddressGridTab = ({
   delAddress,
   editAddress,
   maxAccess,
-  labels,
+
+  // labels,
  height
 
 }) => {
+
+  const {
+    labels: labels,
+    access
+  } = useResourceParams({
+    datasetId: ResourceIds.Address
+  })
 
   const columns = [
     {

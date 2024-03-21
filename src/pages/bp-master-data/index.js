@@ -100,7 +100,7 @@ const BPMasterData = () => {
     },
     {
       field: 'groupName',
-      headerName: _labels.group,
+      headerName: _labels.groupName,
       flex: 1
     },
     ,

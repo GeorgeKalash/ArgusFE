@@ -12,7 +12,7 @@ export const AddressFormShell = ({setAddress , address , maxAccess , editMode , 
     labels: labels,
     access
   } = useResourceParams({
-    datasetId: ResourceIds.ClientMaster
+    datasetId: ResourceIds.Address
   })
 
   const initialValues= {
