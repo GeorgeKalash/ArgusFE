@@ -1,7 +1,9 @@
 import { useEffect, useState, useContext } from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { Grid } from '@mui/material';
+import Table from 'src/components/Shared/Table'
+
+import { Box, Grid } from '@mui/material';
 import FormShell from 'src/components/Shared/FormShell';
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox';
 import { RequestsContext } from 'src/providers/RequestsContext';
@@ -9,6 +11,7 @@ import toast from 'react-hot-toast';
 import { useInvalidate } from 'src/hooks/resource';
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository';
 import { ResourceIds } from 'src/resources/ResourceIds';
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const validationSchema = yup.object({
   codeId: yup.string().required('This field is required'),
@@ -59,7 +62,22 @@ const ApproverForm = ({ labels, maxAccess, recordId }) => {
     fetchInitialData();
   }, [recordId]);
 
+  const columns = [
+    {
+      field: 'codeRef',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'codeName',
+      headerName: _labels.name,
+      flex: 1
+    }
+  ]
+
   return (
+    <>
+
     <FormShell
       form={formik}
       resourceId={ResourceIds.DRGroups}
@@ -82,7 +100,80 @@ const ApproverForm = ({ labels, maxAccess, recordId }) => {
         />
       </Grid>
     </FormShell>
+
+  
+    <Box
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%'
+    }}
+  >
+
+    <GridToolbar onAdd={addApprover} maxAccess={maxAccess} />
+    <Table
+      columns={columns}
+      gridData={approverGridData}
+      rowId={['codeId']}
+      api={getApproverGridData}
+      onEdit={editApprover}
+      onDelete={delApprover}
+      isLoading={false}
+      maxAccess={maxAccess}
+      pagination={false}
+      height={300}
+    />
+  </Box>
+  </>
   );
 };
 
 export default ApproverForm;
+
+
+
+const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {
+
+  console.log('data')
+  console.log(approverGridData)
+
+  const columns = [
+    {
+      field: 'codeRef',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'codeName',
+      headerName: _labels.name,
+      flex: 1
+    }
+  ]
+
+  return (
+    <>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%'
+        }}
+      >
+        <GridToolbar onAdd={addApprover} maxAccess={maxAccess} />
+        <Table
+          columns={columns}
+          gridData={approverGridData}
+          rowId={['codeId']}
+          api={getApproverGridData}
+          onEdit={editApprover}
+          onDelete={delApprover}
+          isLoading={false}
+          maxAccess={maxAccess}
+          pagination={false}
+          height={300}
+        />
+      </Box>
+    </>
+  )
+}
+
