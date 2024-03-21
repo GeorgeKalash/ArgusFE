@@ -50,17 +50,53 @@ const BenificiaryCash = ({ maxAccess }) => {
     },
     validationSchema: yup.object({
       firstName: yup.string().required('This field is required'),
-      lastName: yup.string().required('This field is required'),
-      fl_firstName: yup.string().required('This field is required'),
-      fl_lastName: yup.string().required('This field is required')
+      lastName: yup.string().required('This field is required')
     }),
     onSubmit: values => {}
   })
 
   const constructNameField = formValues => {
-    var name =
-      formValues?.firstName + ' ' + formValues?.middleName + ' ' + formValues?.lastName + ' ' + formValues?.familyName
-    formik.setFieldValue('name', name)
+    const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
+    var name = formValues?.name
+    const isArabic = arabicRegex.test(name)
+    if (name) {
+      const { firstName, middleName, lastName, familyName } = splitName(name)
+
+      if (isArabic) {
+        formik.setFieldValue('fl_firstName', firstName)
+        formik.setFieldValue('fl_middleName', middleName)
+        formik.setFieldValue('fl_lastName', lastName)
+        formik.setFieldValue('fl_familyName', familyName)
+      } else {
+        formik.setFieldValue('firstName', firstName)
+        formik.setFieldValue('middleName', middleName)
+        formik.setFieldValue('lastName', lastName)
+        formik.setFieldValue('familyName', familyName)
+      }
+    }
+  }
+
+  const splitName = name => {
+    const nameParts = name.trim().split(/\s+/) // Split the name by whitespace
+
+    const firstName = nameParts.shift() || ''
+    const familyName = nameParts.pop() || ''
+    let middleName = ''
+    let lastName = ''
+
+    if (nameParts.length > 0) {
+      // If there are remaining parts after extracting first and last words
+      if (nameParts.length === 1) {
+        // If only one remaining part, assign it to middleName
+        middleName = nameParts[0]
+      } else {
+        // Otherwise, split remaining parts into middleName and lastName
+        middleName = nameParts.slice(0, -1).join(' ')
+        lastName = nameParts.slice(-1)[0]
+      }
+    }
+
+    return { firstName, middleName, lastName, familyName }
   }
 
   return (
@@ -73,7 +109,10 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'name'}
               value={formik.values?.name}
               maxLength='80'
-              readOnly
+              onChange={formik.handleChange}
+              onBlur={e => {
+                constructNameField(formik.values)
+              }}
               error={formik.touched.name && Boolean(formik.errors.name)}
               helperText={formik.touched.name && formik.errors.name}
               maxAccess={maxAccess}
@@ -87,10 +126,8 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'first'}
               value={formik.values?.firstName}
               required
+              readOnly
               onChange={formik.handleChange}
-              onBlur={e => {
-                constructNameField(formik.values)
-              }}
               maxLength='20'
               onClear={() => formik.setFieldValue('firstName', '')}
               error={formik.touched.firstName && Boolean(formik.errors.firstName)}
@@ -103,10 +140,8 @@ const BenificiaryCash = ({ maxAccess }) => {
               name='middleName'
               label={'middle'}
               value={formik.values?.middleName}
+              readOnly
               onChange={formik.handleChange}
-              onBlur={e => {
-                constructNameField(formik.values)
-              }}
               maxLength='20'
               onClear={() => formik.setFieldValue('middleName', '')}
               error={formik.touched.middleName && Boolean(formik.errors.middleName)}
@@ -120,10 +155,8 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'last'}
               value={formik.values?.lastName}
               required
+              readOnly
               onChange={formik.handleChange}
-              onBlur={e => {
-                constructNameField(formik.values)
-              }}
               maxLength='20'
               onClear={() => formik.setFieldValue('lastName', '')}
               error={formik.touched.lastName && Boolean(formik.errors.lastName)}
@@ -136,10 +169,8 @@ const BenificiaryCash = ({ maxAccess }) => {
               name='familyName'
               label={'family'}
               value={formik.values?.familyName}
+              readOnly
               onChange={formik.handleChange}
-              onBlur={e => {
-                constructNameField(formik.values)
-              }}
               maxLength='20'
               onClear={() => formik.setFieldValue('familyName', '')}
               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
@@ -155,6 +186,7 @@ const BenificiaryCash = ({ maxAccess }) => {
               name='fl_firstName'
               label={'fl_first'}
               value={formik.values?.fl_firstName}
+              readOnly
               onChange={formik.handleChange}
               maxLength='20'
               dir='rtl' // Set direction to right-to-left
@@ -169,6 +201,7 @@ const BenificiaryCash = ({ maxAccess }) => {
               name='fl_middleName'
               label={'fl_middle'}
               value={formik.values?.fl_middleName}
+              readOnly
               onChange={formik.handleChange}
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_familyName', '')}
@@ -182,6 +215,7 @@ const BenificiaryCash = ({ maxAccess }) => {
               name='fl_lastName'
               label={'fl_last'}
               value={formik.values?.fl_lastName}
+              readOnly
               onChange={formik.handleChange}
               maxLength='20'
               dir='rtl' // Set direction to right-to-left
@@ -196,6 +230,7 @@ const BenificiaryCash = ({ maxAccess }) => {
               name='fl_familyName'
               label={'fl_family'}
               value={formik.values?.fl_familyName}
+              readOnly
               onChange={formik.handleChange}
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_familyName', '')}
