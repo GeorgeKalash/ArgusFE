@@ -17,7 +17,7 @@ const AddressTab = ({
 
   return (
     <>
-      <Grid container>
+      <Grid container sx={{pt:1}}>
         {/* First Column */}
         <Grid container rowGap={3} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
@@ -67,7 +67,7 @@ const AddressTab = ({
           <Grid item xs={12}>
             <CustomTextField
               name='email1'
-              label={labels.email}
+              label={labels.email1}
               value={addressValidation.values.email1}
               type='email'
               onBlur={addressValidation.handleBlur}

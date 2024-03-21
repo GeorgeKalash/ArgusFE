@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 
-export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=true, allowAddNewLine=true}) {
+export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=true, allowAddNewLine=true, disabled=false}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
 
@@ -176,11 +176,10 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
     field:  !allowDelete && 'actions',
     editable: false,
     flex: 0,
-    width: 1,
-    sortable: false,
+    width: '100',
     renderCell({ id }) {
       return (
-          <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
+          <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
             <GridDeleteIcon />
           </IconButton>
       )
@@ -273,8 +272,10 @@ return (
         ...columns.map(column => ({
           field: column.name,
           headerName: column.label || column.name,
-          editable: true,
+          editable: !disabled,
           flex: column.flex || 1,
+
+          // width: column.width || 170,
           sortable: false,
           renderCell(params) {
             const Component =
@@ -287,7 +288,7 @@ return (
                 sx={{
                   width: '100%',
                   height: '100%',
-                  padding: '0 10px',
+                  padding: '0 20px',
                   backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
@@ -311,9 +312,7 @@ return (
                   height: '100%',
                   padding: '0 0px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
-
+                  alignItems: 'center'
                 }}
               >
                 <Component {...params} column={column} update={update} isLoading={isUpdatingField} />

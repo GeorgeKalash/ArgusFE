@@ -16,6 +16,7 @@ export const CTCLRepository = {
     get: service + 'get2CLC'
   },
   IDNumber: {
-    get: service + 'getID'
+    get: service + 'getID',
+    get2: service + 'getID2'
   }
 }

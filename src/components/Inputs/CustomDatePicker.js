@@ -41,8 +41,6 @@ const CustomDatePicker = ({
 
   const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
 
-  console.log('_readOnly ', _readOnly)
-
   // Function to check if a date should be disabled
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -63,8 +61,6 @@ const CustomDatePicker = ({
   }
   const newDate = new Date(disabledRangeDate.date) // Create a new Date object to avoid mutating the initialDate
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
-
-  // console.log('newDate ', disabledRangeDate.date, ' new ', newDate)
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>

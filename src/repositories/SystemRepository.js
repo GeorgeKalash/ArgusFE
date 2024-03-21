@@ -11,6 +11,7 @@ export const SystemRepository = {
     qry: service + 'qryDT',
     get: service + 'getDT',
     set: service + 'setDT',
+    snapshot: service + 'snapshotDT',
     del: service + 'delDT'
   },
   DocumentTypeMap: {

@@ -48,5 +48,8 @@ export const SaleRepository = {
   TargetMonth: {
     qry: service + 'qryTGM',
     set2: service + 'set2TGM'
+  },
+  Client: {
+    snapshot: service + 'snapshotCL'
   }
 }
