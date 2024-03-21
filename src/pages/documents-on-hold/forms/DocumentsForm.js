@@ -78,10 +78,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
 
         if (!functionId && !seqNo && !recordId && responseValue !== null) {
           toast.success('Record Added Successfully')
-
-       
         } else {
-      
           toast.success('Record Edited Successfully')
         }
         setWindowOpen(false)
@@ -116,20 +113,20 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
 
   const actions = [
     {
-      key:'Approve all',
+      key: 'Reject',
       condition: true,
-      onClick:() => {
+      onClick: () => {
         setConfirmationWindowOpen(true)
-        setResponseValue(2)
+        setResponseValue(-1)
       },
       disabled: false
     },
     {
-      key:'Dismiss all',
+      key: 'Approve',
       condition: true,
-      onClick:() => {
+      onClick: () => {
         setConfirmationWindowOpen(true)
-        setResponseValue(-1)
+        setResponseValue(2)
       },
       disabled: false
     }
@@ -155,7 +152,6 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         isCleared={false}
         isInfo={false}
         isSaved={false}
-       
       >
         <Grid container spacing={4}>
           <Grid item xs={12}>

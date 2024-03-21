@@ -95,6 +95,7 @@ export const ResourceIds = {
   Routings: 42105,
   CreditOrder: 35301,
   UndeliveredCreditOrder: 35302,
+  CashInvoice: 35208,
   CreditInvoice: 35303,
   SalesPerson: 51201,
   SalesTarget: 51209,

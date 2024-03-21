@@ -45,33 +45,33 @@ export default function FormShell({
     ? false
     : true
 
-    function handleReset() { 
-      form.resetForm({
-        values: form.initialValues,
-      });
+  function handleReset() {
+    form.resetForm({
+      values: form.initialValues
+    })
 
-      if (setIDInfoAutoFilled) {
-        setIDInfoAutoFilled(false);
-      }
-    
-      if (typeof setEditMode === 'function') {
-        setEditMode(false);
-      }
+    if (setIDInfoAutoFilled) {
+      setIDInfoAutoFilled(false)
     }
 
-    function onApproval() {
-      stack({
-        Component: Approvals,
-        props: {
-          recordId: form.values.recordId,
-          functionId: form.values.functionId
-        },
-        width: 1000,
-        height: 500,
-        title: 'Approvals'
-      })
+    if (typeof setEditMode === 'function') {
+      setEditMode(false)
     }
-    
+  }
+
+  function onApproval() {
+    stack({
+      Component: Approvals,
+      props: {
+        recordId: form.values.recordId,
+        functionId: form.values.functionId
+      },
+      width: 1000,
+      height: 500,
+      title: 'Approvals'
+    })
+  }
+
   return (
     <>
       <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>{children}</DialogContent>
@@ -143,9 +143,9 @@ export default function FormShell({
               title: 'Preview Report'
             })
           }
-          isSaved = {isSaved}
-          isInfo = {isInfo}
-          isCleared = {isCleared}
+          isSaved={isSaved}
+          isInfo={isInfo}
+          isCleared={isCleared}
           actions={actions}
           onApproval={onApproval}
           editMode={editMode}
