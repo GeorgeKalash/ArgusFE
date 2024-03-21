@@ -111,7 +111,7 @@ const BPMasterData = () => {
     },
     {
       field: 'flName',
-      headerName: _labels.foreignLanguage,
+      headerName: _labels.flName,
       flex: 1
     },
     {
