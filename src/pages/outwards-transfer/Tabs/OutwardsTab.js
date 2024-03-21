@@ -30,10 +30,18 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useError } from 'src/error'
 import toast from 'react-hot-toast'
 
-export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
+export default function OutwardsTab({
+  _labels,
+  recordId,
+  maxAccess,
+  cashAccountId,
+  plantId,
+  userId,
+  window,
+  editMode
+}) {
   const [position, setPosition] = useState()
   const [productsStore, setProductsStore] = useState([])
-  const [editMode, setEditMode] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [isClosed, setIsClosed] = useState(false)
   const { stack } = useWindow()
@@ -56,6 +64,8 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
     currencyId: '',
     agentId: '',
     idNo: '',
+    beneficiaryId: '',
+    beneficiaryName: '',
     clientId: '',
     clientRef: '',
     clientName: '',
@@ -257,7 +267,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
         Component: BenificiaryBank,
         props: {},
         width: 900,
-        height: 650,
+        height: 600,
         title: 'Bank'
       })
     }
@@ -339,6 +349,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
       <FormShell
         resourceId={ResourceIds.OutwardsTransfer}
         form={formik}
+        editMode={editMode}
         height={480}
         maxAccess={maxAccess}
         onClose={onClose}
@@ -371,6 +382,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -390,6 +402,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 label={_labels.Client}
                 form={formik}
                 required
+                readOnly={editMode}
                 displayFieldWidth={2}
                 valueShow='clientRef'
                 secondValueShow='clientName'
@@ -470,6 +483,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 name='countryId'
                 label={_labels.Country}
                 required
+                readOnly={editMode}
                 displayField={['countryRef', 'countryName']}
                 columnsInDropDown={[
                   { key: 'countryRef', value: 'Reference' },
@@ -483,9 +497,6 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               />
             </Grid>
-          </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
@@ -493,6 +504,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 label={_labels.DispersalType}
                 required
                 name='dispersalType'
+                readOnly={editMode}
                 displayField='dispersalTypeName'
                 valueField='dispersalType'
                 values={formik.values}
@@ -501,6 +513,33 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                   formik.setFieldValue('dispersalTypeName', newValue?.dispersalTypeName)
                 }}
                 error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
+              />
+            </Grid>
+          </Grid>
+          {/* Second Column */}
+          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
+                parameters={{
+                  _clientId: formik.values.clientId,
+                  _dispersalType: formik.values.dispersalType
+                }}
+                valueField='name'
+                displayField='name'
+                name='beneficiaryName'
+                label={_labels.Beneficiary}
+                form={formik}
+                required
+                maxAccess={maxAccess}
+                editMode={editMode}
+                readOnly={editMode}
+                secondDisplayField={false}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('beneficiaryId', newValue?.beneficiaryId)
+                  formik.setFieldValue('beneficiaryName', newValue?.name)
+                }}
+                errorCheck={'beneficiaryId'}
               />
             </Grid>
             <Grid item xs={12}>
@@ -519,7 +558,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 ]}
                 valueField='currencyId'
                 values={formik.values}
-                readOnly={formik.values.dispersalType == ''}
+                readOnly={formik.values.dispersalType == '' || editMode}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.currencyId)
                 }}
@@ -538,7 +577,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId}`}
                 label={_labels.Agent}
                 required={formik.values.dispersalType === 2}
-                readOnly={formik.values.dispersalType !== 2}
+                readOnly={formik.values.dispersalType !== 2 || editMode}
                 name='agentId'
                 displayField='agentName'
                 valueField='agentId'
@@ -558,10 +597,11 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 value={formik.values.fcAmount}
                 required
                 readOnly={
-                  (formik.values.dispersalType == 2 && formik.values.agentId != null) ||
+                  editMode ||
+                  ((formik.values.dispersalType == 2 && formik.values.agentId != null) ||
                   (formik.values.dispersalType == 1 && formik.values.agentId === null)
                     ? false
-                    : true
+                    : true)
                 }
                 maxAccess={maxAccess}
                 onChange={e => {
@@ -603,6 +643,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                   secondValueShow='corName'
                   maxAccess={maxAccess}
                   editMode={editMode}
+                  readOnly={editMode}
                   onChange={async (event, newValue) => {
                     if (newValue) {
                       formik.setFieldValue('corId', newValue?.recordId)

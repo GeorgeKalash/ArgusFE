@@ -170,7 +170,8 @@ const OutwardsTransfer = () => {
         userId: userData && userData.userId,
         maxAccess: access,
         _labels: _labels,
-        recordId: recordId
+        recordId: recordId ? recordId : null,
+        editMode: recordId && true
       },
       width: 950,
       height: 550,

@@ -17,10 +17,22 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { DataSets } from 'src/resources/DataSets'
 
 const BenificiaryCash = ({ maxAccess }) => {
   const [initialValues, setInitialData] = useState({
+    //RTBEN
+    clientId: '',
+    beneficiaryId: '',
     name: '',
+    dispersalType: null,
+    nationalityId: null,
+    isBlocked: false,
+    stoppedDate: null,
+    stoppedReason: '',
+    gender: null,
+
+    //RTBEC
     firstName: '',
     lastName: '',
     middleName: '',
@@ -29,13 +41,12 @@ const BenificiaryCash = ({ maxAccess }) => {
     fl_lastName: '',
     fl_middleName: '',
     fl_familyName: '',
-    nationalityId: '',
+    countryId: '',
     cellPhone: '',
+    addressLine1: '',
+    addressLine2: '',
     birthDate: null,
-    birthPlace: '',
-    isBlocked: '',
-    stoppedDate: null,
-    stoppedReason: ''
+    birthPlace: ''
   })
 
   const formik = useFormik({
@@ -49,8 +60,11 @@ const BenificiaryCash = ({ maxAccess }) => {
       return errors
     },
     validationSchema: yup.object({
-      firstName: yup.string().required('This field is required'),
-      lastName: yup.string().required('This field is required')
+      name: yup.string().required(' '),
+      firstName: yup.string().required(' '),
+      lastName: yup.string().required(' '),
+      fl_firstName: yup.string().required(' '),
+      fl_lastName: yup.string().required(' ')
     }),
     onSubmit: values => {}
   })
@@ -108,13 +122,13 @@ const BenificiaryCash = ({ maxAccess }) => {
               name='name'
               label={'name'}
               value={formik.values?.name}
-              maxLength='80'
+              maxLength='50'
+              required
               onChange={formik.handleChange}
               onBlur={e => {
                 constructNameField(formik.values)
               }}
               error={formik.touched.name && Boolean(formik.errors.name)}
-              helperText={formik.touched.name && formik.errors.name}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -131,7 +145,6 @@ const BenificiaryCash = ({ maxAccess }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('firstName', '')}
               error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-              helperText={formik.touched.firstName && formik.errors.firstName}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -145,7 +158,6 @@ const BenificiaryCash = ({ maxAccess }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('middleName', '')}
               error={formik.touched.middleName && Boolean(formik.errors.middleName)}
-              helperText={formik.touched.middleName && formik.errors.middleName}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -160,7 +172,6 @@ const BenificiaryCash = ({ maxAccess }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('lastName', '')}
               error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-              helperText={formik.touched.lastName && formik.errors.lastName}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -174,7 +185,6 @@ const BenificiaryCash = ({ maxAccess }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('familyName', '')}
               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
-              helperText={formik.touched.familyName && formik.errors.familyName}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -189,10 +199,10 @@ const BenificiaryCash = ({ maxAccess }) => {
               readOnly
               onChange={formik.handleChange}
               maxLength='20'
+              required
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_firstName', '')}
               error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
-              helperText={formik.touched.fl_firstName && formik.errors.fl_firstName}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -202,11 +212,11 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'fl_middle'}
               value={formik.values?.fl_middleName}
               readOnly
+              maxLength='20'
               onChange={formik.handleChange}
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_familyName', '')}
               error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
-              helperText={formik.touched.fl_middleName && formik.errors.fl_middleName}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -218,10 +228,10 @@ const BenificiaryCash = ({ maxAccess }) => {
               readOnly
               onChange={formik.handleChange}
               maxLength='20'
+              required
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_lastName', '')}
               error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
-              helperText={formik.touched.fl_lastName && formik.errors.fl_lastName}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -231,11 +241,11 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'fl_family'}
               value={formik.values?.fl_familyName}
               readOnly
+              maxLength='20'
               onChange={formik.handleChange}
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_familyName', '')}
               error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
-              helperText={formik.touched.fl_familyName && formik.errors.fl_familyName}
             />
           </Grid>
         </Grid>
@@ -250,21 +260,6 @@ const BenificiaryCash = ({ maxAccess }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('cellPhone', '')}
               error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-              helperText={formik.touched.cellPhone && formik.errors.cellPhone}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomDatePicker
-              name='birthDate'
-              label={'birthDate'}
-              value={formik.values?.birthDate}
-              required={true}
-              onChange={formik.setFieldValue}
-              disabledDate={'>='}
-              onClear={() => formik.setFieldValue('birthDate', '')}
-              error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
-              helperText={formik.touched.birthDate && formik.errors.birthDate}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -281,20 +276,9 @@ const BenificiaryCash = ({ maxAccess }) => {
                 { key: 'flName', value: 'Foreign Language Name' }
               ]}
               values={formik.values}
-              required
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('countryId', newValue?.recordId)
-
-                  formik.setFieldValue('idCity', '')
-                } else {
-                  formik.setFieldValue('countryId', '')
-
-                  formik.setFieldValue('idCity', '')
-                }
-              }}
-              error={formik.touched.idCountry && Boolean(formik.errors.idCountry)}
-              helperText={formik.touched.idCountry && formik.errors.idCountry}
+              displayFieldWidth={1.25}
+              onChange={formik.handleChange}
+              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -307,12 +291,80 @@ const BenificiaryCash = ({ maxAccess }) => {
               maxLength='50'
               onClear={() => formik.setFieldValue('birthPlace', '')}
               error={formik.touched.birthPlace && Boolean(formik.errors.birthPlace)}
-              helperText={formik.touched.birthPlace && formik.errors.birthPlace}
               maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextArea
+              name='addressLine1'
+              label='Address 1'
+              value={formik.values.addressLine1}
+              rows={3}
+              maxLength='100'
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('addressLine1', '')}
+              error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextArea
+              name='addressLine2'
+              label='Address 2'
+              value={formik.values.addressLine2}
+              rows={3}
+              maxLength='100'
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('addressLine2', '')}
+              error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
             />
           </Grid>
         </Grid>
         <Grid container xs={6} spacing={2} sx={{ padding: '5px' }}>
+          <Grid item xs={12}>
+            <CustomDatePicker
+              name='birthDate'
+              label={'birthDate'}
+              value={formik.values?.birthDate}
+              onChange={formik.setFieldValue}
+              disabledDate={'>='}
+              onClear={() => formik.setFieldValue('birthDate', '')}
+              error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.GENDER}
+              name='gender'
+              label='Gender'
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              onChange={formik.handleChange}
+              error={formik.touched.gender && Boolean(formik.errors.gender)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
+              name='countryId'
+              label={'Nationality'}
+              valueField='recordId'
+              displayField={['reference', 'name', 'flName']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' },
+                { key: 'flName', value: 'Foreign Language Name' }
+              ]}
+              displayFieldWidth={1.25}
+              values={formik.values}
+              onChange={formik.handleChange}
+              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              maxAccess={maxAccess}
+            />
+          </Grid>
           <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
             <FormControlLabel
               control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
@@ -326,7 +378,6 @@ const BenificiaryCash = ({ maxAccess }) => {
               value={formik.values?.stopDate}
               readOnly={true}
               error={formik.touched.stopDate && Boolean(formik.errors.stopDate)}
-              helperText={formik.touched.stopDate && formik.errors.stopDate}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -337,11 +388,7 @@ const BenificiaryCash = ({ maxAccess }) => {
               readOnly
               value={formik.values.stopReason}
               rows={3}
-              maxLength='150' //maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('stopReason', '')}
               error={formik.touched.stopReason && Boolean(formik.errors.stopReason)}
-              helperText={formik.touched.stopReason && formik.errors.stopReason}
             />
           </Grid>
         </Grid>
