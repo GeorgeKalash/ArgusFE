@@ -63,8 +63,8 @@ const IDNumberForm = ({ store, maxAccess, labels , editMode }) => {
   }
 
   useEffect(()=>{
-     getIdNumber(recordId)
-   },[store.category])
+    store.category?.length > 0 && getIdNumber(recordId)
+   },[store.category, recordId])
 
 async function  getIdNumber(recordId) {
 

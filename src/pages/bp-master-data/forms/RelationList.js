@@ -81,7 +81,6 @@ useEffect(()=>{
       field: 'endDate',
       headerName: labels.to,
       flex: 1,
-
       valueGetter: ({ row }) =>  formatDateDefault(row?.endDate)
 
     }

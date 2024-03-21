@@ -51,7 +51,7 @@ const CustomComboBox = ({
       value={value}
       size={size}
       options={store}
-
+      key={value}
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={(option , value )=> {
         if (typeof option === 'object') {
