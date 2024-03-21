@@ -5,7 +5,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { InputAdornment, IconButton } from '@mui/material'
 
 const CustomPaper = props => {
-  return <Paper sx={{ position: 'absolute', width: '100%', zIndex: 999, mt: 1 }} {...props} />
+  return <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }} {...props} />
 }
 
 const CustomLookup = ({
@@ -24,6 +24,7 @@ const CustomLookup = ({
   onChange,
   error,
   firstFieldWidth = secondDisplayField ? '50%' : '100%',
+  displayFieldWidth = 1,
   helperText,
   variant = 'outlined', //outlined, standard, filled
   size = 'small', //small, medium
@@ -32,7 +33,7 @@ const CustomLookup = ({
   disabled = false,
   readOnly = false,
   editMode,
-  hasBorder=true,
+  hasBorder = true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -71,18 +72,15 @@ const CustomLookup = ({
             size={size}
             options={store}
             getOptionLabel={option => {
-              if(typeof option === 'object'){
-              const displayTextArray = Object.keys(option);
-              const displayText = displayTextArray.map(keys => option[keys]).join(' || ');
+              if (typeof option === 'object') {
+                const displayTextArray = Object.keys(option)
+                const displayText = displayTextArray.map(keys => option[keys]).join(' || ')
 
-              return `${displayText} - ${option[valueField]}`;
-              }
-              else{
-
+                return `${displayText} - ${option[valueField]}`
+              } else {
                 return option
               }
             }}
-
             // getOptionLabel={option => {
             //   if (typeof option === 'object' && Array.isArray(displayField)) {
             //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space
@@ -99,7 +97,11 @@ const CustomLookup = ({
             // getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
             onChange={(event, newValue) => onChange(name, newValue)}
-            PaperComponent={CustomPaper}
+            PaperComponent={({ children }) => (
+              <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }}>
+                {children}
+              </Paper>
+            )}
             renderOption={(props, option) => (
               <Box>
                 {props.id.endsWith('-0') && (

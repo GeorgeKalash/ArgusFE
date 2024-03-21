@@ -78,7 +78,7 @@ export default function FormShell({
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
-          onSave={() => form.handleSubmit()}
+          onSave={() => form?.handleSubmit()}
           onClear={() => handleReset()}
           onPost={() => {
             // Set a flag in thexpt Formik state before calling handleSubmit
