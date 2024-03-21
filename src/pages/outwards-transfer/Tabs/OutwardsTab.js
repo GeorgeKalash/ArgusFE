@@ -27,13 +27,17 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { useError } from 'src/error'
+import toast from 'react-hot-toast'
 
 export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [position, setPosition] = useState()
   const [productsStore, setProductsStore] = useState([])
   const [editMode, setEditMode] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const [isClosed, setIsClosed] = useState(false)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.OutwardsTransfer.page
@@ -135,6 +139,50 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
     }
   })
 
+  const onClose = async () => {
+    const obj = formik.values
+    const copy = { ...obj }
+    copy.date = formatDateToApi(copy.date)
+
+    // Default values for properties if they are empty
+    copy.wip = copy.wip === '' ? 1 : copy.wip
+    copy.status = copy.status === '' ? 1 : copy.status
+    copy.beneficiaryId = 1
+
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
+      record: JSON.stringify(copy)
+    })
+
+    if (res.recordId) {
+      toast.success('Record Closed Successfully')
+      invalidate()
+      setIsClosed(true)
+    }
+  }
+
+  const onReopen = async () => {
+    const obj = formik.values
+    const copy = { ...obj }
+    copy.date = formatDateToApi(copy.date)
+
+    // Default values for properties if they are empty
+    copy.wip = copy.wip === '' ? 1 : copy.wip
+    copy.status = copy.status === '' ? 1 : copy.status
+    copy.beneficiaryId = 1
+
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.reopen,
+      record: JSON.stringify(copy)
+    })
+
+    if (res.recordId) {
+      toast.success('Record Closed Successfully')
+      invalidate()
+      setIsClosed(false)
+    }
+  }
+
   const productFormik = useFormik({
     initialValues: initialValues2,
     enableReinitialize: true,
@@ -173,6 +221,24 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
       .then(res => {
         const newList = { list: res.list }
         setProductsStore(newList)
+
+        if (formFields.recordId) {
+          if (!formFields.productId) {
+            stackError({
+              message: `There's no checked product`
+            })
+          } else {
+            const updatedList = res.list.map(product => {
+              if (product.productId === formFields.productId) {
+                return { ...product, checked: true }
+              }
+
+              return product
+            })
+            const newUpdatedList = { list: updatedList }
+            setProductsStore(newUpdatedList)
+          }
+        }
       })
       .catch(error => {})
   }
@@ -207,41 +273,25 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
     formik.setFieldValue('nationalityId', res?.record?.idCountryId)
   }
 
-  /* const onIdNoBlur = idNo => {
-    var parameters = `_idNo=${idNo}`
-
-    getRequest({
-      extension: CurrencyTradingClientRepository.Identity.get,
-      parameters: parameters
-    })
-      .then(res => {
-        if (res?.record?.clientId) {
-          var clientParameters = `_recordId=${res?.record?.clientId}`
-          getRequest({
-            extension: CurrencyTradingClientRepository.Client.get,
-            parameters: clientParameters
-          }).then(clientRes => {
-            console.log(clientRes)
-            if (clientRes?.record) {
-              formik.setFieldValue('cl_reference', clientRes?.record?.reference)
-              formik.setFieldValue('cl_name', clientRes?.record?.name)
-              formik.setFieldValue('idType', res?.record?.idtId)
-              formik.setFieldValue('nationalityId', clientRes?.record?.nationalityId)
-            }
-          })
-        } //clear the id field or show a message that there isn't any client with this ID
-        else {
-          formik.setFieldValue('idNo', '')
-          formik.setFieldValue('cl_reference', '')
-          formik.setFieldValue('cl_name', '')
-          formik.setFieldValue('idType', '')
-          formik.setFieldValue('nationalityId', '')
-        }
-      })
-      .catch(error => {})
-  }*/
-
   const actions = [
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
     {
       key: 'Beneficiary',
       condition: true,
@@ -264,7 +314,6 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
       //title: labels[1]
     })
   }
-  console.log('formik ', formik.values)
   useEffect(() => {
     ;(async function () {
       try {
@@ -273,12 +322,14 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
             extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
             parameters: `_recordId=${recordId}`
           })
+          setIsClosed(res.record.wip === 2 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           formik.setValues(res.record)
           formik.setFieldValue('net', parseInt(res.record.commission) + parseInt(res.record.lcAmount))
           res.record.checked = true
           productDataFill(res.record)
           getIDinfo(res.record.clientId)
+          checkProduct(res.record.productId)
         }
       } catch (error) {}
     })()
@@ -292,6 +343,9 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
         form={formik}
         height={480}
         maxAccess={maxAccess}
+        onClose={onClose}
+        onReopen={onReopen}
+        isClosed={isClosed}
         actions={actions}
       >
         <Grid container sx={{ pt: 2 }}>

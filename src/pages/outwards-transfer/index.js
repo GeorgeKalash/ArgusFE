@@ -12,7 +12,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { ControlContext } from 'src/providers/ControlContext'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -27,7 +26,6 @@ const OutwardsTransfer = () => {
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
   const { stack } = useWindow()
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -101,13 +99,13 @@ const OutwardsTransfer = () => {
       return ''
     }
   }
-  async function openForm() {
+  async function openForm(recordId) {
     try {
       const plantId = await getPlantId()
       const cashAccountId = await getCashAccountId()
 
       if (plantId !== '' && cashAccountId !== '') {
-        openOutWardsWindow(plantId, cashAccountId)
+        openOutWardsWindow(plantId, cashAccountId, recordId)
       } else {
         if (plantId === '') {
           setErrorMessage({ error: 'The user does not have a default plant' })
@@ -156,15 +154,14 @@ const OutwardsTransfer = () => {
   }
 
   const addOutwards = () => {
-    openForm()
+    openForm('')
   }
 
   const editOutwards = obj => {
-    openForm()
-    setSelectedRecordId(obj.recordId)
+    openForm(obj.recordId)
   }
 
-  function openOutWardsWindow(plantId, cashAccountId) {
+  function openOutWardsWindow(plantId, cashAccountId, recordId) {
     stack({
       Component: OutwardsTab,
       props: {
@@ -173,7 +170,7 @@ const OutwardsTransfer = () => {
         userId: userData && userData.userId,
         maxAccess: access,
         _labels: _labels,
-        recordId: selectedRecordId
+        recordId: recordId
       },
       width: 800,
       height: 550,
