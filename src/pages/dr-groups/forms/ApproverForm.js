@@ -74,6 +74,118 @@ const ApproverForm = ({ labels, maxAccess, recordId }) => {
       flex: 1
     }
   ]
+  
+  const approverValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      codeId: yup.string().required('This field is required')
+    }),
+    onSubmit: values => {
+      postApprover(values)
+    }
+  })
+
+  const postApprover = obj => {
+    const codeId = obj.codeId
+    const groupId = obj.groupId ? obj.groupId : drGroupValidation.values.recordId
+    postRequest({
+      extension: DocumentReleaseRepository.GroupCode.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        if (!codeId) {
+          toast.success('Record Added Successfully')
+        } else toast.success('Record Editted Successfully')
+
+        setApproverWindowOpen(false)
+        getApproverGridData(groupId)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+
+  const getApproverGridData = groupId => {
+    setApproverGridData([])
+    const defaultParams = `_groupId=${groupId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: DocumentReleaseRepository.GroupCode.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        console.log(res)
+        setApproverGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const delApprover = obj => {
+    postRequest({
+      extension: DocumentReleaseRepository.GroupCode.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        toast.success('Record Deleted Successfully')
+        getApproverGridData(obj.groupId)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const addApprover = () => {
+    approverValidation.setValues(getNewGroupCode(drGroupValidation.values.recordId))
+    setApproverWindowOpen(true)
+  }
+
+  const editApprover = obj => {
+    console.log(obj)
+    getApproverById(obj)
+  }
+
+   const getApproverById = obj => {
+    const _codeId = obj.codeId
+    const _groupId = obj.groupId
+    const defaultParams = `_codeId=${_codeId}&_groupId=${_groupId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: DocumentReleaseRepository.GroupCode.get,
+      parameters: parameters
+    })
+      .then(res => {
+        approverValidation.setValues(populateGroupCode(res.record))
+        setApproverEditMode(true)
+        setApproverWindowOpen(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  } 
+
+  const handleApproverSubmit = () => {
+    approverValidation.handleSubmit()
+  }
+
+  const fillApproverComboStore = ({ _startAt = 0, _pageSize = 50 }) => {
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
+    console.log(_pageSize)
+    getRequest({
+      extension: DocumentReleaseRepository.ReleaseCode.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setApproverComboStore(res)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
 
   return (
     <>
@@ -132,48 +244,6 @@ export default ApproverForm;
 
 
 
-const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {
+const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {}
 
-  console.log('data')
-  console.log(approverGridData)
-
-  const columns = [
-    {
-      field: 'codeRef',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'codeName',
-      headerName: _labels.name,
-      flex: 1
-    }
-  ]
-
-  return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addApprover} maxAccess={maxAccess} />
-        <Table
-          columns={columns}
-          gridData={approverGridData}
-          rowId={['codeId']}
-          api={getApproverGridData}
-          onEdit={editApprover}
-          onDelete={delApprover}
-          isLoading={false}
-          maxAccess={maxAccess}
-          pagination={false}
-          height={300}
-        />
-      </Box>
-    </>
-  )
-}
-
+  
