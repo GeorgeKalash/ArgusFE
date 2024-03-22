@@ -90,9 +90,10 @@ const DRGroups = () => {
       props: {
         labels: _labels,
         recordId: recordId? recordId : null,
+        maxAccess : access
       },
-      width: 1200,
-      height: 600,
+      width: 600,
+      height: 400,
       title: _labels.group
     })
   }

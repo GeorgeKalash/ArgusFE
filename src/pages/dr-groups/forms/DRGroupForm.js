@@ -15,7 +15,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository} from 'src/repositories/DocumentReleaseRepository'
 import { useInvalidate} from 'src/hooks/resource'
 
-const CorrespondentForm = ({
+const DRGroupForm = ({
   labels,
   editMode,
   maxAccess,
@@ -82,6 +82,7 @@ const CorrespondentForm = ({
       toast.error('An error occurred');
     }
   };
+
  useEffect(() => {
   recordId && getGroupId(recordId);
 }, [recordId]);
@@ -144,7 +145,7 @@ return (
   )
 }
 
-export default CorrespondentForm
+export default DRGroupForm
 
 // // ** MUI Imports
 // import { Grid } from '@mui/material'

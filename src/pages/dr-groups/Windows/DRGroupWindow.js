@@ -3,7 +3,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import DRGroupForm from '../forms/DRGroupForm'
-import ApproverForm from '../forms/ApproverForm'
+import ApproverList from '../forms/ApproverList'
 
 
 
@@ -43,7 +43,7 @@ const DRGroupWindow = ({
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
-        <ApproverForm
+        <ApproverList
           labels={labels}
           setEditMode={setEditMode}
           setStore={setStore}
