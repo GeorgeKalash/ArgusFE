@@ -14,11 +14,8 @@ import useResourceParams from 'src/hooks/useResourceParams'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
-
   const { stack } = useWindow()
-
- //error
- const [errorMessage, setErrorMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
  const getPlantId = async () => {
   const userData = window.sessionStorage.getItem('userData')
@@ -76,26 +73,28 @@ function openForm(recordId,plantId ){
 
 
 
+
+
 const {
   query: { data },
-  search,
-  clear,
+  filterBy,
+  clearFilter,
   labels: labels,
   access
 } = useResourceQuery({
   endpointId: CTTRXrepository.CurrencyTrading.snapshot,
   datasetId: 35208,
-  search: {
+  filter: {
     endpointId: CTTRXrepository.CurrencyTrading.snapshot,
-    searchFn: fetchWithSearch,
+    filterFn: fetchWithSearch,
   }
 })
-async function fetchWithSearch({options = {} , qry}) {
+async function fetchWithSearch({options = {} , filters}) {
   const { _startAt = 0, _pageSize = 50 } = options
 
   return await getRequest({
         extension: CTTRXrepository.CurrencyTrading.snapshot,
-        parameters: `_filter=${qry}&_category=1`
+        parameters: `_filter=${filters.qry}&_category=1`
       })
     }
 
@@ -103,7 +102,16 @@ return (
     <Box>
       { labels && access && (
         <>
-          <GridToolbar maxAccess={access}  onSearch={search} onSearchClear={clear}  labels={labels} inputSearch={true}/>
+          <GridToolbar maxAccess={access}  onSearch={value => {
+              filterBy('qry', value)
+            }}
+            onSearchClear={() => {
+              clearFilter('qry')
+            }}
+
+            labels={labels} inputSearch={true}/>
+
+
           <Table
             columns={[
               {

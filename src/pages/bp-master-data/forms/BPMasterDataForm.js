@@ -15,13 +15,15 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { formatDateDefault, formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 
-export default function BPMasterDataForm({ labels, maxAccess, defaultValue, recordId }) {
-  const [idCategoryStore, setIDCategoryStore] = useState([])
+export default function BPMasterDataForm({ labels, maxAccess, defaultValue, setEditMode , store, setStore}) {
   const [isLoading, setIsLoading] = useState(false)
 
+  const {category, recordId} = store
+
   const [initialValues, setInitialData] = useState({
-    recordId: null,
+    recordId: recordId,
     reference: '',
     name: '',
     category: null,
@@ -47,26 +49,22 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const editMode = !!recordId
 
   const filterIdCategory = async categId => {
-    try {
+
       const res = await getRequest({
         extension: BusinessPartnerRepository.CategoryID.qry,
         parameters: `_startAt=0&_pageSize=1000`
       })
 
-      return categId
-        ? res.list.filter(
-            item => (categId === 1 && item.person) || (categId === 2 && item.org) || (categId === 3 && item.group)
-          )
-        : []
-    } catch (error) {
-      setErrorMessage(error.res)
 
-      return []
-    }
+return  categId  ? res.list.filter(
+            item => (parseInt(categId) === 1 && item.person) || (parseInt(categId) === 2 && item.org) || (parseInt(categId) === 3 && item.group)
+          )
+
+        : []
+
   }
 
   const invalidate = useInvalidate({
@@ -84,19 +82,52 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
       name: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      // const recordId = obj.recordId
+      console.log(obj)
+      obj.recordId=recordId
+       const date =  obj?.birthDate && formatDateToApi(obj?.birthDate)
+       const data = { ...obj, birthDate : date }
 
-      await postRequest({
+      const res = await postRequest({
         extension: BusinessPartnerRepository.MasterData.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(data)
       })
 
-      if (!recordId) toast.success('Record Added Successfully')
-      else toast.success('Record Edited Successfully')
+      if (!recordId){
+          toast.success('Record Added Successfully')
+          setEditMode(true)
+          formik.setFieldValue('recordId' , res.recordId )
+
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: res.recordId
+          }));
+      }
+      else{ toast.success('Record Edited Successfully')}
+       setEditMode(true)
 
       invalidate()
     }
   })
+
+  // const getDefault = obj => {
+  //   const bpId = obj.recordId
+  //   const incId = obj.defaultInc
+  //   var parameters = `_bpId=${bpId}&_incId=${incId}`
+
+  //   getRequest({
+  //     extension: BusinessPartnerRepository.MasterIDNum.get,
+  //     parameters: parameters
+  //   })
+  //     .then(res => {
+  //       if (res.record && res.record.idNum != null) {
+  //         formik.setFieldValue('defaultId' , res.record.idNum)
+  //       }
+  //     })
+  //     .catch(error => {
+  //       setErrorMessage(error)
+  //     })
+  // }
 
   useEffect(() => {
     ;(async function () {
@@ -109,10 +140,10 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          res.record.birthDate = formatDateFromApi(res.record.birthDate)
+          formik.setValues(res.record)
         }
       } catch (exception) {
-        setErrorMessage(error)
       }
       setIsLoading(false)
     })()
@@ -120,7 +151,14 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
 
   useEffect(() => {
     ;(async function () {
-      if (formik?.values?.category) setIDCategoryStore(await filterIdCategory(formik.values.category))
+      if (formik?.values?.category){
+       const _category = await filterIdCategory(formik?.values?.category)
+
+        setStore(prevStore => ({
+          ...prevStore,
+          category: _category
+        }));
+}
     })()
   }, [formik?.values?.category])
 
@@ -128,7 +166,6 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
     <FormShell
       resourceId={ResourceIds.BPMasterData}
       form={formik}
-      height={400}
       maxAccess={maxAccess}
       editMode={editMode}
     >
@@ -157,7 +194,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
             <ResourceComboBox
               endpointId={BusinessPartnerRepository.Group.qry}
               name='groupId'
-              label={labels.group}
+              label={labels.groupName}
               valueField='recordId'
               displayField='name'
               values={formik.values}
@@ -205,7 +242,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
               name='birthDate'
               label={labels.birthDate}
               value={formik.values.birthDate}
-              onChange={formik.handleChange}
+              onChange={formik.setFieldValue}
               maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('birthDate', '')}
               error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
@@ -228,7 +265,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
           <Grid item xs={12}>
             <CustomTextField
               name='flName'
-              label={labels.foreignLanguage}
+              label={labels.flName}
               value={formik.values.flName}
               maxLength='70'
               maxAccess={maxAccess}
@@ -255,14 +292,14 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
             />
           </Grid>
           <Grid item xs={12}>
-            {idCategoryStore && (
+
               <CustomComboBox
                 name='defaultInc'
                 label={labels.idCategory}
                 valueField='recordId'
                 displayField='name'
-                store={idCategoryStore}
-                value={idCategoryStore.filter(item => item.recordId === formik.values.defaultInc)[0]}
+                store={store.category}
+                value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('defaultInc', newValue?.recordId)
@@ -270,7 +307,7 @@ export default function BPMasterDataForm({ labels, maxAccess, defaultValue, reco
                 error={formik.touched.defaultInc && Boolean(formik.errors.defaultInc)}
                 helperText={formik.touched.defaultInc && formik.errors.defaultInc}
               />
-            )}
+
           </Grid>
           <Grid item xs={12}>
             <CustomTextField

@@ -5,12 +5,12 @@ import ErrorWindow from './ErrorWindow'
 
 export const ResourceLookup = ({
   endpointId,
-  name,
-  form,
   parameters,
+  form,
+  name,
+  valueShow,
   secondValueShow,
   errorCheck,
-  valueShow,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)

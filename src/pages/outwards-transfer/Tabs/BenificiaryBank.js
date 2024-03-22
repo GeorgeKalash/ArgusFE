@@ -9,27 +9,36 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function BenificiaryBank({ maxAccess }) {
   const [initialValues, setInitialData] = useState({
-    recordId: null,
+    //RTBEN
+    clientId: '',
+    beneficiaryId: '',
     name: '',
-    serviceType: '',
+    dispersalType: null,
+    nationalityId: null,
+    isBlocked: false,
+    stoppedDate: null,
+    stoppedReason: '',
+    gender: null,
+
+    //RTBEB
+    accountRef: '',
+    IBAN: '',
+    bankName: '',
+    routingNo: '',
+    swiftCode: '',
+    branchCode: '',
     branchName: '',
-    address1: '',
-    address2: '',
-    countryId: '',
+    addressLine1: '',
+    addressLine2: '',
+    nationalityId: '',
     stateId: '',
     cityId: '',
-    city: '',
     zipCode: '',
-    drBank: '',
-    remarks: '',
-    ifsc: '',
-    routingNumber: '',
-    iban: '',
-    isBlocked: false,
-    stopReason: ''
+    remarks: ''
   })
 
   const formik = useFormik({
@@ -37,14 +46,7 @@ export default function BenificiaryBank({ maxAccess }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      serviceType: yup.string().required('This field is required'),
-      branchName: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required'),
-      drBank: yup.string().required('This field is required'),
-      remarks: yup.string().required('This field is required'),
-      ifsc: yup.string().required('This field is required'),
-      isBlocked: yup.string().required('This field is required')
+      name: yup.string().required(' ')
     }),
     onSubmit: values => {}
   })
@@ -64,69 +66,77 @@ export default function BenificiaryBank({ maxAccess }) {
               value={formik.values.name}
               required
               onChange={formik.handleChange}
+              maxLength='50'
               error={formik.touched.name && Boolean(formik.errors.name)}
-              helperText={formik.touched.name && formik.errors.name}
               maxAccess={maxAccess}
             />
           </Grid>
+
           <Grid item xs={12}>
-            <ResourceComboBox //endpointId={SystemRepository.Plant.qry}
-              name='serviceType'
-              label='serviceType'
-              required
-              valueField='recordId'
-              values={formik.values}
+            <CustomTextArea
+              name='branchName'
+              label='Branch Name'
+              rows={3}
+              value={formik.values.branchName}
+              onChange={formik.handleChange}
+              maxLength='100'
+              error={formik.touched.branchName && Boolean(formik.errors.branchName)}
               maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('serviceType', newValue?.recordId)
-              }}
-              error={formik.touched.serviceType && Boolean(formik.errors.serviceType)}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='branchName'
-              label='Branch Name'
-              value={formik.values.branchName}
-              required
+              name='branchCode'
+              label='Branch Code'
+              value={formik.values.branchCode}
               onChange={formik.handleChange}
-              error={formik.touched.branchName && Boolean(formik.errors.branchName)}
-              helperText={formik.touched.branchName && formik.errors.branchName}
+              maxLength='20'
+              error={formik.touched.branchCode && Boolean(formik.errors.branchCode)}
               maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.BANK_ACCOUNT_TYPE}
+              name='accountType'
+              label='account Type'
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              onChange={formik.handleChange}
+              error={formik.touched.accountType && Boolean(formik.errors.accountType)}
+            />
+          </Grid>
+          <Grid item xs={12}>
             <CustomTextArea
-              name='address1'
+              name='addressLine1'
               label='Address 1'
-              value={formik.values.address1}
+              value={formik.values.addressLine1}
               rows={3}
-              maxLength='150'
+              maxLength='100'
               maxAccess={maxAccess}
               onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('address1', '')}
-              error={formik.touched.address1 && Boolean(formik.errors.address1)}
-              helperText={formik.touched.address1 && formik.errors.address1}
+              onClear={() => formik.setFieldValue('addressLine1', '')}
+              error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
-              name='address2'
+              name='addressLine2'
               label='Address 2'
-              value={formik.values.address2}
+              value={formik.values.addressLine2}
               rows={3}
-              maxLength='150'
+              maxLength='100'
               maxAccess={maxAccess}
               onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('address2', '')}
-              error={formik.touched.address2 && Boolean(formik.errors.address2)}
-              helperText={formik.touched.address2 && formik.errors.address2}
+              onClear={() => formik.setFieldValue('addressLine2', '')}
+              error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
             />
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
-              name='countryId'
+              name='nationalityId'
               label='Country'
               valueField='recordId'
               displayField={['reference', 'name']}
@@ -137,30 +147,28 @@ export default function BenificiaryBank({ maxAccess }) {
               ]}
               maxAccess={maxAccess}
               values={formik.values}
-              required
               onChange={(event, newValue) => {
                 formik.setFieldValue('stateId', null)
                 formik.setFieldValue('cityId', '')
                 formik.setFieldValue('city', '')
                 if (newValue) {
-                  formik.setFieldValue('countryId', newValue?.recordId)
+                  formik.setFieldValue('nationalityId', newValue?.recordId)
                 } else {
-                  formik.setFieldValue('countryId', '')
+                  formik.setFieldValue('nationalityId', '')
                 }
               }}
-              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              helperText={formik.touched.countryId && formik.errors.countryId}
+              error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
             />
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-              endpointId={formik.values.countryId && SystemRepository.State.qry}
-              parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
+              endpointId={formik.values.nationalityId && SystemRepository.State.qry}
+              parameters={formik.values.nationalityId && `_countryId=${formik.values.nationalityId}`}
               name='stateId'
               label='State'
               valueField='recordId'
               displayField='name'
-              readOnly={!formik.values.countryId}
+              readOnly={!formik.values.nationalityId}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('stateId', newValue?.recordId)
@@ -168,7 +176,6 @@ export default function BenificiaryBank({ maxAccess }) {
                 formik.setFieldValue('city', '')
               }}
               error={formik.touched.stateId && Boolean(formik.errors.stateId)}
-              helperText={formik.touched.stateId && formik.errors.stateId}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -176,7 +183,7 @@ export default function BenificiaryBank({ maxAccess }) {
             <ResourceLookup
               endpointId={SystemRepository.City.snapshot}
               parameters={{
-                _countryId: formik.values.countryId,
+                _countryId: formik.values.nationalityId,
                 _stateId: formik.values.stateId ?? 0
               }}
               valueField='name'
@@ -201,89 +208,62 @@ export default function BenificiaryBank({ maxAccess }) {
               errorCheck={'cityId'}
             />
           </Grid>
+        </Grid>
+        {/* Second Column */}
+        <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.GENDER}
+              name='gender'
+              label='Gender'
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              onChange={formik.handleChange}
+              error={formik.touched.gender && Boolean(formik.errors.gender)}
+            />
+          </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='zipCode'
               label='Zip Code'
               value={formik.values.zipCode}
+              maxLength='30'
               onChange={formik.handleChange}
               error={formik.touched.zipCode && Boolean(formik.errors.zipCode)}
-              helperText={formik.touched.zipCode && formik.errors.zipCode}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-        </Grid>
-        {/* Second Column */}
-        <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='drBank'
-              label='DR Bank'
-              value={formik.values.drBank}
-              required
-              onChange={formik.handleChange}
-              error={formik.touched.branchNadrBankme && Boolean(formik.errors.drBank)}
-              helperText={formik.touched.drBank && formik.errors.drBank}
               maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='drBranch'
-              label='DR Branch'
-              value={formik.values.drBranch}
-              required
+              name='swiftCode'
+              label='IFSC / swift code'
+              maxLength='30'
+              value={formik.values.swiftCode}
               onChange={formik.handleChange}
-              error={formik.touched.drBranch && Boolean(formik.errors.drBranch)}
-              helperText={formik.touched.drBranch && formik.errors.drBranch} // maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextArea
-              name='remarks'
-              label='Remarks'
-              value={formik.values.remarks}
-              rows={3}
-              maxLength='150'
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('remarks', '')}
-              error={formik.touched.remarks && Boolean(formik.errors.remarks)}
-              helperText={formik.touched.remarks && formik.errors.remarks}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='ifsc'
-              label='IFSC'
-              value={formik.values.ifsc}
-              required
-              onChange={formik.handleChange}
-              error={formik.touched.ifsc && Boolean(formik.errors.ifsc)}
-              helperText={formik.touched.ifsc && formik.errors.ifsc}
+              error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
               maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='routingNumber'
+              name='routingNo'
               label='Routing Number'
-              value={formik.values.routingNumber}
-              numberField={true}
+              maxLength='50'
+              value={formik.values.routingNo}
               onChange={formik.handleChange}
-              error={formik.touched.routingNumber && Boolean(formik.errors.routingNumber)}
-              helperText={formik.touched.routingNumber && formik.errors.routingNumber}
+              error={formik.touched.routingNo && Boolean(formik.errors.routingNo)}
               maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='iban'
+              name='IBAN'
               label='IBAN'
-              value={formik.values.iban}
+              maxLength='50'
+              value={formik.values.IBAN}
               onChange={formik.handleChange}
-              error={formik.touched.iban && Boolean(formik.errors.iban)}
-              helperText={formik.touched.iban && formik.errors.iban}
+              error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -303,29 +283,37 @@ export default function BenificiaryBank({ maxAccess }) {
             />
           </Grid>
           <Grid item xs={12}>
+            <CustomTextArea
+              name='remarks'
+              label='Remarks'
+              value={formik.values.remarks}
+              rows={3}
+              maxLength='150'
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('remarks', '')}
+              error={formik.touched.remarks && Boolean(formik.errors.remarks)}
+            />
+          </Grid>
+          <Grid item xs={12}>
             <CustomDatePicker
-              name='stopDate'
-              label={'stopDate'}
-              value={formik.values?.stopDate}
+              name='stoppedDate'
+              label={'stopped Date'}
+              value={formik.values?.stoppedDate}
               readOnly
-              error={formik.touched.stopDate && Boolean(formik.errors.stopDate)}
-              helperText={formik.touched.stopDate && formik.errors.stopDate}
+              error={formik.touched.stoppedDate && Boolean(formik.errors.stoppedDate)}
               maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
-              name='stopReason'
+              name='stoppedReason'
               label='Stop Reason'
               readOnly
-              value={formik.values.stopReason}
+              value={formik.values.stoppedReason}
               rows={3}
-              maxLength='150'
               maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('stopReason', '')}
-              error={formik.touched.stopReason && Boolean(formik.errors.stopReason)}
-              helperText={formik.touched.stopReason && formik.errors.stopReason}
+              error={formik.touched.stoppedReason && Boolean(formik.errors.stoppedReason)}
             />
           </Grid>
         </Grid>

@@ -124,7 +124,11 @@ const LoDefault = () => {
                             displayField='name'
                             maxAccess={access}
                             onChange={(event, newValue) => {
-                            formik.setFieldValue('transitSiteId', newValue?.recordId)
+                                if (newValue) {
+                                    formik.setFieldValue('transitSiteId', newValue?.recordId)
+                                  } else {
+                                    formik.setFieldValue('transitSiteId', '')
+                                  }
                             }}
                             error={formik.touched.transitSiteId && Boolean(formik.errors.transitSiteId)}
 
@@ -139,7 +143,10 @@ const LoDefault = () => {
                         padding: 3,
                         textAlign: 'center',
                     }}>
-                        <WindowToolbar onSave={handleSubmit}  />
+                        <WindowToolbar 
+                            onSave={handleSubmit}
+                            isSaved={true}
+                        />
                     </Grid>
                 </Grid>
                 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
