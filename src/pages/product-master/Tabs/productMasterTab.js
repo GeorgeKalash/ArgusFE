@@ -1,26 +1,93 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
+
+// ** Third Party Imports
+import { useFormik } from 'formik'
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
+
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { DataSets } from 'src/resources/DataSets'
+import { useContext, useState } from 'react'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import FormShell from 'src/components/Shared/FormShell'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 const ProductMasterTab = ({
-  productMasterValidation,
-  typeStore,
-  functionStore,
-  commissionBaseStore,
-  correspondentStore,
-  setCorrespondentStore,
-  interfaceStore,
-  lookupCorrespondent,
-  languageStore,
+  setEditMode,
   maxAccess
 }) => {
-  
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const[ initialValues, setData] = useState({
+    recordId: null,
+    name: null,
+    reference: null,
+    type: null,
+    functionId: null,
+    corId: null,
+    corName: null,
+    corRef: null,
+    languages: null,
+    commissionBase: null,
+    interfaceId: null,
+    posMsg: null,
+    posMsgIsActive: false,
+    isInactive: false
+  })
+
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      reference:  yup.string().required('This field is required'),
+      name:  yup.string().required('This field is required'),
+      type:  yup.string().required('This field is required'),
+      functionId:  yup.string().required('This field is required'),
+      interfaceId:  yup.string().required('This field is required'),
+      commissionBase:  yup.string().required('This field is required'),
+      isInactive:  yup.string().required('This field is required'),
+
+      // corId : type==="1" ? yup.string().required('This field is required') : yup.string().notRequired()
+    }),
+    onSubmit: values => {
+      postProductMaster(values)
+    }
+  })
+
+  const postProductMaster = obj => {
+    const recordId = obj.recordId
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductMaster.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+
+        if (!recordId){
+          formik.setFieldValue('recordId', res.recordId)
+
+          toast.success('Record Added Successfully')
+          setEditMode(true)
+
+        }else{
+          toast.success('Record Editted Successfully')
+        }
+
+      })
+      .catch(error => {
+      })
+  }
+
 return (
-    <>
+    <FormShell form={formik} resourceId={ResourceIds.ProductMaster}>
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
@@ -28,13 +95,13 @@ return (
             <CustomTextField
               name='reference'
               label='Reference'
-              value={productMasterValidation.values.reference}
+              value={formik.values.reference}
               required
               readOnly={false}
-              onChange={productMasterValidation.handleChange}
-              onClear={() => productMasterValidation.setFieldValue('reference', '')}
-              error={productMasterValidation.touched.reference && Boolean(productMasterValidation.errors.reference)}
-              helperText={productMasterValidation.touched.reference && productMasterValidation.errors.reference}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('reference', '')}
+              error={formik.touched.reference && Boolean(formik.errors.reference)}
+              helperText={formik.touched.reference && formik.errors.reference}
               maxAccess={maxAccess}
             />
           </Grid>
@@ -42,156 +109,141 @@ return (
             <CustomTextField
               name='name'
               label='Name'
-              value={productMasterValidation.values.name}
+              value={formik.values.name}
               required
-              onChange={productMasterValidation.handleChange}
-              onClear={() => productMasterValidation.setFieldValue('name', '')}
-              error={productMasterValidation.touched.name && Boolean(productMasterValidation.errors.name)}
-              helperText={productMasterValidation.touched.name && productMasterValidation.errors.name}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('name', '')}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              helperText={formik.touched.name && formik.errors.name}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
               name='type'
               label='Type'
+              datasetId={DataSets.RT_Product_Type}
               valueField='key'
               displayField='value'
-              store={typeStore}
-              value={typeStore.filter(item => item.key === productMasterValidation.values.type?.toString())[0]}
+              values={formik.values}
               required
               onChange={(event, newValue) => {
-                productMasterValidation && productMasterValidation.setFieldValue('type', newValue?.key);
+                formik && formik.setFieldValue('type', newValue?.key);
               }}
-              error={productMasterValidation.touched.type && Boolean(productMasterValidation.errors.type)}
-              helperText={productMasterValidation.touched.type && productMasterValidation.errors.type}
+              error={formik.touched.type && Boolean(formik.errors.type)}
+              helperText={formik.touched.type && formik.errors.type}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
               name='functionId'
               label='Function'
+              datasetId={DataSets.RT_Function}
               valueField='key'
               displayField='value'
-              store={functionStore}
-              value={functionStore.filter(item => item.key === productMasterValidation.values.functionId?.toString())[0]}
+              values={formik.values}
               required
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('functionId', newValue?.key)
+                formik.setFieldValue('functionId', newValue?.key)
               }}
-              error={productMasterValidation.touched.functionId && Boolean(productMasterValidation.errors.functionId)}
-              helperText={productMasterValidation.touched.functionId && productMasterValidation.errors.functionId}
+              error={formik.touched.functionId && Boolean(formik.errors.functionId)}
+              helperText={formik.touched.functionId && formik.errors.functionId}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomLookup
+            <ResourceLookup
               name='corId'
-
-              // label={labels.correspondent}
+              endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
               label='Correspondent'
-              value={productMasterValidation.values.corId}
-              required={productMasterValidation.values.type === "1" ? true : false}
+              form={formik}
+              required={formik.values.type === "1" ? true : false}
               valueField='reference'
               displayField='name'
-              store={correspondentStore}
-              firstValue={productMasterValidation.values.corRef}
-              secondValue={productMasterValidation.values.corName}
-              setStore={setCorrespondentStore}
-              onLookup={lookupCorrespondent}
+              firstValue={formik.values.corRef}
+              secondValue={formik.values.corName}
               onChange={(event, newValue) => {
                 if (newValue) {
-                  productMasterValidation.setFieldValue('corId', newValue?.recordId)
-                  productMasterValidation.setFieldValue('corRef', newValue?.reference)
-                  productMasterValidation.setFieldValue('corName', newValue?.name)
+                  formik.setFieldValue('corId', newValue?.recordId)
+                  formik.setFieldValue('corRef', newValue?.reference)
+                  formik.setFieldValue('corName', newValue?.name)
                 } else {
-                  productMasterValidation.setFieldValue('corId', null)
-                  productMasterValidation.setFieldValue('corRef', null)
-                  productMasterValidation.setFieldValue('corName', null)
+                  formik.setFieldValue('corId', null)
+                  formik.setFieldValue('corRef', null)
+                  formik.setFieldValue('corName', null)
                 }
               }}
               error={
-                productMasterValidation.touched.corId &&
-                Boolean(productMasterValidation.errors.corId)
+                formik.touched.corId &&
+                Boolean(formik.errors.corId)
               }
               helperText={
-                productMasterValidation.touched.corId && productMasterValidation.errors.corId
+                formik.touched.corId && formik.errors.corId
               }
               maxAccess={maxAccess}
             />
           </Grid>
-          {/* <Grid item xs={12}>
-            <CustomTextField
-              name='correspondent'
-              label='Correspondent'
-              value={productMasterValidation.values.correspondent}
-              required={productMasterValidation.values.type === 1 ? true : false}
-              onChange={productMasterValidation.handleChange}
-              onClear={() => productMasterValidation.setFieldValue('correspondent', '')}
-              error={Boolean(productMasterValidation.errors.correspondent)}
-              helperText={productMasterValidation.errors.correspondent}
-            />
-          </Grid> */}
+
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              datasetId={DataSets.RT_Language}
               name='languages'
               label='languages'
               valueField='key'
               displayField='value'
-              store={languageStore}
-              value={languageStore.filter(item => item.key === productMasterValidation.values.languages?.toString())[0]}
+              value={formik.values}
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('languages', newValue?.key)
+                formik.setFieldValue('languages', newValue?.key)
               }}
-              error={productMasterValidation.touched.languages && Boolean(productMasterValidation.errors.languages)}
-              helperText={productMasterValidation.touched.languages && productMasterValidation.errors.languages}
+              error={formik.touched.languages && Boolean(formik.errors.languages)}
+              helperText={formik.touched.languages && formik.errors.languages}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={ RemittanceSettingsRepository.Interface.qry}
               name='interfaceId'
               label='Interface'
               valueField='recordId'
               displayField='name'
-              store={interfaceStore}
-              value={interfaceStore.filter(item => item.recordId === productMasterValidation.values.interfaceId)[0]}
+              value={formik.values}
               required
               onChange={(event, newValue) => {
-                productMasterValidation.setFieldValue('interfaceId', newValue?.recordId)
+                formik.setFieldValue('interfaceId', newValue?.recordId)
               }}
-              error={ productMasterValidation.touched.interfaceId && Boolean(productMasterValidation.errors.interfaceId)}
-              helperText={productMasterValidation.touched.interfaceId && productMasterValidation.errors.interfaceId}
+              error={ formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
+              helperText={formik.touched.interfaceId && formik.errors.interfaceId}
             />
           </Grid>
 
 
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              datasetId={DataSets.RT_Commission_Base}
               name='commissionBase'
               label='Commission Base'
               valueField='key'
               displayField='value'
-              store={commissionBaseStore}
-              value={commissionBaseStore.filter(item => item.key === productMasterValidation.values.commissionBase?.toString())[0]}
+              values={formik.values}
               required
               onChange={(event, newValue) => {
-             productMasterValidation.setFieldValue('commissionBase', newValue?.key)
+             formik.setFieldValue('commissionBase', newValue?.key)
               }}
-              error={productMasterValidation.touched.commissionBase && Boolean(productMasterValidation.errors.commissionBase)}
-              helperText={productMasterValidation.touched.commissionBase && productMasterValidation.errors.commissionBase}
+              error={formik.touched.commissionBase && Boolean(formik.errors.commissionBase)}
+              helperText={formik.touched.commissionBase && formik.errors.commissionBase}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='posMsg'
               label='Message To Operator'
-              value={productMasterValidation.values.posMsg}
+              value={formik.values.posMsg}
               readOnly={false}
-              onChange={productMasterValidation.handleChange}
-              onClear={() => productMasterValidation.setFieldValue('posMsg', '')}
-              error={ productMasterValidation.errors && Boolean(productMasterValidation.errors.posMsg)}
-              helperText={productMasterValidation.errors && productMasterValidation.errors.posMsg}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('posMsg', '')}
+              error={ formik.errors && Boolean(formik.errors.posMsg)}
+              helperText={formik.errors && formik.errors.posMsg}
             />
           </Grid>
           <Grid item xs={12}>
@@ -199,8 +251,8 @@ return (
               control={
                 <Checkbox
                   name='posMsgIsActive'
-                  checked={productMasterValidation.values?.posMsgIsActive}
-                  onChange={productMasterValidation.handleChange}
+                  checked={formik.values?.posMsgIsActive}
+                  onChange={formik.handleChange}
                 />
               }
               label='Activate Counter Message'
@@ -211,8 +263,8 @@ return (
               control={
                 <Checkbox
                   name='isInactive'
-                  checked={productMasterValidation.values?.isInactive}
-                  onChange={productMasterValidation.handleChange}
+                  checked={formik.values?.isInactive}
+                  onChange={formik.handleChange}
                 />
               }
               label='Is inactive'
@@ -220,7 +272,7 @@ return (
           </Grid>
         </Grid>
       </Grid>
-    </>
+    </FormShell>
   )
 }
 

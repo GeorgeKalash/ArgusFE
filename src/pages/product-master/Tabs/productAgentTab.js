@@ -5,6 +5,7 @@ import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+import { useFormik } from 'formik'
 
 const ProductAgentTab = ({
   onDispersalSelection,
@@ -15,6 +16,8 @@ const ProductAgentTab = ({
   dispersalStore,
   maxAccess
 }) => {
+
+
 return (
     <>
       <Box
@@ -27,7 +30,7 @@ return (
         <Grid container gap={2}>
           <Grid container xs={12} spacing={2}>
             <Grid item xs={6}>
-              <CustomComboBox
+              <lookupComboBox
                 name='dispersalId'
                 label='Dispersal'
                 valueField='recordId'
@@ -36,8 +39,7 @@ return (
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
                 ]}
-                store={dispersalStore}
-                value={dispersalStore?.filter(item => item.key === agentsHeaderValidation.values.dispersalId?.toString())[0]}
+                values={formik?.values}
                 required
                 onChange={(event, newValue) => {
                   agentsHeaderValidation.setFieldValue('dispersalId', newValue?.recordId)
