@@ -29,6 +29,7 @@ const CustomComboBox = ({
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
+  hidden = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess

@@ -3,7 +3,7 @@ import { Box, Autocomplete, TextField, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search' // Import the icon you want to use
 import ClearIcon from '@mui/icons-material/Clear'
 import { InputAdornment, IconButton } from '@mui/material'
-import { DISABLED, FORCE_ENABLED, HIDDEN } from 'src/services/api/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomPaper = props => {
   return <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }} {...props} />
