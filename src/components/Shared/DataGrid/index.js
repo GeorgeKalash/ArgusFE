@@ -229,7 +229,6 @@ export function DataGrid({
         hideFooter
         autoHeight={height ? false : true}
         columnResizable={false}
-        // autoWidth
         disableColumnFilter
         disableColumnMenu
         disableColumnSelector
