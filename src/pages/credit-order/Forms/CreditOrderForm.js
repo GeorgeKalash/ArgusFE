@@ -34,6 +34,8 @@ import { useWindow } from 'src/windows'
 import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { MANDATORY } from 'src/services/api/maxAccess'
+import { useForm } from 'src/hooks/form'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, window }) {
   const { height } = useWindowDimensions()
@@ -84,7 +86,8 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     endpointId: CTTRXrepository.CreditOrder.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
@@ -870,7 +873,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 editMode={editMode}
                 maxAccess={maxAccess}
                 readOnly={isClosed}
-                onChange={formik.handleChange}
+                onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
                 helperText={formik.touched.notes && formik.errors.notes}

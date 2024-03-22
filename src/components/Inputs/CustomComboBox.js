@@ -3,8 +3,7 @@ import { Autocomplete, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import Paper from '@mui/material/Paper'
-
-
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
@@ -29,21 +28,21 @@ const CustomComboBox = ({
   sx,
   columnsInDropDown,
   editMode = false,
-  hasBorder=true,
+  hasBorder = true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
-  const fieldAccess =
-    props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
+  const _readOnly =
+    maxAccess < 3 ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
 
-  const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
+  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
-  const _required = required || fieldAccess === ControlAccessLevel.Mandatory
-
-  const _hidden = fieldAccess === ControlAccessLevel.Hidden
+  const _required = required || accessLevel === MANDATORY
 
   return (
     <Autocomplete
@@ -51,33 +50,31 @@ const CustomComboBox = ({
       value={value}
       size={size}
       options={store}
-
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={option => {
         if (typeof option === 'object') {
           // Check if the option is an object
           if (Array.isArray(displayField)) {
             // Check if displayField is an array
-            let text = '';
+            let text = ''
             displayField.forEach(header => {
               if (option[header]) {
-                text += `${option[header]} `;
+                text += `${option[header]} `
               } else {
-                text += `${header} `;
+                text += `${header} `
               }
-            });
+            })
 
-            return text.trim(); // Trim to remove extra spaces
+            return text.trim() // Trim to remove extra spaces
           } else {
             // If displayField is not an array, use it directly
-            return option[displayField] || '';
+            return option[displayField] || ''
           }
         } else {
           // If the option is not an object, return the option itself
-          return option;
+          return option
         }
       }}
-
       getOptionLabels={option => {
         if (option.length == 1) {
         }
@@ -107,7 +104,7 @@ const CustomComboBox = ({
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
-      disabled={_disabled}
+      disabled={_readOnly}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
@@ -159,17 +156,16 @@ const CustomComboBox = ({
           InputProps={{
             ...params.InputProps,
             style: {
-              border: 'none', // Set width to 100%
-            },
+              border: 'none' // Set width to 100%
+            }
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: !hasBorder && 'none', // Hide border
-              },
-            },
+                border: !hasBorder && 'none' // Hide border
+              }
+            }
           }}
-
         />
       )}
     />

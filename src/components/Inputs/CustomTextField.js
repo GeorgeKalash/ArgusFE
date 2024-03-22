@@ -2,7 +2,8 @@
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/Search'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type
@@ -19,69 +20,74 @@ const CustomTextField = ({
   editMode = false,
   maxLength = '1000',
   position,
-  dir='ltr',
+  dir = 'ltr',
   hidden = false,
   phone = false,
-  search= false,
-  language="",
-  hasBorder=true,
+  search = false,
+  language = '',
+  hasBorder = true,
   ...props
 }) => {
+  const name = props.name
+
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
+
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
+  const _readOnly =
+    maxAccess < 3 ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+
+  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
   const inputRef = useRef(null)
-  const [focus, setFocus] = useState(!hasBorder);
-
-
-  useEffect(() => {
-    if(inputRef.current.selectionStart !== undefined && focus && value  && value?.length < 1 ){
-         inputRef.current.focus();
-      }
-  }, [value]);
-
+  const [focus, setFocus] = useState(!hasBorder)
 
   useEffect(() => {
-    if (typeof inputRef.current.selectionStart !== undefined && position   ) {
+    if (inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
+      inputRef.current.focus()
+    }
+  }, [value])
+
+  useEffect(() => {
+    if (typeof inputRef.current.selectionStart !== undefined && position) {
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
 
-
-  const handleInput = (e) => {
-    const inputValue = e.target.value;
-    if (type=== 'number' && props && e.target.value && inputValue.length > maxLength) {
-      const truncatedValue = inputValue.slice(0, maxLength);
-      e.target.value = truncatedValue;
-      props?.onChange(e);
+  const handleInput = e => {
+    const inputValue = e.target.value
+    if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
+      const truncatedValue = inputValue.slice(0, maxLength)
+      e.target.value = truncatedValue
+      props?.onChange(e)
     }
 
     if (phone) {
-      const truncatedValue = inputValue.slice(0, maxLength);
-      e.target.value = truncatedValue?.replace(/\D/g, '');
-      props?.onChange(e);
+      const truncatedValue = inputValue.slice(0, maxLength)
+      e.target.value = truncatedValue?.replace(/\D/g, '')
+      props?.onChange(e)
     }
-    if (language ==='number') {
-      e.target.value = inputValue?.replace(/[^0-9.]/g, '');
-      props?.onChange(e);
+    if (language === 'number') {
+      e.target.value = inputValue?.replace(/[^0-9.]/g, '')
+      props?.onChange(e)
     }
-    if (language ==='arabic') {
-      e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '');
-      props?.onChange(e);
+    if (language === 'arabic') {
+      e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
+      props?.onChange(e)
     }
 
-    if (language ==='english') {
-      e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '');
-      props?.onChange(e);
+    if (language === 'english') {
+      e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
+      props?.onChange(e)
     }
-  };
-
-
+  }
 
   return (
-    <div style={{ display: hidden ? 'none' : 'block' }}>
+    <div style={{ display: _hidden ? 'none' : 'block' }}>
       <TextField
-        key={(value?.length < 1 || readOnly  || value === null)  && value }
+        key={(value?.length < 1 || readOnly || value === null) && value}
         inputRef={inputRef}
         type={type}
         variant={variant}
@@ -91,46 +97,43 @@ const CustomTextField = ({
         fullWidth={fullWidth}
         autoFocus={focus}
         inputProps={{
-          autoComplete: "off",
+          autoComplete: 'off',
           readOnly: _readOnly,
           maxLength: maxLength,
-           dir:  dir, // Set direction to right-to-left
+          dir: dir, // Set direction to right-to-left
           inputMode: 'numeric',
           pattern: numberField && '[0-9]*', // Allow only numeric input
           style: {
             textAlign: numberField && 'right',
-            '-moz-appearance': 'textfield', // Firefox
-
+            '-moz-appearance': 'textfield' // Firefox
           }
         }}
         autoComplete={autoComplete}
-
         onInput={handleInput}
-        onKeyDown={(e)=> e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true)}
+        onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
         InputProps={{
-
-          endAdornment:
-         <InputAdornment position='end'>
-            {search &&   <IconButton tabIndex={-1} edge='start' onClick={() =>onSearch(value)}  aria-label='search input'>
+          endAdornment: (
+            <InputAdornment position='end'>
+              {search && (
+                <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
                   <SearchIcon />
-                </IconButton>}
-         { (!readOnly &&
-            ((value || value===0 ) && // Only show the clear icon if readOnly is false
-                <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                  <ClearIcon />
-                </IconButton>)
-            )}
-
+                </IconButton>
+              )}
+              {!readOnly &&
+                (value || value === 0) && ( // Only show the clear icon if readOnly is false
+                  <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
+                    <ClearIcon />
+                  </IconButton>
+                )}
             </InputAdornment>
-
+          )
         }}
-
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none', // Hide border
-            },
-          },
+              border: !hasBorder && 'none' // Hide border
+            }
+          }
         }}
         {...props}
       />
