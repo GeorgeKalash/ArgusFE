@@ -94,7 +94,7 @@ function FormProvider({ formik, maxAccess, labels, children }) {
 export default function TransactionForm({ recordId, labels, maxAccess, plantId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
-
+  
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -841,6 +841,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 error={formik.errors.operations}
                 height={300}
                 disabled={isClosed}
+                maxAccess={maxAccess}
+                name='operations'
                 bg={
                   formik.values.functionId &&
                   (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
