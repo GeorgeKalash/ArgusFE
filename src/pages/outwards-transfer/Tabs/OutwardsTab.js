@@ -265,7 +265,7 @@ export default function OutwardsTab({
     } else if (formValues.dispersalType === 2) {
       stack({
         Component: BenificiaryBank,
-        props: {},
+        props: { clientId: formik.values.clientId, dispersalType: formik.values.dispersalType },
         width: 900,
         height: 600,
         title: 'Bank'
