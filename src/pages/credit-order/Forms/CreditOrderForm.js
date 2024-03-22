@@ -380,6 +380,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       header: labels[8],
       name: 'currencyId',
       mandatory: true,
+      maxAccessName: 'gridCurrency',
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
@@ -450,6 +451,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       header: labels[9],
       name: 'currencyName',
       readOnly: true,
+      maxAccessName: 'gridCurrency',
       width: 300,
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
     },
@@ -503,6 +505,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'exRate',
       mandatory: true,
       width: 200,
+      maxAccessName: 'gridRate',
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
@@ -830,6 +833,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           <Grid container sx={{ pt: 2 }} xs={12}>
             <Box sx={{ width: '100%' }}>
               <InlineEditGrid
+                maxAccess={maxAccess}
                 gridValidation={detailsFormik}
                 columns={columns}
                 background={
