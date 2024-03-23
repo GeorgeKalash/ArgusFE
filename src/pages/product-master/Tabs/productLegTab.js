@@ -2,14 +2,11 @@
 import { Grid, Box, Checkbox } from '@mui/material'
 
 // ** Custom Imports
-import Table from 'src/components/Shared/Table'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
+
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import Window from 'src/components/Shared/Window'
+
 
 // ** Helpers
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 const productLegTab = ({
@@ -32,9 +29,6 @@ return (
           height: '100%'
         }}
       >
-
-
-
         <Grid container gap={2}>
           <Grid container xs={12} spacing={3}>
          {productLegValidation.values && productLegValidation.values.dispersalId  &&  <Grid item xs={3} >

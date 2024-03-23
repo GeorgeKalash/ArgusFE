@@ -21,6 +21,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 const ProductMasterTab = ({
+  store,
+  setStore,
+  labels,
+  editMode,
   setEditMode,
   maxAccess
 }) => {
@@ -76,10 +80,15 @@ const ProductMasterTab = ({
 
           toast.success('Record Added Successfully')
           setEditMode(true)
+          setStore(prevStore => ({
+            ...prevStore,
+              recordId: res.recordId
+          }));
 
         }else{
           toast.success('Record Editted Successfully')
         }
+
 
       })
       .catch(error => {
@@ -87,8 +96,10 @@ const ProductMasterTab = ({
   }
 
 return (
-    <FormShell form={formik} resourceId={ResourceIds.ProductMaster}>
-      <Grid container>
+  <FormShell form={formik}
+   resourceId={ResourceIds.ProductMaster}
+   maxAccess={maxAccess}
+   editMode={editMode}>      <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
@@ -192,7 +203,7 @@ return (
               label='languages'
               valueField='key'
               displayField='value'
-              value={formik.values}
+              values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('languages', newValue?.key)
               }}
@@ -207,7 +218,7 @@ return (
               label='Interface'
               valueField='recordId'
               displayField='name'
-              value={formik.values}
+              values={formik.values}
               required
               onChange={(event, newValue) => {
                 formik.setFieldValue('interfaceId', newValue?.recordId)

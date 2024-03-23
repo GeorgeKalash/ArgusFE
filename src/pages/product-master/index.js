@@ -48,7 +48,6 @@ const ProductMaster = () => {
 
   async function fetchGridData(options={}) {
     const { _startAt = 0, _pageSize = 50 } = options
-
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
 
@@ -103,6 +102,7 @@ const ProductMaster = () => {
       props: {
         labels: _labels,
         recordId: recordId? recordId : null,
+        maxAccess: access
       },
       width: 1200,
       height: 600,
@@ -113,9 +113,6 @@ const ProductMaster = () => {
   const edit = obj => {
    openForm(obj?.recordId)
   }
-
-
-
 
   return (
     <>

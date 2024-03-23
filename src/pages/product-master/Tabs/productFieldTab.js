@@ -4,10 +4,75 @@ import { Grid, Box } from '@mui/material'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import { useEffect, useState } from 'react'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const ProductFieldTab = ({ productFieldGridData, dispersalStore, maxAccess }) => {
+const ProductFieldTab = ({ dispersalStore, maxAccess }) => {
   //stores
+  const [gridData, setGridDate ] = useState()
+
+  useEffect(()=>{
+    getProductFieldGridData('')
+  }, [])
+
+  const getProductFieldGridData = ({ _startAt = 0, _pageSize = 50 }) => {
+    const newData = {
+      list: [
+        {
+          recordId: 1,
+          controls: 'beneficiary',
+          format: 'Alpha',
+          securityLevel: 'Mandatory',
+          specialChars: '@',
+          fixedLength: 20,
+          minLength: 3,
+          maxLength: 20
+        },
+        {
+          recordId: 2,
+          controls: 'phone',
+          format: 'Alpha',
+          securityLevel: 'readOnly',
+          specialChars: '@',
+          fixedLength: 10,
+          minLength: 3,
+          maxLength: 10
+        },
+        {
+          recordId: 3,
+          controls: 'email',
+          format: 'Alpha+SP',
+          securityLevel: 'Optional',
+          specialChars: '@',
+          fixedLength: 10,
+          minLength: 3,
+          maxLength: 10
+        },
+        {
+          recordId: 4,
+          controls: 'Country',
+          format: 'Numeric',
+          securityLevel: 'Mandatory',
+          specialChars: '@',
+          fixedLength: 10,
+          minLength: 3,
+          maxLength: 10
+        },
+        {
+          recordId: 5,
+          controls: 'City',
+          format: 'Alpha Numeric',
+          securityLevel: 'hidden',
+          specialChars: '@',
+          fixedLength: 10,
+          minLength: 3,
+          maxLength: 10
+        }
+      ]
+    }
+    setGridDate({ ...newData })
+  }
 
   const columns = [
     {
@@ -65,7 +130,9 @@ const ProductFieldTab = ({ productFieldGridData, dispersalStore, maxAccess }) =>
               <CustomTextField label='Name' value={''} readOnly={true} />
             </Grid>
             <Grid item xs={6}>
-              <CustomComboBox name='dispersalId'
+              <ResourceComboBox
+              endpointId= {SystemRepository.Currency.qry}
+              name='dispersalId'
               label='Dispersal'
               valueField='recordId'
               displayField='name'
@@ -77,12 +144,12 @@ const ProductFieldTab = ({ productFieldGridData, dispersalStore, maxAccess }) =>
           <Grid xs={12}>
             <Table
               columns={columns}
-              gridData={productFieldGridData}
+              gridData={gridData}
               rowId={['recordId']}
               isLoading={false}
               pagination={false}
               height={220}
-              maxAccess={maxAccess} 
+              maxAccess={maxAccess}
             />
           </Grid>
         </Grid>

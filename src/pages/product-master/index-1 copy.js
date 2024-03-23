@@ -37,7 +37,7 @@ import {
   getNewProductScheduleRange,
   populateProductScheduleRange
 } from 'src/Models/RemittanceSettings/ProductScheduleRange'
-import ProductDispersalWindow from './Windows/ProductDispersalWindow'
+import ProductDispersalWindow from './Tabs/ProductDispersalForm'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const ProductMaster = () => {
@@ -412,7 +412,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
           recordId: 1,
           controls: 'beneficiary',
           format: 'Alpha',
-          securityLevel: 'Mandatory', 
+          securityLevel: 'Mandatory',
           specialChars: '@',
           fixedLength: 20,
           minLength: 3,
@@ -422,7 +422,7 @@ setType(productMasterValidation.values && productMasterValidation.values.type)
           recordId: 2,
           controls: 'phone',
           format: 'Alpha',
-          securityLevel: 'readOnly', 
+          securityLevel: 'readOnly',
           specialChars: '@',
           fixedLength: 10,
           minLength: 3,

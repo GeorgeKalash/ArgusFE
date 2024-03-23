@@ -176,10 +176,10 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
     field:  !allowDelete && 'actions',
     editable: false,
     flex: 0,
-    width: '100',
-    renderCell({ id }) {
+    width: '20',
+    renderCell({ id : idName }) {
       return (
-          <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
+          <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  idName])}>
             <GridDeleteIcon />
           </IconButton>
       )
@@ -312,7 +312,9 @@ return (
                   height: '100%',
                   padding: '0 0px',
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
+
                 }}
               >
                 <Component {...params} column={column} update={update} isLoading={isUpdatingField} />
