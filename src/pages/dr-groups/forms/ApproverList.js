@@ -36,6 +36,8 @@ const ApproverList = ({store,labels,maxAccess}) => {
   const { stack } = useWindow()
   const [valueGridData , setValueGridData] = useState()
 
+  const [refresh,setRefresh]=useState(false)
+
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -59,6 +61,7 @@ const ApproverList = ({store,labels,maxAccess}) => {
     })
       .then(res => {
         setValueGridData(res)
+        console.log('resss',res)
       
       })
       .catch(error => {
@@ -67,7 +70,8 @@ const ApproverList = ({store,labels,maxAccess}) => {
   }
   useEffect(()=>{
     recordId && getValueGridData(recordId)
-  },[recordId])
+    
+  },[recordId,refresh])
 
   // const {
   //   query: { data },
@@ -103,6 +107,7 @@ const ApproverList = ({store,labels,maxAccess}) => {
       extension:DocumentReleaseRepository.GroupCode.del,
       record: JSON.stringify(obj)
     })
+    setRefresh(prev=>!prev)
     
     toast.success('Record Deleted Successfully')
   }
@@ -114,7 +119,9 @@ const ApproverList = ({store,labels,maxAccess}) => {
         labels: labels,
         recordId: recordId? recordId : null,
         maxAccess,
-        store
+        store,
+        setRefresh
+        
       },
       width: 300,
       height: 300,

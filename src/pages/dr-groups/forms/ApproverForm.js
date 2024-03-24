@@ -13,6 +13,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { DocumentReleaseRepository} from 'src/repositories/DocumentReleaseRepository'
 
 import * as yup from 'yup'
+import toast from 'react-hot-toast'
+import { grid } from '@mui/system'
+import { ResetTvRounded } from '@mui/icons-material'
 
 
 
@@ -22,7 +25,8 @@ const ApproverForm= ({
     maxAccess,
     setEditMode,
     recordId,
-    store
+    store,
+    setRefresh
   }) => {
   
     const { postRequest, getRequest} = useContext(RequestsContext)
@@ -32,9 +36,10 @@ const ApproverForm= ({
 
   
     const [initialValues , setInitialData] = useState({
-      recordId: null,
+      recordId:grId,
       codeId:'',
-     
+      groupId:grId
+
    
     })
   
@@ -55,6 +60,7 @@ const ApproverForm= ({
     const postGroups = async obj => {
       const isNewRecord = !obj?.recordId;
       
+      
       try {
         const res = await postRequest({
           extension:DocumentReleaseRepository.GroupCode.set,
@@ -69,7 +75,6 @@ const ApproverForm= ({
             recordId: res.recordId 
           }));
           setEditMode(true); 
-          invalidate(); 
         } else {
           toast.success('Record Edited Successfully');
           setInitialData(prevData => ({
@@ -78,6 +83,7 @@ const ApproverForm= ({
           }));
          
         }
+        setRefresh(prev=>!prev)
       } catch (error) {
        
         toast.error('An error occurred');
