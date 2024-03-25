@@ -59,10 +59,11 @@ const   formatDateToApiFunction = (value)=>{
  }
 
  function formatDateDefault(date) {
+  if(!date) return
   const formats = JSON.parse(window.localStorage.getItem('default') &&  window.localStorage.getItem('default'))['dateFormat']
 
   // JSON.parse(window.localStorage.getItem('default'))['dateFormat']
-      const timestamp = date instanceof Date ? date.getTime() : parseInt(date.match(/\d+/)[0], 10);
+      const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10);
       const formattedDate=  format(new Date(timestamp), formats);
 
     return formattedDate;

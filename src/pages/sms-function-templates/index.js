@@ -163,22 +163,27 @@ const SmsFunctionTemplate = () => {
   return (
     <>
 
-         <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
-          <FormShell form={formik} infoVisible={false} visibleClear={false}>
-
-            <Grid container>
-              <Grid sx={{ width: '100%'  }}>
-                <Box sx={{ width: '100%'  }}>
-                  <DataGrid
-                   height={`calc(100vh - 150px)`}
-                   onChange={value => { formik.setFieldValue('rows', value)}}
-                   value={formik.values.rows}
-                   error={formik.errors.rows}
-                   columns={columns}
-                   allowDelete={false}
-                   allowAddNewLine={false}
-                  />
-                </Box>
+         <Box sx={{height: `calc(100vh - 50px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}> 
+         <FormShell 
+            form={formik} 
+            isCleared={false}
+            isInfo={false}
+         >
+          <Grid container>
+            <Grid sx={{ width: '100%' }}>
+              <Box sx={{ width: '100%' }}>
+                <DataGrid
+                  height={`calc(100vh - 150px)`}
+                  onChange={value => {
+                    formik.setFieldValue('rows', value)
+                  }}
+                  value={formik.values.rows}
+                  error={formik.errors.rows}
+                  columns={columns}
+                  allowDelete={false}
+                  allowAddNewLine={false}
+                />
+              </Box>
               </Grid>
             </Grid>
           </FormShell>

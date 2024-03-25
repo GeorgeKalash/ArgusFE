@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
 
-export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=true, allowAddNewLine=true}) {
+export function DataGrid({ idName = 'id', columns, value, error, bg, height, onChange ,  allowDelete=true, allowAddNewLine=true, disabled=false}) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
 
@@ -173,13 +173,13 @@ export function DataGrid({ idName = 'id', columns, value, error, bg, height, onC
   }
 
   const actionsColumn = {
-    field: 'actions',
+    field:  !allowDelete && 'actions',
     editable: false,
     flex: 0,
     width: '100',
     renderCell({ id }) {
       return (
-          <IconButton tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
+          <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  id])}>
             <GridDeleteIcon />
           </IconButton>
       )
@@ -272,7 +272,7 @@ return (
         ...columns.map(column => ({
           field: column.name,
           headerName: column.label || column.name,
-          editable: true,
+          editable: !disabled,
           flex: column.flex || 1,
 
           // width: column.width || 170,
@@ -292,6 +292,7 @@ return (
                   backgroundColor: bg,
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
                   border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
 
                 }}

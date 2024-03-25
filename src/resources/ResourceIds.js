@@ -3,6 +3,7 @@ export const ResourceIds = {
   JournalVoucher: 30302,
   FRT_DR_approvals: 10302,
   DocumentTypes: 20104,
+  ChartOfAccounts: 30201,
   DocumentTypeMaps: 20201,
   GeographicRegions: 20133,
   GLSettings: 30110,
@@ -94,9 +95,12 @@ export const ResourceIds = {
   Routings: 42105,
   CreditOrder: 35301,
   UndeliveredCreditOrder: 35302,
+  CashInvoice: 35208,
   CreditInvoice: 35303,
   SalesPerson: 51201,
   SalesTarget: 51209,
   SystemFunction: 20105,
-  SmsRequestLog: 20132
+  SmsRequestLog: 20132,
+  ModuleDeactivation: 23107,
+  OutwardsTransfer: 36301
 }
