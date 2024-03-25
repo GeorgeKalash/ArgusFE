@@ -100,6 +100,7 @@ export const ResourceIds = {
   SalesPerson: 51201,
   SalesTarget: 51209,
   SystemFunction: 20105,
+  SmsRequestLog: 20132,
   ModuleDeactivation: 23107,
   OutwardsTransfer: 36301
 }

@@ -82,6 +82,7 @@ const CustomLookup = ({
                 return option
               }
             }}
+            
             // getOptionLabel={option => {
             //   if (typeof option === 'object' && Array.isArray(displayField)) {
             //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space

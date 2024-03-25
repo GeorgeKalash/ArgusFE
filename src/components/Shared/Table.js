@@ -82,7 +82,7 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
 }))
 
 const TableContainer = styled(Box)({
-  // height: '600px', // Change this value as needed
+  //height: '600px', // Change this value as needed
   // flex: 1,
   // overflow: 'auto', // Enable scrolling within the container
   position: 'relative'
@@ -381,7 +381,12 @@ const Table = ({
                     : gridData?.list
                   : []
               }
-              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
+              sx={{
+                minHeight: tableHeight,
+                overflow: 'auto',
+                position: 'relative',
+                pb: 2
+              }}
               density='compact'
               components={{
                 LoadingOverlay: LinearProgress,
