@@ -9,6 +9,7 @@ import { Box, Button, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 export function DataGrid({
   idName = 'id',
@@ -60,6 +61,8 @@ export function DataGrid({
 
   const [nextEdit, setNextEdit] = useState(null)
 
+  const skip = allowDelete ? 1 : 0
+
   useEffect(() => {
     if (!isUpdatingField && nextEdit) {
       const { id, field } = nextEdit
@@ -89,13 +92,13 @@ export function DataGrid({
       return
     }
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-    const columns = apiRef.current.getAllColumns()
+    const columns = apiRef.current.getVisibleColumns()
 
     const nextCell = findCell(params)
 
     const currentCell = { ...nextCell }
 
-    if (nextCell.columnIndex === columns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
+    if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
       if (error || !allowAddNewLine) {
         event.stopPropagation()
 
@@ -108,7 +111,7 @@ export function DataGrid({
         field: columns[nextCell.columnIndex].field
       })
 
-    if (nextCell.columnIndex === columns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
+    if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
       addRow()
     }
 
@@ -125,10 +128,10 @@ export function DataGrid({
 
     process.nextTick(() => {
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-      const columns = apiRef.current.getAllColumns()
+      const columns = apiRef.current.getVisibleColumns()
 
       if (!event.shiftKey) {
-        if (nextCell.columnIndex < columns.length - 2) {
+        if (nextCell.columnIndex < columns.length - 1 - skip) {
           nextCell.columnIndex += 1
         } else {
           nextCell.rowIndex += 1
@@ -261,6 +264,11 @@ export function DataGrid({
         }}
         onCellKeyDown={handleCellKeyDown}
         columnVisibilityModel={{
+          ...Object.fromEntries(
+            columns
+              .filter(({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) === HIDDEN)
+              .map(({ name }) => [name, false])
+          ),
           actions: allowDelete
         }}
         rows={value}
