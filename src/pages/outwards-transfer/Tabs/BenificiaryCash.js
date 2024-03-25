@@ -18,19 +18,27 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { DataSets } from 'src/resources/DataSets'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import toast from 'react-hot-toast'
 
-const BenificiaryCash = ({ maxAccess }) => {
+const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const [notArabic, setNotArabic] = useState(true)
+
   const [initialValues, setInitialData] = useState({
     //RTBEN
-    clientId: '',
-    beneficiaryId: '',
+    clientId: clientId || '',
+    beneficiaryId: 0,
     name: '',
-    dispersalType: null,
+    dispersalType: dispersalType || '',
     nationalityId: null,
     isBlocked: false,
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
+    addressLine1: '',
+    addressLine2: '',
 
     //RTBEC
     firstName: '',
@@ -42,9 +50,8 @@ const BenificiaryCash = ({ maxAccess }) => {
     fl_middleName: '',
     fl_familyName: '',
     countryId: '',
+    nationalityId: '',
     cellPhone: '',
-    addressLine1: '',
-    addressLine2: '',
     birthDate: null,
     birthPlace: ''
   })
@@ -62,11 +69,50 @@ const BenificiaryCash = ({ maxAccess }) => {
     validationSchema: yup.object({
       name: yup.string().required(' '),
       firstName: yup.string().required(' '),
-      lastName: yup.string().required(' '),
-      fl_firstName: yup.string().required(' '),
-      fl_lastName: yup.string().required(' ')
+      lastName: yup.string().required(' ')
     }),
-    onSubmit: values => {}
+    onSubmit: async values => {
+      const header = {
+        clientId: values.clientId,
+        beneficiaryId: values.beneficiaryId,
+        gender: values.gender,
+        name: values.name,
+        dispersalType: values.dispersalType,
+        isBlocked: values.isBlocked,
+        stoppedDate: values.stoppedDate,
+        stoppedReason: values.stoppedReason,
+        nationalityId: values.nationalityId,
+        addressLine1: values.addressLine1,
+        addressLine2: values.addressLine2
+      }
+
+      const cashInfo = {
+        clientId: values.clientId,
+        beneficiaryId: values.beneficiaryId,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        middleName: values.middleName,
+        familyName: values.familyName,
+        fl_firstName: values.fl_firstName,
+        fl_lastName: values.fl_lastName,
+        fl_middleName: values.fl_middleName,
+        fl_familyName: values.fl_familyName,
+        countryId: values.countryId,
+        cellPhone: values.cellPhone,
+        nationalityId: values.nationalityId,
+        birthDate: values.birthDate,
+        birthPlace: values.birthPlace
+      }
+      const data = { header: header, beneficiaryCash: cashInfo }
+
+      const res = await postRequest({
+        extension: RemittanceOutwardsRepository.BeneficiaryCash.set,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Updated Successfully')
+      }
+    }
   })
 
   const constructNameField = formValues => {
@@ -81,11 +127,21 @@ const BenificiaryCash = ({ maxAccess }) => {
         formik.setFieldValue('fl_middleName', middleName)
         formik.setFieldValue('fl_lastName', lastName)
         formik.setFieldValue('fl_familyName', familyName)
+        formik.setFieldValue('firstName', '')
+        formik.setFieldValue('middleName', '')
+        formik.setFieldValue('lastName', '')
+        formik.setFieldValue('familyName', '')
+        setNotArabic(false)
       } else {
         formik.setFieldValue('firstName', firstName)
         formik.setFieldValue('middleName', middleName)
         formik.setFieldValue('lastName', lastName)
         formik.setFieldValue('familyName', familyName)
+        formik.setFieldValue('fl_firstName', '')
+        formik.setFieldValue('fl_middleName', '')
+        formik.setFieldValue('fl_lastName', '')
+        formik.setFieldValue('fl_familyName', '')
+        setNotArabic(true)
       }
     }
   }
@@ -140,7 +196,7 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'first'}
               value={formik.values?.firstName}
               required
-              readOnly
+              readOnly={notArabic}
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('firstName', '')}
@@ -167,7 +223,7 @@ const BenificiaryCash = ({ maxAccess }) => {
               label={'last'}
               value={formik.values?.lastName}
               required
-              readOnly
+              readOnly={notArabic}
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('lastName', '')}
@@ -199,7 +255,6 @@ const BenificiaryCash = ({ maxAccess }) => {
               readOnly
               onChange={formik.handleChange}
               maxLength='20'
-              required
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_firstName', '')}
               error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
@@ -228,7 +283,6 @@ const BenificiaryCash = ({ maxAccess }) => {
               readOnly
               onChange={formik.handleChange}
               maxLength='20'
-              required
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_lastName', '')}
               error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
@@ -266,7 +320,7 @@ const BenificiaryCash = ({ maxAccess }) => {
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
-              name='countryId'
+              name='nationalityId'
               label={'Country'}
               valueField='recordId'
               displayField={['reference', 'name', 'flName']}
@@ -277,7 +331,13 @@ const BenificiaryCash = ({ maxAccess }) => {
               ]}
               values={formik.values}
               displayFieldWidth={1.25}
-              onChange={formik.handleChange}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  formik.setFieldValue('nationalityId', newValue?.recordId)
+                } else {
+                  formik.setFieldValue('nationalityId', '')
+                }
+              }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               maxAccess={maxAccess}
             />
@@ -349,7 +409,7 @@ const BenificiaryCash = ({ maxAccess }) => {
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
-              name='countryId'
+              name='nationalityId'
               label={'Nationality'}
               valueField='recordId'
               displayField={['reference', 'name', 'flName']}
@@ -360,7 +420,13 @@ const BenificiaryCash = ({ maxAccess }) => {
               ]}
               displayFieldWidth={1.25}
               values={formik.values}
-              onChange={formik.handleChange}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  formik.setFieldValue('nationalityId', newValue?.recordId)
+                } else {
+                  formik.setFieldValue('nationalityId', '')
+                }
+              }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               maxAccess={maxAccess}
             />

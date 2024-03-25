@@ -13,6 +13,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import toast from 'react-hot-toast'
 
 export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,7 +21,7 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
   const [initialValues, setInitialData] = useState({
     //RTBEN
     clientId: clientId || '',
-    beneficiaryId: '',
+    beneficiaryId: 0,
     name: '',
     dispersalType: dispersalType || '',
     nationalityId: null,
@@ -28,6 +29,8 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
+    addressLine1: '',
+    addressLine2: '',
 
     //RTBEB
     accountRef: '',
@@ -38,8 +41,6 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
     swiftCode: '',
     branchCode: '',
     branchName: '',
-    addressLine1: '',
-    addressLine2: '',
     nationalityId: '',
     stateId: '',
     cityId: '',
@@ -64,7 +65,9 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
         isBlocked: values.isBlocked,
         stoppedDate: values.stoppedDate,
         stoppedReason: values.stoppedReason,
-        nationalityId: values.nationalityId
+        nationalityId: values.nationalityId,
+        addressLine1: values.addressLine1,
+        addressLine2: values.addressLine2
       }
 
       const bankInfo = {
@@ -78,8 +81,6 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
         swiftCode: values.swiftCode,
         branchCode: values.branchCode,
         branchName: values.branchName,
-        addressLine1: values.addressLine1,
-        addressLine2: values.addressLine2,
         cityId: values.cityId,
         stateId: values.stateId,
         zipcode: values.zipcode
