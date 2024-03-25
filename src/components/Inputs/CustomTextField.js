@@ -84,6 +84,8 @@ const CustomTextField = ({
     }
   }
 
+  const required = props.required || accessLevel === MANDATORY
+
   return (
     <div style={{ display: _hidden ? 'none' : 'block' }}>
       <TextField
@@ -135,6 +137,7 @@ const CustomTextField = ({
             }
           }
         }}
+        required={required}
         {...props}
       />
     </div>

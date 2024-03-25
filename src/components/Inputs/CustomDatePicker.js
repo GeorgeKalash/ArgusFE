@@ -69,6 +69,8 @@ const CustomDatePicker = ({
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
 
+  const isRequired = required || accessLevel === MANDATORY
+
   return (
     <Box
       sx={{
@@ -96,7 +98,7 @@ const CustomDatePicker = ({
           slotProps={{
             // replacing clearable behaviour
             textField: {
-              required: required,
+              required: isRequired,
               size: size,
               fullWidth: fullWidth,
               error: error,

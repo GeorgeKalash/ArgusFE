@@ -49,6 +49,8 @@ const CustomLookup = ({
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
+  const isRequired = required || accessLevel === MANDATORY
+
   return (
     <Box
       sx={{
@@ -139,7 +141,7 @@ const CustomLookup = ({
                 type={type}
                 variant={variant}
                 label={label}
-                required={required}
+                required={isRequired}
                 onKeyUp={onKeyUp}
                 autoFocus={autoFocus}
                 error={error}
@@ -196,7 +198,7 @@ const CustomLookup = ({
               variant={variant}
               placeholder={displayField.toUpperCase()}
               value={secondValue ? secondValue : ''}
-              required={required}
+              required={isRequired}
               disabled={disabled}
               InputProps={{
                 readOnly: true

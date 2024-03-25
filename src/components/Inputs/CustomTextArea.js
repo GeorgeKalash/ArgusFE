@@ -43,6 +43,8 @@ const CustomTextArea = ({
     }
   }, [position])
 
+  const required = props.required || accessLevel === MANDATORY
+
   return (
     <Box sx={{ width: '100%', display: _hidden ? 'none' : 'block' }}>
       <TextField
@@ -76,6 +78,7 @@ const CustomTextArea = ({
               </InputAdornment>
             )
         }}
+        required={required}
         {...props}
       />
     </Box>
