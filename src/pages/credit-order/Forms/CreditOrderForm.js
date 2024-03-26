@@ -461,6 +461,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'qty',
       mandatory: true,
       width: 200,
+      maxAccessName: 'gridQty',
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       async onChange(row) {
         const rate = row.rowData?.exRate
