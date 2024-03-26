@@ -152,6 +152,8 @@ return (
 
   <FormShell
    form={formik}
+   isCleared={false}
+   infoVisible={false}
    resourceId={ResourceIds.ProductMaster}
    maxAccess={maxAccess}>
         <Box
@@ -169,7 +171,7 @@ return (
              error={formik.errors.productLegCommission}
              columns={columns}
              allowDelete={false}
-             height={height-100}
+             height={height-50}
              allowAddNewLine={false}/>
             </Grid>
           </Grid>

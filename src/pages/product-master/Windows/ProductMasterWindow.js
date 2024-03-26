@@ -51,6 +51,7 @@ const ProductMasterWindow = ({
           labels={labels}
           setEditMode={setEditMode}
           maxAccess={maxAccess}
+          editMode={editMode}
         />
       </CustomTabPanel>
      <CustomTabPanel height={height} index={1} value={activeTab}>
@@ -60,6 +61,7 @@ const ProductMasterWindow = ({
           labels={labels}
           maxAccess={maxAccess}
            height={height}
+           editMode={editMode}
         />
       </CustomTabPanel>
      <CustomTabPanel height={height} index={2} value={activeTab}>
@@ -68,6 +70,7 @@ const ProductMasterWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           height={height}
+          editMode={editMode}
         />
       </CustomTabPanel>
         <CustomTabPanel height={height} index={3} value={activeTab}>
@@ -77,6 +80,7 @@ const ProductMasterWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           height={height}
+          editMode={editMode}
         />
       </CustomTabPanel>
      <CustomTabPanel  height={height} index={4} value={activeTab}>
@@ -86,6 +90,7 @@ const ProductMasterWindow = ({
           labels={labels}
           maxAccess={maxAccess}
           height={height}
+          editMode={editMode}
         />
       </CustomTabPanel>
        <CustomTabPanel height={height}  index={5} value={activeTab}>
@@ -94,7 +99,8 @@ const ProductMasterWindow = ({
         setStore={setStore}
         labels={labels}
         maxAccess={maxAccess}
-        height={height}
+         height={height}
+         editMode={editMode}
         />
       </CustomTabPanel>
 

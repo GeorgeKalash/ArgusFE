@@ -108,8 +108,8 @@ const ProductMaster = () => {
         recordId: recordId? recordId : null,
         maxAccess: access,
       },
-      width: 1200,
-      height: 600,
+      width: 1000,
+      height: 500,
       title: _labels?.productMaster
     })
   }

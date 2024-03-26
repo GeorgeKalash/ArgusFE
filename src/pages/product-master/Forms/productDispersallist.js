@@ -52,7 +52,7 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, height }) =>
       flex: 1
     },
     {
-      field: 'dispersalType',
+      field: 'dispersalTypeName',
       headerName: labels.dispersalType,
       flex: 1
     },

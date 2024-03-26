@@ -147,7 +147,7 @@ const ProductLegForm = ({
   }
 
 return (
-  <FormShell form={formik}
+  store.plantId && store.currencyId  && <FormShell form={formik}
   resourceId={ResourceIds.ProductMaster}
   maxAccess={maxAccess}
   editMode={editMode}>
@@ -211,8 +211,6 @@ return (
          <Grid item xs={3}>{}
               <ResourceComboBox
                store={store?.dispersals}
-
-                // parameters={`_productId=${pId}`}
                 name='dispersalId'
                 label={labels.dispersal}
                 valueField= 'recordId'
@@ -228,12 +226,12 @@ return (
             </Grid>
           </Grid>
           <Grid xs={12}>
-            <DataGrid
+             && <DataGrid
                onChange={value => formik.setFieldValue('productLegs', value)}
                value={formik.values.productLegs}
                error={formik.errors.productLegs}
                 columns={columns}
-                height={height-100}
+                height={height-200}
             />
           </Grid>
         </Grid>

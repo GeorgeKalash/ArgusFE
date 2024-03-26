@@ -21,7 +21,7 @@ const ProductAgentForm = ({
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const {recordId : pId, dispersals} = store
-  const[ _dispersalId , setDispersalId] = useState()
+  const[ _dispersalId , setDispersalId] = useState({})
 
   const columns = [
     {
@@ -146,11 +146,11 @@ return (
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
                 ]}
-                values={formik?.values}
+                values={_dispersalId}
                 required
                 onChange={(event, newValue) => {
 
-                  setDispersalId(newValue?.recordId);
+                  setDispersalId({dispersalId : newValue?.recordId});
                   onDispersalSelection(newValue?.recordId)
 
                 }}
@@ -165,7 +165,7 @@ return (
             value={formik.values.agents}
             error={formik.errors.agents}
             columns={columns}
-            height={height-100}
+            height={height-200}
             />
           </Grid>
         </Grid>
