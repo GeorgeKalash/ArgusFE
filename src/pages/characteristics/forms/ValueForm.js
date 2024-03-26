@@ -20,6 +20,7 @@ const ValueForm = ({
   getValueGridData,
   recordId,
   seqNo,
+  window,
   chId
 }) => {
 
@@ -53,7 +54,7 @@ const ValueForm = ({
         if (recordId) {
           toast.success('Record Editted Successfully')
         } else toast.success('Record Added Successfully')
-
+        window.close()
       })
   }
 

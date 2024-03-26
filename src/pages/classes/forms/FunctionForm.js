@@ -14,12 +14,13 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 
-const NewFunctionForm = ({
+const FunctionForm = ({
   labels,
   maxAccess,
   getFunctionGridData,
   recordId,
   functionId,
+  window,
   editMode
 }) => {
 
@@ -51,10 +52,11 @@ const NewFunctionForm = ({
       record: JSON.stringify(obj)
     })
       .then(res => {
-        if (!classId) {
+        if (!editMode) {
           toast.success('Record Added Successfully')
         } else toast.success('Record Editted Successfully')
         getFunctionGridData(classId)
+        window.close()
       })
       .catch(error => {
         setErrorMessage(error)
@@ -123,4 +125,4 @@ return (
   )
 }
 
-export default NewFunctionForm
+export default FunctionForm

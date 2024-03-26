@@ -13,11 +13,12 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-const NewCharacteristicForm = ({
+const CharacteristicForm = ({
   labels,
   maxAccess,
   getCharacteristicGridData,
-  recordId
+  recordId,
+  window
 }) => {
 
   const { postRequest, getRequest} = useContext(RequestsContext)
@@ -48,10 +49,9 @@ const NewCharacteristicForm = ({
       record: JSON.stringify(obj)
     })
       .then(res => {
-        if (!classId) {
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Editted Successfully')
+        toast.success('Record Added Successfully')
         getCharacteristicGridData(classId)
+        window.close()
       })
       .catch(error => {
         setErrorMessage(error)
@@ -105,4 +105,4 @@ return (
   )
 }
 
-export default NewCharacteristicForm
+export default CharacteristicForm

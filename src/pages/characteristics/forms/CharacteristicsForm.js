@@ -44,7 +44,7 @@ const CharacteristicsForm = ({
     allowNegative: false,
     caseSensitive: false,
     textSize:'',
-    validFrom: new Date()
+    validFrom: null
   })
 
   const formik = useFormik({
@@ -55,11 +55,7 @@ const CharacteristicsForm = ({
       name: yup.string().required(' '),
       dataType: yup.string().required(' '),
       propertyName: yup.string().required(' '),
-      validFrom: yup.string().required(' '),
-      textSize: yup
-          .number()
-            .min(0, 'min')
-            .max(999, 'max'),
+      validFrom: yup.string().required(' ')
     }),
     onSubmit: values => {
       postCharacteristics(values)
@@ -89,6 +85,7 @@ const CharacteristicsForm = ({
             invalidate()
 
         } else {
+          invalidate()
           toast.success('Record Editted Successfully')
         }
       })
@@ -220,7 +217,7 @@ return (
           value={formik.values.textSize}
           onChange={formik.handleChange}
           maxAccess={maxAccess}
-          type='numeric'
+          type='number'
           onClear={() => formik.setFieldValue('textSize', '')}
           error={formik.touched.textSize && Boolean(formik.errors.textSize)}
         />
@@ -229,8 +226,7 @@ return (
         <CustomDatePicker
           name='validFrom'
           label={labels.validFrom}
-          value={formik?.values?.validFrom}
-          required
+          value={formik.values.validFrom}
           onChange={formik.setFieldValue}
           maxAccess={maxAccess}
           onClear={() => formik.setFieldValue('validFrom', '')}
