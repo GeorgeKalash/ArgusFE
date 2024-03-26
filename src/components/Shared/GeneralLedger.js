@@ -38,8 +38,9 @@ import { DataGrid } from './DataGrid';
 import { column } from 'stylis';
 import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
-import { getNewProductMaster } from 'src/Models/RemittanceSettings/ProductMaster';
+
 import { formatDateDefault, formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+
 
 const GeneralLedger =({ labels,recordId ,functionId,formValues,maxAccess}) => {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -56,7 +57,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
   
       return await getRequest({
         extension: GeneralLedgerRepository.GeneralLedger.qry,
-        parameters: `_functionId=${functionId}&_recordId=${recordId}`
+        parameters: `_functionId=${functionId}&_recordId=${formValues.recordId}`
       })
     }
     
@@ -84,14 +85,15 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
           
           tpAccountName: '',
           currency: {
-            reference: ""
+            reference: '',
+            recordId:''
           },
           sign: {
             key: ""
           },
           notes: '',
           functionId:functionId,
-          exRate: '',
+          exRate:'',
           amount: '',
           baseAmount: '',
           
@@ -114,26 +116,29 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       amount: yup.number().positive('Amount must be positive').required('Amount is required'),
       baseAmount: yup.number().positive('Base amount must be positive').required('Base amount is required'),
     });
-  
+    
     const formikValidationSchema = yup.object().shape({
       generalAccount: yup.array().of(generalAccountItemSchema).required('General account entries are required'),
     });
 
- 
-
     const formik2 = useFormik({
       initialValues,
       enableReinitialize: true,
+
       validationSchema:formikValidationSchema,
       validateOnChange: true,
       onSubmit: async (values) => {{
+        console.log('recordId',formik2.values.recordId)
+        console.log('general',values.generalAccount)
+
+
           const data = {
             transactions: values.generalAccount.map(({ id, exRate, account, sign, tpAccount, functionId, currency, ...rest }) => ({
               seqNo: id,
               accountId: account.recordId,
               exRate,
               sign: sign.key,
-              tpAccountId: tpAccount.recordId,
+              tpAccountId: tpAccount?.recordId,
               functionId,
               rateCalcMethod: 1,
               currencyId: currency.recordId, 
@@ -141,11 +146,13 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
             })),
             date: formatDateToApi(values.date),
             functionId: values.functionId,
-            recordId: values.recordId,
+            recordId: formValues.recordId,
             reference: values.reference,
           };
-      
+          
+          
           console.log('Submitting data:', data);
+
       
           
           const response = await postRequest({
@@ -162,36 +169,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       },
     });
 
-async function getData(id){
 
-  const res = await getRequest({
-    extension: GeneralLedgerRepository.GeneralLedger.qry,
-    parameters: `_recordId=${id}&_functionId=${functionId}`
-
-  })
-     formik2.setValues({
-        
-      generalAccount: res.list.map(
-          ({ seqNo, currencyId, currencyName, currencyRef,  ...rest }) => ({
-            id : seqNo,
-            currencyId: currencyId,
-            currency :{
-             recordId: currencyId, name :currencyName, reference :currencyRef
-            },
-   
-           ...rest
-          })
-        )
-      })
-}
-
-    
-    useEffect(() => {
-      if (formValues.recordId) {
-        getData(formValues.recordId);
-      }
-    }, [formValues.recordId]);
-    
 
 
 
@@ -249,13 +227,21 @@ async function getData(id){
           } else if (curr.sign?.key == '1') {
             acc[currency].debit += parseFloat(curr.amount || 0);
           }
-          console.log(formik2)
 
           return acc;
-          
+
         }, {});
     
-        const currencyData = Object.entries(currencyTotals).map(([currency, { credit, debit }]) => ({
+        // Filter out entries where the currency reference is not provided
+        const filteredCurrencyTotals = Object.entries(currencyTotals).reduce((acc, [currency, data]) => {
+          if (currency) { // Check if currency is not undefined or empty
+            acc[currency] = data;
+          }
+
+          return acc;
+        }, {});
+    
+        const currencyData = Object.entries(filteredCurrencyTotals).map(([currency, { credit, debit }]) => ({
           currency,
           credit,
           debit,
@@ -268,11 +254,16 @@ async function getData(id){
     }, [formik2.values]);
 
     console.log('formik2',formik2)
+
+
+
     useEffect(() => {
+
+
+      
+      
       if (data && data.list.length>0 && Array.isArray(data.list)) {
-
-          console.log(data);
-
+      
         const generalAccount=  data.list.map((row, idx) => ({
           id: idx,
           account: {accountRef: row.accountRef,
@@ -300,6 +291,29 @@ async function getData(id){
 
       formik2.setFieldValue("generalAccount", generalAccount);
       }
+
+      // else{
+      //   async function fetchCurrencyExchangeRate() {
+      //     if (formValues.currencyId) {
+      //       try {
+      //         const res = await getCurrencyApi(formValues.currencyId);
+      //         if (res && res.record) {
+      //           setInitialData(prevState => ({
+      //             ...prevState,
+      //             generalAccount: prevState.generalAccount.map((account, index) =>
+      //               index === 0 ? { ...account, exRate: res.record.exRate } : account
+      //             ),
+      //           }));
+      //         }
+      //       } catch (error) {
+      
+      //         console.error("Failed to fetch currency exchange rate:", error);
+      //       }
+      //     }
+      //   }
+        
+      //   fetchCurrencyExchangeRate();
+      // }
     }, [data]);
 
     const RateDivision = {
@@ -356,7 +370,6 @@ async function getData(id){
       })
       
     }
-  
 
 
 
@@ -469,10 +482,19 @@ async function getData(id){
       async onChange({ row: { update, oldRow, newRow } }) {
         console.log('newRow',newRow)
         if(!newRow?.currency?.recordId){
-        return;
+          return
+  
+        
         }
-       
 
+        else{
+          newRow.currency= {
+            reference:formValues.currencyRef,
+            recordId:formValues.currencyId
+          }
+         
+        }
+        
         const result = await getCurrencyApi(newRow?.currency?.recordId)
 
         const result2 = result.record
