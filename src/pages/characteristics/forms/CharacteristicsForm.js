@@ -68,11 +68,12 @@ const CharacteristicsForm = ({
 
   const postCharacteristics = obj => {console.log(obj.validFrom)
     const recordId = obj?.recordId || ''
-    const vForm = formatDateToApi(obj.validFrom)
+    const date =  obj?.validFrom && formatDateToApi(obj?.validFrom)
+    const data = { ...obj, validFrom : date }
     console.log(obj.validFrom)
     postRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.set,
-      record: JSON.stringify(obj)
+      record: JSON.stringify(data)
     })
       .then(res => {
         if (!recordId) {
