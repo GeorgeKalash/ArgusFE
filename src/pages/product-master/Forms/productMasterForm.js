@@ -29,6 +29,7 @@ const ProductMasterForm = ({
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const {recordId : pId } = store
+  const[ type, setType] = useState('')
 
   const[ initialValues, setData] = useState({
     recordId: null,
@@ -63,8 +64,7 @@ const ProductMasterForm = ({
       interfaceId:  yup.string().required('This field is required'),
       commissionBase:  yup.string().required('This field is required'),
       isInactive:  yup.string().required('This field is required'),
-
-      // corId : type==="1" ? yup.string().required('This field is required') : yup.string().notRequired()
+      corId : type==="1" ? yup.string().required('This field is required') : yup.string().notRequired()
     }),
     onSubmit: values => {
       postProductMaster(values)
@@ -124,7 +124,7 @@ return (
   <FormShell form={formik}
    resourceId={ResourceIds.ProductMaster}
    maxAccess={maxAccess}
-   editMode={editMode}>      <Grid container>
+   editMode={editMode} >      <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
@@ -164,6 +164,7 @@ return (
               required
               onChange={(event, newValue) => {
                 formik && formik.setFieldValue('type', newValue?.key);
+                setType(newValue?.key)
               }}
               error={formik.touched.type && Boolean(formik.errors.type)}
               helperText={formik.touched.type && formik.errors.type}
