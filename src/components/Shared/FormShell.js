@@ -64,7 +64,7 @@ export default function FormShell({
       Component: Approvals,
       props: {
         recordId: form.values.recordId,
-        functionId: form.values.functionId
+        functionId: form.values.functionId ?? functionId
       },
       width: 1000,
       height: 500,
