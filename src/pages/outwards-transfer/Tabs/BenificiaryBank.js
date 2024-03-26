@@ -1,7 +1,7 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -10,34 +10,41 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import toast from 'react-hot-toast'
 
-export default function BenificiaryBank({ maxAccess }) {
+export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
   const [initialValues, setInitialData] = useState({
     //RTBEN
-    clientId: '',
-    beneficiaryId: '',
+    clientId: clientId || '',
+    beneficiaryId: 0,
     name: '',
-    dispersalType: null,
+    dispersalType: dispersalType || '',
     nationalityId: null,
     isBlocked: false,
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
+    addressLine1: '',
+    addressLine2: '',
 
     //RTBEB
     accountRef: '',
+    accountType: '',
     IBAN: '',
     bankName: '',
     routingNo: '',
     swiftCode: '',
     branchCode: '',
     branchName: '',
-    addressLine1: '',
-    addressLine2: '',
     nationalityId: '',
     stateId: '',
     cityId: '',
-    zipCode: '',
+    zipcode: '',
     remarks: ''
   })
 
@@ -48,7 +55,46 @@ export default function BenificiaryBank({ maxAccess }) {
     validationSchema: yup.object({
       name: yup.string().required(' ')
     }),
-    onSubmit: values => {}
+    onSubmit: async values => {
+      const header = {
+        clientId: values.clientId,
+        beneficiaryId: values.beneficiaryId,
+        gender: values.gender,
+        name: values.name,
+        dispersalType: values.dispersalType,
+        isBlocked: values.isBlocked,
+        stoppedDate: values.stoppedDate,
+        stoppedReason: values.stoppedReason,
+        nationalityId: values.nationalityId,
+        addressLine1: values.addressLine1,
+        addressLine2: values.addressLine2
+      }
+
+      const bankInfo = {
+        clientId: values.clientId,
+        beneficiaryId: values.beneficiaryId,
+        accountRef: values.accountRef,
+        accountType: values.accountType,
+        IBAN: values.IBAN,
+        bankName: values.name,
+        routingNo: values.routingNo,
+        swiftCode: values.swiftCode,
+        branchCode: values.branchCode,
+        branchName: values.branchName,
+        cityId: values.cityId,
+        stateId: values.stateId,
+        zipcode: values.zipcode
+      }
+      const data = { header: header, beneficiaryBank: bankInfo }
+
+      const res = await postRequest({
+        extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Updated Successfully')
+      }
+    }
   })
 
   return (
@@ -58,7 +104,7 @@ export default function BenificiaryBank({ maxAccess }) {
     >
       <Grid container>
         {/* First Column */}
-        <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+        <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
           <Grid item xs={12}>
             <CustomTextField
               name='name'
@@ -71,9 +117,34 @@ export default function BenificiaryBank({ maxAccess }) {
               maxAccess={maxAccess}
             />
           </Grid>
+          <Grid item xs={12}>
+            <ResourceLookup
+              endpointId={CashBankRepository.CashAccount.snapshot}
+              parameters={{
+                _type: 1
+              }}
+              valueField='accountNo'
+              displayField='name'
+              name='accountId'
+              label='Account Ref'
+              form={formik}
+              valueShow='accountRef'
+              secondDisplayField={false}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  formik.setFieldValue('accountId', newValue?.recordId)
+                  formik.setFieldValue('accountRef', newValue?.accountNo)
+                } else {
+                  formik.setFieldValue('accountId', null)
+                  formik.setFieldValue('accountRef', null)
+                }
+              }}
+              errorCheck={'accountId'}
+            />
+          </Grid>
 
           <Grid item xs={12}>
-            <CustomTextArea
+            <CustomTextField
               name='branchName'
               label='Branch Name'
               rows={3}
@@ -103,7 +174,13 @@ export default function BenificiaryBank({ maxAccess }) {
               valueField='key'
               displayField='value'
               values={formik.values}
-              onChange={formik.handleChange}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  formik.setFieldValue('accountType', newValue?.key)
+                } else {
+                  formik.setFieldValue('accountType', '')
+                }
+              }}
               error={formik.touched.accountType && Boolean(formik.errors.accountType)}
             />
           </Grid>
@@ -210,7 +287,7 @@ export default function BenificiaryBank({ maxAccess }) {
           </Grid>
         </Grid>
         {/* Second Column */}
-        <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+        <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
           <Grid item xs={12}>
             <ResourceComboBox
               datasetId={DataSets.GENDER}
@@ -219,18 +296,25 @@ export default function BenificiaryBank({ maxAccess }) {
               valueField='key'
               displayField='value'
               values={formik.values}
-              onChange={formik.handleChange}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  formik.setFieldValue('gender', newValue?.key)
+                } else {
+                  formik.setFieldValue('gender', '')
+                }
+              }}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
+              helperText={formik.touched.gender && formik.errors.gender}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
-              name='zipCode'
+              name='zipcode'
               label='Zip Code'
-              value={formik.values.zipCode}
+              value={formik.values.zipcode}
               maxLength='30'
               onChange={formik.handleChange}
-              error={formik.touched.zipCode && Boolean(formik.errors.zipCode)}
+              error={formik.touched.zipcode && Boolean(formik.errors.zipcode)}
               maxAccess={maxAccess}
             />
           </Grid>

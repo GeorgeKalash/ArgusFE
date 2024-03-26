@@ -632,7 +632,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
-          setIsTFR((res.record.releaseStatus===3 && res.record.status!==3 ) ? true : false)
+          setIsTFR(res.record.releaseStatus === 3 && res.record.status !== 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
@@ -653,25 +653,25 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode,
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus===3 && formik.values.status===3),
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
     },
     {
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled:!isClosed,
+      disabled: !isClosed
     },
     {
-      key:'Invoice',
+      key: 'Invoice',
       condition: onTFR,
       onClick: onTFR,
-      disabled: !isTFR,
+      disabled: !isTFR
     }
   ]
 

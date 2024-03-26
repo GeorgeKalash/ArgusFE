@@ -23,9 +23,20 @@ export const RemittanceOutwardsRepository = {
     set: service + 'setOW',
     del: service + 'delOW',
     close: service + 'closeOW',
-    reopen: service + 'reopenOW'
+    reopen: service + 'reopenOW',
+    snapshot: service + 'snapshotOW'
   },
   Beneficiary: {
     snapshot: service + 'snapshotBEN'
+  },
+  BeneficiaryBank: {
+    qry: service + 'qryBEB',
+    get: service + 'getBEB',
+    set: service + 'set2BEB'
+  },
+  BeneficiaryCash: {
+    qry: service + 'qryBEC',
+    get: service + 'getBEC',
+    set: service + 'set2BEC'
   }
 }
