@@ -34,6 +34,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
+  const [isPosted, setIsPosted] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -537,6 +538,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           setInitialData(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
+          setIsPosted(res.record.status === 3 ? true : false)
         }
       } catch (error) {
       } finally {
@@ -545,14 +547,34 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
-  console.log('editMode ', editMode)
+
+  const onPost = async () => {
+    const obj = formik.values
+
+    const res = await postRequest({
+      extension: CTTRXrepository.CreditInvoice.post,
+      record: JSON.stringify(obj)
+    })
+
+    if (res?.recordId) {
+      toast.success('Record Posted Successfully')
+      invalidate()
+      setIsPosted(true)
+    }
+  }
 
   const actions = [
     {
-      key:'GL',
-      condition: editMode,
-      onClick: 'newHandler' ,
-      disabled:!editMode,
+      key: 'GL',
+      condition: true,
+      onClick: 'newHandler',
+      disabled: !editMode
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode && !isPosted
     }
   ]
 
@@ -592,6 +614,10 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
               values={formik.values}
               valueField='recordId'
               displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               required
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
