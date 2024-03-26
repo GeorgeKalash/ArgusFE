@@ -1,6 +1,6 @@
 import { Grid, Box, Checkbox } from '@mui/material'
 import { useFormik } from 'formik'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 
 // ** Custom Imports
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -14,9 +14,10 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 
-const ProductSchedulesTab = ({
+const ProductSchedulesForm = ({
   store,
   labels,
+  setStore,
   editMode,
   height,
   maxAccess }) => {
@@ -27,7 +28,36 @@ const ProductSchedulesTab = ({
     const formik = useFormik({
       enableReinitialize: false,
       validateOnChange: true,
-
+      validationSchema: yup.object({ schedules: yup
+        .array()
+        .of(
+          yup.object().shape({
+            currency: yup
+              .object()
+              .shape({
+                recordId: yup.string().required('currency recordId is required')
+              })
+              .required('currency is required'),
+              country: yup
+              .object()
+              .shape({
+                countryId: yup.string().required('Country recordId is required')
+              })
+              .required('Country is required'),
+              plant: yup
+              .object()
+              .shape({
+                recordId: yup.string().required('plant recordId is required')
+              })
+              .required('plant is required'),
+              dispersal: yup
+              .object()
+              .shape({
+                recordId: yup.string().required('dispersal recordId is required')
+              })
+              .required('dispersal is required')
+          })
+        ).required('schedules array is required') }),
       initialValues: {
         schedules: [
           { id:1,
@@ -47,7 +77,8 @@ const ProductSchedulesTab = ({
             dispersalRef:'',
             dispersalType: '',
             dispersalTypeName: '',
-            isInactive: false
+            isInactive: false,
+            saved:false
           }
         ]
       },
@@ -60,13 +91,14 @@ const ProductSchedulesTab = ({
       const data = {
         productId: pId,
         productSchedules: obj.map(
-          ({ country, id, countryId, currency, currencyId, plant, plantId,dispersalId, dispersalType, dispersal,...rest} ) => ({
+          ({ country, id,seqNo, countryId, currency, currencyId, plant, plantId,dispersalId, dispersalType, dispersal,productId, saved,...rest}, index ) => ({
+              seqNo: index +1,
               productId: pId,
               countryId: country.countryId,
               currencyId: currency.recordId,
               plantId: plant.recordId,
               dispersalId: dispersal.recordId,
-              dispersalType: dispersal.dispersalType,
+              dispersalType: dispersalType.key,
               plantId: plant.recordId,
               ...rest
           }))
@@ -77,6 +109,7 @@ const ProductSchedulesTab = ({
       })
         .then(res => {
           if (res) toast.success('Record Edited Successfully')
+          getProductSchedules(pId)
         })
         .catch(error => {
           // setErrorMessage(error)
@@ -87,17 +120,24 @@ const ProductSchedulesTab = ({
 
     {
       component: 'button',
-      label: 'select',
-      name : 'select',
+
+      label: labels.select,
+       name : 'saved',
       onClick: (e, row) => {
-        // productLegValidation.setValues(populateProductScheduleRange(row))
-        // resetScheduleRanges(row)
-        // getCorrespondentScheduleRange(row)
-      }
+           setStore(prevStore => ({
+          ...prevStore,
+          plantId: row.plant.recordId,
+          currencyId:row.currency.recordId,
+          countryId: row.country.countryId,
+          dispersalId:row.dispersal.recordId,
+          _seqNo: row.seqNo
+           }));
+
+    }
     },
     {
       component: 'resourcecombobox',
-      label: 'Country',
+      label: labels.country,
       name: 'country',
       props: {
         store: countries,
@@ -113,14 +153,15 @@ const ProductSchedulesTab = ({
     },
     {
       component: 'textfield',
-      label: 'name',
+      label: labels.name,
       name: 'countryName',
-      mandatory: false,
-      readOnly: true
+      props:{
+        readOnly: true
+      }
     },
     {
       component: 'resourcecombobox',
-      label: 'plant',
+      label: labels.plant,
       name: 'plant',
       props: {
         endpointId: SystemRepository.Plant.qry,
@@ -136,14 +177,15 @@ const ProductSchedulesTab = ({
     },
     {
       component: 'textfield',
-      label: 'name',
+      label: labels.name,
       name: 'plantName',
-      mandatory: false,
-      readOnly: true
+      props:{
+        readOnly: true
+      }
     },
     {
       component: 'resourcecombobox',
-      label: 'Currency',
+      label: labels.currency,
       name: 'currency',
       props: {
         endpointId: SystemRepository.Currency.qry,
@@ -159,46 +201,52 @@ const ProductSchedulesTab = ({
     },
     {
       component: 'textfield',
-      label: 'name',
+      label: labels.name,
       name: 'currencyName',
-      mandatory: false,
-      readOnly: true
+      props:{
+        readOnly: true
+      }
     },
     {
       component: 'resourcecombobox',
-      label: 'Dispersal Type',
+      label: labels.dispersal,
       name: 'dispersal',
       props: {
-        endpointId: RemittanceSettingsRepository.ProductDispersal.qry,
+        endpointId: pId && RemittanceSettingsRepository.ProductDispersal.qry,
         parameters :`_productId=${pId}`,
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 3,
-        fieldsToUpdate: [ { from: 'name', to: 'dispersalName' } ],
+        fieldsToUpdate: [ { from: 'name', to: 'dispersalName' },
+       ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
         ]
       },
-      async onChange({ row: { update, newRow }}) {
-        console.log(newRow)
-        update({dispersalType: {key : newRow.dispersal.dispersalType, value: newRow.dispersal.dispersalTypeName} , dispersalName:newRow.dispersal.name})
+      async onChange({ row: { update, newRow , oldRow}}) {
+        if( newRow.dispersal.recordId && newRow.dispersal.recordId != oldRow?.dispersal?.recordId ){
+         update({dispersalType: {key : newRow.dispersal.dispersalType, value: newRow.dispersal.dispersalTypeName} , dispersalName: newRow.dispersal.name})
+        }
+        if(!newRow.dispersal){
+          update({dispersalType: {key : '', value: ''} , dispersalName: ''})
+        }
       }
     },
     {
       component: 'textfield',
-      label: 'name',
+      label: labels.name,
       name: 'dispersalName',
-      mandatory: false,
-      readOnly: true
+      props:{
+        readOnly: true
+      }
     },
     {
       component: 'resourcecombobox',
-      label: 'Dispersal Type',
+      label: labels.dispersalType,
       name: 'dispersalType',
       props: {
-        datasetId: DataSets.RT_Dispersal_Type,
-        parameters :`_productId=${pId}`,
+        datasetId:  DataSets.RT_Dispersal_Type,
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
@@ -206,10 +254,57 @@ const ProductSchedulesTab = ({
     },
     {
       component: 'checkbox',
-      label: 'is inactive',
+      label: labels.isInactive,
       name: 'isInactive'
     }
   ]
+
+  useEffect(()=>{
+    pId  && getProductSchedules(pId)
+  }, [pId])
+
+  const getProductSchedules = pId => {
+    const defaultParams = `_productId=${pId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductSchedules.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0)
+        formik.setValues({ schedules: res.list.map(({ countryId,  countryRef, currencyId, currencyRef, plantId, plantRef,dispersalId, dispersalRef, dispersalType, dispersalTypeName, ...rest } , index)=>({
+          id : index + 1,
+          country : {
+            countryId,
+            countryRef
+         },
+         currency : {
+          recordId: currencyId,
+          reference: currencyRef
+         },
+         plant: {
+          recordId: plantId,
+          reference: plantRef
+         },
+         dispersal: {
+          recordId: dispersalId,
+          reference: dispersalRef
+         },
+
+          dispersalType : {
+          key: dispersalType,
+          value: dispersalTypeName
+         },
+
+         saved: true,
+          ...rest
+
+        }))
+     })
+      })
+      .catch(error => {
+      })
+  }
 
 return (
   <FormShell form={formik}
@@ -228,7 +323,7 @@ return (
           <Grid xs={12}>
             <DataGrid
 
-              idName='seqNo'
+              // idName='seqNo'
                onChange={value => formik.setFieldValue('schedules', value)}
                value={formik.values.schedules}
                error={formik.errors.schedules}
@@ -243,4 +338,4 @@ return (
   )
 }
 
-export default ProductSchedulesTab
+export default ProductSchedulesForm

@@ -12,7 +12,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const ProductCountriesTab = ({
+const ProductCountriesForm = ({
   store,
   setStore,
   labels,
@@ -59,7 +59,7 @@ const ProductCountriesTab = ({
       const data = {
         productId: pId,
         productCountries : obj?.map(
-        ({country, id, countryId,...rest} ) => ({
+        ({country, id, countryId,productId,...rest} ) => ({
           productId: pId,
             countryId: country.recordId,
             ...rest
@@ -81,7 +81,7 @@ const ProductCountriesTab = ({
     const column = [
       {
         component: 'resourcecombobox',
-        label: 'Country',
+        label: labels.country,
         name: 'country',
         props: {
           endpointId: SystemRepository.Country.qry,
@@ -96,14 +96,14 @@ const ProductCountriesTab = ({
       },
       {
         component: 'textfield',
-        label: 'name',
+        label: labels.name,
         name: 'countryName',
         mandatory: false,
         readOnly: true
       },
       {
         component: 'checkbox',
-        label: 'is inactive',
+        label: labels.isInactive,
         name: 'isInactive'
       }
     ]
@@ -149,9 +149,9 @@ const ProductCountriesTab = ({
 
   return (
     <FormShell form={formik}
-    resourceId={ResourceIds.ProductMaster}
-    maxAccess={maxAccess}
-    editMode={editMode}>
+      resourceId={ResourceIds.ProductMaster}
+      maxAccess={maxAccess}
+      editMode={editMode}>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
         <DataGrid
            onChange={value => formik.setFieldValue('countries', value)}
@@ -165,4 +165,4 @@ const ProductCountriesTab = ({
   )
 }
 
-export default ProductCountriesTab
+export default ProductCountriesForm

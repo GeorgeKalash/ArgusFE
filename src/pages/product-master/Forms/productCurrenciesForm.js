@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 import { useFormik } from 'formik'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -11,8 +11,9 @@ import toast from 'react-hot-toast'
 // ** Custom Imports
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 
-const ProductCurrenciesTab = ({
+const ProductCurrenciesForm = ({
   store,
   labels,
   editMode,
@@ -24,7 +25,32 @@ const ProductCurrenciesTab = ({
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const formik = useFormik({
-    initialValues: {
+    validationSchema: yup.object({ currencies: yup
+      .array()
+      .of(
+        yup.object().shape({
+          currency: yup
+            .object()
+            .shape({
+              recordId: yup.string().required('currency  is required')
+            })
+            .required('currency is required'),
+            country : yup
+            .object()
+            .shape({
+              countryId: yup.string().required('Country  is required')
+            })
+            .required('Country is required'),
+            dispersalType : yup
+            .object()
+            .shape({
+              key: yup.string().required('Dispersal Type  is required')
+            })
+            .required('Country is required'),
+        })
+
+      ).required('Operations array is required') }),
+      initialValues: {
       currencies: [
         { id:1,
           productId: pId,
@@ -43,19 +69,19 @@ const ProductCurrenciesTab = ({
     enableReinitialize: false,
     validateOnChange: true,
     onSubmit: values => {
-      postProductMonetaries(values.currencies)
+      post(values.currencies)
     }
   })
 
-  const postProductMonetaries = obj => {
+  const post = obj => {
     const data = {
       productId: pId,
       productMonetaries: obj.map(
-        ({ country, id, countryId, currency, currencyId, dispersalType, dispersal,...rest} ) => ({
+        ({ country, id, countryId, currency, currencyId, dispersalType, productId,...rest} ) => ({
             productId: pId,
             countryId: country.countryId,
             currencyId: currency.recordId,
-            dispersalType: dispersal.recordId,
+            dispersalType: dispersalType.key,
             ...rest
         }))
     }
@@ -74,7 +100,7 @@ const ProductCurrenciesTab = ({
   const columns = [
     {
       component: 'resourcecombobox',
-      header: 'Country',
+      label: labels.country,
       name: 'country',
       props: {
         store: countries,
@@ -89,14 +115,14 @@ const ProductCurrenciesTab = ({
     },
     {
       component: 'textfield',
-      header: 'name',
+      label: labels.name,
       name: 'countryName',
       mandatory: false,
       readOnly: true
     },
     {
       component: 'resourcecombobox',
-      label: 'Currency',
+      label: labels.currency,
       name: 'currency',
       props: {
         endpointId: SystemRepository.Currency.qry,
@@ -111,7 +137,7 @@ const ProductCurrenciesTab = ({
     },
     {
       component: 'textfield',
-      label: 'name',
+      label: labels.name,
       name: 'currencyName',
       mandatory: false,
       readOnly: true
@@ -119,27 +145,57 @@ const ProductCurrenciesTab = ({
 
     {
       component: 'resourcecombobox',
-      label: 'Dispersal Type',
-      name: 'dispersal',
+      label: labels.dispersalType,
+      name: 'dispersalType',
       props: {
-        endpointId: RemittanceSettingsRepository.ProductDispersal.qry,
-        parameters :`_productId=${pId}`,
-        valueField: 'recordId',
-        displayField: 'reference',
-
-        // fieldsToUpdate: [ { from: 'name', to: 'dispersalName' } ],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
-        ]
+        datasetId:  DataSets.RT_Dispersal_Type,
+        valueField: 'key',
+        displayField: 'value',
       }
+
     },
     {
       component: 'checkbox',
-      label: 'is inactive',
+      label: labels.isInactive,
       name: 'isInactive'
     }
   ]
+
+  useEffect(()=>{
+    pId  && getMonetaries(pId)
+  }, [pId])
+
+  const getMonetaries = pId => {
+
+    const defaultParams = `_productId=${pId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductMonetaries.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        if (res.list.length > 0)
+         formik.setValues({ currencies: res.list.map(({ countryId,  countryRef, countryName,currencyId,currencyName,currencyRef, dispersalType, dispersalTypeName, ...rest } , index) => ({
+          id : index,
+          country : {
+            countryId,
+            countryRef
+         },
+         countryName: countryName,
+         currency : {
+          recordId: currencyId,
+          reference: currencyRef
+         },
+         currencyName: currencyName,
+          dispersalType :{
+          key: dispersalType,
+          value: dispersalTypeName
+         },
+
+          ...rest
+       })) })
+      })
+  }
 
 return (
   <FormShell form={formik}
@@ -161,4 +217,4 @@ return (
 }
 
 
-export default ProductCurrenciesTab
+export default ProductCurrenciesForm

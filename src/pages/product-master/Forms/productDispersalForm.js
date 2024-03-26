@@ -16,6 +16,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 const ProductDispersalForm = ({
   pId,
+  labels,
   recordId,
   getGridData,
   maxAccess,
@@ -97,19 +98,12 @@ return (
    resourceId={ResourceIds.ProductMaster}
    maxAccess={maxAccess}
   >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%'
-          }}
-        >
-          <Grid container gap={2}>
+     <Grid container gap={2}>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='reference'
-                  label='Reference'
+                  label={labels.reference}
                   value={formik.values.reference}
                   required
                   readOnly={false}
@@ -123,7 +117,7 @@ return (
               <Grid item xs={12}>
                 <CustomTextField
                   name='name'
-                  label='Name'
+                  label={labels.name}
                   value={formik.values.name}
                   required
                   readOnly={false}
@@ -137,7 +131,7 @@ return (
               <Grid item xs={12}>
                 <ResourceComboBox
                   name='dispersalType'
-                  label='dispersalType'
+                  label={labels.dispersalType}
                   datasetId={DataSets.RT_Dispersal_Type}
                   valueField='key'
                   displayField='value'
@@ -160,7 +154,7 @@ return (
                       onChange={formik.handleChange}
                     />
                   }
-                  label='Is Default'
+                  label={labels.isDefault}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -173,12 +167,12 @@ return (
                       onChange={formik.handleChange}
                     />
                   }
-                  label='Is inactive'
+                  label={labels.isInactive}
                 />
               </Grid>
             </Grid>
           </Grid>
-        </Box>
+
         </FormShell>
 
   )

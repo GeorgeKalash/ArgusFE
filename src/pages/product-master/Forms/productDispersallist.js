@@ -44,27 +44,27 @@ const ProductDispersalTab = ({ store, setStore, labels, maxAccess, height }) => 
   const columns = [
     {
       field: 'reference',
-      headerName: 'Reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: 'Name',
+      headerName: labels.name,
       flex: 1
     },
     {
-      field: 'dispersalTypeName',
-      headerName: 'Dispersal Type',
+      field: 'dispersalType',
+      headerName: labels.dispersalType,
       flex: 1
     },
     {
       field: 'isInactive',
-      headerName: 'is Inactive',
+      headerName: labels.isInactive,
       flex: 1
     },
     {
       field: 'isDefault',
-      headerName: 'is Default',
+      headerName:labels.isDefault,
       flex: 1
     }
   ]

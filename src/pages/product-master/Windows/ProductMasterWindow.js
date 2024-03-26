@@ -2,13 +2,14 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
-import ProductMasterTab from '../Tabs/productMasterTab'
-import ProductCountriesTab from '../Tabs/productCountriesTab'
-import ProductCurrenciesTab from '../Tabs/productCurrenciesTab'
-import ProductDispersalTab from '../Tabs/productDispersalTab'
-import ProductSchedulesTab from '../Tabs/productSchedulesTab'
-import ProductFieldTab from '../Tabs/productFieldTab'
-import ProductAgentTab from '../Tabs/productAgentTab'
+import ProductAgentForm from '../Forms/productAgentForm'
+import ProductLegForm from '../Forms/productLegForm'
+import ProductSchedulesForm from '../Forms/productSchedulesForm'
+import ProductDispersalForm from '../Forms/productDispersalForm'
+import ProductCurrenciesForm from '../Forms/productCurrenciesForm'
+import ProductCountriesForm from '../Forms/productCountriesForm'
+import ProductMasterForm from '../Forms/productMasterForm'
+import ProductDispersalList from '../Forms/productDispersallist'
 
 const ProductMasterWindow = ({
   labels,
@@ -22,7 +23,12 @@ const ProductMasterWindow = ({
   const [store , setStore] = useState({
     recordId : recordId || null,
     countries: null,
-    dispersals: null
+    dispersals: null,
+    _seqNo: null,
+    plantId: null,
+    currencyId:null,
+    countryId:null,
+    dispersalId:null
   })
 
   const tabs = [
@@ -32,7 +38,6 @@ const ProductMasterWindow = ({
     { label: labels.dispersal, disabled: !editMode },
     { label: labels.schedules, disabled: !editMode },
     { label: labels.amountRange, disabled: !editMode },
-    { label: labels.field, disabled: !editMode },
     { label: labels.agent, disabled: !editMode }
   ]
 
@@ -40,17 +45,17 @@ const ProductMasterWindow = ({
     <>
 
       <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-
       <CustomTabPanel height={height} index={0} value={activeTab}>
-        <ProductMasterTab
-          maxAccess={maxAccess}
+        <ProductMasterForm
+          store={store}
+          setStore={setStore}
           labels={labels}
           setEditMode={setEditMode}
-
+          maxAccess={maxAccess}
         />
       </CustomTabPanel>
      <CustomTabPanel height={height} index={1} value={activeTab}>
-        <ProductCountriesTab
+        <ProductCountriesForm
           store={store}
           setStore={setStore}
           labels={labels}
@@ -59,15 +64,15 @@ const ProductMasterWindow = ({
         />
       </CustomTabPanel>
      <CustomTabPanel height={height} index={2} value={activeTab}>
-        <ProductCurrenciesTab
+        <ProductCurrenciesForm
           store={store}
           labels={labels}
           maxAccess={maxAccess}
           height={height}
         />
       </CustomTabPanel>
-        <CustomTabPanel index={3} value={activeTab}>
-       <ProductDispersalTab
+        <CustomTabPanel height={height} index={3} value={activeTab}>
+       <ProductDispersalList
           store={store}
           setStore={setStore}
           labels={labels}
@@ -76,44 +81,30 @@ const ProductMasterWindow = ({
         />
       </CustomTabPanel>
      <CustomTabPanel  height={height} index={4} value={activeTab}>
-        <ProductSchedulesTab
+        <ProductSchedulesForm
           store={store}
+          setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
           height={height}
         />
       </CustomTabPanel>
-      {/*  <CustomTabPanel index={5} value={activeTab}>
-        <ProductLegTab
-          productLegValidation={productLegValidation}
-          scheduleRangeGridValidation={scheduleRangeGridValidation}
-          scheduleRangeInlineGridColumns={scheduleRangeInlineGridColumns}
-          currencyStore={currencyStore.list}
-          plantStore={plantStore.list}
-          countryStore={countryStore.list}
-          dispersalStore={dispersalStore}
-          maxAccess={maxAccess}
-        />
-      </CustomTabPanel> */}
-      <CustomTabPanel index={6} value={activeTab}>
-        <ProductFieldTab
+       <CustomTabPanel height={height}  index={5} value={activeTab}>
+        <ProductLegForm
         store={store}
+        setStore={setStore}
         labels={labels}
         maxAccess={maxAccess}
         height={height}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={7} value={activeTab}>
-        <ProductAgentTab
+
+      <CustomTabPanel height={height} index={6} value={activeTab}>
+        <ProductAgentForm
           store={store}
           labels={labels}
           maxAccess={maxAccess}
           height={height}
-
-          // agentsHeaderValidation={agentsHeaderValidation}
-          // agentsGridValidation={agentsGridValidation}
-          // agentsInlineGridColumns={agentsInlineGridColumns}
-          // dispersalStore={dispersalStore}
         />
       </CustomTabPanel>
     </>

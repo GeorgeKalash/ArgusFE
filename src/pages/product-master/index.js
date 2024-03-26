@@ -18,7 +18,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Windows
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
@@ -27,10 +26,6 @@ import ProductMasterWindow from './Windows/ProductMasterWindow'
 const ProductMaster = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  //control
 
   const {
     query: { data },
@@ -89,7 +84,16 @@ const ProductMaster = () => {
 
 
   const del = obj => {
-
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductMaster.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        toast.success('Record Deleted Successfully')
+        invalidate()
+      })
+      .catch(error => {
+      })
   }
 
   const add = () => {
@@ -102,7 +106,7 @@ const ProductMaster = () => {
       props: {
         labels: _labels,
         recordId: recordId? recordId : null,
-        maxAccess: access
+        maxAccess: access,
       },
       width: 1200,
       height: 600,

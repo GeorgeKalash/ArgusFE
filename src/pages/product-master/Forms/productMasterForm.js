@@ -9,18 +9,17 @@ import toast from 'react-hot-toast'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { DataSets } from 'src/resources/DataSets'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
 
-const ProductMasterTab = ({
+const ProductMasterForm = ({
   store,
   setStore,
   labels,
@@ -29,6 +28,7 @@ const ProductMasterTab = ({
   maxAccess
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const {recordId : pId } = store
 
   const[ initialValues, setData] = useState({
     recordId: null,
@@ -45,6 +45,10 @@ const ProductMasterTab = ({
     posMsg: null,
     posMsgIsActive: false,
     isInactive: false
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: RemittanceSettingsRepository.Correspondent.qry
   })
 
   const formik = useFormik({
@@ -89,9 +93,30 @@ const ProductMasterTab = ({
           toast.success('Record Editted Successfully')
         }
 
+        invalidate()
 
       })
       .catch(error => {
+      })
+  }
+
+  useEffect(()=>{
+    pId && getProductMasterById(pId)
+  }, [pId])
+
+  const getProductMasterById = pId => {
+    const defaultParams = `_recordId=${pId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: RemittanceSettingsRepository.ProductMaster.get,
+      parameters: parameters
+    })
+      .then(res => {
+        formik.setValues(res.record)
+        setEditMode(true)
+      })
+      .catch(error => {
+        setErrorMessage(error)
       })
   }
 
@@ -105,7 +130,7 @@ return (
           <Grid item xs={12}>
             <CustomTextField
               name='reference'
-              label='Reference'
+              label={labels.reference}
               value={formik.values.reference}
               required
               readOnly={false}
@@ -119,7 +144,7 @@ return (
           <Grid item xs={12}>
             <CustomTextField
               name='name'
-              label='Name'
+              label={labels.name}
               value={formik.values.name}
               required
               onChange={formik.handleChange}
@@ -131,7 +156,7 @@ return (
           <Grid item xs={12}>
             <ResourceComboBox
               name='type'
-              label='Type'
+              label={labels.type}
               datasetId={DataSets.RT_Product_Type}
               valueField='key'
               displayField='value'
@@ -147,7 +172,7 @@ return (
           <Grid item xs={12}>
             <ResourceComboBox
               name='functionId'
-              label='Function'
+              label={labels.function}
               datasetId={DataSets.RT_Function}
               valueField='key'
               displayField='value'
@@ -164,7 +189,7 @@ return (
             <ResourceLookup
               name='corId'
               endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-              label='Correspondent'
+              label={labels.correspondent}
               form={formik}
               required={formik.values.type === "1" ? true : false}
               valueField='reference'
@@ -200,7 +225,7 @@ return (
             <ResourceComboBox
               datasetId={DataSets.RT_Language}
               name='languages'
-              label='languages'
+              label={labels.languages}
               valueField='key'
               displayField='value'
               values={formik.values}
@@ -215,7 +240,7 @@ return (
             <ResourceComboBox
               endpointId={ RemittanceSettingsRepository.Interface.qry}
               name='interfaceId'
-              label='Interface'
+              label={labels.interface}
               valueField='recordId'
               displayField='name'
               values={formik.values}
@@ -233,7 +258,7 @@ return (
             <ResourceComboBox
               datasetId={DataSets.RT_Commission_Base}
               name='commissionBase'
-              label='Commission Base'
+              label={labels.commissionBase}
               valueField='key'
               displayField='value'
               values={formik.values}
@@ -248,7 +273,7 @@ return (
           <Grid item xs={12}>
             <CustomTextField
               name='posMsg'
-              label='Message To Operator'
+              label={labels.messageToOperator}
               value={formik.values.posMsg}
               readOnly={false}
               onChange={formik.handleChange}
@@ -266,7 +291,8 @@ return (
                   onChange={formik.handleChange}
                 />
               }
-              label='Activate Counter Message'
+              label={labels.activateCounterMessage}
+
             />
           </Grid>
           <Grid item xs={12}>
@@ -278,7 +304,7 @@ return (
                   onChange={formik.handleChange}
                 />
               }
-              label='Is inactive'
+              label={labels.isInactive}
             />
           </Grid>
         </Grid>
@@ -287,4 +313,4 @@ return (
   )
 }
 
-export default ProductMasterTab
+export default ProductMasterForm
