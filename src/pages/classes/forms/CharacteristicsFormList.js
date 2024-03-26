@@ -14,8 +14,8 @@ import Table from 'src/components/Shared/Table'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-// ** Windows
-import CharacteristicsWindow from '../Windows/CharacteristicsWindow'
+// ** Forms
+import CharacteristicForm from '../forms/CharacteristicForm'
 
 // ** Helpers
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
@@ -48,7 +48,7 @@ const CharacteristicsForm = (
 
   function openForm (){
     stack({
-      Component: CharacteristicsWindow,
+      Component: CharacteristicForm,
       props: {
         labels: labels,
         recordId: recordId,
@@ -85,7 +85,7 @@ const CharacteristicsForm = (
       parameters: parameters
     })
       .then(res => {
-        setCharacteristicGridData(res.list)
+        setCharacteristicGridData(res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -102,7 +102,7 @@ const CharacteristicsForm = (
         <GridToolbar onAdd={addCharacteristic} maxAccess={maxAccess} />
         <Table
           columns={columns}
-          gridData={{list : CharacteristicGridData}}
+          gridData={CharacteristicGridData}
           rowId={['chId']}
           onDelete={delCharacteristic}
           isLoading={false}

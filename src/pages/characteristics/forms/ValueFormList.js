@@ -14,8 +14,8 @@ import Table from 'src/components/Shared/Table'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-// ** Windows
-import ValuesWindow from '../Windows/ValuesWindow'
+// ** Forms
+import ValueForm from '../forms/ValueForm'
 
 // ** Helpers
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
@@ -44,7 +44,7 @@ const ValueFormList = (
 
   function openForm (recordId , seqNo){
     stack({
-      Component: ValuesWindow,
+      Component: ValueForm,
       props: {
         labels: labels,
         chId: store.recordId ,
@@ -86,7 +86,7 @@ const ValueFormList = (
       parameters: parameters
     })
       .then(res => {
-        setValueGridData(res.list)
+        setValueGridData(res)
         const maxSeq = Math.max(...res.list.map(item => item.seqNo), 0)
         setMaxSeqNo(maxSeq)
       })
@@ -105,7 +105,7 @@ const ValueFormList = (
         <GridToolbar onAdd={addValue} maxAccess={maxAccess} />
         <Table
           columns={columns}
-          gridData={{list : valueGridData}}
+          gridData={valueGridData}
           rowId={['seqNo']}
           onEdit={editValue}
           onDelete={delValue}

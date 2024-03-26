@@ -14,14 +14,14 @@ import Table from 'src/components/Shared/Table'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-// ** Windows
-import FunctionWindow from '../Windows/FunctionWindow'
+// ** Forms
+import FunctionForm from '../forms/FunctionForm'
 
 // ** Helpers
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
 
-const FunctionForm = (
+const FunctionFormList = (
  { 
   labels,
   store,
@@ -48,7 +48,7 @@ const FunctionForm = (
 
   function openForm (functionId, editMode){
     stack({
-      Component: FunctionWindow,
+      Component: FunctionForm,
       props: {
         labels: labels,
         recordId: recordId,
@@ -91,7 +91,7 @@ const FunctionForm = (
       parameters: parameters
     })
       .then(res => {
-        setFunctionGridData(res.list)
+        setFunctionGridData(res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -108,7 +108,7 @@ const FunctionForm = (
         <GridToolbar onAdd={addFunction} maxAccess={maxAccess} />
         <Table
           columns={columns}
-          gridData={{list : FunctionGridData}}
+          gridData={FunctionGridData}
           rowId={['functionId']}
           onEdit={editFunction}
           onDelete={delFunction}
@@ -122,4 +122,4 @@ const FunctionForm = (
   )
 }
 
-export default FunctionForm
+export default FunctionFormList
