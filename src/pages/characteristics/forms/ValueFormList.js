@@ -21,7 +21,7 @@ import ValuesWindow from '../Windows/ValuesWindow'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
 
-const ValuesForm = (
+const ValueFormList = (
  { 
   labels,
   store,
@@ -42,7 +42,7 @@ const ValuesForm = (
     }
   ]
 
-  function openForm (recordId , seqNo, edit){
+  function openForm (recordId , seqNo){
     stack({
       Component: ValuesWindow,
       props: {
@@ -52,7 +52,6 @@ const ValuesForm = (
         seqNo: seqNo,
         maxAccess: maxAccess,
         getValueGridData: getValueGridData,
-        edit: edit
       },
       width: 400,
       height: 400,
@@ -72,11 +71,11 @@ const ValuesForm = (
   }
 
   const addValue = () => {
-    openForm('', maxSeqNo + 1, false)
+    openForm('', maxSeqNo + 1)
   }
 
   const editValue = obj => {
-    openForm(obj?.chId , obj?.seqNo, true)
+    openForm(obj?.chId , obj?.seqNo)
   }
 
   const getValueGridData = chId => {
@@ -120,4 +119,4 @@ const ValuesForm = (
   )
 }
 
-export default ValuesForm
+export default ValueFormList

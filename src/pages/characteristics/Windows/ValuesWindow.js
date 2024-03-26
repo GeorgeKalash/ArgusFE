@@ -1,4 +1,4 @@
-import NewValueForm from '../forms/NewValueForm'
+import ValueForm from '../forms/ValueForm'
 
 const ValuesWindow = ({
   recordId,
@@ -6,19 +6,17 @@ const ValuesWindow = ({
   maxAccess,
   seqNo,
   chId,
-  getValueGridData,
-  edit
+  getValueGridData
 }) => {
 
   return (
-    <NewValueForm
+    <ValueForm
       labels={labels}
       maxAccess={maxAccess}
       recordId={recordId}
       chId={chId}
       seqNo={seqNo}
       getValueGridData={getValueGridData}
-      edit={edit}
     />
   )
 }

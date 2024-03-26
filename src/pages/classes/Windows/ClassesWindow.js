@@ -2,10 +2,12 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
-import CharacteristicsForm from '../forms/CharacteristicsForm'
-import ValueFormList from '../forms/ValueFormList'
+import ClassesForm from '../forms/ClassesForm'
+import CharacteristicsFormList from '../forms/CharacteristicsFormList'
+import FunctionsFormList from '../forms/FunctionFormList'
 
-const CharacteristicsWindow = ({
+
+const ClassesWindow = ({
   height,
   recordId,
   labels,
@@ -21,15 +23,16 @@ const CharacteristicsWindow = ({
   })
 
   const tabs = [
-    { label: labels.characteristics },
-    { label: labels.values, disabled: !store.recordId },
+    { label: labels.class },
+    { label: labels.characteristics, disabled: !store.recordId },
+    { label: labels.function, disabled: !store.recordId },
   ]
 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={height} index={0} value={activeTab}>
-        <CharacteristicsForm
+        <ClassesForm
           labels={labels}
           setEditMode={setEditMode}
           setStore={setStore}
@@ -39,7 +42,18 @@ const CharacteristicsWindow = ({
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
-        <ValueFormList
+        <CharacteristicsFormList
+          labels={labels}
+          setEditMode={setEditMode}
+          setStore={setStore}
+          maxAccess={maxAccess}
+          store={store}
+          expanded={expanded}
+          height={height}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={2} value={activeTab}>
+        <FunctionsFormList
           labels={labels}
           setEditMode={setEditMode}
           setStore={setStore}
@@ -53,4 +67,4 @@ const CharacteristicsWindow = ({
   )
 }
 
-export default CharacteristicsWindow
+export default ClassesWindow

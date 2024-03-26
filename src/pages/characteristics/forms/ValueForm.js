@@ -14,14 +14,13 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const NewValueForm = ({
+const ValueForm = ({
   labels,
   maxAccess,
   getValueGridData,
   recordId,
   seqNo,
-  chId,
-  edit
+  chId
 }) => {
 
   const { postRequest, getRequest} = useContext(RequestsContext)
@@ -51,7 +50,7 @@ const NewValueForm = ({
     })
       .then(res => {
       getValueGridData(chId)
-        if (edit === true) {
+        if (recordId) {
           toast.success('Record Editted Successfully')
         } else toast.success('Record Added Successfully')
 
@@ -101,4 +100,4 @@ return (
   )
 }
 
-export default NewValueForm
+export default ValueForm
