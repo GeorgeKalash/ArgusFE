@@ -28,12 +28,13 @@ export default function ResourceComboBox({
           callback: setStore
         })
       else
-      endpointId &&   getRequest({
-          extension: endpointId,
-          parameters
-        }).then(res => {
-          setStore(res.list)
-        })
+        endpointId &&
+          getRequest({
+            extension: endpointId,
+            parameters
+          }).then(res => {
+            setStore(res.list)
+          })
   }, [parameters])
 
   const filteredStore = store.filter(filter)
@@ -44,7 +45,6 @@ export default function ResourceComboBox({
       : (datasetId
           ? filteredStore.find(item => item[valueField] === values[name]?.toString())
           : filteredStore.find(item => item[valueField] === values[name])) ?? ''
-
 
   return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value }} />
 }

@@ -1,13 +1,8 @@
 // ** React Importsport
-import { useEffect, useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, Button, Checkbox, FormControlLabel } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
+import { Box } from '@mui/material'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
@@ -17,109 +12,211 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { ControlContext } from 'src/providers/ControlContext'
-
-// ** Windows
-import OutwardsWindow from './Windows/OutwardsWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { getNewOutwards, populateOutwards } from 'src/Models/RemittanceActivities/Outwards'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import ProductsWindow from './Windows/ProductsWindow'
-import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
-const OutwardsTransfer = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
+import { useWindow } from 'src/windows'
+import OutwardsTab from './Tabs/OutwardsTab'
+import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import toast from 'react-hot-toast'
 
-  //stores
-  const [gridData, setGridData] = useState(null)
-  const [productsStore, setProductsStore] = useState([])
+const OutwardsTransfer = () => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
 
   //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [productsWindowOpen, setProductsWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRow, setSelectedRow] = useState(null)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
-  }
+  const { stack } = useWindow()
 
   const {
     query: { data },
+    filterBy,
+    clearFilter,
     labels: _labels,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: SystemRepository.Currency.qry,
-    datasetId: ResourceIds.Currencies
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+    datasetId: ResourceIds.OutwardsTransfer,
+    filter: {
+      endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
+  }
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.SMSTemplate.page
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
   })
+
+  const userData = window.sessionStorage.getItem('userData')
+    ? JSON.parse(window.sessionStorage.getItem('userData'))
+    : null
+
+  const getPlantId = async () => {
+    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: parameters
+      })
+
+      if (res.record.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      setErrorMessage(error)
+
+      return ''
+    }
+  }
+
+  const getCashAccountId = async () => {
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null
+
+    const parameters = `_userId=${userData && userData.userId}&_key=cashAccountId`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: parameters
+      })
+
+      if (res.record.value) {
+        return res.record.value
+      }
+
+      return ''
+    } catch (error) {
+      setErrorMessage(error)
+
+      return ''
+    }
+  }
+  async function openForm(recordId) {
+    try {
+      const plantId = await getPlantId()
+      const cashAccountId = await getCashAccountId()
+
+      if (plantId !== '' && cashAccountId !== '') {
+        openOutWardsWindow(plantId, cashAccountId, recordId)
+      } else {
+        if (plantId === '') {
+          setErrorMessage({ error: 'The user does not have a default plant' })
+        }
+        if (cashAccountId === '') {
+          setErrorMessage({ error: 'The user does not have a default cash account' })
+        }
+        setWindowOpen(false)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const columns = [
     {
       field: 'countryRef',
-      headerName: 'countryRef',
+      headerName: _labels.CountryRef,
       flex: 1
     },
     {
       field: 'dispersalName',
-      headerName: 'dispersalName',
+      headerName: _labels.DispersalName,
       flex: 1
     },
     ,
     {
       field: 'currencyRef',
-      headerName: 'currencyRef',
+      headerName: _labels.Currency,
       flex: 1
     },
     {
-      field: 'agent',
-      headerName: 'agent',
+      field: 'agentName',
+      headerName: _labels.Agents,
+      flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: _labels.ReleaseStatus,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.Status,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.WIP,
       flex: 1
     }
   ]
 
-  const delOutwards = obj => {}
+  const delOutwards = async obj => {
+    await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
+  }
 
   const addOutwards = () => {
-    setWindowOpen(true)
+    openForm('')
   }
 
   const editOutwards = obj => {
-    setWindowOpen(true)
-    setSelectedRecordId(obj.recordId)
+    openForm(obj.recordId)
   }
 
-  const handleProductSelection = () => {
-    const selectedRowData = productsStore?.list.find(row => row.productId === selectedRow)
-    formik.setFieldValue('productId', selectedRowData?.productId)
-    formik.setFieldValue('fees', selectedRowData?.fees)
-    formik.setFieldValue('baseAmount', selectedRowData?.baseAmount)
-    formik.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount)
-    setProductsWindowOpen(false)
+  function openOutWardsWindow(plantId, cashAccountId, recordId) {
+    stack({
+      Component: OutwardsTab,
+      props: {
+        plantId: plantId,
+        cashAccountId: cashAccountId,
+        userId: userData && userData.userId,
+        maxAccess: access,
+        _labels: _labels,
+        recordId: recordId ? recordId : null
+      },
+      width: 950,
+      height: 550,
+      title: 'Outwards'
+    })
   }
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addOutwards} maxAccess={access} />
+        <GridToolbar
+          onAdd={addOutwards}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data ? data : { list: [] }}
           rowId={['recordId']}
           onEdit={editOutwards}
           onDelete={delOutwards}
@@ -129,29 +226,7 @@ const OutwardsTransfer = () => {
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
-        <OutwardsWindow
-          onClose={() => setWindowOpen(false)}
-          labels={_labels}
-          setProductsWindowOpen={setProductsWindowOpen}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
 
-      {productsWindowOpen && (
-        <ProductsWindow
-          onClose={() => setProductsWindowOpen(false)}
-          width={700}
-          height={200}
-          onSave={handleProductSelection}
-          gridData={productsStore}
-          setSelectedRow={setSelectedRow}
-          selectedRow={selectedRow}
-          maxAccess={access}
-        />
-      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

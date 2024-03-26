@@ -331,7 +331,11 @@ const GlobalExchangeBuyMap = () => {
                   margin: 0,
                 }}
                 >
-              <WindowToolbar onSave={handleSubmit}  smallBox={true}/>
+              <WindowToolbar 
+                  onSave={handleSubmit}
+                  isSaved={true}
+                  smallBox={true}
+              />
               </Box>
       </CustomTabPanel>
 

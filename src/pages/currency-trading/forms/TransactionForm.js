@@ -25,8 +25,9 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
-import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
+import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 
 const FormContext = React.createContext(null)
 
@@ -81,8 +82,6 @@ function FormField({ type, name, Component, valueField, onFocus, language, ...re
       onClear={() => {
         formik.setFieldValue(name, '')
       }}
-
-
       form={formik}
     />
   )
@@ -90,30 +89,6 @@ function FormField({ type, name, Component, valueField, onFocus, language, ...re
 
 function FormProvider({ formik, maxAccess, labels, children }) {
   return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
-}
-
-function useLookup({ endpointId, parameters }) {
-  const [store, setStore] = useState([])
-
-  const { getRequest } = useContext(RequestsContext)
-
-  return {
-    store,
-    lookup(searchQry) {
-      getRequest({
-        extension: endpointId,
-        parameters: new URLSearchParams({ ...parameters, _filter: searchQry })
-      }).then(res => {
-        setStore(res.list)
-      })
-    },
-    valueOf(id) {
-      return store.find(({ recordId }) => recordId === id)
-    },
-    clear() {
-      setStore([])
-    }
-  }
 }
 
 export default function TransactionForm({ recordId, labels, maxAccess, plantId, setErrorMessage }) {
@@ -132,6 +107,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [rateType, setRateType] = useState(null)
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
+  const [isClosed, setIsClosed] = useState(false)
 
   async function checkTypes(value) {
     if (!value) {
@@ -151,16 +127,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   const invalidate = useInvalidate({
-    endpointId: 'CTTRX.asmx/pageCIV'
+    endpointId: CTTRXrepository.CurrencyTrading.snapshot
   })
-
-
 
   const initial = {
     recordId: null,
     reference: null,
     operations: [
-       {
+      {
         id: 1,
         currencyId: '',
         fcAmount: '',
@@ -238,36 +212,35 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       cell_phone: yup.string().required(),
       profession: yup.string().required(),
       operations: yup
-      .array()
-      .of(
-        yup.object().shape({
-          currency: yup
-            .object()
-            .shape({
-              recordId: yup.string().required('Currency recordId is required')
-            })
-            .required('Currency is required'),
-          exRate: yup.string().nullable().required('Rate is required'),
-          fcAmount: yup.string().required('FcAmount is required'),
-          lcAmount: yup.string().required('LcAmount is required')
-        })
-      )
-      .required('Operations array is required'),
+        .array()
+        .of(
+          yup.object().shape({
+            currency: yup
+              .object()
+              .shape({
+                recordId: yup.string().required('Currency recordId is required')
+              })
+              .required('Currency is required'),
+            exRate: yup.string().nullable().required('Rate is required'),
+            fcAmount: yup.string().required('FcAmount is required'),
+            lcAmount: yup.string().required('LcAmount is required')
+          })
+        )
+        .required('Operations array is required'),
       amount: yup
-      .array()
-      .of(
-        yup.object().shape({
-          types: yup
-            .object()
-            .shape({
-              key: yup.string().required('Currency recordId is required')
-            })
-            .required('Currency is required'),
-          amount: yup.string().nullable().required('amount is required')
-
-        })
-      )
-      .required('Operations array is required')
+        .array()
+        .of(
+          yup.object().shape({
+            types: yup
+              .object()
+              .shape({
+                key: yup.string().required('Currency recordId is required')
+              })
+              .required('Currency is required'),
+            amount: yup.string().nullable().required('amount is required')
+          })
+        )
+        .required('Operations array is required')
     }),
 
     initialValues,
@@ -351,7 +324,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }, [])
 
   async function getData(id) {
-
     const _recordId = recordId ? recordId : id
 
     const { record } = await getRequest({
@@ -368,30 +340,33 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         reference: record.headerView.reference,
         operations: record.items.map(
           ({ seqNo, currencyId, currencyName, currencyRef, lcAmount, fcAmount, minRate, maxRate, ...rest }) => ({
-            id : seqNo,
+            id: seqNo,
             currencyId: currencyId,
-            currency :{
-             recordId: currencyId, name :currencyName, reference :currencyRef
+            currency: {
+              recordId: currencyId,
+              name: currencyName,
+              reference: currencyRef
             },
             lcAmount: getFormattedNumber(lcAmount),
             fcAmount: getFormattedNumber(fcAmount),
-            minRate, maxRate,
-           ...rest
+            minRate,
+            maxRate,
+            ...rest
           })
         ),
-        amount: record.cash.map(
-          ({ seqNo,amount,type, typeName, ccId, ccName, ...rest }) => ({
-            id : seqNo,
-            types :{
-              key: type, value :typeName
-             },
-             creditCards :{
-              recordId: ccId, name :ccName
-             },
-            amount: getFormattedNumber(amount),
-           ...rest
-          })
-        ),
+        amount: record.cash.map(({ seqNo, amount, type, typeName, ccId, ccName, ...rest }) => ({
+          id: seqNo,
+          types: {
+            key: type,
+            value: typeName
+          },
+          creditCards: {
+            recordId: ccId,
+            name: ccName
+          },
+          amount: getFormattedNumber(amount),
+          ...rest
+        })),
         clientType: record.clientMaster.category,
         date: formatDateFromApi(record.headerView.date),
         clientId: record?.clientIndividual?.clientId,
@@ -422,48 +397,108 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         cell_phone: record.clientMaster.cellPhone,
         status: record.headerView.status
       })
-
     }
+    setIsClosed(record.headerView.wip === 2 ? true : false)
   }
-
 
   const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   async function fetchRate({ currencyId }) {
-    if(currencyId){
-    const result = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_key=baseCurrencyId`
+    if (currencyId) {
+      const result = await getRequest({
+        extension: SystemRepository.Defaults.get,
+        parameters: `_key=baseCurrencyId`
+      })
+
+      const response = await getRequest({
+        extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
+        parameters: `_plantId=${
+          plantId ? plantId : formik.values.plantId
+        }&_currencyId=${currencyId}&_rateTypeId=${rateType}&_racurrencyId=${result.record.value}`
+      })
+
+      return response.record
+    }
+  }
+
+  const onClose = async () => {
+    const values = formik.values
+
+    const { record: cashAccountRecord } = await getRequest({
+      extension: `SY.asmx/getUD`,
+      parameters: `_userId=${userId}&_key=cashAccountId`
     })
 
-    const response = await getRequest({
-      extension: CurrencyTradingSettingsRepository.ExchangeMap.get,
-      parameters: `_plantId=${plantId ? plantId : formik.values.plantId }&_currencyId=${currencyId}&_rateTypeId=${rateType}&_racurrencyId=${result.record.value}`
+    const data = {
+      recordId: values?.recordId || null,
+      status: values.status,
+      functionId: values.functionId,
+      plantId: plantId ? plantId : values.plantId,
+      clientId: values.clientId,
+      cashAccountId: cashAccountRecord.value,
+      poeId: values.purpose_of_exchange,
+      wip: values.wip,
+      otpVerified: values.otp,
+      amount: String(total || '').replaceAll(',', ''),
+      notes: values.remarks
+    }
+
+    const res = await postRequest({
+      extension: CTTRXrepository.CurrencyTrading.close,
+      record: JSON.stringify(data)
+    })
+    if (res.recordId) {
+      toast.success('Record Closed Successfully')
+      invalidate()
+      setIsClosed(true)
+    }
+  }
+
+  async function onReopen() {
+    const values = formik.values
+
+    const { record: cashAccountRecord } = await getRequest({
+      extension: `SY.asmx/getUD`,
+      parameters: `_userId=${userId}&_key=cashAccountId`
     })
 
-    return response.record
-  }
-  }
+    const data = {
+      recordId: values?.recordId || null,
+      date: formatDateToApiFunction(values.date),
+      reference: values.reference,
+      status: values.status,
+      functionId: values.functionId,
+      plantId: plantId ? plantId : values.plantId,
+      clientId: values.clientId,
+      cashAccountId: cashAccountRecord.value,
+      poeId: values.purpose_of_exchange,
+      wip: values.wip,
+      otpVerified: values.otp,
+      amount: String(total || '').replaceAll(',', ''),
+      notes: values.remarks
+    }
 
+    const res = await postRequest({
+      extension: CTTRXrepository.CurrencyTrading.reopen,
+      record: JSON.stringify(data)
+    })
+    if (res.recordId) {
+      toast.success('Record Reopened Successfully')
+      invalidate()
+      setIsClosed(false)
+    }
+  }
 
   const total = formik.values.operations.reduce((acc, { lcAmount }) => {
-
-    const amountString = String(lcAmount || 0).replaceAll(',', '')
-
-    return acc + parseFloat(amountString) || 0
+    return acc + lcAmount
   }, 0)
 
-
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
-
-return acc + amount
-
-
+    return acc + amount
   }, 0)
 
   const Balance = total - receivedTotal
   async function onSubmit(values) {
-
     if (
       (!values.idNoConfirm && values.clientId) ||
       (!values.confirmIdNo && !values.clientId && !values.cellPhoneConfirm)
@@ -567,17 +602,19 @@ return acc + amount
 
         cash:
           formik.values.amount.length > 0 &&
-          formik.values.amount.map(({ id, types, creditCards, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
-            seqNo: id,
+          formik.values.amount.map(
+            ({ id, types, creditCards, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
+              seqNo: id,
 
-            type : types.key,
+              type: types.key,
 
-            ccId : creditCards.recordId,
-            bankFees,
-            amount: String(amount || '').replaceAll(',', ''),
-            receiptRef,
-            cashAccountId: cashAccountRecord.value
-          }))
+              ccId: creditCards.recordId,
+              bankFees,
+              amount: String(amount || '').replaceAll(',', ''),
+              receiptRef,
+              cashAccountId: cashAccountRecord.value
+            })
+          )
       }
 
       const response = await postRequest({
@@ -649,10 +686,38 @@ return acc + amount
     return response.record
   }
 
+  // function onClose (){
 
+  // }
+
+  // function onReopen() {
+
+  // }
+
+  const actions = [
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    }
+  ]
 
   return (
-    <ApprovalFormShell
+    <FormShell
+      actions={actions}
       height={400}
       form={formik}
       initialValues={initial}
@@ -660,6 +725,7 @@ return acc + amount
       setIDInfoAutoFilled={setIDInfoAutoFilled}
       resourceId={35208}
       editMode={editMode}
+      isClosed={isClosed}
       disabledSubmit={Balance && true}
       previewReport={editMode}
     >
@@ -678,7 +744,7 @@ return acc + amount
                   required={true}
                   onChange={formik.setFieldValue}
                   onClear={() => formik.setFieldValue('date', '')}
-                  readOnly={editMode}
+                  readOnly={editMode || isClosed}
                   error={formik.touched.date && Boolean(formik.errors.date)}
                   helperText={formik.touched.date && formik.errors.date}
                   maxAccess={maxAccess}
@@ -758,7 +824,7 @@ return acc + amount
                           console.error('Error fetching ID info:', error)
                         })
                   }}
-                  readOnly={editMode}
+                  readOnly={editMode || isClosed}
                   onFocus={value => {
                     setSearch(value)
                   }}
@@ -768,16 +834,17 @@ return acc + amount
             </Grid>
           </FieldSet>
           <FieldSet title='Operations'>
-            <Grid width={"100%"}>
-               <DataGrid
+            <Grid width={'100%'}>
+              <DataGrid
                 onChange={value => formik.setFieldValue('operations', value)}
                 value={formik.values.operations}
                 error={formik.errors.operations}
                 height={300}
+                disabled={isClosed}
                 bg={
-                  formik.values.functionId && (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
+                  formik.values.functionId &&
+                  (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
                 }
-
                 columns={[
                   {
                     component: 'resourcecombobox',
@@ -786,52 +853,47 @@ return acc + amount
                     props: {
                       endpointId: SystemRepository.Currency.qry,
                       displayField: ['reference', 'name'],
-                      valueField:  'recordId',
+                      valueField: 'recordId',
                       columnsInDropDown: [
-                        { key: "reference", value: "Reference" },
-                        { key: "name", value: "Name" },
-                      ],
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]
                     },
                     async onChange({ row: { update, oldRow, newRow } }) {
-
-                        if(!newRow?.currency?.recordId){
-                        return;
-                        }
-                        const exchange = await fetchRate({currencyId: newRow?.currency?.recordId})
-                        if (!exchange?.rate){
-                          stackError({
-                            message: `Rate not defined for ${newRow.currency.name}.`
-                          })
-
-                        return;
-
-                        }
-                        if (exchange && newRow.fcAmount ) {
-                          const exRate = exchange.rate
-                          const rateCalcMethod = exchange.rateCalcMethod
-
-                          const lcAmount =
-                            rateCalcMethod === 1
-                              ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) * exRate
-                              : rateCalcMethod === 2
-                              ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) / exRate
-                              : 0
-
-                              exchange.rate &&  update({lcAmount :  lcAmount})
-
-                         }
-
-                        update({
-                          currencyId: newRow.currency.recordId,
-                          exRate: exchange?.rate,
-                          defaultRate: exchange?.rate,
-                          rateCalcMethod : exchange?.rateCalcMethod,
-                          minRate :exchange?.minRate,
-                          maxRate:  exchange?.maxRate,
+                      if (!newRow?.currency?.recordId) {
+                        return
+                      }
+                      const exchange = await fetchRate({ currencyId: newRow?.currency?.recordId })
+                      if (!exchange?.rate) {
+                        stackError({
+                          message: `Rate not defined for ${newRow.currency.name}.`
                         })
 
-                    },
+                        return
+                      }
+                      if (exchange && newRow.fcAmount) {
+                        const exRate = exchange.rate
+                        const rateCalcMethod = exchange.rateCalcMethod
 
+                        const lcAmount =
+                          rateCalcMethod === 1
+                            ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) * exRate
+                            : rateCalcMethod === 2
+                            ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) / exRate
+                            : 0
+
+                        exchange.rate && update({ lcAmount: lcAmount })
+                      }
+
+                      update({
+                        currencyId: newRow.currency.recordId,
+                        exRate: exchange?.rate,
+                        defaultRate: exchange?.rate,
+                        rateCalcMethod: exchange?.rateCalcMethod,
+                        minRate: exchange?.minRate,
+                        maxRate: exchange?.maxRate
+                      })
+                    },
 
                     flex: 1.5
                   },
@@ -840,11 +902,11 @@ return acc + amount
                     label: labels.fcAmount,
                     name: 'fcAmount',
                     async onChange({ row: { update, newRow } }) {
-
-                    const fcAmount =  parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
-                    !isNaN(fcAmount) && update({
-                        lcAmount: newRow.exRate * fcAmount
-                      })
+                      const fcAmount = parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
+                      !isNaN(fcAmount) &&
+                        update({
+                          lcAmount: newRow.exRate * fcAmount
+                        })
                     },
                     defaultValue: ''
                   },
@@ -856,22 +918,23 @@ return acc + amount
                       readOnly: false
                     },
                     async onChange({ row: { update, newRow } }) {
-                      const fcAmount =  parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
+                      const fcAmount = parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
 
-                      if(newRow.exRate >= newRow.minRate  &&  newRow.exRate <= newRow.maxRate ){
-                        !isNaN(newRow.exRate * fcAmount) &&     update({
-                        lcAmount: newRow.exRate * fcAmount
-                      })
-                      }else{
-                      stackError({
-                        message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
-                      })
-                      update({
-                        exRate: ''
-                      })
+                      if (newRow.exRate >= newRow.minRate && newRow.exRate <= newRow.maxRate) {
+                        !isNaN(newRow.exRate * fcAmount) &&
+                          update({
+                            lcAmount: newRow.exRate * fcAmount
+                          })
+                      } else {
+                        stackError({
+                          message: `Rate not in the [${newRow.minRate}-${newRow.maxRate}]range.`
+                        })
+                        update({
+                          exRate: ''
+                        })
 
-                    return
-                    }
+                        return
+                      }
                     },
 
                     defaultValue: ''
@@ -884,21 +947,18 @@ return acc + amount
                       readOnly: false
                     },
                     async onChange({ row: { update, newRow } }) {
-                      const lcAmount =  parseFloat(newRow.lcAmount?.toString().replace(/,/g, ''))
+                      const lcAmount = parseFloat(newRow.lcAmount?.toString().replace(/,/g, ''))
                       const fcAmount = lcAmount ? lcAmount / newRow.exRate : ''
-                      if(fcAmount && newRow.exRate )
-                      update({
-                        fcAmount: fcAmount
-                      })
-
-
+                      if (fcAmount && newRow.exRate)
+                        update({
+                          fcAmount: fcAmount
+                        })
                     },
 
                     defaultValue: ''
                   }
                 ]}
               />
-
             </Grid>
           </FieldSet>
           <FieldSet title='Individual'>
@@ -924,7 +984,6 @@ return acc + amount
                               if (IDInfo.clientId != null) {
                                 fetchClientInfo({ clientId: IDInfo.clientId })
                               }
-
                             }
                           })
                           .catch(error => {
@@ -936,7 +995,7 @@ return acc + amount
                       setShowAsPasswordIDNumber(false)
                       value && setIdNumber(value)
                     }}
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled}
                     required
                   />
                 </Grid>
@@ -949,7 +1008,7 @@ return acc + amount
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('birth_date', '')}
                     error={formik.touched.birth_date && Boolean(formik.errors.birth_date)}
-                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -962,7 +1021,7 @@ return acc + amount
                       endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
                       valueField='recordId'
                       displayField='name'
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       required
                     />
                   </Grid>
@@ -984,7 +1043,11 @@ return acc + amount
                         })
                       }
                       disabled={
-                        !formik?.values?.id_type || !formik?.values?.birth_date || !formik.values?.id_number || editMode
+                        !formik?.values?.id_type ||
+                        !formik?.values?.birth_date ||
+                        !formik.values?.id_number ||
+                        editMode ||
+                        isClosed
                           ? true
                           : false
                       }
@@ -995,7 +1058,6 @@ return acc + amount
                 </Grid>
 
                 <Grid item xs={7}>
-
                   <CustomDatePicker
                     name='expiry_date'
                     label={labels.expiry_date}
@@ -1004,7 +1066,7 @@ return acc + amount
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('expiry_date', '')}
                     error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
-                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -1020,7 +1082,7 @@ return acc + amount
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     required
                   />
                 </Grid>
@@ -1036,7 +1098,7 @@ return acc + amount
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language Name' }
                     ]}
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled}
                     required
                   />
                 </Grid>
@@ -1047,7 +1109,7 @@ return acc + amount
                     name='cell_phone'
                     Component={CustomTextField}
                     required
-                    readOnly={editMode || idInfoAutoFilled}
+                    readOnly={editMode || isClosed || idInfoAutoFilled}
                     onBlur={e => {
                       setShowAsPasswordPhone(true)
                     }}
@@ -1063,7 +1125,7 @@ return acc + amount
                     onChange={formik.handleChange}
                     control={<Checkbox defaultChecked />}
                     label='Resident'
-                    readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                    disabled={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                   />
                 </Grid>
                 <Grid item xs={2}>
@@ -1084,7 +1146,7 @@ return acc + amount
                     <FormField
                       name='firstName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       required
                       language='english'
                     />
@@ -1094,14 +1156,14 @@ return acc + amount
                       name='middleName'
                       language='english'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
                       name='lastName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       required
                       language='english'
                     />
@@ -1111,7 +1173,7 @@ return acc + amount
                       name='familyName'
                       language='english'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
                 </Grid>
@@ -1120,7 +1182,7 @@ return acc + amount
                     <FormField
                       name='fl_firstName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
                     />
                   </Grid>
@@ -1128,7 +1190,7 @@ return acc + amount
                     <FormField
                       name='fl_middleName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
                     />
                   </Grid>
@@ -1136,14 +1198,14 @@ return acc + amount
                     <FormField
                       name='fl_lastName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
                   <Grid item xs={3}>
                     <FormField
                       name='fl_familyName'
                       Component={CustomTextField}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                       language='arabic'
                     />
                   </Grid>
@@ -1152,7 +1214,7 @@ return acc + amount
 
                 <Grid container rowGap={3} xs={8}>
                   <Grid item xs={12}>
-                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode} />
+                    <FormField name='sponsor' Component={CustomTextField} readOnly={editMode || isClosed} />
                   </Grid>
 
                   <Grid item xs={12}>
@@ -1166,7 +1228,7 @@ return acc + amount
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode}
+                      readOnly={editMode || isClosed}
                     />
                   </Grid>
 
@@ -1181,7 +1243,7 @@ return acc + amount
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
 
@@ -1197,12 +1259,12 @@ return acc + amount
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly={editMode || idInfoAutoFilled || infoAutoFilled}
+                      readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                     />
                   </Grid>
 
                   <Grid item xs={12}>
-                    <FormField name='remarks' Component={CustomTextField} readOnly={editMode} />
+                    <FormField name='remarks' Component={CustomTextField} readOnly={editMode || isClosed} />
                   </Grid>
                 </Grid>
               </Grid>
@@ -1210,70 +1272,63 @@ return acc + amount
           </FieldSet>
           <FieldSet title='Amount'>
             <Grid container xs={12} spacing={4}>
-              <Grid item  xs={9} spacing={4}>
-              <Grid container xs={12} spacing={4}>
-              <Grid width={"100%"} >
-
-
-            <DataGrid
-                onChange={value => formik.setFieldValue('amount', value)}
-                value={formik.values.amount}
-                error={formik.errors.amount}
-
-                columns={[
-
-                  {
-                    component: 'resourcecombobox',
-                    label: labels.type,
-                    name: 'types',
-                    props: {
-                      datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-                      displayField: 'value',
-                      valueField: 'key',
-                      filter:  (item) =>  formik.values.functionId === '3502' ? (item.key === '2') : true
-                    }
-
-                  },
-                  {
-                    component: 'numberfield',
-                    name: 'amount',
-                    async onChange({ row: { update, newRow } }) {
-                      update({
-                        lcAmount: newRow.exRate * newRow.fcAmount
-                      })
-                    },
-                    defaultValue: ''
-                  },
-                  {
-                    component: 'resourcecombobox',
-                    name: 'creditCards',
-                    label: labels.creditCard,
-                    props: {
-                      endpointId: CashBankRepository.CreditCard.qry,
-                      valueField: 'recordId',
-                      displayField: 'name',
-
-                    }
-
-                  },
-                  {
-                    component: 'numberfield',
-                    header: labels.receiptRef,
-                    name: 'bankFees',
-                    label: labels.BanKFees,
-                  },
-                  {
-                    component: 'numberfield',
-                    header: labels.receiptRef,
-                    name: 'receiptRef',
-                    label: labels.receiptRef,
-
-                  }
-                ]}
-              />
-
-            </Grid>
-            </Grid>
+              <Grid item xs={9} spacing={4}>
+                <Grid container xs={12} spacing={4}>
+                  <Grid width={'100%'}>
+                    <DataGrid
+                      onChange={value => formik.setFieldValue('amount', value)}
+                      value={formik.values.amount}
+                      error={formik.errors.amount}
+                      disabled={isClosed}
+                      columns={[
+                        {
+                          component: 'resourcecombobox',
+                          label: labels.type,
+                          name: 'types',
+                          props: {
+                            datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
+                            displayField: 'value',
+                            valueField: 'key',
+                            filter: item => (formik.values.functionId === '3502' ? item.key === '2' : true)
+                          }
+                        },
+                        {
+                          component: 'numberfield',
+                          name: 'amount',
+                          async onChange({ row: { update, newRow } }) {
+                            update({
+                              lcAmount: newRow.exRate * newRow.fcAmount
+                            })
+                          },
+                          defaultValue: ''
+                        },
+                        {
+                          component: 'resourcecombobox',
+                          name: 'creditCards',
+                          editable: false,
+                          label: labels.creditCard,
+                          props: {
+                            endpointId: CashBankRepository.CreditCard.qry,
+                            valueField: 'recordId',
+                            displayField: 'name'
+                          }
+                        },
+                        {
+                          component: 'numberfield',
+                          header: labels.receiptRef,
+                          name: 'bankFees',
+                          label: labels.BanKFees
+                        },
+                        {
+                          component: 'numberfield',
+                          header: labels.receiptRef,
+                          name: 'receiptRef',
+                          label: labels.receiptRef
+                        }
+                      ]}
+                    />
+                  </Grid>
+                </Grid>
               </Grid>
 
               <Grid container xs={3} spacing={2} sx={{ p: 4 }}>
@@ -1291,6 +1346,6 @@ return acc + amount
           </FieldSet>
         </Grid>
       </FormProvider>
-    </ApprovalFormShell>
+    </FormShell>
   )
 }

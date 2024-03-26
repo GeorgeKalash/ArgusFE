@@ -4,6 +4,7 @@ export default {
   view: props => {
     const displayFields = props?.column?.props?.displayField
 
+
     if (Array.isArray(displayFields) && displayFields.length > 1) {
       const text = displayFields
         .filter((item) => props?.value?.[item])
