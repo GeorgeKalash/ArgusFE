@@ -33,7 +33,7 @@ import { useWindow } from 'src/windows'
 import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
-import Approvals from 'src/components/Shared/Approvals'
+import { useForm } from 'src/hooks/form'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, window }) {
   const { height } = useWindowDimensions()
@@ -84,7 +84,8 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     endpointId: CTTRXrepository.CreditOrder.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
@@ -379,6 +380,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       header: labels[8],
       name: 'currencyId',
       mandatory: true,
+      maxAccessName: 'gridCurrency',
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
@@ -449,6 +451,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       header: labels[9],
       name: 'currencyName',
       readOnly: true,
+      maxAccessName: 'gridCurrency',
       width: 300,
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
     },
@@ -458,6 +461,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'qty',
       mandatory: true,
       width: 200,
+      maxAccessName: 'gridQty',
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       async onChange(row) {
         const rate = row.rowData?.exRate
@@ -502,6 +506,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'exRate',
       mandatory: true,
       width: 200,
+      maxAccessName: 'gridRate',
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
@@ -632,7 +637,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
-          setIsTFR((res.record.releaseStatus===3 && res.record.status!==3 ) ? true : false)
+          setIsTFR(res.record.releaseStatus === 3 && res.record.status !== 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
@@ -653,25 +658,25 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode,
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus===3 && formik.values.status===3),
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
     },
     {
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled:!isClosed,
+      disabled: !isClosed
     },
     {
-      key:'Invoice',
+      key: 'Invoice',
       condition: onTFR,
       onClick: onTFR,
-      disabled: !isTFR,
+      disabled: !isTFR
     }
   ]
 
@@ -829,6 +834,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           <Grid container sx={{ pt: 2 }} xs={12}>
             <Box sx={{ width: '100%' }}>
               <InlineEditGrid
+                maxAccess={maxAccess}
                 gridValidation={detailsFormik}
                 columns={columns}
                 background={
@@ -875,7 +881,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 editMode={editMode}
                 maxAccess={maxAccess}
                 readOnly={isClosed}
-                onChange={formik.handleChange}
+                onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
                 helperText={formik.touched.notes && formik.errors.notes}
@@ -895,6 +901,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               <Grid item xs={12}>
                 <CustomTextField
                   name='baseAmount'
+                  maxAccess={maxAccess}
                   label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
                   style={{ textAlign: 'right' }}
                   value={getFormattedNumber(totalLoc.toFixed(2))}

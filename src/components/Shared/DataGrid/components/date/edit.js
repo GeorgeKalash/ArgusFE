@@ -23,7 +23,7 @@ export default function DateEdit({ column: { props }, id, field, value }) {
           value: ''
         })
       }
-      disabledDate={props?.disabledDate}
+      {...props}
     />
   )
 }
