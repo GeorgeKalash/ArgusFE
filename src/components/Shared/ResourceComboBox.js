@@ -14,6 +14,7 @@ export default function ResourceComboBox({
   filter = () => true,
   ...rest
 }) {
+  const {store : data} = rest
   const { getRequest } = useContext(RequestsContext)
 
   const { getAllKvsByDataset } = useContext(CommonContext)
@@ -37,7 +38,7 @@ export default function ResourceComboBox({
           })
   }, [parameters])
 
-  const filteredStore = store.filter(filter)
+  const filteredStore =  data ? data : store.filter(filter)
 
   const value =
     typeof values[name] === 'object'
