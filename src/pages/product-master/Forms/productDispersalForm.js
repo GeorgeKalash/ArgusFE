@@ -2,7 +2,6 @@
 import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
 
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
