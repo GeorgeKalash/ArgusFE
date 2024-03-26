@@ -82,13 +82,12 @@ const CustomLookup = ({
                 return option
               }
             }}
+            
             // getOptionLabel={option => {
             //   if (typeof option === 'object' && Array.isArray(displayField)) {
             //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space
 
             //     return `${displayText} - ${option[valueField]}`;
-            //   }
-            //   else if (typeof option === 'object') {
             //     return `${option[displayField] || option[valueField]} - ${option[valueField]}`;
             //   } else {
             //     return option;
