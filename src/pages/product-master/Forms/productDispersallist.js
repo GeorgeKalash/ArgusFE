@@ -10,10 +10,10 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useWindow } from 'src/windows'
-import ProductDispersalForm from './ProductDispersalForm'
+import ProductDispersalForm from './productDispersalForm'
 
 
-const ProductDispersalTab = ({ store, setStore, labels, maxAccess, height }) => {
+const ProductDispersalList = ({ store, setStore, labels, maxAccess, height }) => {
   const {recordId : pId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [gridData , setGridData] = useState()
@@ -138,4 +138,4 @@ const ProductDispersalTab = ({ store, setStore, labels, maxAccess, height }) => 
   )
 }
 
-export default ProductDispersalTab
+export default ProductDispersalList
