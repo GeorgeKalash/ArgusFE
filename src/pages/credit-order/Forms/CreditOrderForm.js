@@ -901,6 +901,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               <Grid item xs={12}>
                 <CustomTextField
                   name='baseAmount'
+                  maxAccess={maxAccess}
                   label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
                   style={{ textAlign: 'right' }}
                   value={getFormattedNumber(totalLoc.toFixed(2))}
