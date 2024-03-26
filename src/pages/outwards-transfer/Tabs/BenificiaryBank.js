@@ -14,9 +14,11 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function BenificiaryBank({ clientId, dispersalType }) {
+  const { postRequest } = useContext(RequestsContext)
 
   const [initialValues, setInitialData] = useState({
     //RTBEN
@@ -97,24 +99,25 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
     }
   })
 
+  const { labels: _labels, access } = useResourceQuery({
+    datasetId: ResourceIds.BeneficiaryBank
+  })
+
   return (
-    <FormShell //resourceId={ResourceIds.Currencies}
-      form={formik}
-      height={480} // maxAccess={maxAccess}
-    >
+    <FormShell resourceId={ResourceIds.BeneficiaryBank} form={formik} height={480} maxAccess={access}>
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
           <Grid item xs={12}>
             <CustomTextField
               name='name'
-              label='Name'
+              label={_labels.name}
               value={formik.values.name}
               required
               onChange={formik.handleChange}
               maxLength='50'
               error={formik.touched.name && Boolean(formik.errors.name)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -126,7 +129,8 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
               valueField='accountNo'
               displayField='name'
               name='accountId'
-              label='Account Ref'
+              label={_labels.accountRef}
+              maxAccess={access}
               form={formik}
               valueShow='accountRef'
               secondDisplayField={false}
@@ -146,31 +150,31 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
           <Grid item xs={12}>
             <CustomTextField
               name='branchName'
-              label='Branch Name'
+              label={_labels.branchName}
               rows={3}
               value={formik.values.branchName}
               onChange={formik.handleChange}
               maxLength='100'
               error={formik.touched.branchName && Boolean(formik.errors.branchName)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='branchCode'
-              label='Branch Code'
+              label={_labels.branchCode}
               value={formik.values.branchCode}
               onChange={formik.handleChange}
               maxLength='20'
               error={formik.touched.branchCode && Boolean(formik.errors.branchCode)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
               datasetId={DataSets.BANK_ACCOUNT_TYPE}
               name='accountType'
-              label='account Type'
+              label={_labels.accountType}
               valueField='key'
               displayField='value'
               values={formik.values}
@@ -181,17 +185,18 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
                   formik.setFieldValue('accountType', '')
                 }
               }}
+              maxAccess={access}
               error={formik.touched.accountType && Boolean(formik.errors.accountType)}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
               name='addressLine1'
-              label='Address 1'
+              label={_labels.addressLine1}
               value={formik.values.addressLine1}
               rows={3}
               maxLength='100'
-              maxAccess={maxAccess}
+              maxAccess={access}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
@@ -200,11 +205,11 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
           <Grid item xs={12}>
             <CustomTextArea
               name='addressLine2'
-              label='Address 2'
+              label={_labels.addressLine2}
               value={formik.values.addressLine2}
               rows={3}
               maxLength='100'
-              maxAccess={maxAccess}
+              maxAccess={access}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
@@ -214,7 +219,7 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
               name='nationalityId'
-              label='Country'
+              label={_labels.country}
               valueField='recordId'
               displayField={['reference', 'name']}
               displayFieldWidth={2}
@@ -222,7 +227,7 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
-              maxAccess={maxAccess}
+              maxAccess={access}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('stateId', null)
@@ -242,7 +247,7 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
               endpointId={formik.values.nationalityId && SystemRepository.State.qry}
               parameters={formik.values.nationalityId && `_countryId=${formik.values.nationalityId}`}
               name='stateId'
-              label='State'
+              label={_labels.state}
               valueField='recordId'
               displayField='name'
               readOnly={!formik.values.nationalityId}
@@ -253,7 +258,7 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
                 formik.setFieldValue('city', '')
               }}
               error={formik.touched.stateId && Boolean(formik.errors.stateId)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -266,10 +271,10 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
               valueField='name'
               displayField='name'
               name='city'
-              label='City'
+              label={_labels.city}
               readOnly={!formik.values.stateId}
               form={formik}
-              maxAccess={maxAccess}
+              maxAccess={access}
               secondDisplayField={false}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -292,7 +297,7 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
             <ResourceComboBox
               datasetId={DataSets.GENDER}
               name='gender'
-              label='Gender'
+              label={_labels.gender}
               valueField='key'
               displayField='value'
               values={formik.values}
@@ -303,6 +308,7 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
                   formik.setFieldValue('gender', '')
                 }
               }}
+              maxAccess={access}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
               helperText={formik.touched.gender && formik.errors.gender}
             />
@@ -310,45 +316,45 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
           <Grid item xs={12}>
             <CustomTextField
               name='zipcode'
-              label='Zip Code'
+              label={_labels.zipCode}
               value={formik.values.zipcode}
               maxLength='30'
               onChange={formik.handleChange}
               error={formik.touched.zipcode && Boolean(formik.errors.zipcode)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='swiftCode'
-              label='IFSC / swift code'
+              label={_labels.ifscSwift}
               maxLength='30'
               value={formik.values.swiftCode}
               onChange={formik.handleChange}
               error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='routingNo'
-              label='Routing Number'
+              label={_labels.routingNo}
               maxLength='50'
               value={formik.values.routingNo}
               onChange={formik.handleChange}
               error={formik.touched.routingNo && Boolean(formik.errors.routingNo)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='IBAN'
-              label='IBAN'
+              label={_labels.iban}
               maxLength='50'
               value={formik.values.IBAN}
               onChange={formik.handleChange}
               error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
@@ -360,20 +366,20 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
                   disabled={true}
                   checked={formik.values?.isBlocked}
                   onChange={formik.handleChange}
-                  maxAccess={maxAccess}
+                  maxAccess={access}
                 />
               }
-              label='is Blocked'
+              label={_labels.isBlocked}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
               name='remarks'
-              label='Remarks'
+              label={_labels.remarks}
               value={formik.values.remarks}
               rows={3}
               maxLength='150'
-              maxAccess={maxAccess}
+              maxAccess={access}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('remarks', '')}
               error={formik.touched.remarks && Boolean(formik.errors.remarks)}
@@ -382,21 +388,21 @@ export default function BenificiaryBank({ maxAccess, clientId, dispersalType }) 
           <Grid item xs={12}>
             <CustomDatePicker
               name='stoppedDate'
-              label={'stopped Date'}
+              label={_labels.stoppedDate}
               value={formik.values?.stoppedDate}
               readOnly
               error={formik.touched.stoppedDate && Boolean(formik.errors.stoppedDate)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
               name='stoppedReason'
-              label='Stop Reason'
+              label={_labels.stoppedReason}
               readOnly
               value={formik.values.stoppedReason}
               rows={3}
-              maxAccess={maxAccess}
+              maxAccess={access}
               error={formik.touched.stoppedReason && Boolean(formik.errors.stoppedReason)}
             />
           </Grid>

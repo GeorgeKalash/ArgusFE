@@ -21,10 +21,15 @@ import { DataSets } from 'src/resources/DataSets'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
+import { useResourceQuery } from 'src/hooks/resource'
 
-const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+const BenificiaryCash = ({ clientId, dispersalType }) => {
+  const { postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
+
+  const { labels: _labels, access } = useResourceQuery({
+    datasetId: ResourceIds.BeneficiaryCash
+  })
 
   const [initialValues, setInitialData] = useState({
     //RTBEN
@@ -170,13 +175,13 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.ClientList} form={formik} maxAccess={maxAccess}>
+    <FormShell resourceId={ResourceIds.BeneficiaryCash} form={formik} maxAccess={access}>
       <Grid container spacing={4} sx={{ padding: '15px' }}>
         <Grid container xs={12} spacing={2} sx={{ padding: '5px' }}>
           <Grid item xs={12}>
             <CustomTextField
               name='name'
-              label={'name'}
+              label={_labels.name}
               value={formik.values?.name}
               maxLength='50'
               required
@@ -185,7 +190,7 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
                 constructNameField(formik.values)
               }}
               error={formik.touched.name && Boolean(formik.errors.name)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
         </Grid>
@@ -193,7 +198,7 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
           <Grid item xs={3}>
             <CustomTextField
               name='firstName'
-              label={'first'}
+              label={_labels.firstName}
               value={formik.values?.firstName}
               required
               readOnly={notArabic}
@@ -201,26 +206,26 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('firstName', '')}
               error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={3}>
             <CustomTextField
               name='middleName'
-              label={'middle'}
+              label={_labels.middleName}
               value={formik.values?.middleName}
               readOnly
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('middleName', '')}
               error={formik.touched.middleName && Boolean(formik.errors.middleName)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={3}>
             <CustomTextField
               name='lastName'
-              label={'last'}
+              label={_labels.lastName}
               value={formik.values?.lastName}
               required
               readOnly={notArabic}
@@ -228,20 +233,20 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('lastName', '')}
               error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={3}>
             <CustomTextField
               name='familyName'
-              label={'family'}
+              label={_labels.familyName}
               value={formik.values?.familyName}
               readOnly
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('familyName', '')}
               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
         </Grid>
@@ -250,7 +255,7 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
           <Grid item xs={3}>
             <CustomTextField
               name='fl_firstName'
-              label={'fl_first'}
+              label={_labels.flFirstName}
               value={formik.values?.fl_firstName}
               readOnly
               onChange={formik.handleChange}
@@ -258,13 +263,13 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_firstName', '')}
               error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={3}>
             <CustomTextField
               name='fl_middleName'
-              label={'fl_middle'}
+              label={_labels.flMiddleName}
               value={formik.values?.fl_middleName}
               readOnly
               maxLength='20'
@@ -272,13 +277,13 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_familyName', '')}
               error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={3}>
             <CustomTextField
               name='fl_lastName'
-              label={'fl_last'}
+              label={_labels.flLastName}
               value={formik.values?.fl_lastName}
               readOnly
               onChange={formik.handleChange}
@@ -286,16 +291,17 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_lastName', '')}
               error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={3}>
             <CustomTextField
               name='fl_familyName'
-              label={'fl_family'}
+              label={_labels.flFamilyName}
               value={formik.values?.fl_familyName}
               readOnly
               maxLength='20'
+              maxAccess={access}
               onChange={formik.handleChange}
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_familyName', '')}
@@ -308,20 +314,20 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
             <CustomTextField
               name='cellPhone'
               phone={true}
-              label={'cellPhone'}
+              label={_labels.cellPhone}
               value={formik.values?.cellPhone}
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('cellPhone', '')}
               error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
               name='nationalityId'
-              label={'Country'}
+              label={_labels.country}
               valueField='recordId'
               displayField={['reference', 'name', 'flName']}
               columnsInDropDown={[
@@ -339,29 +345,29 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
                 }
               }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='birthPlace'
-              label={'birthPlace'}
+              label={_labels.birthPlace}
               value={formik.values?.birthPlace}
               onChange={formik.handleChange}
               maxLength='50'
               onClear={() => formik.setFieldValue('birthPlace', '')}
               error={formik.touched.birthPlace && Boolean(formik.errors.birthPlace)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
               name='addressLine1'
-              label='Address 1'
+              label={_labels.addressLine1}
               value={formik.values.addressLine1}
               rows={3}
               maxLength='100'
-              maxAccess={maxAccess}
+              maxAccess={access}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
@@ -370,11 +376,11 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
           <Grid item xs={12}>
             <CustomTextArea
               name='addressLine2'
-              label='Address 2'
+              label={_labels.addressLine2}
               value={formik.values.addressLine2}
               rows={3}
               maxLength='100'
-              maxAccess={maxAccess}
+              maxAccess={access}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
@@ -385,24 +391,25 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
           <Grid item xs={12}>
             <CustomDatePicker
               name='birthDate'
-              label={'birthDate'}
+              label={_labels.birthDate}
               value={formik.values?.birthDate}
               onChange={formik.setFieldValue}
               disabledDate={'>='}
               onClear={() => formik.setFieldValue('birthDate', '')}
               error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
               datasetId={DataSets.GENDER}
               name='gender'
-              label='Gender'
+              label={_labels.gender}
               valueField='key'
               displayField='value'
               values={formik.values}
               onChange={formik.handleChange}
+              maxAccess={access}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
             />
           </Grid>
@@ -410,7 +417,7 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
               name='nationalityId'
-              label={'Nationality'}
+              label={_labels.nationality}
               valueField='recordId'
               displayField={['reference', 'name', 'flName']}
               columnsInDropDown={[
@@ -428,33 +435,33 @@ const BenificiaryCash = ({ maxAccess, clientId, dispersalType }) => {
                 }
               }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              maxAccess={maxAccess}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
             <FormControlLabel
               control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
-              label={'isBlocked'}
+              label={_labels.isBlocked}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomDatePicker
-              name='stopDate'
-              label={'stopDate'}
-              value={formik.values?.stopDate}
+              name='stoppedDate'
+              label={_labels.stoppedDate}
+              value={formik.values?.stoppedDate}
               readOnly={true}
-              error={formik.touched.stopDate && Boolean(formik.errors.stopDate)}
-              maxAccess={maxAccess}
+              error={formik.touched.stoppedDate && Boolean(formik.errors.stoppedDate)}
+              maxAccess={access}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
-              name='stopReason'
-              label='Stop Reason'
+              name='stoppedReason'
+              label={_labels.stoppedReason}
               readOnly
-              value={formik.values.stopReason}
+              value={formik.values.stoppedReason}
               rows={3}
-              error={formik.touched.stopReason && Boolean(formik.errors.stopReason)}
+              error={formik.touched.stoppedReason && Boolean(formik.errors.stoppedReason)}
             />
           </Grid>
         </Grid>
