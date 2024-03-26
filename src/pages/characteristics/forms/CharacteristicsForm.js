@@ -55,17 +55,21 @@ const CharacteristicsForm = ({
       name: yup.string().required(' '),
       dataType: yup.string().required(' '),
       propertyName: yup.string().required(' '),
-      validFrom: yup.string().required(' ')
+      validFrom: yup.string().required(' '),
+      textSize: yup
+          .number()
+            .min(0, 'min')
+            .max(999, 'max'),
     }),
     onSubmit: values => {
       postCharacteristics(values)
     }
   })
 
-  const postCharacteristics = obj => {
+  const postCharacteristics = obj => {console.log(obj.validFrom)
     const recordId = obj?.recordId || ''
-    obj.validFrom = formatDateToApi(obj.validFrom)
-
+    const vForm = formatDateToApi(obj.validFrom)
+    console.log(obj.validFrom)
     postRequest({
       extension: DocumentReleaseRepository.CharacteristicsGeneral.set,
       record: JSON.stringify(obj)
@@ -215,6 +219,7 @@ return (
           value={formik.values.textSize}
           onChange={formik.handleChange}
           maxAccess={maxAccess}
+          type='numeric'
           onClear={() => formik.setFieldValue('textSize', '')}
           error={formik.touched.textSize && Boolean(formik.errors.textSize)}
         />
