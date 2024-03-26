@@ -210,8 +210,9 @@ return (
 
          <Grid item xs={3}>{}
               <ResourceComboBox
-               endpointId={ pId && RemittanceSettingsRepository.ProductDispersal.qry}
-                parameters={`_productId=${pId}`}
+               store={store?.dispersals}
+
+                // parameters={`_productId=${pId}`}
                 name='dispersalId'
                 label={labels.dispersal}
                 valueField= 'recordId'
