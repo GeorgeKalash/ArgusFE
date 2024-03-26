@@ -56,6 +56,18 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'BeneficiaryCash',
+    color: '#014a39',
+    image: 'beneficiary.png',
+    main: false
+  },
+  {
+    key: 'BeneficiaryBank',
+    color: '#a54630',
+    image: 'beneficiary.png',
+    main: false
+  },
+  {
     key: 'Invoice',
     color: '#231f20',
     image: 'invoice.png',

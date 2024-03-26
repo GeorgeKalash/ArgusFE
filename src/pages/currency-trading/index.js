@@ -17,100 +17,97 @@ export default function CurrencyTrading() {
   const { stack } = useWindow()
   const [errorMessage, setErrorMessage] = useState(null)
 
- const getPlantId = async () => {
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null;
+  const getPlantId = async () => {
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null
 
-  const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
+    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
-  try {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters,
-    });
-
-    if (res.record.value) {
-      return res.record.value;
-    }
-
-    return '';
-  } catch (error) {
-    setErrorMessage(error);
-
-     return '';
-  }
-};
- async function openFormWindow(recordId) {
-    if(!recordId){
     try {
-      const plantId = await getPlantId();
-      if (plantId !== '') {
-        openForm('' , plantId)
-      } else {
-        setErrorMessage({ error: 'The user does not have a default plant' });
+      const res = await getRequest({
+        extension: SystemRepository.UserDefaults.get,
+        parameters: parameters
+      })
+
+      if (res.record.value) {
+        return res.record.value
       }
+
+      return ''
     } catch (error) {
-    }}else{
+      setErrorMessage(error)
+
+      return ''
+    }
+  }
+  async function openFormWindow(recordId) {
+    if (!recordId) {
+      try {
+        const plantId = await getPlantId()
+        if (plantId !== '') {
+          openForm('', plantId)
+        } else {
+          setErrorMessage({ error: 'The user does not have a default plant' })
+        }
+      } catch (error) {}
+    } else {
       openForm(recordId)
     }
-
   }
-function openForm(recordId,plantId ){
-  stack({
-    Component: TransactionForm,
-    props: {
-      labels,
-      maxAccess: access,
-      plantId: plantId,
-      recordId
-    },
-    width: 1200,
-    height:600,
-    title: 'Cash Invoice'
-  })
-}
+  function openForm(recordId, plantId) {
+    stack({
+      Component: TransactionForm,
+      props: {
+        labels,
+        maxAccess: access,
+        plantId: plantId,
+        recordId
+      },
+      width: 1200,
+      height: 600,
+      title: 'Cash Invoice'
+    })
+  }
 
-
-
-
-
-const {
-  query: { data },
-  filterBy,
-  clearFilter,
-  labels: labels,
-  access
-} = useResourceQuery({
-  endpointId: CTTRXrepository.CurrencyTrading.snapshot,
-  datasetId: 35208,
-  filter: {
+  const {
+    query: { data },
+    filterBy,
+    clearFilter,
+    labels: labels,
+    access
+  } = useResourceQuery({
     endpointId: CTTRXrepository.CurrencyTrading.snapshot,
-    filterFn: fetchWithSearch,
-  }
-})
-async function fetchWithSearch({options = {} , filters}) {
-  const { _startAt = 0, _pageSize = 50 } = options
-
-  return await getRequest({
-        extension: CTTRXrepository.CurrencyTrading.snapshot,
-        parameters: `_filter=${filters.qry}&_category=1`
-      })
+    datasetId: 35208,
+    filter: {
+      endpointId: CTTRXrepository.CurrencyTrading.snapshot,
+      filterFn: fetchWithSearch
     }
+  })
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-return (
+    return await getRequest({
+      extension: CTTRXrepository.CurrencyTrading.snapshot,
+      parameters: `_filter=${filters.qry}&_category=1`
+    })
+  }
+
+  return (
     <Box>
-      { labels && access && (
+      {labels && access && (
         <>
-          <GridToolbar maxAccess={access}  onSearch={value => {
+          <GridToolbar
+            maxAccess={access}
+            onSearch={value => {
               filterBy('qry', value)
             }}
             onSearchClear={() => {
               clearFilter('qry')
             }}
-
-            labels={labels} inputSearch={true}/>
-
+            labels={labels}
+            inputSearch={true}
+          />
 
           <Table
             columns={[
@@ -154,7 +151,7 @@ return (
             onEdit={obj => {
               openFormWindow(obj.recordId)
             }}
-            gridData={data ? data : {list: []}}
+            gridData={data ? data : { list: [] }}
             rowId={['recordId']}
             isLoading={false}
             pageSize={50}
@@ -163,8 +160,7 @@ return (
           />
         </>
       )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
-
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </Box>
   )
 }
