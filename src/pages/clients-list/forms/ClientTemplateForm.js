@@ -34,6 +34,8 @@ import { useWindow } from 'src/windows'
 import Confirmation from 'src/components/Shared/Confirmation'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
+import BeneficiaryBankWindow from '../Windows/BeneficiaryBankWindow'
+import BeneficiaryCashWindow from '../Windows/BeneficiaryCashWindow'
 
 const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAccess }) => {
   const { stack } = useWindow()
@@ -617,16 +619,34 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
     {
       key: 'BeneficiaryBank',
       condition: true,
-      onClick: () => openBankWindow()
+      onClick: () => openBankWindow(),
+      disabled: !editMode
     },
     {
       key: 'BeneficiaryCash',
       condition: true,
-      onClick: () => openCashWindow()
+      onClick: () => openCashWindow(),
+      disabled: !editMode
     }
   ]
-  function openBankWindow() {}
-  function openCashWindow() {}
+  function openBankWindow() {
+    stack({
+      Component: BeneficiaryBankWindow,
+      props: { clientId: recordId },
+      width: 900,
+      height: 500,
+      title: 'Beneficiary Bank'
+    })
+  }
+  function openCashWindow() {
+    stack({
+      Component: BeneficiaryCashWindow,
+      props: { clientId: recordId },
+      width: 900,
+      height: 500,
+      title: 'Beneficiary Cash'
+    })
+  }
 
   return (
     <FormShell

@@ -102,6 +102,6 @@ export const ResourceIds = {
   SystemFunction: 20105,
   ModuleDeactivation: 23107,
   OutwardsTransfer: 36301,
-  OutwardBank: 36303,
-  OutwardCash: 36304
+  BeneficiaryBank: 36303,
+  BeneficiaryCash: 36304
 }
