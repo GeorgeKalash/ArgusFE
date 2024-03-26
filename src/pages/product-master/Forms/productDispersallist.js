@@ -12,7 +12,6 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { useWindow } from 'src/windows'
 import ProductDispersalForm from './productDispersalForm'
 
-
 const ProductDispersalList = ({ store, setStore, labels, maxAccess, height }) => {
   const {recordId : pId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
