@@ -37,7 +37,13 @@ const ProductsWindow = ({ _labels, width, height, gridData, maxAccess, form }) =
   ]
 
   return (
-    <FormShell resourceId={ResourceIds.OutwardsTransfer} form={form} height={480} maxAccess={maxAccess}>
+    <FormShell
+      resourceId={ResourceIds.OutwardsTransfer}
+      form={form}
+      height={480}
+      maxAccess={maxAccess}
+      infoVisible={false}
+    >
       <Table
         width={width}
         height={height}

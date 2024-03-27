@@ -190,7 +190,7 @@ const OutwardsTransfer = () => {
         cashAccountId: cashAccountId,
         userId: userData && userData.userId,
         maxAccess: access,
-        _labels: _labels,
+        labels: _labels,
         recordId: recordId ? recordId : null
       },
       width: 950,
