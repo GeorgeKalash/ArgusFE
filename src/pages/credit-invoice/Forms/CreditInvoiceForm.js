@@ -640,6 +640,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
               name='date'
               required
               label={_labels[2]}
+              readOnly={isPosted || isCancelled}
               value={formik?.values?.date}
               onChange={formik.setFieldValue}
               maxAccess={maxAccess}
@@ -703,7 +704,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 required
                 valueShow='corRef'
                 secondValueShow='corName'
-                readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                readOnly={isPosted || isCancelled || detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
                 onChange={async (event, newValue) => {
                   if (newValue) {
                     const baseCurrency = await getBaseCurrency()
@@ -735,6 +736,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             required
             label={_labels[22]}
             form={formik}
+            readOnly={isPosted || isCancelled}
             valueShow='cashAccountRef'
             secondValueShow='cashAccountName'
             onChange={(event, newValue) => {
@@ -816,6 +818,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
               label={_labels[11]}
               value={formik.values.notes}
               rows={3}
+              readOnly={isPosted || isCancelled}
               maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('notes', '')}

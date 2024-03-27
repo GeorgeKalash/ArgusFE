@@ -260,7 +260,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             recordId: res.recordId
           },
           width: 900,
-          height: 650,
+          height: 600,
           title: _labelsINV[1]
         })
       }
@@ -770,7 +770,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   firstFieldWidth='30%'
                   valueShow='corRef'
                   secondValueShow='corName'
-                  readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                  readOnly={isClosed || detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
                   maxAccess={maxAccess}
                   editMode={editMode}
                   onChange={async (event, newValue) => {
