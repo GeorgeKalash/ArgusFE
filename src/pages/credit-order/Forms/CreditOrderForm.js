@@ -27,13 +27,13 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { FormatLineSpacing } from '@mui/icons-material'
-import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
 import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import Approvals from 'src/components/Shared/Approvals'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, window }) {
   const { height } = useWindowDimensions()
@@ -89,9 +89,9 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required('This field is required'),
-      plantId: yup.string().required('This field is required'),
-      corId: yup.string().required('This field is required')
+      date: yup.string().required(' '),
+      plantId: yup.string().required(' '),
+      corId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       try {
@@ -173,10 +173,10 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-          currencyId: yup.string().required('This field is required'),
-          qty: yup.string().required('This field is required'),
-          exRate: yup.string().required('This field is required'),
-          amount: yup.string().required('This field is required')
+          currencyId: yup.string().required(' '),
+          qty: yup.string().required(' '),
+          exRate: yup.string().required(' '),
+          amount: yup.string().required(' ')
         })
       )
     })
@@ -208,20 +208,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
 
   const onReopen = async () => {
     try {
-      /*  const releaseStatus = formik.values.releaseStatus
-
-      const releaseIndicatorResponse = await getRequest({
-        extension: DocumentReleaseRepository.ReleaseIndicator.get,
-        parameters: `_recordId=${releaseStatus}`
-      })
-
-      if (releaseIndicatorResponse.record) {
-        if (releaseIndicatorResponse?.record?.isReleased == true) {
-          stackError({
-            message: `Document is released, cannot reopen.`
-          })
-        } else {
-          */
       const obj = formik.values
       const copy = { ...obj }
 
@@ -241,9 +227,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         invalidate()
         setIsClosed(false)
       }
-
-      //    }
-      //  }
     } catch (error) {}
   }
 
@@ -649,11 +632,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
-          setIsTFR(res.record.releaseStatus === 3 ? true : false)
+          setIsTFR(res.record.releaseStatus === 3 && res.record.status !== 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
-          setInitialData(res.record)
+          formik.setValues(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
         }
@@ -665,6 +648,33 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
 
+  const actions = [
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'Invoice',
+      condition: onTFR,
+      onClick: onTFR,
+      disabled: !isTFR
+    }
+  ]
+
   return (
     <>
       <ConfirmationDialog
@@ -675,7 +685,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           await onTFR()
         }}
       />
-      <ApprovalFormShell
+      <FormShell
         resourceId={ResourceIds.CreditOrder}
         form={formik}
         maxAccess={maxAccess}
@@ -683,12 +693,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         onClose={onClose}
         onReopen={onReopen}
         isClosed={isClosed}
-        hiddenReopen={!isClosed}
-        hiddenClose={isClosed}
-        hiddenPost={true}
-        visibleTFR={true}
-        onTFR={onTFR}
-        isTFR={isTFR}
+        actions={actions}
         previewReport={editMode}
       >
         <Grid container>
@@ -900,7 +905,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             </Grid>
           </Grid>
         </Grid>
-      </ApprovalFormShell>
+      </FormShell>
     </>
   )
 }

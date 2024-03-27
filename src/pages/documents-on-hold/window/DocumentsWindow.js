@@ -1,5 +1,4 @@
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import DocumentsForm from '../forms/DocumentsForm'
 
 const DocumentsWindow = ({ onClose, labels, maxAccess, recordId, functionId, seqNo, setWindowOpen }) => {
@@ -12,17 +11,15 @@ const DocumentsWindow = ({ onClose, labels, maxAccess, recordId, functionId, seq
       width={500}
       height={400}
     >
-      <CustomTabPanel>
-        <DocumentsForm
-          onClose={onClose}
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-          functionId={functionId}
-          seqNo={seqNo}
-          setWindowOpen={setWindowOpen}
-        />
-      </CustomTabPanel>
+      <DocumentsForm
+        onClose={onClose}
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+        functionId={functionId}
+        seqNo={seqNo}
+        setWindowOpen={setWindowOpen}
+      />
     </Window>
   )
 }

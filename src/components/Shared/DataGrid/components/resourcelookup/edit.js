@@ -1,9 +1,6 @@
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-
-
 export default function ResourceLookupEdit({ id, field, value,  column: { props } , update }) {
-
 
 return (
     <ResourceLookup
