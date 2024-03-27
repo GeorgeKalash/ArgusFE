@@ -150,7 +150,7 @@ export function DataGrid({
   }
 
   function addRow() {
-    const highestIndex = value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
+    const highestIndex =  value?.length ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1 : 1
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
@@ -165,10 +165,17 @@ export function DataGrid({
     ])
   }
 
-  function deleteRow(deleteId) {
-    const newRows = value.filter(({ id }) => id !== deleteId)
+  useEffect(()=>{
+    console.log(value)
+    if (!value?.length) {
+      addRow();
+     }
+  },[value])
 
-    onChange(newRows)
+
+   function deleteRow(deleteId) {
+    const newRows = value.filter(({ id }) => id !== deleteId)
+     onChange(newRows)
   }
 
   const actionsColumn = {
