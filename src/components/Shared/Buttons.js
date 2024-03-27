@@ -6,6 +6,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Cancel',
+    color: '#0A4164',
+    image: 'cancelWhite.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',
@@ -56,13 +62,13 @@ export const Buttons = [
     main: false
   },
   {
-    key: 'BeneficiaryCash',
+    key: 'Beneficiary Cash',
     color: '#014a39',
     image: 'beneficiary.png',
     main: false
   },
   {
-    key: 'BeneficiaryBank',
+    key: 'Beneficiary Bank',
     color: '#a54630',
     image: 'beneficiary.png',
     main: false

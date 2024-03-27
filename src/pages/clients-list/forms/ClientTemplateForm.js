@@ -617,13 +617,13 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       disabled: !editMode
     },
     {
-      key: 'BeneficiaryBank',
+      key: 'Beneficiary Bank',
       condition: true,
       onClick: () => openBankWindow(),
       disabled: !editMode
     },
     {
-      key: 'BeneficiaryCash',
+      key: 'Beneficiary Cash',
       condition: true,
       onClick: () => openCashWindow(),
       disabled: !editMode
