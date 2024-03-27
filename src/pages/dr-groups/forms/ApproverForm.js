@@ -19,6 +19,7 @@ import { ResetTvRounded } from '@mui/icons-material'
 
 
 
+
 const ApproverForm= ({
     labels,
     editMode,
@@ -32,6 +33,7 @@ const ApproverForm= ({
     const { postRequest, getRequest} = useContext(RequestsContext)
     
     const {recordId:grId} = store
+
 
 
   
@@ -54,6 +56,7 @@ const ApproverForm= ({
       }),
       onSubmit: values => {
         postGroups(values)
+    
       }
     })
   
@@ -76,12 +79,16 @@ const ApproverForm= ({
           }));
           setEditMode(true); 
         } else {
+          
           toast.success('Record Edited Successfully');
           setInitialData(prevData => ({
             ...prevData,
-            ...obj
-          }));
-         
+            ...obj,
+            
+          })
+          
+          );
+          console.log('ooooooooooooooooooooooooooo',obj.recordId)
         }
         setRefresh(prev=>!prev)
       } catch (error) {
@@ -103,6 +110,7 @@ const ApproverForm= ({
         .then(res => {
           setInitialData(res.record); 
           setEditMode(true);
+        
         })
         .catch(error => {
         });
@@ -128,8 +136,9 @@ const ApproverForm= ({
      readOnly={editMode}
      maxAccess={maxAccess}
      onChange={(event, newValue) => {
-       formik && formik.setFieldValue('codeId', newValue?.recordId)
+       formik.setFieldValue('codeId', newValue?.recordId)
      }}
+     error={formik.touched.codeId && Boolean(formik.errors.codeId)}
 />
         </Grid>
      
