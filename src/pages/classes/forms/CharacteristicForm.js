@@ -77,8 +77,9 @@ return (
                   values={formik.values}
                   required
                   maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('chId', '')}
                   onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('chId', newValue?.recordId)
+                      formik && formik.setFieldValue('chId', newValue?.recordId || '')
                   }}
                   error={formik.touched.chId && Boolean(formik.errors.chId)}
                 />
@@ -94,8 +95,9 @@ return (
                   values={formik.values}
                   required      
                   maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('seqNo', '')}
                   onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('seqNo', newValue?.seqNo)
+                      formik && formik.setFieldValue('seqNo', newValue?.seqNo || '')
                   }}
                   error={formik.touched.seqNo && Boolean(formik.errors.seqNo)}
                 />

@@ -121,8 +121,9 @@ return (
           valueField='key'
           displayField='value'
           values={formik.values}
+          onClear={() => formik.setFieldValue('name', '')}
           onChange={(event, newValue) => {
-            formik.setFieldValue('characteristicOperator', newValue?.key)
+            formik.setFieldValue('characteristicOperator', newValue?.key || '')
           }}
           error={formik.touched.characteristicOperator && Boolean(formik.errors.characteristicOperator)}
         />

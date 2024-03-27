@@ -139,8 +139,9 @@ return (
           valueField='key'
           displayField='value'
           values={formik.values}
+          onClear={() => formik.setFieldValue('dataType', '')}
           onChange={(event, newValue) => {
-            formik.setFieldValue('dataType', newValue?.key)
+            formik.setFieldValue('dataType', newValue?.key || '')
           }}
           error={formik.touched.dataType && Boolean(formik.errors.dataType)}
         />

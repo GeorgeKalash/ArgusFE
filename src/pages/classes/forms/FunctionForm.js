@@ -97,8 +97,9 @@ return (
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('functionId', '')}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('functionId', newValue?.key)
+                  formik.setFieldValue('functionId', newValue?.key || '')
                 }}
                 error={formik.touched.functionId && Boolean(formik.errors.functionId)}
               />
@@ -114,8 +115,9 @@ return (
                 values={formik.values}
                 required      
                 maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('strategyId', '')}
                 onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('strategyId', newValue?.recordId)
+                    formik && formik.setFieldValue('strategyId', newValue?.recordId || '')
                 }}
                 error={formik.touched.strategyId && Boolean(formik.errors.strategyId)}
               />
