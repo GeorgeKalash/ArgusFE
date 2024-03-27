@@ -35,6 +35,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
+  const [isCancelled, setIsCancelled] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
@@ -539,6 +540,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
           setIsPosted(res.record.status === 3 ? true : false)
+          setIsCancelled(res.record.status === -1 ? true : false)
         }
       } catch (error) {
       } finally {
@@ -563,6 +565,21 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     }
   }
 
+  const onCancel = async () => {
+    const obj = formik.values
+
+    const res = await postRequest({
+      extension: CTTRXrepository.CreditInvoice.cancel,
+      record: JSON.stringify(obj)
+    })
+
+    if (res?.recordId) {
+      toast.success('Record Cancelled Successfully')
+      invalidate()
+      setIsCancelled(true)
+    }
+  }
+
   const actions = [
     {
       key: 'GL',
@@ -575,6 +592,12 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       condition: true,
       onClick: onPost,
       disabled: !editMode && !isPosted
+    },
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: onCancel,
+      disabled: !editMode && !isCancelled
     }
   ]
 
@@ -583,6 +606,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       actions={actions}
       resourceId={ResourceIds.CreditInvoice}
       form={formik}
+      editMode={editMode}
       maxAccess={maxAccess}
       previewReport={editMode}
       functionId={formik.values.functionId}

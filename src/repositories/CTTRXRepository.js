@@ -33,7 +33,8 @@ export const CTTRXrepository = {
     snapshot: service + 'snapshotIVC',
     set: service + 'set2IVC',
     close: service + 'closeIVC',
-    post: service + 'postIVC'
+    post: service + 'postIVC',
+    cancel: service + 'cancelIVC'
   },
   CreditInvoiceItem: {
     qry: service + 'qryIVI'
