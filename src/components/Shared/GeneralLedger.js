@@ -42,11 +42,12 @@ import { AuthContext } from 'src/providers/AuthContext'
 import { formatDateDefault, formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 
 
-const GeneralLedger =({ labels,recordId ,functionId,formValues,maxAccess}) => {
+const GeneralLedger =({ labels,recordId ,functionId,formValues,maxAccess,height}) => {
     const { getRequest, postRequest } = useContext(RequestsContext)
     const [formik, setformik] = useState(null);
     const { user, setUser } = useContext(AuthContext)
     const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 });
+    const [exRateValue,setExRateValue]=useState(null)
 const [currencyGridData, setCurrencyGridData] = useState([]);
   
     //states
@@ -202,9 +203,9 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
     useEffect(() => {
       if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
         const generalAccountData = formik2.values.generalAccount;
-
+    
         console.log(generalAccountData)
-
+    
         const baseCredit = generalAccountData.reduce((acc, curr) => {
           return curr.sign?.key == '2' ? acc + parseFloat(curr.baseAmount || 0) : acc;
         }, 0);
@@ -215,41 +216,47 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
     
         const baseBalance = baseDebit - baseCredit;
     
-        setBaseGridData({ base: 'Base', credit: baseCredit, debit: baseDebit, balance: baseBalance });
+        setBaseGridData({ 
+          base: 'Base', 
+          credit: baseCredit.toLocaleString(), 
+          debit: baseDebit.toLocaleString(), 
+          balance: baseBalance.toLocaleString() 
+        });
     
         const currencyTotals = generalAccountData.reduce((acc, curr) => {
           const currency = curr.currency?.reference;
-          if (!acc[currency]) {
-            acc[currency] = { credit: 0, debit: 0 };
-          }
-          if (curr.sign?.key == '2') {
-            acc[currency].credit += parseFloat(curr.amount || 0);
-          } else if (curr.sign?.key == '1') {
-            acc[currency].debit += parseFloat(curr.amount || 0);
+          if (currency) { // Check if currency is selected
+            if (!acc[currency]) {
+              acc[currency] = { credit: 0, debit: 0 };
+            }
+            if (curr.sign?.key == '2') {
+              acc[currency].credit += parseFloat(curr.amount || 0);
+            } else if (curr.sign?.key == '1') {
+              acc[currency].debit += parseFloat(curr.amount || 0);
+            }
           }
 
           return acc;
-
         }, {});
-    
-        // Filter out entries where the currency reference is not provided
+        
         const filteredCurrencyTotals = Object.entries(currencyTotals).reduce((acc, [currency, data]) => {
-          if (currency) { // Check if currency is not undefined or empty
+          if (currency) {
             acc[currency] = data;
           }
 
           return acc;
+
         }, {});
+    
     
         const currencyData = Object.entries(filteredCurrencyTotals).map(([currency, { credit, debit }]) => ({
           currency,
-          credit,
-          debit,
-          balance: debit - credit
+          credit: credit.toLocaleString(), // Format the number with commas
+          debit: debit.toLocaleString(), // Format the number with commas
+          balance: (debit - credit).toLocaleString() // Format the number with commas
         }));
     
         setCurrencyGridData(currencyData);
-
       }
     }, [formik2.values]);
 
@@ -258,7 +265,6 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
 
 
     useEffect(() => {
-
 
       
       
@@ -292,29 +298,33 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       formik2.setFieldValue("generalAccount", generalAccount);
       }
 
-      // else{
-      //   async function fetchCurrencyExchangeRate() {
-      //     if (formValues.currencyId) {
-      //       try {
-      //         const res = await getCurrencyApi(formValues.currencyId);
-      //         if (res && res.record) {
-      //           setInitialData(prevState => ({
-      //             ...prevState,
-      //             generalAccount: prevState.generalAccount.map((account, index) =>
-      //               index === 0 ? { ...account, exRate: res.record.exRate } : account
-      //             ),
-      //           }));
-      //         }
-      //       } catch (error) {
-      
-      //         console.error("Failed to fetch currency exchange rate:", error);
-      //       }
-      //     }
-      //   }
-        
-      //   fetchCurrencyExchangeRate();
-      // }
     }, [data]);
+
+    useEffect(()=>{
+      
+      async function fetchCurrencyExchangeRate() {
+        if (formValues.currencyId) {
+          console.log('formm',formValues.currencyId)
+          try {
+            const res = await getCurrencyApi(formValues.currencyId);
+            if (res && res.record) {
+              console.log('XXXXXXXXXXXXXXXXXXXXX',res.record.exRate)
+              setExRateValue(res.record.exRate);     
+              console.log()
+           
+            }
+          } catch (error) {
+            console.error("Failed to fetch currency exchange rate:", error);
+          }
+        }
+      }
+      
+      fetchCurrencyExchangeRate();
+    },[formValues])
+
+
+
+
 
     const RateDivision = {
       FINANCIALS: 1,
@@ -363,8 +373,6 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
 
       return getRequest({
 
-        
-
         extension: MultiCurrencyRepository.Currency.get,
         parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formValues.date)}&_rateDivision=${_rateDivision}`
       })
@@ -378,6 +386,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       resourceId={ResourceIds.GeneralLedger}
       form={formik2}
       maxAccess={maxAccess}
+      
     >
         <Box>
           {formik && (
@@ -432,7 +441,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
   onChange={value => formik2.setFieldValue('generalAccount', value)}
   value={formik2.values.generalAccount}
   error={formik2.errors.generalAccount}
-  height={300}
+  height={height-280}
   columns={[
     {
 
@@ -447,6 +456,48 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
         valueField: 'recordId',
         fieldsToUpdate: [{ from: 'name', to: 'accountName' }],
       },
+      async onChange({ row: { update, oldRow, newRow } }) {
+
+        if (newRow.account.recordId){
+        update({
+          currency:{
+            reference:formValues.currencyRef,
+            recordId:formValues.currencyId
+
+          },
+          exRate:exRateValue
+          
+        })
+
+        // const result = await getCurrencyApi(newRow?.currency?.recordId)
+
+        // const result2 = result.record
+        // const exRate = exRateValue
+        // const rateCalcMethod = result2.rateCalcMethod
+
+
+       
+        //     if(newRow?.amount){
+        //       const amount =
+        //       rateCalcMethod === 1
+        //         ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
+        //         : rateCalcMethod === 2
+        //         ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
+        //         : 0
+        //         update({
+        //           baseAmount:amount,
+        //         })
+        //     }
+
+        
+
+        // update({
+        //   exRate:exRate,
+        //   rateCalcMethod :rateCalcMethod,
+
+     
+        // })
+      }}
     },
     {
       component: 'textfield',
@@ -483,17 +534,8 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
         console.log('newRow',newRow)
         if(!newRow?.currency?.recordId){
           return
-  
-        
         }
 
-        else{
-          newRow.currency= {
-            reference:formValues.currencyRef,
-            recordId:formValues.currencyId
-          }
-         
-        }
         
         const result = await getCurrencyApi(newRow?.currency?.recordId)
 
@@ -600,10 +642,10 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
 
 
        
-          <Grid container paddingTop={2}>
+          <Grid container marginTop={3.7}>
             <Grid xs={6}>
               <Box paddingInlineEnd={2}  sx={{
-              width: '25.8rem',
+              width: '25.9rem',
               overflow:'hidden',
               marginLeft:'3rem'
             }}>
