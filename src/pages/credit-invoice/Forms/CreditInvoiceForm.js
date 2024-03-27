@@ -552,6 +552,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
 
   const onPost = async () => {
     const obj = formik.values
+    obj.date = formatDateToApi(obj.date)
 
     const res = await postRequest({
       extension: CTTRXrepository.CreditInvoice.post,
@@ -561,12 +562,22 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     if (res?.recordId) {
       toast.success('Record Posted Successfully')
       invalidate()
-      setIsPosted(true)
+
+      const res = await getRequest({
+        extension: CTTRXrepository.CreditInvoice.get,
+        parameters: `_recordId=${recordId}`
+      })
+      res.record.date = formatDateFromApi(res.record.date)
+      setInitialData(res.record)
+
+      setIsPosted(res.record.status === 3 ? true : false)
+      setIsCancelled(res.record.status === -1 ? true : false)
     }
   }
 
   const onCancel = async () => {
     const obj = formik.values
+    obj.date = formatDateToApi(obj.date)
 
     const res = await postRequest({
       extension: CTTRXrepository.CreditInvoice.cancel,
@@ -576,7 +587,16 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     if (res?.recordId) {
       toast.success('Record Cancelled Successfully')
       invalidate()
-      setIsCancelled(true)
+
+      const res = await getRequest({
+        extension: CTTRXrepository.CreditInvoice.get,
+        parameters: `_recordId=${recordId}`
+      })
+      res.record.date = formatDateFromApi(res.record.date)
+      setInitialData(res.record)
+
+      setIsPosted(res.record.status === 3 ? true : false)
+      setIsCancelled(res.record.status === -1 ? true : false)
     }
   }
 
@@ -591,13 +611,13 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       key: 'Post',
       condition: true,
       onClick: onPost,
-      disabled: !editMode && !isPosted
+      disabled: !editMode || isPosted || isCancelled
     },
     {
       key: 'Cancel',
       condition: true,
       onClick: onCancel,
-      disabled: !editMode && !isCancelled
+      disabled: !editMode || isPosted || isCancelled
     }
   ]
 
@@ -610,6 +630,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       maxAccess={maxAccess}
       previewReport={editMode}
       functionId={formik.values.functionId}
+      disabledSubmit={isPosted || isCancelled}
     >
       <Grid container>
         <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
