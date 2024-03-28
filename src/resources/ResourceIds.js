@@ -103,5 +103,6 @@ export const ResourceIds = {
   ModuleDeactivation: 23107,
   OutwardsTransfer: 36301,
   BeneficiaryBank: 36303,
-  BeneficiaryCash: 36304
+  BeneficiaryCash: 36304,
+  CorrespondentControl: 36119
 }

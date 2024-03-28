@@ -145,5 +145,8 @@ export const SystemRepository = {
   },
   FiscalYears: {
     qry: service + 'qryFY'
+  },
+  ResourceControls: {
+    qry: service + 'qryResourceControls'
   }
 }

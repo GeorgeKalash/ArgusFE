@@ -2,19 +2,16 @@ import { Box, Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import Table from 'src/components/Shared/Table'
 
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { AuthContext } from 'src/providers/AuthContext'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -28,10 +25,10 @@ const BeneficiaryFields = () => {
     corId: '',
     rows: [
       {
+        id: 1,
         controlId: '',
         controlName: '',
-        accessLevel: '',
-        accessLevelName: ''
+        accessLevel: ''
       }
     ]
   })
@@ -45,18 +42,22 @@ const BeneficiaryFields = () => {
       dispersalType: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
+      console.log('obj ', obj)
+
       const headerObj = {
         countryId: obj.countryId,
         dispersalType: obj.dispersalType,
         corId: obj.corId
       }
 
-      const controlAccessList = obj.rows.map(row => ({
-        controlId: row.controlId,
-        controlName: row.controlName,
-        accessLevel: row.accessLevel,
-        accessLevelName: row.accessLevelName
-      }))
+      const controlAccessList = obj.rows
+        .filter(row => row.accessLevel)
+        .map(row => ({
+          controlId: row.controlId,
+          controlName: row.controlName,
+          accessLevel: row.accessLevel
+        }))
+      console.log('obj 2 ', controlAccessList)
 
       const resultObject = {
         header: headerObj,
@@ -64,11 +65,11 @@ const BeneficiaryFields = () => {
       }
 
       const res = await postRequest({
-        //extension:,
+        extension: RemittanceSettingsRepository.CorrespondentControl.set,
         record: JSON.stringify(resultObject)
       })
 
-      if (res.recordId) {
+      if (res) {
         toast.success('Record Updated Successfully')
       }
     }
@@ -79,28 +80,56 @@ const BeneficiaryFields = () => {
     const dispersalType = filters?.dispersalType
     const corId = filters?.corId || 0
 
-    if (!filters || !countryId || dispersalType || corId) {
+    if (!filters || !countryId || !dispersalType) {
       return { list: [] }
-    } else {
-      /*  return await getRequest({
-        extension: SystemRepository.SMSRequest.qry,
+    } else if (dispersalType !== '') {
+      const controllRES = await getRequest({
+        extension: SystemRepository.ResourceControls.qry,
+        parameters: `_resourceId=${dispersalType}`
+      })
+
+      const accessLevelRES = await getRequest({
+        extension: RemittanceSettingsRepository.CorrespondentControl.qry,
         parameters: `_countryId=${countryId}&_correspondentId=${corId}&_dispersalType=${dispersalType}`
-      })*/
-      return
+      })
+
+      const finalList = controllRES.list.map(x => {
+        const n = {
+          controlId: x.id,
+          controlName: x.name,
+          accessLevel: null
+        }
+
+        const matchingControl = accessLevelRES.list.find(y => n.controlId === y.controlId)
+
+        if (matchingControl) {
+          n.accessLevel = matchingControl.accessLevel
+        }
+
+        return n
+      })
+      formik.setValues({
+        ...formik.values,
+        rows: finalList.map((item, index) => ({
+          id: index + 1,
+          ...item
+        }))
+      })
+
+      return { list: finalList }
     }
   }
 
   const {
-    query: { data },
     labels: labels,
     filterBy,
     access,
     filters
   } = useResourceQuery({
-    datasetId: ResourceIds.OutwardsTransfer,
+    datasetId: ResourceIds.CorrespondentControl,
     filter: {
-      //endpointId: SystemRepository.SMSRequest.qry,
-      //filterFn: fetchWithFilter
+      endpointId: SystemRepository.ResourceControls.qry,
+      filterFn: fetchWithFilter
     }
   })
 
@@ -116,13 +145,12 @@ const BeneficiaryFields = () => {
     <>
       <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
         <div style={{ display: 'flex' }}>
-          <GridToolbar //  maxAccess={access}
-          >
+          <GridToolbar maxAccess={access}>
             <Box sx={{ display: 'flex', width: '1000px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
                 name='countryId'
-                label='Country'
+                label={labels.country}
                 valueField='recordId'
                 required
                 displayField={['reference', 'name', 'flName']}
@@ -139,12 +167,13 @@ const BeneficiaryFields = () => {
                     onChange('countryId', newValue?.recordId)
                   }
                 }}
-                error={formik.touched.countryId && Boolean(formik.errors.countryId)} // maxAccess={access}
+                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+                maxAccess={access}
                 sx={{ width: '300px' }}
               />
               <ResourceComboBox
-                datasetId={DataSets.RT_Dispersal_Type}
-                label={'DispersalType'}
+                datasetId={DataSets.BENEFICIARY_RESOURCEIDS}
+                label={labels.dispersalType}
                 required
                 name='dispersalType'
                 valueField='key'
@@ -165,12 +194,13 @@ const BeneficiaryFields = () => {
                   valueField='reference'
                   displayField='name'
                   name='corId'
-                  label='Correspondant'
+                  label={labels.correspondent}
                   form={formik}
                   displayFieldWidth={2}
                   firstFieldWidth='40%'
                   valueShow='corRef'
-                  secondValueShow='corName' // maxAccess={maxAccess}
+                  secondValueShow='corName'
+                  maxAccess={access}
                   onChange={async (event, newValue) => {
                     if (newValue) {
                       onChange('corId', newValue?.recordId)
@@ -193,51 +223,40 @@ const BeneficiaryFields = () => {
           height={600}
           form={formik}
           isInfo={false}
-          initialValues={initialValues} //resourceId={35208}
+          initialValues={initialValues}
+          resourceId={ResourceIds.CorrespondentControl}
         >
           <Grid width={'100%'}>
             <DataGrid
-              onChange={value => formik.setFieldValue}
-              value={formik.values}
+              onChange={value => formik.setFieldValue('rows', value)}
+              value={formik.values.rows}
               error={formik.errors}
-              height={300}
+              height={550}
               columns={[
                 {
-                  component: 'numberfield',
+                  component: 'textfield',
                   name: 'controlId',
-                  label: 'Control Id',
+                  label: labels.controlId,
                   props: {
                     readOnly: true
                   }
                 },
                 {
-                  component: 'numberfield',
+                  component: 'textfield',
                   name: 'controlName',
-                  label: 'Control Name',
+                  label: labels.controlName,
                   props: {
                     readOnly: true
                   }
                 },
                 {
                   component: 'resourcecombobox',
-                  label: 'Access Level',
+                  label: labels.accessLevel,
                   name: 'accesslevel',
                   props: {
-                    endpointId: SystemRepository.Currency.qry,
-                    displayField: ['reference', 'name'],
-                    valueField: 'recordId',
-                    columnsInDropDown: [
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]
-                  },
-                  async onChange({ row: { update, oldRow, newRow } }) {
-                    if (!newRow?.currency?.recordId) {
-                      return
-                    }
-                    update({
-                      currencyId: newRow.currency.recordId
-                    })
+                    datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
+                    displayField: 'value',
+                    valueField: 'key'
                   },
                   flex: 1.5
                 }
