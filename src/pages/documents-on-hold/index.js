@@ -34,6 +34,7 @@ import CreditInvoiceForm from '../credit-invoice/Forms/CreditInvoiceForm'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
+import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
 
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -169,6 +170,14 @@ const DocumentsOnHold = () => {
         windowWidth = 1200
         title = labels.cashInvoice
         break
+
+      case SystemFunction.Outwards:
+        relevantComponent = OutwardsTab
+        labels = await getLabels(ResourceIds.OutwardsTransfer)
+        relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
+        windowHeight = 550
+        windowWidth = 950
+        title = labels.OutwardsTransfer
 
       default:
         // Handle default case if needed

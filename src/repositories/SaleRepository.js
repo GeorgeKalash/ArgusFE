@@ -51,5 +51,8 @@ export const SaleRepository = {
   },
   Client: {
     snapshot: service + 'snapshotCL'
+  },
+  WorkFlow: {
+    graph: service + 'graph'
   }
 }
