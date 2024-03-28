@@ -10,6 +10,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
+import { formatDateFromApi } from 'src/lib/date-helper'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -23,12 +24,47 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
   useEffect(() => {
     ;(async function () {
       if (beneficiaryId) {
-        const res = await getRequest({
+        const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
         })
 
-        formik.setValues(res.record)
+        const RTBEN = await getRequest({
+          extension: RemittanceOutwardsRepository.Beneficiary.get,
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+        })
+
+        const obj = {
+          //RTBEN
+          clientId: clientId,
+          beneficiaryId: beneficiaryId,
+          name: RTBEN?.record?.name,
+          dispersalType: dispersalType,
+          nationalityId: RTBEN?.record?.nationalityId,
+          isBlocked: RTBEN?.record?.isBlocked,
+          stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
+          stoppedReason: RTBEN?.record?.stoppedReason,
+          gender: RTBEN?.record?.gender,
+          addressLine1: RTBEN?.record?.addressLine1,
+          addressLine2: RTBEN?.record?.addressLine2,
+
+          //RTBEB
+          accountRef: RTBEB?.record?.accountRef,
+          accountType: RTBEB?.record?.accountType,
+          IBAN: RTBEB?.record?.IBAN,
+          bankName: RTBEB?.record?.bankName,
+          routingNo: RTBEB?.record?.routingNo,
+          swiftCode: RTBEB?.record?.swiftCode,
+          branchCode: RTBEB?.record?.branchCode,
+          branchName: RTBEB?.record?.branchName,
+          nationalityId: RTBEB?.record?.nationalityId,
+          stateId: RTBEB?.record?.stateId,
+          cityId: RTBEB?.record?.cityId,
+          zipcode: RTBEB?.record?.zipcode,
+          remarks: RTBEB?.record?.remarks
+        }
+
+        formik.setValues(obj)
       }
     })()
   }, [])
@@ -106,6 +142,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
         record: JSON.stringify(data)
       })
+
       if (res.recordId) {
         toast.success('Record Updated Successfully')
       }

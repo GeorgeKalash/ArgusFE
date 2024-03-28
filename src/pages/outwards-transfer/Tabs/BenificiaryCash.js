@@ -9,7 +9,7 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 
 // ** Helpers
-
+import { formatDateFromApi } from 'src/lib/date-helper'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
@@ -27,12 +27,46 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId }) => {
   useEffect(() => {
     ;(async function () {
       if (beneficiaryId) {
-        const res = await getRequest({
+        const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
         })
 
-        formik.setValues(res.record)
+        const RTBEN = await getRequest({
+          extension: RemittanceOutwardsRepository.Beneficiary.get,
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+        })
+
+        const obj = {
+          //RTBEN
+          clientId: clientId,
+          beneficiaryId: beneficiaryId,
+          name: RTBEN?.record?.name,
+          dispersalType: dispersalType,
+          nationalityId: RTBEN?.record?.nationalityId,
+          isBlocked: RTBEN?.record?.isBlocked,
+          stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
+          stoppedReason: RTBEN?.record?.stoppedReason,
+          gender: RTBEN?.record?.gender,
+          addressLine1: RTBEN?.record?.addressLine1,
+          addressLine2: RTBEN?.record?.addressLine2,
+
+          //RTBEC
+          firstName: RTBEC?.record?.firstName,
+          lastName: RTBEC?.record?.lastName,
+          middleName: RTBEC?.record?.middleName,
+          familyName: RTBEC?.record?.familyName,
+          fl_firstName: RTBEC?.record?.fl_firstName,
+          fl_lastName: RTBEC?.record?.fl_lastName,
+          fl_middleName: RTBEC?.record?.fl_middleName,
+          fl_familyName: RTBEC?.record?.fl_familyName,
+          countryId: RTBEC?.record?.countryId,
+          nationalityId: RTBEC?.record?.nationalityId,
+          cellPhone: RTBEC?.record?.cellPhone,
+          birthDate: RTBEC?.record?.birthDate && formatDateFromApi(RTBEC.record.birthDate),
+          birthPlace: RTBEC?.record?.birthPlace
+        }
+        formik.setValues(obj)
       }
     })()
   }, [])
