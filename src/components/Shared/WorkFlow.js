@@ -1,103 +1,113 @@
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
-const MyChartComponent = () => {
+const WorkFlow = ({ functionId, recordId }) => {
+  const { getRequest } = useContext(RequestsContext)
+
+  const getWorkFlowData = () => {
+    var parameters = `_functionId=${functionId}&_recordId=${recordId}`
+    getRequest({
+      extension: SaleRepository.WorkFlow.graph,
+      parameters: parameters
+    }).then(res => {
+      return res?.result
+    })
+  }
+
+  const getDeptsJson = graph => {
+    let result = []
+    let result2 = []
+    let parent = ''
+    let child = ''
+    let parentId = -1
+    let childId = -1
+
+    // Iterate over objects
+    graph.objects.forEach(item => {
+      result.push({ functionName: item.functionName, reference: item.reference, date: item.date })
+    })
+
+    // Iterate over workflow
+    graph.workflow.forEach(item => {
+      graph.objects.forEach(item2 => {
+        let functionLines = item2.functionName.split(' ')
+        let functionString = functionLines.join('\r\n')
+
+        if (item.parentId === item2.recordId && item.parentFunctionId === item2.functionId) {
+          parent = item2.reference + '\r\n' + item2.date + '\r\n' + functionString
+          parentId = item.parentId
+        }
+        if (item.childId === item2.recordId && item.childFunctionId === item2.functionId) {
+          child = item2.reference + '\r\n' + item2.date + '\r\n' + functionString
+          childId = item.childId
+        }
+      })
+
+      if (!(parent === '' || child === '')) {
+        result2.push({ from: parent, to: child, value: 1, labelText: '' })
+      }
+      parent = ''
+      child = ''
+    })
+
+    return result2
+  }
+
   useEffect(() => {
-    const loadScript = (url, callback) => {
-      const script = document.createElement('script')
-      script.type = 'text/javascript'
-      script.src = url
-      script.async = true
-      script.onload = callback
-      document.head.appendChild(script)
-    }
+    var data = getWorkFlowData()
+    if (data) {
+      const loadScript = (url, callback) => {
+        const script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.src = url
+        script.async = true
+        script.onload = callback
+        document.head.appendChild(script)
+      }
 
-    loadScript('https://cdn.amcharts.com/lib/5/index.js', () => {
-      loadScript('https://cdn.amcharts.com/lib/5/flow.js', () => {
-        loadScript('https://cdn.amcharts.com/lib/5/themes/Animated.js', () => {
-          am5.ready(() => {
-            const root = am5.Root.new('chartdiv')
-            root.setThemes([am5themes_Animated.new(root)])
+      loadScript('https://cdn.amcharts.com/lib/4/core.js', () => {
+        loadScript('https://cdn.amcharts.com/lib/4/charts.js', () => {
+          loadScript('https://cdn.amcharts.com/lib/4/themes/animated.js', () => {
+            am4core.ready(() => {
+              const chart = am4core.create('chartdiv', am4charts.SankeyDiagram)
+              const combinedData = getDeptsJson(data)
+              chart.data = combinedData
+              chart.dataFields.fromName = 'from'
+              chart.dataFields.toName = 'to'
+              chart.dataFields.value = 'value'
+              chart.paddingRight = 40
 
-            const series = root.container.children.push(
-              am5flow.Sankey.new(root, {
-                sourceIdField: 'from',
-                targetIdField: 'to',
-                valueField: 'value',
-                paddingRight: 50,
-                nodeWidth: 100
-              })
-            )
+              const nodeTemplate = chart.nodes.template
+              nodeTemplate.draggable = false
+              nodeTemplate.inert = true
+              nodeTemplate.clickable = false
+              nodeTemplate.width = 110
+              nodeTemplate.height = 30
 
-            series.links.template.set('fill', am5.color('#A8C686'))
-            series.links.template.set('strokeWidth', 5)
-            series.links.template.set('fillOpacity', 0)
-            series.links.template.set('strokeOpacity', 0.3)
-            series.links.template.set('stroke', am5.color('#555'))
-            series.links.template.set('hoverable', false)
-            series.links.template.set('hoverOnFocus', false)
-            series.links.template.set('isHover', false)
+              nodeTemplate.nameLabel.locationX = 0
+              nodeTemplate.nameLabel.height = undefined
+              nodeTemplate.nameLabel.label.fontWeight = 'bold'
+              const linkTemplate = chart.links.template
+              linkTemplate.middleLine.strokeOpacity = 0.3
+              linkTemplate.middleLine.stroke = am4core.color('#555')
+              linkTemplate.middleLine.strokeWidth = 5
+              linkTemplate.middleLine.hoverable = false
+              linkTemplate.fillOpacity = 0
+              linkTemplate.hoverable = true
+              linkTemplate.hoverOnFocus = true
+              linkTemplate.fill = am4core.color('#A8C686')
+              linkTemplate.isHover = true
 
-            series.nodes.nodes.template.setAll({
-              draggable: false, // disables dragging
-              toggleKey: 'none' // disables toggling
+              chart.appear(1000, 100)
             })
-
-            // series.nodes..template.setAll({
-            //   fillOpacity: 0.5,
-            //   stroke: am5.color(0x000000),
-            //   strokeWidth: 1,
-            //   cornerRadiusTL: 4,
-            //   cornerRadiusTR: 4,
-            //   cornerRadiusBL: 4,
-            //   cornerRadiusBR: 4
-            // });
-
-            // // Customize nodes appearance
-            // const nodesTemplate = series.nodes.template
-            // nodesTemplate.set('width', 100)
-            // nodesTemplate.set('height', 30)
-            // nodesTemplate.set('fill', am5.color('#4CAF50'))
-            // nodesTemplate.set('strokeWidth', 0)
-            // nodesTemplate.set('draggable', false)
-            // nodesTemplate.set('inert', true)
-            // nodesTemplate.set('clickable', true)
-            // nodesTemplate.set('locationX', 0)
-            // nodesTemplate.set('nameLabel', 'bold')
-
-            // series.nodes.template.setAll({
-            //   width: 100, // Adjust node width
-            //   height: 30, // Adjust node height
-            //   fill: am5.color('#4CAF50'), // Green color for nodes
-            //   strokeWidth: 0, // Remove border if not needed
-            //   draggable: false,
-            //   inert: true,
-            //   clickable: false,
-            //   locationX: 0,
-            //   nameLabel: 'bold'
-            // })
-
-            series.data.setAll([
-              { from: 'A', to: 'D', value: 10 },
-              { from: 'B', to: 'D', value: 8 },
-              { from: 'B', to: 'E', value: 4 },
-              { from: 'C', to: 'E', value: 3 },
-              { from: 'D', to: 'G', value: 5 },
-              { from: 'D', to: 'I', value: 2 },
-              { from: 'D', to: 'H', value: 3 },
-              { from: 'E', to: 'H', value: 6 },
-              { from: 'G', to: 'J', value: 5 },
-              { from: 'I', to: 'J', value: 1 },
-              { from: 'H', to: 'J', value: 9 }
-            ])
-
-            series.appear(1000, 100)
           })
         })
       })
-    })
+    }
   }, [])
 
   return <div id='chartdiv' style={{ width: '100%', height: '500px' }} />
 }
 
-export default MyChartComponent
+export default WorkFlow

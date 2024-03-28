@@ -606,9 +606,12 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
   const onWorkFlowClick = async () => {
     stack({
       Component: WorkFlow,
-      props: null,
-      width: 700,
-      height: 500,
+      props: {
+        functionId: formik.values.functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      height: 600,
       title: 'Workflow'
     })
   }

@@ -13,8 +13,8 @@ export const Buttons = [
   },
   {
     key: 'WorkFlow',
-    color: '#0A4164',
-    image: 'cancelWhite.png',
+    color: '#231f20',
+    image: 'workflow.png',
     main: false
   },
   {
