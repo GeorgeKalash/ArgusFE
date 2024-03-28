@@ -121,8 +121,8 @@ const ApproverList = ({store,labels,maxAccess}) => {
         setRefresh
         
       },
-      width: 300,
-      height: 300,
+      width: 500,
+      height: 400,
       title: labels.approver
     })
   }
@@ -148,7 +148,7 @@ const ApproverList = ({store,labels,maxAccess}) => {
       rowId={['codeId']}
       isLoading={false}
       pageSize={50}
-      paginationType='client'
+      pagination={false}
      
       onDelete={delApprover}
       maxAccess={maxAccess}      

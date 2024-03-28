@@ -27,7 +27,8 @@ const ApproverForm= ({
     setEditMode,
     recordId,
     store,
-    setRefresh
+    setRefresh,
+    
   }) => {
   
     const { postRequest, getRequest} = useContext(RequestsContext)
@@ -131,7 +132,10 @@ const ApproverForm= ({
      name='codeId'
      label={'codeId'}
      valueField='recordId'
-     displayField='name'
+     columnsInDropDown={[
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]}
      values={formik.values}
      required
      readOnly={editMode}

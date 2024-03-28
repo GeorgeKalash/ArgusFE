@@ -14,6 +14,7 @@ const DRGroupWindow = ({
   maxAccess,
   approver,
 }) => {
+
   const [activeTab , setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
@@ -24,14 +25,13 @@ const DRGroupWindow = ({
 
   const tabs = [
     { label: labels.group },
-    { label: labels.approver, disabled: !store.recordId },
+    { label: labels.approver, disabled: !store.recordId},
   
   ]
 
   return (
     <>
-    <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={height} index={0} value={activeTab}>
         <DRGroupForm
           labels={labels}
@@ -40,7 +40,7 @@ const DRGroupWindow = ({
           store={store}
           editMode={editMode}
           maxAccess={maxAccess}
-        />
+                 />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
         <ApproverList

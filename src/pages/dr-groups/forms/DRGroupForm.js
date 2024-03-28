@@ -59,9 +59,13 @@ const DRGroupForm = ({
         extension: DocumentReleaseRepository.DRGroup.set,
         record: JSON.stringify(obj)
       });
-      
+  
       if (isNewRecord) {
         toast.success('Record Added Successfully');
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId 
+        }));
         setInitialData(prevData => ({
           ...prevData,
           ...obj,
@@ -78,11 +82,9 @@ const DRGroupForm = ({
         invalidate();
       }
     } catch (error) {
-     
       toast.error('An error occurred');
     }
   };
-
  useEffect(() => {
   recordId && getGroupId(recordId);
 }, [recordId]);
