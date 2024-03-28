@@ -98,9 +98,7 @@ const ApproverList = ({store,labels,maxAccess}) => {
     openForm2()
   }
 
-  const editApprover = obj => {
-    openForm2()
-  }
+
 
   const delApprover = async obj => {
     await postRequest({
@@ -151,7 +149,7 @@ const ApproverList = ({store,labels,maxAccess}) => {
       isLoading={false}
       pageSize={50}
       paginationType='client'
-      onEdit={editApprover}
+     
       onDelete={delApprover}
       maxAccess={maxAccess}      
       height={300}
@@ -165,97 +163,3 @@ export default ApproverList
 
 
   
-
-//   </>
-//   );
-// };
-
-
-
-
-
-// const ApproverTab = ({ approverGridData, getApproverGridData, addApprover, delApprover, editApprover, maxAccess, _labels }) => {}
-// const ValuesForm = (
-//   {
-//    labels,
-//    store,
-//    maxAccess,
-//    height
-//  }) => {
-//    const { getRequest, postRequest } = useContext(RequestsContext)
-//    const [maxSeqNo, setMaxSeqNo] = useState(0);
-//    const [valueGridData , setValueGridData] = useState()
-//    const { stack } = useWindow()
-//    const { recordId } = store
-//    const columns = [
-//      {
-//        field: 'value',
-//        headerName: labels.value,
-//        flex: 1
-//      }
-//    ]
-//    function openForm (recordId , seqNo, edit){
-//      stack({
-//        Component: ValuesWindow,
-//        props: {
-//          labels: labels,
-//          chId: store.recordId ,
-//          recordId: recordId,
-//          seqNo: seqNo,
-//          maxAccess: maxAccess,
-//          getValueGridData: getValueGridData,
-//          edit: edit
-//        },
-//        width: 400,
-//        height: 400,
-//        title: labels.values
-//      })
-//    }
-//    const delValue = obj => {
-//      postRequest({
-//        extension: DocumentReleaseRepository.CharacteristicsValues.del,
-//        record: JSON.stringify(obj)
-//      })
-//        .then(res => {
-//          getValueGridData(recordId)
-//          toast.success('Record Deleted Successfully')
-//        })
-//    }
-//    const addValue = () => {
-//      openForm('', maxSeqNo + 1, false)
-//    }
-//    const editValue = obj => {
-//      openForm(obj?.chId , obj?.seqNo, true)
-//    }
-
-//        .then(res => {
-//          setValueGridData(res.list)
-//          const maxSeq = Math.max(...res.list.map(item => item.seqNo), 0)
-//          setMaxSeqNo(maxSeq)
-//        })
-//        .catch(error => {
-//          setErrorMessage(error)
-//        })
-//    }
-//    useEffect(()=>{
-//      recordId && getValueGridData(recordId)
-//    },[recordId])
-//    return (
-//      <>
-//        <Box>
-//          <GridToolbar onAdd={addValue} maxAccess={maxAccess} />
-//          <Table
-//            columns={columns}
-//            gridData={{list : valueGridData}}
-//            rowId={['seqNo']}
-//            onEdit={editValue}
-//            onDelete={delValue}
-//            isLoading={false}
-//            maxAccess={maxAccess}
-//            pagination={false}
-//            height={height-100}
-//          />
-//        </Box>
-//      </>
-//    )
-//  }

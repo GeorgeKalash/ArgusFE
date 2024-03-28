@@ -152,6 +152,3 @@ const DRGroups = () => {
 
 
 export default DRGroups
-
-// getRequest({
-//   extension: DocumentReleaseRepository.ReleaseCode.qry,

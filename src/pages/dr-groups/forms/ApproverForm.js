@@ -38,7 +38,7 @@ const ApproverForm= ({
 
   
     const [initialValues , setInitialData] = useState({
-      recordId:grId,
+      
       codeId:'',
       groupId:grId
 
@@ -61,7 +61,7 @@ const ApproverForm= ({
     })
   
     const postGroups = async obj => {
-      const isNewRecord = !obj?.recordId;
+      const isNewRecord = !obj?.codeId;
       
       
       try {
@@ -75,7 +75,7 @@ const ApproverForm= ({
           setInitialData(prevData => ({
             ...prevData,
             ...obj,
-            recordId: res.recordId 
+            
           }));
           setEditMode(true); 
         } else {
@@ -83,12 +83,13 @@ const ApproverForm= ({
           toast.success('Record Edited Successfully');
           setInitialData(prevData => ({
             ...prevData,
+            
             ...obj,
             
           })
           
           );
-          console.log('ooooooooooooooooooooooooooo',obj.recordId)
+          console.log('ooooooooooooooooooooooooooo',obj.codeId)
         }
         setRefresh(prev=>!prev)
       } catch (error) {
