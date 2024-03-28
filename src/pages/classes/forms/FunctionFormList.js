@@ -52,7 +52,8 @@ const FunctionFormList = (
       props: {
         labels: labels,
         recordId: recordId,
-        functionId:functionId,
+        classId: store.recordId ,
+        functionId: functionId,
         maxAccess: maxAccess,
         getFunctionGridData: getFunctionGridData,
         editMode: editMode
@@ -83,7 +84,6 @@ const FunctionFormList = (
   }
 
   const getFunctionGridData = classId => {
-    setFunctionGridData([])
     const defaultParams = `_classId=${classId}`
     var parameters = defaultParams
     getRequest({

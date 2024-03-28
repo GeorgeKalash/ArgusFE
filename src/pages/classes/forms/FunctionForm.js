@@ -20,6 +20,7 @@ const FunctionForm = ({
   getFunctionGridData,
   recordId,
   functionId,
+  classId,
   window,
   editMode
 }) => {
@@ -45,21 +46,19 @@ const FunctionForm = ({
   })
   
   const postFunction = obj => {
-    const classId = obj.classId ? obj.classId : recordId
     obj.classId = classId
     postRequest({
       extension: DocumentReleaseRepository.ClassFunction.set,
       record: JSON.stringify(obj)
     })
       .then(res => {
+        getFunctionGridData(classId)
         if (!editMode) {
           toast.success('Record Added Successfully')
         } else toast.success('Record Editted Successfully')
-        getFunctionGridData(classId)
         window.close()
       })
       .catch(error => {
-        setErrorMessage(error)
       })
   }
 
@@ -79,7 +78,7 @@ const FunctionForm = ({
       })
   }
 
-return (
+  return (
     <FormShell
       form={formik}
       resourceId={ResourceIds.Functions}
