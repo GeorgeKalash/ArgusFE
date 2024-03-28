@@ -1,7 +1,7 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useContext, useState } from 'react'
+import { useEffect, useContext, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -17,8 +17,21 @@ import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function BenificiaryBank({ clientId, dispersalType }) {
-  const { postRequest } = useContext(RequestsContext)
+export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  useEffect(() => {
+    ;(async function () {
+      if (beneficiaryId) {
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+        })
+
+        formik.setValues(res.record)
+      }
+    })()
+  }, [])
 
   const [initialValues, setInitialData] = useState({
     //RTBEN

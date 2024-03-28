@@ -23,8 +23,21 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 
-const BenificiaryCash = ({ clientId, dispersalType }) => {
-  const { postRequest } = useContext(RequestsContext)
+const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId }) => {
+  useEffect(() => {
+    ;(async function () {
+      if (beneficiaryId) {
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+        })
+
+        formik.setValues(res.record)
+      }
+    })()
+  }, [])
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
 
   const { labels: _labels, access } = useResourceQuery({
