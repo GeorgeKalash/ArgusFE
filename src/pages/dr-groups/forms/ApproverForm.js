@@ -121,6 +121,7 @@ const ApproverForm= ({
   return (
       <FormShell
       form={formik}
+      infoVisible={false}
       resourceId={ResourceIds.DRGroups}
       maxAccess={maxAccess}
       editMode={editMode} >
