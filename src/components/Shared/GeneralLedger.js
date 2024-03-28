@@ -5,16 +5,18 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import {Box } from '@mui/material'
 import { styled } from '@mui/material/styles';
+import FormShell from "src/components/Shared/FormShell";
+import * as yup from 'yup';
+import toast from 'react-hot-toast';
 
-
-
-
+import { Module } from 'src/resources/Module'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -29,33 +31,157 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { DataGrid } from './DataGrid';
+import { column } from 'stylis';
+import { useFormik } from 'formik'
+import { AuthContext } from 'src/providers/AuthContext'
 
-const GeneralLedger =({ labels,recordId ,functionId,formValues}) => {
+import { formatDateDefault, formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+
+
+const GeneralLedger =({ labels,recordId ,functionId,formValues,maxAccess,height}) => {
     const { getRequest, postRequest } = useContext(RequestsContext)
     const [formik, setformik] = useState(null);
-
+    const { user, setUser } = useContext(AuthContext)
     const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 });
+    const [exRateValue,setExRateValue]=useState(null)
 const [currencyGridData, setCurrencyGridData] = useState([]);
   
     //states
-    const [windowOpen, setWindowOpen] = useState(false)
-    const [errorMessage, setErrorMessage] = useState(null)
+  
   
     async function fetchGridData(options = {}) {
       const { _startAt = 0, _pageSize = 50 } = options
   
       return await getRequest({
         extension: GeneralLedgerRepository.GeneralLedger.qry,
-        parameters: `_functionId=${functionId}&_recordId=${recordId}`
+        parameters: `_functionId=${functionId}&_recordId=${formValues.recordId}`
       })
     }
+    
+
+
+
+    const [initialValues, setInitialData] = useState({
+      recordId:formValues.recordId,
+      reference:formValues.reference,
+       date:formValues.date,
+       functionId:functionId,
+       seqNo:'',
+      
+    
+      generalAccount: [{
+          id: 1,
+          account: {
+            accountRef: ""
+          },
+          accountName: '',
+          
+          tpAccount: {
+            reference: ""
+          },
+          
+          tpAccountName: '',
+          currency: {
+            reference: '',
+            recordId:''
+          },
+          sign: {
+            key: ""
+          },
+          notes: '',
+          functionId:functionId,
+          exRate:'',
+          amount: '',
+          baseAmount: '',
+          
+      }]
+  
+    })
+  
+    const generalAccountItemSchema = yup.object().shape({
+      account: yup.object().shape({
+        recordId: yup.string().required('Account ID is required'),
+      }).required('Account is required'),
+      accountName: yup.string().required('Account name is required'),
+      currency: yup.object().shape({
+        recordId: yup.string().required('Currency ID is required'),
+      }).required('Currency is required'),
+      sign: yup.object().shape({
+        key: yup.string().required('Sign key is required'),
+      }).required('Sign is required'),
+      exRate: yup.number().positive('Exchange rate must be positive').required('Exchange rate is required'),
+      amount: yup.number().positive('Amount must be positive').required('Amount is required'),
+      baseAmount: yup.number().positive('Base amount must be positive').required('Base amount is required'),
+    });
+    
+    const formikValidationSchema = yup.object().shape({
+      generalAccount: yup.array().of(generalAccountItemSchema).required('General account entries are required'),
+    });
+
+    const formik2 = useFormik({
+      initialValues,
+      enableReinitialize: true,
+
+      validationSchema:formikValidationSchema,
+      validateOnChange: true,
+      onSubmit: async (values) => {{
+        console.log('recordId',formik2.values.recordId)
+        console.log('general',values.generalAccount)
+
+
+          const data = {
+            transactions: values.generalAccount.map(({ id, exRate, account, sign, tpAccount, functionId, currency, ...rest }) => ({
+              seqNo: id,
+              accountId: account.recordId,
+              exRate,
+              sign: sign.key,
+              tpAccountId: tpAccount?.recordId,
+              functionId,
+              rateCalcMethod: 1,
+              currencyId: currency.recordId, 
+              ...rest,
+            })),
+            date: formatDateToApi(values.date),
+            functionId: values.functionId,
+            recordId: formValues.recordId,
+            reference: values.reference,
+          };
+          
+          
+          console.log('Submitting data:', data);
+
+      
+          
+          const response = await postRequest({
+            extension: GeneralLedgerRepository.GeneralLedger.set2,
+            record: JSON.stringify(data),
+          });
+      
+          console.log('Submission response:', response);
+      
+       
+            toast.success('Record Added Successfully');
+       
+        } 
+      },
+    });
+
+
+
+
 
     useEffect(() => {
       if (formValues) {
         setformik(formValues);
       }
     }, [formValues]);
+    
 
+    
 
   
     const {
@@ -64,109 +190,204 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
       access
     } = useResourceQuery({
       queryFn: fetchGridData,
-      endpointId: GeneralLedgerRepository.GeneralLedger.qry,
+     
       datasetId: ResourceIds.GeneralLedger
     })
 
+    
 
   
-    const invalidate = useInvalidate({
-      endpointId: GeneralLedgerRepository.GeneralLedger.qry
-    })
-  
-    const columns = [
-      {
-        field:'accountRef',
-        headerName : _labels.accountRef,
-        flex: 1
-      },
-      {
-        field: 'accountName',
-        headerName: _labels.accountName,
-        flex: 1
-      },
-      {
-        field: 'tpAccountRef',
-        headerName: _labels.thirdPartyRef,
-        flex: 1,
-        
-      },{
-        field:"tpAccountName",
-        headerName:_labels.thirdPartyName,
-        flex:1
-      },{
-        field:"currencyRef",
-        headerName:_labels.currency,
-        flex:1
-      },{
-        field:"sign",
-        headerName:_labels.sign,
-        flex:1,
-        renderCell: (params) => {
-          return params.value === 1 ? 'D' : 'C';
-        }
-      },{
-        field:"notes",
-        headerName:_labels.notes,
-        flex:1,
-      },{
-        field:"exRate",
-        headerName:_labels.exRate,
-        flex:1,
-        align: 'right',
-      },{
-        field:"amount",
-        headerName:_labels.amount,
-        flex:1,
-        align: 'right',
-        
-      },{
-        field:"baseAmount",
-        headerName:_labels.base,
-        flex:1,
-        align: 'right',
-  
-      }
-
-    ]
+ 
+    
 
     useEffect(() => {
-      if (data && data.list && Array.isArray(data.list)) {
-        const baseCredit = data.list.reduce((acc, curr) => curr.sign === 2 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
-        const baseDebit = data.list.reduce((acc, curr) => curr.sign === 1 ? acc + parseFloat(curr.baseAmount || 0) : acc, 0);
-        const baseBalance = baseDebit - baseCredit;
-        
-        setBaseGridData({ base :'Base',credit: baseCredit, debit: baseDebit, balance: baseBalance });
+      if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
+        const generalAccountData = formik2.values.generalAccount;
     
-        const currencyTotals = data.list.reduce((acc, curr) => {
-          const currency = curr.currencyRef;
-          if (!acc[currency]) {
-            acc[currency] = { credit: 0, debit: 0 };
-          }
-          if (curr.sign === 2) {
-            acc[currency].credit += parseFloat(curr.amount || 0);
-          } else if (curr.sign === 1) {
-            acc[currency].debit += parseFloat(curr.amount || 0);
+        console.log(generalAccountData)
+    
+        const baseCredit = generalAccountData.reduce((acc, curr) => {
+          return curr.sign?.key == '2' ? acc + parseFloat(curr.baseAmount || 0) : acc;
+        }, 0);
+    
+        const baseDebit = generalAccountData.reduce((acc, curr) => {
+          return curr.sign?.key == "1" ? acc + parseFloat(curr.baseAmount || 0) : acc;
+        }, 0);
+    
+        const baseBalance = baseDebit - baseCredit;
+    
+        setBaseGridData({ 
+          base: 'Base', 
+          credit: baseCredit.toLocaleString(), 
+          debit: baseDebit.toLocaleString(), 
+          balance: baseBalance.toLocaleString() 
+        });
+    
+        const currencyTotals = generalAccountData.reduce((acc, curr) => {
+          const currency = curr.currency?.reference;
+          if (currency) { // Check if currency is selected
+            if (!acc[currency]) {
+              acc[currency] = { credit: 0, debit: 0 };
+            }
+            if (curr.sign?.key == '2') {
+              acc[currency].credit += parseFloat(curr.amount || 0);
+            } else if (curr.sign?.key == '1') {
+              acc[currency].debit += parseFloat(curr.amount || 0);
+            }
           }
 
           return acc;
         }, {});
-    
-        const currencyData = Object.entries(currencyTotals).map(([currency, { credit, debit }]) => ({
-          currency,
-          credit,
-          debit,
-          balance: debit - credit
-        }));
         
+        const filteredCurrencyTotals = Object.entries(currencyTotals).reduce((acc, [currency, data]) => {
+          if (currency) {
+            acc[currency] = data;
+          }
+
+          return acc;
+
+        }, {});
+    
+    
+        const currencyData = Object.entries(filteredCurrencyTotals).map(([currency, { credit, debit }]) => ({
+          currency,
+          credit: credit.toLocaleString(), // Format the number with commas
+          debit: debit.toLocaleString(), // Format the number with commas
+          balance: (debit - credit).toLocaleString() // Format the number with commas
+        }));
+    
         setCurrencyGridData(currencyData);
       }
+    }, [formik2.values]);
+
+    console.log('formik2',formik2)
+
+
+
+    useEffect(() => {
+
+      
+      
+      if (data && data.list.length>0 && Array.isArray(data.list)) {
+      
+        const generalAccount=  data.list.map((row, idx) => ({
+          id: idx,
+          account: {accountRef: row.accountRef,
+            recordId:row.accountId},
+          accountName: row.accountName,
+          tpAccount: {reference: row.tpAccountRef},
+          tpAccountName: row.tpAccountName,
+          currency:{
+            reference: row.currencyRef,
+            recordId : row.currencyId
+          },
+          
+          sign: {
+            "dataset": 157,
+            "language": 1,
+            "key": row.sign,
+            "value": row.sign == 1 ? "D" : "C"
+
+          },
+          notes: row.notes,
+          exRate: row.exRate,
+          amount: row.amount,
+          baseAmount: row.baseAmount
+      }));
+
+      formik2.setFieldValue("generalAccount", generalAccount);
+      }
+
     }, [data]);
+
+    useEffect(()=>{
+      
+      async function fetchCurrencyExchangeRate() {
+        if (formValues.currencyId) {
+          console.log('formm',formValues.currencyId)
+          try {
+            const res = await getCurrencyApi(formValues.currencyId);
+            if (res && res.record) {
+              console.log('XXXXXXXXXXXXXXXXXXXXX',res.record.exRate)
+              setExRateValue(res.record.exRate);     
+              console.log()
+           
+            }
+          } catch (error) {
+            console.error("Failed to fetch currency exchange rate:", error);
+          }
+        }
+      }
+      
+      fetchCurrencyExchangeRate();
+    },[formValues])
+
+
+
+
+
+    const RateDivision = {
+      FINANCIALS: 1,
+      SALES: 2,
+      PURCHASE: 3,
+      MANUFACTURING: 4
+    };
+
+    // Function to get rate division
+    // console.log('idddddddddd',functionId)
+
+    const getRateDivision = (functionId) => {
+      const sysFct = getSystemFunctionModule(functionId);
+      if (
+        sysFct ===Module.GeneralLedger||
+        sysFct === Module.Financials ||
+        sysFct === Module.Manufacturing||
+        sysFct === Module.Cash
+      ) {
+        return RateDivision.FINANCIALS;
+      } else if (sysFct ===Module.Sales) {
+        return RateDivision.SALES;
+      } else if (sysFct === Module.Purchase) {
+        return RateDivision.PURCHASE;
+      } else if (sysFct === Module.Manufacturing) {
+        return RateDivision.MANUFACTURING;
+      } else {
+        return 0;
+      }
+    };
+
+    // Function to get system function module
+
+    const getSystemFunctionModule = (functionId) => {
+      return Math.floor(functionId / 100);
+    };
+
+    function getCurrencyApi(_currencyId){
+      
+
+      const _rateDivision = getRateDivision(functionId)
+    
+      console.log("ratde",_rateDivision)
+
+     
+
+      return getRequest({
+
+        extension: MultiCurrencyRepository.Currency.get,
+        parameters: `_currencyId=${_currencyId}&_date=${formatDateToApiFunction(formValues.date)}&_rateDivision=${_rateDivision}`
+      })
+      
+    }
 
 
 
     return (
-      <>
+      <FormShell
+      resourceId={ResourceIds.GeneralLedger}
+      form={formik2}
+      maxAccess={maxAccess}
+      
+    >
         <Box>
           {formik && (
             <Grid container spacing={2} padding={1}>
@@ -188,7 +409,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomTextField
-                  name="currencyRef"
+                  name="currency"
                   label={_labels.currency}
                   value={formik.currencyRef}
                   readOnly={true}
@@ -205,7 +426,7 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
               </Grid>
             </Grid>
           )}
-          <Table
+          {/* <Table
             columns={columns}
             gridData={data}
             rowId={['seqNo']}
@@ -215,17 +436,224 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
             maxAccess={access}
             height={"280"}
             pagination={false}
-          />
-          <Grid container paddingTop={2}>
+          /> */}
+      <DataGrid
+  onChange={value => formik2.setFieldValue('generalAccount', value)}
+  value={formik2.values.generalAccount}
+  error={formik2.errors.generalAccount}
+  height={height-280}
+  columns={[
+    {
+
+      component: 'resourcelookup',
+      
+      label: _labels.accountRef,
+      name: 'account',
+      props: {
+        endpointId: GeneralLedgerRepository.Account.snapshot,
+        parameters: '_type=',
+        displayField: 'accountRef',
+        valueField: 'recordId',
+        fieldsToUpdate: [{ from: 'name', to: 'accountName' }],
+      },
+      async onChange({ row: { update, oldRow, newRow } }) {
+
+        if (newRow.account.recordId){
+        update({
+          currency:{
+            reference:formValues.currencyRef,
+            recordId:formValues.currencyId
+
+          },
+          exRate:exRateValue
+          
+        })
+
+        // const result = await getCurrencyApi(newRow?.currency?.recordId)
+
+        // const result2 = result.record
+        // const exRate = exRateValue
+        // const rateCalcMethod = result2.rateCalcMethod
+
+
+       
+        //     if(newRow?.amount){
+        //       const amount =
+        //       rateCalcMethod === 1
+        //         ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
+        //         : rateCalcMethod === 2
+        //         ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
+        //         : 0
+        //         update({
+        //           baseAmount:amount,
+        //         })
+        //     }
+
+        
+
+        // update({
+        //   exRate:exRate,
+        //   rateCalcMethod :rateCalcMethod,
+
+     
+        // })
+      }}
+    },
+    {
+      component: 'textfield',
+      label: _labels.accountName,
+      name: 'accountName',
+    },
+    {
+      component: 'resourcelookup',
+      label: _labels.thirdPartyRef,
+      name: 'tpAccount',
+      props: {
+        endpointId: FinancialRepository.Account.snapshot,
+        displayField: 'reference',
+        valueField: 'recordId',
+        fieldsToUpdate: [{ from: 'name', to: 'tpAccountName' }],
+      },
+    },
+    {
+      component: 'textfield',
+      label: _labels.thirdPartyName,
+      name: 'tpAccountName',
+    },
+    {
+      component: 'resourcecombobox',
+      label: _labels.currency,
+      name: 'currency',
+      props: {
+        endpointId: SystemRepository.Currency.qry,
+        displayField: 'reference',
+        valueField: 'recordId',
+      },
+
+      async onChange({ row: { update, oldRow, newRow } }) {
+        console.log('newRow',newRow)
+        if(!newRow?.currency?.recordId){
+          return
+        }
+
+        
+        const result = await getCurrencyApi(newRow?.currency?.recordId)
+
+        const result2 = result.record
+        const exRate = result2.exRate
+        const rateCalcMethod = result2.rateCalcMethod
+
+// account amount base amount sign curency 
+
+       
+            if(newRow?.amount){
+              const amount =
+              rateCalcMethod === 1
+                ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
+                : rateCalcMethod === 2
+                ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
+                : 0
+                update({
+                  baseAmount:amount,
+                })
+            }
+
+        
+
+        update({
+         
+
+          currencyId: newRow.currency.recordId,
+          exRate:exRate,
+          rateCalcMethod :rateCalcMethod,
+
+     
+        })
+
+        
+
+    },
+    },
+    {
+      component: 'resourcecombobox',
+      label: _labels.sign,
+      name: 'sign',
+      props: {
+        endpointId: SystemRepository.KeyValueStore,
+        _language: user.languageId,
+        parameters: `_dataset=${157}&_language=${1}`,
+        displayField: 'value',
+        valueField: 'key',
+      },
+    },
+    {
+      component: 'textfield',
+      label: _labels.notes,
+      name: 'notes',
+    },
+    {
+      component: 'numberfield',
+      label: _labels.exRate,
+      name: 'exRate',
+    },
+    {
+      component: 'numberfield',
+      label: _labels.amount,
+      name: 'amount',
+
+      async onChange({ row: { update, oldRow, newRow } }) {
+        console.log('newRow222',newRow)
+        if(!newRow?.amount){
+        return;
+        }
+       
+       
+            if(newRow?.amount&&newRow?.exRate){
+              const amount =
+              newRow.rateCalcMethod === 1
+                ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / newRow?.exRate
+                : newRow.rateCalcMethod === 2
+                ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * newRow?.exRate
+                : 0
+                update({
+                  baseAmount:amount,
+                })
+            }
+
+        
+
+        
+
+     },
+
+
+    },
+    {
+      component: 'numberfield',
+      label: _labels.baseAmount,
+      name: 'baseAmount',
+    },
+  ]}
+/>
+       
+
+
+
+
+
+       
+          <Grid container marginTop={3.7}>
             <Grid xs={6}>
               <Box paddingInlineEnd={2}  sx={{
-              width: '25.8rem',
+              width: '25.9rem',
               overflow:'hidden',
               marginLeft:'3rem'
             }}>
+               
                 <Table
                   gridData={{count: 1, list: [baseGridData]}}
                   maxAccess={access}
+             
                   height={"150"}
                   columns={[
                     { field: 'base', headerName:_labels.base },
@@ -265,8 +693,11 @@ const [currencyGridData, setCurrencyGridData] = useState([]);
           </Grid>
           <GridToolbar maxAccess={access}  />
         </Box>
-      </>
+      </FormShell>
     );
   };
 
 export default GeneralLedger;
+
+
+

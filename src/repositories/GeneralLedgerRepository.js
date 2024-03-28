@@ -54,9 +54,12 @@ export const GeneralLedgerRepository = {
     },GeneralLedger:{
       qry: service + 'qryTRX',
       get: service + 'getTRX',
+      get2: service + 'get2TRX',
+      set2: service + 'set2TRX',
       set: service + 'setTRX',
       del: service + 'delTRX',
-    }
+    },Account:{
+    snapshot:service + "snapshotAC"}
 
 
 }

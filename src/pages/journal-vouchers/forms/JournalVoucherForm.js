@@ -117,6 +117,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
           setIsLoading(false)
         })()
       }, [])
+      console.log(SystemFunction.JournalVoucher)
       
     return (
         <FormShell 

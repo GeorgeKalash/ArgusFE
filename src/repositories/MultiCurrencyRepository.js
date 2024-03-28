@@ -22,6 +22,10 @@ export const MultiCurrencyRepository = {
     qry: service + 'qryCRT',
     get: service + 'getCRT',
     set: service + 'setCRT',
+  },Currency:{
+    get: service + 'getDRI',
+    
+
   }
 
 }

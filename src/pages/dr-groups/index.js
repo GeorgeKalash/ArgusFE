@@ -53,10 +53,10 @@ const DRGroups = () => {
   const [approverEditMode, setApproverEditMode] = useState(false)
 
   const _labels = {
-    reference: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    group: labels && labels.find(item => item.key === "3").value,
-    approver: labels && labels.find(item => item.key === "4").value
+    reference: labels && labels.find(item => item.key === "reference").value,
+    name: labels && labels.find(item => item.key === "name").value,
+    group: labels && labels.find(item => item.key === "group").value,
+    approver: labels && labels.find(item => item.key === "approver").value
   }
 
   const columns = [

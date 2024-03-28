@@ -108,12 +108,11 @@ export default function FormShell({
               Component: GeneralLedger,
               props: {
                 formValues: form.values,
-
                 recordId: form.values?.recordId,
-                functionId: functionId
+                functionId:functionId
               },
               width: 1000,
-              height: 600,
+              height: 620,
               title: 'General Ledger'
             })
           }
@@ -162,6 +161,7 @@ export default function FormShell({
           setSelectedReport={setSelectedReport}
           previewReport={previewReport}
           visibleClear={visibleClear}
+          functionId={functionId}
         />
       )}
       {windowInfo && (
