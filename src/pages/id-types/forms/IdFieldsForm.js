@@ -51,39 +51,36 @@ const IdFieldsForm = ({
         }
       ]
     },
-    onSubmit: values => {console.log(values.rows)
+    onSubmit: values => {
       postIdFields(values)
     }
   })
 
   const postIdFields = obj => {console.log(obj.rows)
-    const typesRows= obj?.rows
 
     const data = {
       idtId: recordId,
-      typesRows : typesRows.map(
-        ({ accessLevel, idtId, ...rest }) => 
-        ({
-          idtId: recordId,
-          ...rest
-        })
-      )
+      items: {
+        rows: [...obj.rows] 
+      }
     }
+    
     postRequest({
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
       record: JSON.stringify(data)
     })
+    console.log(data)
       .then(res => {
           setStore(prevStore => ({
-            ...prevStore,
-              rows: typesRows
-          }));
+          ...prevStore,
+          rows: obj?.rows
+        }));
             toast.success('Record Edited Successfully')
       })
       .catch(error => {
         setErrorMessage(error)
       })
-  }
+  }  
 
   useEffect(()=>{
     const defaultParams = `_idtId=${recordId}`
@@ -93,13 +90,27 @@ const IdFieldsForm = ({
       parameters: parameters
     })
     .then(res => {
-      const rowsWithId = res.list.map(item => ({ ...item, id: item.idtId }));
-      if (rowsWithId.length > 0) {
-        formik.setValues({ rows: rowsWithId });
+      if (res?.list?.length > 0) {
+
+        formik.setValues({ countries: res.list.map(
+          ({ accessLevelId, accessLevelName, ...rest } , index) => ({
+             id : index,
+             accessLevel : { 
+             recordId: accessLevelId,
+             name: accessLevelName
+            },
+            accessLevelName: accessLevelName,
+            accessLevelId,
+             ...rest
+          }) )})
+          setStore(prevStore => ({
+            ...prevStore,
+              rows: typesRows
+          }));
       } else {
         formik.setValues({
           rows: [
-            {
+            { 
               id: 1 ,
               idtId: '', 
               controlId: '',
@@ -107,11 +118,12 @@ const IdFieldsForm = ({
               accessLevelName: ''
             }
           ]
-        });
+        })
       }
     })
-      .catch(error => {
-      })
+    .catch(error => {
+    })
+
   },[recordId])
 
   return (
@@ -148,13 +160,12 @@ const IdFieldsForm = ({
                   ]
                 },
               async onChange({ row: { update, newRow } }) {
-                if(!newRow?.accessLevel?.recordId){
+                if(!newRow?.accessLevel?.key){
                 return;
-                }else{
+                }else{console.log(newRow)
                   update({
-                    'controlId':newRow?.controlId,
                     'accessLevelName':newRow?.accessLevel?.value,
-                    'accessLevelId': newRow?.accessLevel?.recordId 
+                    'accessLevelId': newRow?.accessLevel?.key 
                   })
                 }
               }
