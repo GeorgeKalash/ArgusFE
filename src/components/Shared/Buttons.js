@@ -6,6 +6,18 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Cancel',
+    color: '#0A4164',
+    image: 'cancelWhite.png',
+    main: false
+  },
+  {
+    key: 'WorkFlow',
+    color: '#231f20',
+    image: 'workflow.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',
