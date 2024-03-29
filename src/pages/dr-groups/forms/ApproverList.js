@@ -42,14 +42,7 @@ const ApproverList = ({store,labels,maxAccess}) => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  // async function fetchGridData(options = {}) {
-  //   const { _startAt = 0, _pageSize = 50 } = options
 
-  //   return await getRequest({
-  //     extension: DocumentReleaseRepository.GroupCode.qry,
-  //     parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_groupId=${recordId}`
-  //   })
-  // }
 
 
 
@@ -89,6 +82,10 @@ const ApproverList = ({store,labels,maxAccess}) => {
     {
       field: 'codeRef',
       headerName: labels.reference,
+      flex: 1
+    },   {
+      field: 'codeName',
+      headerName: labels.name,
       flex: 1
     },
   ]
@@ -152,7 +149,7 @@ const ApproverList = ({store,labels,maxAccess}) => {
      
       onDelete={delApprover}
       maxAccess={maxAccess}      
-      height={300}
+      height={200}
     />
   </Box>
       
