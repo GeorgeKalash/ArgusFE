@@ -85,7 +85,7 @@ const ValueFormList = (
       extension: DocumentReleaseRepository.CharacteristicsValues.qry,
       parameters: parameters
     })
-      .then(res => {
+      .then(res => {console.log(res)
         setValueGridData(res)
         const maxSeq = Math.max(...res.list.map(item => item.seqNo), 0)
         setMaxSeqNo(maxSeq)

@@ -46,13 +46,13 @@ const FunctionFormList = (
     }
   ]
 
-  function openForm (functionId, editMode){
+  function openForm (functionId, classId, editMode){
     stack({
       Component: FunctionForm,
       props: {
         labels: labels,
         recordId: recordId,
-        classId: store.recordId ,
+        classId: classId ,
         functionId: functionId,
         maxAccess: maxAccess,
         getFunctionGridData: getFunctionGridData,
@@ -80,7 +80,7 @@ const FunctionFormList = (
   }
 
   const editFunction = obj => {
-    openForm(obj?.functionId, true)
+    openForm(obj?.functionId, obj?.classId, true)
   }
 
   const getFunctionGridData = classId => {
@@ -90,7 +90,7 @@ const FunctionFormList = (
       extension: DocumentReleaseRepository.ClassFunction.qry,
       parameters: parameters
     })
-      .then(res => {
+      .then(res => {console.log(res)
         setFunctionGridData(res)
       })
       .catch(error => {

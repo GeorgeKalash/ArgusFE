@@ -74,6 +74,7 @@ const FunctionForm = ({
       parameters: parameters
     })
       .then(res => {
+        console.log(res.record)
         formik.setValues(res.record)
       })
   }
@@ -94,6 +95,7 @@ const FunctionForm = ({
                 required
                 valueField='key'
                 displayField='value'
+                readOnly={editMode}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('functionId', '')}
