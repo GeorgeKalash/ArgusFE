@@ -64,7 +64,7 @@ export default function FormShell({
       Component: Approvals,
       props: {
         recordId: form.values.recordId,
-        functionId: form.values.functionId
+        functionId: form.values.functionId ?? functionId
       },
       width: 1000,
       height: 500,
@@ -74,7 +74,7 @@ export default function FormShell({
 
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>{children}</DialogContent>
+      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0  }}><Box sx={{mt:1}}>{children}</Box></DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}

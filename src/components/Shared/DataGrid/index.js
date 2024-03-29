@@ -27,7 +27,7 @@ export function DataGrid({
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
-  async function processDependencies(newRow, oldRow, editCell) {
+  async function processDependenciesForColumn(newRow, oldRow, editCell) {
     const column = columns.find(({ name }) => name === editCell.field)
 
     let updatedRow = { ...newRow }
@@ -46,7 +46,7 @@ export function DataGrid({
     return updatedRow
   }
 
-  function handleChange(row) {
+  function handleRowChange(row) {
     const newRows = [...value]
     const index = newRows.findIndex(({ id }) => id === row.id)
     newRows[index] = row
@@ -155,7 +155,9 @@ export function DataGrid({
   }
 
   function addRow() {
-    const highestIndex = value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
+    const highestIndex = value?.length
+      ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
+      : 1
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
@@ -170,9 +172,15 @@ export function DataGrid({
     ])
   }
 
+  useEffect(() => {
+    console.log(value)
+    if (!value?.length) {
+      addRow()
+    }
+  }, [value])
+
   function deleteRow(deleteId) {
     const newRows = value.filter(({ id }) => id !== deleteId)
-
     onChange(newRows)
   }
 
@@ -180,8 +188,8 @@ export function DataGrid({
     field: !allowDelete && 'actions',
     editable: false,
     flex: 0,
-    width: '100',
-    renderCell({ id }) {
+    width: '20',
+    renderCell({ id: idName }) {
       return (
         <IconButton
           disabled={disabled}
@@ -208,7 +216,7 @@ export function DataGrid({
       value
     })
 
-    const updatedRow = await processDependencies(
+    const updatedRow = await processDependenciesForColumn(
       {
         ...row,
         [field]: value
@@ -222,7 +230,33 @@ export function DataGrid({
 
     apiRef.current.updateRows([updatedRow])
 
-    handleChange(updatedRow, row)
+    handleRowChange(updatedRow)
+  }
+
+  async function updateRow({ id, changes }) {
+    const row = apiRef.current.getRow(id)
+
+    apiRef.current.setEditCellValue({
+      id: currentEditCell.current.id,
+      field: currentEditCell.current.field,
+      value: row[currentEditCell.current.field]
+    })
+
+    const updatedRow = await processDependenciesForColumn(
+      {
+        ...row,
+        ...changes
+      },
+      row,
+      {
+        id: currentEditCell.current.id,
+        field: currentEditCell.current.field
+      }
+    )
+
+    apiRef.current.updateRows([updatedRow])
+
+    handleRowChange(updatedRow)
   }
 
   return (
@@ -340,6 +374,7 @@ export function DataGrid({
                       props
                     }}
                     update={update}
+                    updateRow={updateRow}
                     isLoading={isUpdatingField}
                   />
                 </Box>

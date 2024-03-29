@@ -22,9 +22,7 @@ export default function ResourceComboBoxEdit({ column: { props }, id, field, val
           for (let updateObj of fieldsToUpdate) {
             const { from, to } = updateObj
 
-            if (value && value[from]) {
-              update({ id, field: to, value: value[from] || '' })
-            }
+            update({ id, field: to, value: (value && value[from]) || '' })
           }
         }
       }}
