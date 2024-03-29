@@ -38,6 +38,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           //RTBEN
           clientId: clientId,
           beneficiaryId: beneficiaryId,
+          recordId: clientId * 1000 + beneficiaryId,
           name: RTBEN?.record?.name,
           dispersalType: dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
@@ -73,6 +74,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     //RTBEN
     clientId: clientId || '',
     beneficiaryId: 0,
+    recordId: '',
     name: '',
     dispersalType: dispersalType || '',
     nationalityId: null,
@@ -154,7 +156,13 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
   })
 
   return (
-    <FormShell resourceId={ResourceIds.BeneficiaryBank} form={formik} height={480} maxAccess={access}>
+    <FormShell
+      resourceId={ResourceIds.BeneficiaryBank}
+      form={formik}
+      editMode={formik?.values?.beneficiaryId}
+      height={480}
+      maxAccess={access}
+    >
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>

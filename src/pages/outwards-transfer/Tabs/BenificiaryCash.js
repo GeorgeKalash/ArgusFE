@@ -40,6 +40,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId }) => {
         const obj = {
           //RTBEN
           clientId: clientId,
+          recordId: clientId * 1000 + beneficiaryId,
           beneficiaryId: beneficiaryId,
           name: RTBEN?.record?.name,
           dispersalType: dispersalType,
@@ -81,6 +82,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId }) => {
   const [initialValues, setInitialData] = useState({
     //RTBEN
     clientId: clientId || '',
+    recordId: '',
     beneficiaryId: 0,
     name: '',
     dispersalType: dispersalType || '',
@@ -222,7 +224,12 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId }) => {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.BeneficiaryCash} form={formik} maxAccess={access}>
+    <FormShell
+      resourceId={ResourceIds.BeneficiaryCash}
+      form={formik}
+      editMode={formik?.values?.beneficiaryId}
+      maxAccess={access}
+    >
       <Grid container spacing={4} sx={{ padding: '15px' }}>
         <Grid container xs={12} spacing={2} sx={{ padding: '5px' }}>
           <Grid item xs={12}>

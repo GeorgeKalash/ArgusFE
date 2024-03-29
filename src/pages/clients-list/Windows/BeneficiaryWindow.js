@@ -60,7 +60,7 @@ const BeneficiaryWindow = ({ clientId }) => {
       flex: 1
     },
     {
-      field: 'accountRef',
+      field: 'accountReference',
       headerName: _labels.accountRef,
       flex: 1
     },
