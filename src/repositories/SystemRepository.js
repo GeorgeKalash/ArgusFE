@@ -148,5 +148,8 @@ export const SystemRepository = {
   },
   ModuleClassRES: {
     qry: service + 'qryRES'
+  },
+  ResourceControl: {
+    qry: service + 'qryResourceControls'
   }
 }
