@@ -25,7 +25,7 @@ const ExchangeMapForm= ({
   labels
 }) => {
 
-  const {recordId :currencyId , name:currencyName } = currency
+  const {currencyId , currencyName } = currency
 
   const {recordId, countries} = store
   const { postRequest, getRequest} = useContext(RequestsContext)
@@ -37,14 +37,10 @@ const ExchangeMapForm= ({
       .array()
       .of(
         yup.object().shape({
-          exchange: yup
-            .object()
-            .shape({
-              recordId: yup.string().required('country recordId is required')
-            })
-            .required('exchange is required'),
+          exchangeId: yup.string().required('country recordId is required')
+
         })
-      ).required('Operations array is required') }),
+      ).required('plants array is required') }),
     initialValues: {
       currencyId: currencyId ,
       countryId : '',
@@ -73,32 +69,18 @@ const columns=[
   {
 
     component: 'resourcecombobox',
-    name: 'exchange',
+    name: 'exchangeId',
     label: labels.exchangeTable,
     props: {
       endpointId: MultiCurrencyRepository.ExchangeTable.qry,
       valueField: 'recordId',
       displayField: 'reference',
-      fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
+      mapping: [{ from: 'recordId', to: 'exchangeId' }, { from: 'reference', to: 'exchangeRef' } ],
       columnsInDropDown: [
         { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
       ],
       displayFieldWidth: 3
-    },
-    async onChange({ row: { update, newRow } }) {
-
-      if(!newRow?.exchange?.recordId){
-      return;
-      }else{
-           update({'exchangeName':newRow.exchange?.name,
-                   'exchangeRef': newRow.exchange?.reference,
-                   'exchangeId': newRow.exchange?.recordId })
-
-      }
-
-
-
     }
   },
   {
@@ -135,7 +117,7 @@ const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
           }, {})
 
           const plants = result.list.map((plant, index) => {
-            const value = valuesMap[plant.recordId] || 0
+            const value = valuesMap[plant?.recordId] || 0
 
             return {
               id : index,
@@ -144,15 +126,10 @@ const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
               countryId: countryId,
               plantId: plant.recordId,
               plantName: plant.name,
-              exchange :{
-                recordId: value.exchangeId,
-                reference: value.exchangeRef ? value.exchangeRef : '',
-                name: value.exchangeName
-              },
-              exchangeName: value.exchangeName,
-
-              // exchangeId: value.exchangeId,
-              plantRef: plant.reference
+              plantRef: plant.reference,
+              exchangeName: value?.exchangeName,
+              exchangeRef: value.exchangeRef ? value.exchangeRef : '',
+              exchangeId: value?.exchangeId,
 
             }
           })

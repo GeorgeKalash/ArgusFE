@@ -32,12 +32,7 @@ const CorrespondentCountriesForm = ({
         .array()
         .of(
           yup.object().shape({
-            country: yup
-              .object()
-              .shape({
-                recordId: yup.string().required('Country recordId is required')
-              })
-              .required('Country is required'),
+            currencyId: yup.string().required('currency  is required')
           })
         ).required('Operations array is required') }),
 
@@ -101,14 +96,8 @@ const CorrespondentCountriesForm = ({
             const correspondentCountries = res.list
 
             formik.setValues({ countries: correspondentCountries.map(
-              ({ countryId,  countryRef, countryName, ...rest } , index) => ({
-                 id : index,
-                 country : { recordId: countryId,
-                 name: countryName,
-                 reference: countryRef
-                },
-                countryName: countryName,
-                countryId,
+              ({  ...rest } , index) => ({
+                 id : index +1,
                  ...rest
 
 
@@ -157,24 +146,11 @@ return (
                   endpointId: SystemRepository.Country.qry,
                   valueField: 'recordId',
                   displayField: 'reference',
-                  fieldsToUpdate: [ { from: 'name', to: 'countryName' } ],
+                  mapping: [{ from: 'recordId', to: 'countryId' }, { from: 'name', to: 'countryName' }, { from: 'reference', to: 'countryRef' } ],
                   columnsInDropDown: [
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
                   ]
-                },
-                async onChange({ row: { update, newRow } }) {
-                  if(!newRow?.country?.recordId){
-                  return;
-                  }else{
-                       update({'countryName':newRow.country?.name,
-                               'countryRef': newRow.country?.reference,
-                               'countryId': newRow.country?.recordId })
-
-                  }
-
-
-
                 }
               },
               {

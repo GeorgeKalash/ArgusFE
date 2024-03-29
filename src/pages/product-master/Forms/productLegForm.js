@@ -226,12 +226,12 @@ return (
             </Grid>
           </Grid>
           <Grid xs={12}>
-             && <DataGrid
+             <DataGrid
                onChange={value => formik.setFieldValue('productLegs', value)}
                value={formik.values.productLegs}
                error={formik.errors.productLegs}
                 columns={columns}
-                height={height-200}
+                height={height-150}
             />
           </Grid>
         </Grid>

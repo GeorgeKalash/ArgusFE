@@ -725,10 +725,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
+
+                // columnsInDropDown={[
+                //   { key: 'reference', value: 'Reference' },
+                //   { key: 'name', value: 'Name' }
+                // ]}
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {

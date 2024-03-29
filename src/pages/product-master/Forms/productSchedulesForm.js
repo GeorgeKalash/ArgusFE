@@ -32,30 +32,10 @@ const ProductSchedulesForm = ({
         .array()
         .of(
           yup.object().shape({
-            currency: yup
-              .object()
-              .shape({
-                recordId: yup.string().required('currency recordId is required')
-              })
-              .required('currency is required'),
-              country: yup
-              .object()
-              .shape({
-                countryId: yup.string().required('Country recordId is required')
-              })
-              .required('Country is required'),
-              plant: yup
-              .object()
-              .shape({
-                recordId: yup.string().required('plant recordId is required')
-              })
-              .required('plant is required'),
-              dispersal: yup
-              .object()
-              .shape({
-                recordId: yup.string().required('dispersal recordId is required')
-              })
-              .required('dispersal is required')
+            countryId: yup.string().required('currency  is required'),
+            countryId: yup.string().required('Country  is required'),
+            dispersalId: yup.string().required('Dispersal Type  is required'),
+            plantId: yup.string().required('plantId Type  is required')
           })
         ).required('schedules array is required') }),
       initialValues: {
@@ -94,12 +74,6 @@ const ProductSchedulesForm = ({
           ({ country, id,seqNo, countryId, currency, currencyId, plant, plantId,dispersalId, dispersalType, dispersal,productId, saved,...rest}, index ) => ({
               seqNo: index +1,
               productId: pId,
-              countryId: country.countryId,
-              currencyId: currency.recordId,
-              plantId: plant.recordId,
-              dispersalId: dispersal.recordId,
-              dispersalType: dispersalType.key,
-              plantId: plant.recordId,
               ...rest
           }))
       }
@@ -112,7 +86,6 @@ const ProductSchedulesForm = ({
           getProductSchedules(pId)
         })
         .catch(error => {
-          // setErrorMessage(error)
         })
     }
 
@@ -120,16 +93,16 @@ const ProductSchedulesForm = ({
 
     {
       component: 'button',
-
       label: labels.select,
        name : 'saved',
       onClick: (e, row) => {
+        console.log(row)
            setStore(prevStore => ({
           ...prevStore,
-          plantId: row.plant.recordId,
-          currencyId:row.currency.recordId,
-          countryId: row.country.countryId,
-          dispersalId:row.dispersal.recordId,
+          plantId: row.plantId,
+          currencyId: row.currencyId,
+          countryId: row.countryId,
+          dispersalId: row.dispersalId,
           _seqNo: row.seqNo
            }));
 
@@ -138,13 +111,13 @@ const ProductSchedulesForm = ({
     {
       component: 'resourcecombobox',
       label: labels.country,
-      name: 'country',
+      name: 'countryId',
       props: {
         store: countries,
         valueField: 'countryId',
         displayField: 'countryRef',
-        displayFieldWidth: 3,
-        fieldsToUpdate: [ { from: 'countryName', to: 'countryName' } ],
+        displayFieldWidth: 4,
+        mapping: [{ from: 'countryId', to: 'countryId' } , { from: 'countryName', to: 'countryName' }, { from: 'countryRef', to: 'countryRef' } ],
         columnsInDropDown: [
           { key: 'countryRef', value: 'Reference' },
           { key: 'countryName', value: 'Name' },
@@ -162,13 +135,13 @@ const ProductSchedulesForm = ({
     {
       component: 'resourcecombobox',
       label: labels.plant,
-      name: 'plant',
+      name: 'plantId',
       props: {
         endpointId: SystemRepository.Plant.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 3,
-        fieldsToUpdate: [ { from: 'name', to: 'plantName' } ],
+        displayFieldWidth: 4,
+        mapping: [ { from: 'recordId', to: 'plantId' }, { from: 'name', to: 'plantName' } , { from: 'reference', to: 'plantRef' } ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
@@ -186,13 +159,13 @@ const ProductSchedulesForm = ({
     {
       component: 'resourcecombobox',
       label: labels.currency,
-      name: 'currency',
+      name: 'currencyId',
       props: {
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 3,
-        fieldsToUpdate: [ { from: 'name', to: 'currencyName' } ],
+        displayFieldWidth: 4,
+        mapping: [ { from: 'recordId', to: 'currencyId' }, { from: 'name', to: 'currencyName' }, { from: 'reference', to: 'currencyRef' } ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
@@ -206,18 +179,19 @@ const ProductSchedulesForm = ({
       props:{
         readOnly: true
       }
-    },
+    }
+    ,
     {
       component: 'resourcecombobox',
       label: labels.dispersal,
-      name: 'dispersal',
+      name: 'dispersalId',
       props: {
         endpointId: pId && RemittanceSettingsRepository.ProductDispersal.qry,
         parameters :`_productId=${pId}`,
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 3,
-        fieldsToUpdate: [ { from: 'name', to: 'dispersalName' },
+        mapping: [ { from: 'recordId', to: 'dispersalId' } ,{ from: 'name', to: 'dispersalName' } ,{ from: 'reference', to: 'dispersalRef' }
        ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
@@ -250,6 +224,7 @@ const ProductSchedulesForm = ({
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
+        mapping: [ { from: 'key', to: 'dispersalType' }, { from: 'value', to: 'dispersalTypeName' }, { from: 'reference', to: 'currencyRef' } ],
       }
     },
     {
@@ -272,31 +247,9 @@ const ProductSchedulesForm = ({
     })
       .then(res => {
         if (res.list.length > 0)
-        formik.setValues({ schedules: res.list.map(({ countryId,  countryRef, currencyId, currencyRef, plantId, plantRef,dispersalId, dispersalRef, dispersalType, dispersalTypeName, ...rest } , index)=>({
+        formik.setValues({ schedules: res.list.map(({ ...rest } , index)=>({
           id : index + 1,
-          country : {
-            countryId,
-            countryRef
-         },
-         currency : {
-          recordId: currencyId,
-          reference: currencyRef
-         },
-         plant: {
-          recordId: plantId,
-          reference: plantRef
-         },
-         dispersal: {
-          recordId: dispersalId,
-          reference: dispersalRef
-         },
-
-          dispersalType : {
-          key: dispersalType,
-          value: dispersalTypeName
-         },
-
-         saved: true,
+          saved: true,
           ...rest
 
         }))

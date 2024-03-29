@@ -1,6 +1,6 @@
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ResourceLookupEdit({ id, field, value,  column: { props } , update }) {
+export default function ResourceLookupEdit({ id, field, value, updateRow, column: { props } , update }) {
 
 return (
     <ResourceLookup
@@ -9,9 +9,11 @@ return (
       endpointId={props.endpointId}
       parameters={props.parameters}
       hasBorder={false}
+      displayFieldWidth={props.displayFieldWidth}
       firstFieldWidth='100%'
-      valueField={props.displayField}
-      displayField={props.valueField}
+      valueField={props.valueField}
+      displayField={props.displayField}
+      columnsInDropDown={props.columnsInDropDown}
       name='field'
       form={{
         values: {
@@ -19,12 +21,11 @@ return (
         }
       }}
       secondDisplayField={false}
-      onChange={(event, newValue) => {
-          update({
-            id,
-            field,
-            value: newValue || ''
-          })
+      onChange={(e, value) => {
+        let changes = props.mapping.map(({ from, to }) => ({
+          [to]: value ? value[from] : ''
+        })).reduce((acc, obj) => ({ ...acc, ...obj }), {});
+        updateRow({ id, changes })
       }}
     />
   )

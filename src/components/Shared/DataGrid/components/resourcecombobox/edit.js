@@ -1,14 +1,19 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ column: { props }, id, field, value , update}) {
+export default function ResourceComboBoxEdit({ column: { props }, id, field, value , updateRow, row}) {
+ console.log('row', row)
+
+   let changes = props.mapping.map(({ from, to }) => ({
+    [from]:  row[to] || ''
+  })).reduce((acc, obj) => ({ ...acc, ...obj }), {});
 
 return (
     <ResourceComboBox
       {...props}
       name={field}
       values={{
-        [field]: value
+        [field]: changes
       }}
       autoFocus
       columnsInDropDown={props.columnsInDropDown}
@@ -18,23 +23,10 @@ return (
       hasBorder={false}
       readOnly={props?.readOnly}
       onChange={(e, value) => {
-        update({
-          id,
-          field,
-          value : value || ''
-        })
-
-        const fieldsToUpdate  = props?.fieldsToUpdate
-        if (fieldsToUpdate && fieldsToUpdate.length > 0) {
-          for (let updateObj of fieldsToUpdate) {
-              const { from, to } = updateObj;
-
-              // if (value) {
-                  update({ id, field: to, value: value && value[from] || ''});
-
-              // }
-          }
-        }
+        let changes = props.mapping.map(({ from, to }) => ({
+          [to]: value ? value[from] : ''
+        })).reduce((acc, obj) => ({ ...acc, ...obj }), {});
+        updateRow({ id, changes })
 
       }}
     />

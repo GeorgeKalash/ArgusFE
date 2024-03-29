@@ -102,7 +102,7 @@ const ProductMasterWindow = ({
          height={height}
          editMode={editMode}
         />
-      </CustomTabPanel>
+       </CustomTabPanel>
 
       <CustomTabPanel height={height} index={6} value={activeTab}>
         <ProductAgentForm

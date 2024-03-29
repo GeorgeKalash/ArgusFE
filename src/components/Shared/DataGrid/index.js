@@ -166,7 +166,6 @@ export function DataGrid({
   }
 
   useEffect(()=>{
-    console.log(value)
     if (!value?.length) {
       addRow();
      }
@@ -228,7 +227,7 @@ export function DataGrid({
     apiRef.current.setEditCellValue({
       id: currentEditCell.current.id,
       field: currentEditCell.current.field,
-      value: row[currentEditCell.current.field]
+      value: changes[currentEditCell.current.field]
     })
 
     const updatedRow = await processDependenciesForColumn(
@@ -328,6 +327,7 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
+
                   <Component {...params} column={column} />
                 </Box>
               )
@@ -348,7 +348,7 @@ export function DataGrid({
 
                 }}
               >
-                <Component {...params} column={column} update={update} isLoading={isUpdatingField} />
+                <Component {...params} column={column} update={update} updateRow={updateRow} isLoading={isUpdatingField} />
               </Box>
             )
           }

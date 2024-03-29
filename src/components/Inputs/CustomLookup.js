@@ -15,6 +15,7 @@ const CustomLookup = ({
   firstValue,
   secondValue,
   secondDisplayField = true,
+  columnsInDropDown,
   store = [],
   setStore,
   onKeyUp,
@@ -39,7 +40,7 @@ const CustomLookup = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
-  return (
+return (
     <Box
       sx={{
         position: 'relative',
@@ -72,34 +73,14 @@ const CustomLookup = ({
             value={firstValue}
             size={size}
             options={store}
-            getOptionLabel={option => {
-              if (typeof option === 'object') {
-                const displayTextArray = Object.keys(option)
-                const displayText = displayTextArray.map(keys => option[keys]).join(' || ')
+            filterOptions={(options, { inputValue }) => {
+              if (displayField) {
+                return options.filter((option) => option
+              );
 
-                return `${displayText} - ${option[valueField]}`
-              } else {
-                return option
               }
             }}
-
-            // getOptionLabel={option => {
-            //   if (typeof option === 'object' && Array.isArray(displayField)) {
-            //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space
-
-            //     return `${displayText} - ${option[valueField]}`;
-            //   }
-            //   else if (typeof option === 'object') {
-            //     return `${option[displayField] || option[valueField]} - ${option[valueField]}`;
-            //   } else {
-            //     return option;
-            //   }
-            // }}
-            // getOptionDisabled={(option) =>
-            //  firstValue === option[valueField]
-            // }
-
-            // getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
+            getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
             onChange={(event, newValue) => onChange(name, newValue)}
             PaperComponent={({ children }) => (
@@ -107,7 +88,34 @@ const CustomLookup = ({
                 {children}
               </Paper>
             )}
-            renderOption={(props, option) => (
+            renderOption={(props, option) => {
+              if (columnsInDropDown && columnsInDropDown.length > 0) {
+                return (
+                  <Box>
+                    {props.id.endsWith('-0') && (
+                      <li className={props.className}>
+                        {columnsInDropDown.map((header, i) => {
+                          return (
+                            <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                              {header.value.toUpperCase()}
+                            </Box>
+                          )
+                        })}
+                      </li>
+                    )}
+                    <li {...props}>
+                      {columnsInDropDown.map((header, i) => {
+                        return (
+                          <Box key={i} sx={{ flex: 1 }}>
+                            {option[header.key]}
+                          </Box>
+                        )
+                      })}
+                    </li>
+                  </Box>
+                )
+              } else {
+                return (
               <Box>
                 {props.id.endsWith('-0') && (
                   <li className={props.className}>
@@ -120,7 +128,24 @@ const CustomLookup = ({
                   {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
                 </li>
               </Box>
-            )}
+                )
+              }
+            }}
+
+            // renderOption={(props, option) => (
+            //   <Box>
+            //     {props.id.endsWith('-0') && (
+            //       <li className={props.className}>
+            //         {secondDisplayField && <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>}
+            //         {secondDisplayField && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
+            //       </li>
+            //     )}
+            //     <li {...props}>
+            //       <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
+            //       {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
+            //     </li>
+            //   </Box>
+            // )}
             renderInput={params => (
               <TextField
                 {...params}

@@ -27,11 +27,12 @@ const ProductAgentForm = ({
     {
       component: 'resourcecombobox',
       label: labels.agents,
-      name: 'agent',
+      name: 'agentId',
       props: {
         endpointId:  RemittanceSettingsRepository.CorrespondentAgents.qry,
         valueField: 'recordId',
         displayField: 'name',
+        mapping: [ { from: 'recordId', to: 'agentId' }, { from: 'name', to: 'agentName' } ],
         columnsInDropDown: [{ key: 'name', value: 'name' }]
       }
 
@@ -45,12 +46,7 @@ const ProductAgentForm = ({
       .array()
       .of(
         yup.object().shape({
-          agent: yup
-            .object()
-            .shape({
-              recordId: yup.string().required('agent recordId is required')
-            })
-            .required('agent is required'),
+           agentId: yup.string().required('agent recordId is required')
         })
       ).required('agents array is required') }),
     initialValues: {
@@ -70,12 +66,11 @@ const ProductAgentForm = ({
   const postProductAgents = obj => {
     const data = {
       dispersalId: pId,
-      productDispersalAgents: obj.map(({dispersalId, agent, agentId, agentName, ...rest}, index)=>({
+      productDispersalAgents: obj.map(({dispersalId, ...rest}, index)=>({
         id: index + 1,
-        agent,
-        dispersalId: _dispersalId,
-        agentId: agent.recordId,
-        agentName: agent.name,
+
+        dispersalId: _dispersalId.dispersalId,
+
         ...rest
        }))
     }
@@ -106,12 +101,8 @@ const ProductAgentForm = ({
     })
       .then(res => {
         if (res.list.length > 0) {
-          formik.setValues({ agents: res.list.map(({agentId,agentName,...rest}, index)=>({
+          formik.setValues({ agents: res.list.map(({...rest}, index)=>({
            id: index+1,
-           agent:{
-            recordId: agentId,
-            name: agentName
-           },
            ...rest
           })) }) //map
         }
@@ -165,7 +156,7 @@ return (
             value={formik.values.agents}
             error={formik.errors.agents}
             columns={columns}
-            height={height-200}
+            height={height-150}
             />
           </Grid>
         </Grid>
