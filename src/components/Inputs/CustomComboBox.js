@@ -45,7 +45,9 @@ const CustomComboBox = ({
 
   const _required = required || accessLevel === MANDATORY
 
-  return (
+  return _hidden ? (
+    <></>
+  ) : (
     <Autocomplete
       name={name}
       value={value}
@@ -76,7 +78,7 @@ const CustomComboBox = ({
       readOnly={_readOnly}
       freeSolo={_readOnly}
       disabled={_readOnly}
-      sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
+      sx={{ ...sx, display: 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           return (

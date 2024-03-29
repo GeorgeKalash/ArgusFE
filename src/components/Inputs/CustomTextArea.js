@@ -38,15 +38,17 @@ const CustomTextArea = ({
 
   useEffect(() => {
     // Save the cursor position before the value changes
-    if (typeof inputRef.current.selectionStart !== undefined && position) {
+    if (inputRef.current && typeof inputRef.current.selectionStart !== undefined && position) {
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
 
   const required = props.required || accessLevel === MANDATORY
 
-  return (
-    <Box sx={{ width: '100%', display: _hidden ? 'none' : 'block' }}>
+  return _hidden ? (
+    <></>
+  ) : (
+    <Box sx={{ width: '100%' }}>
       <TextField
         multiline
         rows={rows} // You can adjust the number of rows as needed

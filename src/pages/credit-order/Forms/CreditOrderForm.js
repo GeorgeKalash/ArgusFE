@@ -26,14 +26,13 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { FormatLineSpacing } from '@mui/icons-material'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
 import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useForm } from 'src/hooks/form'
+import FormGrid from 'src/components/form/layout/FormGrid'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, window }) {
   const { height } = useWindowDimensions()
@@ -704,7 +703,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         <Grid container>
           <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
             {/* First Column */}
-            <Grid item style={{ marginRight: '10px', width: '205px' }}>
+            <FormGrid hideonempty item style={{ marginRight: '10px', width: '205px' }}>
               <CustomDatePicker
                 name='date'
                 required
@@ -718,7 +717,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 helperText={formik.touched.date && formik.errors.date}
               />
-            </Grid>
+            </FormGrid>
 
             {/* Second Column */}
             <Grid item style={{ marginRight: '10px', width: '465px' }}>
@@ -872,7 +871,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
           >
             {/* First Column (moved to the left) */}
-            <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
+            <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
               <CustomTextArea
                 name='notes'
                 label={labels[11]}
@@ -886,7 +885,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
                 helperText={formik.touched.notes && formik.errors.notes}
               />
-            </Grid>
+            </FormGrid>
             {/* Second Column  */}
             <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
               <Grid item xs={12}>

@@ -51,14 +51,16 @@ const CustomLookup = ({
 
   const isRequired = required || accessLevel === MANDATORY
 
-  return (
+  return _hidden ? (
+    <></>
+  ) : (
     <Box
       sx={{
         position: 'relative',
         width: '100%',
         height: '40px',
         mb: error && helperText ? 6 : 0,
-        display: _hidden ? 'none' : 'block'
+        display: 'block'
       }}
     >
       <Box display={'flex'}>
@@ -95,7 +97,6 @@ const CustomLookup = ({
                 return option
               }
             }}
-            
             // getOptionLabel={option => {
             //   if (typeof option === 'object' && Array.isArray(displayField)) {
             //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space

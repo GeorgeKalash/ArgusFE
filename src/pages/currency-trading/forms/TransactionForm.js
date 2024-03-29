@@ -28,6 +28,7 @@ import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationO
 import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
+import FormGrid from 'src/components/form/layout/FormGrid'
 
 const FormContext = React.createContext(null)
 
@@ -94,7 +95,6 @@ function FormProvider({ formik, maxAccess, labels, children }) {
 export default function TransactionForm({ recordId, labels, maxAccess, plantId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
-  
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
@@ -736,7 +736,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
               <Grid item xs={4}>
                 <FormField name='reference' Component={CustomTextField} readOnly />
               </Grid>
-              <Grid item xs={4}>
+              <FormGrid hideonempty item xs={4}>
                 <CustomDatePicker
                   name='date'
                   label={labels.date}
@@ -750,7 +750,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   maxAccess={maxAccess}
                 />
                 {/* <FormField name='date' Component={CustomDatePicker}  required readOnly={editMode} /> */}
-              </Grid>
+              </FormGrid>
               <Grid item xs={4}>
                 <FormField
                   name='status'
