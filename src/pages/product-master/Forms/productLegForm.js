@@ -23,6 +23,7 @@ const ProductLegForm = ({
   store,
   labels,
   height,
+  expanded,
   editMode,
   maxAccess
 }) => {
@@ -230,8 +231,9 @@ return (
                onChange={value => formik.setFieldValue('productLegs', value)}
                value={formik.values.productLegs}
                error={formik.errors.productLegs}
-                columns={columns}
-                height={height-150}
+               columns={columns}
+               height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
+
             />
           </Grid>
         </Grid>

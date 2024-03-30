@@ -18,6 +18,7 @@ const ProductCurrenciesForm = ({
   labels,
   editMode,
   height,
+  expanded,
   maxAccess
 }) => {
 
@@ -165,23 +166,6 @@ const ProductCurrenciesForm = ({
         if (res.list.length > 0)
          formik.setValues({ currencies: res.list.map(({  ...rest } , index) => ({
           id : index,
-
-        //   country : {
-        //     countryId,
-        //     countryRef
-        //  },
-        //  countryName: countryName,
-
-        //  currency : {
-        //   recordId: currencyId,
-        //   reference: currencyRef
-        //  },
-        //  currencyName: currencyName,
-        //   dispersalType :{
-        //   key: dispersalType,
-        //   value: dispersalTypeName
-        //  },
-
           ...rest
        })) })
       })
@@ -198,7 +182,7 @@ return (
           value={formik.values.currencies}
           error={formik.errors.currencies}
           columns={columns}
-          scrollHeight={height-100}
+          height={`${expanded ? `calc(100vh - 330px)` : `${height-100}px`}`}
 
         />
       </Box>

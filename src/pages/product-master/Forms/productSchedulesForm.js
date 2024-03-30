@@ -20,6 +20,7 @@ const ProductSchedulesForm = ({
   setStore,
   editMode,
   height,
+  expanded,
   maxAccess }) => {
     const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -275,13 +276,11 @@ return (
         <Grid container gap={2}>
           <Grid xs={12}>
             <DataGrid
-
-              // idName='seqNo'
                onChange={value => formik.setFieldValue('schedules', value)}
                value={formik.values.schedules}
                error={formik.errors.schedules}
                columns={columns}
-               scrollHeight={height-100}
+               height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
 
             />
           </Grid>

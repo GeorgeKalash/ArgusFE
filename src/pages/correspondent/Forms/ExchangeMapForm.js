@@ -22,6 +22,7 @@ const ExchangeMapForm= ({
   editMode,
   currency,
   store,
+  expanded, height,
   labels
 }) => {
 
@@ -75,7 +76,7 @@ const columns=[
       endpointId: MultiCurrencyRepository.ExchangeTable.qry,
       valueField: 'recordId',
       displayField: 'reference',
-      mapping: [{ from: 'recordId', to: 'exchangeId' }, { from: 'reference', to: 'exchangeRef' } ],
+      mapping: [{ from: 'recordId', to: 'exchangeId' }, { from: 'reference', to: 'exchangeRef' }, { from: 'name', to: 'exchangeName' }  ],
       columnsInDropDown: [
         { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
@@ -93,8 +94,7 @@ const columns=[
 ]
 
 const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
-
-  formik.resetForm();
+formik.setFieldValue('plants' , [] )
   const parameters = ''
   countryId && currencyId && getRequest({
     extension: SystemRepository.Plant.qry,
@@ -133,7 +133,7 @@ const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
 
             }
           })
-          formik.setValues({  plants })
+          formik.setFieldValue(  'plants' , plants )
         })
         .catch(error => {
         })
@@ -208,7 +208,7 @@ return (
                       recordId,
                       currencyId,
                       selectedCountryId
-                    ) // Fetch and update state data based on the selected country
+                    )
                   }}
 
                   error={formik.touched.countryId && Boolean(formik.errors.countryId)}
@@ -218,14 +218,16 @@ return (
 
             <Grid item xs={12} >
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                  <DataGrid
+                  {formik?.values?.plants[0]?.plantName && <DataGrid
                     onChange={value => formik.setFieldValue('plants', value)}
                     value={formik.values.plants}
                     error={formik.errors.plants}
                     columns={columns}
                     allowDelete={false}
                     allowAddNewLine={false}
-                  />
+                    height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
+
+                  />}
 
               </Box>
             </Grid>

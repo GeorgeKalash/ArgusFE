@@ -27,12 +27,11 @@ const CorrespondentCountriesForm = ({
     const formik = useFormik({
       enableReinitialize: true,
       validateOnChange: true,
-
       validationSchema: yup.object({ countries: yup
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required('currency  is required')
+            countryId: yup.string().required('currency  is required')
           })
         ).required('Operations array is required') }),
 
@@ -140,7 +139,7 @@ return (
             columns={[
               {
                 component: 'resourcecombobox',
-                name: 'country',
+                name: 'countryId',
                 label: labels.country,
                  props: {
                   endpointId: SystemRepository.Country.qry,

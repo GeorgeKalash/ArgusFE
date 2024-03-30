@@ -17,6 +17,7 @@ const ProductAgentForm = ({
   labels,
   editMode,
   height,
+  expanded,
   maxAccess
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -156,7 +157,7 @@ return (
             value={formik.values.agents}
             error={formik.errors.agents}
             columns={columns}
-            height={height-150}
+            height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
             />
           </Grid>
         </Grid>

@@ -1,6 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react'
 import FormShell from './FormShell'
-import InlineEditGrid from './InlineEditGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -16,9 +15,8 @@ import { DataGrid } from './DataGrid'
 import * as yup from "yup";
 
 
-export const ClientRelationForm = ({recordId, name , reference, setErrorMessage , height}) => {
+export const ClientRelationForm = ({recordId, name , reference, setErrorMessage , height, expanded}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
 
   const {
     labels: _labels,
@@ -31,7 +29,6 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage 
 
     getGridData(recordId)
   },[recordId])
-
 
 
   function getGridData(parentId){
@@ -76,12 +73,6 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage 
 
       });
   }
-
-
-
-
-
-
 
   const columns = [
 
@@ -146,7 +137,6 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage 
     }
   ]
 
-
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
@@ -175,12 +165,9 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage 
         activationDate: ''}]
     },
     onSubmit: values => {
-      console.log(values)
       post(values)
     }
   })
-
-
 
   const post = obj => {
     const res = obj.relations.map(({parentId, activationDate,expiryDate,...rest} ,index) => ({
@@ -192,13 +179,11 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage 
      ...rest
     }));
 
-
     const data = {
       parentId: recordId,
       items: res
     }
 
-    console.log(data)
     postRequest({
       extension: RTCLRepository.ClientRelation.set2,
       record: JSON.stringify(data)
@@ -218,14 +203,12 @@ return (
       </Grid>
       <Grid  spacing={4} sx={{mt: 1}}>
 
-
-<DataGrid
+        <DataGrid
           onChange={value => formik.setFieldValue('relations', value)}
           value={formik.values.relations}
           error={formik.errors.relations}
           columns={columns}
-          height={`${ height-300}`}
-
+          height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
         />
 
       </Grid>

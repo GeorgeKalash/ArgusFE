@@ -25,6 +25,8 @@ const ProductMasterForm = ({
   labels,
   editMode,
   setEditMode,
+  height,
+  expanded,
   maxAccess
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

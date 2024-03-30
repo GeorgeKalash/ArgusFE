@@ -15,9 +15,10 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
 const ProductLegCommissionForm = ({
-row, labels, maxAccess, store, height
+row, labels, maxAccess, store, height,
+expanded,
 }) => {
-  const {recordId : pId, countries, seqNo } = store
+  const {recordId : pId,  seqNo } = store
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -171,7 +172,7 @@ return (
              error={formik.errors.productLegCommission}
              columns={columns}
              allowDelete={false}
-             height={height-50}
+             height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
              allowAddNewLine={false}/>
             </Grid>
           </Grid>

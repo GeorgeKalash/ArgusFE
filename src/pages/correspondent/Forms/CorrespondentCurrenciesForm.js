@@ -99,7 +99,6 @@ const CorrespondentCurrenciesForm = ({
         valueField: 'recordId',
         displayField: 'reference',
         mapping: [{ from: 'recordId', to: 'currencyId' }, { from: 'reference', to: 'currencyRef' } , { from: 'name', to: 'currencyName' } ],
-
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
@@ -159,7 +158,6 @@ const CorrespondentCurrenciesForm = ({
       name:"saved",
       label: labels.exchange,
       onClick:  async (e, row) => {
-
        stack({
           Component: ExchangeMapForm,
           props: {
@@ -189,17 +187,6 @@ const CorrespondentCurrenciesForm = ({
           formik.setValues({ currencies: res.list.map(
             ({ ...rest } , index) => ({
                id : index,
-
-              //  currency : {
-              //   recordId: currencyId,
-              //   reference: currencyRef,
-              //   name: currencyName,
-              // }, exchange : {
-              //   recordId: exchangeId,
-              //   reference: exchangeRef,
-              //   name: exchangeName,
-
-              // },
                saved: true,
                 ...rest
           }))})
@@ -248,8 +235,7 @@ return (
           error={formik.errors.currencies}
           columns={columns}
           height={`${expanded ? height-300 : 350}px`}
-
-        />
+          />
       </Box>
     </FormShell>
   )

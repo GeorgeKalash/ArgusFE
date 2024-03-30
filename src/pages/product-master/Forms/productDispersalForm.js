@@ -20,6 +20,8 @@ const ProductDispersalForm = ({
   getGridData,
   maxAccess,
   window,
+  height,
+  expanded,
 }) => {
 
   const { getRequest, postRequest } = useContext(RequestsContext)

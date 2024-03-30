@@ -18,6 +18,7 @@ const ProductCountriesForm = ({
   labels,
   editMode,
   height,
+  expanded,
   maxAccess
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -148,7 +149,8 @@ const ProductCountriesForm = ({
            value={formik.values.countries}
            error={formik.errors.countries}
            columns={column}
-           height={height-100}
+           height={`${expanded ? `calc(100vh - 330px)` : `${height-100}px`}`}
+
         />
       </Box>
     </FormShell>

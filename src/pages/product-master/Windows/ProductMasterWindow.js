@@ -14,7 +14,8 @@ const ProductMasterWindow = ({
   labels,
   recordId,
   maxAccess,
-  height
+  height,
+  expanded
 }) => {
   const [editMode , setEditMode] = useState(recordId)
   const [activeTab , setActiveTab] = useState(0)
@@ -61,6 +62,7 @@ const ProductMasterWindow = ({
           labels={labels}
           maxAccess={maxAccess}
            height={height}
+           expanded={expanded}
            editMode={editMode}
         />
       </CustomTabPanel>
@@ -69,6 +71,7 @@ const ProductMasterWindow = ({
           store={store}
           labels={labels}
           maxAccess={maxAccess}
+          expanded={expanded}
           height={height}
           editMode={editMode}
         />
@@ -79,6 +82,7 @@ const ProductMasterWindow = ({
           setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
+          expanded={expanded}
           height={height}
           editMode={editMode}
         />
@@ -89,6 +93,7 @@ const ProductMasterWindow = ({
           setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
+          expanded={expanded}
           height={height}
           editMode={editMode}
         />
@@ -99,7 +104,8 @@ const ProductMasterWindow = ({
         setStore={setStore}
         labels={labels}
         maxAccess={maxAccess}
-         height={height}
+        expanded={expanded}
+        height={height}
          editMode={editMode}
         />
        </CustomTabPanel>
@@ -109,6 +115,7 @@ const ProductMasterWindow = ({
           store={store}
           labels={labels}
           maxAccess={maxAccess}
+          expanded={expanded}
           height={height}
         />
       </CustomTabPanel>
