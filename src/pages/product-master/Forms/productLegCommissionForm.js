@@ -124,9 +124,6 @@ expanded,
       .catch(error => {
       })
 
-
-
-    //step 3: merge both
   }
 
   const post = obj => {

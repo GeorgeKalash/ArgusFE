@@ -182,7 +182,7 @@ return (
           value={formik.values.currencies}
           error={formik.errors.currencies}
           columns={columns}
-          height={`${expanded ? `calc(100vh - 330px)` : `${height-100}px`}`}
+          height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
 
         />
       </Box>

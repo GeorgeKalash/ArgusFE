@@ -34,7 +34,7 @@ const ProductSchedulesForm = ({
         .of(
           yup.object().shape({
             countryId: yup.string().required('currency  is required'),
-            countryId: yup.string().required('Country  is required'),
+            currencyId: yup.string().required('Country  is required'),
             dispersalId: yup.string().required('Dispersal Type  is required'),
             plantId: yup.string().required('plantId Type  is required')
           })
@@ -72,7 +72,7 @@ const ProductSchedulesForm = ({
       const data = {
         productId: pId,
         productSchedules: obj.map(
-          ({ country, id,seqNo, countryId, currency, currencyId, plant, plantId,dispersalId, dispersalType, dispersal,productId, saved,...rest}, index ) => ({
+          ({  id,seqNo,productId, saved,...rest}, index ) => ({
               seqNo: index +1,
               productId: pId,
               ...rest
@@ -95,9 +95,8 @@ const ProductSchedulesForm = ({
     {
       component: 'button',
       label: labels.select,
-       name : 'saved',
+      name : 'saved',
       onClick: (e, row) => {
-        console.log(row)
            setStore(prevStore => ({
           ...prevStore,
           plantId: row.plantId,
@@ -193,19 +192,12 @@ const ProductSchedulesForm = ({
         displayField: 'reference',
         displayFieldWidth: 3,
         mapping: [ { from: 'recordId', to: 'dispersalId' } ,{ from: 'name', to: 'dispersalName' } ,{ from: 'reference', to: 'dispersalRef' }
+        ,{ from: 'dispersalType', to: 'dispersalType' } ,{ from: 'dispersalTypeName', to: 'dispersalTypeName' }
        ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
         ]
-      },
-      async onChange({ row: { update, newRow , oldRow}}) {
-        if( newRow.dispersal.recordId && newRow.dispersal.recordId != oldRow?.dispersal?.recordId ){
-         update({dispersalType: {key : newRow.dispersal.dispersalType, value: newRow.dispersal.dispersalTypeName} , dispersalName: newRow.dispersal.name})
-        }
-        if(!newRow.dispersal){
-          update({dispersalType: {key : '', value: ''} , dispersalName: ''})
-        }
       }
     },
     {
@@ -280,7 +272,7 @@ return (
                value={formik.values.schedules}
                error={formik.errors.schedules}
                columns={columns}
-               height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
+               height={`${expanded ? `calc(100vh - 300px)` : `${height-160}px`}`}
 
             />
           </Grid>

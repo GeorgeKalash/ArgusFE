@@ -149,7 +149,7 @@ const ProductCountriesForm = ({
            value={formik.values.countries}
            error={formik.errors.countries}
            columns={column}
-           height={`${expanded ? `calc(100vh - 330px)` : `${height-100}px`}`}
+           height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
 
         />
       </Box>
