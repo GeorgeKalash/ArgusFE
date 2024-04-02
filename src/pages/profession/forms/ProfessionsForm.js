@@ -16,12 +16,13 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function ProfessionsForm ({labels, maxAccess,recordId}){
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [position, setPosition] = useState(0)
-  
+
   const [initialValues, setInitialData] = useState({
       recordId: null,
       reference: '',
@@ -53,12 +54,13 @@ export default function ProfessionsForm ({labels, maxAccess,recordId}){
       onSubmit: async obj => {
         try{
         const recordId = obj.recordId
+        const data = {...obj, monthlyIncome : obj.monthlyIncome?.split(',')?.join('') }
 
         const response = await postRequest({
           extension: RemittanceSettingsRepository.Profession.set,
-          record: JSON.stringify(obj)
+          record: JSON.stringify(data)
         })
-        
+
         if (!recordId) {
           toast.success('Record Added Successfully')
           setInitialData({
@@ -86,7 +88,7 @@ export default function ProfessionsForm ({labels, maxAccess,recordId}){
                 extension: RemittanceSettingsRepository.Profession.get,
                 parameters: `_recordId=${recordId}`
               })
-              
+
               setInitialData(res.record)
             }
           } catch (exception) {
@@ -98,13 +100,13 @@ export default function ProfessionsForm ({labels, maxAccess,recordId}){
       }, [])
 
     return (
-      <FormShell 
+      <FormShell
       resourceId={ResourceIds.Profession}
-      form={formik} 
-      height={300} 
-      maxAccess={maxAccess} 
+      form={formik}
+      height={300}
+      maxAccess={maxAccess}
       editMode={editMode}
-      > 
+      >
       <Grid container spacing={4}>
       <Grid item xs={12}>
         <CustomTextField
@@ -151,9 +153,9 @@ export default function ProfessionsForm ({labels, maxAccess,recordId}){
           // helperText={formik.touched.flName && formik.errors.flName}
         />
       </Grid>
-      
+
       <Grid item xs={12}>
-        <CustomTextField
+        {/* <CustomTextField
           name='monthlyIncome'
           type="text"
           label={labels.monthlyIncome}
@@ -172,9 +174,23 @@ export default function ProfessionsForm ({labels, maxAccess,recordId}){
           }}
           onClear={() => formik.setFieldValue('monthlyIncome', '')}
           error={formik.touched.monthlyIncome && Boolean(formik.errors.monthlyIncome)}
-      
+
           // helperText={formik.touched.monthlyIncome && formik.errors.monthlyIncome}
-        />
+        /> */}
+        <CustomNumberField
+          name='monthlyIncome'
+           type="text"
+          label={labels.monthlyIncome}
+          value={formik.values.monthlyIncome}
+          required
+          maxAccess={maxAccess}
+          onChange={(e) => formik.setFieldValue('monthlyIncome', e.target.value)}
+
+          onClear={() => formik.setFieldValue('monthlyIncome', '')}
+          error={formik.touched.monthlyIncome && Boolean(formik.errors.monthlyIncome)}
+
+          // helperText={formik.touched.monthlyIncome && formik.errors.monthlyIncome}
+          />
       </Grid>
       <Grid item xs={12}>
         <CustomTextField
@@ -211,7 +227,7 @@ export default function ProfessionsForm ({labels, maxAccess,recordId}){
             />
           </Grid>
           </Grid>
-             
+
       </FormShell>
     )
 }

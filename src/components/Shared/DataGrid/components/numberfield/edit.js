@@ -1,4 +1,5 @@
 import { useGridApiContext } from '@mui/x-data-grid'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
@@ -16,11 +17,11 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
   }
 
 return (
-    <CustomTextField
-      value={getFormattedNumber(value)}
+    <CustomNumberField
+      value={value}
       label={''}
-      language={'number'}
       readOnly={props?.readOnly}
+      decimalScale={props?.decimalScale} // much number after .
       autoFocus
       hasBorder={false}
       onChange={e => {
@@ -28,7 +29,7 @@ return (
           id,
           field,
           value: handleNumberFieldNewValue(
-            e.target.value,
+            e.target.value?.split(',')?.join(''),
             value
           )
         })
