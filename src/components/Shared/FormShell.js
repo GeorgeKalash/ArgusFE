@@ -22,7 +22,6 @@ export default function FormShell({
   postVisible = false,
   resourceId,
   functionId,
-  NewComponentVisible = false,
   maxAccess,
   isPosted = false,
   isClosed = false,
@@ -74,7 +73,9 @@ export default function FormShell({
 
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0  }}><Box sx={{mt:1}}>{children}</Box></DialogContent>
+      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>
+        <Box sx={{ mt: 1 }}>{children}</Box>
+      </DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
@@ -109,7 +110,7 @@ export default function FormShell({
               props: {
                 formValues: form.values,
                 recordId: form.values?.recordId,
-                functionId:functionId
+                functionId: functionId
               },
               width: 1000,
               height: 620,
@@ -150,7 +151,6 @@ export default function FormShell({
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
-          NewComponentVisible={NewComponentVisible}
           postVisible={postVisible}
           isPosted={isPosted}
           isClosed={isClosed}

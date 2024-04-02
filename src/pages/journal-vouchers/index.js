@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -13,7 +13,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-import { formatDateDefault } from 'src/lib/date-helper';
+import { formatDateDefault } from 'src/lib/date-helper'
 
 // ** Windows
 import JournalVoucherWindow from './Windows/JournalVoucherWindow'
@@ -27,7 +27,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -46,6 +46,7 @@ const JournalVoucher = () => {
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -79,9 +80,7 @@ const JournalVoucher = () => {
       headerName: _labels.status,
       flex: 1
     }
-    
   ]
-
 
   const add = () => {
     setWindowOpen(true)
@@ -100,7 +99,6 @@ const JournalVoucher = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>
@@ -114,7 +112,8 @@ const JournalVoucher = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
         />
       </Box>

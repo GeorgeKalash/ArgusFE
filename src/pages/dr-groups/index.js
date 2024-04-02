@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -13,23 +13,19 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-
-
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import DRGroupWindow from './Windows/DRGroupWindow'
 
 const DRGroups = () => {
-
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -39,26 +35,14 @@ const DRGroups = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-
-      extension:DocumentReleaseRepository.DRGroup.qry,
+    return await getRequest({
+      extension: DocumentReleaseRepository.DRGroup.qry,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-
     })
-
-
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "reference").value,
-    name: labels && labels.find(item => item.key === "name").value,
-    group: labels && labels.find(item => item.key === "group").value,
-    approver: labels && labels.find(item => item.key === "approver").value
-
-    return {...response,  _startAt: _startAt}
-
   }
 
- const {
+  const {
     query: { data },
     labels: _labels,
     paginationParameters,
@@ -87,18 +71,17 @@ const DRGroups = () => {
     }
   ]
 
-
   const add = () => {
     openForm()
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: DRGroupWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
-        maxAccess : access
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 600,
       height: 400,
@@ -107,19 +90,17 @@ const DRGroups = () => {
   }
 
   const edit = obj => {
-   
     openForm(obj.recordId)
   }
 
   const del = async obj => {
     await postRequest({
-      extension:DocumentReleaseRepository.DRGroup.del,
+      extension: DocumentReleaseRepository.DRGroup.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>
@@ -155,8 +136,5 @@ const DRGroups = () => {
     </>
   )
 }
-
-
-
 
 export default DRGroups
