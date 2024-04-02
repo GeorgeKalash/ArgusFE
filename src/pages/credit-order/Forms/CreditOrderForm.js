@@ -34,6 +34,7 @@ import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Approvals from 'src/components/Shared/Approvals'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, window }) {
   const { height } = useWindowDimensions()
@@ -260,7 +261,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             recordId: res.recordId
           },
           width: 900,
-          height: 650,
+          height: 600,
           title: _labelsINV[1]
         })
       }
@@ -648,6 +649,19 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: formik.values.functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      height: 600,
+      title: 'Workflow'
+    })
+  }
+
   const actions = [
     {
       key: 'Close',
@@ -672,6 +686,12 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       condition: onTFR,
       onClick: onTFR,
       disabled: !isTFR
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     }
   ]
 
@@ -771,7 +791,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   firstFieldWidth='30%'
                   valueShow='corRef'
                   secondValueShow='corName'
-                  readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                  readOnly={isClosed || detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
                   maxAccess={maxAccess}
                   editMode={editMode}
                   onChange={async (event, newValue) => {

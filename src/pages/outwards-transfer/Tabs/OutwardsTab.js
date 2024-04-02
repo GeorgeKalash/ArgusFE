@@ -31,7 +31,7 @@ import { useError } from 'src/error'
 import toast from 'react-hot-toast'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
+export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [position, setPosition] = useState()
   const [productsStore, setProductsStore] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
@@ -318,7 +318,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
         gridData: productsStore,
         maxAccess: maxAccess,
         form: productFormik,
-        _labels: _labels
+        _labels: labels
       },
       width: 800,
       height: 400
@@ -368,7 +368,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
-                label={_labels.Reference}
+                label={labels.Reference}
                 value={formik?.values?.reference}
                 maxAccess={maxAccess}
                 maxLength='30'
@@ -382,7 +382,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
               <CustomDatePicker
                 name='date'
                 required
-                label={_labels.date}
+                label={labels.date}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
@@ -403,7 +403,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 valueField='reference'
                 displayField='name'
                 name='clientId'
-                label={_labels.Client}
+                label={labels.Client}
                 form={formik}
                 required
                 readOnly={isClosed}
@@ -430,7 +430,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
             <Grid item xs={12}>
               <CustomTextField
                 name='idNo'
-                label={_labels.IdNo}
+                label={labels.IdNo}
                 value={formik.values.idNo}
                 required
                 onChange={formik.handleChange}
@@ -445,7 +445,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
-                label={_labels.IdType}
+                label={labels.IdType}
                 required
                 name='idType'
                 displayField='name'
@@ -461,7 +461,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
-                label={_labels.Nationality}
+                label={labels.Nationality}
                 required
                 name='nationalityId'
                 displayField={['reference', 'name']}
@@ -482,7 +482,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
               <ResourceComboBox
                 endpointId={RemittanceOutwardsRepository.Country.qry}
                 name='countryId'
-                label={_labels.Country}
+                label={labels.Country}
                 required
                 readOnly={isClosed}
                 displayField={['countryRef', 'countryName']}
@@ -502,7 +502,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
               <ResourceComboBox
                 endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
                 parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
-                label={_labels.DispersalType}
+                label={labels.DispersalType}
                 required
                 readOnly={isClosed}
                 name='dispersalType'
@@ -531,7 +531,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 valueField='name'
                 displayField='name'
                 name='beneficiaryName'
-                label={_labels.Beneficiary}
+                label={labels.Beneficiary}
                 form={formik}
                 required
                 maxAccess={maxAccess}
@@ -550,7 +550,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                   formik.values.countryId && formik.values.dispersalType && RemittanceOutwardsRepository.Currency.qry
                 }
                 parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
-                label={_labels.Currency}
+                label={labels.Currency}
                 required
                 name='currencyId'
                 displayField={['currencyRef', 'currencyName']}
@@ -577,7 +577,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                   RemittanceOutwardsRepository.Agent.qry
                 }
                 parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId}`}
-                label={_labels.Agent}
+                label={labels.Agent}
                 required={formik.values.dispersalType === 2}
                 readOnly={formik.values.dispersalType !== 2 || isClosed}
                 name='agentId'
@@ -596,7 +596,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 position={position}
                 name='fcAmount'
                 type='text'
-                label={_labels.Amount}
+                label={labels.Amount}
                 value={formik.values.fcAmount}
                 required
                 readOnly={
@@ -636,7 +636,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                   valueField='reference'
                   displayField='name'
                   name='corId'
-                  label={_labels.Correspondant}
+                  label={labels.Correspondant}
                   form={formik}
                   required
                   displayFieldWidth={2}
@@ -668,7 +668,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 position={position}
                 name='commission'
                 type='text'
-                label={_labels.Fees}
+                label={labels.Fees}
                 value={formik.values.commission}
                 required
                 readOnly
@@ -695,7 +695,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 position={position}
                 name='lcAmount'
                 type='text'
-                label={_labels.BaseAmount}
+                label={labels.BaseAmount}
                 value={formik.values.lcAmount}
                 required
                 readOnly
@@ -722,7 +722,7 @@ export default function OutwardsTab({ _labels, recordId, maxAccess, cashAccountI
                 position={position}
                 name='net'
                 type='text'
-                label={_labels.NetToPay}
+                label={labels.NetToPay}
                 value={formik.values.net}
                 required
                 readOnly
