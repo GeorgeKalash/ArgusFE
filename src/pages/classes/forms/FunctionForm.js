@@ -20,7 +20,6 @@ const FunctionForm = ({
   getFunctionGridData,
   recordId,
   functionId,
-  classId,
   window,
   editMode
 }) => {
