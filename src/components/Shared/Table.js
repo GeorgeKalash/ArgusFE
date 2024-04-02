@@ -54,8 +54,7 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   },
   '& .MuiDataGrid-cell': {
     color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)',
-    whiteSpace: 'pre-line !important',
-    minHeight: '180px !important'
+    whiteSpace: 'pre-line !important'
   },
   '& .MuiPaginationItem-root': {
     borderRadius: 0
@@ -395,6 +394,8 @@ const Table = ({
                 pb: 2
               }}
               density='compact'
+              getRowHeight={() => 'auto'}
+              getEstimatedRowHeight={() => 200}
               components={{
                 LoadingOverlay: LinearProgress,
 
