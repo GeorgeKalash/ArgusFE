@@ -5,7 +5,7 @@ import {
   useGridApiRef
 } from '@mui/x-data-grid'
 import components from './components'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
@@ -150,7 +150,9 @@ export function DataGrid({
   }
 
   function addRow() {
-    const highestIndex =  value?.length ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1 : 1
+    const highestIndex = value?.length
+      ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
+      : 1
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
@@ -165,16 +167,15 @@ export function DataGrid({
     ])
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     if (!value?.length) {
-      addRow();
-     }
-  },[value])
+      addRow()
+    }
+  }, [value])
 
-
-   function deleteRow(deleteId) {
+  function deleteRow(deleteId) {
     const newRows = value.filter(({ id }) => id !== deleteId)
-     onChange(newRows)
+    onChange(newRows)
   }
 
   const actionsColumn = {
@@ -182,11 +183,16 @@ export function DataGrid({
     editable: false,
     flex: 0,
     width: '20',
-    renderCell({ id : idName }) {
+    renderCell({ id: idName }) {
       return (
-          <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  idName])}>
-            <GridDeleteIcon />
-          </IconButton>
+        <IconButton
+          disabled={disabled}
+          tabIndex='-1'
+          icon='pi pi-trash'
+          onClick={() => setDeleteDialogOpen([true, idName])}
+        >
+          <GridDeleteIcon />
+        </IconButton>
       )
     }
   }
@@ -255,8 +261,6 @@ export function DataGrid({
         hideFooter
         autoHeight={height ? false : true}
         columnResizable={false}
-
-        // autoWidth
         disableColumnFilter
         disableColumnMenu
         disableColumnSelector
@@ -305,8 +309,6 @@ export function DataGrid({
             headerName: column.label || column.name,
             editable: !disabled,
             flex: column.flex || 1,
-
-            // width: column.width || 170,
             sortable: false,
             renderCell(params) {
               const Component =
@@ -327,7 +329,6 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-
                   <Component {...params} column={column} />
                 </Box>
               )
@@ -336,34 +337,39 @@ export function DataGrid({
               const Component =
                 typeof column.component === 'string' ? components[column.component].edit : column.component.edit
 
-            return (
-              <Box
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  padding: '0 0px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
-
-                }}
-              >
-                <Component {...params} column={column} update={update} updateRow={updateRow} isLoading={isUpdatingField} />
-              </Box>
-            )
-          }
-        })),
-       actionsColumn
-      ]}
-    />
-    <DeleteDialog
-            open={deleteDialogOpen}
-            onClose={() => setDeleteDialogOpen([false, {}])}
-            onConfirm={obj => {
-              setDeleteDialogOpen([false, {}])
-              deleteRow(obj)
-            }}
-          />
+              return (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    padding: '0 0px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center'
+                  }}
+                >
+                  <Component
+                    {...params}
+                    column={column}
+                    update={update}
+                    updateRow={updateRow}
+                    isLoading={isUpdatingField}
+                  />
+                </Box>
+              )
+            }
+          })),
+          actionsColumn
+        ]}
+      />
+      <DeleteDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen([false, {}])}
+        onConfirm={obj => {
+          setDeleteDialogOpen([false, {}])
+          deleteRow(obj)
+        }}
+      />
     </Box>
   )
 }
