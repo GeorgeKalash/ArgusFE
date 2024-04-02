@@ -40,34 +40,33 @@ const IdFieldsForm = ({
     //     })
     //   ).required(' ') }),
     initialValues: {
-      rows: [
-        {
-          id: 1 ,
-          idtId: recordId , 
-          accessLevel:'',
-          controlId: '',
-          accessLevelId: '',
-          accessLevelName: ''
-        }
-      ]
+        rows: [
+          {
+            id: 1,
+            idtId: recordId,
+            accessLevel: null,
+            controlId: '',
+            accessLevelId: null,
+            accessLevelName: ''
+          }
+        ]
     },
     onSubmit: values => {
       postIdFields(values)
     }
   })
-
-  const postIdFields = obj => {console.log(recordId)
+  
+  const postIdFields = obj => {console.log(obj)
 
     const data = {
       idtId: recordId,
-      list: obj.rows.map(row => ({
-        accessLevelName: row.accessLevelName,
-        accessLevelId: row.accessLevelId,
+      items: obj.rows.map(row => ({
+        idtId: recordId,
         controlId: row.controlId,
+        accessLevel: Number(row.accessLevelId)
       }))
     }
-    console.log(data)
-    
+
     postRequest({
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
       record: JSON.stringify(data)
@@ -92,24 +91,20 @@ const IdFieldsForm = ({
       extension: CurrencyTradingSettingsRepository.IdFields.qry,
       parameters: parameters
     })
-    .then(res => {
+    .then(res => {console.log(res)
       if (res?.list?.length > 0) {
-
-        formik.setValues({ countries: res.list.map(
-          ({ accessLevelId, accessLevelName, ...rest } , index) => ({
-             recordId: idtId,
-             accessLevel : { 
-             recordId: accessLevelId,
-             name: accessLevelName
-            },
-            accessLevelName: accessLevelName,
-            accessLevelId,
-             ...rest
-          }) )})
-          setStore(prevStore => ({
-            ...prevStore,
-              rows: typesRows
-          }));
+        formik.setValues({
+          rows: res.list.map(({ accessLevel, ...rest }, index) => ({
+            id: index + 1,
+            idtId: recordId,
+            accessLevelId: accessLevel.toString(),
+            ...rest
+          }))
+        })
+        setStore(prevStore => ({
+          ...prevStore,
+            rows: res?.list
+        }))
       } else {
         formik.setValues({
           rows: [
@@ -117,7 +112,7 @@ const IdFieldsForm = ({
               id: 1 ,
               idtId: recordId, 
               controlId: '',
-              accessLevelId: '',
+              accessLevelId: null,
               accessLevelName: ''
             }
           ]
@@ -154,8 +149,7 @@ const IdFieldsForm = ({
               name: 'accessLevel',
               label: labels.accessLevel,
                 props: {
-                  datasetId: DataSets.RT_Language,
-                  mandatory:true, 
+                  datasetId: DataSets.ACCESS_LEVEL,
                   valueField: 'key',
                   displayField: 'value',
                   columnsInDropDown: [
@@ -164,8 +158,8 @@ const IdFieldsForm = ({
                 },
               async onChange({ row: { update, newRow } }) {
                 if(!newRow?.accessLevel?.key){
-                return;
-                }else{console.log(newRow)
+                return
+                }else{
                   update({
                     'accessLevelName':newRow?.accessLevel?.value,
                     'accessLevelId': newRow?.accessLevel?.key 
