@@ -69,7 +69,6 @@ const AuthProvider = ({ children }) => {
 
       const accountName = matchHostname ? matchHostname[1] : 'burger'
 
-
       try {
         const response = await axios({
           method: 'GET',

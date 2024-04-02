@@ -34,6 +34,7 @@ import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Approvals from 'src/components/Shared/Approvals'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, window }) {
   const { height } = useWindowDimensions()
@@ -260,7 +261,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             recordId: res.recordId
           },
           width: 900,
-          height: 650,
+          height: 600,
           title: _labelsINV[1]
         })
       }
@@ -632,7 +633,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
-          setIsTFR((res.record.releaseStatus===3 && res.record.status!==3 ) ? true : false)
+          setIsTFR(res.record.releaseStatus === 3 && res.record.status !== 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           res.record.deliveryDate = formatDateFromApi(res.record.deliveryDate)
           setOperationType(res.record.functionId)
@@ -648,30 +649,49 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: formik.values.functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      height: 600,
+      title: 'Workflow'
+    })
+  }
+
   const actions = [
     {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode,
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus===3 && formik.values.status===3),
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
     },
     {
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled:!isClosed,
+      disabled: !isClosed
     },
     {
-      key:'Invoice',
+      key: 'Invoice',
       condition: onTFR,
       onClick: onTFR,
-      disabled: !isTFR,
+      disabled: !isTFR
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     }
   ]
 
@@ -725,6 +745,10 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -766,7 +790,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   firstFieldWidth='30%'
                   valueShow='corRef'
                   secondValueShow='corName'
-                  readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                  readOnly={isClosed || detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
                   maxAccess={maxAccess}
                   editMode={editMode}
                   onChange={async (event, newValue) => {

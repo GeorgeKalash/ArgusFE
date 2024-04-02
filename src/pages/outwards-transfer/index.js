@@ -20,34 +20,40 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import OutwardsTab from './Tabs/OutwardsTab'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import toast from 'react-hot-toast'
 
 const OutwardsTransfer = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
 
   //states
   const [errorMessage, setErrorMessage] = useState(null)
   const { stack } = useWindow()
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter`
-    })
-  }
 
   const {
     query: { data },
+    filterBy,
+    clearFilter,
     labels: _labels,
     access
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.page,
-    datasetId: ResourceIds.OutwardsTransfer
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+    datasetId: ResourceIds.OutwardsTransfer,
+    filter: {
+      endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
+  }
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.page
+    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
   })
 
   const userData = window.sessionStorage.getItem('userData')
@@ -141,6 +147,21 @@ const OutwardsTransfer = () => {
       field: 'agentName',
       headerName: _labels.Agents,
       flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: _labels.ReleaseStatus,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.Status,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.WIP,
+      flex: 1
     }
   ]
 
@@ -169,9 +190,8 @@ const OutwardsTransfer = () => {
         cashAccountId: cashAccountId,
         userId: userData && userData.userId,
         maxAccess: access,
-        _labels: _labels,
-        recordId: recordId ? recordId : null,
-        editMode: recordId && true
+        labels: _labels,
+        recordId: recordId ? recordId : null
       },
       width: 950,
       height: 550,
@@ -182,10 +202,21 @@ const OutwardsTransfer = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addOutwards} maxAccess={access} />
+        <GridToolbar
+          onAdd={addOutwards}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
-          gridData={data}
+          gridData={data ? data : { list: [] }}
           rowId={['recordId']}
           onEdit={editOutwards}
           onDelete={delOutwards}
