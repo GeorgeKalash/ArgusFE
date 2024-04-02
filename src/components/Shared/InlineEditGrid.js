@@ -16,6 +16,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { formatDateFromApi, formatDateFromApiInline, formatDateDefault } from 'src/lib/date-helper'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { fontSize } from '@mui/system'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from 'src/services/api/maxAccess'
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
@@ -36,7 +37,8 @@ const InlineEditGrid = ({
   scrollable = true,
   allowDelete = true,
   allowAddNewLine = true,
-  onDelete
+  onDelete,
+  maxAccess
 }) => {
   const [write, setWrite] = useState(false)
 
@@ -98,6 +100,13 @@ const InlineEditGrid = ({
     const fieldName = row.field
     const cellId = `table-cell-${rowIndex}-${column.id}` // Unique identifier for the cell
 
+    const access = accessLevel({
+      maxAccess: maxAccess,
+      name: column.maxAccessName || column.name
+    })
+
+    const readOnly = access === DISABLED || (column.readOnly && access !== MANDATORY && access !== FORCE_ENABLED)
+
     switch (field) {
       case 'incremented':
         return (
@@ -116,8 +125,8 @@ const InlineEditGrid = ({
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][fieldName]}
             required={column?.mandatory}
-            readOnly={column?.readOnly}
-            disabled={column?.disabled}
+            readOnly={readOnly}
+            disabled={readOnly}
             onChange={event => {
               const newValue = event.target.value
               gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
@@ -137,8 +146,8 @@ const InlineEditGrid = ({
               name={fieldName}
               value={formatDateFromApiInline(gridValidation.values.rows[rowIndex][fieldName])}
               required={column?.mandatory}
-              readOnly={column?.readOnly}
-              disabled={column?.disabled}
+              readOnly={readOnly}
+              disabled={readOnly}
               format={dateFormat}
               onChange={newDate => {
                 if (newDate) {
@@ -210,8 +219,8 @@ const InlineEditGrid = ({
             size='small'
             fullWidth={true}
             inputProps={{
-              readOnly: column?.readOnly,
-              disabled: column?.disabled,
+              readOnly: readOnly,
+              disabled: readOnly,
               pattern: '[0-9]*',
               style: {
                 textAlign: 'right'
@@ -255,8 +264,8 @@ const InlineEditGrid = ({
             size='small'
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
-            readOnly={column?.readOnly}
-            disabled={column?.disabled}
+            readOnly={readOnly}
+            disabled={readOnly}
             options={column.store}
             getOptionLabel={option => {
               if (typeof option === 'object') {
@@ -280,7 +289,7 @@ const InlineEditGrid = ({
                 else return ''
               }
             }}
-
+            
             // getOptionLabel={option => {
             //   if (typeof option === 'object') {
             //     if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
@@ -372,8 +381,8 @@ const InlineEditGrid = ({
             size='small'
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.name}`]}
-            readOnly={column?.readOnly}
-            disabled={column?.disbaled}
+            readOnly={readOnly}
+            disabled={readOnly}
             options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
             open={write}
@@ -404,8 +413,8 @@ const InlineEditGrid = ({
                   </Box>
                 )
             }}
-           
-           // onFocus={() => setOpen(true)}
+            
+            // onFocus={() => setOpen(true)}
 
             // getOptionLabel={option => {
 
@@ -646,12 +655,17 @@ const InlineEditGrid = ({
         size='small'
       >
         {columns.map((column, i) => {
+          const access = accessLevel({
+            maxAccess,
+            name: column.maxAccessName || column.name
+          })
+
           return (
             <Column
               key={column.field}
               field={column.name}
               header={column.header}
-              hidden={column.hidden}
+              hidden={(column.hidden || access === HIDDEN) && access !== MANDATORY && access !== FORCE_ENABLED}
               style={{
                 width: column.width || tableWidth / columns.length,
                 background: background
