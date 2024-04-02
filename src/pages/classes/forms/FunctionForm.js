@@ -46,6 +46,7 @@ const FunctionForm = ({
   })
   
   const postFunction = obj => {
+    const classId = obj.classId ? obj.classId : recordId
     obj.classId = classId
     postRequest({
       extension: DocumentReleaseRepository.ClassFunction.set,

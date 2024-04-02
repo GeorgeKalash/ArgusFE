@@ -46,14 +46,12 @@ const FunctionFormList = (
     }
   ]
 
-  function openForm (functionId, classId, editMode){
+  function openForm (editMode){
     stack({
       Component: FunctionForm,
       props: {
         labels: labels,
         recordId: recordId,
-        classId: classId ,
-        functionId: functionId,
         maxAccess: maxAccess,
         getFunctionGridData: getFunctionGridData,
         editMode: editMode
@@ -76,14 +74,15 @@ const FunctionFormList = (
   }
 
   const addFunction = () => {
-    openForm('', false)
+    openForm(false)
   }
 
   const editFunction = obj => {
-    openForm(obj?.functionId, obj?.classId, true)
+    openForm(true)
   }
 
   const getFunctionGridData = classId => {
+    setFunctionGridData([])
     const defaultParams = `_classId=${classId}`
     var parameters = defaultParams
     getRequest({
