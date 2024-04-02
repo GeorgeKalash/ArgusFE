@@ -16,7 +16,7 @@ import toast from 'react-hot-toast'
 
 const ProductLegCommissionForm = ({
 row, labels, maxAccess, store, height,
-expanded,
+expanded
 }) => {
   const {recordId : pId,  seqNo } = store
 
@@ -169,7 +169,7 @@ return (
              error={formik.errors.productLegCommission}
              columns={columns}
              allowDelete={false}
-             height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
+             height={`${expanded ? `calc(100vh - 330px)` : `${height-50}px`}`}
              allowAddNewLine={false}/>
             </Grid>
           </Grid>

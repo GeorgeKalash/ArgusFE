@@ -55,15 +55,15 @@ const ExchangeMapForm= ({
 const columns=[
   {
     component: 'textfield',
-    label: labels?.plantName,
-    name: 'plantName',
+    label: labels?.plant,
+    name: 'plantRef',
     props:{readOnly:true}
   },
 
   {
     component: 'textfield',
     label: labels?.name,
-    name: 'plantRef',
+    name: 'plantName',
     props:{readOnly:true}
   },
 
@@ -225,7 +225,7 @@ return (
                     columns={columns}
                     allowDelete={false}
                     allowAddNewLine={false}
-                    height={`${expanded ? `calc(100vh - 330px)` : `${height-160}px`}`}
+                    height={`${expanded ? `calc(100vh - 330px)` : `${height-100}px`}`}
 
                   />}
 

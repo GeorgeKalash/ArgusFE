@@ -160,7 +160,7 @@ return (
               },
             ]}
 
-            height={`${expanded ? height-280 : 380}px`}
+            height={`${expanded ? height-300 : 380}px`}
 
 
         />
