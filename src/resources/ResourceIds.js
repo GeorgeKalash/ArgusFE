@@ -101,6 +101,7 @@ export const ResourceIds = {
   SalesTarget: 51209,
   SystemFunction: 20105,
   ModuleDeactivation: 23107,
+  Dispersal: 36109,
   OutwardsTransfer: 36301,
   BeneficiaryBank: 36303,
   BeneficiaryCash: 36304

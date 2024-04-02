@@ -4,9 +4,7 @@ import SearchIcon from '@mui/icons-material/Search' // Import the icon you want 
 import ClearIcon from '@mui/icons-material/Clear'
 import { InputAdornment, IconButton } from '@mui/material'
 
-const CustomPaper = props => {
-  return <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }} {...props} />
-}
+
 
 const CustomLookup = ({
   type = 'text', //any valid HTML5 input type
@@ -21,6 +19,7 @@ const CustomLookup = ({
   onKeyUp,
   valueField = 'key',
   displayField = 'value',
+  freeSolo=false,
   onLookup,
   onChange,
   error,
@@ -132,20 +131,6 @@ return (
               }
             }}
 
-            // renderOption={(props, option) => (
-            //   <Box>
-            //     {props.id.endsWith('-0') && (
-            //       <li className={props.className}>
-            //         {secondDisplayField && <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>}
-            //         {secondDisplayField && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
-            //       </li>
-            //     )}
-            //     <li {...props}>
-            //       <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
-            //       {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
-            //     </li>
-            //   </Box>
-            // )}
             renderInput={params => (
               <TextField
                 {...params}
@@ -189,7 +174,7 @@ return (
               />
             )}
             readOnly={_readOnly}
-            freeSolo={_readOnly}
+            freeSolo= {_readOnly || freeSolo  && true}
             disabled={disabled}
           />
         </Box>

@@ -16,13 +16,13 @@ export const ResourceLookup = ({
   const { getRequest } = useContext(RequestsContext)
   const [errorMessage, setErrorMessage] = useState()
   const [store, setStore] = useState([])
+  const [freeSolo, setFreeSolo] = useState(true)
 
   useEffect(() => {
     setStore([])
   }, [parameters])
 
   const onLookup = searchQry => {
-    console.log('searchQry' + searchQry)
     setStore([])
     getRequest({
       extension: endpointId,
@@ -47,12 +47,20 @@ export const ResourceLookup = ({
   }, [firstValue])
 
   const onKeyUp = e => {
-    if (!e.target.value) setStore([])
+
+    if (e.target.value?.length  > 0){
+      setStore([])
+      setFreeSolo(false)
+
+    }else{
+       setFreeSolo(true)
+    }
+
   }
 
   return (
     <>
-      <CustomLookup {...{ onLookup, store, setStore, firstValue, secondValue, error, onKeyUp, helperText, ...rest }} />
+      <CustomLookup {...{ onLookup, store, setStore, firstValue, secondValue, error, onKeyUp, helperText,freeSolo, ...rest }} />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

@@ -256,6 +256,7 @@ return (
   <FormShell form={formik}
    resourceId={ResourceIds.ProductMaster}
    maxAccess={maxAccess}
+   infoVisible={false}
    editMode={editMode}>
 
       <Box
