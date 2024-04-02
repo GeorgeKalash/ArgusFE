@@ -234,7 +234,7 @@ return (
           value={formik.values.currencies}
           error={formik.errors.currencies}
           columns={columns}
-          height={`${expanded ? height-300 : 380}px`}
+          height={`${expanded ? height-280 : 380}px`}
           />
       </Box>
     </FormShell>

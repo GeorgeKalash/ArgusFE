@@ -57,7 +57,8 @@ const columns=[
     component: 'textfield',
     label: labels?.plant,
     name: 'plantRef',
-    props:{readOnly:true}
+    props:{readOnly:true},
+
   },
 
   {
@@ -88,7 +89,8 @@ const columns=[
     component: 'textfield',
     label: labels?.name,
     name: 'exchangeName',
-    props:{readOnly:true}
+    props:{readOnly:true},
+    flex: 1.5
   }
 
 ]
