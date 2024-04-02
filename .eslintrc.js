@@ -26,7 +26,7 @@ module.exports = {
 
     // add new line above comment
     'lines-around-comment': [
-      'error',
+      'warn',
       {
         beforeLineComment: true,
         beforeBlockComment: true,
