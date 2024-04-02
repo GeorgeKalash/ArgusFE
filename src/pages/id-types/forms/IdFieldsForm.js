@@ -43,7 +43,7 @@ const IdFieldsForm = ({
       rows: [
         {
           id: 1 ,
-          idtId: recordId || null, 
+          idtId: recordId , 
           accessLevel:'',
           controlId: '',
           accessLevelId: '',
@@ -56,14 +56,17 @@ const IdFieldsForm = ({
     }
   })
 
-  const postIdFields = obj => {console.log(obj.rows)
+  const postIdFields = obj => {console.log(recordId)
 
     const data = {
       idtId: recordId,
-      items: {
-        rows: [...obj.rows] 
-      }
+      list: obj.rows.map(row => ({
+        accessLevelName: row.accessLevelName,
+        accessLevelId: row.accessLevelId,
+        controlId: row.controlId,
+      }))
     }
+    console.log(data)
     
     postRequest({
       extension: CurrencyTradingSettingsRepository.IdFields.set2,
@@ -94,7 +97,7 @@ const IdFieldsForm = ({
 
         formik.setValues({ countries: res.list.map(
           ({ accessLevelId, accessLevelName, ...rest } , index) => ({
-             id : index,
+             recordId: idtId,
              accessLevel : { 
              recordId: accessLevelId,
              name: accessLevelName
@@ -112,7 +115,7 @@ const IdFieldsForm = ({
           rows: [
             { 
               id: 1 ,
-              idtId: '', 
+              idtId: recordId, 
               controlId: '',
               accessLevelId: '',
               accessLevelName: ''
