@@ -1,3 +1,5 @@
+
+
 // ** React Imports
 import { useState, useContext } from 'react'
 
@@ -11,23 +13,20 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
+// ** Windows
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-import { useWindow } from 'src/windows'
-
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import DRGroupWindow from './Windows/DRGroupWindow'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-const DRGroups = () => {
-
-  const { stack } = useWindow()
+const Strategies2 = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -39,26 +38,14 @@ const DRGroups = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-
-      extension:DocumentReleaseRepository.DRGroup.qry,
-
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-
+    return await getRequest({
+        extension: DocumentReleaseRepository.Strategy.qry,
+ parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
-
-
-  const _labels = {
-    reference: labels && labels.find(item => item.key === "reference").value,
-    name: labels && labels.find(item => item.key === "name").value,
-    group: labels && labels.find(item => item.key === "group").value,
-    approver: labels && labels.find(item => item.key === "approver").value
-
-    return {...response,  _startAt: _startAt}
-
   }
 
- const {
+
+  const {
     query: { data },
     labels: _labels,
     paginationParameters,
@@ -66,54 +53,40 @@ const DRGroups = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.DRGroup.qry,
-    datasetId: ResourceIds.DRGroups
+    endpointId:  DocumentReleaseRepository.Strategy.qry,
+    datasetId: ResourceIds.Strategies
   })
 
   const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DRGroup.qry
+    endpointId:  DocumentReleaseRepository.Strategy.qry
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'groupName',
+      headerName: _labels.groupstra,
       flex: 1
     }
   ]
 
 
   const add = () => {
-    openForm()
-  }
-
-  function openForm (recordId){
-    stack({
-      Component: DRGroupWindow,
-      props: {
-        labels: _labels,
-        recordId: recordId? recordId : null,
-        maxAccess : access
-      },
-      width: 600,
-      height: 400,
-      title: _labels.group
-    })
+    setWindowOpen(true)
   }
 
   const edit = obj => {
-   
-    openForm(obj.recordId)
+    setSelectedRecordId(obj.recordId)
+    setWindowOpen(true)
   }
 
   const del = async obj => {
     await postRequest({
-      extension:DocumentReleaseRepository.DRGroup.del,
+      extension: FinancialRepository.Group.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -139,8 +112,8 @@ const DRGroups = () => {
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
-        <DRGroupWindow
+      {/* {windowOpen && (
+        <AccountGroupsWindow
           onClose={() => {
             setWindowOpen(false)
             setSelectedRecordId(null)
@@ -151,12 +124,9 @@ const DRGroups = () => {
           setSelectedRecordId={setSelectedRecordId}
         />
       )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} /> */}
     </>
   )
 }
 
-
-
-
-export default DRGroups
+export default Strategies2

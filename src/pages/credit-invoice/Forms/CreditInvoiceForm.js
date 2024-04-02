@@ -30,6 +30,8 @@ import { FormatLineSpacing } from '@mui/icons-material'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { useWindow } from 'src/windows'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId }) {
   const { height } = useWindowDimensions()
@@ -39,6 +41,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
   const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
+  const { stack } = useWindow()
   const { stack: stackError } = useError()
   const [toCurrency, setToCurrency] = useState(null)
   const [toCurrencyRef, setToCurrencyRef] = useState(null)
@@ -600,6 +603,19 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     }
   }
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: formik.values.functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      height: 600,
+      title: 'Workflow'
+    })
+  }
+
   const actions = [
     {
       key: 'GL',
@@ -618,6 +634,12 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       condition: true,
       onClick: onCancel,
       disabled: !editMode || isPosted || isCancelled
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     }
   ]
 
