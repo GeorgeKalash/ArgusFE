@@ -3,6 +3,7 @@ import { Autocomplete, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import Paper from '@mui/material/Paper'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
@@ -28,22 +29,25 @@ const CustomComboBox = ({
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
+  hidden = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
-  const fieldAccess =
-    props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
+  const _readOnly =
+    maxAccess < 3 ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
 
-  const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
+  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
-  const _required = required || fieldAccess === ControlAccessLevel.Mandatory
+  const _required = required || accessLevel === MANDATORY
 
-  const _hidden = fieldAccess === ControlAccessLevel.Hidden
-
-  return (
+  return _hidden ? (
+    <></>
+  ) : (
     <Autocomplete
       name={name}
       value={value}
@@ -73,8 +77,8 @@ const CustomComboBox = ({
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
-      disabled={_disabled}
-      sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
+      disabled={_readOnly}
+      sx={{ ...sx, display: 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           return (

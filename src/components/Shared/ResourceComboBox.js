@@ -47,5 +47,5 @@ export default function ResourceComboBox({
           ? filteredStore.find(item => item[valueField] === values[name]?.toString())
           : filteredStore.find(item => item[valueField] === values[name])) ?? ''
 
-  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value }} />
+  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value, name }} />
 }
