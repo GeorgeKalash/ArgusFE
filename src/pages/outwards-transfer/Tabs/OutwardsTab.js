@@ -714,7 +714,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                     label={labels.state}
                     valueField='recordId'
                     displayField='name'
-                    readOnly={!formik.values.countryId}
+                    readOnly
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('stateId', newValue?.recordId)
@@ -770,7 +770,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   <ResourceComboBox
                     endpointId={SystemRepository.Country.qry}
                     name='idCountry'
-                    label={labels.issusCountry}
+                    label={labels.issueCountry}
                     valueField='recordId'
                     displayField={['reference', 'name', 'flName']}
                     readOnly
@@ -806,7 +806,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       _stateId: 0
                     }}
                     name='idCity'
-                    label={labels.issusPlace}
+                    label={labels.issuePlace}
                     form={formik}
                     valueField='name'
                     displayField='name'
