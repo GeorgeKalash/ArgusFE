@@ -1,14 +1,14 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ column: { props }, id, field, value , updateRow, row}) {
- console.log('row', row)
+export default function ResourceComboBoxEdit({ column: { props }, id, field, updateRow, row }) {
+  let changes = props.mapping
+    .map(({ from, to }) => ({
+      [from]: row[to] || ''
+    }))
+    .reduce((acc, obj) => ({ ...acc, ...obj }), {})
 
-   let changes = props.mapping.map(({ from, to }) => ({
-    [from]:  row[to] || ''
-  })).reduce((acc, obj) => ({ ...acc, ...obj }), {});
-
-return (
+  return (
     <ResourceComboBox
       {...props}
       name={field}
@@ -23,11 +23,12 @@ return (
       hasBorder={false}
       readOnly={props?.readOnly}
       onChange={(e, value) => {
-        let changes = props.mapping.map(({ from, to }) => ({
-          [to]: value ? value[from] : ''
-        })).reduce((acc, obj) => ({ ...acc, ...obj }), {});
+        let changes = props.mapping
+          .map(({ from, to }) => ({
+            [to]: value ? value[from] : ''
+          }))
+          .reduce((acc, obj) => ({ ...acc, ...obj }), {})
         updateRow({ id, changes })
-
       }}
     />
   )
