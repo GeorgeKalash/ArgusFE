@@ -3,6 +3,7 @@ import { Box, Autocomplete, TextField, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search' // Import the icon you want to use
 import ClearIcon from '@mui/icons-material/Clear'
 import { InputAdornment, IconButton } from '@mui/material'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomPaper = props => {
   return <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }} {...props} />
@@ -34,18 +35,32 @@ const CustomLookup = ({
   readOnly = false,
   editMode,
   hasBorder = true,
+  hidden = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
 
-  return (
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
+  const _readOnly =
+    maxAccess < 3 ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+
+  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+
+  const isRequired = required || accessLevel === MANDATORY
+
+  return _hidden ? (
+    <></>
+  ) : (
     <Box
       sx={{
         position: 'relative',
         width: '100%',
         height: '40px',
-        mb: error && helperText ? 6 : 0
+        mb: error && helperText ? 6 : 0,
+        display: 'block'
       }}
     >
       <Box display={'flex'}>
@@ -82,7 +97,7 @@ const CustomLookup = ({
                 return option
               }
             }}
-
+            
             // getOptionLabel={option => {
             //   if (typeof option === 'object' && Array.isArray(displayField)) {
             //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space
@@ -128,7 +143,7 @@ const CustomLookup = ({
                 type={type}
                 variant={variant}
                 label={label}
-                required={required}
+                required={isRequired}
                 onKeyUp={onKeyUp}
                 autoFocus={autoFocus}
                 error={error}
@@ -185,7 +200,7 @@ const CustomLookup = ({
               variant={variant}
               placeholder={displayField.toUpperCase()}
               value={secondValue ? secondValue : ''}
-              required={required}
+              required={isRequired}
               disabled={disabled}
               InputProps={{
                 readOnly: true
