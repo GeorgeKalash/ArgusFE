@@ -47,20 +47,20 @@ export const ResourceLookup = ({
   }, [firstValue])
 
   const onKeyUp = e => {
-
-    if (e.target.value?.length  > 0){
+    setFreeSolo(true)
+    if (e.target.value?.length > 0) {
       setStore([])
       setFreeSolo(false)
-
-    }else{
-       setFreeSolo(true)
+    } else {
+      setFreeSolo(true)
     }
-
   }
 
   return (
     <>
-      <CustomLookup {...{ onLookup, store, setStore, firstValue, secondValue, error, onKeyUp, helperText,freeSolo, ...rest }} />
+      <CustomLookup
+        {...{ onLookup, store, setStore, firstValue, secondValue, error, onKeyUp, helperText, freeSolo, ...rest }}
+      />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
