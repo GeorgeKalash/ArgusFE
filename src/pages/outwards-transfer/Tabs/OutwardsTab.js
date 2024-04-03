@@ -680,32 +680,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                     error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={RemittanceOutwardsRepository.Country.qry}
-                    name='countryId'
-                    label={labels.Country}
-                    readOnly
-                    displayField={['countryRef', 'countryName']}
-                    columnsInDropDown={[
-                      { key: 'countryRef', value: 'Reference' },
-                      { key: 'countryName', value: 'Name' }
-                    ]}
-                    valueField='countryId'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('stateId', null)
-                      formik.setFieldValue('cityId', '')
-                      formik.setFieldValue('city', '')
-                      if (newValue) {
-                        formik.setFieldValue('countryId', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('countryId', '')
-                      }
-                    }}
-                    error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-                  />
-                </Grid>
+
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={formik.values.countryId && SystemRepository.State.qry}
@@ -942,6 +917,26 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           </Grid>
           {/* Second Column */}
           <Grid container rowGap={2} xs={6} sx={{ px: 2, pl: 5 }}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={RemittanceOutwardsRepository.Country.qry}
+                name='countryId'
+                label={labels.Country}
+                required
+                readOnly={isClosed}
+                displayField={['countryRef', 'countryName']}
+                columnsInDropDown={[
+                  { key: 'countryRef', value: 'Reference' },
+                  { key: 'countryName', value: 'Name' }
+                ]}
+                valueField='countryId'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('countryId', newValue?.countryId)
+                }}
+                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              />
+            </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
