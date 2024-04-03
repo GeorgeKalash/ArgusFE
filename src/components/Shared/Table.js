@@ -53,7 +53,8 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
   '& .MuiDataGrid-cell': {
-    color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)'
+    color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)',
+    whiteSpace: 'pre-line !important'
   },
   '& .MuiPaginationItem-root': {
     borderRadius: 0
@@ -334,7 +335,12 @@ const Table = ({
   }
 
   const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
+
+  const tableHeight = height
+    ? typeof height === 'string' && height?.includes('calc')
+      ? height
+      : `${height}px`
+    : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
@@ -388,6 +394,8 @@ const Table = ({
                 pb: 2
               }}
               density='compact'
+              getRowHeight={() => 'auto'}
+              getEstimatedRowHeight={() => 200}
               components={{
                 LoadingOverlay: LinearProgress,
 

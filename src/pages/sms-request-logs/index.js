@@ -141,14 +141,8 @@ const SmsRequestLog = () => {
             {
               field: 'smsBody',
               headerName: labels.SmsBody,
-              flex: 2
-
-              /*cellClassName: 'wrap-cell',
-              renderCell: params => (
-                <div style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', minHeight: '50px', height: 'auto' }}>
-                  {params.value}
-                </div>
-              )*/
+              flex: 2,
+              wrapText: true
             },
             {
               field: 'smsStatusName',
