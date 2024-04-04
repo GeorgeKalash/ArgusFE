@@ -4,7 +4,11 @@ export const CashBankRepository = {
   CashAccount: {
     qry: service + 'qryACC',
     get: service + 'getACC',
+    del: service + 'delACC',
     snapshot: service + 'snapshotACC'
+  },
+  CashBox: {
+    set: service + 'setCBX'
   },
   CreditCard: {
     qry: service + 'qryCC'
