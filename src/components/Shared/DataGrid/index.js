@@ -5,7 +5,7 @@ import {
   useGridApiRef
 } from '@mui/x-data-grid'
 import components from './components'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
@@ -173,7 +173,6 @@ export function DataGrid({
   }
 
   useEffect(() => {
-    console.log(value)
     if (!value?.length) {
       addRow()
     }
@@ -195,7 +194,7 @@ export function DataGrid({
           disabled={disabled}
           tabIndex='-1'
           icon='pi pi-trash'
-          onClick={() => setDeleteDialogOpen([true, id])}
+          onClick={() => setDeleteDialogOpen([true, idName])}
         >
           <GridDeleteIcon />
         </IconButton>
@@ -239,7 +238,7 @@ export function DataGrid({
     apiRef.current.setEditCellValue({
       id: currentEditCell.current.id,
       field: currentEditCell.current.field,
-      value: row[currentEditCell.current.field]
+      value: changes[currentEditCell.current.field]
     })
 
     const updatedRow = await processDependenciesForColumn(
@@ -279,9 +278,9 @@ export function DataGrid({
         }}
         processRowUpdate={async (newRow, oldRow) => {
           setIsUpdating(true)
-          const updated = await processDependencies(newRow, oldRow, currentEditCell.current)
+          const updated = await processDependenciesForColumn(newRow, oldRow, currentEditCell.current)
 
-          const change = handleChange(updated, oldRow)
+          const change = handleRowChange(updated, oldRow)
 
           setIsUpdating(false)
 
@@ -319,8 +318,6 @@ export function DataGrid({
             headerName: column.label || column.name,
             editable: !disabled,
             flex: column.flex || 1,
-
-            // width: column.width || 170,
             sortable: false,
             renderCell(params) {
               const Component =
@@ -364,7 +361,8 @@ export function DataGrid({
                     height: '100%',
                     padding: '0 0px',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center'
                   }}
                 >
                   <Component

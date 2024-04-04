@@ -3,11 +3,8 @@ import { Box, Autocomplete, TextField, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search' // Import the icon you want to use
 import ClearIcon from '@mui/icons-material/Clear'
 import { InputAdornment, IconButton } from '@mui/material'
+import { useEffect, useState } from 'react'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-
-const CustomPaper = props => {
-  return <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }} {...props} />
-}
 
 const CustomLookup = ({
   type = 'text', //any valid HTML5 input type
@@ -16,6 +13,7 @@ const CustomLookup = ({
   firstValue,
   secondValue,
   secondDisplayField = true,
+  columnsInDropDown,
   store = [],
   setStore,
   onKeyUp,
@@ -39,6 +37,12 @@ const CustomLookup = ({
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
+  const [freeSolo, setFreeSolo] = useState(false)
+
+  useEffect(() => {
+    store.length < 1 && setFreeSolo(false)
+    firstValue && setFreeSolo(true)
+  }, [store, firstValue])
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
@@ -87,34 +91,14 @@ const CustomLookup = ({
             value={firstValue}
             size={size}
             options={store}
-            getOptionLabel={option => {
-              if (typeof option === 'object') {
-                const displayTextArray = Object.keys(option)
-                const displayText = displayTextArray.map(keys => option[keys]).join(' || ')
-
-                return `${displayText} - ${option[valueField]}`
-              } else {
-                return option
+            filterOptions={(options, { inputValue }) => {
+              if (displayField) {
+                return options.filter(option => option)
               }
             }}
-            
-            // getOptionLabel={option => {
-            //   if (typeof option === 'object' && Array.isArray(displayField)) {
-            //     const displayText = displayField.map(field => option[field]).join(' '); // Join contents with space
-
-            //     return `${displayText} - ${option[valueField]}`;
-            //   }
-            //   else if (typeof option === 'object') {
-            //     return `${option[displayField] || option[valueField]} - ${option[valueField]}`;
-            //   } else {
-            //     return option;
-            //   }
-            // }}
-            // getOptionDisabled={(option) =>
-            //  firstValue === option[valueField]
-            // }
-
-            // getOptionLabel={option => (typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option )}
+            getOptionLabel={option =>
+              typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
+            }
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
             onChange={(event, newValue) => onChange(name, newValue)}
             PaperComponent={({ children }) => (
@@ -122,29 +106,72 @@ const CustomLookup = ({
                 {children}
               </Paper>
             )}
-            renderOption={(props, option) => (
-              <Box>
-                {props.id.endsWith('-0') && (
-                  <li className={props.className}>
-                    {secondDisplayField && <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>}
-                    {secondDisplayField && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
-                  </li>
-                )}
-                <li {...props}>
-                  <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
-                  {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
-                </li>
-              </Box>
-            )}
+            renderOption={(props, option) => {
+              if (columnsInDropDown && columnsInDropDown.length > 0) {
+                return (
+                  <Box>
+                    {props.id.endsWith('-0') && (
+                      <li className={props.className}>
+                        {columnsInDropDown.map((header, i) => {
+                          return (
+                            secondDisplayField && (
+                              <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                                {header.value.toUpperCase()}
+                              </Box>
+                            )
+                          )
+                        })}
+                      </li>
+                    )}
+                    <li {...props}>
+                      {columnsInDropDown.map((header, i) => {
+                        return (
+                          <Box key={i} sx={{ flex: 1 }}>
+                            {option[header.key]}
+                          </Box>
+                        )
+                      })}
+                    </li>
+                  </Box>
+                )
+              } else {
+                return (
+                  <Box>
+                    {props.id.endsWith('-0') && (
+                      <li className={props.className}>
+                        {secondDisplayField && <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>}
+                        {secondDisplayField && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
+                      </li>
+                    )}
+                    <li {...props}>
+                      <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
+                      {secondDisplayField && <Box sx={{ flex: 1 }}>{option[displayField]}</Box>}
+                    </li>
+                  </Box>
+                )
+              }
+            }}
             renderInput={params => (
               <TextField
                 {...params}
-                onChange={e => (e.target.value ? onLookup(e.target.value) : setStore([]))}
+                onChange={e => {
+                  if (e.target.value) {
+                    onLookup(e.target.value)
+                    setFreeSolo(true)
+                  } else {
+                    setStore([])
+                    setFreeSolo(false)
+                  }
+                }}
+                onBlur={() => setFreeSolo(true)}
                 type={type}
                 variant={variant}
                 label={label}
                 required={isRequired}
-                onKeyUp={onKeyUp}
+                onKeyUp={() => {
+                  onKeyUp
+                  setFreeSolo(true)
+                }}
                 autoFocus={autoFocus}
                 error={error}
                 helperText={helperText} // style={{ textAlign: 'right', width: firstFieldWidth }}
@@ -179,7 +206,7 @@ const CustomLookup = ({
               />
             )}
             readOnly={_readOnly}
-            freeSolo={_readOnly}
+            freeSolo={_readOnly || freeSolo}
             disabled={disabled}
           />
         </Box>
