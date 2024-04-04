@@ -37,11 +37,12 @@ const CustomLookup = ({
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const [freeSolo, setFreeSolo] = useState(true)
+  const [freeSolo, setFreeSolo] = useState(false)
 
   useEffect(() => {
     store.length < 1 && setFreeSolo(false)
-  }, [store])
+    firstValue && setFreeSolo(true)
+  }, [store, firstValue])
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
 
