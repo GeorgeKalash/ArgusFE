@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search' // Import the icon you want 
 import ClearIcon from '@mui/icons-material/Clear'
 import { InputAdornment, IconButton } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomLookup = ({
   type = 'text', //any valid HTML5 input type
@@ -32,23 +33,37 @@ const CustomLookup = ({
   readOnly = false,
   editMode,
   hasBorder = true,
+  hidden = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const _readOnly = editMode ? editMode && maxAccess < 3 : readOnly
   const [freeSolo, setFreeSolo] = useState(true)
 
   useEffect(() => {
     store.length < 1 && setFreeSolo(false)
   }, [store])
 
-  return (
+  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+
+  const _readOnly =
+    maxAccess < 3 ||
+    accessLevel === DISABLED ||
+    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+
+  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+
+  const isRequired = required || accessLevel === MANDATORY
+
+  return _hidden ? (
+    <></>
+  ) : (
     <Box
       sx={{
         position: 'relative',
         width: '100%',
         height: '40px',
-        mb: error && helperText ? 6 : 0
+        mb: error && helperText ? 6 : 0,
+        display: 'block'
       }}
     >
       <Box display={'flex'}>
@@ -142,18 +157,16 @@ const CustomLookup = ({
                   if (e.target.value) {
                     onLookup(e.target.value)
                     setFreeSolo(true)
-                    console.log('! solo')
                   } else {
                     setStore([])
                     setFreeSolo(false)
-                    console.log('solo')
                   }
                 }}
                 onBlur={() => setFreeSolo(true)}
                 type={type}
                 variant={variant}
                 label={label}
-                required={required}
+                required={isRequired}
                 onKeyUp={() => {
                   onKeyUp
                   setFreeSolo(true)
@@ -213,7 +226,7 @@ const CustomLookup = ({
               variant={variant}
               placeholder={displayField.toUpperCase()}
               value={secondValue ? secondValue : ''}
-              required={required}
+              required={isRequired}
               disabled={disabled}
               InputProps={{
                 readOnly: true

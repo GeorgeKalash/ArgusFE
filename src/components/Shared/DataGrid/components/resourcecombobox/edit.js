@@ -1,4 +1,3 @@
-import { useGridApiContext } from '@mui/x-data-grid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function ResourceComboBoxEdit({ column: { props }, id, field, value, updateRow, update, row }) {
@@ -12,18 +11,13 @@ export default function ResourceComboBoxEdit({ column: { props }, id, field, val
 
   return (
     <ResourceComboBox
-      {...props}
       name={field}
       values={{
         [field]: changes
       }}
       autoFocus
-      columnsInDropDown={props.columnsInDropDown}
-      displayField={props.displayField}
-      displayFieldWidth={props.displayFieldWidth}
       label={''}
       hasBorder={false}
-      readOnly={props?.readOnly}
       onChange={(e, value) => {
         if (props?.mapping) {
           let changes = props.mapping
@@ -51,6 +45,7 @@ export default function ResourceComboBoxEdit({ column: { props }, id, field, val
           }
         }
       }}
+      {...props}
     />
   )
 }

@@ -12,6 +12,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'WorkFlow',
+    color: '#231f20',
+    image: 'workflow.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',
@@ -58,18 +64,6 @@ export const Buttons = [
   {
     key: 'Beneficiary',
     color: '#231f20',
-    image: 'beneficiary.png',
-    main: false
-  },
-  {
-    key: 'Beneficiary Cash',
-    color: '#014a39',
-    image: 'beneficiary.png',
-    main: false
-  },
-  {
-    key: 'Beneficiary Bank',
-    color: '#a54630',
     image: 'beneficiary.png',
     main: false
   },

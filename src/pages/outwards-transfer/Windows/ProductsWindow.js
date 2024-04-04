@@ -7,37 +7,43 @@ import { useEffect, useState } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const ProductsWindow = ({ _labels, width, height, gridData, maxAccess, form }) => {
+const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) => {
   const columns = [
     {
       field: 'productRef',
-      headerName: _labels.ProductRef,
+      headerName: labels.ProductRef,
       flex: 1
     },
     {
       field: 'productName',
-      headerName: _labels.ProductName,
+      headerName: labels.ProductName,
       flex: 1
     },
     {
       field: 'dispersalRef',
-      headerName: _labels.DispersalRef,
+      headerName: labels.DispersalRef,
       flex: 1
     },
     {
       field: 'fees',
-      headerName: _labels.Fees,
+      headerName: labels.Fees,
       flex: 1
     },
     {
       field: 'baseAmount',
-      headerName: _labels.BaseAmount,
+      headerName: labels.BaseAmount,
       flex: 1
     }
   ]
 
   return (
-    <FormShell resourceId={ResourceIds.OutwardsTransfer} form={form} height={480} maxAccess={maxAccess}>
+    <FormShell
+      resourceId={ResourceIds.OutwardsTransfer}
+      form={form}
+      height={480}
+      maxAccess={maxAccess}
+      infoVisible={false}
+    >
       <Table
         width={width}
         height={height}

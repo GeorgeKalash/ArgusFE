@@ -11,33 +11,32 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
       newValue = newValue.replace(/[^0-9.]/g, '')
       const _newValue = getNumberWithoutCommas(newValue)
 
-      return _newValue;
+      return _newValue
     }
   }
 
-return (
+  return (
     <CustomTextField
       value={getFormattedNumber(value)}
       label={''}
       language={'number'}
-      readOnly={props?.readOnly}
       autoFocus
       hasBorder={false}
       onChange={e => {
         update({
           id,
           field,
-          value: handleNumberFieldNewValue(
-            e.target.value,
-            value
-          )
+          value: handleNumberFieldNewValue(e.target.value, value)
         })
       }}
-      onClear={() =>api.current.setEditCellValue({
-        id,
-        field,
-        value: ''
-      })}
+      onClear={() =>
+        api.current.setEditCellValue({
+          id,
+          field,
+          value: ''
+        })
+      }
+      {...props}
     />
   )
 }

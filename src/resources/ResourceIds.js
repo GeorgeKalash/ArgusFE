@@ -104,5 +104,6 @@ export const ResourceIds = {
   Dispersal: 36109,
   OutwardsTransfer: 36301,
   BeneficiaryBank: 36303,
-  BeneficiaryCash: 36304
+  BeneficiaryCash: 36304,
+  Beneficiary: 36305
 }

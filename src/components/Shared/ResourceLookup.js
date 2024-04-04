@@ -54,7 +54,9 @@ export const ResourceLookup = ({
 
   return (
     <>
-      <CustomLookup {...{ onLookup, store, setStore, firstValue, secondValue, error, onKeyUp, helperText, ...rest }} />
+      <CustomLookup
+        {...{ onLookup, store, setStore, firstValue, secondValue, error, onKeyUp, helperText, name, ...rest }}
+      />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
