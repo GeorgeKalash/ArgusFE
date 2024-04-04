@@ -105,20 +105,6 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
       <Grid container spacing={4}>
         <Grid item xs={12}>
             <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                readOnly={editMode}
-                required
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                maxLength='10'
-                maxAccess={maxAccess}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <CustomTextField
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
@@ -131,12 +117,29 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
             />
         </Grid>
         <Grid item xs={12}>
+            <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                maxLength='10'
+                maxAccess={maxAccess}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+            />
+        </Grid>
+        <Grid item xs={12}>
             <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
                 valueField='recordId'
                 displayField='name'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}   
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('currencyId', '')}
@@ -153,6 +156,10 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 label={labels.plant}
                 valueField='recordId'
                 displayField='name'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}   
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('plantId', '')}
@@ -185,6 +192,10 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 label={labels.groupId}
                 valueField='recordId'
                 displayField='name'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}   
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('groupId', '')}

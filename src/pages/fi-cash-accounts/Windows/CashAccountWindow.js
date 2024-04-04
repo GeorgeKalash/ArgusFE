@@ -19,7 +19,7 @@ const CashAccountWindow = ({
             controlled={true} 
             onClose={onClose} 
             width={600}
-            height={600} 
+            height={520} 
         >
             <CashAccountForm
                 labels={labels}

@@ -76,13 +76,13 @@ const CashAccounts = () => {
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
+      field: 'name',
+      headerName: _labels.name,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: _labels.name,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
