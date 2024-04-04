@@ -117,7 +117,7 @@ const TabsProvider = ({ children }) => {
     setClosing(true);
     const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
     const tabsLength = activeTabs.length;
-    console.log(tabsLength)
+    
     if (tabsLength === 1) {
       router.push('/default');
       setActiveTabs([]);
