@@ -24,6 +24,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -83,8 +84,9 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
 
       // Default values for properties if they are empty
       copy.status = copy.status === '' ? 1 : copy.status
+      copy.wip = copy.wip === '' ? 1 : copy.wip
 
-      const updatedRows = formik.transfers.values.rows.map((transferDetail, index) => {
+      const updatedRows = formik.values.transfers.map((transferDetail, index) => {
         const seqNo = index + 1 // Adding 1 to make it 1-based index
 
         return {
@@ -131,14 +133,15 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         parameters: parameters
       }).then(res => {
         // Create a new list by modifying each object in res.list
-        const modifiedList = res.list.map(item => ({
+        const modifiedList = res.list.map((item, index) => ({
           ...item,
+          id: item.seqNo,
           amount: parseFloat(item.amount).toFixed(2)
         }))
 
-        formik.transfers.setValues({
-          ...formik.transfers.values,
-          rows: modifiedList
+        formik.setValues({
+          ...formik.values,
+          transfers: modifiedList // Update the transfers array directly
         })
       })
     } catch (error) {}
@@ -162,15 +165,19 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
   useEffect(() => {
     ;(async function () {
       try {
+        console.log('check ', recordId)
         if (recordId) {
           const res = await getRequest({
             extension: CashBankRepository.CashTransfer.get,
             parameters: `_recordId=${recordId}`
           })
+
           res.record.date = formatDateFromApi(res.record.date)
-          formik.setValues(res.record)
+
+          formik.setValues(res?.record)
           fillCurrencyTransfer(recordId)
         }
+
         getAccView()
       } catch (error) {}
     })()
@@ -325,7 +332,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
               />
             </Grid>
           </Grid>
-          <Grid width={'100%'}>
+          <Grid width={'100%'} sx={{ pt: 5 }}>
             <DataGrid
               onChange={value => formik.setFieldValue('transfers', value)}
               value={formik.values.transfers}
@@ -336,12 +343,13 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 {
                   component: 'resourcecombobox',
                   label: labels.currency,
-                  name: 'currencyId',
+                  name: 'currencyName',
                   props: {
                     endpointId: SystemRepository.Currency.qry,
-                    displayField: ['reference', 'name'],
+                    displayField: 'reference',
                     valueField: 'recordId',
-                    fieldsToUpdate: [
+                    mapping: [
+                      { from: 'recordId', to: 'currencyId' },
                       { from: 'name', to: 'currencyName' },
                       { from: 'reference', to: 'currencyRef' }
                     ],
@@ -350,7 +358,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                       { key: 'name', value: 'Name' }
                     ]
                   },
-                  flex: 1.5
+                  widthDropDown: 200,
+                  displayFieldWidth: 2
                 },
                 {
                   component: 'numberfield',

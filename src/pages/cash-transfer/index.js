@@ -188,11 +188,6 @@ const CashTransfer = () => {
       field: 'statusName',
       headerName: _labels.status,
       flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: _labels.wip,
-      flex: 1
     }
   ]
 
