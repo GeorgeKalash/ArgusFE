@@ -22,10 +22,11 @@ const ExchangeMapForm= ({
   editMode,
   currency,
   store,
+  expanded, height,
   labels
 }) => {
 
-  const {recordId :currencyId , name:currencyName } = currency
+  const {currencyId , currencyName } = currency
 
   const {recordId, countries} = store
   const { postRequest, getRequest} = useContext(RequestsContext)
@@ -37,14 +38,10 @@ const ExchangeMapForm= ({
       .array()
       .of(
         yup.object().shape({
-          exchange: yup
-            .object()
-            .shape({
-              recordId: yup.string().required('country recordId is required')
-            })
-            .required('exchange is required'),
+          exchangeId: yup.string().required('country recordId is required')
+
         })
-      ).required('Operations array is required') }),
+      ).required('plants array is required') }),
     initialValues: {
       currencyId: currencyId ,
       countryId : '',
@@ -58,61 +55,48 @@ const ExchangeMapForm= ({
 const columns=[
   {
     component: 'textfield',
-    label: labels?.plantName,
-    name: 'plantName',
-    props:{readOnly:true}
+    label: labels?.plant,
+    name: 'plantRef',
+    props:{readOnly:true},
+
   },
 
   {
     component: 'textfield',
     label: labels?.name,
-    name: 'plantRef',
+    name: 'plantName',
     props:{readOnly:true}
   },
 
   {
 
     component: 'resourcecombobox',
-    name: 'exchange',
+    name: 'exchangeId',
     label: labels.exchangeTable,
     props: {
       endpointId: MultiCurrencyRepository.ExchangeTable.qry,
       valueField: 'recordId',
       displayField: 'reference',
-      fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
+      mapping: [{ from: 'recordId', to: 'exchangeId' }, { from: 'reference', to: 'exchangeRef' }, { from: 'name', to: 'exchangeName' }  ],
       columnsInDropDown: [
         { key: 'reference', value: 'Reference' },
         { key: 'name', value: 'Name' },
       ],
       displayFieldWidth: 3
-    },
-    async onChange({ row: { update, newRow } }) {
-
-      if(!newRow?.exchange?.recordId){
-      return;
-      }else{
-           update({'exchangeName':newRow.exchange?.name,
-                   'exchangeRef': newRow.exchange?.reference,
-                   'exchangeId': newRow.exchange?.recordId })
-
-      }
-
-
-
     }
   },
   {
     component: 'textfield',
     label: labels?.name,
     name: 'exchangeName',
-    props:{readOnly:true}
+    props:{readOnly:true},
+    flex: 1.5
   }
 
 ]
 
 const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
-
-  formik.resetForm();
+formik.setFieldValue('plants' , [] )
   const parameters = ''
   countryId && currencyId && getRequest({
     extension: SystemRepository.Plant.qry,
@@ -135,7 +119,7 @@ const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
           }, {})
 
           const plants = result.list.map((plant, index) => {
-            const value = valuesMap[plant.recordId] || 0
+            const value = valuesMap[plant?.recordId] || 0
 
             return {
               id : index,
@@ -144,19 +128,14 @@ const getCurrenciesExchangeMaps = (corId, currencyId, countryId) => {
               countryId: countryId,
               plantId: plant.recordId,
               plantName: plant.name,
-              exchange :{
-                recordId: value.exchangeId,
-                reference: value.exchangeRef ? value.exchangeRef : '',
-                name: value.exchangeName
-              },
-              exchangeName: value.exchangeName,
-
-              // exchangeId: value.exchangeId,
-              plantRef: plant.reference
+              plantRef: plant.reference,
+              exchangeName: value?.exchangeName,
+              exchangeRef: value.exchangeRef ? value.exchangeRef : '',
+              exchangeId: value?.exchangeId,
 
             }
           })
-          formik.setValues({  plants })
+          formik.setFieldValue(  'plants' , plants )
         })
         .catch(error => {
         })
@@ -193,6 +172,7 @@ return (
   <FormShell
     form={formik}
     resourceId={ResourceIds.Correspondent}
+    infoVisible={false}
     maxAccess={maxAccess}
     editMode={editMode} >
 
@@ -231,7 +211,7 @@ return (
                       recordId,
                       currencyId,
                       selectedCountryId
-                    ) // Fetch and update state data based on the selected country
+                    )
                   }}
 
                   error={formik.touched.countryId && Boolean(formik.errors.countryId)}
@@ -241,14 +221,16 @@ return (
 
             <Grid item xs={12} >
               <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                  <DataGrid
+                  {formik?.values?.plants[0]?.plantName && <DataGrid
                     onChange={value => formik.setFieldValue('plants', value)}
                     value={formik.values.plants}
                     error={formik.errors.plants}
                     columns={columns}
                     allowDelete={false}
                     allowAddNewLine={false}
-                  />
+                    height={`${expanded ? `calc(100vh - 330px)` : `${height-100}px`}`}
+
+                  />}
 
               </Box>
             </Grid>

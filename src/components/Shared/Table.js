@@ -19,6 +19,7 @@ import DeleteDialog from './DeleteDialog'
 
 // ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 const ODD_OPACITY = 0.2
 
@@ -270,7 +271,13 @@ const Table = ({
     }
   }
 
-  const columns = props.columns
+  const columns = props.columns.filter(
+    ({ field }) =>
+      accessLevel({
+        maxAccess: props.maxAccess,
+        name: field
+      }) !== HIDDEN
+  )
 
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
@@ -334,7 +341,7 @@ const Table = ({
   }
 
   const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
+  const tableHeight = height ?  typeof height === 'string' &&  height?.includes('calc') ? height :`${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {

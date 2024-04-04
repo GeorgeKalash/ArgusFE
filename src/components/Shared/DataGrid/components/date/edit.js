@@ -1,7 +1,7 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
-export default function DateEdit({ column: { props }, id, field, value }) {
+export default function DateEdit({ column: { props }, id, field, value , update}) {
   const api = useGridApiContext()
 
   return (
@@ -9,21 +9,22 @@ export default function DateEdit({ column: { props }, id, field, value }) {
       autoFocus
       value={value}
       required={true}
+      hasBorder={false}
       onChange={(name, newValue) => {
-        api.current.setEditCellValue({
+        update({
           id,
           field,
           value: newValue
         })
       }}
       onClear={() =>
-        api.current.setEditCellValue({
+        update({
           id,
           field,
           value: ''
         })
       }
-      disabledDate={props?.disabledDate}
+      {...props}
     />
   )
 }
