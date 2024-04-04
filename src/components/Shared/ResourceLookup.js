@@ -8,6 +8,8 @@ export const ResourceLookup = ({
   parameters,
   form,
   name,
+  firstValue,
+  secondValue,
   valueShow,
   secondValueShow,
   errorCheck,
@@ -35,15 +37,16 @@ export const ResourceLookup = ({
       })
   }
   const check = errorCheck ? errorCheck : name
-  const firstValue = valueShow ? form.values[valueShow] : form.values[name]
-  const secondValue = secondValueShow ? form.values[secondValueShow] : form.values[name]
+
+  const _firstValue = firstValue || (valueShow ? form.values[valueShow] : form.values[name])
+  const _secondValue = secondValue || (secondValueShow ? form.values[secondValueShow] : form.values[name])
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
   const helperText = form?.touched && form.touched[check] && form.errors[check]
 
   useEffect(() => {
     setStore([])
-  }, [firstValue])
+  }, [_firstValue])
 
   const onKeyUp = e => {
     if (e.target.value?.length > 0) {
@@ -55,7 +58,18 @@ export const ResourceLookup = ({
   return (
     <>
       <CustomLookup
-        {...{ onLookup, store, setStore, firstValue, secondValue, error, onKeyUp, helperText, name, ...rest }}
+        {...{
+          onLookup,
+          store,
+          setStore,
+          firstValue: _firstValue,
+          secondValue: _secondValue,
+          error,
+          onKeyUp,
+          helperText,
+          name,
+          ...rest
+        }}
       />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>

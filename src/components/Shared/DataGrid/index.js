@@ -367,7 +367,10 @@ export function DataGrid({
                 >
                   <Component
                     {...params}
-                    column={column}
+                    column={{
+                      ...column,
+                      props
+                    }}
                     update={update}
                     updateRow={updateRow}
                     isLoading={isUpdatingField}

@@ -12,9 +12,7 @@ export default function ResourceComboBoxEdit({ column: { props }, id, field, val
   return (
     <ResourceComboBox
       name={field}
-      values={{
-        [field]: changes
-      }}
+      value={changes}
       autoFocus
       label={''}
       hasBorder={false}
