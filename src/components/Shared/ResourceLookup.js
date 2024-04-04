@@ -30,9 +30,12 @@ export const ResourceLookup = ({
       parameters: new URLSearchParams({ ...parameters, _filter: searchQry })
     })
       .then(res => {
-        if (filter && filter.length === 2) {
-          // Filter the results based on the condition
-          res.list = res.list.filter(item => item[filter[0]] == filter[1])
+        if (filter) {
+          res.list = res.list.filter(item => {
+            return Object.keys(filter).every(key => {
+              return parseInt(item[key]) == parseInt(filter[key])
+            })
+          })
         }
         setStore(res.list)
       })

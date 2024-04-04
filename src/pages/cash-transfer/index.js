@@ -21,6 +21,7 @@ import { useWindow } from 'src/windows'
 import CashTransferTab from './Tabs/CashTransferTab'
 import toast from 'react-hot-toast'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -103,13 +104,34 @@ const CashTransfer = () => {
       return ''
     }
   }
+
+  const getDefaultDT = async () => {
+    const parameters = `_userId=${userData && userData.userId}&_functionId=${SystemFunction.CashTransfer}`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: parameters
+      })
+      if (res.record) {
+        return res.record.dtId
+      }
+
+      return ''
+    } catch (error) {
+      setErrorMessage(error)
+
+      return ''
+    }
+  }
   async function openForm(recordId) {
     try {
       const plantId = await getPlantId()
       const cashAccountId = await getCashAccountId()
+      const dtId = await getDefaultDT()
 
       if (plantId !== '' && cashAccountId !== '') {
-        openOutWardsWindow(plantId, cashAccountId, recordId)
+        openOutWardsWindow(plantId, cashAccountId, recordId, dtId)
       } else {
         if (plantId === '') {
           setErrorMessage({ error: 'The user does not have a default plant' })
@@ -191,12 +213,13 @@ const CashTransfer = () => {
     openForm(obj.recordId)
   }
 
-  function openOutWardsWindow(plantId, cashAccountId, recordId) {
+  function openOutWardsWindow(plantId, cashAccountId, recordId, dtId) {
     stack({
       Component: CashTransferTab,
       props: {
         plantId: plantId,
         cashAccountId: cashAccountId,
+        dtId: dtId,
         maxAccess: access,
         labels: _labels,
         recordId: recordId ? recordId : null

@@ -25,7 +25,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
 
-export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId }) {
+export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -36,15 +36,17 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
-    dtId: '',
+    dtId: parseInt(dtId),
     reference: '',
     date: new Date(),
-    toPlantId: '',
+    toPlantId: parseInt(plantId),
     fromPlantId: parseInt(plantId),
     fromCashAccountId: parseInt(cashAccountId),
     fromCashAccountRef: '',
     fromCashAccountName: '',
     toCashAccountId: '',
+    toCashAccountRef: '',
+    toCashAccountName: '',
     notes: '',
     wip: '',
     status: '',
@@ -55,9 +57,11 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     transfers: [
       {
         id: 1,
-        transferId: '',
+        transferId: recordId,
         seqNo: '',
         currencyId: '',
+        currencyName: '',
+        currencyRef: '',
         amount: '',
         balance: ''
       }
@@ -86,7 +90,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         return {
           ...transferDetail,
           seqNo: seqNo,
-          orderId: formik.values.recordId || 0
+          transferId: formik.values.recordId || 0
         }
       })
 
@@ -300,9 +304,10 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 name='toCashAccountId'
                 displayFieldWidth={2}
                 required
+                readOnly={!formik.values.toPlantId}
                 label={labels.toCashAcc}
                 form={formik}
-                filter={['plantId', plantId]}
+                filter={{ plantId: plantId }}
                 valueShow='toCashAccountRef'
                 secondValueShow='toCashAccountName'
                 onChange={(event, newValue) => {
@@ -327,22 +332,24 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
               error={formik.errors.transfers}
               height={220}
               maxAccess={maxAccess}
-              name='transfers'
               columns={[
                 {
                   component: 'resourcecombobox',
                   label: labels.currency,
-                  name: 'currency',
+                  name: 'currencyId',
                   props: {
                     endpointId: SystemRepository.Currency.qry,
                     displayField: ['reference', 'name'],
                     valueField: 'recordId',
+                    fieldsToUpdate: [
+                      { from: 'name', to: 'currencyName' },
+                      { from: 'reference', to: 'currencyRef' }
+                    ],
                     columnsInDropDown: [
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]
                   },
-
                   flex: 1.5
                 },
                 {
