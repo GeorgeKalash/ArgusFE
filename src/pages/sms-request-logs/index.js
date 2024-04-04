@@ -41,11 +41,30 @@ const SmsRequestLog = () => {
 
       return { list: [] }
     } else {
-      return await getRequest({
+      const data = await getRequest({
         extension: SystemRepository.SMSRequest.qry,
         parameters: `_filter=&_resourceId=${resourceId}`
       })
+      let obj = []
+
+      const mappedData = data.list.map(item => {
+        // Parse the date string
+        const date =
+          'dans les prochains jours pour votre livraison. Montant de la commande 99,000 à payer à la dans les prochains jours pour votre livraison. Montant de la commande 99,000 à payer à la'
+
+        // Add parsed date to the object
+        return {
+          ...item,
+          smsRequestDate: date
+        }
+      })
+
+      return { ...data, list: mappedData }
     }
+  }
+
+  const customCellRenderer = params => {
+    return <div style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{params.value}</div>
   }
 
   const {
@@ -123,11 +142,14 @@ const SmsRequestLog = () => {
               headerName: labels.MasterRef,
               flex: 1
             },
-            {
-              field: 'smsRequestDate',
-              headerName: labels.SmsRequestDate,
-              flex: 1
-            },
+
+            // {
+            //   field: 'smsRequestDate',
+            //   headerName: labels.SmsRequestDate,
+            //   flex: 1
+
+            //   // wrap: true
+            // },
             {
               field: 'reference',
               headerName: labels.Reference,
@@ -141,13 +163,22 @@ const SmsRequestLog = () => {
             {
               field: 'smsBody',
               headerName: labels.SmsBody,
-              flex: 2,
-              wrapText: true
+              flex: 1,
+              height: 'auto'
+
+              // renderCell: params => <div style={{ flex: 'nowrap' }}>{params.value}</div>
             },
             {
               field: 'smsStatusName',
               headerName: labels.SmsStatus,
               flex: 1
+            },
+            {
+              field: 'smsRequestDate',
+              headerName: labels.SmsRequestDate,
+              flex: 1
+
+              // wrap: true
             }
           ]}
           gridData={data && filters?.resourceId ? data : { list: [] }}
