@@ -86,17 +86,17 @@ const CashAccounts = () => {
       flex: 1
     },
     {
-      field: 'currencyId',
+      field: 'currencyName',
       headerName: _labels.currency,
       flex: 1
     },
     {
-      field: 'plantId',
+      field: 'plantName',
       headerName: _labels.plant,
       flex: 1
     },
     {
-      field: 'activeStatus',
+      field: 'statusName',
       headerName: _labels.status,
       flex: 1
     },
