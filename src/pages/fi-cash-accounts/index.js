@@ -111,7 +111,7 @@ const CashAccounts = () => {
       flex: 1
     },
     {
-      field: 'groupId',
+      field: 'groupName',
       headerName: _labels.groupId,
       flex: 1
     }
