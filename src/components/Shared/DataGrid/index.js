@@ -280,7 +280,7 @@ export function DataGrid({
           setIsUpdating(true)
           const updated = await processDependenciesForColumn(newRow, oldRow, currentEditCell.current)
 
-          const change = handleChange(updated, oldRow)
+          const change = handleRowChange(updated, oldRow)
 
           setIsUpdating(false)
 
