@@ -11,6 +11,7 @@ export const ResourceLookup = ({
   valueShow,
   secondValueShow,
   errorCheck,
+  filter = {},
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -29,6 +30,10 @@ export const ResourceLookup = ({
       parameters: new URLSearchParams({ ...parameters, _filter: searchQry })
     })
       .then(res => {
+        if (filter && filter.length === 2) {
+          // Filter the results based on the condition
+          res.list = res.list.filter(item => item[filter[0]] == filter[1])
+        }
         setStore(res.list)
       })
       .catch(error => {

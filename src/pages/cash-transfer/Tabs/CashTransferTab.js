@@ -11,7 +11,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
@@ -22,19 +22,16 @@ import { useError } from 'src/error'
 import toast from 'react-hot-toast'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import FormGrid from 'src/components/form/layout/FormGrid'
 
 export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [isClosed, setIsClosed] = useState(false)
-  const { stack } = useWindow()
   const { stack: stackError } = useError()
 
   const invalidate = useInvalidate({
-    // endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
+    endpointId: CashBankRepository.CashTransfer.snapshot
   })
 
   const [initialValues, setInitialData] = useState({
@@ -43,8 +40,10 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     reference: '',
     date: new Date(),
     toPlantId: '',
-    fromPlantId: plantId,
-    fromCashAccountId: cashAccountId,
+    fromPlantId: parseInt(plantId),
+    fromCashAccountId: parseInt(cashAccountId),
+    fromCashAccountRef: '',
+    fromCashAccountName: '',
     toCashAccountId: '',
     notes: '',
     wip: '',
@@ -75,16 +74,34 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
       toCashAccountId: yup.string().required('This field is required')
     }),
     onSubmit: async values => {
-      /*   const copy = { ...values }
+      const copy = { ...values }
       copy.date = formatDateToApi(copy.date)
 
       // Default values for properties if they are empty
-      copy.wip = copy.wip === '' ? 1 : copy.wip
       copy.status = copy.status === '' ? 1 : copy.status
 
+      const updatedRows = formik.transfers.values.rows.map((transferDetail, index) => {
+        const seqNo = index + 1 // Adding 1 to make it 1-based index
+
+        return {
+          ...transferDetail,
+          seqNo: seqNo,
+          orderId: formik.values.recordId || 0
+        }
+      })
+
+      if (updatedRows.length == 1 && updatedRows[0].currencyId == '') {
+        throw new Error('Grid not filled. Please fill the grid before saving.')
+      }
+
+      const resultObject = {
+        header: copy,
+        items: updatedRows
+      }
+
       const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsTransfer.set,
-        record: JSON.stringify(copy)
+        extension: CashBankRepository.CashTransfer.set,
+        record: JSON.stringify(resultObject)
       })
 
       if (res.recordId) {
@@ -93,96 +110,68 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         setEditMode(true)
 
         const res2 = await getRequest({
-          extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
+          extension: CashBankRepository.CashTransfer.get,
           parameters: `_recordId=${res.recordId}`
         })
         formik.setFieldValue('reference', res2.record.reference)
         invalidate()
-      }*/
+      }
     }
   })
 
-  const onClose = async () => {
-    /* const obj = formik.values
-    const copy = { ...obj }
-    copy.date = formatDateToApi(copy.date)
+  const fillCurrencyTransfer = transferId => {
+    try {
+      var parameters = `_transferId=${transferId}`
+      getRequest({
+        extension: CashBankRepository.CurrencyTransfer.qry,
+        parameters: parameters
+      }).then(res => {
+        // Create a new list by modifying each object in res.list
+        const modifiedList = res.list.map(item => ({
+          ...item,
+          amount: parseFloat(item.amount).toFixed(2)
+        }))
 
-    // Default values for properties if they are empty
-    copy.wip = copy.wip === '' ? 1 : copy.wip
-    copy.status = copy.status === '' ? 1 : copy.status
-
-    const res = await postRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
-      record: JSON.stringify(copy)
-    })
-
-    if (res.recordId) {
-      toast.success('Record Closed Successfully')
-      invalidate()
-      setIsClosed(true)
-    }*/
+        formik.transfers.setValues({
+          ...formik.transfers.values,
+          rows: modifiedList
+        })
+      })
+    } catch (error) {}
   }
 
-  const onReopen = async () => {
-    /*   const obj = formik.values
-    const copy = { ...obj }
-    copy.date = formatDateToApi(copy.date)
+  const getAccView = async () => {
+    console.log('cashAccountId ', cashAccountId)
+    if (cashAccountId) {
+      const defaultParams = `_recordId=${cashAccountId}`
 
-    // Default values for properties if they are empty
-    copy.wip = copy.wip === '' ? 1 : copy.wip
-    copy.status = copy.status === '' ? 1 : copy.status
-
-    const res = await postRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.reopen,
-      record: JSON.stringify(copy)
-    })
-
-    if (res.recordId) {
-      toast.success('Record Closed Successfully')
-      invalidate()
-      setIsClosed(false)
-    }*/
-  }
-
-  const actions = [
-    {
-      key: 'Close',
-      condition: !isClosed,
-      onClick: onClose,
-      disabled: isClosed || !editMode
-    },
-    {
-      key: 'Reopen',
-      condition: isClosed,
-      onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
-    },
-    {
-      key: 'Approval',
-      condition: true,
-      onClick: 'onApproval',
-      disabled: !isClosed
+      const res = await getRequest({
+        extension: CashBankRepository.CashAccount.get,
+        parameters: defaultParams
+      })
+      if (res.record) {
+        formik.setFieldValue('fromCashAccountRef', res.record.accountNo)
+        formik.setFieldValue('fromCashAccountName', res.record.name)
+      }
     }
-  ]
-
+  }
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          /* const res = await getRequest({
-            extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
+          const res = await getRequest({
+            extension: CashBankRepository.CashTransfer.get,
             parameters: `_recordId=${recordId}`
           })
-          setIsClosed(res.record.wip === 2 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
-          formik.setValues(res.record)*/
+          formik.setValues(res.record)
+          fillCurrencyTransfer(recordId)
         }
+        getAccView()
       } catch (error) {}
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  console.log('fromplantId one', formik.values.fromPlantId)
-  console.log('fromplantId two', formik.values.fromCashAccountId)
 
   return (
     <>
@@ -192,10 +181,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         editMode={editMode}
         height={480}
         maxAccess={maxAccess}
-        onClose={onClose}
-        onReopen={onReopen}
-        isClosed={isClosed}
-        actions={actions}
         functionId={SystemFunction.Outwards}
       >
         <Grid container sx={{ pt: 2 }}>
@@ -208,7 +193,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 value={formik?.values?.reference}
                 maxAccess={maxAccess}
                 maxLength='15'
-                readOnly={isClosed}
+                readOnly
                 required
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
                 helperText={formik.touched.reference && formik.errors.reference}
@@ -277,7 +262,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
-                readOnly={isClosed}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -318,6 +302,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 required
                 label={labels.toCashAcc}
                 form={formik}
+                filter={['plantId', plantId]}
                 valueShow='toCashAccountRef'
                 secondValueShow='toCashAccountName'
                 onChange={(event, newValue) => {
@@ -341,7 +326,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
               value={formik.values.transfers}
               error={formik.errors.transfers}
               height={220}
-              disabled={isClosed}
               maxAccess={maxAccess}
               name='transfers'
               columns={[
@@ -390,9 +374,9 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 label={labels.note}
                 value={formik.values.notes}
                 rows={3}
+                maxLength='100'
                 editMode={editMode}
                 maxAccess={maxAccess}
-                readOnly={isClosed}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}

@@ -20,7 +20,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import CashTransferTab from './Tabs/CashTransferTab'
 import toast from 'react-hot-toast'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -36,25 +36,26 @@ const CashTransfer = () => {
     labels: _labels,
     access
   } = useResourceQuery({
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+    endpointId: CashBankRepository.CashTransfer.snapshot,
     datasetId: ResourceIds.CashTransfer,
     filter: {
-      endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      endpointId: CashBankRepository.CashTransfer.snapshot,
       filterFn: fetchWithSearch
     }
   })
   async function fetchWithSearch({ options = {}, filters }) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    /*return await getRequest({
-      extension: RemittanceOutwardsRepository.CashTransfer.snapshot,
+    return await getRequest({
+      extension: CashBankRepository.CashTransfer.snapshot,
       parameters: `_filter=${filters.qry}`
-    })*/
+    })
+
     return
   }
 
   const invalidate = useInvalidate({
-    //  endpointId: RemittanceOutwardsRepository.CashTransfer.snapshot
+    endpointId: CashBankRepository.CashTransfer.snapshot
   })
 
   const userData = window.sessionStorage.getItem('userData')
@@ -174,10 +175,10 @@ const CashTransfer = () => {
   ]
 
   const delCashTFR = async obj => {
-    /* await postRequest({
-      extension: RemittanceOutwardsRepository.CashTransfer.del,
+    await postRequest({
+      extension: CashBankRepository.CashTransfer.del,
       record: JSON.stringify(obj)
-    })*/
+    })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
