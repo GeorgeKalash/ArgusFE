@@ -3,7 +3,6 @@ import { Autocomplete, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import Paper from '@mui/material/Paper'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
@@ -29,25 +28,22 @@ const CustomComboBox = ({
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
-  hidden = false,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+  const fieldAccess =
+    props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
 
-  const _readOnly =
-    maxAccess < 3 ||
-    accessLevel === DISABLED ||
-    (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
+  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
 
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
+  const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
 
-  const _required = required || accessLevel === MANDATORY
+  const _required = required || fieldAccess === ControlAccessLevel.Mandatory
 
-  return _hidden ? (
-    <></>
-  ) : (
+  const _hidden = fieldAccess === ControlAccessLevel.Hidden
+
+  return (
     <Autocomplete
       name={name}
       value={value}
@@ -56,13 +52,15 @@ const CustomComboBox = ({
       key={value}
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={(option, value) => {
+        if (typeof displayField == 'object') {
+          const text = displayField
+            .map(header => option[header])
+            .filter(item => item)
+            .join(' ')
+
+          if (text) return text
+        }
         if (typeof option === 'object') {
-          if (columnsInDropDown && columnsInDropDown.length > 0) {
-            const search = columnsInDropDown.map(header => option[header.key]).join(' ')
-
-            return search || option[displayField]
-          }
-
           return `${option[displayField]}`
         } else {
           const selectedOption = store.find(item => {
@@ -72,13 +70,33 @@ const CustomComboBox = ({
           else return ''
         }
       }}
+      filterOptions={(options, { inputValue }) => {
+        if (columnsInDropDown) {
+          return options.filter(option =>
+            columnsInDropDown
+              .map(header => header.key)
+              .some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+          )
+        } else {
+          var displayFields = ''
+          if (Array.isArray(displayField)) {
+            displayFields = displayField
+          } else {
+            displayFields = [displayField]
+          }
+
+          return options.filter(option =>
+            displayFields.some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+          )
+        }
+      }}
       isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
       onChange={onChange}
       fullWidth={fullWidth}
       readOnly={_readOnly}
       freeSolo={_readOnly}
-      disabled={_readOnly}
-      sx={{ ...sx, display: 'unset' }}
+      disabled={_disabled}
+      sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           return (
