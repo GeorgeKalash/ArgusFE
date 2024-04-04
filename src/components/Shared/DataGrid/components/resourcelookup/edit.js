@@ -13,6 +13,9 @@ export default function ResourceLookupEdit({ id, value, updateRow, column: { pro
       columnsInDropDown={props.columnsInDropDown}
       firstValue={value}
       secondValue={value}
+      form={{
+        values: {}
+      }}
       secondDisplayField={false}
       onChange={(e, value) => {
         if (props?.mapping) {
