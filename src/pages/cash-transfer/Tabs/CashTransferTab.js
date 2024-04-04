@@ -307,7 +307,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 readOnly={!formik.values.toPlantId}
                 label={labels.toCashAcc}
                 form={formik}
-                filter={{ plantId: plantId }}
+                filter={{ plantId: formik.values.toPlantId }}
                 valueShow='toCashAccountRef'
                 secondValueShow='toCashAccountName'
                 onChange={(event, newValue) => {
