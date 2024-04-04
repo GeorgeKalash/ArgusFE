@@ -278,7 +278,7 @@ export function DataGrid({
         }}
         processRowUpdate={async (newRow, oldRow) => {
           setIsUpdating(true)
-          const updated = await processDependencies(newRow, oldRow, currentEditCell.current)
+          const updated = await processDependenciesForColumn(newRow, oldRow, currentEditCell.current)
 
           const change = handleChange(updated, oldRow)
 
