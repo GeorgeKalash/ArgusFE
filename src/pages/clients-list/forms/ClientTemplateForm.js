@@ -1305,7 +1305,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         Component: AddressFormShell,
                         props: {
                           readOnly: editMode,
-                          requiredOptional: requiredOptional,
+                          requiredOptional: true,
                           labels: _labels,
                           setAddress: setAddress,
                           address: address

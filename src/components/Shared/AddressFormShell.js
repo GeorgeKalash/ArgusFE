@@ -14,10 +14,10 @@ export const AddressFormShell = ({
   window,
   readOnly,
   allowPost,
-  setPost,
+  requiredOptional = false,
   onSubmit
 }) => {
-  const [requiredOptional, setRequiredOptional] = useState(true)
+  const [required, setRequired] = useState(false)
 
   const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.Address
@@ -54,8 +54,10 @@ export const AddressFormShell = ({
     validate: values => {
       const errors = {}
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-      if (values.name || values.cityId || values.phone || values.countryId || values.street1) {
+      if (
+        ((values.name || values.cityId || values.phone || values.countryId || values.street1) && requiredOptional) ||
+        !requiredOptional
+      ) {
         if (!values.name) {
           errors.name = ' '
         }
@@ -94,28 +96,27 @@ export const AddressFormShell = ({
     }
   })
 
-  useEffect(() => {
-    if (
-      (formik.values.name ||
-        formik.values.street1 ||
-        formik.values.phone ||
-        formik.values.countryId ||
-        formik.values.cityId) &&
-      requiredOptional
-    ) {
-      setRequiredOptional(false)
-    }
+  // useEffect(() => {
+  //   if (
+  //     formik.values.name ||
+  //     formik.values.street1 ||
+  //     formik.values.phone ||
+  //     formik.values.countryId ||
+  //     formik.values.cityId
+  //   ) {
+  //     setRequired(false)
+  //   }
 
-    if (
-      !formik.values.name &&
-      !formik.values.street1 &&
-      !formik.values.phone &&
-      !formik.values.countryId &&
-      !formik.values.cityId
-    ) {
-      setRequiredOptional(true)
-    }
-  }, [formik.values])
+  //   if (
+  //     !formik.values.name &&
+  //     !formik.values.street1 &&
+  //     !formik.values.phone &&
+  //     !formik.values.countryId &&
+  //     !formik.values.cityId
+  //   ) {
+  //     setRequired(true)
+  //   }
+  // }, [formik.values])
 
   return (
     <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} readOnly={readOnly} editMode={editMode}>
@@ -123,7 +124,7 @@ export const AddressFormShell = ({
         addressValidation={formik}
         maxAccess={access}
         labels={labels}
-        requiredOptional={requiredOptional}
+        required={required}
         readOnly={readOnly}
       />
     </FormShell>
