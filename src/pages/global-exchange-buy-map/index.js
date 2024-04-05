@@ -2,12 +2,11 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox, DialogActions } from '@mui/material'
+import { Grid, Box } from '@mui/material'
 
 // ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -25,14 +24,12 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
-  const { width, height } = useWindowDimensions()
+  const { height } = useWindowDimensions()
 
   //state
   const [currencyStore, setCurrencyStore] = useState([])
-  const [exchangeTableStore, setExchangeTableStore] = useState([])
-  const [countryStore, setCountryStore] = useState([])
+
   const [errorMessage, setErrorMessage] = useState()
-  const [currencyId, setCurrencyId] = useState(0)
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
 
@@ -41,7 +38,6 @@ const GlobalExchangeBuyMap = () => {
     else {
       if (access.record.maxAccess > 0) {
         fillCurrencyStore()
-        fillCountryStore()
 
         getLabels(ResourceIds.GlobalExchangeBuyMap, setLabels)
       } else {
@@ -62,54 +58,27 @@ const GlobalExchangeBuyMap = () => {
       .catch(error => {})
   }
 
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCountryStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillExchangeTableStore = id => {
-    setExchangeTableStore({})
-    var parameters = `_currencyId=` + id
-    getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.qry2,
-      parameters: parameters
-    })
-      .then(res => {
-        setExchangeTableStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
 
-    // validate: values => {
-    //   const isValid = values.rows && values.rows.every(row => !!row.countryId)
-    //   const isValidExchangeId = values.rows && values.rows.every(row => !!row.exchangeId)
-
-    //   return isValid // prevent Submit if not validate
-    //     ? isValidExchangeId
-    //       ? {}
-    //       : { rows: Array(values.rows && values.rows.length).fill({ exchangeId: 'Exchange is required' }) }
-    //     : { rows: Array(values.rows && values.rows.length).fill({ countryId: 'country is required' }) }
-    // },
+    validationSchema: yup.object({
+      rows: yup
+        .array()
+        .of(
+          yup.object().shape({
+            countryId: yup.string().required('Country recordId is required'),
+            exchangeId: yup.string().required('exchange recordId is required')
+          })
+        )
+        .required('Operations array is required')
+    }),
     initialValues: {
+      currencyId: '',
       rows: [
         {
           id: 1,
-          currencyId: currencyId,
+          currencyId: '',
           countryId: '',
           countryName: '',
           countryRef: '',
@@ -133,8 +102,11 @@ const GlobalExchangeBuyMap = () => {
 
   const postExchangeMaps = obj => {
     const data = {
-      currencyId: currencyId,
-      globalExchangeBuyMaps: obj.rows
+      currencyId: obj.currencyId,
+      globalExchangeBuyMaps: obj.rows.map(({ currencyId, ...rest }) => ({
+        currencyId: obj.currencyId,
+        ...rest
+      }))
     }
     postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeBuyMap.set2,
@@ -149,41 +121,41 @@ const GlobalExchangeBuyMap = () => {
   }
 
   const getCurrenciesExchangeMaps = currencyId => {
-    fillExchangeTableStore(currencyId)
-    formik.setValues({
-      rows: [
-        {
-          id: 1,
-          currencyId: '',
-          countryId: '',
-          countryName: '',
-          countryRef: '',
-          exchangeRef: '', // validate red
-          exchangeName: '', // validate red
-          exchangeId: ''
-        }
-      ]
-    })
+    formik.setFieldValue(`rows`, [
+      {
+        id: 1,
+        currencyId: '',
+        countryId: '',
+        countryName: '',
+        countryRef: '',
+        exchangeRef: '', // validate red
+        exchangeName: '', // validate red
+        exchangeId: ''
+      }
+    ])
     const defaultParams = `_currencyId=${currencyId}`
     var parameters = defaultParams
-    getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentExchangeBuyMap.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        if (res.list.length > 0) {
-          formik.setValues({
-            rows: res.list.map(({ ...rest }, index) => ({
-              id: index + 1,
-              ...rest
-            }))
-          })
-        }
+    currencyId &&
+      getRequest({
+        extension: RemittanceSettingsRepository.CorrespondentExchangeBuyMap.qry,
+        parameters: parameters
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+        .then(res => {
+          if (res.list.length > 0) {
+            formik.setFieldValue(
+              'rows',
+              res.list.map(({ ...rest }, index) => ({
+                id: index + 1,
+                ...rest
+              }))
+            )
+          }
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
   }
+  console.log(formik.values)
 
   //columns
   const columns = [
@@ -219,7 +191,7 @@ const GlobalExchangeBuyMap = () => {
       name: 'exchangeId',
       props: {
         endpointId: MultiCurrencyRepository.ExchangeTable.qry2,
-        parameters: `_currencyId=` + currencyId,
+        parameters: `_currencyId=` + formik.values.currencyId,
         valueField: 'recordId',
         displayField: 'reference',
         mapping: [
@@ -270,11 +242,12 @@ const GlobalExchangeBuyMap = () => {
                   value={currencyStore.filter(item => item.recordId === formik.values.currencyId)[0]} // Ensure the value matches an option or set it to null
                   required
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('currencyId', newValue?.recordId)
                     const selectedCurrencyId = newValue?.recordId || ''
-                    getCurrenciesExchangeMaps(selectedCurrencyId)
-                    setCurrencyId(selectedCurrencyId)
+
                     formik.setFieldValue('currencyId', selectedCurrencyId)
+                    getCurrenciesExchangeMaps(selectedCurrencyId)
+
+                    // formik.setFieldValue('currencyId', selectedCurrencyId)
 
                     // Fetch and update state data based on the selected country
                   }}
@@ -283,7 +256,7 @@ const GlobalExchangeBuyMap = () => {
                 />
               </Grid>
             </Grid>
-            {currencyId > 0 && (
+            {
               <Grid xs={12} sx={{ pt: 2 }}>
                 <Box>
                   <DataGrid
@@ -291,11 +264,11 @@ const GlobalExchangeBuyMap = () => {
                     value={formik.values.rows}
                     error={formik.errors.rows}
                     columns={columns}
-                    height={`calc(100vh - 280px)`}
+                    height={`calc(100vh - 180px)`}
                   />
                 </Box>
               </Grid>
-            )}
+            }
           </Grid>
         </Box>
         <Box
