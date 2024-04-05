@@ -35,14 +35,11 @@ const CorrespondentCurrenciesForm = ({
     .array()
     .of(
       yup.object().shape({
-        currency: yup
-          .object()
-          .shape({
-            recordId: yup.string().required('Currency recordId is required')
-          })
-          .required('Currency is required'),
+        currencyId: yup.string().required('currency  is required'),
+        exchangeId: yup.string().required('Country  is required')
+
       })
-    ).required('Operations array is required') }),
+    ).required('currencies array is required') }),
     initialValues: {
       currencies: [
         { id: 1,
@@ -70,9 +67,8 @@ const CorrespondentCurrenciesForm = ({
   const postCorrespondentCurrencies = obj => {
 
     const correspondentCurrencies = obj?.currencies?.map(
-      ({ currency,  exchange, currencyId ,exchangeId,  ...rest }) => ({
-         currencyId: currency?.recordId,
-         exchangeId: exchange?.recordId,
+      ({corId, ...rest }) => ({
+
          corId : recordId,
          ...rest
       }))
@@ -96,12 +92,13 @@ const CorrespondentCurrenciesForm = ({
   const columns = [
     {
       component: 'resourcecombobox',
-      name: 'currency',
+      name: 'currencyId',
       label: labels.currency,
       props: {
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
         displayField: 'reference',
+        mapping: [{ from: 'recordId', to: 'currencyId' }, { from: 'reference', to: 'currencyRef' } , { from: 'name', to: 'currencyName' } ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
@@ -113,12 +110,14 @@ const CorrespondentCurrenciesForm = ({
 
     {
       component: 'resourcecombobox',
-      name: 'exchange',
+      name: 'exchangeId',
       label: labels.exchange,
       props: {
         endpointId: MultiCurrencyRepository.ExchangeTable.qry,
         valueField: 'recordId',
         displayField: 'reference',
+        mapping: [{ from: 'recordId', to: 'exchangeId' }, { from: 'reference', to: 'exchangeRef' } ],
+
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
@@ -159,15 +158,14 @@ const CorrespondentCurrenciesForm = ({
       name:"saved",
       label: labels.exchange,
       onClick:  async (e, row) => {
-
        stack({
           Component: ExchangeMapForm,
           props: {
             labels: labels,
             recordId: recordId? recordId : null,
             store: store,
-            currency: row?.currency,
-            exchange :  row?.exchange,
+            currency:{ currencyId:  row?.currencyId, currencyName:  row?.currencyName},
+            exchange :  {exchangeId :row?.exchangeId, exchangeName :row?.exchangeName},
           },
           width: 700,
           height: 600,
@@ -187,18 +185,8 @@ const CorrespondentCurrenciesForm = ({
       .then(res => {
         if (res?.list?.length > 0) {
           formik.setValues({ currencies: res.list.map(
-            ({ currencyId,  currencyRef,currencyName, exchangeId, exchangeRef, exchangeName,...rest } , index) => ({
+            ({ ...rest } , index) => ({
                id : index,
-               currency : {
-                recordId: currencyId,
-                reference: currencyRef,
-                name: currencyName,
-              }, exchange : {
-                recordId: exchangeId,
-                reference: exchangeRef,
-                name: exchangeName,
-
-              },
                saved: true,
                 ...rest
           }))})
@@ -238,6 +226,7 @@ return (
   <FormShell
   form={formik}
   resourceId={ResourceIds.Correspondent}
+  infoVisible={false}
   maxAccess={maxAccess}
   editMode={editMode} >
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
@@ -246,9 +235,8 @@ return (
           value={formik.values.currencies}
           error={formik.errors.currencies}
           columns={columns}
-          height={`${expanded ? height-300 : 350}px`}
-
-        />
+          height={`${expanded ? height-280 : 380}px`}
+          />
       </Box>
     </FormShell>
   )

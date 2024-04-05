@@ -1,7 +1,7 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useContext, useState } from 'react'
+import { useEffect, useContext, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -10,6 +10,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
+import { formatDateFromApi } from 'src/lib/date-helper'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -17,13 +18,63 @@ import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-export default function BenificiaryBank({ clientId, dispersalType }) {
-  const { postRequest } = useContext(RequestsContext)
+export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  useEffect(() => {
+    ;(async function () {
+      if (beneficiaryId) {
+        const RTBEB = await getRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+        })
+
+        const RTBEN = await getRequest({
+          extension: RemittanceOutwardsRepository.Beneficiary.get,
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+        })
+
+        const obj = {
+          //RTBEN
+          clientId: clientId,
+          beneficiaryId: beneficiaryId,
+          recordId: clientId * 1000 + beneficiaryId,
+          name: RTBEN?.record?.name,
+          dispersalType: dispersalType,
+          nationalityId: RTBEN?.record?.nationalityId,
+          isBlocked: RTBEN?.record?.isBlocked,
+          stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
+          stoppedReason: RTBEN?.record?.stoppedReason,
+          gender: RTBEN?.record?.gender,
+          addressLine1: RTBEN?.record?.addressLine1,
+          addressLine2: RTBEN?.record?.addressLine2,
+
+          //RTBEB
+          accountRef: RTBEB?.record?.accountRef,
+          accountType: RTBEB?.record?.accountType,
+          IBAN: RTBEB?.record?.IBAN,
+          bankName: RTBEB?.record?.bankName,
+          routingNo: RTBEB?.record?.routingNo,
+          swiftCode: RTBEB?.record?.swiftCode,
+          branchCode: RTBEB?.record?.branchCode,
+          branchName: RTBEB?.record?.branchName,
+          nationalityId: RTBEB?.record?.nationalityId,
+          stateId: RTBEB?.record?.stateId,
+          cityId: RTBEB?.record?.cityId,
+          zipcode: RTBEB?.record?.zipcode,
+          remarks: RTBEB?.record?.remarks
+        }
+
+        formik.setValues(obj)
+      }
+    })()
+  }, [])
 
   const [initialValues, setInitialData] = useState({
     //RTBEN
     clientId: clientId || '',
     beneficiaryId: 0,
+    recordId: '',
     name: '',
     dispersalType: dispersalType || '',
     nationalityId: null,
@@ -93,6 +144,7 @@ export default function BenificiaryBank({ clientId, dispersalType }) {
         extension: RemittanceOutwardsRepository.BeneficiaryBank.set,
         record: JSON.stringify(data)
       })
+
       if (res.recordId) {
         toast.success('Record Updated Successfully')
       }
@@ -104,7 +156,13 @@ export default function BenificiaryBank({ clientId, dispersalType }) {
   })
 
   return (
-    <FormShell resourceId={ResourceIds.BeneficiaryBank} form={formik} height={480} maxAccess={access}>
+    <FormShell
+      resourceId={ResourceIds.BeneficiaryBank}
+      form={formik}
+      editMode={formik?.values?.beneficiaryId}
+      height={480}
+      maxAccess={access}
+    >
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
