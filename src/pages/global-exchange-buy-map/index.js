@@ -155,7 +155,6 @@ const GlobalExchangeBuyMap = () => {
           setErrorMessage(error)
         })
   }
-  console.log(formik.values)
 
   //columns
   const columns = [
@@ -243,13 +242,8 @@ const GlobalExchangeBuyMap = () => {
                   required
                   onChange={(event, newValue) => {
                     const selectedCurrencyId = newValue?.recordId || ''
-
                     formik.setFieldValue('currencyId', selectedCurrencyId)
                     getCurrenciesExchangeMaps(selectedCurrencyId)
-
-                    // formik.setFieldValue('currencyId', selectedCurrencyId)
-
-                    // Fetch and update state data based on the selected country
                   }}
                   error={formik.errors && Boolean(formik.errors.currencyId)}
                   helperText={formik.touched.currencyId && formik.errors.currencyId}
