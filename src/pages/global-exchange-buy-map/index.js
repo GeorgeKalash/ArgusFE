@@ -20,11 +20,12 @@ import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
-  const { width, height } = useWindowDimensions();
+  const { width, height } = useWindowDimensions()
 
   //state
   const [currencyStore, setCurrencyStore] = useState([])
@@ -35,29 +36,13 @@ const GlobalExchangeBuyMap = () => {
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
 
-
-    // const [pageHeight, setPageHeight] = useState(window.innerHeight);
-
-    // useEffect(() => {
-    //   const handleResize = () => {
-    //     setPageHeight(window.innerHeight);
-    //   };
-
-    //   window.addEventListener('resize', handleResize);
-
-    //   // Cleanup: remove the event listener on component unmount
-    //   return () => {
-    //     window.removeEventListener('resize', handleResize);
-    //   };
-    // }, []); //
   useEffect(() => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         fillCurrencyStore()
-           fillCountryStore()
+        fillCountryStore()
 
-        // fillExchangeTableStore()
         getLabels(ResourceIds.GlobalExchangeBuyMap, setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
@@ -65,9 +50,7 @@ const GlobalExchangeBuyMap = () => {
     }
   }, [access])
 
-
-
-  const fillCurrencyStore=()=>{
+  const fillCurrencyStore = () => {
     var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Currency.qry,
@@ -93,7 +76,7 @@ const GlobalExchangeBuyMap = () => {
       })
   }
 
-  const fillExchangeTableStore = (id) => {
+  const fillExchangeTableStore = id => {
     setExchangeTableStore({})
     var parameters = `_currencyId=` + id
     getRequest({
@@ -108,22 +91,24 @@ const GlobalExchangeBuyMap = () => {
       })
   }
 
-  const exchangeMapsGridValidation = useFormik({
+  const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validate: values => {
-      const isValid = values.rows && values.rows.every(row => !!row.countryId)
-      const isValidExchangeId = values.rows && values.rows.every(row => !!row.exchangeId)
 
-      return isValid // prevent Submit if not validate
-        ? isValidExchangeId
-          ? {}
-          : { rows: Array(values.rows && values.rows.length).fill({ exchangeId: 'Exchange is required' }) }
-        : { rows: Array(values.rows && values.rows.length).fill({ countryId: 'country is required' }) }
-    },
+    // validate: values => {
+    //   const isValid = values.rows && values.rows.every(row => !!row.countryId)
+    //   const isValidExchangeId = values.rows && values.rows.every(row => !!row.exchangeId)
+
+    //   return isValid // prevent Submit if not validate
+    //     ? isValidExchangeId
+    //       ? {}
+    //       : { rows: Array(values.rows && values.rows.length).fill({ exchangeId: 'Exchange is required' }) }
+    //     : { rows: Array(values.rows && values.rows.length).fill({ countryId: 'country is required' }) }
+    // },
     initialValues: {
       rows: [
         {
+          id: 1,
           currencyId: currencyId,
           countryId: '',
           countryName: '',
@@ -140,11 +125,10 @@ const GlobalExchangeBuyMap = () => {
   })
 
   const _labels = {
-    country: labels && labels.find(item => item.key === "1") && labels.find(item => item.key === "1").value,
-    currency: labels && labels.find(item => item.key === "2") && labels.find(item => item.key === "2").value,
-    exchangeTable: labels && labels.find(item => item.key === "3") && labels.find(item => item.key === "3").value,
-    name: labels && labels.find(item => item.key === "4") && labels.find(item => item.key === "4").value
-
+    country: labels && labels.find(item => item.key === '1') && labels.find(item => item.key === '1').value,
+    currency: labels && labels.find(item => item.key === '2') && labels.find(item => item.key === '2').value,
+    exchangeTable: labels && labels.find(item => item.key === '3') && labels.find(item => item.key === '3').value,
+    name: labels && labels.find(item => item.key === '4') && labels.find(item => item.key === '4').value
   }
 
   const postExchangeMaps = obj => {
@@ -164,11 +148,12 @@ const GlobalExchangeBuyMap = () => {
       })
   }
 
-  const getCurrenciesExchangeMaps = (currencyId) => {
+  const getCurrenciesExchangeMaps = currencyId => {
     fillExchangeTableStore(currencyId)
-    exchangeMapsGridValidation.setValues({
+    formik.setValues({
       rows: [
         {
+          id: 1,
           currencyId: '',
           countryId: '',
           countryName: '',
@@ -187,7 +172,11 @@ const GlobalExchangeBuyMap = () => {
     })
       .then(res => {
         if (res.list.length > 0) {
-          exchangeMapsGridValidation.setValues({ rows: res.list })
+          formik.setValues({
+            rows: res.list.map(({ ...rest }, index) => {
+              id: index + 1
+            })
+          })
         }
       })
       .catch(error => {
@@ -196,72 +185,74 @@ const GlobalExchangeBuyMap = () => {
   }
 
   //columns
-  const exchangeMapsInlineGridColumns = [
+  const columns = [
     {
-      field: 'combobox',
-      header: _labels.country, //label
-      nameId: 'countryId',
-      name: 'countryRef',
-      mandatory: true,
-      store: countryStore.list,
-
-      valueField: 'recordId',
-      displayField: 'reference',
-      fieldsToUpdate: [{ from: 'name', to: 'countryName' }],
-
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ]
+      component: 'resourcecombobox',
+      label: _labels.country,
+      name: 'countryId',
+      props: {
+        endpointId: SystemRepository.Country.qry,
+        valueField: 'recordId',
+        displayField: 'reference',
+        mapping: [
+          { from: 'name', to: 'countryName' },
+          { from: 'reference', to: 'countryRef' },
+          { from: 'recordId', to: 'countryId' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      }
     },
     {
-      field: 'textfield',
-      header: _labels.name,
+      component: 'textfield',
+      label: _labels.name,
       name: 'countryName',
       mandatory: false,
       readOnly: true
     },
-
     {
-      field: 'combobox',
-      header: _labels.exchangeTable,
-      nameId: 'exchangeId',
-      name: 'exchangeRef',
-      mandatory: true,
-
-      store: exchangeTableStore.list ,
-      valueField: 'recordId',
-      displayField: 'reference',
-      fieldsToUpdate: [{ from: 'name', to: 'exchangeName' }],
-
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ]
+      component: 'resourcecombobox',
+      label: _labels.country,
+      name: 'exchangeId',
+      props: {
+        endpointId: MultiCurrencyRepository.ExchangeTable.qry2,
+        parameters: `_currencyId=` + currencyId,
+        valueField: 'recordId',
+        displayField: 'reference',
+        mapping: [
+          { from: 'name', to: 'exchangeName' },
+          { from: 'reference', to: 'exchangeRef' },
+          { from: 'recordId', to: 'exchangeId' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
+      }
     },
     {
-      field: 'textfield',
-      header: _labels.name,
+      component: 'textfield',
+      label: _labels.name,
       name: 'exchangeName',
       mandatory: false,
       readOnly: true
     }
-
   ]
 
   const handleSubmit = () => {
-    exchangeMapsGridValidation.handleSubmit()
+    formik.handleSubmit()
   }
 
   return (
-  <Box
-  sx={{
-    height: `${height-80}px`
-   }}
+    <Box
+      sx={{
+        height: `${height - 80}px`
+      }}
     >
       <CustomTabPanel index={0} value={0}>
-        <Box
-        >
+        <Box>
           <Grid container>
             <Grid container xs={12} spacing={4}>
               <Grid item xs={6}>
@@ -269,80 +260,56 @@ const GlobalExchangeBuyMap = () => {
                   name='currencyId'
                   label={_labels.currency}
                   valueField='recordId'
-                  displayField= {['reference', 'name']}
-                  columnsInDropDown= {[
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
                     { key: 'reference', value: 'Currency Ref' },
-                    { key: 'name', value: 'Name' },
+                    { key: 'name', value: 'Name' }
                   ]}
                   store={currencyStore}
-                  value={
-                    currencyStore.filter(item => item.recordId === exchangeMapsGridValidation.values.currencyId)[0]
-                  } // Ensure the value matches an option or set it to null
+                  value={currencyStore.filter(item => item.recordId === formik.values.currencyId)[0]} // Ensure the value matches an option or set it to null
                   required
                   onChange={(event, newValue) => {
-                    exchangeMapsGridValidation.setFieldValue('currencyId', newValue?.recordId)
+                    formik.setFieldValue('currencyId', newValue?.recordId)
                     const selectedCurrencyId = newValue?.recordId || ''
                     getCurrenciesExchangeMaps(selectedCurrencyId)
                     setCurrencyId(selectedCurrencyId)
-                    exchangeMapsGridValidation.setFieldValue('currencyId', selectedCurrencyId)
+                    formik.setFieldValue('currencyId', selectedCurrencyId)
 
                     // Fetch and update state data based on the selected country
                   }}
-                  error={exchangeMapsGridValidation.errors && Boolean(exchangeMapsGridValidation.errors.currencyId)}
-                  helperText={
-                    exchangeMapsGridValidation.touched.currencyId && exchangeMapsGridValidation.errors.currencyId
-                  }
+                  error={formik.errors && Boolean(formik.errors.currencyId)}
+                  helperText={formik.touched.currencyId && formik.errors.currencyId}
                 />
               </Grid>
             </Grid>
             {currencyId > 0 && (
-
-              <Grid xs={12} sx={{pt:2}}>
+              <Grid xs={12} sx={{ pt: 2 }}>
                 <Box>
-                      <InlineEditGrid
-                    gridValidation={exchangeMapsGridValidation}
-                    columns={exchangeMapsInlineGridColumns}
-                    defaultRow={{
-                      currencyId: currencyId ? currencyId : '',
-                      countryId: exchangeMapsGridValidation.values.countryId
-                        ? exchangeMapsGridValidation.values.countryId
-                        : '',
-                      exchangeId: exchangeMapsGridValidation.values.exchangeId
-                        ? exchangeMapsGridValidation.values.exchangeId
-                        : '',
-                      countryName: '',
-                      exchangeRef: ''
-                    }}
-                    width={'1200'}
-                    scrollable={true}
-                    scrollHeight={`${ height - 190}px`}
+                  <DataGrid
+                    onChange={value => formik.setFieldValue('rows', value)}
+                    value={formik.values.rows}
+                    error={formik.errors.rows}
+                    columns={columns}
+                    height={`calc(100vh - 280px)`}
                   />
                 </Box>
-
               </Grid>
             )}
           </Grid>
-               </Box>
-              <Box sx={{
-                  position: 'fixed',
-                  bottom: 0,
-                  left: 0,
-                  width: '100%',
-                  margin: 0,
-                }}
-                >
-              <WindowToolbar 
-                  onSave={handleSubmit}
-                  isSaved={true}
-                  smallBox={true}
-              />
-              </Box>
+        </Box>
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            width: '100%',
+            margin: 0
+          }}
+        >
+          <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+        </Box>
       </CustomTabPanel>
-
-
     </Box>
-
-
   )
 }
 
