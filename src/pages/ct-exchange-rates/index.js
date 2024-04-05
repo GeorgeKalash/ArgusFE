@@ -282,7 +282,7 @@ const CTExchangeRates = () => {
             }
           })
           console.log(rows)
-          puFormik.setValues({
+          formik.setValues({
             ...formik.values,
             rows: rows
           })
