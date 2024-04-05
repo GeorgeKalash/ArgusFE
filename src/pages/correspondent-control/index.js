@@ -28,7 +28,11 @@ const BeneficiaryFields = () => {
         id: 1,
         controlId: '',
         controlName: '',
-        accessLevel: ''
+        accessLevel: '',
+        accessLevelName: '',
+        corId: '',
+        countryId: '',
+        resourceId: ''
       }
     ]
   })
@@ -39,25 +43,27 @@ const BeneficiaryFields = () => {
     validateOnChange: true,
     validationSchema: yup.object({
       countryId: yup.string().required('This field is required'),
-      dispersalType: yup.string().required('This field is required')
+      dispersalType: yup.string().required('This field is required'),
+      corId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
-      console.log('obj ', obj)
-
       const headerObj = {
         countryId: obj.countryId,
         dispersalType: obj.dispersalType,
         corId: obj.corId
       }
+      console.log('obj ', headerObj)
 
       const controlAccessList = obj.rows
         .filter(row => row.accessLevel)
         .map(row => ({
           controlId: row.controlId,
           controlName: row.controlName,
-          accessLevel: row.accessLevel
+          accessLevel: row.accessLevel,
+          corId: obj.corId,
+          resourceId: obj.dispersalType,
+          countryId: obj.countryId
         }))
-      console.log('obj 2 ', controlAccessList)
 
       const resultObject = {
         header: headerObj,
@@ -68,7 +74,6 @@ const BeneficiaryFields = () => {
         extension: RemittanceSettingsRepository.CorrespondentControl.set,
         record: JSON.stringify(resultObject)
       })
-
       if (res) {
         toast.success('Record Updated Successfully')
       }
@@ -78,11 +83,11 @@ const BeneficiaryFields = () => {
   async function fetchWithFilter({ filters }) {
     const countryId = filters?.countryId
     const dispersalType = filters?.dispersalType
-    const corId = filters?.corId || 0
+    const corId = filters?.corId
 
-    if (!filters || !countryId || !dispersalType) {
+    if (!filters || !countryId || !dispersalType || !corId) {
       return { list: [] }
-    } else if (dispersalType !== '') {
+    } else if (dispersalType !== '' && corId !== '') {
       const controllRES = await getRequest({
         extension: SystemRepository.ResourceControls.qry,
         parameters: `_resourceId=${dispersalType}`
@@ -90,20 +95,22 @@ const BeneficiaryFields = () => {
 
       const accessLevelRES = await getRequest({
         extension: RemittanceSettingsRepository.CorrespondentControl.qry,
-        parameters: `_countryId=${countryId}&_correspondentId=${corId}&_dispersalType=${dispersalType}`
+        parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${dispersalType}`
       })
 
       const finalList = controllRES.list.map(x => {
         const n = {
           controlId: x.id,
           controlName: x.name,
-          accessLevel: null
+          accessLevel: null,
+          accessLevelName: null
         }
 
         const matchingControl = accessLevelRES.list.find(y => n.controlId === y.controlId)
 
         if (matchingControl) {
           n.accessLevel = matchingControl.accessLevel
+          n.accessLevelName = matchingControl.accessLevelName
         }
 
         return n
@@ -196,6 +203,7 @@ const BeneficiaryFields = () => {
                   name='corId'
                   label={labels.correspondent}
                   form={formik}
+                  required
                   displayFieldWidth={2}
                   firstFieldWidth='40%'
                   valueShow='corRef'
@@ -207,10 +215,6 @@ const BeneficiaryFields = () => {
                       formik.setFieldValue('corId', newValue?.recordId)
                       formik.setFieldValue('corName', newValue?.name || '')
                       formik.setFieldValue('corRef', newValue?.reference || '')
-                    } else {
-                      formik.setFieldValue('corId', null)
-                      formik.setFieldValue('corName', null)
-                      formik.setFieldValue('corRef', null)
                     }
                   }}
                   errorCheck={'corId'}
@@ -231,6 +235,7 @@ const BeneficiaryFields = () => {
               onChange={value => formik.setFieldValue('rows', value)}
               value={formik.values.rows}
               error={formik.errors.rows}
+              allowDelete={false}
               height={550}
               columns={[
                 {
@@ -256,14 +261,14 @@ const BeneficiaryFields = () => {
                   props: {
                     datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
                     displayField: 'value',
-                    valueField: 'key'
+                    valueField: 'key',
+                    mapping: [
+                      { from: 'key', to: 'accessLevel' },
+                      { from: 'value', to: 'accessLevelName' }
+                    ],
+                    displayFieldWidth: 20
                   },
-                  widthDropDown: 200,
-                  mapping: [
-                    { from: 'accessLevel', to: 'key' },
-                    { from: 'accessLevelName', to: 'value' }
-                  ],
-                  displayFieldWidth: 2
+                  widthDropDown: 200
                 }
               ]}
             />
