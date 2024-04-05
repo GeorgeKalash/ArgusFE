@@ -173,7 +173,7 @@ export function DataGrid({
   }
 
   useEffect(() => {
-    if (!value?.length) {
+    if (!value?.length && allowAddNewLine) {
       addRow()
     }
   }, [value])
