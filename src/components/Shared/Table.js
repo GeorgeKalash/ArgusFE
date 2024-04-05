@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 
 // ** MUI Imports
@@ -120,6 +120,65 @@ const Table = ({
   const refetch = props?.refetch
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
+
+  const apiRef = useRef(null)
+
+  // Effect to set row height based on column heights
+  useEffect(() => {
+    if (apiRef.current) {
+      const columnHeights = {}
+
+      // Get heights of each column
+      gridData.list.forEach(column => {
+        console.log(column)
+        const columnId = column.recordId
+        const sms = column.smsBody
+
+        console.log(columnId)
+
+        // const columnElement = apiRef.current.getColumn(sms)
+        // console.log('columnElement', columnElement)
+
+        // Get the rendered cell element
+        const columnElements = apiRef.current.getColumn(columnId)
+
+        // columnElements.parentElement
+        console.log(columnElements)
+
+        // Check if the column element exists
+        if (columnElements) {
+          // Set the height of the column element (adjust height value as needed)
+          columnElements.style.height = '500px' // Example height value
+        } else {
+          console.log(apiRef.current)
+        }
+
+        // Set the content of the hidden div to the smsBody content
+        apiRef.current.innerText = sms
+
+        // console.log('Height of smsBody content:', cellElement)
+
+        // Measure the height of the text
+        const textHeight = apiRef.current.style
+
+        // setTimeout(() => {
+        //   const textHeight = apiRef.current.offsetHeight
+        //   console.log('Height of smsBody content:', textHeight)
+        // }, 0)
+
+        // Log or use the measured height as needed
+        console.log('Height of smsBody content style:', textHeight)
+
+        // columnHeights[columnId] = columnElement.computedWidth // Change to 'height' if using rowHeight
+        // apiRef.current.setRowHeight(columnId, 300) // Set row height for all rows
+      })
+
+      // Set row height based on maximum column height
+      // const maxColumnHeight = Math.max(...Object.values(columnHeights))
+
+      // apiRef.current.setRowHeight(columnId, maxColumnHeight) // Set row height for all rows
+    }
+  }, [gridData])
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -394,8 +453,7 @@ const Table = ({
                 pb: 2
               }}
               density='compact'
-              getRowHeight={() => 'auto'}
-              getEstimatedRowHeight={() => 200}
+              apiRef={apiRef}
               components={{
                 LoadingOverlay: LinearProgress,
 
