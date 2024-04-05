@@ -103,7 +103,9 @@ const CTExchangeRates = () => {
             minRate: yup.string().required('minRate is required'),
             maxRate: yup.string().required('maxRate is required'),
             rate: yup.string().required('rate is required'),
-            rateCalcMethod: yup.string().required('rateCalcMethod is required')
+            rateCalcMethodName: yup.string().required('rateCalcMethod is required')
+
+            // rateCalcMethod: yup.string().required('rateCalcMethod is required')
           })
         )
         .required('rows array is required')
@@ -142,7 +144,7 @@ const CTExchangeRates = () => {
             minRate: yup.string().required('minRate is required'),
             maxRate: yup.string().required('maxRate is required'),
             rate: yup.string().required('rate is required'),
-            rateCalcMethod: yup.string().required('rateCalcMethod is required')
+            rateCalcMethodName: yup.string().required('rateCalcMethod is required')
           })
         )
         .required('rows array is required')
