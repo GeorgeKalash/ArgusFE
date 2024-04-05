@@ -22,6 +22,7 @@ import CashTransferTab from './Tabs/CashTransferTab'
 import toast from 'react-hot-toast'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -35,6 +36,7 @@ const CashTransfer = () => {
     filterBy,
     clearFilter,
     labels: _labels,
+    refetch,
     access
   } = useResourceQuery({
     endpointId: CashBankRepository.CashTransfer.snapshot,
@@ -155,7 +157,8 @@ const CashTransfer = () => {
     {
       field: 'date',
       headerName: _labels.date,
-      flex: 1
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.date)
     },
     ,
     {
@@ -169,12 +172,12 @@ const CashTransfer = () => {
       flex: 1
     },
     {
-      field: 'fromCashAccountName',
+      field: 'fromCAName',
       headerName: _labels.fromCashAcc,
       flex: 1
     },
     {
-      field: 'toCashAccountName',
+      field: 'toCAName',
       headerName: _labels.toCashAcc,
       flex: 1
     },
@@ -248,6 +251,7 @@ const CashTransfer = () => {
           onDelete={delCashTFR}
           isLoading={false}
           pageSize={50}
+          refetch={refetch}
           paginationType='client'
           maxAccess={access}
         />

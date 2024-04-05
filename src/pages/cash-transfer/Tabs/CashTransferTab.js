@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useWindow } from 'src/windows'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -18,7 +17,6 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { useError } from 'src/error'
 import toast from 'react-hot-toast'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -29,7 +27,6 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack: stackError } = useError()
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CashTransfer.snapshot
@@ -43,11 +40,11 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     toPlantId: parseInt(plantId),
     fromPlantId: parseInt(plantId),
     fromCashAccountId: parseInt(cashAccountId),
-    fromCashAccountRef: '',
-    fromCashAccountName: '',
+    fromCARef: '',
+    fromCAName: '',
     toCashAccountId: '',
-    toCashAccountRef: '',
-    toCashAccountName: '',
+    toCARef: '',
+    toCAName: '',
     notes: '',
     wip: '',
     status: '',
@@ -92,7 +89,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         return {
           ...transferDetail,
           seqNo: seqNo,
-          transferId: formik.values.recordId || 0
+          transferId: formik.values.recordId
         }
       })
 
@@ -125,7 +122,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     }
   })
 
-  const fillCurrencyTransfer = transferId => {
+  const fillCurrencyTransfer = async (transferId, data) => {
     try {
       var parameters = `_transferId=${transferId}`
       getRequest({
@@ -140,7 +137,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         }))
 
         formik.setValues({
-          ...formik.values,
+          ...data,
           transfers: modifiedList // Update the transfers array directly
         })
       })
@@ -157,15 +154,14 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         parameters: defaultParams
       })
       if (res.record) {
-        formik.setFieldValue('fromCashAccountRef', res.record.accountNo)
-        formik.setFieldValue('fromCashAccountName', res.record.name)
+        formik.setFieldValue('fromCARef', res.record.accountNo)
+        formik.setFieldValue('fromCAName', res.record.name)
       }
     }
   }
   useEffect(() => {
     ;(async function () {
       try {
-        console.log('check ', recordId)
         if (recordId) {
           const res = await getRequest({
             extension: CashBankRepository.CashTransfer.get,
@@ -174,8 +170,20 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
 
           res.record.date = formatDateFromApi(res.record.date)
 
-          formik.setValues(res?.record)
-          fillCurrencyTransfer(recordId)
+          // Add an empty transfer object to res.record , it's returning error in length object without it when setting values to formik
+          res.record.transfers = [
+            {
+              id: 1,
+              transferId: recordId,
+              seqNo: '',
+              currencyId: '',
+              currencyName: '',
+              currencyRef: '',
+              amount: '',
+              balance: ''
+            }
+          ]
+          await fillCurrencyTransfer(recordId, res.record)
         }
 
         getAccView()
@@ -246,17 +254,17 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 label={labels.fromCashAcc}
                 form={formik}
                 readOnly
-                valueShow='fromCashAccountRef'
-                secondValueShow='fromCashAccountName'
+                valueShow='fromCARef'
+                secondValueShow='fromCAName'
                 onChange={(event, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('fromCashAccountId', newValue?.recordId)
-                    formik.setFieldValue('fromCashAccountRef', newValue?.accountNo)
-                    formik.setFieldValue('fromCashAccountName', newValue?.name)
+                    formik.setFieldValue('fromCARef', newValue?.accountNo)
+                    formik.setFieldValue('fromCAName', newValue?.name)
                   } else {
                     formik.setFieldValue('fromCashAccountId', null)
-                    formik.setFieldValue('fromCashAccountRef', null)
-                    formik.setFieldValue('fromCashAccountName', null)
+                    formik.setFieldValue('fromCARef', null)
+                    formik.setFieldValue('fromCAName', null)
                   }
                 }}
                 errorCheck={'fromCashAccountId'}
@@ -294,7 +302,11 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('toPlantId', newValue?.recordId)
+                  if (newValue) formik.setFieldValue('toPlantId', newValue?.recordId)
+                  else formik.setFieldValue('toPlantId', null)
+                  formik.setFieldValue('toCashAccountId', null)
+                  formik.setFieldValue('toCARef', null)
+                  formik.setFieldValue('toCAName', null)
                 }}
                 error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
               />
@@ -315,17 +327,17 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 label={labels.toCashAcc}
                 form={formik}
                 filter={{ plantId: formik.values.toPlantId }}
-                valueShow='toCashAccountRef'
-                secondValueShow='toCashAccountName'
+                valueShow='toCARef'
+                secondValueShow='toCAName'
                 onChange={(event, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('toCashAccountId', newValue?.recordId)
-                    formik.setFieldValue('toCashAccountRef', newValue?.accountNo)
-                    formik.setFieldValue('toCashAccountName', newValue?.name)
+                    formik.setFieldValue('toCARef', newValue?.accountNo)
+                    formik.setFieldValue('toCAName', newValue?.name)
                   } else {
                     formik.setFieldValue('toCashAccountId', null)
-                    formik.setFieldValue('toCashAccountRef', null)
-                    formik.setFieldValue('toCashAccountName', null)
+                    formik.setFieldValue('toCARef', null)
+                    formik.setFieldValue('toCAName', null)
                   }
                 }}
                 errorCheck={'fromCashAccountId'}
