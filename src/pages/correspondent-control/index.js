@@ -230,7 +230,7 @@ const BeneficiaryFields = () => {
             <DataGrid
               onChange={value => formik.setFieldValue('rows', value)}
               value={formik.values.rows}
-              error={formik.errors}
+              error={formik.errors.rows}
               height={550}
               columns={[
                 {
@@ -252,13 +252,18 @@ const BeneficiaryFields = () => {
                 {
                   component: 'resourcecombobox',
                   label: labels.accessLevel,
-                  name: 'accesslevel',
+                  name: 'accesslevelName',
                   props: {
                     datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
                     displayField: 'value',
                     valueField: 'key'
                   },
-                  flex: 1.5
+                  widthDropDown: 200,
+                  mapping: [
+                    { from: 'accessLevel', to: 'key' },
+                    { from: 'accessLevelName', to: 'value' }
+                  ],
+                  displayFieldWidth: 2
                 }
               ]}
             />
