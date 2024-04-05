@@ -18,6 +18,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import toast from 'react-hot-toast'
+import { useError } from 'src/error'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -27,6 +28,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 export default function CashTransferTab({ labels, recordId, maxAccess, plantId, cashAccountId, dtId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CashTransfer.snapshot
@@ -71,8 +73,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fromPlantId: yup.string().required(' '),
       fromCashAccountId: yup.string().required(' '),
+      fromPlantId: yup.string().required(' '),
       date: yup.string().required(' '),
       toPlantId: yup.string().required(' '),
       toCashAccountId: yup.string().required(' ')
@@ -95,9 +97,12 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
           transferId: formik.values.recordId || 0
         }
       })
+      if (updatedRows.length === 1 && updatedRows[0].currencyId === '') {
+        stackError({
+          message: `Grid not filled. Please fill the grid before saving.`
+        })
 
-      if (updatedRows.length == 1 && updatedRows[0].currencyId == '') {
-        throw new Error('Grid not filled. Please fill the grid before saving.')
+        return
       }
 
       const resultObject = {
@@ -217,7 +222,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 maxLength='15'
                 readOnly
                 required
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -225,7 +229,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 endpointId={SystemRepository.Plant.qry}
                 name='fromPlantId'
                 label={labels.fromPlant}
-                readOnly
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -233,6 +236,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                readOnly
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -269,8 +273,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                     formik.setFieldValue('fromCAName', null)
                   }
                 }}
-                maxAccess={maxAccess}
                 error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
@@ -286,7 +290,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)} // errorCheck={'date'}
+                error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -310,7 +314,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   formik.setFieldValue('toCARef', null)
                   formik.setFieldValue('toCAName', null)
                 }}
-                error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)} // errorCheck={'toPlantId'}
+                error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -343,7 +347,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   }
                 }}
                 maxAccess={maxAccess}
-                error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)} // errorCheck={'toCashAccountId'}
+                error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
               />
             </Grid>
           </Grid>
