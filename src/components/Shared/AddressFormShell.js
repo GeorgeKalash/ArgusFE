@@ -96,28 +96,6 @@ export const AddressFormShell = ({
     }
   })
 
-  // useEffect(() => {
-  //   if (
-  //     formik.values.name ||
-  //     formik.values.street1 ||
-  //     formik.values.phone ||
-  //     formik.values.countryId ||
-  //     formik.values.cityId
-  //   ) {
-  //     setRequired(false)
-  //   }
-
-  //   if (
-  //     !formik.values.name &&
-  //     !formik.values.street1 &&
-  //     !formik.values.phone &&
-  //     !formik.values.countryId &&
-  //     !formik.values.cityId
-  //   ) {
-  //     setRequired(true)
-  //   }
-  // }, [formik.values])
-
   return (
     <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} readOnly={readOnly} editMode={editMode}>
       <AddressTab
