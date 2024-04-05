@@ -58,37 +58,33 @@ const CTExchangeRates = () => {
     {
       component: 'textfield',
       label: labels.plant,
-      name: 'plantName',
-      mandatory: true,
-      readOnly: true
+      name: 'plantName'
     },
-    {
-      component: 'resourcecombobox',
-      label: labels.rcm,
-      name: 'rateCalcMethodName',
-      props: {
-        datasetId: DataSets.MC_RATE_CALC_METHOD,
-        displayField: 'value',
-        valueField: 'key'
-      }
-    },
+
+    // {
+    //   component: 'resourcecombobox',
+    //   label: labels.rcm,
+    //   name: 'rateCalcMethodName',
+    //   props: {
+    //     datasetId: DataSets.MC_RATE_CALC_METHOD,
+    //     displayField: 'value',
+    //     valueField: 'key'
+    //   }
+    // },
     {
       component: 'textfield',
       label: labels.min,
-      name: 'minRate',
-      mandatory: true
+      name: 'minRate'
     },
     {
       component: 'textfield',
       label: labels.rate,
-      name: 'rate',
-      mandatory: true
+      name: 'rate'
     },
     {
       component: 'textfield',
       label: labels.max,
-      name: 'maxRate',
-      mandatory: true
+      name: 'maxRate'
     }
   ]
 
@@ -116,7 +112,7 @@ const CTExchangeRates = () => {
   //   }
   // })
   const puFormik = useFormik({
-    enableReinitialize: false,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       rows: yup
@@ -285,8 +281,11 @@ const CTExchangeRates = () => {
               maxRate: value.maxRate
             }
           })
-
-          formik.setValues('rows', rows)
+          console.log(rows)
+          puFormik.setValues({
+            ...formik.values,
+            rows: rows
+          })
         })
 
         .catch(error => {
@@ -519,7 +518,8 @@ const CTExchangeRates = () => {
                         columns={exchangeRatesInlineGridColumns}
                         allowDelete={false}
                         height={`${expanded ? `calc(100vh - 330px)` : `${height - 50}px`}`}
-                        allowAddNewLine={false}
+
+                        // allowAddNewLine={false}
                       />
 
                       {/* <Box>
