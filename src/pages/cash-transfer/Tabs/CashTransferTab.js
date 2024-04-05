@@ -55,7 +55,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     transfers: [
       {
         id: 1,
-        transferId: recordId,
+        transferId: recordId || 0,
         seqNo: '',
         currencyId: '',
         currencyName: '',
@@ -71,12 +71,15 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required('This field is required'),
-      toPlantId: yup.string().required('This field is required'),
-      toCashAccountId: yup.string().required('This field is required')
+      fromPlantId: yup.string().required(' '),
+      fromCashAccountId: yup.string().required(' '),
+      date: yup.string().required(' '),
+      toPlantId: yup.string().required(' '),
+      toCashAccountId: yup.string().required(' ')
     }),
     onSubmit: async values => {
       const copy = { ...values }
+      delete copy.transfers
       copy.date = formatDateToApi(copy.date)
 
       // Default values for properties if they are empty
@@ -89,7 +92,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         return {
           ...transferDetail,
           seqNo: seqNo,
-          transferId: formik.values.recordId
+          transferId: formik.values.recordId || 0
         }
       })
 
@@ -215,7 +218,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 readOnly
                 required
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
             <Grid item xs={12}>
@@ -267,7 +269,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                     formik.setFieldValue('fromCAName', null)
                   }
                 }}
-                errorCheck={'fromCashAccountId'}
+                maxAccess={maxAccess}
+                error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
               />
             </Grid>
           </Grid>
@@ -283,8 +286,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-                helperText={formik.touched.date && formik.errors.date}
+                error={formik.touched.date && Boolean(formik.errors.date)} // errorCheck={'date'}
               />
             </Grid>
             <Grid item xs={12}>
@@ -308,7 +310,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                   formik.setFieldValue('toCARef', null)
                   formik.setFieldValue('toCAName', null)
                 }}
-                error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
+                error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)} // errorCheck={'toPlantId'}
               />
             </Grid>
             <Grid item xs={12}>
@@ -340,7 +342,8 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                     formik.setFieldValue('toCAName', null)
                   }
                 }}
-                errorCheck={'fromCashAccountId'}
+                maxAccess={maxAccess}
+                error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)} // errorCheck={'toCashAccountId'}
               />
             </Grid>
           </Grid>
@@ -407,8 +410,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
-                helperText={formik.touched.notes && formik.errors.notes}
               />
             </FormGrid>
           </Grid>
