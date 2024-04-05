@@ -14,11 +14,9 @@ export const AddressFormShell = ({
   window,
   readOnly,
   allowPost,
-  requiredOptional = false,
+  required = false,
   onSubmit
 }) => {
-  const [required, setRequired] = useState(false)
-
   const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.Address
   })
@@ -55,8 +53,8 @@ export const AddressFormShell = ({
       const errors = {}
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (
-        ((values.name || values.cityId || values.phone || values.countryId || values.street1) && requiredOptional) ||
-        !requiredOptional
+        ((values.name || values.cityId || values.phone || values.countryId || values.street1) && required) ||
+        !required
       ) {
         if (!values.name) {
           errors.name = ' '
@@ -98,13 +96,7 @@ export const AddressFormShell = ({
 
   return (
     <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} readOnly={readOnly} editMode={editMode}>
-      <AddressTab
-        addressValidation={formik}
-        maxAccess={access}
-        labels={labels}
-        required={required}
-        readOnly={readOnly}
-      />
+      <AddressTab addressValidation={formik} maxAccess={access} labels={labels} readOnly={readOnly} />
     </FormShell>
   )
 }
