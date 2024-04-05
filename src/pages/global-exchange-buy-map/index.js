@@ -173,9 +173,10 @@ const GlobalExchangeBuyMap = () => {
       .then(res => {
         if (res.list.length > 0) {
           formik.setValues({
-            rows: res.list.map(({ ...rest }, index) => {
-              id: index + 1
-            })
+            rows: res.list.map(({ ...rest }, index) => ({
+              id: index + 1,
+              ...rest
+            }))
           })
         }
       })
