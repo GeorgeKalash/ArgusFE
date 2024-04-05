@@ -60,17 +60,20 @@ const CTExchangeRates = () => {
       label: labels.plant,
       name: 'plantName'
     },
-
-    // {
-    //   component: 'resourcecombobox',
-    //   label: labels.rcm,
-    //   name: 'rateCalcMethodName',
-    //   props: {
-    //     datasetId: DataSets.MC_RATE_CALC_METHOD,
-    //     displayField: 'value',
-    //     valueField: 'key'
-    //   }
-    // },
+    {
+      component: 'resourcecombobox',
+      label: labels.rcm,
+      name: 'rateCalcMethodName',
+      props: {
+        datasetId: DataSets.MC_RATE_CALC_METHOD,
+        displayField: 'value',
+        valueField: 'key',
+        mapping: [
+          { from: 'key', to: 'rateCalcMethod' },
+          { from: 'value', to: 'rateCalcMethodName' }
+        ]
+      }
+    },
     {
       component: 'textfield',
       label: labels.min,
@@ -89,28 +92,6 @@ const CTExchangeRates = () => {
   ]
 
   //purchase grid
-  // const puFormik = useFormik({
-  //   enableReinitialize: true,
-  //   validateOnChange: true,
-  //   validate: values => {
-  //     const isValidMin = values.rows && values.rows.every(row => !!row.maxRate)
-  //     const isValidMax = values.rows && values.rows.every(row => !!row.minRate)
-  //     const isValidRate = values.rows && values.rows.every(row => !!row.rate)
-
-  //     return isValidMin && isValidMax & isValidRate
-  //       ? {}
-  //       : {
-  //           rows: Array(values.rows && values.rows.length).fill({
-  //             minRate: 'Min Rate is required',
-  //             maxRate: 'Max rate is required',
-  //             rate: 'Rate is required'
-  //           })
-  //         }
-  //   },
-  //   onSubmit: values => {
-  //     postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId)
-  //   }
-  // })
   const puFormik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
@@ -121,7 +102,8 @@ const CTExchangeRates = () => {
           yup.object().shape({
             minRate: yup.string().required('minRate is required'),
             maxRate: yup.string().required('maxRate is required'),
-            rate: yup.string().required('rate is required')
+            rate: yup.string().required('rate is required'),
+            rateCalcMethod: yup.string().required('rateCalcMethod is required')
           })
         )
         .required('rows array is required')
@@ -144,33 +126,11 @@ const CTExchangeRates = () => {
       ]
     },
     onSubmit: values => {
-      post(values.rows)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
     }
   })
 
   //sales grid
-  // const saFormik = useFormik({
-  //   enableReinitialize: true,
-  //   validateOnChange: true,
-  //   validate: values => {
-  //     const isValidMin = values.rows && values.rows.every(row => !!row.maxRate)
-  //     const isValidMax = values.rows && values.rows.every(row => !!row.minRate)
-  //     const isValidRate = values.rows && values.rows.every(row => !!row.rate)
-
-  //     return isValidMin && isValidMax & isValidRate
-  //       ? {}
-  //       : {
-  //           rows: Array(values.rows && values.rows.length).fill({
-  //             minRate: 'Min Rate is required',
-  //             maxRate: 'Max rate is required',
-  //             rate: 'Rate is required'
-  //           })
-  //         }
-  //   },
-  //   onSubmit: values => {
-  //     postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
-  //   }
-  // })
   const saFormik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
@@ -181,13 +141,31 @@ const CTExchangeRates = () => {
           yup.object().shape({
             minRate: yup.string().required('minRate is required'),
             maxRate: yup.string().required('maxRate is required'),
-            rate: yup.string().required('rate is required')
+            rate: yup.string().required('rate is required'),
+            rateCalcMethod: yup.string().required('rateCalcMethod is required')
           })
         )
         .required('rows array is required')
     }),
+    initialValues: {
+      rows: [
+        {
+          id: 1,
+          currencyId: null,
+          raCurrencyId: null,
+          rateTypeId: null,
+          plantId: null,
+          plantName: '',
+          rateCalcMethod: null,
+          rateCalcMethodName: '',
+          minRate: null,
+          maxRate: null,
+          rate: null
+        }
+      ]
+    },
     onSubmit: values => {
-      post(values.rows)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
     }
   })
 
@@ -281,7 +259,7 @@ const CTExchangeRates = () => {
               maxRate: value.maxRate
             }
           })
-          console.log(rows)
+
           formik.setValues({
             ...formik.values,
             rows: rows
@@ -327,7 +305,10 @@ const CTExchangeRates = () => {
       }
     })
 
-    formik.setValues('rows', rows)
+    formik.setValues({
+      ...formik.values,
+      rows: rows
+    })
   }
 
   return (
@@ -445,15 +426,17 @@ const CTExchangeRates = () => {
                   </Grid>
                   {formik.values.currencyId != null && formik.values.puRateTypeId != null && (
                     <Grid xs={12} sx={{ pt: 2 }}>
-                      <DataGrid
-                        onChange={value => puFormik.setFieldValue('rows', value)}
-                        value={puFormik.values.rows}
-                        error={puFormik.errors.rows}
-                        columns={exchangeRatesInlineGridColumns}
-                        allowDelete={false}
-                        height={`${height - 50}px`}
-                        allowAddNewLine={false}
-                      />
+                      <Box>
+                        <DataGrid
+                          onChange={value => puFormik.setFieldValue('rows', value)}
+                          value={puFormik.values.rows}
+                          error={puFormik.errors.rows}
+                          columns={exchangeRatesInlineGridColumns}
+                          allowDelete={false}
+                          height={`${height - 50}px`}
+                          allowAddNewLine={false}
+                        />
+                      </Box>
 
                       {/* <Box>
                         <InlineEditGrid
@@ -517,7 +500,7 @@ const CTExchangeRates = () => {
                         error={saFormik.errors.rows}
                         columns={exchangeRatesInlineGridColumns}
                         allowDelete={false}
-                        height={`${expanded ? `calc(100vh - 330px)` : `${height - 50}px`}`}
+                        height={`${height - 50}px`}
 
                         // allowAddNewLine={false}
                       />
