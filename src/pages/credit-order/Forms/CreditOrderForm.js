@@ -35,6 +35,7 @@ import { useForm } from 'src/hooks/form'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import Approvals from 'src/components/Shared/Approvals'
 import WorkFlow from 'src/components/Shared/WorkFlow'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, window }) {
   const { height } = useWindowDimensions()
@@ -157,6 +158,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     initialValues: {
       rows: [
         {
+          id: 1,
           orderId: '',
           seqNo: '',
           currencyId: '',
@@ -853,34 +855,18 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           </Grid>
           <Grid container sx={{ pt: 2 }} xs={12}>
             <Box sx={{ width: '100%' }}>
-              <InlineEditGrid
-                maxAccess={maxAccess}
-                gridValidation={detailsFormik}
+              <DataGrid
+                onChange={value => detailsFormik.setFieldValue('rows', value)}
+                value={detailsFormik.values.rows}
+                error={detailsFormik.errors.rows}
                 columns={columns}
-                background={
+                bg={
                   formik.values.functionId &&
                   (formik.values.functionId != SystemFunction.CurrencyCreditOrderPurchase
                     ? '#C7F6C7'
                     : 'rgb(245, 194, 193)')
                 }
-                defaultRow={{
-                  orderId: '',
-                  seqNo: '',
-                  currencyId: '',
-                  qty: '',
-                  rateCalcMethod: '',
-                  exRate: '',
-                  defaultRate: '',
-                  minRate: '',
-                  maxRate: '',
-                  amount: '',
-                  baseAmount: '',
-                  notes: ''
-                }}
-                allowDelete={true}
-                allowAddNewLine={true}
-                scrollable={true}
-                scrollHeight={`${expanded ? height - 430 : 200}px`}
+                height={`${expanded ? `calc(100vh - 330px)` : `${height - 160}px`}`}
               />
             </Box>
           </Grid>
