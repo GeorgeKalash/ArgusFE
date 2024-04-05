@@ -14,11 +14,9 @@ export const AddressFormShell = ({
   window,
   readOnly,
   allowPost,
-  setPost,
+  required = false,
   onSubmit
 }) => {
-  const [requiredOptional, setRequiredOptional] = useState(true)
-
   const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.Address
   })
@@ -54,8 +52,10 @@ export const AddressFormShell = ({
     validate: values => {
       const errors = {}
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-      if (values.name || values.cityId || values.phone || values.countryId || values.street1) {
+      if (
+        ((values.name || values.cityId || values.phone || values.countryId || values.street1) && required) ||
+        !required
+      ) {
         if (!values.name) {
           errors.name = ' '
         }
@@ -94,38 +94,9 @@ export const AddressFormShell = ({
     }
   })
 
-  useEffect(() => {
-    if (
-      (formik.values.name ||
-        formik.values.street1 ||
-        formik.values.phone ||
-        formik.values.countryId ||
-        formik.values.cityId) &&
-      requiredOptional
-    ) {
-      setRequiredOptional(false)
-    }
-
-    if (
-      !formik.values.name &&
-      !formik.values.street1 &&
-      !formik.values.phone &&
-      !formik.values.countryId &&
-      !formik.values.cityId
-    ) {
-      setRequiredOptional(true)
-    }
-  }, [formik.values])
-
   return (
     <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} readOnly={readOnly} editMode={editMode}>
-      <AddressTab
-        addressValidation={formik}
-        maxAccess={access}
-        labels={labels}
-        requiredOptional={requiredOptional}
-        readOnly={readOnly}
-      />
+      <AddressTab addressValidation={formik} maxAccess={access} labels={labels} readOnly={readOnly} />
     </FormShell>
   )
 }
