@@ -27,17 +27,21 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { FormatLineSpacing } from '@mui/icons-material'
-import ApprovalFormShell from 'src/components/Shared/ApprovalFormShell'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { useWindow } from 'src/windows'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
+  const [isPosted, setIsPosted] = useState(false)
+  const [isCancelled, setIsCancelled] = useState(false)
   const [currencyStore, setCurrencyStore] = useState([])
   const [rateType, setRateType] = useState(148)
   const [editMode, setEditMode] = useState(!!recordId)
+  const { stack } = useWindow()
   const { stack: stackError } = useError()
   const [toCurrency, setToCurrency] = useState(null)
   const [toCurrencyRef, setToCurrencyRef] = useState(null)
@@ -538,6 +542,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           setInitialData(res.record)
           const baseCurrency = await getBaseCurrency()
           getCorrespondentById(res.record.corId ?? '', baseCurrency, res.record.plantId)
+          setIsPosted(res.record.status === 3 ? true : false)
+          setIsCancelled(res.record.status === -1 ? true : false)
         }
       } catch (error) {
       } finally {
@@ -546,21 +552,107 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height])
-  console.log('editMode ', editMode)
+
+  const onPost = async () => {
+    const obj = formik.values
+    obj.date = formatDateToApi(obj.date)
+
+    const res = await postRequest({
+      extension: CTTRXrepository.CreditInvoice.post,
+      record: JSON.stringify(obj)
+    })
+
+    if (res?.recordId) {
+      toast.success('Record Posted Successfully')
+      invalidate()
+
+      const res = await getRequest({
+        extension: CTTRXrepository.CreditInvoice.get,
+        parameters: `_recordId=${recordId}`
+      })
+      res.record.date = formatDateFromApi(res.record.date)
+      setInitialData(res.record)
+
+      setIsPosted(res.record.status === 3 ? true : false)
+      setIsCancelled(res.record.status === -1 ? true : false)
+    }
+  }
+
+  const onCancel = async () => {
+    const obj = formik.values
+    obj.date = formatDateToApi(obj.date)
+
+    const res = await postRequest({
+      extension: CTTRXrepository.CreditInvoice.cancel,
+      record: JSON.stringify(obj)
+    })
+
+    if (res?.recordId) {
+      toast.success('Record Cancelled Successfully')
+      invalidate()
+
+      const res = await getRequest({
+        extension: CTTRXrepository.CreditInvoice.get,
+        parameters: `_recordId=${recordId}`
+      })
+      res.record.date = formatDateFromApi(res.record.date)
+      setInitialData(res.record)
+
+      setIsPosted(res.record.status === 3 ? true : false)
+      setIsCancelled(res.record.status === -1 ? true : false)
+    }
+  }
+
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: formik.values.functionId,
+        recordId: formik.values.recordId
+      },
+      width: 950,
+      height: 600,
+      title: 'Workflow'
+    })
+  }
+
+  const actions = [
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'newHandler',
+      disabled: !editMode
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode || isPosted || isCancelled
+    },
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: onCancel,
+      disabled: !editMode || isPosted || isCancelled
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    }
+  ]
 
   return (
-    <ApprovalFormShell
+    <FormShell
+      actions={actions}
       resourceId={ResourceIds.CreditInvoice}
       form={formik}
-      maxAccess={maxAccess}
       editMode={editMode}
-      hiddenApprove={true}
-      hiddenPost={true}
-      hiddenClose={true}
-      hiddenReopen={true}
+      maxAccess={maxAccess}
       previewReport={editMode}
       functionId={formik.values.functionId}
-      NewComponentVisible={editMode}
+      disabledSubmit={isPosted || isCancelled}
     >
       <Grid container>
         <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
@@ -570,6 +662,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
               name='date'
               required
               label={_labels[2]}
+              readOnly={isPosted || isCancelled}
               value={formik?.values?.date}
               onChange={formik.setFieldValue}
               maxAccess={maxAccess}
@@ -589,6 +682,10 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
               values={formik.values}
               valueField='recordId'
               displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
               required
               maxAccess={maxAccess}
               onChange={(event, newValue) => {
@@ -629,7 +726,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 required
                 valueShow='corRef'
                 secondValueShow='corName'
-                readOnly={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                readOnly={isPosted || isCancelled || detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
                 onChange={async (event, newValue) => {
                   if (newValue) {
                     const baseCurrency = await getBaseCurrency()
@@ -661,6 +758,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             required
             label={_labels[22]}
             form={formik}
+            readOnly={isPosted || isCancelled}
             valueShow='cashAccountRef'
             secondValueShow='cashAccountName'
             onChange={(event, newValue) => {
@@ -742,6 +840,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
               label={_labels[11]}
               value={formik.values.notes}
               rows={3}
+              readOnly={isPosted || isCancelled}
               maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('notes', '')}
@@ -773,6 +872,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           </Grid>
         </Grid>
       </Grid>
-    </ApprovalFormShell>
+    </FormShell>
   )
 }

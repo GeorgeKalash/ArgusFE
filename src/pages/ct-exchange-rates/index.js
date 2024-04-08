@@ -8,7 +8,7 @@ import * as yup from 'yup'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -28,7 +28,6 @@ const CTExchangeRates = () => {
   //state
   const [errorMessage, setErrorMessage] = useState()
   const [plantStore, setPlantsStore] = useState(null)
-  const [rcmStore, setRcmStore] = useState([])
   const { height } = useWindowDimensions()
 
   const { labels: labels, access } = useResourceQuery({
@@ -57,45 +56,38 @@ const CTExchangeRates = () => {
 
   const exchangeRatesInlineGridColumns = [
     {
-      field: 'textfield',
-      header: labels.plant,
-      nameId: 'plantId',
-      name: 'plantName',
-      mandatory: true,
-      readOnly: true
+      component: 'textfield',
+      label: labels.plant,
+      name: 'plantName'
     },
     {
-      field: 'combobox',
-      valueField: 'key',
-      displayField: 'value',
-      header: labels.rcm,
-      nameId: 'rateCalcMethod',
+      component: 'resourcecombobox',
+      label: labels.rcm,
       name: 'rateCalcMethodName',
-      store: rcmStore,
-      mandatory: true,
-      widthDropDown: '150',
-      columnsInDropDown: [{ key: 'value', value: 'rateCalcMethodName' }]
+      props: {
+        datasetId: DataSets.MC_RATE_CALC_METHOD,
+        displayField: 'value',
+        valueField: 'key',
+        mapping: [
+          { from: 'key', to: 'rateCalcMethod' },
+          { from: 'value', to: 'rateCalcMethodName' }
+        ]
+      }
     },
     {
-      field: 'textfield',
-      header: labels.min,
-      nameId: 'minRate',
-      name: 'minRate',
-      mandatory: true
+      component: 'textfield',
+      label: labels.min,
+      name: 'minRate'
     },
     {
-      field: 'textfield',
-      header: labels.rate,
-      nameId: 'rate',
-      name: 'rate',
-      mandatory: true
+      component: 'textfield',
+      label: labels.rate,
+      name: 'rate'
     },
     {
-      field: 'textfield',
-      header: labels.max,
-      nameId: 'maxRate',
-      name: 'maxRate',
-      mandatory: true
+      component: 'textfield',
+      label: labels.max,
+      name: 'maxRate'
     }
   ]
 
@@ -103,44 +95,76 @@ const CTExchangeRates = () => {
   const puFormik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validate: values => {
-      const isValidMin = values.rows && values.rows.every(row => !!row.maxRate)
-      const isValidMax = values.rows && values.rows.every(row => !!row.minRate)
-      const isValidRate = values.rows && values.rows.every(row => !!row.rate)
+    validationSchema: yup.object({
+      rows: yup
+        .array()
+        .of(
+          yup.object().shape({
+            minRate: yup.string().required('minRate is required'),
+            maxRate: yup.string().required('maxRate is required'),
+            rate: yup.string().required('rate is required'),
+            rateCalcMethodName: yup.string().required('rateCalcMethod is required')
 
-      return isValidMin && isValidMax & isValidRate
-        ? {}
-        : {
-            rows: Array(values.rows && values.rows.length).fill({
-              minRate: 'Min Rate is required',
-              maxRate: 'Max rate is required',
-              rate: 'Rate is required'
-            })
-          }
+            // rateCalcMethod: yup.string().required('rateCalcMethod is required')
+          })
+        )
+        .required('rows array is required')
+    }),
+    initialValues: {
+      rows: [
+        {
+          id: 1,
+          currencyId: null,
+          raCurrencyId: null,
+          rateTypeId: null,
+          plantId: null,
+          plantName: '',
+          rateCalcMethod: null,
+          rateCalcMethodName: '',
+          minRate: null,
+          maxRate: null,
+          rate: null
+        }
+      ]
     },
     onSubmit: values => {
-      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
     }
   })
 
   //sales grid
   const saFormik = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
-    validate: values => {
-      const isValidMin = values.rows && values.rows.every(row => !!row.maxRate)
-      const isValidMax = values.rows && values.rows.every(row => !!row.minRate)
-      const isValidRate = values.rows && values.rows.every(row => !!row.rate)
-
-      return isValidMin && isValidMax & isValidRate
-        ? {}
-        : {
-            rows: Array(values.rows && values.rows.length).fill({
-              minRate: 'Min Rate is required',
-              maxRate: 'Max rate is required',
-              rate: 'Rate is required'
-            })
-          }
+    validationSchema: yup.object({
+      rows: yup
+        .array()
+        .of(
+          yup.object().shape({
+            minRate: yup.string().required('minRate is required'),
+            maxRate: yup.string().required('maxRate is required'),
+            rate: yup.string().required('rate is required'),
+            rateCalcMethodName: yup.string().required('rateCalcMethod is required')
+          })
+        )
+        .required('rows array is required')
+    }),
+    initialValues: {
+      rows: [
+        {
+          id: 1,
+          currencyId: null,
+          raCurrencyId: null,
+          rateTypeId: null,
+          plantId: null,
+          plantName: '',
+          rateCalcMethod: null,
+          rateCalcMethodName: '',
+          minRate: null,
+          maxRate: null,
+          rate: null
+        }
+      ]
     },
     onSubmit: values => {
       postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
@@ -187,7 +211,6 @@ const CTExchangeRates = () => {
 
   useEffect(() => {
     getAllPlants()
-    fillRcmStore()
     formik.setFieldValue('rateAgainst', '1')
     getDefaultBaseCurrencyId()
   }, [])
@@ -203,7 +226,7 @@ const CTExchangeRates = () => {
   }
 
   const getExchangeRates = (cuId, rateTypeId, raCurrencyId, formik) => {
-    formik.setValues({ rows: [] })
+    formik.setFieldValue('rows', [])
     if (cuId && rateTypeId) {
       const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
       getRequest({
@@ -213,7 +236,7 @@ const CTExchangeRates = () => {
         .then(values => {
           //step 1: display all plants
 
-          // Create a mapping of commissionId to values entry for efficient lookup
+          // Create a mapping of plantId to values entry for efficient lookup
           const valuesMap = values.list.reduce((acc, fee) => {
             acc[fee.plantId] = fee
 
@@ -221,10 +244,11 @@ const CTExchangeRates = () => {
           }, {})
 
           // Combine exchangeTable and values
-          const rows = plantStore.map(plant => {
+          const rows = plantStore.map((plant, index) => {
             const value = valuesMap[plant.recordId] || 0
 
             return {
+              id: index,
               currencyId: cuId,
               raCurrencyId: raCurrencyId,
               rateTypeId: rateTypeId,
@@ -237,20 +261,17 @@ const CTExchangeRates = () => {
               maxRate: value.maxRate
             }
           })
-          formik.setValues({ rows })
+
+          formik.setValues({
+            ...formik.values,
+            rows: rows
+          })
         })
 
         .catch(error => {
           setErrorMessage(error)
         })
     }
-  }
-
-  const fillRcmStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.MC_RATE_CALC_METHOD,
-      callback: setRcmStore
-    })
   }
 
   const getDefaultBaseCurrencyId = () => {
@@ -286,7 +307,10 @@ const CTExchangeRates = () => {
       }
     })
 
-    formik.setValues({ rows })
+    formik.setValues({
+      ...formik.values,
+      rows: rows
+    })
   }
 
   return (
@@ -405,6 +429,18 @@ const CTExchangeRates = () => {
                   {formik.values.currencyId != null && formik.values.puRateTypeId != null && (
                     <Grid xs={12} sx={{ pt: 2 }}>
                       <Box>
+                        <DataGrid
+                          onChange={value => puFormik.setFieldValue('rows', value)}
+                          value={puFormik.values.rows}
+                          error={puFormik.errors.rows}
+                          columns={exchangeRatesInlineGridColumns}
+                          allowDelete={false}
+                          height={`${height - 300}px`}
+                          allowAddNewLine={false}
+                        />
+                      </Box>
+
+                      {/* <Box>
                         <InlineEditGrid
                           gridValidation={puFormik}
                           columns={exchangeRatesInlineGridColumns}
@@ -414,7 +450,7 @@ const CTExchangeRates = () => {
                           scrollable={true}
                           scrollHeight={`${height - 300}px`}
                         />
-                      </Box>
+                      </Box> */}
                     </Grid>
                   )}
                 </FieldSet>
@@ -460,7 +496,17 @@ const CTExchangeRates = () => {
                   </Grid>
                   {formik.values.currencyId != null && formik.values.saRateTypeId != null && (
                     <Grid xs={12} sx={{ pt: 2 }}>
-                      <Box>
+                      <DataGrid
+                        onChange={value => saFormik.setFieldValue('rows', value)}
+                        value={saFormik.values.rows}
+                        error={saFormik.errors.rows}
+                        columns={exchangeRatesInlineGridColumns}
+                        allowDelete={false}
+                        height={`${height - 300}px`}
+                        allowAddNewLine={false}
+                      />
+
+                      {/* <Box>
                         <InlineEditGrid
                           gridValidation={saFormik}
                           columns={exchangeRatesInlineGridColumns}
@@ -470,7 +516,7 @@ const CTExchangeRates = () => {
                           scrollable={true}
                           scrollHeight={`${height - 300}px`}
                         />
-                      </Box>
+                      </Box> */}
                     </Grid>
                   )}
                 </FieldSet>
@@ -488,7 +534,7 @@ const CTExchangeRates = () => {
             textAlign: 'center'
           }}
         >
-          <WindowToolbar onSave={handleSubmit} smallBox={true} />
+          <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
         </Grid>
       </CustomTabPanel>
 

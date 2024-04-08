@@ -1,12 +1,12 @@
 // ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import PlantForm from '../Forms/PlantForm'
-import AddressForm from '../Forms/AddressForm'
 import { useContext, useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import toast from 'react-hot-toast'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 const PlantWindow = ({
   labels,
@@ -28,10 +28,10 @@ const PlantWindow = ({
 
   async function onSubmit (address){
 
-    const addressId = address.recordId
+    const addressId = address.addressId
     if(!store.plant.addressId){
 
-    const res = { ...store.plant , addressId :address?.recordId}
+    const res = { ...store.plant , addressId : addressId}
     if(res){
     const data = {...res  , recordId:  store?.recordId}
      await  postRequest({

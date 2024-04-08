@@ -15,7 +15,6 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import FormShellDocument from 'src/components/Shared/formShellDocument'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import {
   formatDateToApi,
@@ -79,24 +78,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
 
         if (!functionId && !seqNo && !recordId && responseValue !== null) {
           toast.success('Record Added Successfully')
-
-          // setInitialData({
-          //   ...obj, // Spread the existing properties
-          //   recordId: response.recordId, // Update only the recordId field
-          //   response: responseValue,
-
-          //    date:formatDateDefault(obj.date)
-          // });
         } else {
-          //  setInitialData({
-          //    ...obj, // Spread the existing properties
-          //    recordId: response.recordId, // Update only the recordId field
-          //    response: responseValue,
-          //     date:formatDateDefault(obj.date)
-
-          //  });
-          console.log(obj)
-
           toast.success('Record Edited Successfully')
         }
         setWindowOpen(false)
@@ -129,6 +111,27 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Reject',
+      condition: true,
+      onClick: () => {
+        setConfirmationWindowOpen(true)
+        setResponseValue(-1)
+      },
+      disabled: false
+    },
+    {
+      key: 'Approve',
+      condition: true,
+      onClick: () => {
+        setConfirmationWindowOpen(true)
+        setResponseValue(2)
+      },
+      disabled: false
+    }
+  ]
+
   return (
     <>
       <ConfirmationDialog
@@ -140,19 +143,15 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
           setConfirmationWindowOpen(false)
         }}
       />
-      <FormShellDocument
+      <FormShell
+        actions={actions}
         resourceId={ResourceIds.DocumentsOnHold}
         form={formik}
         height={300}
         maxAccess={maxAccess}
-        onReject={() => {
-          setConfirmationWindowOpen(true)
-          setResponseValue(-1)
-        }}
-        onApprove={() => {
-          setConfirmationWindowOpen(true)
-          setResponseValue(2)
-        }}
+        isCleared={false}
+        isInfo={false}
+        isSaved={false}
       >
         <Grid container spacing={4}>
           <Grid item xs={12}>
@@ -198,7 +197,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
             />
           </Grid>
         </Grid>
-      </FormShellDocument>
+      </FormShell>
     </>
   )
 }
