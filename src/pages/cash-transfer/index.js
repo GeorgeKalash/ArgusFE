@@ -223,7 +223,7 @@ const CashTransfer = () => {
         recordId: recordId ? recordId : null
       },
       width: 950,
-      height: 600,
+      height: 620,
       title: 'Cash Transfer'
     })
   }

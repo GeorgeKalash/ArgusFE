@@ -14,6 +14,7 @@ export const ResourceLookup = ({
   secondValueShow,
   errorCheck,
   filter = {},
+  viewHelperText = true,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -50,8 +51,7 @@ export const ResourceLookup = ({
   const _secondValue = secondValue || (secondValueShow ? form.values[secondValueShow] : form.values[name])
 
   const error = form?.touched && form.touched[check] && Boolean(form.errors[check])
-  const helperText = form?.touched && form.touched[check] && form.errors[check]
-
+  const helperText = viewHelperText && form?.touched && form.touched[check] && form.errors[check]
   useEffect(() => {
     setStore([])
   }, [_firstValue])

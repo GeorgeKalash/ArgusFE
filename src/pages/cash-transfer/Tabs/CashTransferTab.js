@@ -73,11 +73,11 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fromCashAccountId: yup.string().required(' '),
-      fromPlantId: yup.string().required(' '),
-      date: yup.string().required(' '),
-      toPlantId: yup.string().required(' '),
-      toCashAccountId: yup.string().required(' ')
+      fromCashAccountId: yup.string().required(),
+      fromPlantId: yup.string().required(),
+      date: yup.string().required(),
+      toPlantId: yup.string().required(),
+      toCashAccountId: yup.string().required()
     }),
     onSubmit: async values => {
       const copy = { ...values }
@@ -335,6 +335,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 filter={{ plantId: formik.values.toPlantId }}
                 valueShow='toCARef'
                 secondValueShow='toCAName'
+                viewHelperText={false}
                 onChange={(event, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('toCashAccountId', newValue?.recordId)
