@@ -10,7 +10,7 @@ const CustomNumberField = ({
   size = 'small',
   label,
   readOnly = false,
-  decimalScale = 0,
+  decimalScale = 2,
   onChange,
   onClear,
   hidden = false,
