@@ -142,6 +142,7 @@ const ProductCountriesForm = ({
     <FormShell form={formik}
       resourceId={ResourceIds.ProductMaster}
       maxAccess={maxAccess}
+      infoVisible={false}
       editMode={editMode}>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
         <DataGrid

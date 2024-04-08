@@ -1,32 +1,39 @@
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function ResourceLookupEdit({ id, field, value, updateRow, column: { props } , update }) {
-
-return (
+export default function ResourceLookupEdit({ id, value, updateRow, column: { props }, update, field }) {
+  return (
     <ResourceLookup
       autoFocus
       label={''}
-      endpointId={props.endpointId}
-      parameters={props.parameters}
       hasBorder={false}
       displayFieldWidth={props.displayFieldWidth}
       firstFieldWidth='100%'
       valueField={props.valueField}
       displayField={props.displayField}
       columnsInDropDown={props.columnsInDropDown}
-      name='field'
+      firstValue={value}
+      secondValue={value}
       form={{
-        values: {
-          field: value
-        }
+        values: {}
       }}
       secondDisplayField={false}
       onChange={(e, value) => {
-        let changes = props.mapping.map(({ from, to }) => ({
-          [to]: value ? value[from] : ''
-        })).reduce((acc, obj) => ({ ...acc, ...obj }), {});
-        updateRow({ id, changes })
+        if (props?.mapping) {
+          let changes = props.mapping
+            .map(({ from, to }) => ({
+              [to]: value ? value[from] : ''
+            }))
+            .reduce((acc, obj) => ({ ...acc, ...obj }), {})
+          updateRow({ id, changes })
+        } else {
+          update({
+            id,
+            field,
+            value: value || ''
+          })
+        }
       }}
+      {...props}
     />
   )
 }

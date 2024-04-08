@@ -131,6 +131,7 @@ return (
           form={formik}
           resourceId={ResourceIds.Correspondent}
           maxAccess={maxAccess}
+          infoVisible={false}
           editMode={editMode} >
           <DataGrid
             onChange={value => formik.setFieldValue('countries', value)}

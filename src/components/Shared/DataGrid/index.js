@@ -5,13 +5,16 @@ import {
   useGridApiRef
 } from '@mui/x-data-grid'
 import components from './components'
-import { Box, Button, IconButton } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useError } from 'src/error'
 import DeleteDialog from '../DeleteDialog'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 export function DataGrid({
   idName = 'id',
+  name,
+  maxAccess,
   columns,
   value,
   error,
@@ -29,7 +32,7 @@ export function DataGrid({
 
     let updatedRow = { ...newRow }
 
-    if (column.onChange)
+    if (column?.onChange)
       await column.onChange({
         row: {
           newRow,
@@ -57,6 +60,8 @@ export function DataGrid({
   const [isUpdatingField, setIsUpdating] = useState(false)
 
   const [nextEdit, setNextEdit] = useState(null)
+
+  const skip = allowDelete ? 1 : 0
 
   useEffect(() => {
     if (!isUpdatingField && nextEdit) {
@@ -87,13 +92,13 @@ export function DataGrid({
       return
     }
     const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-    const columns = apiRef.current.getAllColumns()
+    const columns = apiRef.current.getVisibleColumns()
 
     const nextCell = findCell(params)
 
     const currentCell = { ...nextCell }
 
-    if (nextCell.columnIndex === columns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
+    if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
       if (error || !allowAddNewLine) {
         event.stopPropagation()
 
@@ -106,7 +111,7 @@ export function DataGrid({
         field: columns[nextCell.columnIndex].field
       })
 
-    if (nextCell.columnIndex === columns.length - 2 && nextCell.rowIndex === rowIds.length - 1) {
+    if (nextCell.columnIndex === columns.length - 1 - skip && nextCell.rowIndex === rowIds.length - 1) {
       addRow()
     }
 
@@ -123,10 +128,10 @@ export function DataGrid({
 
     process.nextTick(() => {
       const rowIds = gridExpandedSortedRowIdsSelector(apiRef.current.state)
-      const columns = apiRef.current.getAllColumns()
+      const columns = apiRef.current.getVisibleColumns()
 
       if (!event.shiftKey) {
-        if (nextCell.columnIndex < columns.length - 2) {
+        if (nextCell.columnIndex < columns.length - 1 - skip) {
           nextCell.columnIndex += 1
         } else {
           nextCell.rowIndex += 1
@@ -150,7 +155,9 @@ export function DataGrid({
   }
 
   function addRow() {
-    const highestIndex =  value?.length ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1 : 1
+    const highestIndex = value?.length
+      ? value.reduce((max, current) => (max[idName] > current[idName] ? max : current))[idName] + 1
+      : 1
 
     const defaultValues = Object.fromEntries(
       columns.filter(({ name }) => name !== idName).map(({ name, defaultValue }) => [name, defaultValue])
@@ -165,16 +172,15 @@ export function DataGrid({
     ])
   }
 
-  useEffect(()=>{
-    if (!value?.length) {
-      addRow();
-     }
-  },[value])
+  useEffect(() => {
+    if (!value?.length && allowAddNewLine) {
+      addRow()
+    }
+  }, [value])
 
-
-   function deleteRow(deleteId) {
+  function deleteRow(deleteId) {
     const newRows = value.filter(({ id }) => id !== deleteId)
-     onChange(newRows)
+    onChange(newRows)
   }
 
   const actionsColumn = {
@@ -182,11 +188,16 @@ export function DataGrid({
     editable: false,
     flex: 0,
     width: '20',
-    renderCell({ id : idName }) {
+    renderCell({ id: idName }) {
       return (
-          <IconButton disabled={disabled} tabIndex='-1' icon='pi pi-trash' onClick={() => setDeleteDialogOpen([true,  idName])}>
-            <GridDeleteIcon />
-          </IconButton>
+        <IconButton
+          disabled={disabled}
+          tabIndex='-1'
+          icon='pi pi-trash'
+          onClick={() => setDeleteDialogOpen([true, idName])}
+        >
+          <GridDeleteIcon />
+        </IconButton>
       )
     }
   }
@@ -249,14 +260,11 @@ export function DataGrid({
 
   return (
     <Box sx={{ height: height ? height : 'auto', width: '100%', overflow: 'auto' }}>
-      {' '}
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
         autoHeight={height ? false : true}
         columnResizable={false}
-
-        // autoWidth
         disableColumnFilter
         disableColumnMenu
         disableColumnSelector
@@ -272,7 +280,7 @@ export function DataGrid({
           setIsUpdating(true)
           const updated = await processDependenciesForColumn(newRow, oldRow, currentEditCell.current)
 
-          const change = handleRowChange(updated)
+          const change = handleRowChange(updated, oldRow)
 
           setIsUpdating(false)
 
@@ -289,6 +297,11 @@ export function DataGrid({
         }}
         onCellKeyDown={handleCellKeyDown}
         columnVisibilityModel={{
+          ...Object.fromEntries(
+            columns
+              .filter(({ name: fieldName }) => accessLevel({ maxAccess, name: `${name}.${fieldName}` }) === HIDDEN)
+              .map(({ name }) => [name, false])
+          ),
           actions: allowDelete
         }}
         rows={value}
@@ -305,8 +318,6 @@ export function DataGrid({
             headerName: column.label || column.name,
             editable: !disabled,
             flex: column.flex || 1,
-
-            // width: column.width || 170,
             sortable: false,
             renderCell(params) {
               const Component =
@@ -327,7 +338,6 @@ export function DataGrid({
                     border: `1px solid ${error?.[cell.rowIndex]?.[params.field] ? '#ff0000' : 'transparent'}`
                   }}
                 >
-
                   <Component {...params} column={column} />
                 </Box>
               )
@@ -336,34 +346,50 @@ export function DataGrid({
               const Component =
                 typeof column.component === 'string' ? components[column.component].edit : column.component.edit
 
-            return (
-              <Box
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  padding: '0 0px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: (column.component === 'checkbox'|| column.component === 'button') && 'center',
+              const maxAccessName = `${name}.${column.name}`
 
-                }}
-              >
-                <Component {...params} column={column} update={update} updateRow={updateRow} isLoading={isUpdatingField} />
-              </Box>
-            )
-          }
-        })),
-       actionsColumn
-      ]}
-    />
-    <DeleteDialog
-            open={deleteDialogOpen}
-            onClose={() => setDeleteDialogOpen([false, {}])}
-            onConfirm={obj => {
-              setDeleteDialogOpen([false, {}])
-              deleteRow(obj)
-            }}
-          />
+              const props = {
+                ...column.props,
+                name: maxAccessName,
+                maxAccess
+              }
+
+              return (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    padding: '0 0px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: (column.component === 'checkbox' || column.component === 'button') && 'center'
+                  }}
+                >
+                  <Component
+                    {...params}
+                    column={{
+                      ...column,
+                      props
+                    }}
+                    update={update}
+                    updateRow={updateRow}
+                    isLoading={isUpdatingField}
+                  />
+                </Box>
+              )
+            }
+          })),
+          actionsColumn
+        ]}
+      />
+      <DeleteDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen([false, {}])}
+        onConfirm={obj => {
+          setDeleteDialogOpen([false, {}])
+          deleteRow(obj)
+        }}
+      />
     </Box>
   )
 }

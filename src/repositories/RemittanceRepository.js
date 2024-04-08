@@ -122,5 +122,9 @@ export const RemittanceSettingsRepository = {
     get: service + 'getSI',
     set: service + 'setSI',
     del: service + 'delSI'
+  },
+  CorrespondentControl: {
+    qry: service + 'qryCCL',
+    set: service + 'set2CCL'
   }
 }

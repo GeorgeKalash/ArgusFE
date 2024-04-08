@@ -12,11 +12,11 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
       newValue = newValue.replace(/[^0-9.]/g, '')
       const _newValue = getNumberWithoutCommas(newValue)
 
-      return _newValue;
+      return _newValue
     }
   }
 
-return (
+  return (
     <CustomNumberField
       value={value}
       label={''}
@@ -28,17 +28,17 @@ return (
         update({
           id,
           field,
-          value: handleNumberFieldNewValue(
-            e.target.value?.split(',')?.join(''),
-            value
-          )
+          value: handleNumberFieldNewValue(e.target.value?.split(',')?.join(''), value)
         })
       }}
-      onClear={() =>api.current.setEditCellValue({
-        id,
-        field,
-        value: ''
-      })}
+      onClear={() =>
+        api.current.setEditCellValue({
+          id,
+          field,
+          value: ''
+        })
+      }
+      {...props}
     />
   )
 }

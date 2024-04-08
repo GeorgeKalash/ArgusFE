@@ -172,6 +172,7 @@ return (
   <FormShell
     form={formik}
     resourceId={ResourceIds.Correspondent}
+    infoVisible={false}
     maxAccess={maxAccess}
     editMode={editMode} >
 

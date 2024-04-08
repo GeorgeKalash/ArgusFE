@@ -226,6 +226,7 @@ return (
   <FormShell
   form={formik}
   resourceId={ResourceIds.Correspondent}
+  infoVisible={false}
   maxAccess={maxAccess}
   editMode={editMode} >
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>

@@ -4,8 +4,6 @@ import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import Paper from '@mui/material/Paper'
 
-
-
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
   name,
@@ -29,7 +27,7 @@ const CustomComboBox = ({
   sx,
   columnsInDropDown,
   editMode = false,
-  hasBorder=true,
+  hasBorder = true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -53,11 +51,14 @@ const CustomComboBox = ({
       options={store}
       key={value}
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
-      getOptionLabel={(option , value )=> {
+      getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
-         const text = displayField.map(header => option[header]).filter(item => item).join(' ');
+          const text = displayField
+            .map(header => option[header])
+            .filter(item => item)
+            .join(' ')
 
-        if(text) return text
+          if (text) return text
         }
         if (typeof option === 'object') {
           return `${option[displayField]}`
@@ -71,28 +72,24 @@ const CustomComboBox = ({
       }}
       filterOptions={(options, { inputValue }) => {
         if (columnsInDropDown) {
-          return options.filter((option) =>
-            columnsInDropDown.map(header => header.key).some((field) =>
-              option[field]?.toLowerCase().includes(inputValue?.toLowerCase())
-            )
-          );
+          return options.filter(option =>
+            columnsInDropDown
+              .map(header => header.key)
+              .some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+          )
         } else {
-          var displayFields =''
+          var displayFields = ''
           if (Array.isArray(displayField)) {
-           displayFields = displayField
-          }else{
+            displayFields = displayField
+          } else {
             displayFields = [displayField]
           }
 
-          return options.filter((option) =>
-          displayFields.some((field) =>
-          option[field]?.toLowerCase().includes(inputValue?.toLowerCase())
+          return options.filter(option =>
+            displayFields.some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
           )
-        );
-
         }
       }}
-
       isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
       onChange={onChange}
       fullWidth={fullWidth}
@@ -150,17 +147,16 @@ const CustomComboBox = ({
           InputProps={{
             ...params.InputProps,
             style: {
-              border: 'none', // Set width to 100%
-            },
+              border: 'none' // Set width to 100%
+            }
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                border: !hasBorder && 'none', // Hide border
-              },
-            },
+                border: !hasBorder && 'none' // Hide border
+              }
+            }
           }}
-
         />
       )}
     />
