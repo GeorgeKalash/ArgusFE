@@ -17,7 +17,7 @@ const IdTypesWindow = ({
 
   const [store , setStore] = useState({
     recordId : recordId || null,
-    countries: []
+    IdField: null,
   })
 
   const tabs = [
@@ -40,13 +40,13 @@ const IdTypesWindow = ({
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
         <IdFieldsForm
-          labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
-          maxAccess={maxAccess}
           store={store}
-          expanded={expanded}
+          setStore={setStore}
+          labels={labels}
+          maxAccess={maxAccess}
           height={height}
+          expanded={expanded}
+          editMode={editMode}
         />
       </CustomTabPanel>
     </>

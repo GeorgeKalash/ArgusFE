@@ -1,178 +1,153 @@
+import { Box } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 
 // ** Custom Imports
+import * as yup from 'yup'
+import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import toast from 'react-hot-toast'
-import * as yup from 'yup'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataSets } from 'src/resources/DataSets'
 
 const IdFieldsForm = ({
   store,
-  maxAccess,
+  setStore,
   labels,
+  editMode,
+  height,
   expanded,
-  editMode
+  maxAccess
 }) => {
-  const {recordId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
+  const {recordId : idtId } = store
 
   const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-
-    // validationSchema: yup.object({ rows: yup
-    //   .array()
-    //   .of(
-    //     yup.object().shape({
-    //       accessLevel: yup
-    //         .object()
-    //         .shape({
-    //           recordId: yup.string().required(' ')
-    //         })
-    //         .required(' '),
-    //     })
-    //   ).required(' ') }),
-    initialValues: {
-        rows: [
-          {
-            id: 1,
-            idtId: recordId,
+      enableReinitialize: false,
+      validateOnChange: true,
+      validationSchema: yup.object({ IdField: yup
+        .array()
+        .of(
+          yup.object().shape({
+            accessLevel: yup.string().required('Access Level recordId is required')
+          })
+        ).required('Operations array is required') }),
+      initialValues: {
+        IdField: [
+          { id :1,
+            idtId: idtId,
             accessLevel: null,
-            controlId: '',
-            accessLevelId: null,
-            accessLevelName: ''
+            accessLevel: null,
+            accessLevelName: '',
+            controlId: ''
           }
         ]
-    },
-    onSubmit: values => {
-      postIdFields(values)
-    }
-  })
-  
-  const postIdFields = obj => {console.log(obj)
-
-    const data = {
-      idtId: recordId,
-      items: obj.rows.map(row => ({
-        idtId: recordId,
-        controlId: row.controlId,
-        accessLevel: Number(row.accessLevelId)
-      }))
-    }
-
-    postRequest({
-      extension: CurrencyTradingSettingsRepository.IdFields.set2,
-      record: JSON.stringify(data)
-    })
-    console.log(data)
-      .then(res => {
-          setStore(prevStore => ({
-          ...prevStore,
-          rows: obj?.rows
-        }));
-            toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }  
-
-  useEffect(()=>{
-    const defaultParams = `_idtId=${recordId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.IdFields.qry,
-      parameters: parameters
-    })
-    .then(res => {console.log(res)
-      if (res?.list?.length > 0) {
-        formik.setValues({
-          rows: res.list.map(({ accessLevel, ...rest }, index) => ({
-            id: index + 1,
-            idtId: recordId,
-            accessLevelId: accessLevel.toString(),
-            ...rest
-          }))
-        })
-        setStore(prevStore => ({
-          ...prevStore,
-            rows: res?.list
-        }))
-      } else {
-        formik.setValues({
-          rows: [
-            { 
-              id: 1 ,
-              idtId: recordId, 
-              controlId: '',
-              accessLevelId: null,
-              accessLevelName: ''
-            }
-          ]
-        })
+      },
+      onSubmit: values => {
+        postIdFields(values.IdField)
       }
     })
-    .catch(error => {
-    })
 
-  },[recordId])
+    const postIdFields = obj => {
+
+      const data = {
+        idtId: idtId,
+        items : obj.map(
+          ({ accessLevel, controlId} ) => ({
+              idtId: idtId,
+              accessLevel: Number(accessLevel),
+              controlId: controlId
+          })
+        )
+      }
+      postRequest({
+        extension: CurrencyTradingSettingsRepository.IdFields.set2,
+        record: JSON.stringify(data)
+      })
+        .then(res => {
+          if (res) toast.success('Record Edited Successfully')
+          getIdField(idtId)
+        })
+        .catch(error => {
+        })
+    }
+
+    const column = [
+      {
+        component: 'textfield',
+        label: labels.control,
+        name: 'controlId',
+        mandatory: true
+      },
+      {
+        component: 'resourcecombobox',
+        label: labels.accessLevel,
+        name: 'accessLevel',
+        props: {
+          datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
+          valueField: 'key',
+          displayField: 'value',
+          mapping: [ 
+            { from: 'value', to: 'accessLevelName' },
+            { from: 'key', to: 'accessLevel' } 
+          ],
+          columnsInDropDown: [
+            { key: 'key', value: 'Key' },
+            { key: 'value', value: 'Value' },
+          ]
+        }
+      }    
+    ]
+    useEffect(()=>{
+      idtId  && getIdField(idtId)
+    }, [idtId])
+
+    const getIdField = idtId => {
+      const defaultParams = `_idtId=${idtId}`
+      var parameters = defaultParams
+      getRequest({
+        extension: CurrencyTradingSettingsRepository.IdFields.qry,
+        parameters: parameters
+      })
+        .then(res => {
+          if (res.list.length > 0){
+             const IdField = res.list.map(({ accessLevel, ...rest } , index) => ({
+               id : index,
+               accessLevel: accessLevel.toString(),
+               ...rest
+            }))
+            formik.setValues({ IdField: IdField})
+
+          setStore(prevStore => ({
+            ...prevStore,
+            IdField: IdField,
+          }));
+          }
+        })
+        .catch(error => {
+        })
+    }
 
   return (
-    <>
-      <FormShell
-        form={formik}
-        resourceId={ResourceIds.IdTypes}
-        maxAccess={maxAccess}
-        editMode={editMode} 
-        isInfo={false}
-      >
+    <FormShell 
+      form={formik}
+      resourceId={ResourceIds.IdTypes}
+      maxAccess={maxAccess}
+      infoVisible={false}
+      editMode={editMode}
+    >
+      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
         <DataGrid
-          onChange={value => formik.setFieldValue('rows', value)}
-          value={formik.values.rows}
-          error={formik.errors.rows}
-          columns={[
-            {
-              component: 'textfield',
-              label: labels.control,
-              name: 'controlId',
-              mandatory: true
-            },
-            {
-              component: 'resourcecombobox',
-              name: 'accessLevel',
-              label: labels.accessLevel,
-                props: {
-                  datasetId: DataSets.ACCESS_LEVEL,
-                  valueField: 'key',
-                  displayField: 'value',
-                  columnsInDropDown: [
-                    { key: 'value', value: 'Value' },
-                  ]
-                },
-              async onChange({ row: { update, newRow } }) {
-                if(!newRow?.accessLevel?.key){
-                return
-                }else{
-                  update({
-                    'accessLevelName':newRow?.accessLevel?.value,
-                    'accessLevelId': newRow?.accessLevel?.key 
-                  })
-                }
-              }
-            },
-            
-          ]}
-          height={`${expanded ? height-300 : 350}px`}
+          onChange={value => formik.setFieldValue('IdField', value)}
+          value={formik.values.IdField}
+          error={formik.errors.IdField}
+          columns={column}
+          height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
         />
-      </FormShell>
-    </>
+      </Box>
+    </FormShell>
   )
 }
 
