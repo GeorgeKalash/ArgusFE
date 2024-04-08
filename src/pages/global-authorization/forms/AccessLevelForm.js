@@ -59,6 +59,7 @@ export default function AccessLevelForm ({
           console.log(updatedData)
           updatedData.forEach(item => {
             console.log('item')
+            item.accessLevel != "" ? item.accessLevel = item.accessLevel : item.accessLevel = 0
             console.log(item)
             postRequest({
               extension: AccessControlRepository.AuthorizationResourceGlobal.set,
@@ -110,6 +111,7 @@ export default function AccessLevelForm ({
             formik && formik.setFieldValue('accessLevel', newValue?.key)
           }}
           error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
+          editable = {false}
           
           //helperText={formik.touched.accessLevel && formik.errors.accessLevel}
         />

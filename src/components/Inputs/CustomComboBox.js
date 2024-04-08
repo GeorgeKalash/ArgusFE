@@ -28,6 +28,7 @@ const CustomComboBox = ({
   columnsInDropDown,
   editMode = false,
   hasBorder = true,
+  editable = true,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
@@ -138,6 +139,7 @@ const CustomComboBox = ({
         <TextField
           {...params}
           type={type}
+          onKeyDown={(e) => !editable && e.preventDefault()}
           variant={variant}
           label={label}
           required={_required}
@@ -148,13 +150,17 @@ const CustomComboBox = ({
             ...params.InputProps,
             style: {
               border: 'none' // Set width to 100%
-            }
+            },
+
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
                 border: !hasBorder && 'none' // Hide border
               }
+            },
+            '& .MuiAutocomplete-clearIndicator': {
+              display: !editable && 'none'
             }
           }}
         />

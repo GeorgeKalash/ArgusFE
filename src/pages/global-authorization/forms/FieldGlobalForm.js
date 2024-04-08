@@ -43,16 +43,21 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
 
       const updatedRows = detailsFormik.values.rows
         .filter(obj => {
-          return obj.accessLevelCombo.key != null
-        })
-        .map(({ accessLevelCombo, controlId }) => {
+          return obj.accessLevel != null
+        }).map(({ ...rest }) => ({
+          resourceId: resourceId,
+          ...rest
+        }))
+
+        /*.map(({ accessLevelCombo, controlId }) => {
           return {
             controlId: controlId,
             accessLevel: accessLevelCombo?.key,
             accessLevelName: accessLevelCombo?.value,
             resourceId: resourceId
           }
-        })
+        })*/
+        console.log('list')
 
         console.log(updatedRows)
 
@@ -99,13 +104,9 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
       props: {
         datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
         valueField: 'key',
-        displayField: 'value'
-
-        //fieldsToUpdate: [ { from: 'name', to: 'countryName' } ],
-        /*columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
-        ]*/
+        displayField: 'value',
+        mapping: [ { from: 'key', to: 'accessLevel' } ,
+          { from: 'value', to: 'accessLevelName' }]
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.accessLevelCombo?.key) {
@@ -160,12 +161,8 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
           
           detailsFormik.setValues({
             ...detailsFormik.values,
-            rows: finalList.map(({ accessLevel, accessLevelName, ...rest }, index) => ({
+            rows: finalList.map(({ ...rest }, index) => ({
               id: index + 1,
-              accessLevelCombo: {
-                key: accessLevel,
-                value: accessLevelName
-              },
               ...rest
             }))
           })

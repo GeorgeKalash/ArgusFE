@@ -21,7 +21,8 @@ export default function ResourceGlobalForm ({
   labels,
   maxAccess,
   resourceName,
-  resourceId
+  resourceId,
+  moduleId
 })
 {
 
@@ -30,9 +31,10 @@ export default function ResourceGlobalForm ({
     //const [editMode, setEditMode] = useState(!!recordId)
 
     const [initialValues, setInitialData] = useState({
-      resourceId: null,
+      resourceId: resourceId,
+      resourceName: resourceName,
       accessLevel: '',
-      moduleId: null,
+      moduleId: moduleId,
       accessLevelName: ''
    })
 
@@ -49,15 +51,10 @@ export default function ResourceGlobalForm ({
         enableReinitialize: true,
         validateOnChange: true,
         validationSchema: yup.object({
-          accessLevel: yup.string().required('')
-
-          //reference: yup.string().required('This field is required'),
-          //decimals: yup.string().required('This field is required'),
-          //currencyType: yup.string().required('This field is required'),
-          //profileId: yup.string().required('This field is required')
+          accessLevel: yup.string().required(' ')
         }),
         onSubmit: async obj => {
-          //const recordId = obj.recordId
+          console.log('data')
           console.log(obj)
           
           const response = await postRequest({
@@ -65,21 +62,13 @@ export default function ResourceGlobalForm ({
             record: JSON.stringify(obj)
           })
 
-          /*if (!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
-            });
-          }
-          else {toast.success('Record Edited Successfully')
-          setEditMode(true)
-            } */
-
           toast.success('Record Edited Successfully')
           invalidate()
         }
       })
+
+      console.log('formik')
+      console.log(formik)
 
       useEffect(() => {
         ;(async function () {
@@ -92,8 +81,9 @@ export default function ResourceGlobalForm ({
                 extension: AccessControlRepository.AuthorizationResourceGlobal.get,
                 parameters: `_resourceId=${resourceId}`
               })
+              console.log('data')
               console.log(res.record)
-              setInitialData(res.record)
+              if(res.record) setInitialData(res.record)
             }
           } catch (exception) {
             setErrorMessage(error)
@@ -150,15 +140,14 @@ export default function ResourceGlobalForm ({
           valueField='key'
           displayField='value'
           values={formik.values}
-          
-          //values={{ accessLevel: filters.accessLevel ?? 10 }}
           required
           maxAccess={maxAccess}
           onChange={(event, newValue) => {
-            formik && formik.setFieldValue('accessLevel', newValue?.key)
+            formik && formik.setFieldValue('accessLevel', newValue?.key || '')
           }}
           error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
-          
+          editable = {false}
+
           //helperText={formik.touched.accessLevel && formik.errors.accessLevel}
         />
       </Grid>

@@ -21,7 +21,7 @@ const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const [errorMessage, setErrorMessage] = useState(null)
-  const [moduleIdSelection, setModuleIdSelection] = useState() //check new way
+  const [moduleIdSelection, setModuleIdSelection] = useState(10) //check new way
 
   async function fetchGridData() {
     return await getRequest({
@@ -86,6 +86,8 @@ const GlobalAuthorization = () => {
 
 
   function openResourceGlobal(row) {
+    console.log('mod')
+    console.log(moduleIdSelection)
     stack({
       Component: ResourceGlobalForm,
       props: {
@@ -93,7 +95,8 @@ const GlobalAuthorization = () => {
         labels: labels,
         maxAccess: access,
         resourceId: row.key,
-        resourceName: row.value
+        resourceName: row.value,
+        moduleId: moduleIdSelection
       },
       width: 450,
       height: 300,
