@@ -122,63 +122,47 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const apiRef = useRef(null)
+  const [rowHeights, setRowHeights] = useState({})
 
-  // Effect to set row height based on column heights
   useEffect(() => {
-    if (apiRef.current) {
-      const columnHeights = {}
-
-      // Get heights of each column
-      gridData.list.forEach(column => {
-        console.log(column)
-        const columnId = column.recordId
-        const sms = column.smsBody
-
-        console.log(columnId)
-
-        // const columnElement = apiRef.current.getColumn(sms)
-        // console.log('columnElement', columnElement)
-
-        // Get the rendered cell element
-        const columnElements = apiRef.current.getColumn(columnId)
-
-        // columnElements.parentElement
-        console.log(columnElements)
-
-        // Check if the column element exists
-        if (columnElements) {
-          // Set the height of the column element (adjust height value as needed)
-          columnElements.style.height = '500px' // Example height value
-        } else {
-          console.log(apiRef.current)
-        }
-
-        // Set the content of the hidden div to the smsBody content
-        apiRef.current.innerText = sms
-
-        // console.log('Height of smsBody content:', cellElement)
-
-        // Measure the height of the text
-        const textHeight = apiRef.current.style
-
-        // setTimeout(() => {
-        //   const textHeight = apiRef.current.offsetHeight
-        //   console.log('Height of smsBody content:', textHeight)
-        // }, 0)
-
-        // Log or use the measured height as needed
-        console.log('Height of smsBody content style:', textHeight)
-
-        // columnHeights[columnId] = columnElement.computedWidth // Change to 'height' if using rowHeight
-        // apiRef.current.setRowHeight(columnId, 300) // Set row height for all rows
-      })
-
-      // Set row height based on maximum column height
-      // const maxColumnHeight = Math.max(...Object.values(columnHeights))
-
-      // apiRef.current.setRowHeight(columnId, maxColumnHeight) // Set row height for all rows
-    }
+    const newHeights = {}
+    gridData.list.forEach(column => {
+      const sms = column.smsBody
+      const element = document.querySelector(`[data-field="smsBody"]`)
+      console.log(element)
+      if (element) {
+        const elementHeight = element.offsetHeight
+        newHeights[column.recordId] = elementHeight
+        console.log(newHeights)
+      } else {
+        console.log(`Element with data-field "${sms}" not found.`)
+      }
+    })
+    setRowHeights(newHeights)
   }, [gridData])
+
+  // Custom row renderer to set row heights
+  const CustomRowRenderer = ({ row, ...props }) => {
+    // const height = rowHeights[row.id] || 'auto'
+    ;<div
+      class='MuiDataGrid-cell MuiDataGrid-cell--textLeft MuiDataGrid-withBorderColor'
+      role='cell'
+      data-field='smsBody'
+      data-colindex='3'
+      aria-colindex='4'
+      aria-colspan='1'
+      tabindex='-1'
+      style='min-width: 195px; max-width: 195px; min-height: auto; max-height: none;'
+    >
+      <div
+        class='MuiDataGrid-cellContent'
+        title='Marius (07 88 71 35 34 ) vous appellera dans les prochains jours pour votre livraison. Montant de la commande 0 à payer à la livraison.'
+      >
+        Marius (07 88 71 35 34 ) vous appellera dans les prochains jours pour votre livraison. Montant de la commande 0
+        à payer à la livraison.
+      </div>
+    </div>
+  }
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -452,10 +436,13 @@ const Table = ({
                 position: 'relative',
                 pb: 2
               }}
+              getRowHeight={() => 'auto'}
               density='compact'
               apiRef={apiRef}
               components={{
                 LoadingOverlay: LinearProgress,
+
+                // Row: CustomRowRenderer,
 
                 // Pagination: pagination ? CustomPagination : null,
                 Footer: CustomPagination,
