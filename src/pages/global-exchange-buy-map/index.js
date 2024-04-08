@@ -181,8 +181,9 @@ const GlobalExchangeBuyMap = () => {
       component: 'textfield',
       label: _labels.name,
       name: 'countryName',
-      mandatory: false,
-      readOnly: true
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'resourcecombobox',
@@ -208,8 +209,9 @@ const GlobalExchangeBuyMap = () => {
       component: 'textfield',
       label: _labels.name,
       name: 'exchangeName',
-      mandatory: false,
-      readOnly: true
+      props: {
+        readOnly: true
+      }
     }
   ]
 
