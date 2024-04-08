@@ -186,7 +186,7 @@ const GlobalExchangeBuyMap = () => {
     },
     {
       component: 'resourcecombobox',
-      label: _labels.country,
+      label: _labels.exchangeTable,
       name: 'exchangeId',
       props: {
         endpointId: MultiCurrencyRepository.ExchangeTable.qry2,
@@ -253,13 +253,15 @@ const GlobalExchangeBuyMap = () => {
             {
               <Grid xs={12} sx={{ pt: 2 }}>
                 <Box>
-                  <DataGrid
-                    onChange={value => formik.setFieldValue('rows', value)}
-                    value={formik.values.rows}
-                    error={formik.errors.rows}
-                    columns={columns}
-                    height={`calc(100vh - 180px)`}
-                  />
+                  {formik.values.currencyId && (
+                    <DataGrid
+                      onChange={value => formik.setFieldValue('rows', value)}
+                      value={formik.values.rows}
+                      error={formik.errors.rows}
+                      columns={columns}
+                      height={`calc(100vh - 180px)`}
+                    />
+                  )}
                 </Box>
               </Grid>
             }
