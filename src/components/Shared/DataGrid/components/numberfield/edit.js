@@ -1,7 +1,6 @@
 import { useGridApiContext } from '@mui/x-data-grid'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { getFormattedNumber, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 export default function NumberfieldEdit({ column: { props }, id, field, value, update }) {
   const api = useGridApiContext()
@@ -32,7 +31,7 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
         })
       }}
       onClear={() =>
-        api.current.setEditCellValue({
+        update({
           id,
           field,
           value: ''
