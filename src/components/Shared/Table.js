@@ -111,7 +111,6 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
-  const [filteredRows, setFilteredRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   const pageSize = props.pageSize ? props.pageSize : 50
@@ -122,47 +121,35 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const apiRef = useRef(null)
-  const [rowHeights, setRowHeights] = useState({})
 
+  // Effect to set row height based on column heights
   useEffect(() => {
-    const newHeights = {}
-    gridData.list.forEach(column => {
-      const sms = column.smsBody
-      const element = document.querySelector(`[data-field="smsBody"]`)
-      console.log(element)
-      if (element) {
-        const elementHeight = element.offsetHeight
-        newHeights[column.recordId] = elementHeight
-        console.log(newHeights)
-      } else {
-        console.log(`Element with data-field "${sms}" not found.`)
-      }
-    })
-    setRowHeights(newHeights)
-  }, [gridData])
+    if (apiRef.current) {
+      gridData.list.forEach(column => {
+        console.log(column)
+        const columnId = column.recordId
+        const sms = column.smsBody
 
-  // Custom row renderer to set row heights
-  const CustomRowRenderer = ({ row, ...props }) => {
-    // const height = rowHeights[row.id] || 'auto'
-    ;<div
-      class='MuiDataGrid-cell MuiDataGrid-cell--textLeft MuiDataGrid-withBorderColor'
-      role='cell'
-      data-field='smsBody'
-      data-colindex='3'
-      aria-colindex='4'
-      aria-colspan='1'
-      tabindex='-1'
-      style='min-width: 195px; max-width: 195px; min-height: auto; max-height: none;'
-    >
-      <div
-        class='MuiDataGrid-cellContent'
-        title='Marius (07 88 71 35 34 ) vous appellera dans les prochains jours pour votre livraison. Montant de la commande 0 à payer à la livraison.'
-      >
-        Marius (07 88 71 35 34 ) vous appellera dans les prochains jours pour votre livraison. Montant de la commande 0
-        à payer à la livraison.
-      </div>
-    </div>
-  }
+        console.log(apiRef.current)
+        apiRef.current.setRowHeight(100)
+
+        // const columnElement = apiRef.current.getColumn(sms)
+        // console.log('columnElement', columnElement)
+
+        // Get the rendered cell element
+        const columnElements = apiRef.current.getColumn(columnId)
+
+        console.log(columnElements)
+
+        if (columnElements) {
+          columnElements.style.height = '100px' // Example height value
+          console.log('elements', columnElements)
+        } else {
+          console.log(apiRef.current)
+        }
+      })
+    }
+  }, [gridData])
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -436,13 +423,11 @@ const Table = ({
                 position: 'relative',
                 pb: 2
               }}
-              getRowHeight={() => 'auto'}
               density='compact'
               apiRef={apiRef}
+              getRowHeight={() => 'auto'}
               components={{
                 LoadingOverlay: LinearProgress,
-
-                // Row: CustomRowRenderer,
 
                 // Pagination: pagination ? CustomPagination : null,
                 Footer: CustomPagination,
