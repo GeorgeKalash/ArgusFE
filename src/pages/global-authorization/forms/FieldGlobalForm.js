@@ -39,7 +39,6 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
       resourceName: resourceName
     },
     onSubmit: async obj => {
-      console.log(detailsFormik.values.rows)
 
       const updatedRows = detailsFormik.values.rows
         .filter(obj => {
@@ -49,25 +48,11 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
           ...rest
         }))
 
-        /*.map(({ accessLevelCombo, controlId }) => {
-          return {
-            controlId: controlId,
-            accessLevel: accessLevelCombo?.key,
-            accessLevelName: accessLevelCombo?.value,
-            resourceId: resourceId
-          }
-        })*/
-        console.log('list')
-
-        console.log(updatedRows)
-
       // Create the resultObject
       const resultObject = {
         resourceId: resourceId,
         controls: updatedRows
       }
-
-      console.log(resultObject)
 
       const response = await postRequest({
         extension: AccessControlRepository.GlobalControlAuthorizationPack.set2,
@@ -128,14 +113,11 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
             extension: SystemRepository.ResourceControl.qry,
             parameters: `_resourceId=${resourceId}`
           })
-          console.log(res.list)
 
           const accessLevelRes = await getRequest({
             extension: AccessControlRepository.GlobalControlAuthorizationView.qry,
             parameters: `_resourceId=${resourceId}`
           })
-
-          console.log(accessLevelRes)
 
           const finalList = res.list.map(controlDetail => {
             const n = {
@@ -156,8 +138,6 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
     
             return n;
           });
-
-          console.log(finalList)
           
           detailsFormik.setValues({
             ...detailsFormik.values,
@@ -167,7 +147,6 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
             }))
           })
 
-          //setInitialData(res.record)
         }
       } catch (exception) {
         //setErrorMessage(error)
@@ -222,7 +201,6 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
             <DataGrid
               height={230}
               onChange={value => {
-                console.log(value)
                 detailsFormik.setFieldValue('rows', value)
               }}
               value={detailsFormik.values.rows}

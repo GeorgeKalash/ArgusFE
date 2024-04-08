@@ -66,9 +66,6 @@ const GlobalAuthorization = () => {
   }
 
   function openApplyModuleLevel() {
-    console.log('data')
-    console.log(data)
-    console.log(moduleIdSelection)
     stack({
       Component: AccessLevelForm,
       props: {
@@ -86,8 +83,6 @@ const GlobalAuthorization = () => {
 
 
   function openResourceGlobal(row) {
-    console.log('mod')
-    console.log(moduleIdSelection)
     stack({
       Component: ResourceGlobalForm,
       props: {
@@ -105,8 +100,6 @@ const GlobalAuthorization = () => {
   }
 
   function openFieldGlobal(row) {
-    console.log('row')
-    console.log(row)
     stack({
       Component: FieldGlobalForm,
       props: {

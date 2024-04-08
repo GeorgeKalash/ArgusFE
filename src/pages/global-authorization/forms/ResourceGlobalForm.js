@@ -28,8 +28,6 @@ export default function ResourceGlobalForm ({
 
     const [isLoading, setIsLoading] = useState(false)
 
-    //const [editMode, setEditMode] = useState(!!recordId)
-
     const [initialValues, setInitialData] = useState({
       resourceId: resourceId,
       resourceName: resourceName,
@@ -39,8 +37,6 @@ export default function ResourceGlobalForm ({
    })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
-
-    //const editMode = !!recordId
 
     const invalidate = useInvalidate({
         endpointId: SystemRepository.ModuleClassRES.qry
@@ -54,8 +50,6 @@ export default function ResourceGlobalForm ({
           accessLevel: yup.string().required(' ')
         }),
         onSubmit: async obj => {
-          console.log('data')
-          console.log(obj)
           
           const response = await postRequest({
             extension: AccessControlRepository.AuthorizationResourceGlobal.set,
@@ -66,9 +60,6 @@ export default function ResourceGlobalForm ({
           invalidate()
         }
       })
-
-      console.log('formik')
-      console.log(formik)
 
       useEffect(() => {
         ;(async function () {
@@ -81,8 +72,6 @@ export default function ResourceGlobalForm ({
                 extension: AccessControlRepository.AuthorizationResourceGlobal.get,
                 parameters: `_resourceId=${resourceId}`
               })
-              console.log('data')
-              console.log(res.record)
               if(res.record) setInitialData(res.record)
             }
           } catch (exception) {
@@ -101,7 +90,6 @@ export default function ResourceGlobalForm ({
     isInfo={false}
     isCleared={false}
 
-    //editMode={editMode}
     >
     <Grid container spacing={4}>
       <Grid item xs={12}>

@@ -45,10 +45,6 @@ export default function AccessLevelForm ({
         }),
         onSubmit: async obj => {
 
-          console.log(obj)
-          console.log(data)
-          console.log(moduleId)
-
           const updatedData = data.list.map(item => ({
                 moduleId:moduleId,
                 resourceId: item.key,
@@ -56,11 +52,8 @@ export default function AccessLevelForm ({
             })
           )
 
-          console.log(updatedData)
           updatedData.forEach(item => {
-            console.log('item')
             item.accessLevel != "" ? item.accessLevel = item.accessLevel : item.accessLevel = 0
-            console.log(item)
             postRequest({
               extension: AccessControlRepository.AuthorizationResourceGlobal.set,
               record: JSON.stringify(item)
@@ -104,15 +97,13 @@ export default function AccessLevelForm ({
           displayField='value'
           values={formik.values}
           
-          //values={{ accessLevel: filters.accessLevel ?? 10 }}
-          //required
           maxAccess={maxAccess}
           onChange={(event, newValue) => {
             formik && formik.setFieldValue('accessLevel', newValue?.key)
           }}
           error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
           editable = {false}
-          
+
           //helperText={formik.touched.accessLevel && formik.errors.accessLevel}
         />
       </Grid>
