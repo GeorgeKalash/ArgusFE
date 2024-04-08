@@ -244,9 +244,8 @@ const NumberRange = () => {
     {
       component: 'textfield',
       label: _labels.name,
-      name: 'exchangeName'
-
-      // props: { readOnly: true }
+      name: 'exchangeName',
+      props: { readOnly: true }
     }
   ]
 
