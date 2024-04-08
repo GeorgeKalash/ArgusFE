@@ -69,6 +69,7 @@ const CustomNumberField = ({
           }
         }
       }}
+      {...props}
     />
   )
 }
