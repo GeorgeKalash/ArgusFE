@@ -525,7 +525,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             : rateCalcMethod === 2
             ? parseFloat(qtyToCur) / formik.values.exRate
             : 0
-        console.log('curToBase ', formik.values)
         update({
           amount: getFormattedNumber(qtyToCur.toFixed(2)),
           baseAmount: getFormattedNumber(curToBase.toFixed(2))
@@ -758,7 +757,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       disabled: !editMode
     }
   ]
-  console.log('details formik ', detailsFormik.values)
 
   return (
     <>
@@ -903,13 +901,13 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 value={SystemFunction.CurrencyCreditOrderPurchase}
                 control={<Radio />}
                 label={labels[6]}
-                disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                disabled={detailsFormik?.values?.rows[0]?.currencyId}
               />
               <FormControlLabel
                 value={SystemFunction.CurrencyCreditOrderSale}
                 control={<Radio />}
                 label={labels[7]}
-                disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                disabled={detailsFormik?.values?.rows[0]?.currencyId}
               />
             </RadioGroup>
           </Grid>
@@ -926,7 +924,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                     ? '#C7F6C7'
                     : 'rgb(245, 194, 193)')
                 }
-                height={`190px`}
+                scrollHeight={`${expanded ? height - 430 : 200}px`}
               />
             </Box>
           </Grid>
