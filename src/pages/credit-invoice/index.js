@@ -24,11 +24,11 @@ const CreditInvoice = () => {
   const [plantId, setPlantId] = useState(null)
   const { stack } = useWindow()
 
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
+  const userData = window.sessionStorage.getItem('userData')
+    ? JSON.parse(window.sessionStorage.getItem('userData'))
+    : null
 
+  const getPlantId = async () => {
     const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
     try {
@@ -122,6 +122,7 @@ const CreditInvoice = () => {
         _labels,
         maxAccess: access,
         plantId: plantId,
+        userData: userData,
         recordId
       },
       width: 900,

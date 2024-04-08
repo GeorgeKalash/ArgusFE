@@ -37,7 +37,7 @@ import Approvals from 'src/components/Shared/Approvals'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 
-export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, window }) {
+export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, userData, window }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
@@ -59,6 +59,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     functionId: SystemFunction.CurrencyCreditOrderPurchase,
     deliveryDate: new Date(),
     reference: '',
+    dtId: '',
     plantId: parseInt(plantId),
     corId: '',
     corRef: '',
@@ -317,6 +318,23 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     }
   }
 
+  const getDefaultDT = async functionId => {
+    const parameters = `_userId=${userData && userData.userId}&_functionId=${functionId}`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: parameters
+      })
+      if (res.record) {
+        formik.setFieldValue('dtId', res.record.dtId)
+      } else {
+        formik.setFieldValue('dtId', '')
+      }
+    } catch (error) {
+      formik.setFieldValue('dtId', '')
+    }
+  }
   async function getEXMBase(plantId, currencyId, baseCurrency, rateType) {
     if (!plantId || !currencyId || !rateType || !baseCurrency) {
       if (!plantId) {
@@ -615,6 +633,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       })
       setRateType(res.record.value)
       formik.setFieldValue('functionId', type)
+      getDefaultDT(type)
     }
   }
   async function getBaseCurrency() {
