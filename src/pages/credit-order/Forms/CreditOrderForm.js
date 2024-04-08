@@ -414,7 +414,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3,
-        disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+        disabled:
+          formik?.values?.corId === '' ||
+          formik?.values?.corId === null ||
+          formik?.values?.corId === undefined ||
+          isClosed
       },
       widthDropDown: '400',
       width: 150,
@@ -430,14 +434,14 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           rateType: rateType ?? ''
         })
         if (!exchange?.rate) {
-          stackError({
-            message: `Rate not defined for ${newRow?.currencyRef}.`
-          })
           update({
             exRate: 0,
             defaultRate: 0,
             amount: 0,
             baseAmount: 0
+          })
+          stackError({
+            message: `Rate not defined for ${newRow?.currencyRef}.`
           })
 
           return
@@ -480,7 +484,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'currencyName',
       props: {
         readOnly: true,
-        disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+        disabled:
+          formik?.values?.corId === '' ||
+          formik?.values?.corId === null ||
+          formik?.values?.corId === undefined ||
+          isClosed
       },
       width: 190
     },
@@ -490,7 +498,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'qty',
       props: {
         mandatory: true,
-        disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+        disabled:
+          formik?.values?.corId === '' ||
+          formik?.values?.corId === null ||
+          formik?.values?.corId === undefined ||
+          isClosed
       },
       width: 130,
       async onChange({ row: { update, newRow } }) {
@@ -527,7 +539,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       props: {
         readOnly: true,
         mandatory: true,
-        disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+        disabled:
+          formik?.values?.corId === '' ||
+          formik?.values?.corId === null ||
+          formik?.values?.corId === undefined ||
+          isClosed
       },
       width: 130
     },
@@ -537,7 +553,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'exRate',
       props: {
         mandatory: true,
-        disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+        disabled:
+          formik?.values?.corId === '' ||
+          formik?.values?.corId === null ||
+          formik?.values?.corId === undefined ||
+          isClosed
       },
       width: 130,
       async onChange({ row: { update, newRow } }) {
@@ -589,7 +609,11 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       props: {
         readOnly: true,
         mandatory: true,
-        disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
+        disabled:
+          formik?.values?.corId === '' ||
+          formik?.values?.corId === null ||
+          formik?.values?.corId === undefined ||
+          isClosed
       },
       width: 130
     }
@@ -734,6 +758,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       disabled: !editMode
     }
   ]
+  console.log('details formik ', detailsFormik.values)
 
   return (
     <>
@@ -826,7 +851,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   firstFieldWidth='30%'
                   valueShow='corRef'
                   secondValueShow='corName'
-                  readOnly={isClosed || detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
+                  readOnly={isClosed || detailsFormik?.values?.rows[0]?.currencyId}
                   maxAccess={maxAccess}
                   editMode={editMode}
                   onChange={async (event, newValue) => {
@@ -840,6 +865,8 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                       formik.setFieldValue('corId', null)
                       formik.setFieldValue('corName', null)
                       formik.setFieldValue('corRef', null)
+                      setToCurrency(null)
+                      setToCurrencyRef('')
                     }
                   }}
                   errorCheck={'corId'}
