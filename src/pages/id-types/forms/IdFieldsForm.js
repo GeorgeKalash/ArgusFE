@@ -92,10 +92,6 @@ const IdFieldsForm = ({
           mapping: [ 
             { from: 'value', to: 'accessLevelName' },
             { from: 'key', to: 'accessLevel' } 
-          ],
-          columnsInDropDown: [
-            { key: 'key', value: 'Key' },
-            { key: 'value', value: 'Value' },
           ]
         }
       }    
