@@ -215,16 +215,12 @@ const UpdateExchangeRates = () => {
               parameters: parameters
             })
               .then(values => {
-                console.log(values)
-
-                // Create a mapping of commissionId to values entry for efficient lookup
                 const valuesMap = values.list.reduce((acc, fee) => {
                   acc[fee.exchangeId] = fee
 
                   return acc
                 }, {})
 
-                // Combine exchangeTable and values
                 const rows = exchangeTable.list.map((exchange, index) => {
                   const value = valuesMap[exchange.exchangeId] || 0
 
@@ -251,7 +247,6 @@ const UpdateExchangeRates = () => {
           })
     }
   }
-  console.log(formik)
 
   const handleSubmit = () => {
     formik.handleSubmit()
