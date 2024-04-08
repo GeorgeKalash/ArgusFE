@@ -32,7 +32,7 @@ export function DataGrid({
 
     let updatedRow = { ...newRow }
 
-    if (column.onChange)
+    if (column?.onChange)
       await column.onChange({
         row: {
           newRow,
@@ -173,7 +173,7 @@ export function DataGrid({
   }
 
   useEffect(() => {
-    if (!value?.length) {
+    if (!value?.length && allowAddNewLine) {
       addRow()
     }
   }, [value])
