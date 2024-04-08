@@ -64,7 +64,7 @@ export default function CurrencyTrading() {
 
   return (
     <Box sx={{height: `calc(100vh - 48px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
-   {plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} access={accessADJ}  plantId={plantId} />}
+   {plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} maxAccess={accessADJ}  plantId={plantId} />}
     </Box>
   )
 }

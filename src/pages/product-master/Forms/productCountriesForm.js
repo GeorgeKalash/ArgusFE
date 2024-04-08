@@ -18,6 +18,7 @@ const ProductCountriesForm = ({
   labels,
   editMode,
   height,
+  expanded,
   maxAccess
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,16 +27,12 @@ const ProductCountriesForm = ({
   const formik = useFormik({
       enableReinitialize: false,
       validateOnChange: true,
+
       validationSchema: yup.object({ countries: yup
         .array()
         .of(
           yup.object().shape({
-            country: yup
-              .object()
-              .shape({
-                recordId: yup.string().required('Country recordId is required')
-              })
-              .required('Country is required'),
+            countryId: yup.string().required('Country recordId is required')
           })
         ).required('Operations array is required') }),
       initialValues: {
@@ -58,13 +55,11 @@ const ProductCountriesForm = ({
 
       const data = {
         productId: pId,
-        productCountries : obj?.map(
-        ({country, id, countryId,productId,...rest} ) => ({
-          productId: pId,
-            countryId: country.recordId,
-            ...rest
-        }))
-      }
+        productCountries : obj.map(
+          ({productId,...rest} ) => ({
+              productId: pId,
+              ...rest
+          }))}
       postRequest({
         extension: RemittanceSettingsRepository.ProductCountries.set2,
         record: JSON.stringify(data)
@@ -74,7 +69,6 @@ const ProductCountriesForm = ({
           getCountries(pId)
         })
         .catch(error => {
-          setErrorMessage(error)
         })
     }
 
@@ -82,12 +76,14 @@ const ProductCountriesForm = ({
       {
         component: 'resourcecombobox',
         label: labels.country,
-        name: 'country',
+        name: 'countryId',
         props: {
           endpointId: SystemRepository.Country.qry,
           valueField: 'recordId',
           displayField: 'reference',
-          fieldsToUpdate: [ { from: 'name', to: 'countryName' } ],
+          mapping: [ { from: 'name', to: 'countryName' } ,
+          { from: 'reference', to: 'countryRef' },
+          { from: 'recordId', to: 'countryId' } ],
           columnsInDropDown: [
             { key: 'reference', value: 'Reference' },
             { key: 'name', value: 'Name' },
@@ -123,11 +119,6 @@ const ProductCountriesForm = ({
           if (res.list.length > 0){
             const countries = res.list.map(({ countryId,  countryRef, countryName, ...rest } , index) => ({
                id : index,
-               country : {
-               recordId: countryId,
-               name: countryName,
-               reference: countryRef
-              },
               countryId,
               countryRef,
               countryName,
@@ -151,6 +142,7 @@ const ProductCountriesForm = ({
     <FormShell form={formik}
       resourceId={ResourceIds.ProductMaster}
       maxAccess={maxAccess}
+      infoVisible={false}
       editMode={editMode}>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
         <DataGrid
@@ -158,7 +150,8 @@ const ProductCountriesForm = ({
            value={formik.values.countries}
            error={formik.errors.countries}
            columns={column}
-           height={height-100}
+           height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
+
         />
       </Box>
     </FormShell>

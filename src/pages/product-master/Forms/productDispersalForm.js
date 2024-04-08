@@ -20,6 +20,8 @@ const ProductDispersalForm = ({
   getGridData,
   maxAccess,
   window,
+  height,
+  expanded,
 }) => {
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -94,7 +96,8 @@ const ProductDispersalForm = ({
 
 return (
   <FormShell form={formik}
-   resourceId={ResourceIds.ProductMaster}
+   resourceId={ResourceIds.Dispersal}
+   editMode={recordId}
    maxAccess={maxAccess}
   >
      <Grid container gap={2}>

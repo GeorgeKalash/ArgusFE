@@ -197,6 +197,7 @@ return (
               displayField='name'
               firstValue={formik.values.corRef}
               secondValue={formik.values.corName}
+              displayFieldWidth={2}
               onChange={(event, newValue) => {
                 if (newValue) {
                   formik.setFieldValue('corId', newValue?.recordId)

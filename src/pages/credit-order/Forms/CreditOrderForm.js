@@ -26,13 +26,13 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { FormatLineSpacing } from '@mui/icons-material'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
 import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { useForm } from 'src/hooks/form'
+import FormGrid from 'src/components/form/layout/FormGrid'
 import Approvals from 'src/components/Shared/Approvals'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 
@@ -85,7 +85,8 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     endpointId: CTTRXrepository.CreditOrder.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
@@ -380,6 +381,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       header: labels[8],
       name: 'currencyId',
       mandatory: true,
+      maxAccessName: 'gridCurrency',
       store: currencyStore.list,
       valueField: 'recordId',
       displayField: 'reference',
@@ -450,6 +452,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       header: labels[9],
       name: 'currencyName',
       readOnly: true,
+      maxAccessName: 'gridCurrency',
       width: 300,
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed
     },
@@ -459,6 +462,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'qty',
       mandatory: true,
       width: 200,
+      maxAccessName: 'gridQty',
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       async onChange(row) {
         const rate = row.rowData?.exRate
@@ -503,6 +507,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       name: 'exRate',
       mandatory: true,
       width: 200,
+      maxAccessName: 'gridRate',
       disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined || isClosed,
       async onChange(row) {
         const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
@@ -719,7 +724,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         <Grid container>
           <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
             {/* First Column */}
-            <Grid item style={{ marginRight: '10px', width: '205px' }}>
+            <FormGrid hideonempty item style={{ marginRight: '10px', width: '205px' }}>
               <CustomDatePicker
                 name='date'
                 required
@@ -733,7 +738,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 helperText={formik.touched.date && formik.errors.date}
               />
-            </Grid>
+            </FormGrid>
 
             {/* Second Column */}
             <Grid item style={{ marginRight: '10px', width: '465px' }}>
@@ -745,10 +750,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 values={formik.values}
                 valueField='recordId'
                 displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -853,6 +854,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           <Grid container sx={{ pt: 2 }} xs={12}>
             <Box sx={{ width: '100%' }}>
               <InlineEditGrid
+                maxAccess={maxAccess}
                 gridValidation={detailsFormik}
                 columns={columns}
                 background={
@@ -890,7 +892,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
           >
             {/* First Column (moved to the left) */}
-            <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
+            <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
               <CustomTextArea
                 name='notes'
                 label={labels[11]}
@@ -899,12 +901,12 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 editMode={editMode}
                 maxAccess={maxAccess}
                 readOnly={isClosed}
-                onChange={formik.handleChange}
+                onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
                 helperText={formik.touched.notes && formik.errors.notes}
               />
-            </Grid>
+            </FormGrid>
             {/* Second Column  */}
             <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
               <Grid item xs={12}>
@@ -919,6 +921,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               <Grid item xs={12}>
                 <CustomTextField
                   name='baseAmount'
+                  maxAccess={maxAccess}
                   label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
                   style={{ textAlign: 'right' }}
                   value={getFormattedNumber(totalLoc.toFixed(2))}
