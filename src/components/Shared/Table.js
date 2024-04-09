@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 // ** MUI Imports
 import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell } from '@mui/material'
-import { DataGrid, gridClasses } from '@mui/x-data-grid'
+import { DataGrid, gridClasses, useGridApiRef } from '@mui/x-data-grid'
 import { alpha, styled } from '@mui/material/styles'
 
 // ** Icons
@@ -120,36 +120,37 @@ const Table = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
-  const apiRef = useRef(null)
+  const apiRef = useGridApiRef()
 
   // Effect to set row height based on column heights
-  useEffect(() => {
-    if (apiRef.current) {
-      gridData.list.forEach(column => {
-        console.log(column)
-        const columnId = column.recordId
-        const sms = column.smsBody
+  // useEffect(() => {
+  //   if (apiRef.current) {
+  //     gridData.list.forEach(column => {
+  //       console.log(column)
+  //       const columnId = column.recordId
+  //       const sms = column.smsBody
 
-        console.log(apiRef.current)
-        apiRef.current.setRowHeight(100)
+  //       console.log(apiRef.current)
 
-        // const columnElement = apiRef.current.getColumn(sms)
-        // console.log('columnElement', columnElement)
+  //       // apiRef.current.setRowHeight(100)
 
-        // Get the rendered cell element
-        const columnElements = apiRef.current.getColumn(columnId)
+  //       // const columnElement = apiRef.current.getColumn(sms)
+  //       // console.log('columnElement', columnElement)
 
-        console.log(columnElements)
+  //       // Get the rendered cell element
+  //       const columnElements = apiRef.current.getColumn(columnId)
 
-        if (columnElements) {
-          columnElements.style.height = '100px' // Example height value
-          console.log('elements', columnElements)
-        } else {
-          console.log(apiRef.current)
-        }
-      })
-    }
-  }, [gridData])
+  //       console.log(columnElements)
+
+  //       if (columnElements) {
+  //         columnElements.style.height = '100px' // Example height value
+  //         console.log('elements', columnElements)
+  //       } else {
+  //         console.log(apiRef.current)
+  //       }
+  //     })
+  //   }
+  // }, [gridData])
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -425,7 +426,14 @@ const Table = ({
               }}
               density='compact'
               apiRef={apiRef}
-              getRowHeight={() => 'auto'}
+              getRowHeight={e => {
+                console.log(e.id)
+
+                const element = apiRef.current.getCellElement(e.id, 'smsBody')
+                console.log(element)
+
+                return 300
+              }}
               components={{
                 LoadingOverlay: LinearProgress,
 
