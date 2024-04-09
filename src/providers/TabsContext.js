@@ -178,7 +178,7 @@ const TabsProvider = ({ children }) => {
   }, [children, router.asPath]);
   
 
-  useEffect(() => {
+  useEffect(() => {console.log(activeTabs)
     if(closing && value){
       if(activeTabs[value].route!=router.asPath){
         router.push(activeTabs[value].route)
