@@ -15,31 +15,32 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { SelfServiceRepository } from 'src/repositories/SelfServiceRepository'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import TreeViewMultiSelection from 'src/views/components/tree-view/TreeViewMultiSelection'
 
 import { DataSets } from 'src/resources/DataSets'
 
+import * as yup from 'yup'
+
 const PersonalSettings = () => {
+  const [errorMessage, setErrorMessage] = useState(null)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [initialValues, setInitialValues] = useState({
     recordId: null,
-    email: null,
-    activeStatus: null,
-    userType: null,
-    homePage: null,
-    username: null,
-    fullName: null,
-    languageId: null,
-    menuTheme: null
+    email: '',
+    activeStatus: '',
+    userType: '',
+    homePage: '',
+    username: '',
+    fullName: '',
+    languageId: '',
+    menuTheme: '',
+    languageName: ''
   })
 
   useEffect(() => {
@@ -58,6 +59,8 @@ const PersonalSettings = () => {
             parameters: `_recordId=${_userId}`
           })
 
+          console.log('record')
+          console.log(res.record)
           setInitialValues(res.record)
         
       } catch (exception) {
@@ -75,19 +78,22 @@ const PersonalSettings = () => {
     enableReinitialize: true,
     validateOnChange: true,
     initialValues,
+    validationSchema: yup.object({
+      fullName: yup.string().required(' '),
+      languageId: yup.string().required(' ')
+    }),
     onSubmit: values => {
         postPersonalSettings(values)
     }
   })
 
+  console.log('formik')
+  console.log(formik)
+  
   const postPersonalSettings = obj => {
    
-   /* var data = []
-    Object.entries(obj).forEach(([key, value]) => {
-      const newObj = { key: key, value: value }
-      data.push(newObj)
-    })*/
-    
+    console.log('obj')
+    console.log(obj)
     postRequest({
       extension: SelfServiceRepository.SSUserInfo.set,
       record: JSON.stringify(obj)
@@ -129,13 +135,13 @@ const PersonalSettings = () => {
             <ResourceComboBox
               datasetId={DataSets.LANGUAGE}
               name='languageId'
-              label={_labels.language}
+              label={_labels.lang}
               valueField='key'
               displayField='value'
               values={formik.values}
               required     
               onChange={(event, newValue) => {
-                formik && formik.setFieldValue('languageId', newValue?.key)
+                formik && formik.setFieldValue('languageId', newValue?.key ?? '')
               }}
               error={formik.touched.languageId && Boolean(formik.errors.languageId)}
 
@@ -171,7 +177,7 @@ const PersonalSettings = () => {
             <WindowToolbar onSave={handleSubmit} isSaved={true} />
           </Grid>
         </Grid>
-        
+        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
       </Box>
     </>
   )

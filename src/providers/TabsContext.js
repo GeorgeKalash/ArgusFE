@@ -205,7 +205,7 @@ const TabsProvider = ({ children }) => {
           >
             {activeTabs.length > 0 &&
               activeTabs.map((activeTab, i) => {
-                return (
+                return ( console.log('activeTab', activeTab),
                   !activeTab.isDefault && (
                     <Tab
                       key={i}
