@@ -32,7 +32,7 @@ export function DataGrid({
 
     let updatedRow = { ...newRow }
 
-    if (column?.onChange)
+    if (column.onChange)
       await column.onChange({
         row: {
           newRow,
