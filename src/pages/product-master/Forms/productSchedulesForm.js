@@ -55,7 +55,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
           dispersalType: '',
           dispersalTypeName: '',
           isInactive: false,
-          saved: false
+          saved: false,
+          select: false
         }
       ]
     },
@@ -85,29 +86,14 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
   }
 
   const columns = [
-    // {
-    //   component: 'button',
-    //   label: labels.select,
-    //   name: 'saved',
-    //   onClick: (e, row) => {
-    //     setStore(prevStore => ({
-    //       ...prevStore,
-    //       plantId: row.plantId,
-    //       currencyId: row.currencyId,
-    //       countryId: row.countryId,
-    //       dispersalId: row.dispersalId,
-    //       _seqNo: row.seqNo
-    //     }))
-    //   }
-    // },
     {
       component: 'checkbox',
-
       label: labels.isInactive,
       name: 'select',
       async onChange({ row: { update, newRow } }) {
-        console.log(newRow.id)
-        formik.values.schedules.map(({ id }) => update({ id, select: id === newRow.id ? true : false }))
+        formik.values.schedules.map(({ id }) =>
+          update({ id, select: id === newRow.id && newRow.select ? true : false })
+        )
         setStore(prevStore => ({
           ...prevStore,
           plantId: newRow.plantId,
@@ -116,7 +102,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
           dispersalId: newRow.dispersalId,
           _seqNo: newRow.seqNo
         }))
-        console.log(formik.values.schedules)
       }
     },
     {
