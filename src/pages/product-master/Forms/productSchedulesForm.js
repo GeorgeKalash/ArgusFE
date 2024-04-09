@@ -94,14 +94,23 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
         formik.values.schedules.map(({ id }) =>
           update({ id, select: id === newRow.id && newRow.select ? true : false })
         )
-        setStore(prevStore => ({
-          ...prevStore,
-          plantId: newRow.plantId,
-          currencyId: newRow.currencyId,
-          countryId: newRow.countryId,
-          dispersalId: newRow.dispersalId,
-          _seqNo: newRow.seqNo
-        }))
+        newRow.select
+          ? setStore(prevStore => ({
+              ...prevStore,
+              plantId: newRow.plantId,
+              currencyId: newRow.currencyId,
+              countryId: newRow.countryId,
+              dispersalId: newRow.dispersalId,
+              _seqNo: newRow.seqNo
+            }))
+          : setStore(prevStore => ({
+              ...prevStore,
+              plantId: '',
+              currencyId: '',
+              countryId: '',
+              dispersalId: '',
+              _seqNo: ''
+            }))
       }
     },
     {
