@@ -23,11 +23,13 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
       decimalScale={props?.decimalScale} // much number after .
       autoFocus
       hasBorder={false}
-      onChange={e => {
+      onChange={(e, value) => {
+        console.log(e)
+        console.log(value)
         update({
           id,
           field,
-          value: handleNumberFieldNewValue(e.target.value?.split(',')?.join(''), value)
+          value: e.target.value
         })
       }}
       onClear={() =>

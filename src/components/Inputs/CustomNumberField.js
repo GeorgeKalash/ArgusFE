@@ -3,15 +3,16 @@ import { NumericFormat } from 'react-number-format'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 const CustomNumberField = ({
   variant = 'outlined',
   value,
   size = 'small',
   label,
+  onChange,
   readOnly = false,
   decimalScale = 2,
-  onChange,
   onClear,
   hidden = false,
   error,
@@ -33,6 +34,18 @@ const CustomNumberField = ({
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 
   const required = props.required || accessLevel === MANDATORY
+
+  const handleNumberFieldNewValue = e => {
+    const regex = /^[0-9,]+(\.\d+)?$/
+    let value = e?.target?.value
+    if (value && regex.test(value)) {
+      value = value.replace(/[^0-9.]/g, '')
+      const _newValue = getNumberWithoutCommas(value)
+      e.target.value = _newValue
+      console.log(_newValue)
+      onChange(e)
+    }
+  }
 
   return _hidden ? (
     <></>
@@ -61,7 +74,7 @@ const CustomNumberField = ({
         )
       }}
       customInput={TextField}
-      onChange={onChange}
+      onChange={e => handleNumberFieldNewValue(e)}
       sx={{
         '& .MuiOutlinedInput-root': {
           '& fieldset': {
