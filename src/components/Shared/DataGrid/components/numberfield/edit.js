@@ -23,9 +23,7 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
       decimalScale={props?.decimalScale} // much number after .
       autoFocus
       hasBorder={false}
-      onChange={(e, value) => {
-        console.log(e)
-        console.log(value)
+      onChange={e => {
         update({
           id,
           field,
