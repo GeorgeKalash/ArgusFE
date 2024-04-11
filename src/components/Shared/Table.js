@@ -22,7 +22,7 @@ import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 
 const ODD_OPACITY = 0.2
 
-const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+const StripedDataGrid = styled(DataGrid)(({ theme, heightReference }) => ({
   borderRadius: 0,
   borderTop: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
   borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
@@ -79,6 +79,20 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
         }
       }
     }
+  },
+  '.MuiDataGrid-cell': {
+    position: 'relative',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  '& .MuiDataGrid-cellContent': {
+    position: 'absolute'
+  },
+  [`.MuiDataGrid-cell[data-colindex="${heightReference}"] .MuiDataGrid-cellContent`]: {
+    position: 'relative'
   }
 }))
 
@@ -426,14 +440,7 @@ const Table = ({
               }}
               density='compact'
               apiRef={apiRef}
-              getRowHeight={e => {
-                console.log(e.id)
-
-                const element = apiRef.current.getCellElement(e.id, 'smsBody')
-                console.log(element)
-
-                return 300
-              }}
+              heightReference={apiRef.current.getColumnIndex('smsBody')}
               components={{
                 LoadingOverlay: LinearProgress,
 
