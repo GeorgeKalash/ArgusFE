@@ -82,11 +82,7 @@ const StripedDataGrid = styled(DataGrid)(({ theme, heightReference }) => ({
   },
   '.MuiDataGrid-cell': {
     position: 'relative',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center'
+    overflow: 'hidden'
   },
   '& .MuiDataGrid-cellContent': {
     position: 'absolute'
@@ -135,36 +131,6 @@ const Table = ({
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const apiRef = useGridApiRef()
-
-  // Effect to set row height based on column heights
-  // useEffect(() => {
-  //   if (apiRef.current) {
-  //     gridData.list.forEach(column => {
-  //       console.log(column)
-  //       const columnId = column.recordId
-  //       const sms = column.smsBody
-
-  //       console.log(apiRef.current)
-
-  //       // apiRef.current.setRowHeight(100)
-
-  //       // const columnElement = apiRef.current.getColumn(sms)
-  //       // console.log('columnElement', columnElement)
-
-  //       // Get the rendered cell element
-  //       const columnElements = apiRef.current.getColumn(columnId)
-
-  //       console.log(columnElements)
-
-  //       if (columnElements) {
-  //         columnElements.style.height = '100px' // Example height value
-  //         console.log('elements', columnElements)
-  //       } else {
-  //         console.log(apiRef.current)
-  //       }
-  //     })
-  //   }
-  // }, [gridData])
 
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
@@ -440,7 +406,8 @@ const Table = ({
               }}
               density='compact'
               apiRef={apiRef}
-              heightReference={apiRef.current.getColumnIndex('smsBody')}
+              getRowHeight={() => 'auto'}
+              heightReference={apiRef.current.getColumnIndex && apiRef.current.getColumnIndex('smsBody', false)}
               components={{
                 LoadingOverlay: LinearProgress,
 
