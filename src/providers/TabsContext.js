@@ -20,8 +20,6 @@ const TabsContext = createContext()
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
 
-  //NOTE: EVERY PAGE PADDING CAN BE ADDED HERE
-
   return (
     <Box
       role='tabpanel'
@@ -114,71 +112,65 @@ const TabsProvider = ({ children }) => {
   }
 
   const closeTab = (tabRoute) => {
-    setClosing(true);
+    setClosing(true)
     const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
-    const tabsLength = activeTabs.length;
-    
-    if (tabsLength === 1) {
+    const lastValue = activeTabs.length;
+
+    if (lastValue === 1) {
+      setLength(0);
       router.push('/default');
       setActiveTabs([]);
-      setLength(0);
-      setValue()
     } else {
-      if (index < value) {
-        setValue(value - 1);
-      } else if (index === value) {
-        const newValue = index === tabsLength - 1 ? index - 1 : index + 1;
-        router.push(activeTabs[newValue].route);
+      if (index === lastValue - 1) {
+        const newValue = index > 0 ? index - 1 : 0;
+        if (activeTabs[newValue]) {
+          router.push(activeTabs[newValue].route);
+        }
         setValue(newValue);
+      } else if (value === lastValue - 1) {
+        setValue(lastValue - 2);
       }
-      setActiveTabs(prevState => prevState.filter((tab, i) => i !== index));
+      
+      setActiveTabs((prevState) => {
+        return prevState.filter((tab) => tab.route !== tabRoute);
+      });
     }
-  
-    setClosing(false);
   };
 
-  useEffect(() => {
+  useEffect(() => {console.log("2")
     if(length === 0){
       setActiveTabs([])
       setLength(1)
     } else {
-      if (initialLoadDone && router.asPath !== '/default') {
-        const isTabOpen = activeTabs.some((activeTab, index) => {
-          if (activeTab.page === children || activeTab.route === router.asPath) {
-            setValue(index);
-
-            return true;
-          }
-
-          return false;
-        })
-        if (isTabOpen) return
-        else {
-          const newValueState = activeTabs.length
-          setActiveTabs((prevState) => {
-            const newTabs = [
-              ...prevState,
-              {
-                page: children,
-                route: router.asPath,
-                label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, '')),
-              },
-            ];
-
-            if (newTabs.length === 2) {
-              router.push(newTabs[1].route);
-            }
-  
-            return newTabs;
-          });
-          setValue(newValueState);
+    if (initialLoadDone && router.asPath != '/default') {
+      const isTabOpen = activeTabs.some((activeTab, index) => {
+        if (activeTab.page === children || activeTab.route === router.asPath) {
+          setValue(index);
+          
+          return true;
         }
+        
+          return false;
+      })
+      if (isTabOpen) return
+      else { 
+        const newValueState = activeTabs.length
+        setActiveTabs(prevState => {
+          return [
+            ...prevState,
+            {
+              page: children,
+              route: router.asPath,
+              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
+            }
+          ]
+        })
+        setValue(newValueState)
       }
-    }
-  }, [children, router.asPath]);
-  
+    }}
+  }, [children, router.asPath])
 
-  useEffect(() => {console.log(activeTabs)
+  useEffect(() => {console.log("1")
     if(closing && value){
       if(activeTabs[value].route!=router.asPath){
         router.push(activeTabs[value].route)
