@@ -2,6 +2,7 @@ import { Box, Typography } from '@mui/material'
 import React from 'react'
 import { useRef } from 'react'
 import Button from '@mui/material/Button'
+import { Label } from 'recharts'
 
 const CustomImage = ({ name, value, setValue, setFile }) => {
   const hiddenInputRef = useRef()
@@ -42,7 +43,7 @@ const CustomImage = ({ name, value, setValue, setFile }) => {
       <img
         src={value || '/images/avatars/1.png'}
         alt='Profile Pic'
-        style={{ width: 100, height: 100, objectFit: 'cover', marginRight: 16 }}
+        style={{ width: 140, height: 100, objectFit: 'cover', marginRight: 16 }}
         onClick={handleClick}
       />
       <Box>
@@ -62,13 +63,14 @@ const CustomImage = ({ name, value, setValue, setFile }) => {
             '&:hover': {
               opacity: 0.8
             },
-            width: 20,
+            width: 10,
             height: 35,
             objectFit: 'contain'
           }}
         >
           <img src={`/images/buttonsIcons/clear.png`} alt={'test'} />
         </Button>
+
         <Typography variant='caption' sx={{ mt: 4, display: 'block', color: 'text.disabled' }}>
           Allowed PNG or JPEG. Max size of 800K.
         </Typography>
