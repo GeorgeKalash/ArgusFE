@@ -12,7 +12,7 @@ const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -28,10 +28,12 @@ const RequestsProvider = ({ children }) => {
         'Content-Type': 'multipart/form-data',
         LanguageId: user.languageId
       }
-    }).then(res => res.data).catch(error => {
-      setError(error); // Set the error state
-      throw error;
     })
+      .then(res => res.data)
+      .catch(error => {
+        setError(error) // Set the error state
+        throw error
+      })
   }
 
   const getMicroRequest = async body => {
@@ -40,10 +42,12 @@ const RequestsProvider = ({ children }) => {
     return axios({
       method: 'GET',
       url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
-    }).then(res => res.data).catch(error => {
-      setError(error); // Set the error state
-      throw error;
     })
+      .then(res => res.data)
+      .catch(error => {
+        setError(error) // Set the error state
+        throw error
+      })
   }
 
   const getIdentityRequest = async body => {
@@ -57,11 +61,12 @@ const RequestsProvider = ({ children }) => {
         'Content-Type': 'multipart/form-data',
         LanguageId: user.languageId
       }
-    }).then(res => res.data).catch(error => {
-
-      setError(error); // Set the error state
-      throw error;
     })
+      .then(res => res.data)
+      .catch(error => {
+        setError(error) // Set the error state
+        throw error
+      })
   }
 
   const postRequest = async body => {
@@ -80,10 +85,12 @@ const RequestsProvider = ({ children }) => {
         LanguageId: user.languageId
       },
       data: bodyFormData
-    }).then(res => res.data).catch(error => {
-      setError(error); // Set the error state
-      throw error;
     })
+      .then(res => res.data)
+      .catch(error => {
+        setError(error) // Set the error state
+        throw error
+      })
   }
 
   const getAccessToken = async () => {
@@ -179,11 +186,12 @@ const RequestsProvider = ({ children }) => {
     getMicroRequest
   }
 
-  return <RequestsContext.Provider value={values}>{children}
-  {error && (
-    <ErrorWindow open={true} onClose={()=>setError(false)}message={error} />
-  )}
-</RequestsContext.Provider>
+  return (
+    <RequestsContext.Provider value={values}>
+      {children}
+      {error && <ErrorWindow open={true} onClose={() => setError(false)} message={error} />}
+    </RequestsContext.Provider>
+  )
 }
 
 export { RequestsContext, RequestsProvider }

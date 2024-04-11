@@ -151,5 +151,13 @@ export const SystemRepository = {
   },
   UserFunction: {
     get: service + 'getUFU'
+  },
+  CompanyInfo: {
+    get: service + 'getCOM',
+    set: service + 'setCOM'
+  },
+  Attachment: {
+    get: service + 'getAT',
+    set: service + 'setAT'
   }
 }
