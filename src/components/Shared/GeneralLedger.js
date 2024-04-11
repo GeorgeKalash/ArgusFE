@@ -37,6 +37,8 @@ import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
 
 import { formatDateDefault, formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { width } from '@mui/system'
+import { displayName } from 'cleave.js/react'
 
 const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, height }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -75,13 +77,11 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         tpAccountId: '',
         tpAccountRef: '',
         tpAccountName: '',
-        currency: {
-          reference: '',
-          recordId: ''
-        },
-        sign: {
-          key: ''
-        },
+        currencyRef: '',
+        currencyId: '',
+
+        signKey: '',
+        signValue: '',
         notes: '',
         functionId: functionId,
         exRate: '',
@@ -125,16 +125,16 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
     initialValues,
     enableReinitialize: true,
 
-    validationSchema: yup.object({
-      generalAccount: yup
-        .array()
-        .of(
-          yup.object().shape({
-            accountRef: yup.string().required('accountRef recordId is required')
-          })
-        )
-        .required('Operations array is required')
-    }),
+    // validationSchema: yup.object({
+    //   generalAccount: yup
+    //     .array()
+    //     .of(
+    //       yup.object().shape({
+    //         accountRef: yup.string().required('accountRef recordId is required')
+    //       })
+    //     )
+    //     .required('Operations array is required')
+    // }),
     validateOnChange: true,
     onSubmit: async values => {
       {
@@ -142,19 +142,16 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         console.log('general', values.generalAccount)
 
         const data = {
-          transactions: values.generalAccount.map(
-            ({ id, exRate, account, sign, tpAccount, functionId, currency, ...rest }) => ({
-              seqNo: id,
-              accountId: account.recordId,
-              exRate,
-              sign: sign.key,
-              tpAccountId: tpAccount?.recordId,
-              functionId,
-              rateCalcMethod: 1,
-              currencyId: currency.recordId,
-              ...rest
-            })
-          ),
+          transactions: values.generalAccount.map(({ id, exRate, tpAccount, functionId, ...rest }) => ({
+            seqNo: id,
+
+            exRate,
+
+            functionId,
+            rateCalcMethod: 1,
+
+            ...rest
+          })),
           date: formatDateToApi(values.date),
           functionId: values.functionId,
           recordId: formValues.recordId,
@@ -198,33 +195,42 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
       console.log(generalAccountData)
 
       const baseCredit = generalAccountData.reduce((acc, curr) => {
-        return curr.sign?.key == '2' ? acc + parseFloat(curr.baseAmount || 0) : acc
+        if (curr.signKey) {
+          return curr.signValue == 'C' ? acc + parseFloat(curr.baseAmount || 0) : acc
+        }
       }, 0)
 
       const baseDebit = generalAccountData.reduce((acc, curr) => {
-        return curr.sign?.key == '1' ? acc + parseFloat(curr.baseAmount || 0) : acc
+        if (curr.signKey) {
+          return curr.signValue == 'D' ? acc + parseFloat(curr.baseAmount || 0) : acc
+        }
       }, 0)
 
       const baseBalance = baseDebit - baseCredit
 
       setBaseGridData({
         base: 'Base',
-        credit: baseCredit.toLocaleString(),
-        debit: baseDebit.toLocaleString(),
-        balance: baseBalance.toLocaleString()
+        credit: baseCredit,
+        debit: baseDebit,
+        balance: baseBalance
       })
 
       const currencyTotals = generalAccountData.reduce((acc, curr) => {
-        const currency = curr.currency?.reference
-        if (currency) {
-          // Check if currency is selected
-          if (!acc[currency]) {
-            acc[currency] = { credit: 0, debit: 0 }
-          }
-          if (curr.sign?.key == '2') {
-            acc[currency].credit += parseFloat(curr.amount || 0)
-          } else if (curr.sign?.key == '1') {
-            acc[currency].debit += parseFloat(curr.amount || 0)
+        if (curr.currencyId) {
+          const currency = curr.currencyRef
+
+          if (currency) {
+            // Check if currency is selected
+            if (!acc[currency]) {
+              acc[currency] = { credit: 0, debit: 0 }
+            }
+            if (curr.signKey) {
+              if (curr.signValue == 'C') {
+                acc[currency].credit += parseFloat(curr.amount || 0)
+              } else if (curr.signValue == 'D') {
+                acc[currency].debit += parseFloat(curr.amount || 0)
+              }
+            }
           }
         }
 
@@ -257,22 +263,17 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
       const generalAccount = data.list.map((row, idx) => ({
         id: idx,
         accountRef: row.accountRef,
-        recordId: row.accountId,
+        accountId: row.accountId,
         accountName: row.accountName,
         tpAccountRef: row.tpAccountRef,
         tpAccountName: row.tpAccountName,
         tpAccountId: row.tpAccountId,
-        currency: {
-          reference: row.currencyRef,
-          recordId: row.currencyId
-        },
 
-        sign: {
-          dataset: 157,
-          language: 1,
-          key: row.sign,
-          value: row.sign == 1 ? 'D' : 'C'
-        },
+        currencyRef: row.currencyRef,
+        currencyId: row.currencyId,
+
+        signKey: row.signKey,
+        signValue: row.signValue,
         notes: row.notes,
         exRate: row.exRate,
         amount: row.amount,
@@ -394,51 +395,56 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               label: _labels.accountRef,
               name: 'account',
               props: {
+                displayFieldWidth: 3,
                 endpointId: GeneralLedgerRepository.Account.snapshot,
                 parameters: '_type=',
                 displayField: 'accountRef',
                 valueField: 'recordId',
-                columnsInDropDown: [{ key: 'accountRef', value: 'accountRef' }],
+                columnsInDropDown: [
+                  { key: 'accountRef', value: 'reference' },
+                  { key: 'name', value: 'name' }
+                ],
                 mapping: [
+                  { from: 'recordId', to: 'accountId' },
                   { from: 'name', to: 'accountName' },
-                  { from: 'accountRef', to: 'accountRef' },
-                  { from: 'recordId', to: 'accountId' }
+                  { from: 'accountRef', to: 'accountRef' }
                 ]
+              },
+
+              async onChange({ row: { update, oldRow, newRow } }) {
+                if (newRow.accountId) {
+                  update({
+                    currencyRef: formValues.currencyRef,
+                    currencyId: formValues.currencyId,
+                    exRate: exRateValue
+                  })
+
+                  if (newRow.currencyId) {
+                    const result = await getCurrencyApi(newRow?.currencyId)
+
+                    const result2 = result.record
+                    const exRate = exRateValue
+                    const rateCalcMethod = result2.rateCalcMethod
+
+                    if (newRow?.amount) {
+                      const amount =
+                        rateCalcMethod === 1
+                          ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
+                          : rateCalcMethod === 2
+                          ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
+                          : 0
+                      update({
+                        baseAmount: amount
+                      })
+                    }
+
+                    update({
+                      exRate: exRate,
+                      rateCalcMethod: rateCalcMethod
+                    })
+                  }
+                }
               }
-
-              // async onChange({ row: { update, oldRow, newRow } }) {
-              //   if (newRow.account.recordId) {
-              //     update({
-              //       currencyRef: formValues.currencyRef,
-              //       currencyId: formValues.currencyId,
-              //       exRate: exRateValue
-              //     })
-
-              //     // const result = await getCurrencyApi(newRow?.currency?.recordId)
-
-              //     // const result2 = result.record
-              //     // const exRate = exRateValue
-              //     // const rateCalcMethod = result2.rateCalcMethod
-
-              //     //     if(newRow?.amount){
-              //     //       const amount =
-              //     //       rateCalcMethod === 1
-              //     //         ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
-              //     //         : rateCalcMethod === 2
-              //     //         ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
-              //     //         : 0
-              //     //         update({
-              //     //           baseAmount:amount,
-              //     //         })
-              //     //     }
-
-              //     // update({
-              //     //   exRate:exRate,
-              //     //   rateCalcMethod :rateCalcMethod,
-
-              //     // })
-              //   }
-              // }
             },
             {
               component: 'textfield',
@@ -453,7 +459,11 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
                 endpointId: FinancialRepository.Account.snapshot,
                 displayField: 'reference',
                 valueField: 'recordId',
-                columnsInDropDown: [{ key: 'tpAccountRef', value: 'tpAccountRef' }],
+                displayFieldWidth: 3,
+                columnsInDropDown: [
+                  { key: 'reference', value: 'reference' },
+                  { key: 'name', value: 'name' }
+                ],
                 mapping: [
                   { from: 'name', to: 'tpAccountName' },
                   { from: 'reference', to: 'tpAccountRef' },
@@ -473,40 +483,45 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               props: {
                 endpointId: SystemRepository.Currency.qry,
                 displayField: 'reference',
-                valueField: 'recordId'
+                valueField: 'recordId',
+                mapping: [
+                  { from: 'reference', to: 'currencyRef' },
+                  { from: 'recordId', to: 'currencyId' }
+                ]
               },
 
               async onChange({ row: { update, oldRow, newRow } }) {
                 console.log('newRow', newRow)
-                if (!newRow?.currency?.recordId) {
-                  return
-                }
+                if (newRow.currencyId)
+                  if (!newRow?.currencyId) {
+                    return
+                  }
+                if (newRow.currencyId) {
+                  const result = await getCurrencyApi(newRow?.currencyId)
+                  const result2 = result.record
+                  const exRate = result2.exRate
+                  const rateCalcMethod = result2.rateCalcMethod
 
-                const result = await getCurrencyApi(newRow?.currency?.recordId)
+                  // account amount base amount sign curency
 
-                const result2 = result.record
-                const exRate = result2.exRate
-                const rateCalcMethod = result2.rateCalcMethod
+                  if (newRow?.amount) {
+                    const amount =
+                      rateCalcMethod === 1
+                        ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
+                        : rateCalcMethod === 2
+                        ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
+                        : 0
+                    update({
+                      baseAmount: amount
+                    })
+                  }
 
-                // account amount base amount sign curency
-
-                if (newRow?.amount) {
-                  const amount =
-                    rateCalcMethod === 1
-                      ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
-                      : rateCalcMethod === 2
-                      ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
-                      : 0
                   update({
-                    baseAmount: amount
+                    currencyId: newRow.currencyId,
+                    exRate: exRate,
+                    rateCalcMethod: rateCalcMethod
                   })
                 }
-
-                update({
-                  currencyId: newRow.currency.recordId,
-                  exRate: exRate,
-                  rateCalcMethod: rateCalcMethod
-                })
               }
             },
             {
@@ -518,7 +533,11 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
                 _language: user.languageId,
                 parameters: `_dataset=${157}&_language=${1}`,
                 displayField: 'value',
-                valueField: 'key'
+                valueField: 'key',
+                mapping: [
+                  { from: 'value', to: 'signValue' },
+                  { from: 'key', to: 'signKey' }
+                ]
               }
             },
             {
