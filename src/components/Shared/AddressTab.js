@@ -8,13 +8,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from './ResourceLookup'
 import FormGrid from 'src/components/form/layout/FormGrid'
 
-const AddressTab = ({
-  labels,
-  addressValidation,
-  maxAccess,
-  readOnly = false,
-  requiredOptional = false // work address
-}) => {
+const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) => {
   return (
     <>
       <Grid container sx={{ pt: 1 }}>
@@ -25,7 +19,6 @@ const AddressTab = ({
               name='name'
               label={labels.name}
               value={addressValidation.values.name}
-              required={!requiredOptional}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
@@ -39,7 +32,6 @@ const AddressTab = ({
               name='street1'
               label={labels.street1}
               value={addressValidation.values.street1}
-              required={!requiredOptional}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
@@ -148,7 +140,6 @@ const AddressTab = ({
                 { key: 'flName', value: 'Foreign Language Name' }
               ]}
               values={addressValidation.values}
-              required={!requiredOptional}
               onChange={(event, newValue) => {
                 addressValidation.setFieldValue('stateId', null)
                 addressValidation.setFieldValue('cityId', '')
@@ -201,7 +192,6 @@ const AddressTab = ({
               displayField='name'
               name='city'
               label={labels.city}
-              required={!requiredOptional}
               readOnly={(readOnly || !addressValidation.values.countryId) && true}
               form={addressValidation}
               secondDisplayField={false}
@@ -270,7 +260,6 @@ const AddressTab = ({
               maxLength='15'
               type='text'
               phone={true}
-              required={!requiredOptional}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}

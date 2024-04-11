@@ -33,7 +33,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 
-export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId }) {
+export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId, userData }) {
   const { height } = useWindowDimensions()
   const [isLoading, setIsLoading] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -51,6 +51,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     recordId: recordId || null,
     currencyId: '',
     date: new Date(),
+    dtId: '',
     functionId: SystemFunction.CreditInvoicePurchase,
     reference: '',
     plantId: parseInt(plantId),
@@ -219,6 +220,23 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     }
   }
 
+  const getDefaultDT = async functionId => {
+    const parameters = `_userId=${userData && userData.userId}&_functionId=${functionId}`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: parameters
+      })
+      if (res.record) {
+        formik.setFieldValue('dtId', res.record.dtId)
+      } else {
+        formik.setFieldValue('dtId', '')
+      }
+    } catch (error) {
+      formik.setFieldValue('dtId', '')
+    }
+  }
   async function getEXMBase(plantId, currencyId, baseCurrency, rateType) {
     if (!plantId || !currencyId || !rateType || !baseCurrency) {
       if (!plantId) {
@@ -499,6 +517,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       })
       setRateType(res.record.value)
       formik.setFieldValue('functionId', type)
+      getDefaultDT(type)
     }
   }
   async function getBaseCurrency() {

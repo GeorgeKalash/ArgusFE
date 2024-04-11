@@ -29,6 +29,7 @@ const CustomDatePicker = ({
   disabledDate = null,
   readOnly = false,
   editMode = false,
+  hasBorder = true,
   hidden = false,
   ...props
 }) => {
@@ -83,6 +84,13 @@ const CustomDatePicker = ({
         minDate={disabledRangeDate.date}
         maxDate={newDate}
         fullWidth={fullWidth}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: !hasBorder && 'none' // Hide border
+            }
+          }
+        }}
         autoFocus={autoFocus}
         format={dateFormat}
         onChange={newValue => onChange(name, newValue)}

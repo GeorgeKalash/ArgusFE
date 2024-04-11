@@ -1,6 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react'
 import FormShell from './FormShell'
-import InlineEditGrid from './InlineEditGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -8,40 +7,29 @@ import { useFormik } from 'formik'
 import CustomTextField from '../Inputs/CustomTextField'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { formatDateDefault, formatDateToApiInline } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
+import { DataGrid } from './DataGrid'
+import * as yup from 'yup'
 
-
-export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}) => {
+export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage, height, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const[clientStore , setClientStore] = useState([])
-  const [RelationTypesStore, setRelationTypesStore] =useState([])
 
-
-  const {
-    labels: _labels,
-    access
-  } = useResourceParams({
+  const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.ClientRelation
   })
 
-  useEffect(()=>{
-
+  useEffect(() => {
     getGridData(recordId)
-  },[recordId])
+  }, [recordId])
 
-  useEffect(()=>{
-    getFillRelationTypes()
-
-  },[])
-
-  function getGridData(parentId){
-
+  function getGridData(parentId) {
     formik.setValues({
-      rows: [
+      relations: [
         {
+          id: 1,
           parentId: recordId || '',
           clientId: '',
           clientName: '',
@@ -51,189 +39,149 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}
           rtId: '',
           rtReference: '',
           expiryDate: '',
-          activationDate: ''}
+          activationDate: ''
+        }
       ]
     })
-    var parameters = `_parentId=${parentId}`;
+    var parameters = `_parentId=${parentId}`
 
     getRequest({
       extension: RTCLRepository.ClientRelation.qry,
-      parameters: parameters,
-    })
-      .then((res) => {
-        const result = res.list
-
-        const processedData = result.map((item) => ({
-          ...item,
-          activationDate: formatDateDefault(item?.activationDate),
-          expiryDate: formatDateDefault(item?.expiryDate)
-
-        }));
-        res.list.length > 0 && formik.setValues({rows: processedData});
-      })
-      .catch((error) => {
-
-        setErrorMessage(error);
-
-      });
-  }
-
-
-
-  const lookupClient = inp => {
-
-     const input = inp
-     console.log({list: []})
-
-     if(input){
-    var parameters = `_size=30&_startAt=0&_filter=${input}&_category=1`
-
-    getRequest({
-      extension: CTCLRepository.CtClientIndividual.snapshot,
       parameters: parameters
     })
       .then(res => {
-        console.log(res.list)
-        setClientStore(res.list)
+        const result = res.list
+
+        const processedData = result.map((item, index) => ({
+          ...item,
+          id: index + 1,
+          seqNo: index + 1,
+          activationDate: formatDateFromApi(item?.activationDate),
+          expiryDate: formatDateFromApi(item?.expiryDate)
+        }))
+        res.list.length > 0 && formik.setValues({ relations: processedData })
       })
       .catch(error => {
         setErrorMessage(error)
       })
-
-    }
-
   }
 
-
-
-  const gridColumn = [
+  const columns = [
     {
-      field: 'incremented',
-      header: 'Seq No',
-      name: 'seqNo',
-      mandatory: false,
-      readOnly: true,
-      hidden: true,
-      valueSetter: () => {
-        return formik.values.rows.length + 1
+      component: 'resourcelookup',
+      label: _labels.clientRef,
+      name: 'clientRef',
+      props: {
+        endpointId: CTCLRepository.CtClientIndividual.snapshot,
+        parameters: { _category: 1, _size: 30 },
+        valueField: 'recordId',
+        displayField: 'reference',
+        mapping: [
+          { from: 'recordId', to: 'clientId' },
+          { from: 'reference', to: 'clientRef' },
+          { from: 'name', to: 'clientName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
       }
     },
     {
-      field: 'lookup',
-      header: _labels.clientRef,
-      nameId: 'clientId',
-      name: 'clientRef',
-      mandatory: true,
-      store: clientStore,
-      valueField: 'recordId',
-      displayField:  'name',
-      widthDropDown: 200,
-      fieldsToUpdate: [{ from: 'reference', to: 'clientRef' }, { from: 'name', to: 'clientName' }],
-      columnsInDropDown: [
-        { key: 'reference', value: 'reference' },
-        { key: 'name', value: 'Name' }
-      ],
-       onLookup: lookupClient
-    },
-    {
-      field: 'textfield',
-      header: _labels.clientName,
+      component: 'textfield',
+      label: _labels.clientName,
       name: 'clientName',
-      mandatory: true,
-      readOnly: true
+      props: {
+        readOnly: true
+      }
     },
-
-
     {
-      field: 'combobox',
-      header: _labels.relation,
-      nameId: 'rtId',
+      component: 'resourcecombobox',
+      label: _labels.relation,
       name: 'relationName',
-      mandatory: true,
-      store: RelationTypesStore ,
-      valueField: 'recordId',
-      displayField: 'reference',
-      widthDropDown: 200,
-
-      fieldsToUpdate: [{ from: 'name', to: 'name' }],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ]
+      props: {
+        endpointId: CurrencyTradingSettingsRepository.RelationType.qry,
+        parameters: { _dgId: 0 },
+        valueField: 'recordId',
+        displayField: 'name',
+        widthDropDown: 200,
+        mapping: [
+          { from: 'recordId', to: 'rtId' },
+          { from: 'name', to: 'relationName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
+      }
     },
+
     {
-      id: 1,
-      field: 'datePicker',
-      header: _labels.expiryDate,
-      name: 'expiryDate',
-      mandatory: true,
-
-
-
+      component: 'date',
+      label: _labels.expiryDate,
+      name: 'expiryDate'
     },
-    {
-      id: 1,
-      field: 'datePicker',
-      header: _labels.activationDate,
-      mandatory: true,
-      name: 'activationDate',
 
+    {
+      component: 'date',
+      label: _labels.activationDate,
+      name: 'activationDate'
     }
   ]
-
 
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
+    validationSchema: yup.object({
+      relations: yup
+        .array()
+        .of(
+          yup.object().shape({
+            clientRef: yup.string().required('currency  is required'),
+            relationName: yup.string().required('Country  is required'),
+            expiryDate: yup.string().required('Dispersal Type  is required'),
+            activationDate: yup.string().required('plantId Type  is required')
+          })
+        )
+        .required('schedules array is required')
+    }),
     initialValues: {
-      rows: [
+      relations: [
         {
-        parentId: recordId,
-        clientId: '',
-        name: '',
-        reference: '',
-        seqNo: 1,
-        rtId: '',
-        rtReference: '',
-        expiryDate: '',
-        activationDate: ''}]
+          id: 1,
+          parentId: recordId,
+          clientId: '',
+          name: '',
+          reference: '',
+          seqNo: 1,
+          rtId: '',
+          rtReference: '',
+          expiryDate: '',
+          activationDate: ''
+        }
+      ]
     },
     onSubmit: values => {
-      console.log(values)
       post(values)
     }
   })
 
-  const getFillRelationTypes = () => {
-    const defaultParams = `_filter=`
-    var parameters = defaultParams + '&_dgId=0'
-
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.RelationType.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setRelationTypesStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   const post = obj => {
-    const res = obj.rows.map((item) => ({
-      ...item,
-      activationDate: formatDateToApiInline(item?.activationDate),
-      expiryDate: formatDateToApiInline(item?.expiryDate)
-
-    }));
+    const res = obj.relations.map(({ parentId, activationDate, expiryDate, ...rest }, index) => ({
+      parentId: recordId,
+      seqNo: index + 1,
+      activationDate: activationDate && formatDateToApiFunction(activationDate),
+      expiryDate: expiryDate && formatDateToApiFunction(expiryDate),
+      ...rest
+    }))
 
     const data = {
       parentId: recordId,
       items: res
     }
 
-    console.log(data)
     postRequest({
       extension: RTCLRepository.ClientRelation.set2,
       record: JSON.stringify(data)
@@ -241,35 +189,28 @@ export const ClientRelationForm = ({recordId, name , reference, setErrorMessage}
       .then(res => {
         toast.success('Record Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
-return (
-    <FormShell height={500} form={formik} infoVisible={false}>
-      <Grid container xs={9}  spacing={4} sx={{p:5}}>
-        <Grid item xs={4}><CustomTextField value={reference} label={_labels.reference} readOnly={true}/></Grid> <Grid item xs={5}></Grid>
-        <Grid item xs={6}><CustomTextField value={name} label={_labels.client}   readOnly={true} /></Grid>
+  return (
+    <FormShell form={formik} infoVisible={false}>
+      <Grid container xs={9} spacing={4} sx={{ p: 5 }}>
+        <Grid item xs={4}>
+          <CustomTextField value={reference} label={_labels.reference} readOnly={true} />
+        </Grid>{' '}
+        <Grid item xs={5}></Grid>
+        <Grid item xs={6}>
+          <CustomTextField value={name} label={_labels.client} readOnly={true} />
+        </Grid>
       </Grid>
-      <Grid  spacing={4} sx={{mt: 5}}>
-      <InlineEditGrid
-      gridValidation={formik}
-      columns={gridColumn}
-      defaultRow={{
-        parentId: recordId || '',
-        clientId: '',
-        clientName: '',
-        clientRef: '',
-        relationName: '',
-        seqNo: '' ,
-        rtId: '',
-        expiryDate: '',
-        activationDate: ''
-      }}
-        allowAddNewLine={true}
-        allowDelete={true}
-      />
+      <Grid spacing={4} sx={{ mt: 1 }}>
+        <DataGrid
+          onChange={value => formik.setFieldValue('relations', value)}
+          value={formik.values.relations}
+          error={formik.errors.relations}
+          columns={columns}
+          height={`${expanded ? `calc(100vh - 330px)` : `${height - 160}px`}`}
+        />
       </Grid>
     </FormShell>
   )
