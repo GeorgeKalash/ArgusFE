@@ -34,5 +34,12 @@ export const FinancialRepository = {
     set: service + 'setGRP',
     del: service + 'delGRP',
     page: service + 'pageGRP',
+  },
+  AccountCreditLimit:{
+    qry: service + 'qryACL',
+    page: service + 'pageACL',
+    get: service + 'getACL',
+    set: service + 'setACL',
+    del: service + 'delACL',
   }
 }

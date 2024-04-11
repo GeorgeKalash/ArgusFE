@@ -19,6 +19,11 @@ const AccountsWindow = ({
 
   const editMode = !!recordId
 
+  const [store , setStore] = useState({
+    recordId : recordId || null,
+    list: null,
+  })
+
   return (
 
     <Window
@@ -45,7 +50,7 @@ const AccountsWindow = ({
           recordId={recordId}
         />
       </CustomTabPanel>
-      {/* <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab}>
       <DimensionsForm
           labels={labels}
           maxAccess={maxAccess}
@@ -56,7 +61,8 @@ const AccountsWindow = ({
       <CreditLimitsForm
           labels={labels}
           maxAccess={maxAccess}
-          recordId={recordId}
+          store={store}
+          setStore={setStore}
         />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
@@ -65,7 +71,7 @@ const AccountsWindow = ({
           maxAccess={maxAccess}
           recordId={recordId}
         />
-      </CustomTabPanel> */}
+      </CustomTabPanel>
     </Window>
   )
 }

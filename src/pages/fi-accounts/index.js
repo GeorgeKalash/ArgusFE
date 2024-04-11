@@ -41,14 +41,28 @@ const MfAccounts = () => {
     })
   }
 
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: FinancialRepository.Account.snapshot,
+      parameters: `_filter=${qry}`
+    })
+  }
+
   const {
     query: { data },
     labels: _labels,
-    access
+    search,
+    clear,
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.Account.page,
-    datasetId: ResourceIds.Accounts
+    datasetId: ResourceIds.Accounts,
+    search: {
+      endpointId: FinancialRepository.Account.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
   const invalidate = useInvalidate({
@@ -108,10 +122,17 @@ const MfAccounts = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar 
+          onAdd={add} 
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
-          gridData={data}
+          gridData={data ?? { list: [] }}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
@@ -119,6 +140,7 @@ const MfAccounts = () => {
           pageSize={50}
           paginationType='client'
           maxAccess={access}
+          refetch={refetch}
         />
       </Box>
       {windowOpen && (
