@@ -157,6 +157,7 @@ return (
           label={labels.length}
           value={formik.values.length}
           required
+          type='number'
           minLength='1'
           maxLength='10'
           maxAccess={maxAccess}
