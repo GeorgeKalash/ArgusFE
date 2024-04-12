@@ -2,7 +2,6 @@ import { Box, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import { useRef } from 'react'
 import Button from '@mui/material/Button'
-import { Label } from 'recharts'
 
 const CustomImage = ({ name, value, onChange, setFile }) => {
   const hiddenInputRef = useRef()

@@ -93,6 +93,8 @@ const CompanyInfo = () => {
         if (res) toast.success('Record Edited Successfully')
       })
     } else {
+      if (obj.logoUrl) {
+      }
     }
   }
 
