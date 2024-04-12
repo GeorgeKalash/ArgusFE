@@ -37,8 +37,6 @@ import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
 
 import { formatDateDefault, formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
-import { width } from '@mui/system'
-import { displayName } from 'cleave.js/react'
 
 const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, height }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -80,7 +78,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         currencyRef: '',
         currencyId: '',
 
-        signKey: '',
+        sign: '',
         signValue: '',
         notes: '',
         functionId: functionId,
@@ -125,16 +123,24 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
     initialValues,
     enableReinitialize: true,
 
-    // validationSchema: yup.object({
-    //   generalAccount: yup
-    //     .array()
-    //     .of(
-    //       yup.object().shape({
-    //         accountRef: yup.string().required('accountRef recordId is required')
-    //       })
-    //     )
-    //     .required('Operations array is required')
-    // }),
+    validationSchema: yup.object({
+      generalAccount: yup
+        .array()
+        .of(
+          yup.object().shape({
+            accountRef: yup.string().required('accountRef recordId is required'),
+            accountName: yup.string().required('currencyId recordId is required'),
+            accountId: yup.number().required('currencyId recordId is required'),
+
+            currencyRef: yup.string().required('currencyId recordId is required'),
+            signValue: yup.string().required('currencyId recordId is required'),
+            amount: yup.number().required('currencyId recordId is required'),
+            baseAmount: yup.number().required('currencyId recordId is required'),
+            exRate: yup.number().required('currencyId recordId is required')
+          })
+        )
+        .required('generalAccount array is required')
+    }),
     validateOnChange: true,
     onSubmit: async values => {
       {
@@ -194,16 +200,18 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
 
       console.log(generalAccountData)
 
+      const parseNumber = value => {
+        const number = parseFloat(value)
+
+        return isNaN(number) ? 0 : number
+      }
+
       const baseCredit = generalAccountData.reduce((acc, curr) => {
-        if (curr.signKey) {
-          return curr.signValue == 'C' ? acc + parseFloat(curr.baseAmount || 0) : acc
-        }
+        return curr.signValue === 'C' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
       const baseDebit = generalAccountData.reduce((acc, curr) => {
-        if (curr.signKey) {
-          return curr.signValue == 'D' ? acc + parseFloat(curr.baseAmount || 0) : acc
-        }
+        return curr.signValue === 'D' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
       const baseBalance = baseDebit - baseCredit
@@ -224,7 +232,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             if (!acc[currency]) {
               acc[currency] = { credit: 0, debit: 0 }
             }
-            if (curr.signKey) {
+            if (curr.sign) {
               if (curr.signValue == 'C') {
                 acc[currency].credit += parseFloat(curr.amount || 0)
               } else if (curr.signValue == 'D') {
@@ -272,7 +280,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         currencyRef: row.currencyRef,
         currencyId: row.currencyId,
 
-        signKey: row.signKey,
+        sign: row.sign,
         signValue: row.signValue,
         notes: row.notes,
         exRate: row.exRate,
@@ -293,7 +301,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
           if (res && res.record) {
             console.log('XXXXXXXXXXXXXXXXXXXXX', res.record.exRate)
             setExRateValue(res.record.exRate)
-            console.log()
+            console.log('exrateVVVVVVVVV', exRateValue)
           }
         } catch (error) {
           console.error('Failed to fetch currency exchange rate:', error)
@@ -393,7 +401,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               component: 'resourcelookup',
 
               label: _labels.accountRef,
-              name: 'account',
+              name: 'accountId',
               props: {
                 displayFieldWidth: 3,
                 endpointId: GeneralLedgerRepository.Account.snapshot,
@@ -479,7 +487,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             {
               component: 'resourcecombobox',
               label: _labels.currency,
-              name: 'currency',
+              name: 'currencyRef',
               props: {
                 endpointId: SystemRepository.Currency.qry,
                 displayField: 'reference',
@@ -492,10 +500,10 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
 
               async onChange({ row: { update, oldRow, newRow } }) {
                 console.log('newRow', newRow)
-                if (newRow.currencyId)
-                  if (!newRow?.currencyId) {
-                    return
-                  }
+
+                if (!newRow?.currencyId) {
+                  return
+                }
                 if (newRow.currencyId) {
                   const result = await getCurrencyApi(newRow?.currencyId)
                   const result2 = result.record
@@ -527,7 +535,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             {
               component: 'resourcecombobox',
               label: _labels.sign,
-              name: 'sign',
+              name: 'signValue',
               props: {
                 endpointId: SystemRepository.KeyValueStore,
                 _language: user.languageId,
@@ -536,7 +544,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
                 valueField: 'key',
                 mapping: [
                   { from: 'value', to: 'signValue' },
-                  { from: 'key', to: 'signKey' }
+                  { from: 'key', to: 'sign' }
                 ]
               }
             },
