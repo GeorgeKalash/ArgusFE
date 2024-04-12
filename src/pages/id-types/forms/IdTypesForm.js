@@ -49,14 +49,20 @@ const IdTypesForm = ({
     enableReinitialize: false,
     validateOnChange: true,
     initialValues,
+    validate: (values) => {
+      const errors = {};
+      if (values?.type === '1' && !values.clientFileLifeTime) {
+        errors.clientFileLifeTime = " ";
+      }
+      
+      return errors;
+      },
     validationSchema: yup.object({
       name: yup.string().required(' '),
       format: yup.string().required(' '),
       length: yup.string().required(' '),
       category: yup.string().required(' '),
       clientFileExpiryType: yup.string().required(' '),
-
-      // clientFileLifeTime: values?.type === '1' ? yup.string().required(' ') : yup.string().notRequired(),
       isDiplomat: yup.string().required(' ')
     }),
     onSubmit: values => {
