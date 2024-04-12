@@ -78,7 +78,7 @@ const CreditLimitsForm = ({
         component: 'textfield',
         label: labels.CreditLimits,
         name: 'limit',
-        type:'numeric'
+        props:{type:'number'}
       }
     ]
 
