@@ -14,12 +14,11 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import toast from 'react-hot-toast'
 
 // ** Windows
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 const AddressBook = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -111,18 +110,19 @@ const AddressBook = () => {
 
   const editAddress = obj => {
     setAddress(obj)
-    openForm()
+    openForm(obj)
   }
 
-  function openForm() {
+  function openForm(obj) {
     stack({
-      Component: AddressFormShell,
+      Component: AddressForm,
       props: {
-        readOnly: false,
+        editMode: true,
         labels: _labels,
         setAddress: setAddress,
-        address: address,
-        onSubmitFunction: onSubmitFunction
+        address: obj,
+        recordId: obj.recordId,
+        onSubmit: onSubmitFunction
       },
       width: 600,
       height: 600,
@@ -131,15 +131,7 @@ const AddressBook = () => {
   }
 
   const onSubmitFunction = async obj => {
-    const res = await postRequest({
-      extension: SystemRepository.Address.set,
-      record: JSON.stringify(obj)
-    })
-
-    if (res.recordId) {
-      toast.success('Record Updated Successfully')
-      invalidate()
-    }
+    invalidate()
   }
 
   return (

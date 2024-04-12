@@ -15,8 +15,7 @@ export const AddressFormShell = ({
   readOnly,
   allowPost,
   required = false,
-  onSubmit,
-  onSubmitFunction
+  onSubmit
 }) => {
   const { labels: labels, access } = useResourceParams({
     datasetId: ResourceIds.Address
@@ -86,7 +85,6 @@ export const AddressFormShell = ({
     initialValues,
     onSubmit: values => {
       setAddress(values)
-      onSubmitFunction(values)
 
       if (allowPost) {
         onSubmit(values)
