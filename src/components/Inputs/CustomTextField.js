@@ -70,10 +70,11 @@ const CustomTextField = ({
       props?.onChange(e)
     }
 
-    /*if (language === 'number') {
+    if (language === 'number') {
       e.target.value = inputValue?.replace(/[^0-9.]/g, '')
       props?.onChange(e)
-    }*/
+    }
+
     if (language === 'arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
       props?.onChange(e)
