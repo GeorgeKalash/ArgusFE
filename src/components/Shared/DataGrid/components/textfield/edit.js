@@ -1,23 +1,27 @@
-import { useGridApiContext } from '@mui/x-data-grid'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function TextFieldEdit({ column: { props }, id, field, value }) {
-  const api = useGridApiContext()
-
+export default function TextFieldEdit({ column: { props }, id, field, value, update }) {
   return (
     <CustomTextField
       value={value}
       label={''}
-      readOnly={props?.readOnly}
       autoFocus
       hasBorder={false}
-      onChange={e => {
-        api.current.setEditCellValue({
+      onClear={e =>
+        update({
           id,
           field,
-          value: e.target.value
+          value: ''
+        })
+      }
+      onChange={e => {
+        update({
+          id,
+          field,
+          value: e.target.value || ''
         })
       }}
+      {...props}
     />
   )
 }

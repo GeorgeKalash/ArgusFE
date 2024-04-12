@@ -313,15 +313,24 @@ const ClientTemplateForm = ({
     getClient(recordId);
   }, [recordId]);
 
+  const actions = [
+    {
+      key:'Client Relation',
+      condition: true,
+      onClick:'onClientRelation',
+      disabled:!editMode
+    }
+  ]
+
   return (
     <FormShell
+      actions={actions}
       form={formik}
       height={500}
       resourceId={ResourceIds.ClientCorporate}
       maxAccess={maxAccess}
       recordId={recordId}
       disabledSubmit={editMode}
-      clientRelation={true}
       editMode={editMode}
       setErrorMessage={setErrorMessage}
     >
