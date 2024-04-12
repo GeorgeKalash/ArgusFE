@@ -18,11 +18,13 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 import { useWindow } from 'src/windows'
-import OutwardsTab from './Tabs/OutwardsTab'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import CashTransferTab from './Tabs/CashTransferTab'
 import toast from 'react-hot-toast'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { formatDateDefault } from 'src/lib/date-helper'
 
-const OutwardsTransfer = () => {
+const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   //states
@@ -34,12 +36,13 @@ const OutwardsTransfer = () => {
     filterBy,
     clearFilter,
     labels: _labels,
+    refetch,
     access
   } = useResourceQuery({
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
-    datasetId: ResourceIds.OutwardsTransfer,
+    endpointId: CashBankRepository.CashTransfer.snapshot,
+    datasetId: ResourceIds.CashTransfer,
     filter: {
-      endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      endpointId: CashBankRepository.CashTransfer.snapshot,
       filterFn: fetchWithSearch
     }
   })
@@ -47,13 +50,15 @@ const OutwardsTransfer = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+      extension: CashBankRepository.CashTransfer.snapshot,
       parameters: `_filter=${filters.qry}`
     })
+
+    return
   }
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
+    endpointId: CashBankRepository.CashTransfer.snapshot
   })
 
   const userData = window.sessionStorage.getItem('userData')
@@ -82,10 +87,6 @@ const OutwardsTransfer = () => {
   }
 
   const getCashAccountId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
-
     const parameters = `_userId=${userData && userData.userId}&_key=cashAccountId`
 
     try {
@@ -105,13 +106,34 @@ const OutwardsTransfer = () => {
       return ''
     }
   }
+
+  const getDefaultDT = async () => {
+    const parameters = `_userId=${userData && userData.userId}&_functionId=${SystemFunction.CashTransfer}`
+
+    try {
+      const res = await getRequest({
+        extension: SystemRepository.UserFunction.get,
+        parameters: parameters
+      })
+      if (res.record) {
+        return res.record.dtId
+      }
+
+      return ''
+    } catch (error) {
+      setErrorMessage(error)
+
+      return ''
+    }
+  }
   async function openForm(recordId) {
     try {
       const plantId = await getPlantId()
       const cashAccountId = await getCashAccountId()
+      const dtId = await getDefaultDT()
 
       if (plantId !== '' && cashAccountId !== '') {
-        openOutWardsWindow(plantId, cashAccountId, recordId)
+        openOutWardsWindow(plantId, cashAccountId, recordId, dtId)
       } else {
         if (plantId === '') {
           setErrorMessage({ error: 'The user does not have a default plant' })
@@ -128,74 +150,81 @@ const OutwardsTransfer = () => {
 
   const columns = [
     {
-      field: 'countryRef',
-      headerName: _labels.CountryRef,
+      field: 'reference',
+      headerName: _labels.reference,
       flex: 1
     },
     {
-      field: 'dispersalName',
-      headerName: _labels.DispersalName,
-      flex: 1
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      valueGetter: ({ row }) => formatDateDefault(row?.date)
     },
     ,
     {
-      field: 'currencyRef',
-      headerName: _labels.Currency,
+      field: 'fromPlantName',
+      headerName: _labels.fromPlant,
       flex: 1
     },
     {
-      field: 'agentName',
-      headerName: _labels.Agents,
+      field: 'toPlantName',
+      headerName: _labels.toPlant,
       flex: 1
     },
+    {
+      field: 'fromCAName',
+      headerName: _labels.fromCashAcc,
+      flex: 1
+    },
+    {
+      field: 'toCAName',
+      headerName: _labels.toCashAcc,
+      flex: 1
+    },
+
     {
       field: 'rsName',
-      headerName: _labels.ReleaseStatus,
+      headerName: _labels.releaseStatus,
       flex: 1
     },
     {
       field: 'statusName',
-      headerName: _labels.Status,
-      flex: 1
-    },
-    {
-      field: 'wipName',
-      headerName: _labels.WIP,
+      headerName: _labels.status,
       flex: 1
     }
   ]
 
-  const delOutwards = async obj => {
+  const delCashTFR = async obj => {
     await postRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.del,
+      extension: CashBankRepository.CashTransfer.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
 
-  const addOutwards = () => {
+  const addCashTFR = () => {
     openForm('')
   }
 
-  const editOutwards = obj => {
+  const editCashTFR = obj => {
     openForm(obj.recordId)
   }
 
-  function openOutWardsWindow(plantId, cashAccountId, recordId) {
+  function openOutWardsWindow(plantId, cashAccountId, recordId, dtId) {
     stack({
-      Component: OutwardsTab,
+      Component: CashTransferTab,
       props: {
         plantId: plantId,
         cashAccountId: cashAccountId,
-        userId: userData && userData.userId,
+        dtId: dtId,
         maxAccess: access,
         labels: _labels,
         recordId: recordId ? recordId : null
       },
-      width: 1100,
-      height: 550,
-      title: 'Outwards'
+      width: 950,
+      height: 620,
+      title: 'Cash Transfer'
     })
   }
 
@@ -203,7 +232,7 @@ const OutwardsTransfer = () => {
     <>
       <Box>
         <GridToolbar
-          onAdd={addOutwards}
+          onAdd={addCashTFR}
           maxAccess={access}
           onSearch={value => {
             filterBy('qry', value)
@@ -218,10 +247,11 @@ const OutwardsTransfer = () => {
           columns={columns}
           gridData={data ? data : { list: [] }}
           rowId={['recordId']}
-          onEdit={editOutwards}
-          onDelete={delOutwards}
+          onEdit={editCashTFR}
+          onDelete={delCashTFR}
           isLoading={false}
           pageSize={50}
+          refetch={refetch}
           paginationType='client'
           maxAccess={access}
         />
@@ -232,4 +262,4 @@ const OutwardsTransfer = () => {
   )
 }
 
-export default OutwardsTransfer
+export default CashTransfer

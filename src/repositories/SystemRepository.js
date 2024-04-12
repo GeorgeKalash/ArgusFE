@@ -148,5 +148,8 @@ export const SystemRepository = {
   },
   ResourceControls: {
     qry: service + 'qryResourceControls'
+  },
+  UserFunction: {
+    get: service + 'getUFU'
   }
 }

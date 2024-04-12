@@ -9,6 +9,8 @@ import { ResourceLookup } from './ResourceLookup'
 import FormGrid from 'src/components/form/layout/FormGrid'
 
 const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) => {
+  console.log(maxAccess)
+
   return (
     <>
       <Grid container sx={{ pt: 1 }}>
