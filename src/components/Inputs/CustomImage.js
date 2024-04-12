@@ -33,6 +33,7 @@ const CustomImage = ({ name, value, onChange, setFile }) => {
       reader.readAsDataURL(file)
     } else {
       onChange(name, '')
+      setFile(e.target.result)
     }
   }
 

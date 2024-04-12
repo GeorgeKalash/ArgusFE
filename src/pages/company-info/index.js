@@ -94,6 +94,23 @@ const CompanyInfo = () => {
       })
     } else {
       if (obj.logoUrl) {
+        const data = {
+          resourceId: ResourceIds.CompanyInfo,
+          recordId: 1,
+          seqNo: 0,
+          fileName: file.name,
+          folderId: null,
+          folderName: null,
+          date: day + '/' + month + '/' + year,
+          url: null
+        }
+        postRequest({
+          extension: SystemRepository.Attachment.del,
+          record: JSON.stringify(data),
+          file: obj.logoUrl
+        }).then(res => {
+          if (res) toast.success('Record Edited Successfully')
+        })
       }
     }
   }

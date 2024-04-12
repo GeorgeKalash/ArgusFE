@@ -158,6 +158,7 @@ export const SystemRepository = {
   },
   Attachment: {
     get: service + 'getAT',
-    set: service + 'setAT'
+    set: service + 'setAT',
+    del: service + 'delAT'
   }
 }
