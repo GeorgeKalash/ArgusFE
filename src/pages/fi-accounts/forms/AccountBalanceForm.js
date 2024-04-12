@@ -1,95 +1,81 @@
+// ** React Importsport
+import { useContext, useEffect, useState } from 'react'
+
+// ** MUI Imports
 import { Box } from '@mui/material'
-import { useFormik } from 'formik'
-import { useContext, useEffect } from 'react'
-import { DataGrid } from 'src/components/Shared/DataGrid'
 
 // ** Custom Imports
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import Table from 'src/components/Shared/Table'
 
-const AccountBalanceForm = ({
-  setStore,
+// ** API
+import { RequestsContext } from 'src/providers/RequestsContext'
+
+// ** Helpers
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { useWindow } from 'src/windows'
+
+const AccountBalanceForm = (
+ { 
   labels,
   height,
+  maxAccess,
   store,
-  expanded,
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const {recordId : accountId } = store
+  const [CharacteristicGridData , setCharacteristicGridData] = useState()
+  const { stack } = useWindow()
+  const { recordId } = store
 
-  const formik = useFormik({
-      enableReinitialize: false,
-      validateOnChange: true,
-      initialValues: {
-        balances: [
-          { id :1,
-            accountId: accountId,
-            currencyName: '',
-            currencyId: '',
-            balance: ''
-          }
-        ]
-      },
-     
-    })
-
-    const column = [
-      {
-        component: 'textfield',
-        label: labels.currency,
-        name: 'currencyName',
-        props:{readOnly: true}
-      },
-      {
-        component: 'textfield',
-        label: labels.balance,
-        name: 'balance',
-        props:{readOnly: true}
-      }
-    ]
-
-    useEffect(()=>{
-      accountId  && getCurrencies(accountId)
-    }, [accountId])
-
-    const getCurrencies = accountId => {
-      const defaultParams = `_accountId=${accountId}`
-      var parameters = defaultParams
-      getRequest({
-        extension: FinancialRepository.AccountCreditBalance.qry,
-        parameters: parameters
-      })
-        .then(res => {
-          if (res.list.length > 0){
-            const balances = res.list.map(({ ...rest } , index) => ({
-                id : index,
-                ...rest
-            }))
-            formik.setValues({ balances: balances})
-
-          setStore(prevStore => ({
-            ...prevStore,
-            balances: balances,
-          }));
-          }
-        })
-        .catch(error => {
-        })
+  const columns = [
+    {
+      field: 'currencyName',
+      headerName: labels.currency,
+      flex: 1
+    },
+    {
+      field: 'balance',
+      headerName: labels.balance,
+      flex: 1
     }
+  ]
+
+  const getCharacteristicGridData = accountId => {
+    setCharacteristicGridData([])
+    const defaultParams = `_accountId=${accountId}`
+    var parameters = defaultParams
+    getRequest({
+      extension: FinancialRepository.AccountCreditBalance.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setCharacteristicGridData(res)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  useEffect(()=>{
+    recordId && getCharacteristicGridData(recordId)
+  },[recordId])
 
   return (
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
-        <DataGrid
-           onChange={value => formik.setFieldValue('balances', value)}
-           value={formik.values.balances}
-           error={formik.errors.balances}
-           columns={column}
-           height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
-
+    <>
+      <Box>
+        <GridToolbar maxAccess={maxAccess} />
+        <Table
+          columns={columns}
+          gridData={CharacteristicGridData}
+          rowId={['currencyId']}
+          isLoading={false}
+          maxAccess={maxAccess}
+          pagination={false}
+          height={height-50}
         />
       </Box>
+    </>
   )
 }
 
 export default AccountBalanceForm
-

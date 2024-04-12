@@ -68,6 +68,7 @@ const AccountsWindow = ({
           setStore={setStore}
           labels={labels}
           height={height}
+          maxAccess={maxAccess}
           expanded={expanded}
         />
       </CustomTabPanel>
