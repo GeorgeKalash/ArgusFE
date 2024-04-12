@@ -39,7 +39,6 @@ const CompanyInfo = () => {
       extension: SystemRepository.CompanyInfo.get,
       parameters: `_filter=`
     })
-    console.log(res)
 
     setInitialData(res.record)
 
@@ -47,7 +46,6 @@ const CompanyInfo = () => {
       extension: SystemRepository.Attachment.get,
       parameters: `_resourceId=20120&_seqNo=0&_recordId=1`
     })
-    console.log(resu)
   }
 
   const formik = useFormik({
@@ -62,7 +60,8 @@ const CompanyInfo = () => {
   const post = obj => {
     postRequest({
       extension: SystemRepository.CompanyInfo.set,
-      record: JSON.stringify(obj)
+
+      record: JSON.stringify({ ...obj, logoUrl: null })
     })
       .then(res => {
         if (res && !file) toast.success('Record Edited Successfully')
@@ -192,7 +191,7 @@ const CompanyInfo = () => {
             <CustomImage
               name='logoUrl'
               value={formik.values.logoUrl}
-              setValue={formik.setFieldValue}
+              onChange={formik.setFieldValue}
               setFile={setFile}
             />
           </Grid>

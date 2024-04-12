@@ -1,11 +1,12 @@
 import { Box, Typography } from '@mui/material'
-import React from 'react'
+import React, { useState } from 'react'
 import { useRef } from 'react'
 import Button from '@mui/material/Button'
 import { Label } from 'recharts'
 
-const CustomImage = ({ name, value, setValue, setFile }) => {
+const CustomImage = ({ name, value, onChange, setFile }) => {
   const hiddenInputRef = useRef()
+  const [image, setImage] = useState()
 
   const handleClick = () => {
     hiddenInputRef.current.click()
@@ -24,25 +25,26 @@ const CustomImage = ({ name, value, setValue, setFile }) => {
         return
       }
 
+      onChange(name, file)
+
       const reader = new FileReader()
       reader.onloadend = e => {
-        console.log(e)
-        setValue(name, e.target.result)
+        setImage(e.target.result)
       }
       reader.readAsDataURL(file)
     } else {
-      setValue(name, '')
+      onChange(name, '')
     }
   }
 
   const handleInputImageReset = () => {
-    setValue(name, '')
+    onChange(name, '')
   }
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <img
-        src={value || '/images/avatars/1.png'}
+        src={image || value || '/images/avatars/1.png'}
         alt='Profile Pic'
         style={{ width: 140, height: 100, objectFit: 'cover', marginRight: 16 }}
         onClick={handleClick}
@@ -64,8 +66,8 @@ const CustomImage = ({ name, value, setValue, setFile }) => {
             '&:hover': {
               opacity: 0.8
             },
-            width: 10,
-            height: 35,
+            width: 5,
+            height: 30,
             objectFit: 'contain'
           }}
         >
