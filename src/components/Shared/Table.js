@@ -19,6 +19,7 @@ import DeleteDialog from './DeleteDialog'
 
 // ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 const ODD_OPACITY = 0.2
 
@@ -181,9 +182,9 @@ const Table = ({
         )
       } else {
         if (gridData && gridData.list) {
-          var _gridData = props.gridData.list
-          const pageCount = Math.ceil(originalGridData.length ? originalGridData.length / pageSize : 1)
-          const totalRecords = originalGridData.length
+          var _gridData = props.gridData?.list
+          const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
+          const totalRecords = originalGridData?.length
 
           const incrementPage = () => {
             if (page < pageCount) {
@@ -270,29 +271,28 @@ const Table = ({
     }
   }
 
-  const columns = props.columns
+  const columns = props.columns.filter(
+    ({ field }) =>
+      accessLevel({
+        maxAccess: props.maxAccess,
+        name: field
+      }) !== HIDDEN
+  )
 
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
-      // Create a new object with all the previous checked rows
       const newCheckedRows = { ...prevCheckedRows }
 
-      // Create the key based on the presence of seqNo
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
 
-      // Update the newCheckedRows object with the current row
       newCheckedRows[key] = row
 
-      // Check if newCheckedRows[key] is defined and has checked property
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
 
-      // Pass the entire updated rows in the callback
       handleCheckedRows(filteredRows)
 
-      // Log the updated checkedRows after the state has been updated
       console.log('checkedRows 4 ', newCheckedRows)
 
-      // Return the updated state for the next render
       return filteredRows
     })
   }
@@ -341,7 +341,12 @@ const Table = ({
   }
 
   const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
+
+  const tableHeight = height
+    ? typeof height === 'string' && height?.includes('calc')
+      ? height
+      : `${height}px`
+    : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {

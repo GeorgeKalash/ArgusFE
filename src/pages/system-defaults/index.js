@@ -84,7 +84,6 @@ const SystemDefaults = () => {
           setErrorMessage(error);
       });
     };
-    
 
     const {
         labels: _labels,
@@ -170,7 +169,11 @@ const SystemDefaults = () => {
                         displayField='name'
                         maxAccess={access}
                         onChange={(event, newValue) => {
-                          formik.setFieldValue('baseCurrencyId', newValue?.recordId)
+                          if (newValue) {
+                            formik.setFieldValue('baseCurrencyId', newValue?.recordId)
+                          } else {
+                            formik.setFieldValue('baseCurrencyId', '')
+                          }
                         }}
                         error={formik.touched.baseCurrencyId && Boolean(formik.errors.baseCurrencyId)}
 
@@ -191,7 +194,11 @@ const SystemDefaults = () => {
                         displayField='name'
                         maxAccess={access}
                         onChange={(event, newValue) => {
-                          formik.setFieldValue('countryId', newValue?.recordId)
+                          if (newValue) {
+                            formik.setFieldValue('countryId', newValue?.recordId)
+                          } else {
+                            formik.setFieldValue('countryId', '')
+                          }
                         }}
                         error={formik.touched.countryId && Boolean(formik.errors.countryId)}
 
@@ -222,7 +229,11 @@ const SystemDefaults = () => {
                         values={formik.values}
                         maxAccess={access}
                         onChange={(event, newValue) => {
-                          formik.setFieldValue('timeZone', newValue?.key)
+                          if (newValue) {
+                            formik.setFieldValue('timeZone', newValue?.recordId)
+                          } else {
+                            formik.setFieldValue('timeZone', '')
+                          }
                         }}
                         error={formik.touched.timeZone && Boolean(formik.errors.timeZone)}
 
@@ -239,7 +250,11 @@ const SystemDefaults = () => {
                         values={formik.values}
                         maxAccess={access}
                         onChange={(event, newValue) => {
-                          formik.setFieldValue('dateFormat', newValue?.key)
+                           if (newValue) {
+                                formik.setFieldValue('dateFormat', newValue?.key)
+                              } else {
+                                formik.setFieldValue('dateFormat', '')
+                              }
                         }}
                         error={formik.touched.dateFormat && Boolean(formik.errors.dateFormat)}
 
@@ -281,7 +296,10 @@ const SystemDefaults = () => {
                         padding: 3,
                         textAlign: 'center',
                     }}>
-                        <WindowToolbar onSave={formik.handleSubmit}  />
+                      <WindowToolbar 
+                        onSave={formik.handleSubmit}
+                        isSaved={true}
+                      />
                     </Grid>
                 </Grid>
                 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
