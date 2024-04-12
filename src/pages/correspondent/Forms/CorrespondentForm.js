@@ -159,9 +159,9 @@ return (
               formik.setFieldValue('bpRef', newValue?.reference)
               formik.setFieldValue('bpName', newValue?.name)
             } else {
-              formik.setFieldValue('bpId', null)
-              formik.setFieldValue('bpRef', null)
-              formik.setFieldValue('bpName', null)
+              formik.setFieldValue('bpId', '')
+              formik.setFieldValue('bpRef', '')
+              formik.setFieldValue('bpName', '')
             }
           }}
           errorCheck={'bpId'}

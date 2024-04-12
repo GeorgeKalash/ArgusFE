@@ -114,7 +114,7 @@ const Correspondent = () => {
         labels: _labels,
         recordId: recordId? recordId : null,
       },
-      width: 1200,
+      width: 900,
       height: 600,
       title: _labels.correspondent
     })

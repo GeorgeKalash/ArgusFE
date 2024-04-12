@@ -151,5 +151,12 @@ export const SystemRepository = {
   },
   SMSRequest: {
     qry: service + 'qrySMS'
+  },
+  ResourceControls: {
+    qry: service + 'qryResourceControls'
+  },
+  UserFunction: {
+    get: service + 'getUFU'
+
   }
 }

@@ -102,8 +102,12 @@ export const ResourceIds = {
   SystemFunction: 20105,
   SmsRequestLog: 20132,
   ModuleDeactivation: 23107,
+  Dispersal: 36109,
   OutwardsTransfer: 36301,
   BeneficiaryBank: 36303,
   BeneficiaryCash: 36304,
-  Beneficiary: 36305
+  Beneficiary: 36305,
+  CashAccounts: 33102,
+  CorrespondentControl: 36119,
+  CashTransfer: 33309
 }

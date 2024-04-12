@@ -46,8 +46,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
 
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(false)
   const [referenceRequired, setReferenceRequired] = useState(true)
-  const [requiredOptional, setRequiredOptional] = useState(true)
-  const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
   const [professionStore, setProfessionStore] = useState([])
   const [professionFilterStore, setProfessionFilterStore] = useState([])
   const [address, setAddress] = useState([])
@@ -1305,7 +1303,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         Component: AddressFormShell,
                         props: {
                           readOnly: editMode,
-                          requiredOptional: requiredOptional,
+                          required: true,
                           labels: _labels,
                           setAddress: setAddress,
                           address: address

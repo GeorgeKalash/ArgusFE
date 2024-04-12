@@ -18,6 +18,7 @@ const ProductCurrenciesForm = ({
   labels,
   editMode,
   height,
+  expanded,
   maxAccess
 }) => {
 
@@ -29,24 +30,9 @@ const ProductCurrenciesForm = ({
       .array()
       .of(
         yup.object().shape({
-          currency: yup
-            .object()
-            .shape({
-              recordId: yup.string().required('currency  is required')
-            })
-            .required('currency is required'),
-            country : yup
-            .object()
-            .shape({
-              countryId: yup.string().required('Country  is required')
-            })
-            .required('Country is required'),
-            dispersalType : yup
-            .object()
-            .shape({
-              key: yup.string().required('Dispersal Type  is required')
-            })
-            .required('Country is required'),
+            countryId: yup.string().required('currency  is required'),
+            countryId: yup.string().required('Country  is required'),
+            dispersalType: yup.string().required('Dispersal Type  is required')
         })
 
       ).required('Operations array is required') }),
@@ -77,11 +63,8 @@ const ProductCurrenciesForm = ({
     const data = {
       productId: pId,
       productMonetaries: obj.map(
-        ({ country, id, countryId, currency, currencyId, dispersalType, productId,...rest} ) => ({
+        ({ id,  productId,...rest} ) => ({
             productId: pId,
-            countryId: country.countryId,
-            currencyId: currency.recordId,
-            dispersalType: dispersalType.key,
             ...rest
         }))
     }
@@ -101,12 +84,13 @@ const ProductCurrenciesForm = ({
     {
       component: 'resourcecombobox',
       label: labels.country,
-      name: 'country',
+      name: 'countryId',
       props: {
         store: countries,
         valueField: 'countryId',
         displayField: 'countryRef',
-        fieldsToUpdate: [ { from: 'countryName', to: 'countryName' } ],
+        displayFieldWidth: 2,
+        mapping: [  { from: 'countryId', to: 'countryId' }, { from: 'countryName', to: 'countryName' } ,, { from: 'countryRef', to: 'countryRef' }  ],
         columnsInDropDown: [
           { key: 'countryRef', value: 'Reference' },
           { key: 'countryName', value: 'Name' },
@@ -123,16 +107,18 @@ const ProductCurrenciesForm = ({
     {
       component: 'resourcecombobox',
       label: labels.currency,
-      name: 'currency',
+      name: 'currencyId',
       props: {
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        fieldsToUpdate: [ { from: 'name', to: 'currencyName' } ],
+        mapping: [{ from: 'recordId', to: 'currencyId' }, { from: 'reference', to: 'currencyRef' } , { from: 'name', to: 'currencyName' } ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' },
-        ]
+        ],
+        displayFieldWidth: 2
+
       }
     },
     {
@@ -151,6 +137,9 @@ const ProductCurrenciesForm = ({
         datasetId:  DataSets.RT_Dispersal_Type,
         valueField: 'key',
         displayField: 'value',
+        displayFieldWidth: 2,
+        mapping: [{ from: 'key', to: 'dispersalType' }, { from: 'value', to: 'dispersalTypeName' }],
+
       }
 
     },
@@ -175,23 +164,8 @@ const ProductCurrenciesForm = ({
     })
       .then(res => {
         if (res.list.length > 0)
-         formik.setValues({ currencies: res.list.map(({ countryId,  countryRef, countryName,currencyId,currencyName,currencyRef, dispersalType, dispersalTypeName, ...rest } , index) => ({
+         formik.setValues({ currencies: res.list.map(({  ...rest } , index) => ({
           id : index,
-          country : {
-            countryId,
-            countryRef
-         },
-         countryName: countryName,
-         currency : {
-          recordId: currencyId,
-          reference: currencyRef
-         },
-         currencyName: currencyName,
-          dispersalType :{
-          key: dispersalType,
-          value: dispersalTypeName
-         },
-
           ...rest
        })) })
       })
@@ -201,6 +175,7 @@ return (
   <FormShell form={formik}
    resourceId={ResourceIds.ProductMaster}
    maxAccess={maxAccess}
+   infoVisible={false}
    editMode={editMode}>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
         <DataGrid
@@ -208,7 +183,7 @@ return (
           value={formik.values.currencies}
           error={formik.errors.currencies}
           columns={columns}
-          scrollHeight={height-100}
+          height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
 
         />
       </Box>

@@ -19,6 +19,7 @@ import DeleteDialog from './DeleteDialog'
 
 // ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 const ODD_OPACITY = 0.2
 
@@ -193,9 +194,9 @@ const Table = ({
         )
       } else {
         if (gridData && gridData.list) {
-          var _gridData = props.gridData.list
-          const pageCount = Math.ceil(originalGridData.length ? originalGridData.length / pageSize : 1)
-          const totalRecords = originalGridData.length
+          var _gridData = props.gridData?.list
+          const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
+          const totalRecords = originalGridData?.length
 
           const incrementPage = () => {
             if (page < pageCount) {
@@ -282,7 +283,13 @@ const Table = ({
     }
   }
 
-  const columns = props.columns
+  const columns = props.columns.filter(
+    ({ field }) =>
+      accessLevel({
+        maxAccess: props.maxAccess,
+        name: field
+      }) !== HIDDEN
+  )
 
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {

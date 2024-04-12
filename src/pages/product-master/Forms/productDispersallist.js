@@ -12,7 +12,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { useWindow } from 'src/windows'
 import ProductDispersalForm from './productDispersalForm'
 
-const ProductDispersalList = ({ store, setStore, labels, maxAccess, height }) => {
+const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,height }) => {
   const {recordId : pId} = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [gridData , setGridData] = useState()
@@ -130,8 +130,8 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, height }) =>
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={height-100}
-        />
+          height={`${expanded ? `calc(100vh - 280px)` : `${height-100}`}`}
+          />
       </Box>
     </>
   )
