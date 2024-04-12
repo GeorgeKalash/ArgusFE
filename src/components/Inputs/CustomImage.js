@@ -26,6 +26,7 @@ const CustomImage = ({ name, value, setValue, setFile }) => {
 
       const reader = new FileReader()
       reader.onloadend = e => {
+        console.log(e)
         setValue(name, e.target.result)
       }
       reader.readAsDataURL(file)

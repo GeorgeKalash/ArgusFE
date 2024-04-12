@@ -84,11 +84,12 @@ const CompanyInfo = () => {
         folderId: null,
         folderName: null,
         date: day + '/' + month + '/' + year,
-        url: obj.logoUrl
+        url: null
       }
       postRequest({
         extension: SystemRepository.Attachment.set,
-        record: JSON.stringify(data)
+        record: JSON.stringify(data),
+        file: obj.logoUrl
       }).then(res => {
         if (res) toast.success('Record Edited Successfully')
       })

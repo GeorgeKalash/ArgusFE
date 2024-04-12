@@ -76,6 +76,8 @@ const RequestsProvider = ({ children }) => {
     var bodyFormData = new FormData()
     bodyFormData.append('record', body.record)
 
+    body?.file && bodyFormData.append('file', file)
+
     return axios({
       method: 'POST',
       url: url + body.extension,
