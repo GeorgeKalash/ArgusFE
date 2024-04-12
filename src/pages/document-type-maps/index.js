@@ -33,15 +33,17 @@ const DocumentTypeMaps = () => {
   const [selectedFromFunctionId, setSelectedFromFunctionId] = useState(null)
   const [selectedFromDTId, setSelectedFromDTId] = useState(null)
   const [selectedToFunctionId, setSelectedToFunctionId] = useState(null)
+
   async function fetchGridData() {
-
-
     return await getRequest({
       extension: SystemRepository.DocumentTypeMap.qry,
       parameters: `_filter=&_params=`
     })
-
   }
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.DocumentTypeMap.qry
+  })
 
   const {
     query: { data },
@@ -50,13 +52,10 @@ const DocumentTypeMaps = () => {
     refetch,
     access
   } = useResourceQuery({
-    queryFn:  fetchGridData,
+    queryFn: fetchGridData,
     endpointId: SystemRepository.DocumentTypeMap.qry,
     datasetId: ResourceIds.DocumentTypeMaps
   })
-
-
-
 
   const columns = [
     {
@@ -86,24 +85,24 @@ const DocumentTypeMaps = () => {
       extension: SystemRepository.DocumentTypeMap.del,
       record: JSON.stringify(obj)
     })
-    refresh()
+    invalidate()
     toast.success('Record Deleted Successfully')
   }
-
-  
 
   const add = () => {
     setWindowOpen(true)
     setSelectedFromFunctionId(null)
     setSelectedFromDTId(null)
     setSelectedToFunctionId(null)
+    setSelectedRecordId(null)
   }
 
   const edit = obj => {
-    
     setSelectedFromFunctionId(obj.fromFunctionId)
     setSelectedFromDTId(obj.fromDTId)
     setSelectedToFunctionId(obj.toFunctionId)
+    const rec = String(obj.fromFunctionId) + String(obj.fromDTId) + String(obj.toFunctionId)
+    setSelectedRecordId(rec)
     setWindowOpen(true)
   }
 
@@ -138,7 +137,6 @@ const DocumentTypeMaps = () => {
           fromFunctionId={selectedFromFunctionId}
           fromDTId={selectedFromDTId}
           toFunctionId={selectedToFunctionId}
-          
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
