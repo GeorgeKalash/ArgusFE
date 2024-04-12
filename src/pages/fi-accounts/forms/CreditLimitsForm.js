@@ -124,7 +124,8 @@ const CreditLimitsForm = ({
            value={formik.values.currencies}
            error={formik.errors.currencies}
            columns={column}
-           allowAddNewLine= {false}
+           allowDelete={false}
+           allowAddNewLine={false}
            height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
 
         />

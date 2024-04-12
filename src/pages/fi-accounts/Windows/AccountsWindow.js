@@ -19,25 +19,29 @@ const AccountsWindow = ({
 
   const [store , setStore] = useState({
     recordId : recordId || null,
-    currencies: null,
-    balances: null
+    currencies: null
   })
 
   const tabs = [
     { label: labels.Accounts },
-    { label: labels.Dimensions, disabled: !editMode },
-    { label: labels.CreditLimits, disabled: !editMode },
-    { label: labels.AccountBalance, disabled: !editMode },
+    { label: labels.Dimensions, disabled: !store.recordId },
+    { label: labels.CreditLimits, disabled: !store.recordId },
+    { label: labels.AccountBalance, disabled: !store.recordId },
   ]
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+    <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={height} index={0} value={activeTab}>
         <AccountsForm
+          store={store}
+          setStore={setStore}
+          setEditMode={setEditMode}
           labels={labels}
           maxAccess={maxAccess}
-          recordId={recordId}
+          height={height}
+          expanded={expanded}
+          editMode={editMode}
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
@@ -65,7 +69,6 @@ const AccountsWindow = ({
       <CustomTabPanel height={height} index={3} value={activeTab}>
         <AccountBalanceForm
           store={store}
-          setStore={setStore}
           labels={labels}
           height={height}
           maxAccess={maxAccess}
