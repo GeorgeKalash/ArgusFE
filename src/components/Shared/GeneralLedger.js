@@ -79,7 +79,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         currencyId: '',
 
         sign: '',
-        signValue: '',
+        signName: '',
         notes: '',
         functionId: functionId,
         exRate: '',
@@ -133,7 +133,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             accountId: yup.number().required('currencyId recordId is required'),
 
             currencyRef: yup.string().required('currencyId recordId is required'),
-            signValue: yup.string().required('currencyId recordId is required'),
+            signName: yup.string().required('currencyId recordId is required'),
             amount: yup.number().required('currencyId recordId is required'),
             baseAmount: yup.number().required('currencyId recordId is required'),
             exRate: yup.number().required('currencyId recordId is required')
@@ -207,11 +207,11 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
       }
 
       const baseCredit = generalAccountData.reduce((acc, curr) => {
-        return curr.signValue === 'C' ? acc + parseNumber(curr.baseAmount) : acc
+        return curr.signName === 'C' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
       const baseDebit = generalAccountData.reduce((acc, curr) => {
-        return curr.signValue === 'D' ? acc + parseNumber(curr.baseAmount) : acc
+        return curr.signName === 'D' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
       const baseBalance = baseDebit - baseCredit
@@ -233,9 +233,9 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               acc[currency] = { credit: 0, debit: 0 }
             }
             if (curr.sign) {
-              if (curr.signValue == 'C') {
+              if (curr.signName == 'C') {
                 acc[currency].credit += parseFloat(curr.amount || 0)
-              } else if (curr.signValue == 'D') {
+              } else if (curr.signName == 'D') {
                 acc[currency].debit += parseFloat(curr.amount || 0)
               }
             }
@@ -281,7 +281,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         currencyId: row.currencyId,
 
         sign: row.sign,
-        signValue: row.signValue,
+        signName: row.signName,
         notes: row.notes,
         exRate: row.exRate,
         amount: row.amount,
@@ -535,7 +535,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             {
               component: 'resourcecombobox',
               label: _labels.sign,
-              name: 'signValue',
+              name: 'signName',
               props: {
                 endpointId: SystemRepository.KeyValueStore,
                 _language: user.languageId,
@@ -543,7 +543,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
                 displayField: 'value',
                 valueField: 'key',
                 mapping: [
-                  { from: 'value', to: 'signValue' },
+                  { from: 'value', to: 'signName' },
                   { from: 'key', to: 'sign' }
                 ]
               }
