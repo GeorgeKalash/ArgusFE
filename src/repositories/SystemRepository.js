@@ -151,5 +151,9 @@ export const SystemRepository = {
   },
   UserFunction: {
     get: service + 'getUFU'
+  },
+  SystemChecks: {
+    qry: service + 'qryCHK',
+    set: service + 'set2CHK'
   }
 }
