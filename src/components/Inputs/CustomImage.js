@@ -33,7 +33,7 @@ const CustomImage = ({ name, value, onChange, setFile }) => {
       reader.readAsDataURL(file)
     } else {
       onChange(name, '')
-      setFile(e.target.result)
+      setFile('')
     }
   }
 
@@ -44,7 +44,7 @@ const CustomImage = ({ name, value, onChange, setFile }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <img
-        src={image || value || '/images/avatars/1.png'}
+        src={image || value || '/images/emptyPhoto.jpg'}
         alt='Profile Pic'
         style={{ width: 140, height: 100, objectFit: 'cover', marginRight: 16 }}
         onClick={handleClick}

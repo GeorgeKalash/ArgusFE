@@ -42,10 +42,11 @@ const CompanyInfo = () => {
 
     setInitialData(res.record)
 
-    const resu = await getRequest({
+    const result = await getRequest({
       extension: SystemRepository.Attachment.get,
       parameters: `_resourceId=20120&_seqNo=0&_recordId=1`
     })
+    setFile(result)
   }
 
   const formik = useFormik({
@@ -60,7 +61,6 @@ const CompanyInfo = () => {
   const post = obj => {
     postRequest({
       extension: SystemRepository.CompanyInfo.set,
-
       record: JSON.stringify({ ...obj, logoUrl: null })
     })
       .then(res => {
@@ -68,13 +68,15 @@ const CompanyInfo = () => {
       })
       .catch(error => {})
 
-    const dateObject = new Date(file.lastModifiedDate)
+    console.log(file, obj.logoUrl)
+    if (file && obj.logoUrl) {
+      const dateObject = new Date(file.lastModifiedDate)
 
-    const year = dateObject.getFullYear()
-    const month = dateObject.getMonth() + 1
-    const day = dateObject.getDate()
+      const year = dateObject.getFullYear()
+      const month = dateObject.getMonth() + 1
+      const day = dateObject.getDate()
+      console.log(file, obj.logoUrl)
 
-    if (file) {
       const data = {
         resourceId: ResourceIds.CompanyInfo,
         recordId: 1,
@@ -93,25 +95,29 @@ const CompanyInfo = () => {
         if (res) toast.success('Record Edited Successfully')
       })
     } else {
-      if (obj.logoUrl) {
-        const data = {
-          resourceId: ResourceIds.CompanyInfo,
-          recordId: 1,
-          seqNo: 0,
-          fileName: file.name,
-          folderId: null,
-          folderName: null,
-          date: day + '/' + month + '/' + year,
-          url: null
-        }
-        postRequest({
-          extension: SystemRepository.Attachment.del,
-          record: JSON.stringify(data),
-          file: obj.logoUrl
-        }).then(res => {
-          if (res) toast.success('Record Edited Successfully')
-        })
+      console.log(obj)
+
+      // if (obj.logoUrl) {
+      const data = {
+        resourceId: ResourceIds.CompanyInfo,
+        recordId: 1,
+        seqNo: 0,
+        fileName: file.name,
+        folderId: null,
+        folderName: null,
+
+        // date: day + '/' + month + '/' + year,
+        url: null
       }
+      postRequest({
+        extension: SystemRepository.Attachment.del,
+        record: JSON.stringify(data),
+        file: formik.values.logoUrl
+      }).then(res => {
+        if (res) toast.success('Record Edited Successfully')
+      })
+
+      // }
     }
   }
 
