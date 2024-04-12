@@ -371,7 +371,7 @@ export function DataGrid({
                       ...column,
                       props
                     }}
-                    update={update}
+                    update={column.updateOn == 'blur' ? apiRef.current.setEditCellValue : update}
                     updateRow={updateRow}
                     isLoading={isUpdatingField}
                   />

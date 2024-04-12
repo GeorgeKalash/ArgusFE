@@ -420,6 +420,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           formik?.values?.corId === undefined ||
           isClosed
       },
+      updateOn: 'blur',
       widthDropDown: '400',
       width: 150,
       async onChange({ row: { update, oldRow, newRow } }) {
@@ -559,6 +560,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
           isClosed
       },
       width: 130,
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const nv = parseFloat(newRow.exRate.toString().replace(/,/g, ''))
         if (parseFloat(newRow.exRate.toString().replace(/,/g, '')) > 0) {
@@ -583,6 +585,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 : 0
             update({
               exRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(5),
+              defaultRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(5),
               amount: getFormattedNumber(qtyToCur.toFixed(2)),
               baseAmount: getFormattedNumber(curToBase.toFixed(2))
             })
