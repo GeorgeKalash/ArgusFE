@@ -31,14 +31,12 @@ const CreditLimitsForm = ({
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required('currency recordId is required')
           })
         ).required('Operations array is required') }),
       initialValues: {
         currencies: [
           { id :1,
             accountId: accountId,
-            currencyId: '',
             currencyName: '',
             limit: ''
           }
@@ -53,9 +51,8 @@ const CreditLimitsForm = ({
 
       const data = {
         currencies : obj.map(
-          ({ accountId, currencyId,currencyName,limit} ) => ({
+          ({ accountId, currencyName, limit} ) => ({
                 accountId: accountId,
-                currencyId: currencyId,
                 currencyName: currencyName,
                 limit: limit
             })
@@ -77,14 +74,12 @@ const CreditLimitsForm = ({
         component: 'textfield',
         label: labels.currency,
         name: 'currencyName',
-        mandatory: false,
-        readOnly: true
+        props:{readOnly: true}
       },
       {
         component: 'textfield',
         label: labels.limit,
         name: 'limit',
-        mandatory: false
       }
     ]
 
@@ -101,11 +96,8 @@ const CreditLimitsForm = ({
       })
         .then(res => {
           if (res.list.length > 0){
-            const currencies = res.list.map(({ currencyId, currencyName, limit, ...rest } , index) => ({
+            const currencies = res.list.map(({ ...rest } , index) => ({
                 id : index,
-                currencyId,
-                currencyName,
-                limit,
                 ...rest
             }))
             formik.setValues({ currencies: currencies})
@@ -134,7 +126,8 @@ const CreditLimitsForm = ({
            value={formik.values.currencies}
            error={formik.errors.currencies}
            columns={column}
-           height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
+           
+          //  height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
 
         />
       </Box>

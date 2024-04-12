@@ -6,13 +6,16 @@ import DimensionsForm from '../forms/DimensionsForm'
 import CreditLimitsForm from '../forms/CreditLimitsForm'
 import AccountBalanceForm from '../forms/AccountBalanceForm'
 import { useState } from 'react'
+import { height } from '@mui/system'
+import { now } from 'moment'
 
 
 const AccountsWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId
+    height,
+    recordId,
+    labels,
+    maxAccess,
+    expanded
 }) => {
   
   const [activeTab, setActiveTab] = useState(0)
@@ -25,7 +28,7 @@ const AccountsWindow = ({
   })
 
   return (
-
+    
     <Window
       id='AccountsWindow'
       Title={labels.Accounts}
@@ -63,6 +66,7 @@ const AccountsWindow = ({
           maxAccess={maxAccess}
           store={store}
           setStore={setStore}
+          height={height}
         />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
