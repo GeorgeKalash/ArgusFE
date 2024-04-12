@@ -41,5 +41,12 @@ export const FinancialRepository = {
     get: service + 'getACL',
     set: service + 'setACL',
     del: service + 'delACL',
+  },
+  AccountCreditBalance:{
+    qry: service + 'qryACB',
+    page: service + 'pageACB',
+    get: service + 'getACB',
+    set: service + 'setACB',
+    del: service + 'delACB',
   }
 }
