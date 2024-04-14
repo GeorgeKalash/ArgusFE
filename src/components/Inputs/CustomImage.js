@@ -3,8 +3,9 @@ import React, { useState } from 'react'
 import { useRef } from 'react'
 import Button from '@mui/material/Button'
 
-const CustomImage = ({ name, value, onChange, setFile }) => {
+const CustomImage = ({ name, value, onChange, resourceId }) => {
   const hiddenInputRef = useRef()
+
   const [image, setImage] = useState()
 
   const handleClick = () => {
@@ -12,11 +13,24 @@ const CustomImage = ({ name, value, onChange, setFile }) => {
   }
 
   const handleInputImageChange = event => {
-    const file = event.target.files[0]
-    if (setFile) {
-      setFile(file)
-    }
+    const file = event?.target?.files[0]
     if (file) {
+      const dateObject = new Date(file.lastModifiedDate)
+      const year = dateObject.getFullYear()
+      const month = dateObject.getMonth() + 1
+      const day = dateObject.getDate()
+
+      const data = {
+        resourceId: resourceId,
+        recordId: 1,
+        seqNo: 0,
+        fileName: file.name,
+        folderId: null,
+        folderName: null,
+        date: day + '/' + month + '/' + year,
+        url: null
+      }
+
       const fileSizeInKB = Math.round(file.size / 1024)
       if (parseInt(fileSizeInKB) > 800) {
         alert('Allowed PNG or JPEG. Max size of 800K.')
@@ -25,26 +39,26 @@ const CustomImage = ({ name, value, onChange, setFile }) => {
       }
 
       onChange(name, file)
+      onChange('attachment', data)
 
       const reader = new FileReader()
       reader.onloadend = e => {
         setImage(e.target.result)
       }
       reader.readAsDataURL(file)
-    } else {
-      onChange(name, '')
-      setFile('')
     }
   }
 
   const handleInputImageReset = () => {
     onChange(name, '')
+    onChange('attachment', '')
+    setImage('')
   }
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <img
-        src={image || value || '/images/emptyPhoto.jpg'}
+        src={image || value?.url || '/images/emptyPhoto.jpg'}
         alt='Profile Pic'
         style={{ width: 140, height: 100, objectFit: 'cover', marginRight: 16 }}
         onClick={handleClick}
@@ -62,11 +76,12 @@ const CustomImage = ({ name, value, onChange, setFile }) => {
           variant='contained'
           sx={{
             mr: 1,
-            backgroundColor: 'red',
+            backgroundColor: '#f44336',
             '&:hover': {
               opacity: 0.8
             },
-            width: 5,
+            p: 0,
+            width: 20,
             height: 30,
             objectFit: 'contain'
           }}
