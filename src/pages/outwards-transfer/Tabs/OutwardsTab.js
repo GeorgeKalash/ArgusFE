@@ -34,6 +34,7 @@ import FieldSet from 'src/components/Shared/FieldSet'
 import { DataSets } from 'src/resources/DataSets'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
+import FormGrid from 'src/components/form/layout/FormGrid'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [position, setPosition] = useState()
@@ -43,7 +44,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   const [isClosed, setIsClosed] = useState(false)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const [professionFilterStore, setProfessionFilterStore] = useState([])
 
   const invalidate = useInvalidate({
     endpointId: RemittanceOutwardsRepository.OutwardsTransfer.snapshot
@@ -67,7 +67,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     clientId: '',
     clientRef: '',
     clientName: '',
-    idType: '',
     nationalityId: '',
     fcAmount: '',
     corId: '',
@@ -89,22 +88,14 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     firstName: '',
     middleName: '',
     lastName: '',
+    familyName: '',
     fl_firstName: '',
     fl_middleName: '',
     fl_lastName: '',
-    riskLevel: '',
-    gender: '',
-    city: '',
-    cityId: '',
-    stateId: '',
-    birthDate: null,
+    fl_familyName: '',
     expiryDate: null,
-    idCity: '',
-    idCountry: '',
-    sponsorName: '',
     professionId: '',
     cellPhone: '',
-    incomeSourceId: '',
     purposeOfExchange: ''
   })
 
@@ -297,7 +288,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     if (formValues.dispersalType === 1) {
       stack({
         Component: BenificiaryCash,
-        props: { clientId: formik.values.clientId, dispersalType: formik.values.dispersalType },
+        props: {
+          clientId: formik.values.clientId,
+          dispersalType: formik.values.dispersalType,
+          corId: formik.values.corId,
+          countryId: formik.values.countryId
+        },
         width: 700,
         height: 500,
         title: 'Cash'
@@ -305,7 +301,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     } else if (formValues.dispersalType === 2) {
       stack({
         Component: BenificiaryBank,
-        props: { clientId: formik.values.clientId, dispersalType: formik.values.dispersalType },
+        props: {
+          clientId: formik.values.clientId,
+          dispersalType: formik.values.dispersalType,
+          corId: formik.values.corId,
+          countryId: formik.values.countryId
+        },
         width: 900,
         height: 600,
         title: 'Bank'
@@ -313,40 +314,25 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }
   }
 
-  const getIDinfo = async clientId => {
+  const getClientInfo = async clientId => {
     const res = await getRequest({
       extension: RTCLRepository.CtClientIndividual.get,
       parameters: `_clientId=${clientId}`
     })
     formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
-    formik.setFieldValue('idType', res?.record?.clientIDView?.idtId)
     formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
     formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
     formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
     formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
+    formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
     formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
     formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
     formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-
-    //formik.setFieldValue('riskLevel', )
-    //formik.setFieldValue('gender', )
-    formik.setFieldValue('nationalityId', res?.record?.clientIDView?.idCountryId)
-    formik.setFieldValue('countryId', res?.record?.clientIDView?.idCountryId)
-
-    //formik.setFieldValue('stateId',)
-    formik.setFieldValue('city', res?.record?.clientIDView?.idCityId)
-    formik.setFieldValue('birthDate', formatDateFromApi(res?.record?.clientIndividual?.birthDate))
-
-    //formik.setFieldValue('idCountry', )
-    //formik.setFieldValue('idCity', )
-    formik.setFieldValue('sponsorName', res?.record?.clientIndividual?.sponsorName)
+    formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
+    formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
     formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
-    formik.setFieldValue('incomeSourceId', res?.record?.clientIndividual?.incomeSourceId)
-
-    // formik.setFieldValue('purposeOfExchange', )
-    formik.setFieldValue('profession', res?.record?.clientIndividual?.professionIds)
+    formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
   }
-  console.log('editMode ', editMode)
 
   const actions = [
     {
@@ -402,7 +388,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           formik.setFieldValue('net', parseInt(res.record.commission) + parseInt(res.record.lcAmount))
           res.record.checked = true
           productDataFill(res.record)
-          getIDinfo(res.record.clientId)
+          getClientInfo(res.record.clientId)
           checkProduct(res.record.productId)
           fillProfessionStore()
         }
@@ -410,7 +396,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  console.log('formik values ', formik.values)
 
   return (
     <>
@@ -428,8 +413,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       >
         <Grid container sx={{ pt: 2 }}>
           {/* First Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
+          <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 2 }}>
+            <FormGrid item hideonempty xs={3}>
               <CustomTextField
                 name='reference'
                 label={labels.Reference}
@@ -441,8 +426,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
                 helperText={formik.touched.reference && formik.errors.reference}
               />
-            </Grid>
-            <Grid item xs={12}>
+            </FormGrid>
+            <FormGrid item hideonempty xs={3}>
               <CustomDatePicker
                 name='date'
                 required
@@ -456,507 +441,504 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 helperText={formik.touched.date && formik.errors.date}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CTCLRepository.ClientCorporate.snapshot}
-                parameters={{
-                  _category: 0
-                }}
-                valueField='reference'
-                displayField='name'
-                name='clientId'
-                label={labels.Client}
-                form={formik}
-                required
-                readOnly={isClosed}
-                displayFieldWidth={2}
-                valueShow='clientRef'
-                secondValueShow='clientName'
-                maxAccess={maxAccess}
-                editMode={editMode}
-                onChange={async (event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('clientId', newValue?.recordId)
-                    formik.setFieldValue('clientName', newValue?.name || '')
-                    formik.setFieldValue('clientRef', newValue?.reference || '')
-                    await getIDinfo(newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('clientId', null)
-                    formik.setFieldValue('clientName', null)
-                    formik.setFieldValue('clientRef', null)
-                  }
-                }}
-                errorCheck={'clientId'}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FieldSet title='Client Details'>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='idNo'
-                    label={labels.IdNo}
-                    value={formik.values.idNo}
-                    required
-                    onChange={formik.handleChange}
-                    readOnly={isClosed}
-                    onClear={() => formik.setFieldValue('idNo', '')}
-                    error={formik.touched.idNo && Boolean(formik.errors.idNo)}
-                    helperText={formik.touched.idNo && formik.errors.idNo}
-                    maxLength='15'
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='expiryDate'
-                    label={labels.expiryDate}
-                    value={formik.values?.expiryDate}
-                    readOnly
-                    error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={CurrencyTradingSettingsRepository.IdTypes.qry}
-                    label={labels.IdType}
-                    name='idType'
-                    displayField='name'
-                    valueField='recordId'
-                    readOnly
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('idType', newValue?.recordId)
-                    }}
-                    error={formik.touched.idType && Boolean(formik.errors.idType)}
-                  />
-                </Grid>
-                <Grid container xs={12} spacing={2} sx={{ padding: '5px', pl: '10px' }}>
-                  <Grid item xs={4}>
-                    <CustomTextField
-                      name='firstName'
-                      label={labels.firstName}
-                      value={formik.values?.firstName}
-                      readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      onClear={() => formik.setFieldValue('firstName', '')}
-                      error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-                      maxAccess={maxAccess}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <CustomTextField
-                      name='middleName'
-                      label={labels.middleName}
-                      value={formik.values?.middleName}
-                      readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      onClear={() => formik.setFieldValue('middleName', '')}
-                      error={formik.touched.middleName && Boolean(formik.errors.middleName)}
-                      maxAccess={maxAccess}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <CustomTextField
-                      name='lastName'
-                      label={labels.lastName}
-                      value={formik.values?.lastName}
-                      readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      onClear={() => formik.setFieldValue('lastName', '')}
-                      error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-                      maxAccess={maxAccess}
-                    />
-                  </Grid>
-                </Grid>
-                <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', padding: '5px', pl: '10px' }}>
-                  <Grid item xs={4}>
-                    <CustomTextField
-                      name='fl_firstName'
-                      label={labels.flFirstName}
-                      value={formik.values?.fl_firstName}
-                      readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      dir='rtl' // Set direction to right-to-left
-                      onClear={() => formik.setFieldValue('fl_firstName', '')}
-                      error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
-                      maxAccess={maxAccess}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <CustomTextField
-                      name='fl_middleName'
-                      label={labels.flMiddleName}
-                      value={formik.values?.fl_middleName}
-                      readOnly
-                      maxLength='20'
-                      onChange={formik.handleChange}
-                      dir='rtl' // Set direction to right-to-left
-                      onClear={() => formik.setFieldValue('fl_familyName', '')}
-                      error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
-                      maxAccess={maxAccess}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <CustomTextField
-                      name='fl_lastName'
-                      label={labels.flLastName}
-                      value={formik.values?.fl_lastName}
-                      readOnly
-                      onChange={formik.handleChange}
-                      maxLength='20'
-                      dir='rtl' // Set direction to right-to-left
-                      onClear={() => formik.setFieldValue('fl_lastName', '')}
-                      error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
-                      maxAccess={maxAccess}
-                    />
-                  </Grid>
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={CurrencyTradingSettingsRepository.RiskLevel.qry}
-                    name='riskLevel'
-                    label={labels.riskLevel}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    readOnly
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('riskLevel', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('riskLevel', null)
-                      }
-                    }}
-                    error={formik.touched.riskLevel && Boolean(formik.errors.riskLevel)}
-                    helperText={formik.touched.riskLevel && formik.errors.riskLevel}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    datasetId={DataSets.GENDER}
-                    name='gender'
-                    label={labels.gender}
-                    valueField='key'
-                    displayField='value'
-                    readOnly
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('gender', newValue?.key)
-                      } else {
-                        formik.setFieldValue('gender', '')
-                      }
-                    }}
-                    error={formik.touched.gender && Boolean(formik.errors.gender)}
-                    helperText={formik.touched.gender && formik.errors.gender}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Country.qry}
-                    label={labels.Nationality}
-                    name='nationalityId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    values={formik.values}
-                    readOnly
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('nationalityId', newValue?.recordId)
-                    }}
-                    error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={formik.values.countryId && SystemRepository.State.qry}
-                    parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
-                    name='stateId'
-                    label={labels.state}
-                    valueField='recordId'
-                    displayField='name'
-                    readOnly
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('stateId', newValue?.recordId)
-                      formik.setFieldValue('cityId', '')
-                      formik.setFieldValue('city', '')
-                    }}
-                    error={formik.touched.stateId && Boolean(formik.errors.stateId)}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={SystemRepository.City.snapshot}
-                    parameters={{
-                      _countryId: formik.values.countryId,
-                      _stateId: formik.values.stateId ?? 0
-                    }}
-                    valueField='name'
-                    displayField='name'
-                    name='city'
-                    label={labels.city}
-                    readOnly={!formik.values.stateId}
-                    form={formik}
-                    maxAccess={maxAccess}
-                    secondDisplayField={false}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('cityId', newValue?.recordId)
-                        formik.setFieldValue('city', newValue?.name)
-                      } else {
-                        formik.setFieldValue('cityId', '')
-                        formik.setFieldValue('city', '')
-                      }
-                    }}
-                    errorCheck={'cityId'}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='birthDate'
-                    label={labels.birthDate}
-                    value={formik.values?.birthDate}
-                    readOnly
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('birthDate', '')}
-                    disabledDate={'>='}
-                    error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
-                    helperText={formik.touched.birthDate && formik.errors.birthDate}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Country.qry}
-                    name='idCountry'
-                    label={labels.issueCountry}
-                    valueField='recordId'
-                    displayField={['reference', 'name', 'flName']}
-                    readOnly
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' },
-                      { key: 'flName', value: 'Foreign Language Name' }
-                    ]}
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('idCountry', newValue?.recordId)
-
-                        formik.setFieldValue('idCity', '')
-                        formik.setFieldValue('cityName', '')
-                      } else {
-                        formik.setFieldValue('idCountry', '')
-
-                        formik.setFieldValue('idCity', '')
-                        formik.setFieldValue('cityName', '')
-                      }
-                    }}
-                    error={formik.touched.idCountry && Boolean(formik.errors.idCountry)}
-                    helperText={formik.touched.idCountry && formik.errors.idCountry}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={SystemRepository.City.snapshot}
-                    parameters={{
-                      _countryId: formik.values.idCountry,
-                      _stateId: 0
-                    }}
-                    name='idCity'
-                    label={labels.issuePlace}
-                    form={formik}
-                    valueField='name'
-                    displayField='name'
-                    firstValue={formik.values.cityName}
-                    secondDisplayField={false}
-                    readOnly
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('idCity', newValue?.recordId)
-                        formik.setFieldValue('cityName', newValue?.name)
-                      } else {
-                        formik.setFieldValue('idCity', null)
-                        formik.setFieldValue('cityName', null)
-                      }
-                    }}
-                    error={formik.touched.idCity && Boolean(formik.errors.idCity)}
-                    helperText={formik.touched.idCity && formik.errors.idCity}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='sponsorName'
-                    label={labels.sponsorName}
-                    value={formik.values?.sponsorName}
-                    readOnly
-                    onChange={formik.handleChange}
-                    maxLength='15'
-                    onClear={() => formik.setFieldValue('sponsorName', '')}
-                    error={formik.touched.sponsorName && Boolean(formik.errors.sponsorName)}
-                    helperText={formik.touched.sponsorName && formik.errors.sponsorName}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomComboBox
-                    name='professionId'
-                    label={labels.profession}
-                    valueField='recordId'
-                    displayField={['reference', 'name', 'flName']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' },
-                      { key: 'flName', value: 'Foreign Language Name' }
-                    ]}
-                    store={professionFilterStore}
-                    readOnly
-                    value={
-                      professionFilterStore &&
-                      formik.values.professionId &&
-                      professionFilterStore?.filter(item => item.recordId === formik.values.professionId)[0]
-                    }
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('professionId', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('professionId', '')
-                      }
-                    }}
-                    error={formik.touched.professionId && Boolean(formik.errors.professionId)}
-                    helperText={formik.touched.professionId && formik.errors.professionId}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='cellPhone'
-                    phone={true}
-                    label={labels.cellPhone}
-                    value={formik.values?.cellPhone}
-                    readOnly
-                    onChange={formik.handleChange}
-                    maxLength='15'
-                    autoComplete='off'
-                    onBlur={e => {
-                      formik.handleBlur(e)
-                    }}
-                    onClear={() => formik.setFieldValue('cellPhone', '')}
-                    error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-                    helperText={formik.touched.cellPhone && formik.errors.cellPhone}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
-                    name='incomeSourceId'
-                    label={labels.incomeSource}
-                    valueField='recordId'
-                    readOnly
-                    displayField={['reference', 'name', 'flName']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' },
-                      { key: 'flName', value: 'Foreign Language Name' }
-                    ]}
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('incomeSourceId', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('incomeSourceId', '')
-                      }
-                    }}
-                    error={formik.touched.incomeSourceId && Boolean(formik.errors.incomeSourceId)}
-                    helperText={formik.touched.incomeSourceId && formik.errors.incomeSourceId}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
-                    name='purposeOfExchange'
-                    label={labels.purposeOfExchange}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('purposeOfExchange', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('purposeOfExchange', '')
-                      }
-                    }}
-                    error={formik.touched.purposeOfExchange && Boolean(formik.errors.purposeOfExchange)}
-                    helperText={formik.touched.purposeOfExchange && formik.errors.purposeOfExchange}
-                  />
-                </Grid>
-              </FieldSet>
-            </Grid>
+            </FormGrid>
           </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2, pl: 5 }}>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={RemittanceOutwardsRepository.Country.qry}
-                name='countryId'
-                label={labels.Country}
-                required
-                readOnly={isClosed}
-                displayField={['countryRef', 'countryName']}
-                columnsInDropDown={[
-                  { key: 'countryRef', value: 'Reference' },
-                  { key: 'countryName', value: 'Name' }
-                ]}
-                valueField='countryId'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('countryId', newValue?.countryId)
-                }}
-                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
-                parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
-                label={labels.DispersalType}
-                required
-                readOnly={isClosed}
-                name='dispersalType'
-                displayField='dispersalTypeName'
-                valueField='dispersalType'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('agentId', 0)
-                  formik.setFieldValue('dispersalType', newValue?.dispersalType)
-                  formik.setFieldValue('dispersalTypeName', newValue?.dispersalTypeName)
-                }}
-                error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
-              />
-            </Grid>
-            <Grid item xs={12}>
+
+          <Grid container rowGap={2} xs={4} spacing={2} sx={{ px: 2, pt: 2 }}>
+            <FieldSet title='Transaction Details'>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={RemittanceOutwardsRepository.Country.qry}
+                  name='countryId'
+                  label={labels.Country}
+                  required
+                  readOnly={isClosed}
+                  displayField={['countryRef', 'countryName']}
+                  columnsInDropDown={[
+                    { key: 'countryRef', value: 'Reference' },
+                    { key: 'countryName', value: 'Name' }
+                  ]}
+                  valueField='countryId'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('countryId', newValue?.countryId)
+                  }}
+                  error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={formik.values.countryId && RemittanceOutwardsRepository.DispersalType.qry}
+                  parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
+                  label={labels.DispersalType}
+                  required
+                  readOnly={isClosed}
+                  name='dispersalType'
+                  displayField='dispersalTypeName'
+                  valueField='dispersalType'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('agentId', 0)
+                    formik.setFieldValue('dispersalType', newValue?.dispersalType)
+                    formik.setFieldValue('dispersalTypeName', newValue?.dispersalTypeName)
+                  }}
+                  error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={
+                    formik.values.countryId && formik.values.dispersalType && RemittanceOutwardsRepository.Currency.qry
+                  }
+                  parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
+                  label={labels.Currency}
+                  required
+                  name='currencyId'
+                  displayField={['currencyRef', 'currencyName']}
+                  columnsInDropDown={[
+                    { key: 'currencyRef', value: 'Reference' },
+                    { key: 'currencyName', value: 'Name' }
+                  ]}
+                  valueField='currencyId'
+                  values={formik.values}
+                  readOnly={formik.values.dispersalType == '' || isClosed}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('currencyId', newValue?.currencyId)
+                  }}
+                  error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  position={position}
+                  name='fcAmount'
+                  type='text'
+                  label={labels.Amount}
+                  value={formik.values.fcAmount}
+                  required
+                  readOnly={
+                    (formik.values.dispersalType == 1 && formik.values.agentId !== 0) ||
+                    (formik.values.dispersalType == 2 && formik.values.agentId === 0) ||
+                    isClosed
+                  }
+                  maxAccess={maxAccess}
+                  onChange={e => {
+                    const input = e.target
+                    const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
+
+                    // Save current cursor position
+                    const currentPosition = input.selectionStart
+
+                    // Update field value
+                    formik.setFieldValue('fcAmount', formattedValue)
+
+                    // Calculate the new cursor position based on the formatted value
+                    const newCursorPosition =
+                      currentPosition + (formattedValue && formattedValue.length - input.value.length)
+
+                    setPosition(newCursorPosition)
+                  }}
+                  onBlur={() => {
+                    if (formik.values.fcAmount) productDataFill(formik.values)
+                  }}
+                  onClear={() => formik.setFieldValue('fcAmount', '')}
+                  error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
+                  helperText={formik.touched.fcAmount && formik.errors.fcAmount}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={
+                    formik.values.countryId &&
+                    formik.values.dispersalType &&
+                    formik.values.currencyId &&
+                    RemittanceOutwardsRepository.Agent.qry
+                  }
+                  parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId}`}
+                  label={labels.Agent}
+                  required={formik.values.dispersalType === 2}
+                  readOnly={formik.values.dispersalType !== 2 || isClosed}
+                  name='agentId'
+                  displayField='agentName'
+                  valueField='agentId'
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    if (newValue) formik.setFieldValue('agentId', newValue?.agentId)
+                    else formik.setFieldValue('agentId', 0)
+                  }}
+                  error={formik.touched.agentId && Boolean(formik.errors.agentId)}
+                />
+              </Grid>
+
+              <Grid container xs={12}>
+                <Grid item xs={10}>
+                  <ResourceLookup
+                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='corId'
+                    label={labels.Correspondant}
+                    form={formik}
+                    required
+                    displayFieldWidth={2}
+                    valueShow='corRef'
+                    secondValueShow='corName'
+                    maxAccess={maxAccess}
+                    editMode={editMode}
+                    readOnly={isClosed}
+                    onChange={async (event, newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue('corId', newValue?.recordId)
+                        formik.setFieldValue('corName', newValue?.name || '')
+                        formik.setFieldValue('corRef', newValue?.reference || '')
+                      } else {
+                        formik.setFieldValue('corId', null)
+                        formik.setFieldValue('corName', null)
+                        formik.setFieldValue('corRef', null)
+                      }
+                    }}
+                    errorCheck={'corId'}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <Button onClick={() => openProductWindow()}>Popup</Button>
+                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  position={position}
+                  name='commission'
+                  type='text'
+                  label={labels.Fees}
+                  value={formik.values.commission}
+                  required
+                  readOnly
+                  maxAccess={maxAccess}
+                  onChange={e => {
+                    const input = e.target
+                    const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
+
+                    // Save current cursor position
+                    const currentPosition = input.selectionStart
+
+                    // Calculate the new cursor position based on the formatted value
+                    const newCursorPosition =
+                      currentPosition + (formattedValue && formattedValue.length - input.value.length)
+
+                    setPosition(newCursorPosition)
+                  }}
+                  error={formik.touched.commission && Boolean(formik.errors.commission)}
+                  helperText={formik.touched.commission && formik.errors.commission}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  position={position}
+                  name='lcAmount'
+                  type='text'
+                  label={labels.BaseAmount}
+                  value={formik.values.lcAmount}
+                  required
+                  readOnly
+                  maxAccess={maxAccess}
+                  onChange={e => {
+                    const input = e.target
+                    const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
+
+                    // Save current cursor position
+                    const currentPosition = input.selectionStart
+
+                    // Calculate the new cursor position based on the formatted value
+                    const newCursorPosition =
+                      currentPosition + (formattedValue && formattedValue.length - input.value.length)
+
+                    setPosition(newCursorPosition)
+                  }}
+                  error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
+                  helperText={formik.touched.lcAmount && formik.errors.lcAmount}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  position={position}
+                  name='net'
+                  type='text'
+                  label={labels.NetToPay}
+                  value={formik.values.net}
+                  required
+                  readOnly
+                  maxAccess={maxAccess}
+                  onChange={e => {
+                    const input = e.target
+                    const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
+
+                    // Save current cursor position
+                    const currentPosition = input.selectionStart
+
+                    // Calculate the new cursor position based on the formatted value
+                    const newCursorPosition =
+                      currentPosition + (formattedValue && formattedValue.length - input.value.length)
+
+                    setPosition(newCursorPosition)
+                  }}
+                  error={formik.touched.net && Boolean(formik.errors.net)}
+                  helperText={formik.touched.net && formik.errors.net}
+                />
+              </Grid>
+            </FieldSet>
+          </Grid>
+          <Grid container rowGap={2} xs={8} spacing={2} sx={{ px: 2, pt: 2 }}>
+            <FieldSet title='Client Details'>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={CTCLRepository.ClientCorporate.snapshot}
+                  parameters={{
+                    _category: 0
+                  }}
+                  valueField='reference'
+                  displayField='name'
+                  name='clientId'
+                  label={labels.Client}
+                  form={formik}
+                  required
+                  readOnly={isClosed}
+                  displayFieldWidth={2}
+                  valueShow='clientRef'
+                  secondValueShow='clientName'
+                  maxAccess={maxAccess}
+                  editMode={editMode}
+                  onChange={async (event, newValue) => {
+                    if (newValue) {
+                      formik.setFieldValue('clientId', newValue?.recordId)
+                      formik.setFieldValue('clientName', newValue?.name || '')
+                      formik.setFieldValue('clientRef', newValue?.reference || '')
+                      await getClientInfo(newValue?.recordId)
+                    } else {
+                      formik.setFieldValue('clientId', null)
+                      formik.setFieldValue('clientName', null)
+                      formik.setFieldValue('clientRef', null)
+                    }
+                  }}
+                  errorCheck={'clientId'}
+                />
+              </Grid>
+
+              <Grid container xs={12} spacing={2} sx={{ padding: '5px', pl: '10px' }}>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='firstName'
+                    label={labels.firstName}
+                    value={formik.values?.firstName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    onClear={() => formik.setFieldValue('firstName', '')}
+                    error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='middleName'
+                    label={labels.middleName}
+                    value={formik.values?.middleName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    onClear={() => formik.setFieldValue('middleName', '')}
+                    error={formik.touched.middleName && Boolean(formik.errors.middleName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='lastName'
+                    label={labels.lastName}
+                    value={formik.values?.lastName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    onClear={() => formik.setFieldValue('lastName', '')}
+                    error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='familyName'
+                    label={labels.familyName}
+                    value={formik.values?.familyName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    onClear={() => formik.setFieldValue('familyName', '')}
+                    error={formik.touched.familyName && Boolean(formik.errors.familyName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
+              <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', padding: '5px', pl: '10px' }}>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='fl_firstName'
+                    label={labels.flFirstName}
+                    value={formik.values?.fl_firstName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    dir='rtl' // Set direction to right-to-left
+                    onClear={() => formik.setFieldValue('fl_firstName', '')}
+                    error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='fl_middleName'
+                    label={labels.flMiddleName}
+                    value={formik.values?.fl_middleName}
+                    readOnly
+                    maxLength='20'
+                    onChange={formik.handleChange}
+                    dir='rtl' // Set direction to right-to-left
+                    onClear={() => formik.setFieldValue('fl_familyName', '')}
+                    error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='fl_lastName'
+                    label={labels.flLastName}
+                    value={formik.values?.fl_lastName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    dir='rtl' // Set direction to right-to-left
+                    onClear={() => formik.setFieldValue('fl_lastName', '')}
+                    error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <CustomTextField
+                    name='fl_familyName'
+                    label={labels.flFamilyName}
+                    value={formik.values?.fl_familyName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    dir='rtl' // Set direction to right-to-left
+                    onClear={() => formik.setFieldValue('fl_familyName', '')}
+                    error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
+              <Grid item xs={6}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Country.qry}
+                  label={labels.Nationality}
+                  name='nationalityId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  valueField='recordId'
+                  values={formik.values}
+                  readOnly
+                  error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+                />
+              </Grid>
+
+              <Grid item xs={6}>
+                <CustomTextField
+                  name='idNo'
+                  label={labels.IdNo}
+                  value={formik.values.idNo}
+                  required
+                  onChange={formik.handleChange}
+                  readOnly={isClosed}
+                  onClear={() => formik.setFieldValue('idNo', '')}
+                  error={formik.touched.idNo && Boolean(formik.errors.idNo)}
+                  helperText={formik.touched.idNo && formik.errors.idNo}
+                  maxLength='15'
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <CustomDatePicker
+                  name='expiryDate'
+                  label={labels.expiryDate}
+                  value={formik.values?.expiryDate}
+                  readOnly
+                  error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <CustomTextField
+                  name='cellPhone'
+                  phone={true}
+                  label={labels.cellPhone}
+                  value={formik.values?.cellPhone}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='15'
+                  autoComplete='off'
+                  onBlur={e => {
+                    formik.handleBlur(e)
+                  }}
+                  onClear={() => formik.setFieldValue('cellPhone', '')}
+                  error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
+                  helperText={formik.touched.cellPhone && formik.errors.cellPhone}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <ResourceComboBox
+                  endpointId={RemittanceSettingsRepository.Profession.qry}
+                  label={labels.profession}
+                  name='professionId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  valueField='recordId'
+                  values={formik.values}
+                  readOnly
+                  error={formik.touched.professionId && Boolean(formik.errors.professionId)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <ResourceComboBox
+                  endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
+                  name='purposeOfExchange'
+                  label={labels.purposeOfExchange}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      formik.setFieldValue('purposeOfExchange', newValue?.recordId)
+                    } else {
+                      formik.setFieldValue('purposeOfExchange', '')
+                    }
+                  }}
+                  error={formik.touched.purposeOfExchange && Boolean(formik.errors.purposeOfExchange)}
+                  helperText={formik.touched.purposeOfExchange && formik.errors.purposeOfExchange}
+                />
+              </Grid>
+            </FieldSet>
+            <Grid item xs={5}>
               <ResourceLookup
                 endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
                 parameters={{
@@ -980,207 +962,11 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 errorCheck={'beneficiaryId'}
               />
             </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={
-                  formik.values.countryId && formik.values.dispersalType && RemittanceOutwardsRepository.Currency.qry
-                }
-                parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}`}
-                label={labels.Currency}
-                required
-                name='currencyId'
-                displayField={['currencyRef', 'currencyName']}
-                columnsInDropDown={[
-                  { key: 'currencyRef', value: 'Reference' },
-                  { key: 'currencyName', value: 'Name' }
-                ]}
-                valueField='currencyId'
-                values={formik.values}
-                readOnly={formik.values.dispersalType == '' || isClosed}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.currencyId)
-                }}
-                error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={
-                  formik.values.countryId &&
-                  formik.values.dispersalType &&
-                  formik.values.currencyId &&
-                  RemittanceOutwardsRepository.Agent.qry
-                }
-                parameters={`_dispersalType=${formik.values.dispersalType}&_countryId=${formik.values.countryId}&_currencyId=${formik.values.currencyId}`}
-                label={labels.Agent}
-                required={formik.values.dispersalType === 2}
-                readOnly={formik.values.dispersalType !== 2 || isClosed}
-                name='agentId'
-                displayField='agentName'
-                valueField='agentId'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  if (newValue) formik.setFieldValue('agentId', newValue?.agentId)
-                  else formik.setFieldValue('agentId', 0)
-                }}
-                error={formik.touched.agentId && Boolean(formik.errors.agentId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                position={position}
-                name='fcAmount'
-                type='text'
-                label={labels.Amount}
-                value={formik.values.fcAmount}
-                required
-                readOnly={
-                  (formik.values.dispersalType == 1 && formik.values.agentId !== 0) ||
-                  (formik.values.dispersalType == 2 && formik.values.agentId === 0) ||
-                  isClosed
-                }
-                maxAccess={maxAccess}
-                onChange={e => {
-                  const input = e.target
-                  const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-                  // Save current cursor position
-                  const currentPosition = input.selectionStart
-
-                  // Update field value
-                  formik.setFieldValue('fcAmount', formattedValue)
-
-                  // Calculate the new cursor position based on the formatted value
-                  const newCursorPosition =
-                    currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-                  setPosition(newCursorPosition)
-                }}
-                onBlur={() => {
-                  if (formik.values.fcAmount) productDataFill(formik.values)
-                }}
-                onClear={() => formik.setFieldValue('fcAmount', '')}
-                error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
-                helperText={formik.touched.fcAmount && formik.errors.fcAmount}
-              />
-            </Grid>
-            <Grid container xs={12}>
-              <Grid item xs={10}>
-                <ResourceLookup
-                  endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                  valueField='reference'
-                  displayField='name'
-                  name='corId'
-                  label={labels.Correspondant}
-                  form={formik}
-                  required
-                  displayFieldWidth={2}
-                  valueShow='corRef'
-                  secondValueShow='corName'
-                  maxAccess={maxAccess}
-                  editMode={editMode}
-                  readOnly={isClosed}
-                  onChange={async (event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('corId', newValue?.recordId)
-                      formik.setFieldValue('corName', newValue?.name || '')
-                      formik.setFieldValue('corRef', newValue?.reference || '')
-                    } else {
-                      formik.setFieldValue('corId', null)
-                      formik.setFieldValue('corName', null)
-                      formik.setFieldValue('corRef', null)
-                    }
-                  }}
-                  errorCheck={'corId'}
-                />
-              </Grid>
-              <Grid item xs={2}>
-                <Button onClick={() => openProductWindow()}>Popup</Button>
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                position={position}
-                name='commission'
-                type='text'
-                label={labels.Fees}
-                value={formik.values.commission}
-                required
-                readOnly
-                maxAccess={maxAccess}
-                onChange={e => {
-                  const input = e.target
-                  const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-                  // Save current cursor position
-                  const currentPosition = input.selectionStart
-
-                  // Calculate the new cursor position based on the formatted value
-                  const newCursorPosition =
-                    currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-                  setPosition(newCursorPosition)
-                }}
-                error={formik.touched.commission && Boolean(formik.errors.commission)}
-                helperText={formik.touched.commission && formik.errors.commission}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                position={position}
-                name='lcAmount'
-                type='text'
-                label={labels.BaseAmount}
-                value={formik.values.lcAmount}
-                required
-                readOnly
-                maxAccess={maxAccess}
-                onChange={e => {
-                  const input = e.target
-                  const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-                  // Save current cursor position
-                  const currentPosition = input.selectionStart
-
-                  // Calculate the new cursor position based on the formatted value
-                  const newCursorPosition =
-                    currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-                  setPosition(newCursorPosition)
-                }}
-                error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
-                helperText={formik.touched.lcAmount && formik.errors.lcAmount}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                position={position}
-                name='net'
-                type='text'
-                label={labels.NetToPay}
-                value={formik.values.net}
-                required
-                readOnly
-                maxAccess={maxAccess}
-                onChange={e => {
-                  const input = e.target
-                  const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-                  // Save current cursor position
-                  const currentPosition = input.selectionStart
-
-                  // Calculate the new cursor position based on the formatted value
-                  const newCursorPosition =
-                    currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-                  setPosition(newCursorPosition)
-                }}
-                error={formik.touched.net && Boolean(formik.errors.net)}
-                helperText={formik.touched.net && formik.errors.net}
-              />
-            </Grid>
           </Grid>
+          {/* Second Column */}
+          {/* <Grid container rowGap={2} xs={6} sx={{ px: 2, pl: 5 }}>
+            
+          </Grid> */}
         </Grid>
       </FormShell>
     </>
