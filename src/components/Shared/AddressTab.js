@@ -6,51 +6,43 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from './ResourceLookup'
+import FormGrid from 'src/components/form/layout/FormGrid'
 
-const AddressTab = ({
-  labels,
-  addressValidation,
-  maxAccess,
-  readOnly = false,
-  requiredOptional = false, // work address
-}) => {
+const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) => {
+  console.log(maxAccess)
 
   return (
     <>
-      <Grid container sx={{pt:1}}>
+      <Grid container sx={{ pt: 1 }}>
         {/* First Column */}
         <Grid container rowGap={3} xs={6} sx={{ px: 2 }}>
-          <Grid item xs={12}>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='name'
               label={labels.name}
               value={addressValidation.values.name}
-              required={!requiredOptional}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('name', '')}
               error={addressValidation.touched.name && Boolean(addressValidation.errors.name)}
-              helperText={addressValidation.touched.name && addressValidation.errors.name}
               maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='street1'
               label={labels.street1}
               value={addressValidation.values.street1}
-              required={!requiredOptional}
               readOnly={readOnly}
               maxLength='20'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street1', '')}
               error={addressValidation.touched.street1 && Boolean(addressValidation.errors.street1)}
-              helperText={addressValidation.touched.street1 && addressValidation.errors.street1}
               maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='street2'
               label={labels.street2}
@@ -60,11 +52,10 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street2', '')}
               error={addressValidation.touched.street2 && Boolean(addressValidation.errors.street2)}
-              helperText={addressValidation.touched.street2 && addressValidation.errors.street2}
               maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='email1'
               label={labels.email1}
@@ -76,11 +67,10 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('email1', '')}
               error={addressValidation.touched.email1 && Boolean(addressValidation.errors.email1)}
-              helperText={addressValidation.touched.email1 && addressValidation.errors.email1}
               maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='email2'
               type='email'
@@ -92,11 +82,10 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('email2', '')}
               error={addressValidation.touched.email2 && Boolean(addressValidation.errors.email2)}
-              helperText={addressValidation.touched.email2 && addressValidation.errors.email2}
               maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='bldgNo'
               label={labels.bldgNo}
@@ -106,11 +95,10 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('bldgNo', '')}
               error={addressValidation.touched.bldgNo && Boolean(addressValidation.errors.bldgNo)}
-              helperText={addressValidation.touched.bldgNo && addressValidation.errors.bldgNo}
               maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='unitNo'
               label={labels.unitNo}
@@ -120,11 +108,10 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('unitNo', '')}
               error={addressValidation.touched.unitNo && Boolean(addressValidation.errors.unitNo)}
-              helperText={addressValidation.touched.unitNo && addressValidation.errors.unitNo}
               maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='subNo'
               label={labels.subNo}
@@ -134,14 +121,13 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('subNo', '')}
               error={addressValidation.touched.subNo && Boolean(addressValidation.errors.subNo)}
-              helperText={addressValidation.touched.subNo && addressValidation.errors.subNo}
               maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={3} xs={6} sx={{ px: 2 }}>
-          <Grid item xs={12}>
+          <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
               name='countryId'
@@ -156,7 +142,6 @@ const AddressTab = ({
                 { key: 'flName', value: 'Foreign Language Name' }
               ]}
               values={addressValidation.values}
-              required={!requiredOptional}
               onChange={(event, newValue) => {
                 addressValidation.setFieldValue('stateId', null)
                 addressValidation.setFieldValue('cityId', '')
@@ -166,17 +151,15 @@ const AddressTab = ({
                 if (newValue) {
                   addressValidation.setFieldValue('countryId', newValue?.recordId)
                 } else {
-
                   addressValidation.setFieldValue('countryId', '')
                 }
-
               }}
               error={addressValidation.touched.countryId && Boolean(addressValidation.errors.countryId)}
-              helperText={addressValidation.touched.countryId && addressValidation.errors.countryId}
+              maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
 
-          <Grid item xs={12}>
+          <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={addressValidation.values.countryId && SystemRepository.State.qry}
               parameters={addressValidation.values.countryId && `_countryId=${addressValidation.values.countryId || 0}`}
@@ -194,80 +177,70 @@ const AddressTab = ({
                 addressValidation.setFieldValue('cityDistrict', '')
               }}
               error={addressValidation.touched.stateId && Boolean(addressValidation.errors.stateId)}
-              helperText={addressValidation.touched.stateId && addressValidation.errors.stateId}
-
-              // maxAccess={maxAccess}
+              maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
 
-          <Grid item xs={12}>{}
+          <FormGrid hideonempty xs={12}>
+            {}
 
             <ResourceLookup
-             endpointId={SystemRepository.City.snapshot}
-             parameters={{
-              _countryId: addressValidation.values.countryId,
-              _stateId: addressValidation.values.stateId ? addressValidation.values.stateId : 0
-             }}
-
-             valueField='name'
-             displayField='name'
-             name='city'
-             label={labels.city}
-             required={!requiredOptional}
-             readOnly={(readOnly || !addressValidation.values.countryId) && true}
-             form={addressValidation}
-             secondDisplayField={false}
-             onChange={(event, newValue) => {
-              if (newValue) {
-                addressValidation.setFieldValue('cityId', newValue?.recordId)
-                addressValidation.setFieldValue('city', newValue?.name)
-              } else {
-                addressValidation.setFieldValue('cityId', '')
-                addressValidation.setFieldValue('city', '')
-              }
-              addressValidation.setFieldValue('cityDistrictId', '')
-              addressValidation.setFieldValue('cityDistrict', '')
-
-
-            }}
-            errorCheck={'cityId'}
-
-            />
-          </Grid>
-
-           <Grid item xs={12}>
-
-           <ResourceLookup
-             endpointId={SystemRepository.CityDistrict.snapshot}
-             parameters={{
-              _cityId: addressValidation.values.cityId
-             }}
-             valueField='name'
-             displayField='name'
-             name='cityDistrict'
-             label={labels.cityDistrict}
-
-             readOnly={(readOnly || !addressValidation.values.cityId) && true}
-
-             form={addressValidation}
-             secondDisplayField={false}
-
-             onChange={(event, newValue) => {
-
-              if (newValue) {
-                addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)
-                addressValidation.setFieldValue('cityDistrict', newValue?.name)
-              } else {
+              endpointId={SystemRepository.City.snapshot}
+              parameters={{
+                _countryId: addressValidation.values.countryId,
+                _stateId: addressValidation.values.stateId ? addressValidation.values.stateId : 0
+              }}
+              valueField='name'
+              displayField='name'
+              name='city'
+              label={labels.city}
+              readOnly={(readOnly || !addressValidation.values.countryId) && true}
+              form={addressValidation}
+              secondDisplayField={false}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  addressValidation.setFieldValue('cityId', newValue?.recordId)
+                  addressValidation.setFieldValue('city', newValue?.name)
+                } else {
+                  addressValidation.setFieldValue('cityId', '')
+                  addressValidation.setFieldValue('city', '')
+                }
                 addressValidation.setFieldValue('cityDistrictId', '')
                 addressValidation.setFieldValue('cityDistrict', '')
-              }
-            }}
-
-            errorCheck={'cityDistrictId'}
+              }}
+              errorCheck={'cityId'}
+              maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
 
-          <Grid item xs={12}>
+          <FormGrid hideonempty xs={12}>
+            <ResourceLookup
+              endpointId={SystemRepository.CityDistrict.snapshot}
+              parameters={{
+                _cityId: addressValidation.values.cityId
+              }}
+              valueField='name'
+              displayField='name'
+              name='cityDistrict'
+              label={labels.cityDistrict}
+              readOnly={(readOnly || !addressValidation.values.cityId) && true}
+              form={addressValidation}
+              secondDisplayField={false}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)
+                  addressValidation.setFieldValue('cityDistrict', newValue?.name)
+                } else {
+                  addressValidation.setFieldValue('cityDistrictId', '')
+                  addressValidation.setFieldValue('cityDistrict', '')
+                }
+              }}
+              errorCheck={'cityDistrictId'}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='postalCode'
               label={labels.postalCode}
@@ -276,12 +249,11 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('postalCode', '')}
               error={addressValidation.touched.postalCode && Boolean(addressValidation.errors.postalCode)}
-              helperText={addressValidation.touched.postalCode && addressValidation.errors.postalCode}
               maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
 
-          <Grid item xs={12}>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='phone'
               label={labels.phone}
@@ -290,16 +262,14 @@ const AddressTab = ({
               maxLength='15'
               type='text'
               phone={true}
-              required={!requiredOptional}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
-              helperText={addressValidation.touched.phone && addressValidation.errors.phone}
               maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
 
-          <Grid item xs={12}>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='phone2'
               label={labels.phone2}
@@ -310,12 +280,11 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone2', '')}
               error={addressValidation.touched.phone2 && Boolean(addressValidation.errors.phone2)}
-              helperText={addressValidation.touched.phone2 && addressValidation.errors.phone2}
               maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
 
-          <Grid item xs={12}>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='phone3'
               label={labels.phone3}
@@ -326,10 +295,9 @@ const AddressTab = ({
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone3', '')}
               error={addressValidation.touched.phone3 && Boolean(addressValidation.errors.phone3)}
-              helperText={addressValidation.touched.phone3 && addressValidation.errors.phone3}
               maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
         </Grid>
       </Grid>
     </>

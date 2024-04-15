@@ -52,13 +52,15 @@ const CustomComboBox = ({
       key={value}
       PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
       getOptionLabel={(option, value) => {
+        if (typeof displayField == 'object') {
+          const text = displayField
+            .map(header => option[header])
+            .filter(item => item)
+            .join(' ')
+
+          if (text) return text
+        }
         if (typeof option === 'object') {
-          if (columnsInDropDown && columnsInDropDown.length > 0) {
-            const search = columnsInDropDown.map(header => option[header.key]).join(' ')
-
-            return search || option[displayField]
-          }
-
           return `${option[displayField]}`
         } else {
           const selectedOption = store.find(item => {
@@ -66,6 +68,26 @@ const CustomComboBox = ({
           })
           if (selectedOption) return selectedOption[displayField]
           else return ''
+        }
+      }}
+      filterOptions={(options, { inputValue }) => {
+        if (columnsInDropDown) {
+          return options.filter(option =>
+            columnsInDropDown
+              .map(header => header.key)
+              .some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+          )
+        } else {
+          var displayFields = ''
+          if (Array.isArray(displayField)) {
+            displayFields = displayField
+          } else {
+            displayFields = [displayField]
+          }
+
+          return options.filter(option =>
+            displayFields.some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+          )
         }
       }}
       isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}

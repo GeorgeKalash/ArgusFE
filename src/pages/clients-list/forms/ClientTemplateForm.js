@@ -34,8 +34,7 @@ import { useWindow } from 'src/windows'
 import Confirmation from 'src/components/Shared/Confirmation'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import BeneficiaryBankWindow from '../Windows/BeneficiaryBankWindow'
-import BeneficiaryCashWindow from '../Windows/BeneficiaryCashWindow'
+import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 
 const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAccess }) => {
   const { stack } = useWindow()
@@ -47,8 +46,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
 
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(false)
   const [referenceRequired, setReferenceRequired] = useState(true)
-  const [requiredOptional, setRequiredOptional] = useState(true)
-  const [windowConfirmNumberOpen, setWindowConfirmNumberOpen] = useState(false)
   const [professionStore, setProfessionStore] = useState([])
   const [professionFilterStore, setProfessionFilterStore] = useState([])
   const [address, setAddress] = useState([])
@@ -617,34 +614,19 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       disabled: !editMode
     },
     {
-      key: 'Beneficiary Bank',
+      key: 'Beneficiary',
       condition: true,
-      onClick: () => openBankWindow(),
-      disabled: !editMode
-    },
-    {
-      key: 'Beneficiary Cash',
-      condition: true,
-      onClick: () => openCashWindow(),
+      onClick: () => openBeneficiaryWindow(),
       disabled: !editMode
     }
   ]
-  function openBankWindow() {
+  function openBeneficiaryWindow() {
     stack({
-      Component: BeneficiaryBankWindow,
+      Component: BeneficiaryWindow,
       props: { clientId: recordId },
-      width: 900,
+      width: 1100,
       height: 500,
-      title: 'Beneficiary Bank'
-    })
-  }
-  function openCashWindow() {
-    stack({
-      Component: BeneficiaryCashWindow,
-      props: { clientId: recordId },
-      width: 900,
-      height: 500,
-      title: 'Beneficiary Cash'
+      title: 'Beneficiaries'
     })
   }
 
@@ -1321,7 +1303,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         Component: AddressFormShell,
                         props: {
                           readOnly: editMode,
-                          requiredOptional: requiredOptional,
+                          required: true,
                           labels: _labels,
                           setAddress: setAddress,
                           address: address

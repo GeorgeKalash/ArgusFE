@@ -9,7 +9,7 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 
 // ** Helpers
-
+import { formatDateFromApi } from 'src/lib/date-helper'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
@@ -22,18 +22,83 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
+import { useForm } from 'src/hooks/form'
+import FormGrid from 'src/components/form/layout/FormGrid'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const BenificiaryCash = ({ clientId, dispersalType }) => {
-  const { postRequest } = useContext(RequestsContext)
+const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countryId }) => {
+  const [maxAccess, setMaxAccess] = useState(null)
+
+  useEffect(() => {
+    ;(async function () {
+      if (countryId || corId || dispersalType) {
+        const qryCCL = await getRequest({
+          extension: RemittanceSettingsRepository.CorrespondentControl.qry,
+          parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryCash}`
+        })
+
+        const controls = { controls: qryCCL.list }
+        const maxAccess = { record: controls }
+        setMaxAccess(maxAccess)
+      }
+
+      if (beneficiaryId) {
+        const RTBEC = await getRequest({
+          extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+        })
+
+        const RTBEN = await getRequest({
+          extension: RemittanceOutwardsRepository.Beneficiary.get,
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+        })
+
+        const obj = {
+          //RTBEN
+          clientId: clientId,
+          recordId: clientId * 1000 + beneficiaryId,
+          beneficiaryId: beneficiaryId,
+          name: RTBEN?.record?.name,
+          dispersalType: dispersalType,
+          nationalityId: RTBEN?.record?.nationalityId,
+          isBlocked: RTBEN?.record?.isBlocked,
+          stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
+          stoppedReason: RTBEN?.record?.stoppedReason,
+          gender: RTBEN?.record?.gender,
+          addressLine1: RTBEN?.record?.addressLine1,
+          addressLine2: RTBEN?.record?.addressLine2,
+
+          //RTBEC
+          firstName: RTBEC?.record?.firstName,
+          lastName: RTBEC?.record?.lastName,
+          middleName: RTBEC?.record?.middleName,
+          familyName: RTBEC?.record?.familyName,
+          fl_firstName: RTBEC?.record?.fl_firstName,
+          fl_lastName: RTBEC?.record?.fl_lastName,
+          fl_middleName: RTBEC?.record?.fl_middleName,
+          fl_familyName: RTBEC?.record?.fl_familyName,
+          countryId: RTBEC?.record?.countryId,
+          nationalityId: RTBEC?.record?.nationalityId,
+          cellPhone: RTBEC?.record?.cellPhone,
+          birthDate: RTBEC?.record?.birthDate && formatDateFromApi(RTBEC.record.birthDate),
+          birthPlace: RTBEC?.record?.birthPlace
+        }
+        formik.setValues(obj)
+      }
+    })()
+  }, [])
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const [notArabic, setNotArabic] = useState(true)
 
-  const { labels: _labels, access } = useResourceQuery({
+  const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryCash
   })
 
   const [initialValues, setInitialData] = useState({
     //RTBEN
     clientId: clientId || '',
+    recordId: '',
     beneficiaryId: 0,
     name: '',
     dispersalType: dispersalType || '',
@@ -61,7 +126,8 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
     birthPlace: ''
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
@@ -175,10 +241,15 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
   }
 
   return (
-    <FormShell resourceId={ResourceIds.BeneficiaryCash} form={formik} maxAccess={access}>
-      <Grid container spacing={4} sx={{ padding: '15px' }}>
-        <Grid container xs={12} spacing={2} sx={{ padding: '5px' }}>
-          <Grid item xs={12}>
+    <FormShell
+      resourceId={ResourceIds.BeneficiaryCash}
+      form={formik}
+      editMode={formik?.values?.beneficiaryId}
+      maxAccess={maxAccess}
+    >
+      <Grid container>
+        <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 2 }}>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='name'
               label={_labels.name}
@@ -190,12 +261,12 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
                 constructNameField(formik.values)
               }}
               error={formik.touched.name && Boolean(formik.errors.name)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
         </Grid>
-        <Grid container xs={12} spacing={2} sx={{ padding: '5px' }}>
-          <Grid item xs={3}>
+        <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 2 }}>
+          <FormGrid item hideonempty xs={3}>
             <CustomTextField
               name='firstName'
               label={_labels.firstName}
@@ -206,10 +277,10 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('firstName', '')}
               error={formik.touched.firstName && Boolean(formik.errors.firstName)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={3}>
+          </FormGrid>
+          <FormGrid item hideonempty xs={3}>
             <CustomTextField
               name='middleName'
               label={_labels.middleName}
@@ -219,10 +290,10 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('middleName', '')}
               error={formik.touched.middleName && Boolean(formik.errors.middleName)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={3}>
+          </FormGrid>
+          <FormGrid item hideonempty xs={3}>
             <CustomTextField
               name='lastName'
               label={_labels.lastName}
@@ -233,10 +304,10 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('lastName', '')}
               error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={3}>
+          </FormGrid>
+          <FormGrid item hideonempty xs={3}>
             <CustomTextField
               name='familyName'
               label={_labels.familyName}
@@ -246,13 +317,13 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('familyName', '')}
               error={formik.touched.familyName && Boolean(formik.errors.familyName)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
+          </FormGrid>
         </Grid>
 
-        <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', padding: '5px' }}>
-          <Grid item xs={3}>
+        <Grid container rowGap={2} xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', px: 2, pt: 2 }}>
+          <FormGrid hideonempty xs={3}>
             <CustomTextField
               name='fl_firstName'
               label={_labels.flFirstName}
@@ -263,10 +334,10 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_firstName', '')}
               error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={3}>
+          </FormGrid>
+          <FormGrid hideonempty xs={3}>
             <CustomTextField
               name='fl_middleName'
               label={_labels.flMiddleName}
@@ -277,10 +348,10 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_familyName', '')}
               error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={3}>
+          </FormGrid>
+          <FormGrid hideonempty xs={3}>
             <CustomTextField
               name='fl_lastName'
               label={_labels.flLastName}
@@ -291,26 +362,26 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_lastName', '')}
               error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={3}>
+          </FormGrid>
+          <FormGrid hideonempty xs={3}>
             <CustomTextField
               name='fl_familyName'
               label={_labels.flFamilyName}
               value={formik.values?.fl_familyName}
               readOnly
               maxLength='20'
-              maxAccess={access}
+              maxAccess={maxAccess}
               onChange={formik.handleChange}
               dir='rtl' // Set direction to right-to-left
               onClear={() => formik.setFieldValue('fl_familyName', '')}
               error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
             />
-          </Grid>
+          </FormGrid>
         </Grid>
-        <Grid container xs={6} spacing={2} sx={{ padding: '5px' }}>
-          <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+        <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2 }}>
+          <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
             <CustomTextField
               name='cellPhone'
               phone={true}
@@ -320,10 +391,10 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               maxLength='20'
               onClear={() => formik.setFieldValue('cellPhone', '')}
               error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
               name='nationalityId'
@@ -345,10 +416,10 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
                 }
               }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='birthPlace'
               label={_labels.birthPlace}
@@ -357,38 +428,38 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               maxLength='50'
               onClear={() => formik.setFieldValue('birthPlace', '')}
               error={formik.touched.birthPlace && Boolean(formik.errors.birthPlace)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextArea
               name='addressLine1'
               label={_labels.addressLine1}
               value={formik.values.addressLine1}
               rows={3}
               maxLength='100'
-              maxAccess={access}
+              maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextArea
               name='addressLine2'
               label={_labels.addressLine2}
               value={formik.values.addressLine2}
               rows={3}
               maxLength='100'
-              maxAccess={access}
+              maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
             />
-          </Grid>
+          </FormGrid>
         </Grid>
-        <Grid container xs={6} spacing={2} sx={{ padding: '5px' }}>
-          <Grid item xs={12}>
+        <Grid container rowGap={2} xs={6} spacing={2} sx={{ px: 2, pt: 2 }}>
+          <FormGrid hideonempty xs={12}>
             <CustomDatePicker
               name='birthDate'
               label={_labels.birthDate}
@@ -397,10 +468,10 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               disabledDate={'>='}
               onClear={() => formik.setFieldValue('birthDate', '')}
               error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               datasetId={DataSets.GENDER}
               name='gender'
@@ -409,11 +480,11 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               displayField='value'
               values={formik.values}
               onChange={formik.handleChange}
-              maxAccess={access}
+              maxAccess={maxAccess}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
               name='nationalityId'
@@ -435,26 +506,26 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
                 }
               }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
             <FormControlLabel
               control={<Checkbox name='isBlocked' disabled={true} checked={formik.values?.isBlocked} />}
               label={_labels.isBlocked}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomDatePicker
               name='stoppedDate'
               label={_labels.stoppedDate}
               value={formik.values?.stoppedDate}
               readOnly={true}
               error={formik.touched.stoppedDate && Boolean(formik.errors.stoppedDate)}
-              maxAccess={access}
+              maxAccess={maxAccess}
             />
-          </Grid>
-          <Grid item xs={12}>
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <CustomTextArea
               name='stoppedReason'
               label={_labels.stoppedReason}
@@ -463,7 +534,7 @@ const BenificiaryCash = ({ clientId, dispersalType }) => {
               rows={3}
               error={formik.touched.stoppedReason && Boolean(formik.errors.stoppedReason)}
             />
-          </Grid>
+          </FormGrid>
         </Grid>
       </Grid>
     </FormShell>
