@@ -48,7 +48,7 @@ const CompanyInfo = () => {
       parameters: `_resourceId=20120&_seqNo=0&_recordId=1`
     })
     res.record.attachment = result.record
-
+    res.record.accountId = JSON.parse(window.sessionStorage.getItem('userData')).accountId
     setInitialData(res.record)
   }
 
@@ -101,6 +101,7 @@ const CompanyInfo = () => {
               label={labels.accountId}
               value={formik.values.accountId}
               onChange={formik.handleChange}
+              readOnly={true}
               onClear={() => formik.setFieldValue('posMsg', '')}
               error={formik.errors && Boolean(formik.errors.posMsg)}
             />
