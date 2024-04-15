@@ -1,9 +1,8 @@
 import { Box, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import { useRef } from 'react'
-import Button from '@mui/material/Button'
 
-const CustomImage = ({ name, value, onChange, resourceId }) => {
+const CustomImage = ({ name, value, onChange, resourceId, error }) => {
   const hiddenInputRef = useRef()
 
   const [image, setImage] = useState()
@@ -56,11 +55,17 @@ const CustomImage = ({ name, value, onChange, resourceId }) => {
   }
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
       <img
         src={image || value?.url || '/images/emptyPhoto.jpg'}
         alt='Profile Pic'
-        style={{ width: 140, height: 100, objectFit: 'cover', marginRight: 16 }}
+        style={{
+          width: 140,
+          height: 100,
+          objectFit: 'cover',
+          marginRight: 16,
+          border: error && '2px solid #f44336'
+        }}
         onClick={handleClick}
       />
       <Box>
@@ -71,7 +76,7 @@ const CustomImage = ({ name, value, onChange, resourceId }) => {
           onChange={handleInputImageChange}
           accept='image/png, image/jpeg'
         />
-        <Button
+        <Box
           onClick={handleInputImageReset}
           variant='contained'
           sx={{
@@ -80,14 +85,18 @@ const CustomImage = ({ name, value, onChange, resourceId }) => {
             '&:hover': {
               opacity: 0.8
             },
-            p: 0,
-            width: 20,
+            width: 40,
             height: 30,
-            objectFit: 'contain'
+            objectFit: 'contain',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '20%',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
           }}
         >
           <img src={`/images/buttonsIcons/clear.png`} alt={'test'} />
-        </Button>
+        </Box>
 
         <Typography variant='caption' sx={{ mt: 4, display: 'block', color: 'text.disabled' }}>
           Allowed PNG or JPEG. Max size of 800K.

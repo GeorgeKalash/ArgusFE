@@ -188,6 +188,7 @@ const CompanyInfo = () => {
               value={formik.values.attachment}
               onChange={formik.setFieldValue}
               resourceId={ResourceIds.CompanyInfo}
+              error={formik.errors.url}
             />
           </Grid>
         </Grid>
