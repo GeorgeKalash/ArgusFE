@@ -42,7 +42,7 @@ const AccountsWindow = ({
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab}>
         <CreditLimitsForm
           store={store}
           setStore={setStore}
@@ -53,7 +53,7 @@ const AccountsWindow = ({
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={3} value={activeTab}>
+      <CustomTabPanel height={height} index={2} value={activeTab}>
         <AccountBalanceForm
           store={store}
           labels={labels}
