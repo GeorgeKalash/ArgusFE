@@ -31,29 +31,43 @@ const Classes = () => {
 
   const {
     query: { data },
-    labels : _labels,
+    labels: _labels,
     paginationParameters,
     invalidate,
     refetch,
-    access
+    access,
+    search,
+    clear
   } = useResourceQuery({
-     queryFn: fetchGridData,
-     endpointId: DocumentReleaseRepository.Class.qry,
-     datasetId: ResourceIds.Classes,
-   })
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.Class.qry,
+    datasetId: ResourceIds.Classes,
+    search: {
+      endpointId: DocumentReleaseRepository.Class.snapshot,
+      searchFn: fetchWithSearch
+    }
+  })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: DocumentReleaseRepository.Class.snapshot,
+      parameters: `_filter=${qry}`
+    })
 
-  async function fetchGridData(options={}) {
+    return response
+  }
+
+  async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
 
-     const response =  await getRequest({
+    const response = await getRequest({
       extension: DocumentReleaseRepository.Class.qry,
       parameters: parameters
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -68,24 +82,23 @@ const Classes = () => {
     postRequest({
       extension: DocumentReleaseRepository.Class.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success('Record Deleted Successfully')
+      invalidate()
     })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        invalidate()
-      })
   }
 
   const addClasses = () => {
     openForm('')
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: ClassesWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
-        maxAccess: access,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 600,
       height: 600,
@@ -94,13 +107,20 @@ const Classes = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.recordId )
+    openForm(obj?.recordId)
   }
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={addClasses} maxAccess={access} />
+        <GridToolbar
+          onAdd={addClasses}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
           gridData={data}

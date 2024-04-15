@@ -43,8 +43,7 @@ const BeneficiaryFields = () => {
     validateOnChange: true,
     validationSchema: yup.object({
       countryId: yup.string().required('This field is required'),
-      dispersalType: yup.string().required('This field is required'),
-      corId: yup.string().required('This field is required')
+      dispersalType: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       const headerObj = {
@@ -52,7 +51,6 @@ const BeneficiaryFields = () => {
         dispersalType: obj.dispersalType,
         corId: obj.corId
       }
-      console.log('obj ', headerObj)
 
       const controlAccessList = obj.rows
         .filter(row => row.accessLevel)
@@ -83,9 +81,8 @@ const BeneficiaryFields = () => {
   async function fetchWithFilter({ filters }) {
     const countryId = filters?.countryId
     const dispersalType = filters?.dispersalType
-    const corId = filters?.corId
-
-    if (!filters || !countryId || !dispersalType || !corId) {
+    const corId = filters?.corId == null ? 0 : filters?.corId
+    if (!filters || !countryId || !dispersalType) {
       return { list: [] }
     } else if (dispersalType !== '' && corId !== '') {
       const controllRES = await getRequest({
@@ -141,6 +138,7 @@ const BeneficiaryFields = () => {
   })
 
   const onChange = (index, value) => {
+    console.log(index, value)
     if (value) {
       if (index === 'countryId') filterBy('countryId', value)
       if (index === 'dispersalType') filterBy('dispersalType', value)
@@ -160,14 +158,14 @@ const BeneficiaryFields = () => {
                 label={labels.country}
                 valueField='recordId'
                 required
-                displayField={['reference', 'name', 'flName']}
+                displayField={['name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'Foreign Language Name' }
                 ]}
                 values={formik.values}
-                displayFieldWidth={1.25}
+                displayFieldWidth={1.75}
                 onChange={(event, newValue) => {
                   if (newValue) {
                     formik.setFieldValue('countryId', newValue?.recordId)
@@ -189,6 +187,8 @@ const BeneficiaryFields = () => {
                 onChange={(event, newValue) => {
                   if (newValue) {
                     onChange('dispersalType', newValue?.key)
+                    if (formik.values.corId) onChange('corId', formik.values.corId)
+                    else onChange('corId', 0)
                     formik.setFieldValue('dispersalType', newValue?.key)
                   }
                 }}
@@ -203,7 +203,6 @@ const BeneficiaryFields = () => {
                   name='corId'
                   label={labels.correspondent}
                   form={formik}
-                  required
                   displayFieldWidth={2}
                   firstFieldWidth='40%'
                   valueShow='corRef'
@@ -215,7 +214,18 @@ const BeneficiaryFields = () => {
                       formik.setFieldValue('corId', newValue?.recordId)
                       formik.setFieldValue('corName', newValue?.name || '')
                       formik.setFieldValue('corRef', newValue?.reference || '')
+                    } else {
+                      onChange('corId', 0)
+                      formik.setFieldValue('corId', 0)
+                      formik.setFieldValue('corName', '')
+                      formik.setFieldValue('corRef', '')
                     }
+                  }}
+                  onClear={() => {
+                    onChange('corId', 0)
+                    formik.setFieldValue('corId', 0)
+                    formik.setFieldValue('corName', '')
+                    formik.setFieldValue('corRef', '')
                   }}
                   errorCheck={'corId'}
                 />
