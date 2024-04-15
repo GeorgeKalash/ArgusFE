@@ -1,30 +1,15 @@
-// ** React Imports
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
+import { useState, useContext, useEffect } from 'react'
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Helpers
-import { useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
-import { useFormik } from 'formik'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 const SystemChecks = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,69 +18,55 @@ const SystemChecks = () => {
 
   //states
   const [checkStore, setCheckStore] = useState([])
+  const [data, setData] = useState([])
 
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validate: values => {},
-    initialValues: {
-      rows: [
-        {
-          checkId: '',
-          checkName: '',
-          scope: '',
-          masterId: '',
-          value: false,
-          checked: false
-        }
-      ]
-    },
-    onSubmit: values => {
-      postChecks()
-    }
-  })
-
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
-
-  const {
-    query: { data },
-    labels: _labels,
-    access
-  } = useResourceQuery({
-    queryFn: getGridData,
+  const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.SystemChecks
   })
 
-  async function getGridData(options = {}) {
-    console.log('enter initially')
+  const handleSubmit = () => {
+    postChecks()
+  }
 
-    const resChecks = await getAllKvsByDataset({
+  function getAllSystems() {
+    getAllKvsByDataset({
       _dataset: DataSets.SYSTEM_CHECKS,
       callback: setCheckStore
     })
-
-    const resCheckedSystems = await getRequest({
-      extension: SystemRepository.SystemChecks.qry,
-      parameters: `_scope=1`
-    })
-
-    const finalList = checkStore.map(x => {
-      const n = {
-        checkId: x.key,
-        checkName: x.value,
-        checked: false
-      }
-      const matchingTemplate = resCheckedSystems.list.find(y => n.checkId == y.checkId)
-
-      matchingTemplate && (n.checked = true)
-
-      return n
-    })
-
-    return { list: finalList }
   }
+
+  useEffect(() => {
+    if (checkStore) {
+      const resCheckedSystems = getRequest({
+        extension: SystemRepository.SystemChecks.qry,
+        parameters: `_scope=1`
+      })
+
+      Promise.all([resCheckedSystems]).then(([checkedSystems]) => {
+        const finalList = checkStore.map(x => {
+          const n = {
+            checkId: x.key,
+            checkName: x.value,
+            checked: false,
+            value: false
+          }
+          const matchingTemplate = checkedSystems.list.find(y => n.checkId == y.checkId)
+          matchingTemplate && (n.checked = true)
+          matchingTemplate && (n.value = true)
+
+          return n
+        })
+
+        setData({ list: finalList })
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkStore])
+
+  useEffect(() => {
+    getAllSystems()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const columns = [
     {
@@ -115,7 +86,7 @@ const SystemChecks = () => {
     checkedObjects.forEach(obj => {
       obj.scope = 1
       obj.masterId = 0
-      obj.values = true
+      obj.value = true
     })
 
     const resultObject = {
