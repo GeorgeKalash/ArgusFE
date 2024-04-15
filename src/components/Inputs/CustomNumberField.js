@@ -48,8 +48,6 @@ const CustomNumberField = ({
 
   const handleInput = e => {
     const inputValue = e?.target?.value?.replaceAll(',', '').replaceAll('.', '')
-
-    console.log(inputValue)
     if (inputValue?.length > maxLength) {
       e.target.value = value
       onChange(e)
