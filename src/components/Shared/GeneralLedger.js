@@ -38,7 +38,7 @@ import { AuthContext } from 'src/providers/AuthContext'
 
 import { formatDateDefault, formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 
-const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, height }) => {
+const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, height, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [formik, setformik] = useState(null)
   const { user, setUser } = useContext(AuthContext)
@@ -130,7 +130,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
           yup.object().shape({
             accountRef: yup.string().required('accountRef recordId is required'),
             accountName: yup.string().required('currencyId recordId is required'),
-            accountId: yup.number().required('currencyId recordId is required'),
+            accountRef: yup.string().required('currencyId recordId is required'),
 
             currencyRef: yup.string().required('currencyId recordId is required'),
             signName: yup.string().required('currencyId recordId is required'),
@@ -362,7 +362,12 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
   }
 
   return (
-    <FormShell resourceId={ResourceIds.GeneralLedger} form={formik2} maxAccess={maxAccess}>
+    <FormShell
+      resourceId={ResourceIds.GeneralLedger}
+      form={formik2}
+      maxAccess={maxAccess}
+      disabledSubmit={baseGridData.balance !== 0}
+    >
       <Box>
         {formik && (
           <Grid container spacing={2} padding={1}>
@@ -391,23 +396,24 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             height={"280"}
             pagination={false}
           /> */}
+
         <DataGrid
           onChange={value => formik2.setFieldValue('generalAccount', value)}
           value={formik2.values.generalAccount}
           error={formik2.errors.generalAccount}
-          height={height - 280}
+          height={`${expanded ? `calc(100vh - 400px)` : `${height - 250}px`}`}
           columns={[
             {
               component: 'resourcelookup',
 
               label: _labels.accountRef,
-              name: 'accountId',
+              name: 'accountRef',
               props: {
                 displayFieldWidth: 3,
                 endpointId: GeneralLedgerRepository.Account.snapshot,
                 parameters: '_type=',
-                displayField: 'accountRef',
                 valueField: 'recordId',
+                displayField: 'accountRef',
                 columnsInDropDown: [
                   { key: 'accountRef', value: 'reference' },
                   { key: 'name', value: 'name' }
@@ -462,11 +468,11 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             {
               component: 'resourcelookup',
               label: _labels.thirdPartyRef,
-              name: 'tpAccount',
+              name: 'tpAccountRef',
               props: {
                 endpointId: FinancialRepository.Account.snapshot,
-                displayField: 'reference',
                 valueField: 'recordId',
+                displayField: 'reference',
                 displayFieldWidth: 3,
                 columnsInDropDown: [
                   { key: 'reference', value: 'reference' },
