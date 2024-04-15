@@ -87,6 +87,9 @@ const StripedDataGrid = styled(DataGrid)(({ theme, heightReference }) => ({
   },
   '& .MuiDataGrid-cellContent': {
     position: 'absolute'
+
+    // justifyContent: 'top',
+    // alignItems: 'top'
   },
   [`.MuiDataGrid-cell[data-colindex="${heightReference}"] .MuiDataGrid-cellContent`]: {
     position: 'relative'
