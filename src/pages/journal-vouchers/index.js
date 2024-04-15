@@ -46,6 +46,8 @@ const JournalVoucher = () => {
   const {
     query: { data },
     labels: _labels,
+    search,
+    clear,
 
     paginationParameters,
     access
@@ -132,10 +134,8 @@ const JournalVoucher = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-
           paginationType='api'
           paginationParameters={paginationParameters}
-
           maxAccess={access}
         />
       </Box>
