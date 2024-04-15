@@ -578,9 +578,9 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
                 if (newRow?.amount && newRow?.exRate) {
                   const amount =
                     newRow.rateCalcMethod === 1
-                      ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / newRow?.exRate
-                      : newRow.rateCalcMethod === 2
                       ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * newRow?.exRate
+                      : newRow.rateCalcMethod === 2
+                      ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / newRow?.exRate
                       : 0
                   update({
                     baseAmount: amount
