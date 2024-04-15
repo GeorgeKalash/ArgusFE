@@ -3,7 +3,6 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import AccountsForm from '../forms/AccountsForm'
-import DimensionsForm from '../forms/DimensionsForm'
 import CreditLimitsForm from '../forms/CreditLimitsForm'
 import AccountBalanceForm from '../forms/AccountBalanceForm'
 
