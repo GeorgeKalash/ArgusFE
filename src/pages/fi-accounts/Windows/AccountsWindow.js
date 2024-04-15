@@ -4,7 +4,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import AccountsForm from '../forms/AccountsForm'
 import CreditLimitsForm from '../forms/CreditLimitsForm'
-import AccountBalanceForm from '../forms/AccountBalanceForm'
+import AccountBalanceTable from '../forms/AccountBalanceTable'
 
 const AccountsWindow = ({
   height,
@@ -54,7 +54,7 @@ const AccountsWindow = ({
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab}>
-        <AccountBalanceForm
+        <AccountBalanceTable
           store={store}
           labels={labels}
           height={height}

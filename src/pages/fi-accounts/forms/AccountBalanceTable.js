@@ -1,19 +1,11 @@
-// ** React Importsport
-import { useContext, useEffect, useState } from 'react'
-
-// ** MUI Imports
+import { useContext, useState } from 'react'
 import { Box } from '@mui/material'
-
-// ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Helpers
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const AccountBalanceForm = (
  { 
@@ -22,8 +14,7 @@ const AccountBalanceForm = (
   maxAccess,
   store,
 }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const [CharacteristicGridData , setCharacteristicGridData] = useState()
+  const { getRequest} = useContext(RequestsContext)
   const { recordId } = store
 
   const columns = [
@@ -39,25 +30,27 @@ const AccountBalanceForm = (
     }
   ]
 
-  const getCharacteristicGridData = accountId => {
-    setCharacteristicGridData([])
-    const defaultParams = `_accountId=${accountId}`
+  async function fetchGridData(options={}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_accountId=${recordId}`
     var parameters = defaultParams
-    getRequest({
+
+     const response =  await getRequest({
       extension: FinancialRepository.AccountCreditBalance.qry,
       parameters: parameters
     })
-      .then(res => {
-        setCharacteristicGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+
+    return {...response,  _startAt: _startAt}
   }
 
-  useEffect(()=>{
-    recordId && getCharacteristicGridData(recordId)
-  },[recordId])
+  const {
+    query: { data },
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: FinancialRepository.AccountCreditBalance.qry,
+    datasetId: ResourceIds.Accounts,
+  })
 
   return (
     <>
@@ -65,7 +58,7 @@ const AccountBalanceForm = (
         <GridToolbar maxAccess={maxAccess} />
         <Table
           columns={columns}
-          gridData={CharacteristicGridData}
+          gridData={data}
           rowId={['currencyId']}
           isLoading={false}
           maxAccess={maxAccess}

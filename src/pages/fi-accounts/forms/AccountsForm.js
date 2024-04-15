@@ -1,23 +1,17 @@
-// ** MUI Imports
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-
-// ** Custom Imports
-import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-
 import { SaleRepository } from 'src/repositories/SaleRepository'
-
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
 
 const AccountsForms = ({
   labels,
@@ -35,24 +29,22 @@ const AccountsForms = ({
     endpointId: FinancialRepository.Account.qry
   })
 
-  const [initialValues , setInitialData] = useState({
-    recordId: null,
-    groupId: null,
-    groupename: '',
-    reference: null,
-    name: '',
-    keyWords: null,
-    flName: null,
-    type: null,
-    BpRef: null,
-    szId: null,
-    spId: null,
-    inactive: false
-  })
-
-  const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+  const formik = useForm({
+    initialValues:{
+      recordId: null,
+      groupId: null,
+      groupename: '',
+      reference: null,
+      name: '',
+      keyWords: null,
+      flName: null,
+      type: null,
+      BpRef: null,
+      szId: null,
+      spId: null,
+      inactive: false
+    },
+    maxAccess: maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -83,27 +75,29 @@ const AccountsForms = ({
           invalidate()
         } else toast.success('Record Edited Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
-  useEffect(()=>{
-    recordId  && getAccountsById(recordId)
-  },[recordId])
+  async function fetchGridData(options={}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  const getAccountsById =  recordId => {
-    const defaultParams = `_recordId=${recordId}`
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_recordId=${recordId}`
     var parameters = defaultParams
-     getRequest({
-      extension: FinancialRepository.Account.get,
+
+     const response =  await getRequest({
+      extension: FinancialRepository.Account.qry,
       parameters: parameters
     })
-      .then(res => {
-        formik.setValues(res.record)
-        setEditMode(true)
-      })
+
+    return {...response,  _startAt: _startAt}
   }
+
+  const {
+    query: { data },
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: FinancialRepository.Account.qry,
+    datasetId: ResourceIds.Accounts,
+  })
 
 return (
     <FormShell resourceId={ResourceIds.Accounts} form={formik} height={600} maxAccess={maxAccess} editMode={editMode}>
