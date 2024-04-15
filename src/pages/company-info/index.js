@@ -10,6 +10,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
+import { useForm } from 'src/hooks/form'
 
 const CompanyInfo = () => {
   const [initialValues, setInitialData] = useState({
@@ -26,7 +27,7 @@ const CompanyInfo = () => {
   })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const { labels: labels, access } = useResourceParams({
+  const { labels: labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.CompanyInfo
   })
 
@@ -41,7 +42,6 @@ const CompanyInfo = () => {
       extension: SystemRepository.CompanyInfo.get,
       parameters: `_filter=`
     })
-    formik.setValues(res.record)
 
     const result = await getRequest({
       extension: SystemRepository.Attachment.get,
@@ -52,8 +52,9 @@ const CompanyInfo = () => {
     setInitialData(res.record)
   }
 
-  const formik = useFormik({
-    enableReinitialize: false,
+  const { formik } = useForm({
+    maxAccess,
+    enableReinitialize: true,
     validateOnChange: true,
     initialValues,
     onSubmit: values => {
@@ -93,47 +94,52 @@ const CompanyInfo = () => {
 
   return (
     <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-      <FormShell resourceId={ResourceIds.CompanyInfo} form={formik}>
+      <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} maxAccess={maxAccess}>
         <Grid container spacing={4}>
           <Grid item xs={12}>
             <CustomTextField
               name='accountId'
               label={labels.accountId}
-              value={formik.values.accountId}
+              value={formik.values?.accountId}
               onChange={formik.handleChange}
               readOnly={true}
               onClear={() => formik.setFieldValue('posMsg', '')}
               error={formik.errors && Boolean(formik.errors.posMsg)}
+
+              // maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='name'
               label={labels.name}
-              value={formik.values.name}
+              value={formik.values?.name}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('posMsg', '')}
               error={formik.errors && Boolean(formik.errors.posMsg)}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='flName'
               label={labels.foreignLanguage}
-              value={formik.values.flName}
+              value={formik.values?.flName}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('flName', '')}
               error={formik.errors && Boolean(formik.errors.flName)}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='taxNo'
               label={labels.taxNo}
-              value={formik.values.taxNo}
+              value={formik.values?.taxNo}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('taxNo', '')}
               error={formik.errors && Boolean(formik.errors.taxNo)}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
@@ -151,45 +157,49 @@ const CompanyInfo = () => {
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='licenseNo'
               label={labels.licenseNo}
-              value={formik.values.licenseNo}
+              value={formik.values?.licenseNo}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('licenseNo', '')}
               error={formik.errors && Boolean(formik.errors.licenseNo)}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='crNo'
               label={labels.commercialRegister}
-              value={formik.values.crNo}
+              value={formik.values?.crNo}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('crNo', '')}
               error={formik.errors && Boolean(formik.errors.crNo)}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='webSite'
               label={labels.website}
-              value={formik.values.webSite}
+              value={formik.values?.webSite}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('webSite', '')}
               error={formik.errors && Boolean(formik.errors.webSite)}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomImage
               name='logoUrl'
-              value={formik.values.attachment}
+              value={formik.values?.attachment}
               onChange={formik.setFieldValue}
               resourceId={ResourceIds.CompanyInfo}
-              error={formik.errors.url}
+              error={formik.errors?.url}
             />
           </Grid>
         </Grid>
