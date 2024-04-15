@@ -1,21 +1,10 @@
-// ** React Imports
 import { useContext, useState } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import AddressForm from 'src/components/Shared/AddressForm'
@@ -47,7 +36,6 @@ const AddressBook = () => {
     endpointId: SystemRepository.Address.qry,
     datasetId: ResourceIds.Address,
     search: {
-      endpointId: SystemRepository.Address.snapshot,
       searchFn: fetchWithSearch
     }
   })
