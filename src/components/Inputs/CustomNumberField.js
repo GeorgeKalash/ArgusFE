@@ -42,7 +42,6 @@ const CustomNumberField = ({
       value = value.replace(/[^0-9.]/g, '')
       const _newValue = getNumberWithoutCommas(value)
       e.target.value = _newValue
-      console.log(_newValue)
       onChange(e)
     }
   }
