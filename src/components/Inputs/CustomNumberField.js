@@ -7,7 +7,7 @@ import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
 
 const CustomNumberField = ({
   variant = 'outlined',
-  value,
+  value = '',
   size = 'small',
   label,
   onChange,
@@ -18,10 +18,10 @@ const CustomNumberField = ({
   error,
   helperText,
   hasBorder = true,
+  maxLength = 5,
   ...props
 }) => {
   const name = props.name
-
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
 
   const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
@@ -46,6 +46,16 @@ const CustomNumberField = ({
     }
   }
 
+  const handleInput = e => {
+    const inputValue = e?.target?.value?.replaceAll(',', '').replaceAll('.', '')
+
+    console.log(inputValue)
+    if (inputValue?.length > maxLength) {
+      e.target.value = value
+      onChange(e)
+    }
+  }
+
   return _hidden ? (
     <></>
   ) : (
@@ -62,6 +72,7 @@ const CustomNumberField = ({
       error={error}
       helperText={helperText}
       required={required}
+      onInput={handleInput}
       InputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,

@@ -147,28 +147,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
         </Grid>
 
         <Grid item xs={12}>
-          {/* <CustomTextField
-          name='monthlyIncome'
-          type="text"
-          label={labels.monthlyIncome}
-          value={formik.values.monthlyIncome}
-          required
-          maxAccess={maxAccess}
-          onChange={e => {
-            handleChangeNumber(
-              e.target,
-              8, // digitsBeforePoint
-              2, // digitsAfterPoint
-              formik,
-              setPosition,
-              'monthlyIncome'
-            );
-          }}
-          onClear={() => formik.setFieldValue('monthlyIncome', '')}
-          error={formik.touched.monthlyIncome && Boolean(formik.errors.monthlyIncome)}
-
-          // helperText={formik.touched.monthlyIncome && formik.errors.monthlyIncome}
-        /> */}
           <CustomNumberField
             name='monthlyIncome'
             type='text'
@@ -179,8 +157,7 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
             onChange={e => formik.setFieldValue('monthlyIncome', e.target.value)}
             onClear={() => formik.setFieldValue('monthlyIncome', '')}
             error={formik.touched.monthlyIncome && Boolean(formik.errors.monthlyIncome)}
-
-            // helperText={formik.touched.monthlyIncome && formik.errors.monthlyIncome}
+            maxLength={10}
           />
         </Grid>
         <Grid item xs={12}>
