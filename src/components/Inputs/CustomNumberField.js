@@ -63,6 +63,7 @@ const CustomNumberField = ({
       helperText={helperText}
       required={required}
       InputProps={{
+        autoComplete: 'off',
         readOnly: _readOnly,
         endAdornment: !readOnly && value && (
           <InputAdornment position='end'>
