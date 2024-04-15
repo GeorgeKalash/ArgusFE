@@ -46,13 +46,26 @@ const JournalVoucher = () => {
   const {
     query: { data },
     labels: _labels,
+
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.JournalVoucher.qry,
-    datasetId: ResourceIds.JournalVoucher
+    datasetId: ResourceIds.JournalVoucher,
+    search: {
+      endpointId: GeneralLedgerRepository.JournalVoucher.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.JournalVoucher.qry
@@ -103,7 +116,14 @@ const JournalVoucher = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
           gridData={data}
@@ -112,8 +132,10 @@ const JournalVoucher = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+
           paginationType='api'
           paginationParameters={paginationParameters}
+
           maxAccess={access}
         />
       </Box>

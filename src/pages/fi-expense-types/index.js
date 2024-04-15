@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -25,7 +25,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const ExpenseTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -44,12 +44,27 @@ const ExpenseTypes = () => {
   const {
     query: { data },
     labels: _labels,
-    access
+    access,
+    search,
+    clear,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.ExpenseTypes.page,
-    datasetId: ResourceIds.Expense_Types
+    datasetId: ResourceIds.Expense_Types,
+    search: {
+      endpointId: FinancialRepository.ExpenseTypes.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: FinancialRepository.ExpenseTypes.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.ExpenseTypes.page
@@ -73,7 +88,6 @@ const ExpenseTypes = () => {
     }
   ]
 
-
   const add = () => {
     setWindowOpen(true)
   }
@@ -91,12 +105,19 @@ const ExpenseTypes = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
+
         <Table
           columns={columns}
           gridData={data}
@@ -106,6 +127,7 @@ const ExpenseTypes = () => {
           isLoading={false}
           pageSize={50}
           paginationType='client'
+          refetch={refetch}
           maxAccess={access}
         />
       </Box>

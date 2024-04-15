@@ -1,11 +1,11 @@
 const service = 'GL.asmx/'
 
 export const GeneralLedgerRepository = {
+  //IntegrationLogic
+  IntegrationLogic: {
+    qry: service + 'qryIL'
+  },
 
-    //IntegrationLogic
-    IntegrationLogic: {
-        qry: service + 'qryIL',
-    },
 
     //CostCenter
     CostCenter: {
@@ -60,6 +60,7 @@ export const GeneralLedgerRepository = {
       del: service + 'delTRX',
     },Account:{
     snapshot:service + "snapshotAC"}
-
+}
 
 }
+

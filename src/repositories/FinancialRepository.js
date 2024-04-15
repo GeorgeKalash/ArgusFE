@@ -17,7 +17,9 @@ export const FinancialRepository = {
     get: service + 'getET',
     set: service + 'setET',
     del: service + 'delET',
-    page: service + 'pageET'
+    page: service + 'pageET',
+    snapshot: service + 'snapshotET'
+
   },
   Account: {
     qry: service + 'qryACC',
