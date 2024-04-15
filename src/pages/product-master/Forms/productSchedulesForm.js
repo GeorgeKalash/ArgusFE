@@ -1,6 +1,6 @@
 import { Grid, Box, Checkbox } from '@mui/material'
 import { useFormik } from 'formik'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 // ** Custom Imports
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -15,7 +15,7 @@ import toast from 'react-hot-toast'
 
 const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expanded, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const [selectedRow, setSelectRow] = useState()
   const { recordId: pId, countries } = store
 
   const formik = useFormik({
@@ -85,34 +85,19 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
       .catch(error => {})
   }
 
+  useEffect(() => {
+    selectedRow &&
+      setStore(prevStore => ({
+        ...prevStore,
+        plantId: selectedRow.plantId,
+        currencyId: selectedRow.currencyId,
+        countryId: selectedRow.countryId,
+        dispersalId: selectedRow.dispersalId,
+        _seqNo: selectedRow.seqNo
+      }))
+  }, [selectedRow])
+
   const columns = [
-    {
-      component: 'checkbox',
-      label: labels.isInactive,
-      name: 'select',
-      async onChange({ row: { update, newRow } }) {
-        formik.values.schedules.map(({ id }) =>
-          update({ id, select: id === newRow.id && newRow.select ? true : false })
-        )
-        newRow.select
-          ? setStore(prevStore => ({
-              ...prevStore,
-              plantId: newRow.plantId,
-              currencyId: newRow.currencyId,
-              countryId: newRow.countryId,
-              dispersalId: newRow.dispersalId,
-              _seqNo: newRow.seqNo
-            }))
-          : setStore(prevStore => ({
-              ...prevStore,
-              plantId: '',
-              currencyId: '',
-              countryId: '',
-              dispersalId: '',
-              _seqNo: ''
-            }))
-      }
-    },
     {
       component: 'resourcecombobox',
       label: labels.country,
@@ -297,6 +282,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
               value={formik.values.schedules}
               error={formik.errors.schedules}
               columns={columns}
+              setSelectRow={setSelectRow}
               height={`${expanded ? `calc(100vh - 300px)` : `${height - 160}px`}`}
             />
           </Grid>
