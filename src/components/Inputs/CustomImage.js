@@ -57,7 +57,7 @@ const CustomImage = ({ name, value, onChange, resourceId, error }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
       <img
-        src={`${image || value?.url + `?${new Date().getTime()}` || '/images/emptyPhoto.jpg'}`}
+        src={`${image || (value?.url && value?.url + `?${new Date().getTime()}`) || '/images/emptyPhoto.jpg'}`}
         alt='Profile Pic'
         style={{
           width: 140,
