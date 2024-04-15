@@ -24,7 +24,6 @@ const AccountBalanceForm = (
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [CharacteristicGridData , setCharacteristicGridData] = useState()
-  const { stack } = useWindow()
   const { recordId } = store
 
   const columns = [

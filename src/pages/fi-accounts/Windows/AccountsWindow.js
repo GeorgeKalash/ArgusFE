@@ -24,7 +24,6 @@ const AccountsWindow = ({
 
   const tabs = [
     { label: labels.Accounts },
-    { label: labels.Dimensions, disabled: !store.recordId },
     { label: labels.CreditLimits, disabled: !store.recordId },
     { label: labels.AccountBalance, disabled: !store.recordId },
   ]
@@ -37,17 +36,6 @@ const AccountsWindow = ({
           store={store}
           setStore={setStore}
           setEditMode={setEditMode}
-          labels={labels}
-          maxAccess={maxAccess}
-          height={height}
-          expanded={expanded}
-          editMode={editMode}
-        />
-      </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
-        <DimensionsForm
-          store={store}
-          setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
           height={height}

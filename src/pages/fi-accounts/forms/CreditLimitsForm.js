@@ -44,7 +44,7 @@ const CreditLimitsForm = ({
 
       const filteredObj = obj.filter(({ limit }) => limit > 0);
 
-      const saveTasks = filteredObj.map(currency => {
+      const saveCurrency = filteredObj.map(currency => {
         const data = {
           accountId: currency.accountId,
           currencyName: currency.currencyName,
@@ -57,7 +57,7 @@ const CreditLimitsForm = ({
           record: JSON.stringify(data)
         })
       });
-      Promise.all(saveTasks)
+      Promise.all(saveCurrency)
       .then(res => {
         if (res) toast.success('Record Edited Successfully')
         getCurrencies(accountId)
