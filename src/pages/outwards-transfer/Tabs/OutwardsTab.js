@@ -135,9 +135,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       .then(res => {
         setProfessionFilterStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const formik = useFormik({
@@ -238,6 +236,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       formik.setFieldValue('exRate', selectedRowData?.exRate)
       formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
       formik.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount || '')
+      formik.setFieldValue('exchangeRate', selectedRowData?.exRate)
+      formik.setFieldValue('exchangeRate2', (1 / selectedRowData?.exRate).toFixed(5))
       window.close()
     }
   })
@@ -251,7 +251,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     var currencyId = formFields?.currencyId
     var dispersalType = formFields?.dispersalType
     var amount = formFields?.fcAmount ?? 0
-    var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}&_agentId=0`
+    var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}&_agentId=8`
 
     if (plant && countryId && currencyId && dispersalType) {
       getRequest({
@@ -386,6 +386,17 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       height: 400
     })
   }
+  async function getDefaultVAT() {
+    var parameters = `_filter=&_key=vatPct`
+
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: parameters
+    })
+    const vatPct = res.record.value
+
+    formik.setFieldValue('vatRate', parseInt(vatPct))
+  }
 
   useEffect(() => {
     ;(async function () {
@@ -402,9 +413,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           res.record.checked = true
           productDataFill(res.record)
           getClientInfo(res.record.clientId)
-          checkProduct(res.record.productId)
           fillProfessionStore()
         }
+        getDefaultVAT()
       } catch (error) {}
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
