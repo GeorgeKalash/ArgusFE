@@ -259,7 +259,6 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               readOnly={readOnly}
               maxLength='15'
               type='text'
-              phone={true}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
@@ -273,7 +272,6 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               label={labels.phone2}
               value={addressValidation.values.phone2}
               maxLength='15'
-              phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone2', '')}
@@ -286,7 +284,6 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
             <CustomTextField
               name='phone3'
               label={labels.phone3}
-              phone={true}
               value={addressValidation.values.phone3}
               maxLength='15'
               readOnly={readOnly}
