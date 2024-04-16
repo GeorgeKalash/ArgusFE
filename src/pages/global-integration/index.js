@@ -1,352 +1,145 @@
-// ** React Imports
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box, TextField } from '@mui/material'
-
-// ** Third Party Imports
+import { Box } from '@mui/material'
 import { useFormik } from 'formik'
+import { useContext, useEffect } from 'react'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
+import { useResourceQuery } from 'src/hooks/resource'
 
-const GlobalIntegration = () => {
-    const [errorMessage, setErrorMessage] = useState(null)
-    const { getRequest, postRequest } = useContext(RequestsContext)
-    const [focus, setFocus] = useState()
-    const handleBlur = () => setFocus(undefined)
+const GlobalIntegration = ({
+  editMode,
+  height,
+  expanded
+}) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
-    const [initialValues, setInitialValues] = useState({
-        
-        GLACSegments: null,
-        GLACSeg0: null,
-        GLACSeg1: null,
-        GLACSeg2: null,
-        GLACSeg3: null,
-        GLACSeg4: null,
-        GLACSegName0: null,
-        GLACSegName1: null,
-        GLACSegName2: null,
-        GLACSegName3: null,
-        GLACSegName4: null
-      })
+  const {
+    query: { data },
+    labels: _labels,
+    access,
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: GeneralLedgerRepository.GlobalIntegration.qry,
+    datasetId: ResourceIds.IntegrationAccount,
+  })
 
-    useEffect(() => {
-        getDataResult()
-      }, [])
+  async function fetchGridData(options={}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-    const getDataResult = () => {
-        const myObject = {};
-        var parameters = `_filter=`
-        getRequest({
-          extension:  GeneralLedgerRepository.GlobalIntegration.qry,
-          parameters: parameters
-        })
-        .then(res => {
-            const filteredList = res.list.filter(obj => {
-                return (
-                    obj.key === 'GLACSegments' ||
-                    obj.key === 'GLACSeg0' || 
-                    obj.key === 'GLACSeg1' || 
-                    obj.key === 'GLACSeg2' || 
-                    obj.key === 'GLACSeg3' ||
-                    obj.key === 'GLACSeg4' ||
-                    obj.key === 'GLACSegName0' ||
-                    obj.key === 'GLACSegName1' ||
-                    obj.key === 'GLACSegName2' ||
-                    obj.key === 'GLACSegName3' ||
-                    obj.key === 'GLACSegName4'
-                );
-            });
-        
-            filteredList.forEach(obj => {
-                myObject[obj.key] = (
-                    obj.key === 'GLACSegments' ||
-                    obj.key === 'GLACSeg0' || 
-                    obj.key === 'GLACSeg1' || 
-                    obj.key === 'GLACSeg2' || 
-                    obj.key === 'GLACSeg3' ||
-                    obj.key === 'GLACSeg4' 
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
 
-                ) ? (obj.value ? parseInt(obj.value) : null) :  (obj.value ? obj.value : null) ;
-               
-            });
-            
-            setInitialValues(myObject);
-            console.log(myObject)
-        })
-        .catch(error => {
-            setErrorMessage(error);
-        });
-      };
+     const response =  await getRequest({
+      extension: GeneralLedgerRepository.GlobalIntegration.page,
+      parameters: parameters
+    })
 
-    const {
-        labels: _labels,
-        access
-      } = useResourceQuery({
-        datasetId: ResourceIds.IntegrationAccount,
-      })
-    
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        validateOnChange: true,
-       
-        validationSchema: yup.object({
-            GLACSegments: yup.number().nullable().required('GLACSegments is required').min(2).max(5),
-            GLACSeg0: yup.number().nullable().required('Segment 1 is required').min(1).max(8),
-            GLACSegName0: yup.string().nullable().required('GLACSegName0 is required'),
-            GLACSeg1: yup.number().nullable().required('Segment 2 is required').min(1).max(8),
-            GLACSegName1: yup.string().nullable().required('GLACSegName1 is required'),
-            GLACSeg2: yup.number().nullable().min(1).max(8).test(
-                'is-glacseg2-required',
-                'Segment 3 is required',
-                function (value) {
-                    const { GLACSegments } = this.parent;
-                    
-                    return GLACSegments >= 3 ? value != null && value >= 1 && value <= 8 : true;
-                }
-            ),
-            GLACSegName2: yup.string().nullable().test(
-                'is-glacsegname2-required',
-                'GLACSegName2 is required',
-                function (value) {
-                    const { GLACSegments } = this.parent;
-                    
-                    return GLACSegments >= 3 ? value != null && value.trim() !== '' : true;
-                }
-            ),
-            GLACSeg3: yup.number().nullable().min(1).max(8).test(
-                'is-glacseg3-required',
-                'Segment 4 is required',
-                function (value) {
-                    const { GLACSegments } = this.parent;
-                    
-                    return GLACSegments >= 4 ? value != null && value >= 1 && value <= 8 : true;
-                }
-            ),
-            GLACSegName3: yup.string().nullable().test(
-                'is-glacsegname3-required',
-                'GLACSegName3 is required',
-                function (value) {
-                    const { GLACSegments } = this.parent;
-                    
-                    return GLACSegments >= 4 ? value != null && value.trim() !== '' : true;
-                }
-            ),
-            GLACSeg4: yup.number().nullable().min(1).max(8).test(
-                'is-glacseg4-required',
-                'Segment 5 is required',
-                function (value) {
-                    const { GLACSegments } = this.parent;
-
-                    
-                    return GLACSegments >= 5 ? value != null && value >= 1 && value <= 8 : true;
-                }
-            ),
-            GLACSegName4: yup.string().nullable().test(
-                'is-glacsegname4-required',
-                'GLACSegName4 is required',
-                function (value) {
-                    const { GLACSegments } = this.parent;
-
-                    return GLACSegments >= 5 ? value != null && value.trim() !== '' : true;
-                }
-            ),
-        }),
-        
-        onSubmit: values => {
-            postGLSettings(values);
-           
-            
-        },
-
-    });
-
-    const postGLSettings = obj => {
-       
-        var dataToPost = [];
-    
-        dataToPost.push({ key: 'GLACSegments', value: obj.GLACSegments });
-            for (let i = 0; i < 5; i++) {
-            const segKey = `GLACSeg${i}`;
-            const nameKey = `GLACSegName${i}`;
-            
-    
-            if (obj[segKey] !== undefined) {
-                dataToPost.push({ key: segKey, value: obj[segKey] });
-            }
-            if (obj[nameKey] !== undefined) {
-                dataToPost.push({ key: nameKey, value: obj[nameKey] });
-            }
-        }
-        console.log(dataToPost)
-        postRequest({
-            extension: GeneralLedgerRepository.GlobalIntegration.set,
-            record: JSON.stringify({ sysDefaults: dataToPost }),
-            
-        })
-        .then(res => {
-            toast.success('Record Successfully');
-        })
-        .catch(error => {
-            setErrorMessage(error);
-        });
-    };
-
-       const handleSubmit = () => {
-        formik.handleSubmit()
-      }
-
-      const segNumb = [
-        "GLACSeg0",
-        "GLACSeg1",
-        "GLACSeg2",
-        "GLACSeg3",
-        "GLACSeg4",
-      ];
-
-      const segName = [
-        "GLACSegName0",
-        "GLACSegName1",
-        "GLACSegName2",
-        "GLACSegName3",
-        "GLACSegName4",
-      ]
-
-      useEffect(()=>console.log(formik.values),[formik])
-
-      useEffect(() => {
-        const segmentsNum = formik.values.GLACSegments
-        
-        segNumb.forEach((seg, idx) => {
-            if(idx >= segmentsNum) {
-                formik.setFieldValue(seg, null)
-            }
-        })
-        segName.forEach((seg, idx) => {
-            if(idx >= segmentsNum) {
-                formik.setFieldValue(seg, null)
-            }
-        })
-
-      }, [formik.values.GLACSegments]);
-
-      return(
-        <>
-        <FormShell
-        resourceId={ResourceIds.IntegrationAccount}
-        maxAccess={access}
-        form={formik}
-        >
-         
-                <Grid container spacing={2} >
-                    <Grid item xs={12}>
-                        <CustomTextField
-                            name='GLACSegments'
-                            label={_labels.segments}
-                            value={formik.values.GLACSegments}
-
-                            // onChange={formik.handleChange}
-                            type='number'
-                            numberField={true}
-                            onBlur={formik.handleChange}
-                            onClear={() => formik.setFieldValue('GLACSegments', '')}
-                            error={formik.touched.GLACSegments && Boolean(formik.errors.GLACSegments)}
-                            inputProps={{
-                                min: 2, 
-                                max: 5, 
-                                maxLength: 1,
-                                inputMode: 'numeric', 
-                                pattern: '[2-5]*',
-                            }}
-
-                            helperText={formik.touched.GLACSegments && formik.errors.GLACSegments}
-                        />
-                    </Grid>
-                    
-                        <Grid item xs={12} lg={6}>
-                            {segNumb.map((name, idx) => <Grid key={name} item xs={12} sx={{marginTop:'7px'}}>
-                                <CustomTextField
-                                   name={name}
-                                   label={_labels["segment" + idx]}
-                                   value={formik.values[name]}
-                                   onClear={() => formik.setFieldValue(name, '')}
-                                   type='number'
-                                   numberField={true}
-                                   onChange={formik.handleChange}
-                                   error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
-                                   inputProps={{
-                                     min: 1,
-                                     max: 8,
-                                    readOnly:formik.values.GLACSegments <= idx|| formik.values.GLACSegments=='null',
-                                     maxLength: 1,
-                                     inputMode: 'numeric',
-                                     pattern: '[1-8]*',
-                                   }}
-
-                                    helperText={formik.touched[name] && formik.errors[name]}
-                                />
-                            </Grid>)}
-                        </Grid>
-                        <Grid item xs={12} lg={6}>
-                            {segName.map((name, idx) => <Grid key={name} item xs={12} sx={{marginTop:'7px'}}>
-                                <CustomTextField
-                                    name={name}
-                                    onBlur={handleBlur}
-                                    onFocus={e => setFocus(e.target.name)}
-
-                                    value={formik.values[name]}
-                                    onClear={() => formik.setFieldValue(name, '')}
-                                    
-                                    numberField={true}
-                                    onChange={formik.handleChange}
-                                    error={formik.values.GLACSegments > idx  && Boolean(formik.errors[name])}
-                                    inputProps={{
-                                        maxLength: '20',
-                                        style: { textAlign: 'left' },
-                                        readOnly:formik.values.GLACSegments <= idx|| formik.values.GLACSegments=='null'
-                                      }}
-                                  
-                                />
-                            </Grid>)}
-                        </Grid>
-                    </Grid>
-                   
-                    <Grid sx={{
-                        position: 'fixed',
-                        bottom: 0,
-                        left: 0,
-                        width: '100%',
-                        padding: 3,
-                        textAlign: 'center',
-                    }}>
-                        <WindowToolbar 
-                            onSave={handleSubmit}
-                            isSaved={true}
-                        />
-                    </Grid>
-                    
-                
-                <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-            </FormShell>
-        </>
-    )
+    return {...response,  _startAt: _startAt}
   }
 
-  export default GlobalIntegration
+  const formik = useFormik({
+      enableReinitialize: false,
+      validateOnChange: true,
+      initialValues: {
+        postTypeId:null,
+        accountId: null,
+        accountRef: null,
+        accountName: ''
+      },
+      onSubmit: values => {
+        postCurrencies(values.currencies)
+      }
+    })
 
+    const postCurrencies = obj => {
+
+      const filteredObj = obj.filter(({ limit }) => limit > 0);
+
+      const saveCurrency = filteredObj.map(currency => {
+        const data = {
+          accountId: currency.accountId,
+          currencyName: currency.currencyName,
+          currencyId: currency.currencyId,
+          limit: currency.limit
+        };
+    
+        return postRequest({
+          extension: GeneralLedgerRepository.AccountCreditLimit.set,
+          record: JSON.stringify(data)
+        })
+      });
+      Promise.all(saveCurrency)
+      .then(res => {
+         toast.success('Record Edited Successfully')
+      })
+      .catch(error => { })
+    }
+
+    const column = [
+      {
+        component: 'textfield',
+        label: _labels.currency,
+        name: 'currencyName',
+        props:{readOnly: true}
+      },
+      {
+        component: 'textfield',
+        label: _labels.CreditLimits,
+        name: 'limit',
+        props:{type:'number'}
+      }
+    ]
+
+    const getCurrencies = accountId => {
+      const defaultParams = `_accountId=${accountId}`
+      var parameters = defaultParams
+      getRequest({
+        extension: GeneralLedgerRepository.AccountCreditLimit.qry,
+        parameters: parameters
+      })
+        .then(res => {
+          if (res.list.length > 0){
+            const currencies = res.list.map(( currency , index) => ({
+                id : index,
+                ...currency
+            }))
+            formik.setValues({ currencies: currencies})
+
+          setStore(prevStore => ({
+            ...prevStore,
+            currencies: currencies,
+          }));
+          }
+        })
+        .catch(error => {
+        })
+    }
+
+  return (
+    <FormShell 
+      form={formik}
+      resourceId={ResourceIds.Accounts}
+      maxAccess={access}
+      infoVisible={false}
+      editMode={editMode}>
+      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
+        <DataGrid   
+           onChange={value => formik.setFieldValue('currencies', value)}
+           value={formik.values}
+           error={formik.errors}
+           columns={column}
+           allowDelete={false}
+           allowAddNewLine={false}
+           height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
+
+        />
+      </Box>
+    </FormShell>
+  )
+}
+
+export default GlobalIntegration
