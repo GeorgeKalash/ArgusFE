@@ -75,6 +75,9 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         tpAccountId: '',
         tpAccountRef: '',
         tpAccountName: '',
+        costCenterId: '',
+        costCenterRef: '',
+        costCenterName: '',
         currencyRef: '',
         currencyId: '',
 
@@ -276,6 +279,9 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         tpAccountRef: row.tpAccountRef,
         tpAccountName: row.tpAccountName,
         tpAccountId: row.tpAccountId,
+        costCenterId: row.costCenterId,
+        costCenterRef: row.costCenterRef,
+        costCenterName: row.costCenterName,
 
         currencyRef: row.currencyRef,
         currencyId: row.currencyId,
@@ -489,6 +495,31 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               component: 'textfield',
               label: _labels.thirdPartyName,
               name: 'tpAccountName'
+            },
+            {
+              component: 'resourcelookup',
+              label: 'costcenter',
+              name: 'costCenterRef',
+              props: {
+                endpointId: GeneralLedgerRepository.CostCenter.snapshot,
+                valueField: 'recordId',
+                displayField: 'reference',
+                displayFieldWidth: 3,
+                columnsInDropDown: [
+                  { key: 'reference', value: 'reference' },
+                  { key: 'name', value: 'name' }
+                ],
+                mapping: [
+                  { from: 'name', to: 'costCenterName' },
+                  { from: 'reference', to: 'costCenterRef' },
+                  { from: 'recordId', to: 'costCenterId' }
+                ]
+              }
+            },
+            {
+              component: 'textfield',
+              label: 'costCenterName',
+              name: 'costCenterName'
             },
             {
               component: 'resourcecombobox',
