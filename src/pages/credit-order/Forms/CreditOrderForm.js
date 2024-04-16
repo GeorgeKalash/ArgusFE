@@ -441,6 +441,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             amount: 0,
             baseAmount: 0
           })
+
           stackError({
             message: `Rate not defined for ${newRow?.currencyRef}.`
           })
@@ -562,7 +563,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       width: 130,
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        console.log('newRow ', newRow)
         const nv = parseFloat(newRow.exRate.toString().replace(/,/g, ''))
         if (parseFloat(newRow.exRate.toString().replace(/,/g, '')) > 0) {
           const minRate = parseFloat(newRow.minRate.toString().replace(/,/g, ''))

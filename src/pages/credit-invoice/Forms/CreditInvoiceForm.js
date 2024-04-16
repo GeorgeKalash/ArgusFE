@@ -320,6 +320,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
         displayFieldWidth: 3,
         disabled: formik?.values?.corId === '' || formik?.values?.corId === null || formik?.values?.corId === undefined
       },
+      updateOn: 'blur',
       widthDropDown: '400',
       width: 150,
       async onChange({ row: { update, oldRow, newRow } }) {
@@ -442,6 +443,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
         mandatory: true,
         disabled: formik?.values?.corId === '' || formik?.values?.corId === null || formik?.values?.corId === undefined
       },
+      updateOn: 'blur',
       width: 130,
       async onChange({ row: { update, newRow } }) {
         const nv = parseFloat(newRow.exRate.toString().replace(/,/g, ''))
@@ -467,6 +469,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 : 0
             update({
               exRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(5),
+              defaultRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(5),
               amount: getFormattedNumber(qtyToCur.toFixed(2)),
               baseAmount: getFormattedNumber(curToBase.toFixed(2))
             })
@@ -477,6 +480,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             if (nv) {
               update({
                 exRate: '',
+                defaultRate: '',
                 amount: 0,
                 baseAmount: 0
               })
