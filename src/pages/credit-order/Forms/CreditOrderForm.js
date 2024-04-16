@@ -562,6 +562,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       width: 130,
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        console.log('newRow ', newRow)
         const nv = parseFloat(newRow.exRate.toString().replace(/,/g, ''))
         if (parseFloat(newRow.exRate.toString().replace(/,/g, '')) > 0) {
           const minRate = parseFloat(newRow.minRate.toString().replace(/,/g, ''))
@@ -596,6 +597,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             if (nv) {
               update({
                 exRate: '',
+                defaultRate: '',
                 amount: 0,
                 baseAmount: 0
               })
