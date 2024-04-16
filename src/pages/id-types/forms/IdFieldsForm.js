@@ -1,16 +1,14 @@
 import { Box } from '@mui/material'
-import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
-
-// ** Custom Imports
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
+import { useForm } from 'src/hooks/form'
 
 const IdFieldsForm = ({
   store,
@@ -24,7 +22,8 @@ const IdFieldsForm = ({
   const { getRequest, postRequest } = useContext(RequestsContext)
   const {recordId : idtId } = store
 
-  const formik = useFormik({
+  const {formik} = useForm({
+      maxAccess: maxAccess,
       enableReinitialize: false,
       validateOnChange: true,
       validationSchema: yup.object({ IdField: yup
@@ -67,8 +66,7 @@ const IdFieldsForm = ({
         record: JSON.stringify(data)
       })
         .then(res => {
-          if (res) toast.success('Record Edited Successfully')
-          getIdField(idtId)
+          toast.success('Record Edited Successfully')
         })
         .catch(error => {
         })

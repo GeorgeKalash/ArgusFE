@@ -1,24 +1,11 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import IdTypesWindow from './Windows/IdTypesWindow'
-
-// ** Helpers
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -26,8 +13,6 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 const IdTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-
-  //control
 
   const {
     query: { data },
@@ -86,7 +71,7 @@ const IdTypes = () => {
   }
 
   const addCharacteristics = () => {
-    openForm('')
+    openForm()
   }
 
   function openForm (recordId){

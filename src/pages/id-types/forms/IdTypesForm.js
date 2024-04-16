@@ -1,12 +1,7 @@
-// ** MUI Imports
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-
-// ** Custom Imports
-import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -16,6 +11,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
 
 const IdTypesForm = ({
   labels,
@@ -33,22 +29,21 @@ const IdTypesForm = ({
     endpointId: CurrencyTradingSettingsRepository.IdTypes.qry
   })
 
-  const [initialValues , setInitialData] = useState({
-    recordId: null,
-    name: null,
-    format: null,
-    length: null,
-    category: null,
-    clientFileExpiryType: null,
-    clientFileLifeTime: null,
-    type: null,
-    isDiplomat:false
-  })
-
-  const formik = useFormik({
+  const {formik} = useForm({
+    maxAccess: maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
-    initialValues,
+    initialValues:{
+      recordId: null,
+      name: null,
+      format: null,
+      length: null,
+      category: null,
+      clientFileExpiryType: null,
+      clientFileLifeTime: null,
+      type: null,
+      isDiplomat:false
+    },
     validate: (values) => {
       const errors = {};
       if (values?.type === '1' && !values.clientFileLifeTime) {
@@ -56,7 +51,7 @@ const IdTypesForm = ({
       }
       
       return errors;
-      },
+    },
     validationSchema: yup.object({
       name: yup.string().required(' '),
       format: yup.string().required(' '),
@@ -70,11 +65,11 @@ const IdTypesForm = ({
     }
   })
 
-  const postIdTypes = obj => {console.log(obj.validFrom)
+  const postIdTypes = obj => {
     const recordId = obj?.recordId || ''
     const date =  obj?.validFrom && formatDateToApi(obj?.validFrom)
     const data = { ...obj, validFrom : date }
-    console.log(obj.validFrom)
+
     postRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.set,
       record: JSON.stringify(data)
