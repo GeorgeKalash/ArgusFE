@@ -49,11 +49,11 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
       flName: yup.string().required('FL Name is required'),
       monthlyIncome: yup
         .string()
-        .required('')
+        .required(' ')
         .test({
           name: 'greaterThanZero',
           exclusive: true,
-          message: '',
+          message: ' ',
           test: value => parseFloat(value) > 0
         }),
       riskFactor: yup.string().required('Risk factor is required'),
