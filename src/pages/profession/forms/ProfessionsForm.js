@@ -11,7 +11,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
@@ -82,20 +81,17 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
+      if (recordId) {
+        setIsLoading(true)
 
-          const res = await getRequest({
-            extension: RemittanceSettingsRepository.Profession.get,
-            parameters: `_recordId=${recordId}`
-          })
+        const res = await getRequest({
+          extension: RemittanceSettingsRepository.Profession.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+        setInitialData(res.record)
       }
+
       setIsLoading(false)
     })()
   }, [])
