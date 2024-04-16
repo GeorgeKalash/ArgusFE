@@ -15,7 +15,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { CurrencyTradingClientRepository } from 'src/repositories/CurrencyTradingClientRepository'
 import BenificiaryBank from './BenificiaryBank'
 import BenificiaryCash from './BenificiaryCash'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
@@ -305,7 +304,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           clientId: formik.values.clientId,
           dispersalType: formik.values.dispersalType,
           corId: formik.values.corId,
-          countryId: formik.values.countryId
+          countryId: formik.values.countryId,
+          beneficiaryId: formik.values.beneficiaryId
         },
         width: 700,
         height: 500,
@@ -318,7 +318,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           clientId: formik.values.clientId,
           dispersalType: formik.values.dispersalType,
           corId: formik.values.corId,
-          countryId: formik.values.countryId
+          countryId: formik.values.countryId,
+          beneficiaryId: formik.values.beneficiaryId
         },
         width: 900,
         height: 600,
@@ -420,6 +421,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  /*  useEffect(() => {
+    if (formik.values.beneficiaryId) {
+      console.log('enter cond')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.beneficiaryId])*/
 
   return (
     <>
@@ -588,7 +596,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 <CustomTextField
                   position={position}
                   name='fcAmount'
-                  type='text'
+                  numberField={true}
                   label={labels.fcAmount}
                   value={formik.values.fcAmount}
                   required
@@ -682,7 +690,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 <CustomTextField
                   position={position}
                   name='lcAmount'
-                  type='text'
+                  numberField={true}
                   label={labels.lcAmount}
                   value={formik.values.lcAmount}
                   required
@@ -709,7 +717,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 <CustomTextField
                   position={position}
                   name='commission'
-                  type='text'
+                  numberField={true}
                   label={labels.commission}
                   value={formik.values.commission}
                   required
@@ -735,6 +743,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               <Grid item xs={12}>
                 <CustomTextField
                   name='vatRate'
+                  numberField={true}
                   label={labels.vatRate}
                   value={formik.values.vatRate}
                   readOnly
@@ -746,6 +755,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               <Grid item xs={12}>
                 <CustomTextField
                   name='discount'
+                  numberField={true}
                   label={labels.discount}
                   value={formik.values.discount}
                   readOnly={isClosed}
@@ -758,7 +768,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 <CustomTextField
                   position={position}
                   name='net'
-                  type='text'
+                  numberField={true}
                   label={labels.NetToPay}
                   value={formik.values.net}
                   required
@@ -820,7 +830,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   errorCheck={'clientId'}
                 />
               </Grid>
-
               <Grid container xs={12} spacing={2} sx={{ pl: '10px' }}>
                 <Grid item xs={3}>
                   <CustomTextField
