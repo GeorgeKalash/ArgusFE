@@ -20,16 +20,8 @@ const SystemFunction = () => {
     })
     formik.setValues({
       ...formik.values,
-      rows: resSystemFunction.list.map(({ nraId, nraRef, batchNRAId, batchNRARef, ...rest }, index) => ({
+      rows: resSystemFunction.list.map(({ ...rest }, index) => ({
         id: index + 1,
-        nra: {
-          recordId: nraId,
-          reference: nraRef
-        },
-        batchNRA: {
-          recordId: batchNRAId,
-          reference: batchNRARef
-        },
         ...rest
       }))
     })
@@ -37,7 +29,6 @@ const SystemFunction = () => {
 
   const { labels: labels, MaxAccess } = useResourceQuery({
     queryFn: getGridData,
-    endpointId: SystemRepository.SystemFunction.qry,
     datasetId: ResourceIds.SystemFunction
   })
 
@@ -52,21 +43,17 @@ const SystemFunction = () => {
           id: 1,
           functionId: '',
           sfName: '',
-          nra: ''
+          nraId: '',
+          nraRef: '',
+          batchNRAId: '',
+          batchNRARef: ''
         }
       ]
     },
     onSubmit: async values => {
       const resultObject = {
-        systemFunctionMappings: values.rows.map(({ functionId, nra, batchNRA }) => ({
-          functionId,
-          nraId: nra?.recordId,
-          nraRef: nra?.reference,
-          batchNRAId: batchNRA?.recordId,
-          batchNRARef: batchNRA?.reference
-        }))
+        systemFunctionMappings: values.rows
       }
-
       postRequest({
         extension: SystemRepository.SystemFunction.set2,
         record: JSON.stringify(resultObject)
@@ -98,41 +85,39 @@ const SystemFunction = () => {
     {
       component: 'resourcelookup',
       label: labels.numberRange,
-      name: 'nra',
+      name: 'nraRef',
       props: {
         endpointId: SystemRepository.NumberRange.snapshot,
         displayField: 'reference',
-        valueField: 'reference',
+        valueField: 'recordId',
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'description', value: 'Name' }
+        ],
+        mapping: [
+          { from: 'recordId', to: 'nraId' },
+          { from: 'reference', to: 'nraRef' },
+          { from: 'name', to: 'nraName' }
         ]
-      },
-      onChange({ row: { update, newRow } }) {
-        update({
-          nraId: newRow?.nra?.recordId,
-          nraRef: newRow?.nra?.reference
-        })
       }
     },
     {
       component: 'resourcelookup',
       label: labels.batchNumberRange,
-      name: 'batchNRA',
+      name: 'batchNRARef',
       props: {
         endpointId: SystemRepository.NumberRange.snapshot,
         displayField: 'reference',
-        valueField: 'reference',
+        valueField: 'recordId',
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'description', value: 'Name' }
+        ],
+        mapping: [
+          { from: 'recordId', to: 'batchNRAId' },
+          { from: 'reference', to: 'batchNRARef' },
+          { from: 'name', to: 'batchNRAName' }
         ]
-      },
-      onChange({ row: { update, newRow } }) {
-        update({
-          batchNRAId: newRow?.batchNRA?.recordId,
-          batchNRARef: newRow?.batchNRA?.reference
-        })
       }
     }
   ]
@@ -149,8 +134,8 @@ const SystemFunction = () => {
                   onChange={value => {
                     formik.setFieldValue('rows', value)
                   }}
-                  value={formik?.values?.rows}
-                  error={formik?.errors?.rows}
+                  value={formik.values?.rows}
+                  error={formik.errors?.rows}
                   columns={columns}
                   allowDelete={false}
                   allowAddNewLine={false}
