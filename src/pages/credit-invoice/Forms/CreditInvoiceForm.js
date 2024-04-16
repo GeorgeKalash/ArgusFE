@@ -446,6 +446,16 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       updateOn: 'blur',
       width: 130,
       async onChange({ row: { update, newRow } }) {
+        if (!newRow.exRate) {
+          update({
+            exRate: '',
+            defaultRate: '',
+            amount: 0,
+            baseAmount: 0
+          })
+
+          return
+        }
         const nv = parseFloat(newRow.exRate.toString().replace(/,/g, ''))
         if (parseFloat(newRow.exRate.toString().replace(/,/g, '')) > 0) {
           const minRate = parseFloat(newRow.minRate.toString().replace(/,/g, ''))

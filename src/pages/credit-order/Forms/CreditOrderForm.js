@@ -563,6 +563,16 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       width: 130,
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        if (!newRow.exRate) {
+          update({
+            exRate: '',
+            defaultRate: '',
+            amount: 0,
+            baseAmount: 0
+          })
+
+          return
+        }
         const nv = parseFloat(newRow.exRate.toString().replace(/,/g, ''))
         if (parseFloat(newRow.exRate.toString().replace(/,/g, '')) > 0) {
           const minRate = parseFloat(newRow.minRate.toString().replace(/,/g, ''))
