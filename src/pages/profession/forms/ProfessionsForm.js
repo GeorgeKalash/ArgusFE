@@ -8,7 +8,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { handleChangeNumber } from 'src/lib/numberField-helper'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -21,7 +20,6 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 export default function ProfessionsForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
-  const [position, setPosition] = useState(0)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -44,9 +42,9 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object().shape({
-      name: yup.string().required('Name is required'),
-      reference: yup.string().required('Reference is required'),
-      flName: yup.string().required('FL Name is required'),
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      flName: yup.string().required(' '),
       monthlyIncome: yup
         .string()
         .required(' ')
@@ -56,30 +54,28 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
           message: ' ',
           test: value => parseFloat(value) > 0
         }),
-      riskFactor: yup.string().required('Risk factor is required'),
-      diplomatStatus: yup.string().required('Diplomat status is required')
+      riskFactor: yup.string().required(' '),
+      diplomatStatus: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      try {
-        const recordId = obj.recordId
-        const data = { ...obj, monthlyIncome: obj.monthlyIncome }
+      const recordId = obj.recordId
+      const data = { ...obj, monthlyIncome: obj.monthlyIncome }
 
-        const response = await postRequest({
-          extension: RemittanceSettingsRepository.Profession.set,
-          record: JSON.stringify(data)
+      const response = await postRequest({
+        extension: RemittanceSettingsRepository.Profession.set,
+        record: JSON.stringify(data)
+      })
+
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        setInitialData({
+          ...obj,
+          recordId: response.recordId
         })
-
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-          setInitialData({
-            ...obj, // Spread the existing properties
-            recordId: response.recordId // Update only the recordId field
-          })
-        } else toast.success('Record Edited Successfully')
+      } else {
+        toast.success('Record Edited Successfully')
         setEditMode(true)
         invalidate()
-      } catch (exception) {
-        setErrorMessage(error)
       }
     }
   })
@@ -102,7 +98,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
       }
       setIsLoading(false)
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -119,8 +114,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
             maxAccess={maxAccess}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-
-            // helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -134,8 +127,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-
-            // helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
@@ -149,8 +140,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('flName', '')}
             error={formik.touched.flName && Boolean(formik.errors.flName)}
-
-            // helperText={formik.touched.flName && formik.errors.flName}
           />
         </Grid>
 
@@ -179,8 +168,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('riskFactor', '')}
             error={formik.touched.riskFactor && Boolean(formik.errors.riskFactor)}
-
-            // helperText={formik.touched.riskFactor && formik.errors.riskFactor}
           />
         </Grid>
         <Grid item xs={12}>
@@ -198,8 +185,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
               formik.setFieldValue('diplomatStatus', newValue?.key)
             }}
             error={formik.touched.diplomatStatus && Boolean(formik.errors.diplomatStatus)}
-
-            // helperText={formik.touched.diplomatStatus && formik.errors.diplomatStatus}
           />
         </Grid>
       </Grid>
