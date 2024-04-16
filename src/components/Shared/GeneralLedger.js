@@ -155,11 +155,11 @@ const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) 
       }
 
       const baseCredit = generalAccountData.reduce((acc, curr) => {
-        return curr.sign === '2' ? acc + parseNumber(curr.baseAmount) : acc
+        return curr.sign == '2' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
       const baseDebit = generalAccountData.reduce((acc, curr) => {
-        return curr.sign === '1' ? acc + parseNumber(curr.baseAmount) : acc
+        return curr.sign == '1' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
       const baseBalance = baseDebit - baseCredit
