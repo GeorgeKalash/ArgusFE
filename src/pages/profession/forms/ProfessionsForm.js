@@ -43,13 +43,21 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      flName: yup.string().required(' '),
-      monthlyIncome: yup.string().required(' '),
-      riskFactor: yup.string().required(' '),
-      diplomatStatus: yup.string().required(' ')
+    validationSchema: yup.object().shape({
+      name: yup.string().required('Name is required'),
+      reference: yup.string().required('Reference is required'),
+      flName: yup.string().required('FL Name is required'),
+      monthlyIncome: yup
+        .string()
+        .required('')
+        .test({
+          name: 'greaterThanZero',
+          exclusive: true,
+          message: '',
+          test: value => parseFloat(value) > 0
+        }),
+      riskFactor: yup.string().required('Risk factor is required'),
+      diplomatStatus: yup.string().required('Diplomat status is required')
     }),
     onSubmit: async obj => {
       try {

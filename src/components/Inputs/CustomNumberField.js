@@ -19,6 +19,8 @@ const CustomNumberField = ({
   helperText,
   hasBorder = true,
   maxLength = 1000,
+  min = '',
+  max = '',
   ...props
 }) => {
   const name = props.name
@@ -48,7 +50,6 @@ const CustomNumberField = ({
 
   const handleInput = e => {
     const inputValue = e?.target?.value?.replaceAll(',', '').replaceAll('.', '')
-
     if (e?.target?.value?.indexOf('.') > 0) {
       if (inputValue?.length > maxLength) e.target.value = value
     } else {
