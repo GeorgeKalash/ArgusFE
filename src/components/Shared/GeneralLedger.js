@@ -413,6 +413,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               component: 'resourcelookup',
 
               label: _labels.accountRef,
+
               name: 'accountRef',
               props: {
                 displayFieldWidth: 3,
@@ -498,7 +499,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             },
             {
               component: 'resourcelookup',
-              label: 'costcenter',
+              label: _labels.costRef,
               name: 'costCenterRef',
               props: {
                 endpointId: GeneralLedgerRepository.CostCenter.snapshot,
@@ -518,7 +519,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             },
             {
               component: 'textfield',
-              label: 'costCenterName',
+              label: _labels.costName,
               name: 'costCenterName'
             },
             {
