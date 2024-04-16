@@ -194,7 +194,7 @@ const OutwardsTransfer = () => {
         recordId: recordId ? recordId : null
       },
       width: 1100,
-      height: 550,
+      height: 600,
       title: 'Outwards'
     })
   }
