@@ -1,7 +1,7 @@
 // import Checkbox from '@material-ui/core/Checkbox';
 import { Checkbox } from '@mui/material'
 
-export default function TextFieldEdit({ id, field, value, update, row }) {
+export default function checkBoxEdit({ id, field, value, update, row }) {
   return (
     <Checkbox
       variant='rounded'
@@ -10,7 +10,6 @@ export default function TextFieldEdit({ id, field, value, update, row }) {
       checked={value}
       disabled={!row?.saved && field === 'select'}
       onChange={e => {
-        console.log(e.target.checked)
         update({
           id,
           field,

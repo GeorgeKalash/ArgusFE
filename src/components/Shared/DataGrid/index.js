@@ -23,8 +23,7 @@ export function DataGrid({
   onChange,
   allowDelete = true,
   allowAddNewLine = true,
-  selectedRow,
-  setSelectRow,
+  onSelectionChange,
   disabled = false
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
@@ -262,8 +261,8 @@ export function DataGrid({
 
   const handleRowClick = params => {
     const selectedRow = value.find(row => row.id === params.row.id)
-    if (setSelectRow) {
-      setSelectRow(selectedRow)
+    if (onSelectionChange) {
+      onSelectionChange(selectedRow)
     }
   }
 

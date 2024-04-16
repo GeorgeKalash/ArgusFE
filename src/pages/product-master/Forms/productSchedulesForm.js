@@ -85,18 +85,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
       .catch(error => {})
   }
 
-  useEffect(() => {
-    selectedRow &&
-      setStore(prevStore => ({
-        ...prevStore,
-        plantId: selectedRow.plantId,
-        currencyId: selectedRow.currencyId,
-        countryId: selectedRow.countryId,
-        dispersalId: selectedRow.dispersalId,
-        _seqNo: selectedRow.seqNo
-      }))
-  }, [selectedRow])
-
   const columns = [
     {
       component: 'resourcecombobox',
@@ -282,7 +270,17 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
               value={formik.values.schedules}
               error={formik.errors.schedules}
               columns={columns}
-              setSelectRow={setSelectRow}
+              onSelectionChange={row =>
+                row &&
+                setStore(prevStore => ({
+                  ...prevStore,
+                  plantId: row.plantId,
+                  currencyId: row.currencyId,
+                  countryId: row.countryId,
+                  dispersalId: row.dispersalId,
+                  _seqNo: row.seqNo
+                }))
+              }
               height={`${expanded ? `calc(100vh - 300px)` : `${height - 160}px`}`}
             />
           </Grid>
