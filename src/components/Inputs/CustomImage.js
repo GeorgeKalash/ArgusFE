@@ -1,11 +1,29 @@
-import { Box, Typography } from '@mui/material'
-import React, { useState } from 'react'
+import { Box } from '@mui/material'
+import React, { useContext, useEffect, useState } from 'react'
 import { useRef } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const CustomImage = ({ name, value, onChange, resourceId, error }) => {
+const CustomImage = ({ name, value, onChange, resourceId, error, seqNo, recordId, setInitialData }) => {
   const hiddenInputRef = useRef()
+  const { getRequest } = useContext(RequestsContext)
 
   const [image, setImage] = useState()
+
+  useEffect(() => {
+    resourceId && getData()
+  }, [resourceId])
+
+  async function getData() {
+    const result = await getRequest({
+      extension: SystemRepository.Attachment.get,
+      parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
+    })
+    setInitialData(prevData => ({
+      ...prevData,
+      attachment: result.record
+    }))
+  }
 
   const handleClick = () => {
     hiddenInputRef.current.click()
@@ -31,8 +49,8 @@ const CustomImage = ({ name, value, onChange, resourceId, error }) => {
       }
 
       const fileSizeInKB = Math.round(file.size / 1024)
-      if (parseInt(fileSizeInKB) > 800) {
-        alert('Allowed PNG or JPEG. Max size of 800K.')
+      if (parseInt(fileSizeInKB) > 500) {
+        alert('Allowed PNG or JPEG. Max size of 500KB.')
 
         return
       }
@@ -58,7 +76,7 @@ const CustomImage = ({ name, value, onChange, resourceId, error }) => {
     <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
       <img
         src={`${image || (value?.url && value?.url + `?${new Date().getTime()}`) || '/images/emptyPhoto.jpg'}`}
-        alt='Profile Pic'
+        alt=''
         style={{
           width: 140,
           height: 100,
@@ -74,7 +92,7 @@ const CustomImage = ({ name, value, onChange, resourceId, error }) => {
           type='file'
           ref={hiddenInputRef}
           onChange={handleInputImageChange}
-          accept='image/png, image/jpeg'
+          accept='image/png, image/jpeg, image/jpg'
         />
         <Box
           onClick={handleInputImageReset}
@@ -97,10 +115,6 @@ const CustomImage = ({ name, value, onChange, resourceId, error }) => {
         >
           <img src={`/images/buttonsIcons/clear.png`} alt={'test'} />
         </Box>
-
-        <Typography variant='caption' sx={{ mt: 4, display: 'block', color: 'text.disabled' }}>
-          Allowed PNG or JPEG. Max size of 800K.
-        </Typography>
       </Box>
     </Box>
   )

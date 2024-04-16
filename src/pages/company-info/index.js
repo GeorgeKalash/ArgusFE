@@ -31,8 +31,6 @@ const CompanyInfo = () => {
     datasetId: ResourceIds.CompanyInfo
   })
 
-  // const [file, setFile] = useState()
-
   useEffect(() => {
     getData()
   }, [])
@@ -42,12 +40,6 @@ const CompanyInfo = () => {
       extension: SystemRepository.CompanyInfo.get,
       parameters: `_filter=`
     })
-
-    const result = await getRequest({
-      extension: SystemRepository.Attachment.get,
-      parameters: `_resourceId=20120&_seqNo=0&_recordId=1`
-    })
-    res.record.attachment = result.record
     res.record.accountId = JSON.parse(window.sessionStorage.getItem('userData')).accountId
     setInitialData(res.record)
   }
@@ -198,8 +190,11 @@ const CompanyInfo = () => {
               name='logoUrl'
               value={formik.values?.attachment}
               onChange={formik.setFieldValue}
-              resourceId={ResourceIds.CompanyInfo}
               error={formik.errors?.url}
+              setInitialData={setInitialData}
+              resourceId={ResourceIds.CompanyInfo}
+              seqNo={0}
+              recordId={1}
             />
           </Grid>
         </Grid>
