@@ -86,25 +86,12 @@ const StripedDataGrid = styled(DataGrid)(({ theme, heightReference }) => ({
     overflow: 'hidden'
   },
   '& .MuiDataGrid-cellContent': {
-    position: 'absolute'
-
-    // top: 0 // Align content to the top
-    // left: 0,
-    // right: 0,
-    // bottom: 0,
-    // display: 'flex',
-    // alignItems: 'flex-start'
+    position: heightReference ? 'absolute' : 'relative',
+    top: 1,
+    alignItems: 'flex-start'
   },
   [`.MuiDataGrid-cell[data-colindex="${heightReference}"] .MuiDataGrid-cellContent`]: {
-    position: 'relative',
-    '&.align-top': {
-      top: 0, // Align content to the top
-      left: 0,
-      right: 0,
-      bottom: 0,
-      display: 'flex',
-      alignItems: 'flex-start' // Align content to the start (top) of the cell
-    }
+    position: 'relative'
   }
 }))
 
@@ -151,6 +138,7 @@ const Table = ({
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
   }
+  const columnWrap = props.columns?.filter(item => item.wrap === true)?.[0]?.['field']
 
   const CustomPagination = () => {
     if (pagination) {
@@ -429,7 +417,9 @@ const Table = ({
               density='compact'
               apiRef={apiRef}
               getRowHeight={() => 'auto'}
-              heightReference={apiRef.current.getColumnIndex && apiRef.current.getColumnIndex('smsBody', false)}
+              heightReference={
+                columnWrap && apiRef.current.getColumnIndex && apiRef.current.getColumnIndex(columnWrap, false)
+              }
               components={{
                 LoadingOverlay: LinearProgress,
 

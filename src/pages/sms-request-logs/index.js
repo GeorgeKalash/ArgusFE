@@ -12,6 +12,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const SmsRequestLog = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -37,34 +38,13 @@ const SmsRequestLog = () => {
   async function fetchWithFilter({ filters }) {
     const resourceId = filters?.resourceId
     if (!filters || !filters?.resourceId) {
-      console.log('enter undefined')
-
       return { list: [] }
     } else {
-      const data = await getRequest({
+      return await getRequest({
         extension: SystemRepository.SMSRequest.qry,
         parameters: `_filter=&_resourceId=${resourceId}`
       })
-      let obj = []
-
-      const mappedData = data.list.map(item => {
-        // Parse the date string
-        const date =
-          'dans les prochains jours pour votre livraison. Montant de la commande 99,000 à payer à la dans les prochains jours pour votre livraison. Montant de la commande 99,000 à payer à la'
-
-        // Add parsed date to the object
-        return {
-          ...item,
-          smsRequestDate: date
-        }
-      })
-
-      return { ...data, list: mappedData }
     }
-  }
-
-  const customCellRenderer = params => {
-    return <div style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>{params.value}</div>
   }
 
   const {
@@ -143,13 +123,12 @@ const SmsRequestLog = () => {
               flex: 1
             },
 
-            // {
-            //   field: 'smsRequestDate',
-            //   headerName: labels.SmsRequestDate,
-            //   flex: 1
-
-            //   // wrap: true
-            // },
+            {
+              field: 'smsRequestDate',
+              headerName: labels.SmsRequestDate,
+              flex: 1,
+              valueGetter: ({ row }) => formatDateDefault(row?.smsRequestDate)
+            },
             {
               field: 'reference',
               headerName: labels.Reference,
@@ -164,21 +143,13 @@ const SmsRequestLog = () => {
               field: 'smsBody',
               headerName: labels.SmsBody,
               flex: 1,
-              height: 'auto'
-
-              // renderCell: params => <div style={{ flex: 'nowrap' }}>{params.value}</div>
+              height: 'auto',
+              wrap: true
             },
             {
               field: 'smsStatusName',
               headerName: labels.SmsStatus,
               flex: 1
-            },
-            {
-              field: 'smsRequestDate',
-              headerName: labels.SmsRequestDate,
-              flex: 1
-
-              // wrap: true
             }
           ]}
           gridData={data && filters?.resourceId ? data : { list: [] }}
