@@ -1,37 +1,22 @@
-// ** React Imports
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
+import { useContext } from 'react'
 import { Box, Grid } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Helpers
 import { useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { useForm } from 'react-hook-form'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //states
-  const [initialValues, setData] = useState({ rows: [] })
 
   const getGridData = async () => {
     const resSystemFunction = await getRequest({
       extension: SystemRepository.SystemFunction.qry,
       parameters: `_filter=`
     })
-    console.log(resSystemFunction)
     formik.setValues({
       ...formik.values,
       rows: resSystemFunction.list.map(({ nraId, nraRef, batchNRAId, batchNRARef, ...rest }, index) => ({
@@ -49,10 +34,40 @@ const SystemFunction = () => {
     })
   }
 
-  const { labels: labels } = useResourceQuery({
+  const { labels: labels, MaxAccess } = useResourceQuery({
     queryFn: getGridData,
     endpointId: SystemRepository.SystemFunction.qry,
     datasetId: ResourceIds.SystemFunction
+  })
+
+  const { formik } = useForm({
+    MaxAccess,
+    enableReinitialize: true,
+    validateOnChange: true,
+    initialValues: { rows: [] },
+
+    onSubmit: async values => {
+      const resultObject = {
+        systemFunctionMappings: values.rows.map(({ functionId, nra, batchNRA }) => ({
+          functionId,
+          nraId: nra?.recordId,
+          nraRef: nra?.reference,
+          batchNRAId: batchNRA?.recordId,
+          batchNRARef: batchNRA?.reference
+        }))
+      }
+
+      postRequest({
+        extension: SystemRepository.SystemFunction.set2,
+        record: JSON.stringify(resultObject)
+      })
+        .then(res => {
+          toast.success('Record Updated Successfully')
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
+    }
   })
 
   const columns = [
@@ -114,38 +129,7 @@ const SystemFunction = () => {
     }
   ]
 
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues,
-
-    onSubmit: async values => {
-      console.log(values.rows)
-
-      const resultObject = {
-        systemFunctionMappings: values.rows.map(({ functionId, nra, batchNRA }) => ({
-          functionId,
-          nraId: nra?.recordId,
-          nraRef: nra?.reference,
-          batchNRAId: batchNRA?.recordId,
-          batchNRARef: batchNRA?.reference
-        }))
-      }
-
-      console.log('rows ', resultObject)
-
-      postRequest({
-        extension: SystemRepository.SystemFunction.set2,
-        record: JSON.stringify(resultObject)
-      })
-        .then(res => {
-          toast.success('Record Updated Successfully')
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
-    }
-  })
+  console.log('formik check ', formik)
 
   return (
     <>
@@ -157,11 +141,10 @@ const SystemFunction = () => {
                 <DataGrid
                   height={`calc(100vh - 150px)`}
                   onChange={value => {
-                    console.log(value)
                     formik.setFieldValue('rows', value)
                   }}
-                  value={formik.values.rows}
-                  error={formik.errors.rows}
+                  value={formik?.values?.row}
+                  error={formik?.errors?.rows}
                   columns={columns}
                   allowDelete={false}
                   allowAddNewLine={false}

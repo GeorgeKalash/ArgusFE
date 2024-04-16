@@ -43,21 +43,21 @@ const SystemChecks = () => {
       })
 
       Promise.all([resCheckedSystems]).then(([checkedSystems]) => {
-        const finalList = checkStore.map(x => {
-          const n = {
+        const mergedSYCheckedList = checkStore.map(x => {
+          const item = {
             checkId: x.key,
             checkName: x.value,
             checked: false,
             value: false
           }
-          const matchingTemplate = checkedSystems.list.find(y => n.checkId == y.checkId)
-          matchingTemplate && (n.checked = true)
-          matchingTemplate && (n.value = true)
+          const matchingTemplate = checkedSystems.list.find(y => item.checkId == y.checkId)
+          matchingTemplate && (item.checked = true)
+          matchingTemplate && (item.value = true)
 
-          return n
+          return item
         })
 
-        setData({ list: finalList })
+        setData({ list: mergedSYCheckedList })
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,12 +71,12 @@ const SystemChecks = () => {
   const columns = [
     {
       field: 'checkId',
-      headerName: _labels[1],
+      headerName: _labels.checkId,
       flex: 1
     },
     {
       field: 'checkName',
-      headerName: _labels[2],
+      headerName: _labels.checkName,
       flex: 1
     }
   ]
