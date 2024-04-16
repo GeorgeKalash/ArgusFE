@@ -88,11 +88,23 @@ const StripedDataGrid = styled(DataGrid)(({ theme, heightReference }) => ({
   '& .MuiDataGrid-cellContent': {
     position: 'absolute'
 
-    // justifyContent: 'top',
-    // alignItems: 'top'
+    // top: 0 // Align content to the top
+    // left: 0,
+    // right: 0,
+    // bottom: 0,
+    // display: 'flex',
+    // alignItems: 'flex-start'
   },
   [`.MuiDataGrid-cell[data-colindex="${heightReference}"] .MuiDataGrid-cellContent`]: {
-    position: 'relative'
+    position: 'relative',
+    '&.align-top': {
+      top: 0, // Align content to the top
+      left: 0,
+      right: 0,
+      bottom: 0,
+      display: 'flex',
+      alignItems: 'flex-start' // Align content to the start (top) of the cell
+    }
   }
 }))
 
