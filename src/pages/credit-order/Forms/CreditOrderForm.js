@@ -398,7 +398,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
   const columns = [
     {
       component: 'resourcecombobox',
-      label: labels[8],
+      label: labels.currency,
       name: 'currencyRef',
       props: {
         endpointId: SystemRepository.Currency.qry,
@@ -482,7 +482,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     },
     {
       component: 'textfield',
-      label: labels[9],
+      label: labels.name,
       name: 'currencyName',
       props: {
         readOnly: true,
@@ -496,7 +496,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     },
     {
       component: 'numberfield',
-      label: labels[14],
+      label: labels.quantity,
       name: 'qty',
       props: {
         mandatory: true,
@@ -535,7 +535,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     },
     {
       component: 'numberfield',
-      label: labels[22],
+      label: labels.defaultRate,
       name: 'defaultRate',
       props: {
         readOnly: true,
@@ -550,7 +550,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
     },
     {
       component: 'numberfield',
-      label: labels[15],
+      label: labels.exRate,
       name: 'exRate',
       props: {
         mandatory: true,
@@ -802,7 +802,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 name='date'
                 required
                 readOnly={isClosed}
-                label={labels[2]}
+                label={labels.date}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
@@ -818,7 +818,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
-                label={labels[3]}
+                label={labels.plant}
                 readOnly={true}
                 values={formik.values}
                 valueField='recordId'
@@ -836,7 +836,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             <Grid item style={{ marginRight: '10px', width: '210px' }}>
               <CustomTextField
                 name='reference'
-                label={labels[4]}
+                label={labels.reference}
                 value={formik?.values?.reference}
                 editMode={editMode}
                 maxAccess={maxAccess}
@@ -858,7 +858,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   valueField='reference'
                   displayField='name'
                   name='corId'
-                  label={labels[16]}
+                  label={labels.correspondent}
                   form={formik}
                   required
                   firstFieldWidth='30%'
@@ -892,7 +892,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 <CustomDatePicker
                   name='deliveryDate'
                   readOnly={isClosed}
-                  label={labels[18]}
+                  label={labels.deliveryDate}
                   value={formik?.values?.deliveryDate}
                   onChange={formik.setFieldValue}
                   editMode={editMode}
@@ -915,13 +915,13 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               <FormControlLabel
                 value={SystemFunction.CurrencyCreditOrderPurchase}
                 control={<Radio />}
-                label={labels[6]}
+                label={labels.purchase}
                 disabled={detailsFormik?.values?.rows[0]?.currencyId}
               />
               <FormControlLabel
                 value={SystemFunction.CurrencyCreditOrderSale}
                 control={<Radio />}
-                label={labels[7]}
+                label={labels.sale}
                 disabled={detailsFormik?.values?.rows[0]?.currencyId}
               />
             </RadioGroup>
@@ -954,7 +954,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
               <CustomTextArea
                 name='notes'
-                label={labels[11]}
+                label={labels.notes}
                 value={formik.values.notes}
                 rows={3}
                 editMode={editMode}

@@ -131,7 +131,7 @@ const CreditOrder = () => {
       },
       width: 950,
       height: 600,
-      title: labels[1]
+      title: labels.creditOrder
     })
   }
 
@@ -159,48 +159,48 @@ const CreditOrder = () => {
           columns={[
             {
               field: 'reference',
-              headerName: labels[4],
+              headerName: labels.reference,
               flex: 1
             },
             {
               field: 'date',
-              headerName: labels[2],
+              headerName: labels.date,
               flex: 1,
               valueGetter: ({ row }) => formatDateDefault(row?.date)
             },
             {
               field: 'plantRef',
-              headerName: labels[3]
+              headerName: labels.plant
             },
             {
               field: 'corName',
-              headerName: labels[5],
+              headerName: labels.correspondent,
               flex: 1
             },
             {
               field: 'currencyRef',
-              headerName: labels[8],
+              headerName: labels.currency,
               flex: 1
             },
             {
               field: 'amount',
-              headerName: labels[10],
+              headerName: labels.amount,
               flex: 1,
               valueGetter: ({ row }) => getFormattedNumber(row?.amount)
             },
             {
               field: 'rsName',
-              headerName: labels[19],
+              headerName: labels.releaseStatus,
               flex: 1
             },
             {
               field: 'statusName',
-              headerName: labels[21],
+              headerName: labels.status,
               flex: 1
             },
             {
               field: 'wipName',
-              headerName: labels[20],
+              headerName: labels.wip,
               flex: 1
             }
           ]}
