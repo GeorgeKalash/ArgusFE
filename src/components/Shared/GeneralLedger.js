@@ -2,43 +2,30 @@ import React from 'react'
 import { createContext, useState, useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { Box } from '@mui/material'
-import { styled } from '@mui/material/styles'
 import FormShell from 'src/components/Shared/FormShell'
 import * as yup from 'yup'
+import { DataSets } from 'src/resources/DataSets'
 import toast from 'react-hot-toast'
-
 import { Module } from 'src/resources/Module'
-
-// ** Custom Imports
+import { RateDivision } from 'src/resources/RateDivision'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Windows
-
-// ** Helpers
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { DataGrid } from './DataGrid'
-import { column } from 'stylis'
 import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
 
-import { formatDateDefault, formatDateFromApi, formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 
-const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, height, expanded }) => {
+const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [formik, setformik] = useState(null)
   const { user, setUser } = useContext(AuthContext)
@@ -67,11 +54,9 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
     generalAccount: [
       {
         id: 1,
-
         accountRef: '',
         accountId: '',
         accountName: '',
-
         tpAccountId: '',
         tpAccountRef: '',
         tpAccountName: '',
@@ -80,7 +65,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
         costCenterName: '',
         currencyRef: '',
         currencyId: '',
-
         sign: '',
         signName: '',
         notes: '',
@@ -91,36 +75,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
       }
     ]
   })
-
-  // const generalAccountItemSchema = yup.object().shape({
-  //   account: yup
-  //     .object()
-  //     .shape({
-  //       recordId: yup.string().required('Account ID is required')
-  //     })
-  //     .required('Account is required'),
-  //   accountName: yup.string().required('Account name is required'),
-  //   accountRef: yup.string().required('Account name is required'),
-  //   currency: yup
-  //     .object()
-  //     .shape({
-  //       recordId: yup.string().required('Currency ID is required')
-  //     })
-  //     .required('Currency is required'),
-  //   sign: yup
-  //     .object()
-  //     .shape({
-  //       key: yup.string().required('Sign key is required')
-  //     })
-  //     .required('Sign is required'),
-  //   exRate: yup.number().positive('Exchange rate must be positive').required('Exchange rate is required'),
-  //   amount: yup.number().positive('Amount must be positive').required('Amount is required'),
-  //   baseAmount: yup.number().positive('Base amount must be positive').required('Base amount is required')
-  // })
-
-  // const formikValidationSchema = yup.object().shape({
-  //   generalAccount: yup.array().of(generalAccountItemSchema).required('General account entries are required')
-  // })
 
   const formik2 = useFormik({
     initialValues,
@@ -147,9 +101,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
     validateOnChange: true,
     onSubmit: async values => {
       {
-        console.log('recordId', formik2.values.recordId)
-        console.log('general', values.generalAccount)
-
         const data = {
           transactions: values.generalAccount.map(({ id, exRate, tpAccount, functionId, ...rest }) => ({
             seqNo: id,
@@ -167,14 +118,10 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
           reference: values.reference
         }
 
-        console.log('Submitting data:', data)
-
         const response = await postRequest({
           extension: GeneralLedgerRepository.GeneralLedger.set2,
           record: JSON.stringify(data)
         })
-
-        console.log('Submission response:', response)
 
         toast.success('Record Added Successfully')
       }
@@ -201,8 +148,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
     if (formik2 && formik2.values && formik2.values.generalAccount && Array.isArray(formik2.values.generalAccount)) {
       const generalAccountData = formik2.values.generalAccount
 
-      console.log(generalAccountData)
-
       const parseNumber = value => {
         const number = parseFloat(value)
 
@@ -210,11 +155,11 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
       }
 
       const baseCredit = generalAccountData.reduce((acc, curr) => {
-        return curr.signName === 'C' ? acc + parseNumber(curr.baseAmount) : acc
+        return curr.sign === '2' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
       const baseDebit = generalAccountData.reduce((acc, curr) => {
-        return curr.signName === 'D' ? acc + parseNumber(curr.baseAmount) : acc
+        return curr.sign === '1' ? acc + parseNumber(curr.baseAmount) : acc
       }, 0)
 
       const baseBalance = baseDebit - baseCredit
@@ -236,9 +181,9 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               acc[currency] = { credit: 0, debit: 0 }
             }
             if (curr.sign) {
-              if (curr.signName == 'C') {
+              if (curr.sign == '2') {
                 acc[currency].credit += parseFloat(curr.amount || 0)
-              } else if (curr.signName == 'D') {
+              } else if (curr.sign == '1') {
                 acc[currency].debit += parseFloat(curr.amount || 0)
               }
             }
@@ -266,8 +211,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
       setCurrencyGridData(currencyData)
     }
   }, [formik2.values])
-
-  console.log('formik2', formik2)
 
   useEffect(() => {
     if (data && data.list.length > 0 && Array.isArray(data.list)) {
@@ -301,13 +244,10 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
   useEffect(() => {
     async function fetchCurrencyExchangeRate() {
       if (formValues.currencyId) {
-        console.log('formm', formValues.currencyId)
         try {
           const res = await getCurrencyApi(formValues.currencyId)
           if (res && res.record) {
-            console.log('XXXXXXXXXXXXXXXXXXXXX', res.record.exRate)
             setExRateValue(res.record.exRate)
-            console.log('exrateVVVVVVVVV', exRateValue)
           }
         } catch (error) {
           console.error('Failed to fetch currency exchange rate:', error)
@@ -317,16 +257,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
 
     fetchCurrencyExchangeRate()
   }, [formValues])
-
-  const RateDivision = {
-    FINANCIALS: 1,
-    SALES: 2,
-    PURCHASE: 3,
-    MANUFACTURING: 4
-  }
-
-  // Function to get rate division
-  // console.log('idddddddddd',functionId)
 
   const getRateDivision = functionId => {
     const sysFct = getSystemFunctionModule(functionId)
@@ -356,8 +286,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
 
   function getCurrencyApi(_currencyId) {
     const _rateDivision = getRateDivision(functionId)
-
-    console.log('ratde', _rateDivision)
 
     return getRequest({
       extension: MultiCurrencyRepository.Currency.get,
@@ -391,17 +319,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
             </Grid>
           </Grid>
         )}
-        {/* <Table
-            columns={columns}
-            gridData={data}
-            rowId={['seqNo']}
-            isLoading={false}
-            pageSize={50}
-            paginationType='client'
-            maxAccess={access}
-            height={"280"}
-            pagination={false}
-          /> */}
 
         <DataGrid
           onChange={value => formik2.setFieldValue('generalAccount', value)}
@@ -537,8 +454,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               },
 
               async onChange({ row: { update, oldRow, newRow } }) {
-                console.log('newRow', newRow)
-
                 if (!newRow?.currencyId) {
                   return
                 }
@@ -575,9 +490,7 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               label: _labels.sign,
               name: 'signName',
               props: {
-                endpointId: SystemRepository.KeyValueStore,
-                _language: user.languageId,
-                parameters: `_dataset=${157}&_language=${1}`,
+                datasetId: DataSets.Sign,
                 displayField: 'value',
                 valueField: 'key',
                 mapping: [
@@ -602,7 +515,6 @@ const GeneralLedger = ({ labels, recordId, functionId, formValues, maxAccess, he
               name: 'amount',
 
               async onChange({ row: { update, oldRow, newRow } }) {
-                console.log('newRow222', newRow)
                 if (!newRow?.amount) {
                   return
                 }
