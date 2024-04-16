@@ -510,14 +510,14 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         const rate = newRow.exRate
         const rateCalcMethod = newRow.rateCalcMethod
         update({
-          qty: getFormattedNumber(parseFloat(newRow.qty.toString().replace(/,/g, '')).toFixed(2))
+          qty: getFormattedNumber(parseFloat(newRow?.qty?.toString().replace(/,/g, '')).toFixed(2))
         })
 
         const qtyToCur =
           rateCalcMethod === 1
-            ? parseFloat(newRow.qty.toString().replace(/,/g, '')) * rate
+            ? parseFloat(newRow?.qty?.toString().replace(/,/g, '')) * rate
             : rateCalcMethod === 2
-            ? parseFloat(newRow.qty.toString().replace(/,/g, '')) / rate
+            ? parseFloat(newRow?.qty?.toString().replace(/,/g, '')) / rate
             : 0
 
         const curToBase =
