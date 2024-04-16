@@ -1,3 +1,5 @@
+import GlobalIntegration from "src/pages/global-integration"
+
 const service = 'GL.asmx/'
 
 export const GeneralLedgerRepository = {
@@ -57,5 +59,11 @@ export const GeneralLedgerRepository = {
     get: service + 'getTRX',
     set: service + 'setTRX',
     del: service + 'delTRX'
+  },
+  GlobalIntegration: {
+    qry: service + 'qryIPT',
+    get: service + 'getIPT',
+    set: service + 'setIPT',
+    del: service + 'delIPT'
   }
 }
