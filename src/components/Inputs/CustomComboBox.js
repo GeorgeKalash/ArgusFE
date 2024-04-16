@@ -139,7 +139,7 @@ const CustomComboBox = ({
         <TextField
           {...params}
           type={type}
-          onKeyDown={(e) => !editable && e.preventDefault()}
+          onKeyDown={(e) => e.keyCode!== 9 && !editable && e.preventDefault()}
           variant={variant}
           label={label}
           required={_required}

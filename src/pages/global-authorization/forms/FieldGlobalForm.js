@@ -1,11 +1,7 @@
-import { useFormik } from 'formik'
-import * as yup from 'yup'
 import { useEffect, useState, useContext } from 'react'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Box, Grid } from '@mui/material'
@@ -13,24 +9,21 @@ import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-import { CommonContext } from 'src/providers/CommonContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { AuthContext } from 'src/providers/AuthContext'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { useForm } from 'src/hooks/form.js'
 
-export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourceName, setErrorMessage }) {
+export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourceName }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { user, setUser } = useContext(AuthContext)
   const [isLoading, setIsLoading] = useState(false)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.ModuleClassRES.qry
   })
 
-  const detailsFormik = useFormik({
+  const { formik: detailsFormik } = useForm({
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
@@ -39,14 +32,16 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
       resourceName: resourceName
     },
     onSubmit: async obj => {
+      console.log(detailsFormik.values.rows)
 
       const updatedRows = detailsFormik.values.rows
-        .filter(obj => {
-          return obj.accessLevel != null
-        }).map(({ ...rest }) => ({
+        .filter(obj => obj.accessLevel != null && obj.accessLevel !== '')
+        .map(({ ...rest }) => ({
           resourceId: resourceId,
           ...rest
         }))
+
+      console.log(detailsFormik.values.rows)
 
       // Create the resultObject
       const resultObject = {
@@ -90,67 +85,60 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
         datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
         valueField: 'key',
         displayField: 'value',
-        mapping: [ { from: 'key', to: 'accessLevel' } ,
-          { from: 'value', to: 'accessLevelName' }]
-      },
-      async onChange({ row: { update, newRow } }) {
-        if (!newRow?.accessLevelCombo?.key) {
-          return
-        } else {
-          update({ accessLevelName: newRow.accessLevelCombo?.value, accessLevel: newRow.accessLevelCombo?.key })
-        }
+        mapping: [
+          { from: 'key', to: 'accessLevel' },
+          { from: 'value', to: 'accessLevelName' }
+        ]
       }
     }
   ]
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (resourceId) {
-          setIsLoading(true)
+      if (resourceId) {
+        setIsLoading(true)
 
-          const res = await getRequest({
-            extension: SystemRepository.ResourceControl.qry,
-            parameters: `_resourceId=${resourceId}`
-          })
+        const res = await getRequest({
+          extension: SystemRepository.ResourceControl.qry,
+          parameters: `_resourceId=${resourceId}`
+        })
 
-          const accessLevelRes = await getRequest({
-            extension: AccessControlRepository.GlobalControlAuthorizationView.qry,
-            parameters: `_resourceId=${resourceId}`
-          })
+        const accessLevelRes = await getRequest({
+          extension: AccessControlRepository.GlobalControlAuthorizationView.qry,
+          parameters: `_resourceId=${resourceId}`
+        })
 
-          const finalList = res.list.map(controlDetail => {
-            const n = {
+        let finalList = []
+
+        if (res.list) {
+          finalList = res.list.map(controlDetail => {
+            const control = {
               controlId: controlDetail.id,
               name: controlDetail.name,
               accessLevel: null,
               accessLevelName: null
-            };
-    
-            const matching = accessLevelRes.list.find(
-              y => n.controlId === y.controlId
-            );
-    
-            if (matching) {
-              n.accessLevel = matching.accessLevel;
-              n.accessLevelName = matching.accessLevelName;
             }
-    
-            return n;
-          });
-          
-          detailsFormik.setValues({
-            ...detailsFormik.values,
-            rows: finalList.map(({ ...rest }, index) => ({
-              id: index + 1,
-              ...rest
-            }))
-          })
 
+            const matching = accessLevelRes.list.find(acessL => control.controlId === acessL.controlId)
+
+            if (matching) {
+              control.accessLevel = matching.accessLevel
+              control.accessLevelName = matching.accessLevelName
+            }
+
+            return control
+          })
         }
-      } catch (exception) {
-        //setErrorMessage(error)
+
+        detailsFormik.setValues({
+          ...detailsFormik.values,
+          rows: finalList.map(({ ...rest }, index) => ({
+            id: index + 1,
+            ...rest
+          }))
+        })
       }
+
       setIsLoading(false)
     })()
   }, [])
@@ -165,52 +153,52 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
       isInfo={false}
       isCleared={false}
     >
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='resourceId'
-                label={labels.resourceId}
-                value={resourceId}
-                required
-                onChange={detailsFormik.handleChange}
-                maxAccess={maxAccess}
-                readOnly={true}
-                onClear={() => detailsFormik.setFieldValue('resourceId', '')}
-                error={detailsFormik.touched.resourceId && Boolean(detailsFormik.errors.resourceId)}
-                helperText={detailsFormik.touched.resourceId && detailsFormik.errors.resourceId}
-              />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='resourceName'
-                  label={labels.resourceName}
-                  value={resourceName}
-                  required
-                  readOnly={true}
-                  maxAccess={maxAccess}
-                  onChange={detailsFormik.handleChange}
-                  onClear={() => detailsFormik.setFieldValue('resourceName', '')}
-                  error={detailsFormik.touched.resourceName && Boolean(detailsFormik.errors.resourceName)}
-                  helperText={detailsFormik.touched.resourceName && detailsFormik.errors.resourceName}
-                />
-              </Grid>
-            </Grid>
-            
-        <Grid item xs={12} sx={{ pt: 2 }}>
-          <Box sx={{ width: '100%' }}>
-            <DataGrid
-              height={230}
-              onChange={value => {
-                detailsFormik.setFieldValue('rows', value)
-              }}
-              value={detailsFormik.values.rows}
-              error={detailsFormik.errors.rows}
-              columns={columns}
-              allowDelete={false}
-              allowAddNewLine={false}
-            />
-          </Box>
+      <Grid container spacing={4}>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='resourceId'
+            label={labels.resourceId}
+            value={resourceId}
+            required
+            onChange={detailsFormik.handleChange}
+            maxAccess={maxAccess}
+            readOnly={true}
+            onClear={() => detailsFormik.setFieldValue('resourceId', '')}
+            error={detailsFormik.touched.resourceId && Boolean(detailsFormik.errors.resourceId)}
+            helperText={detailsFormik.touched.resourceId && detailsFormik.errors.resourceId}
+          />
         </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='resourceName'
+            label={labels.resourceName}
+            value={resourceName}
+            required
+            readOnly={true}
+            maxAccess={maxAccess}
+            onChange={detailsFormik.handleChange}
+            onClear={() => detailsFormik.setFieldValue('resourceName', '')}
+            error={detailsFormik.touched.resourceName && Boolean(detailsFormik.errors.resourceName)}
+            helperText={detailsFormik.touched.resourceName && detailsFormik.errors.resourceName}
+          />
+        </Grid>
+      </Grid>
+
+      <Grid item xs={12} sx={{ pt: 2 }}>
+        <Box sx={{ width: '100%' }}>
+          <DataGrid
+            height={230}
+            onChange={value => {
+              detailsFormik.setFieldValue('rows', value)
+            }}
+            value={detailsFormik.values.rows}
+            error={detailsFormik.errors.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Box>
+      </Grid>
     </FormShell>
   )
 }

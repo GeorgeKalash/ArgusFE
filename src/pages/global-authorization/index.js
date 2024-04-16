@@ -1,11 +1,9 @@
 import { Box, Button, Grid, Tooltip, Typography, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
-import { formatDateDefault } from 'src/lib/date-helper'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
@@ -20,20 +18,13 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [moduleIdSelection, setModuleIdSelection] = useState(10) //check new way
-
-  async function fetchGridData() {
-    return await getRequest({
-      extension: SystemRepository.ModuleClassRES.qry,
-      parameters: `_filter=&_moduleId=10`
-    })
-  }
 
   async function fetchWithFilter({ filters }) {
+    // used for both qry and filter since we have same api
+
     return await getRequest({
       extension: SystemRepository.ModuleClassRES.qry,
-      parameters: `_filter=${filters.qry ?? ''}&_moduleId=${filters.moduleId ?? 10}`
+      parameters: `_filter=${filters.qry ?? ''}&_moduleId=${filters.moduleId}`
     })
   }
 
@@ -46,22 +37,20 @@ const GlobalAuthorization = () => {
     access,
     filters
   } = useResourceQuery({
-    queryFn: fetchGridData,
+    queryFn: fetchWithFilter,
     endpointId: SystemRepository.ModuleClassRES.qry,
     datasetId: ResourceIds.GlobalAuthorization,
     filter: {
-      endpointId: SystemRepository.ModuleClassRES.qry,
-      filterFn: fetchWithFilter
+      filterFn: fetchWithFilter,
+      default: { moduleId: 10 }
     }
   })
 
   const onChange = value => {
     if (value) {
       filterBy('moduleId', value)
-      setModuleIdSelection(value)
     } else {
       clearFilter('moduleId')
-      setModuleIdSelection(null)
     }
   }
 
@@ -69,11 +58,10 @@ const GlobalAuthorization = () => {
     stack({
       Component: AccessLevelForm,
       props: {
-        setErrorMessage: setErrorMessage,
         labels: labels,
         maxAccess: access,
         data,
-        moduleId: moduleIdSelection
+        moduleId: filters.moduleId
       },
       width: 450,
       height: 200,
@@ -81,17 +69,15 @@ const GlobalAuthorization = () => {
     })
   }
 
-
   function openResourceGlobal(row) {
     stack({
       Component: ResourceGlobalForm,
       props: {
-        setErrorMessage: setErrorMessage,
         labels: labels,
         maxAccess: access,
         resourceId: row.key,
         resourceName: row.value,
-        moduleId: moduleIdSelection
+        moduleId: filters.moduleId
       },
       width: 450,
       height: 300,
@@ -103,7 +89,6 @@ const GlobalAuthorization = () => {
     stack({
       Component: FieldGlobalForm,
       props: {
-        setErrorMessage: setErrorMessage,
         labels: labels,
         maxAccess: access,
         resourceId: row.key,
@@ -167,19 +152,25 @@ const GlobalAuthorization = () => {
               field: 'Resource Global',
               headerName: labels.resourceGlobal,
               width: 200,
-              renderCell: params => <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}><IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
-              <Icon icon='mdi:application-edit-outline' fontSize={18} />
-            </IconButton>
-            </Box>
+              renderCell: params => (
+                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                  <IconButton size='small' onClick={() => openResourceGlobal(params.row)}>
+                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                  </IconButton>
+                </Box>
+              )
             },
             {
               field: 'field Global',
               headerName: labels.fieldGlobal,
               width: 200,
-              renderCell: params => <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center'}}><IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
-              <Icon icon='mdi:application-edit-outline' fontSize={18} />
-            </IconButton>
-            </Box>
+              renderCell: params => (
+                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                  <IconButton size='small' onClick={() => openFieldGlobal(params.row)}>
+                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                  </IconButton>
+                </Box>
+              )
             }
           ]}
           gridData={data ?? { list: [] }}
@@ -191,8 +182,6 @@ const GlobalAuthorization = () => {
           paginationType='client'
         />
       </Box>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
