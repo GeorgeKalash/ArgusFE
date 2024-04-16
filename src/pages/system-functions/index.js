@@ -8,6 +8,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'react-hook-form'
+import { useFormik } from 'formik'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,12 +41,21 @@ const SystemFunction = () => {
     datasetId: ResourceIds.SystemFunction
   })
 
-  const { formik } = useForm({
-    MaxAccess,
+  const formik = useFormik({
+    //const { formik } = useForm({
+    //MaxAccess,
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues: { rows: [] },
-
+    initialValues: {
+      rows: [
+        {
+          id: 1,
+          functionId: '',
+          sfName: '',
+          nra: ''
+        }
+      ]
+    },
     onSubmit: async values => {
       const resultObject = {
         systemFunctionMappings: values.rows.map(({ functionId, nra, batchNRA }) => ({
@@ -64,9 +74,7 @@ const SystemFunction = () => {
         .then(res => {
           toast.success('Record Updated Successfully')
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch(error => {})
     }
   })
 
@@ -129,11 +137,9 @@ const SystemFunction = () => {
     }
   ]
 
-  console.log('formik check ', formik)
-
   return (
     <>
-      <Box sx={{ height: `calc(100vh - 50px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
+      <Box sx={{ height: `calc(100vh - 50px)`, display: 'flex', flexDirection: 'column' }}>
         <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false}>
           <Grid container>
             <Grid sx={{ width: '100%' }}>
@@ -143,7 +149,7 @@ const SystemFunction = () => {
                   onChange={value => {
                     formik.setFieldValue('rows', value)
                   }}
-                  value={formik?.values?.row}
+                  value={formik?.values?.rows}
                   error={formik?.errors?.rows}
                   columns={columns}
                   allowDelete={false}
