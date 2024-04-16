@@ -3,8 +3,6 @@ import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
-
-// ** Custom Imports
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
@@ -59,12 +57,9 @@ const CreditLimitsForm = ({
       });
       Promise.all(saveCurrency)
       .then(res => {
-        if (res) toast.success('Record Edited Successfully')
-        getCurrencies(accountId)
+         toast.success('Record Edited Successfully')
       })
-      
-      .catch(error => {
-      })
+      .catch(error => { })
     }
 
     const column = [
@@ -95,9 +90,9 @@ const CreditLimitsForm = ({
       })
         .then(res => {
           if (res.list.length > 0){
-            const currencies = res.list.map(({ ...rest } , index) => ({
+            const currencies = res.list.map(( currency , index) => ({
                 id : index,
-                ...rest
+                ...currency
             }))
             formik.setValues({ currencies: currencies})
 

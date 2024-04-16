@@ -1,11 +1,11 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useInvalidate } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -29,7 +29,7 @@ const AccountsForms = ({
     endpointId: FinancialRepository.Account.qry
   })
 
-  const formik = useForm({
+  const { formik } = useForm({
     initialValues:{
       recordId: null,
       groupId: null,
@@ -75,29 +75,25 @@ const AccountsForms = ({
           invalidate()
         } else toast.success('Record Edited Successfully')
       })
+      .catch(error => { })
   }
 
-  async function fetchGridData(options={}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  useEffect(()=>{
+    recordId  && getAccountsById(recordId)
+  },[recordId])
 
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_recordId=${recordId}`
+  const getAccountsById =  recordId => {
+    const defaultParams = `_recordId=${recordId}`
     var parameters = defaultParams
-
-     const response =  await getRequest({
-      extension: FinancialRepository.Account.qry,
+     getRequest({
+      extension: FinancialRepository.Account.get,
       parameters: parameters
     })
-
-    return {...response,  _startAt: _startAt}
+      .then(res => {
+        formik.setValues(res.record)
+        setEditMode(true)
+      })
   }
-
-  const {
-    query: { data },
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: FinancialRepository.Account.qry,
-    datasetId: ResourceIds.Accounts,
-  })
 
 return (
     <FormShell resourceId={ResourceIds.Accounts} form={formik} height={600} maxAccess={maxAccess} editMode={editMode}>

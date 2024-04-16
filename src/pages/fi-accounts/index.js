@@ -1,24 +1,11 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import AccountsWindow from './Windows/AccountsWindow'
-
-// ** Helpers
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
@@ -26,8 +13,6 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-
-  //control
 
   const {
     query: { data },
@@ -43,7 +28,6 @@ const MfAccounts = () => {
     endpointId: FinancialRepository.Account.page,
     datasetId: ResourceIds.Accounts,
     search: {
-      endpointId: FinancialRepository.Account.snapshot,
       searchFn: fetchWithSearch
     }
   })
@@ -104,7 +88,7 @@ const MfAccounts = () => {
   }
 
   const addAccounts = () => {
-    openForm('')
+    openForm()
   }
 
   function openForm (recordId){

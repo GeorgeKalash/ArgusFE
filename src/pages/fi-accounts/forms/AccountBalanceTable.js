@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import { Box } from '@mui/material'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
@@ -16,6 +16,7 @@ const AccountBalanceForm = (
 }) => {
   const { getRequest} = useContext(RequestsContext)
   const { recordId } = store
+  var editMode = recordId? true: false
 
   const columns = [
     {
@@ -47,6 +48,7 @@ const AccountBalanceForm = (
   const {
     query: { data },
   } = useResourceQuery({
+    enabled: editMode,
     queryFn: fetchGridData,
     endpointId: FinancialRepository.AccountCreditBalance.qry,
     datasetId: ResourceIds.Accounts,
