@@ -74,7 +74,9 @@ const IndicatorForm = ({
     // }),
     onSubmit: values => {
       submitIndicators(values.indicatorData)
-      console.log(strategiesFormik.values.recordId)
+      applyStrategy()
+
+      console.log('strt', strategiesFormik.values)
     }
   })
 
@@ -106,7 +108,7 @@ const IndicatorForm = ({
     })
       .then(res => {
         setValueGridData(res)
-        console.log('resss', res)
+        console.log('resss123', res)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -117,13 +119,14 @@ const IndicatorForm = ({
     recordId && getValueGridData(recordId)
   }, [recordId, refresh])
 
-  const applyStrategy = async obj => {
+  const applyStrategy = async () => {
     try {
-      const res2 = await postRequest({
-        extension: DocumentReleaseRepository.Strategy.apply,
-        record: JSON.stringify(obj)
-      })
+      const { groupName, ...valuesWithoutGroupName } = strategiesFormik.values
 
+      const res = await postRequest({
+        extension: DocumentReleaseRepository.ApplySTG.apply,
+        record: JSON.stringify(valuesWithoutGroupName)
+      })
       toast.success('Strategy Applied Successfully')
     } catch (error) {
       toast.error('An error occurred during apply')

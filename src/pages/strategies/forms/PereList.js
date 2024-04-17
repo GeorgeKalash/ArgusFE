@@ -48,7 +48,6 @@ const PereList = ({ store, labels, maxAccess }) => {
     })
       .then(res => {
         setValueGridData(res)
-        console.log('resss', res)
       })
       .catch(error => {
         setErrorMessage(error)

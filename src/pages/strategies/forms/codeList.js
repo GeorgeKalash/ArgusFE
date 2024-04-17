@@ -49,8 +49,6 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
     })
       .then(res => {
         setValueGridData(res)
-        console.log('resss', res)
-        console.log('ggggg', groupId)
       })
       .catch(error => {
         setErrorMessage(error)

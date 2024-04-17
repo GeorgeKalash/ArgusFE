@@ -6,12 +6,12 @@ import FormShell from 'src/components/Shared/FormShell'
 import { useWindow } from 'src/windows'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-import { DocumentReleaseRepository} from 'src/repositories/DocumentReleaseRepository'
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import * as yup from 'yup'
 
-import {  useEffect } from 'react'
+import { useEffect } from 'react'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
@@ -29,42 +29,34 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-const ApproverList = ({store,labels,maxAccess}) => {
+const ApproverList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const {recordId}= store
+  const { recordId } = store
   const [selectedRecordId, setSelectedRecordId] = useState(null)
   const { stack } = useWindow()
-  const [valueGridData , setValueGridData] = useState()
+  const [valueGridData, setValueGridData] = useState()
 
-  const [refresh,setRefresh]=useState(false)
+  const [refresh, setRefresh] = useState(false)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-
-
-
-
   const getValueGridData = recordId => {
-   
     getRequest({
       extension: DocumentReleaseRepository.GroupCode.qry,
       parameters: `_filter=&_groupId=${recordId}`
     })
       .then(res => {
         setValueGridData(res)
-        console.log('resss',res)
-      
       })
       .catch(error => {
         setErrorMessage(error)
       })
   }
-  useEffect(()=>{
+  useEffect(() => {
     recordId && getValueGridData(recordId)
-    
-  },[recordId,refresh])
+  }, [recordId, refresh])
 
   // const {
   //   query: { data },
@@ -76,47 +68,42 @@ const ApproverList = ({store,labels,maxAccess}) => {
   //   datasetId: ResourceIds.DRGroups
   // })
 
-
-
   const columns = [
     {
       field: 'codeRef',
       headerName: labels.reference,
       flex: 1
-    },   {
+    },
+    {
       field: 'codeName',
       headerName: labels.name,
       flex: 1
-    },
+    }
   ]
-
 
   const addApprover = () => {
     openForm2()
   }
 
-
-
   const delApprover = async obj => {
     await postRequest({
-      extension:DocumentReleaseRepository.GroupCode.del,
+      extension: DocumentReleaseRepository.GroupCode.del,
       record: JSON.stringify(obj)
     })
-    setRefresh(prev=>!prev)
-    
+    setRefresh(prev => !prev)
+
     toast.success('Record Deleted Successfully')
   }
 
-  function openForm2 (recordId){
+  function openForm2(recordId) {
     stack({
       Component: ApproverForm,
       props: {
         labels: labels,
-        recordId: recordId? recordId : null,
+        recordId: recordId ? recordId : null,
         maxAccess,
         store,
         setRefresh
-        
       },
       width: 500,
       height: 400,
@@ -124,39 +111,28 @@ const ApproverList = ({store,labels,maxAccess}) => {
     })
   }
 
-
-  
-  
-
   return (
-  
     <Box
-    sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%'
-    }}
-  >
-
-    <GridToolbar onAdd={addApprover} maxAccess={maxAccess} />
-    <Table
-      columns={columns}
-      gridData={valueGridData}
-      rowId={['codeId']}
-      isLoading={false}
-      pageSize={50}
-      pagination={false}
-     
-      onDelete={delApprover}
-      maxAccess={maxAccess}      
-      height={200}
-    />
-  </Box>
-      
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+      }}
+    >
+      <GridToolbar onAdd={addApprover} maxAccess={maxAccess} />
+      <Table
+        columns={columns}
+        gridData={valueGridData}
+        rowId={['codeId']}
+        isLoading={false}
+        pageSize={50}
+        pagination={false}
+        onDelete={delApprover}
+        maxAccess={maxAccess}
+        height={200}
+      />
+    </Box>
   )
 }
 
 export default ApproverList
-
-
-  
