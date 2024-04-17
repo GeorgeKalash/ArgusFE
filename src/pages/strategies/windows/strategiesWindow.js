@@ -7,7 +7,7 @@ import StrategiesForm from '../forms/strategiesForm.js'
 import PereList from '../forms/PereList.js'
 import IndicatorForm from '../forms/indicatorForm.js'
 
-const StrategiesWindow = ({ height, recordId, labels, maxAccess, approver, expanded, onApply }) => {
+const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApply }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
@@ -55,7 +55,7 @@ const StrategiesWindow = ({ height, recordId, labels, maxAccess, approver, expan
       <CustomTabPanel height={height} index={2} value={activeTab}>
         <PereList labels={labels} setEditMode={setEditMode} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={3} value={activeTab}>
+      <CustomTabPanel height={height} index={3} value={activeTab} onApply={onApply}>
         <IndicatorForm
           onApply={onApply}
           labels={labels}

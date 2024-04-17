@@ -20,35 +20,25 @@ const IndicatorForm = ({
   editMode,
   height,
   maxAccess,
-  recordId,
   store,
-
-  setStore,
-  onApply
+  onApply,
+  setStore
 }) => {
-  const handleApply = () => {
-    if (onApply) {
-      onApply(strategiesFormik.values)
-    }
-  }
-
-  const [valueGridData, setValueGridData] = useState()
+  const [valueGridData, setValueGridData] = useState([])
   const { postRequest } = useContext(RequestsContext)
   const [refresh, setRefresh] = useState(false)
   const { getRequest } = useContext(RequestsContext)
-
-  // const gid = strategiesFormik.values.recordId
+  const { recordId } = store
 
   const formik = useFormik({
     initialValues: {
-      strategyId: 26,
       indicatorData: [
         {
           id: 1,
-          codeId: 1,
 
+          strategyId: recordId,
           seqNo: '',
-
+          codeId: '',
           name: '',
           indicatorId: '',
           indicatorName: ''
@@ -74,7 +64,6 @@ const IndicatorForm = ({
     // }),
     onSubmit: values => {
       submitIndicators(values.indicatorData)
-      applyStrategy()
 
       console.log('strt', strategiesFormik.values)
     }
@@ -89,7 +78,7 @@ const IndicatorForm = ({
 
     obj = obj.map(item => {
       const { id, indicatorRef, indicatorName, ...itemWithoutId } = item
-      itemWithoutId.strategyId = 26
+      itemWithoutId.strategyId = recordId
       postRequest({
         extension: DocumentReleaseRepository.StrategyIndicator.set,
         record: JSON.stringify(itemWithoutId)
@@ -107,17 +96,26 @@ const IndicatorForm = ({
       parameters: `_strategyId=${recordId}`
     })
       .then(res => {
-        setValueGridData(res)
-        console.log('resss123', res)
+        const gridData = res.list.map((item, index) => ({
+          id: index + 1,
+          seqNo: item.seqNo,
+          name: item.name,
+          indicatorName: item.indicatorName,
+          indicatorId: item.indicatorId,
+          codeId: item.codeId,
+          strtategyId: item.strategyId
+        }))
+        setValueGridData(gridData)
       })
       .catch(error => {
+        console.error(error)
         setErrorMessage(error)
       })
   }
 
-  useEffect(() => {
-    recordId && getValueGridData(recordId)
-  }, [recordId, refresh])
+  // useEffect(() => {
+  //   recordId && getValueGridData(recordId)
+  // }, [recordId, refresh])
 
   const applyStrategy = async () => {
     try {
@@ -128,10 +126,27 @@ const IndicatorForm = ({
         record: JSON.stringify(valuesWithoutGroupName)
       })
       toast.success('Strategy Applied Successfully')
+      getValueGridData(store.recordId) // Refresh the grid data after applying the strategy
     } catch (error) {
       toast.error('An error occurred during apply')
     }
   }
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! REMOOOOOOOOOVVVVVVVVVVEEEEEEEEEE UUUUUUUSSSSSSSSSEEEEEEEEEEE EEEEEFFFFFFFFEEEEEEEECCCCCTTTTTTTT
+  // const applyStrategy = async () => {
+  //   try {
+  //     const { groupName, ...valuesWithoutGroupName } = strategiesFormik.values;
+
+  //     const res = await postRequest({
+  //       extension: DocumentReleaseRepository.ApplySTG.apply,
+  //       record: JSON.stringify(valuesWithoutGroupName)
+  //     });
+  //     toast.success('Strategy Applied Successfully');
+  //     getValueGridData(store.recordId); // Refresh the grid data after applying the strategy
+  //   } catch (error) {
+  //     toast.error('An error occurred during apply');
+  //   }
+  // }
 
   const columns = [
     {
@@ -169,6 +184,17 @@ const IndicatorForm = ({
     }
   ]
 
+  const actions = [
+    {
+      key: 'Apply',
+      condition: true,
+      onClick: () => {
+        applyStrategy()
+      },
+      disabled: false
+    }
+  ]
+
   return (
     <FormShell
       form={formik}
@@ -176,11 +202,12 @@ const IndicatorForm = ({
       maxAccess={maxAccess}
       infoVisible={false}
       editMode={editMode}
+      actions={actions}
     >
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow: 'hidden' }}>
         <DataGrid
           onChange={value => formik.setFieldValue('indicatorData', value)}
-          value={formik.values.indicatorData}
+          value={valueGridData}
           error={formik.errors.indicatorData}
           columns={columns}
           height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
@@ -198,94 +225,3 @@ export default IndicatorForm
 // DR.asmx/setSTG
 // {"strategyId":20,"codeId":4,"seqNo":1,"indicatorId":3,"name":"Factory Manager"}
 // {"strategyId":1,"codeId":1,"seqNo":2,"indicatorId":1,"name":"code 1"}
-
-// const [initialValues, setInitialData] = useState({
-//   recordId: formValues.recordId,
-//   reference: formValues.reference,
-//   date: formValues.date,
-//   functionId: functionId,
-//   seqNo: '',
-
-//   generalAccount: [
-//     {
-//       id: 1,
-
-//       accountRef: '',
-//       accountId: '',
-//       accountName: '',
-
-//       tpAccountId: '',
-//       tpAccountRef: '',
-//       tpAccountName: '',
-//       currencyRef: '',
-//       currencyId: '',
-
-//       sign: '',
-//       signName: '',
-//       notes: '',
-//       functionId: functionId,
-//       exRate: '',
-//       amount: '',
-//       baseAmount: ''
-//     }
-//   ]
-// })
-
-// const formik2 = useFormik({
-//   initialValues,
-//   enableReinitialize: true,
-
-//   validationSchema: yup.object({
-//     generalAccount: yup
-//       .array()
-//       .of(
-//         yup.object().shape({
-//           accountRef: yup.string().required('accountRef recordId is required'),
-//           accountName: yup.string().required('currencyId recordId is required'),
-//           accountId: yup.number().required('currencyId recordId is required'),
-
-//           currencyRef: yup.string().required('currencyId recordId is required'),
-//           signName: yup.string().required('currencyId recordId is required'),
-//           amount: yup.number().required('currencyId recordId is required'),
-//           baseAmount: yup.number().required('currencyId recordId is required'),
-//           exRate: yup.number().required('currencyId recordId is required')
-//         })
-//       )
-//       .required('generalAccount array is required')
-//   }),
-//   validateOnChange: true,
-//   onSubmit: async values => {
-//     {
-//       console.log('recordId', formik2.values.recordId)
-//       console.log('general', values.generalAccount)
-
-//       const data = {
-//         transactions: values.generalAccount.map(({ id, exRate, tpAccount, functionId, ...rest }) => ({
-//           seqNo: id,
-
-//           exRate,
-
-//           functionId,
-//           rateCalcMethod: 1,
-
-//           ...rest
-//         })),
-//         date: formatDateToApi(values.date),
-//         functionId: values.functionId,
-//         recordId: formValues.recordId,
-//         reference: values.reference
-//       }
-
-//       console.log('Submitting data:', data)
-
-//       const response = await postRequest({
-//         extension: GeneralLedgerRepository.GeneralLedger.set2,
-//         record: JSON.stringify(data)
-//       })
-
-//       console.log('Submission response:', response)
-
-//       toast.success('Record Added Successfully')
-//     }
-//   }
-// })
