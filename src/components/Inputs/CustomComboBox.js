@@ -54,7 +54,7 @@ const CustomComboBox = ({
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
-            .map(header => (option[header]?.toString() ? option[header]?.toString() : header))
+            .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
             ?.filter(item => item)
             ?.join(' ')
 
