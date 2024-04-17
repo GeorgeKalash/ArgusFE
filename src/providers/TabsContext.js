@@ -130,10 +130,10 @@ const TabsProvider = ({ children }) => {
     }
   
     if (value === index) {
-      const newValue = (index === activeTabsLength - 1) ? index - 1 : index;
+      const newValue = (index === activeTabsLength - 1) ? index - 1 : index + 1;
       setValue(newValue);
 
-      router.push(activeTabs[newValue + 1].route);
+      router.push(activeTabs[newValue].route);
     } else if (index < value) {
       setValue((currentValue) => currentValue - 1);
     }
