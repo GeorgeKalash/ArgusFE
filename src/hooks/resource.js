@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 export function useResourceQuery({ endpointId, filter, datasetId, queryFn, search }) {
   const [searchValue, setSearchValue] = useState('')
-  const [filters, setFilters] = useState(filter?.default || {} )
+  const [filters, setFilters] = useState(filter?.default || {})
   const [apiOption, setApiOption] = useState('')
 
   const isSearchMode = !!searchValue

@@ -75,7 +75,11 @@ const CustomComboBox = ({
           return options.filter(option =>
             columnsInDropDown
               .map(header => header.key)
-              .some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+              .some(field =>
+                typeof option[field] === 'string'
+                  ? option[field]?.toLowerCase()?.includes(inputValue?.toLowerCase())
+                  : option[field]?.includes(inputValue)
+              )
           )
         } else {
           var displayFields = ''
@@ -86,7 +90,11 @@ const CustomComboBox = ({
           }
 
           return options.filter(option =>
-            displayFields.some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+            displayFields.some(field =>
+              typeof option[field] === 'string'
+                ? option[field]?.toLowerCase().includes(inputValue?.toLowerCase())
+                : option[field].includes(inputValue)
+            )
           )
         }
       }}

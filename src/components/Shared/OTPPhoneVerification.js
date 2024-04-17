@@ -1,28 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
-import Window from './Window'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 // ** Global css styles
 import styles from '../../../styles/phoneVerification.module.css'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
+import toast from 'react-hot-toast'
 
-const OTPPhoneVerification = ({
-  formValidation,
-  functionId,
-  onClose,
-  setShowOtpVerification,
-  setEditMode,
-  setErrorMessage
-}) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMessage, window }) => {
+  const { postRequest } = useContext(RequestsContext)
 
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [timer, setTimer] = useState(60)
   const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
-
-  // const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     let interval
@@ -78,15 +69,8 @@ const OTPPhoneVerification = ({
         record: JSON.stringify(data)
       })
         .then(res => {
-          // console.log(res)
-          // if (res.status === 303) {
-          //   // Follow the redirection with a new GET request
-          //  alert(res.error)
-          // } else {
-          //   formValidation.setFieldValue('OTPVerified', true )
-          // }
-          // formValidation.setFieldValue('OTPVerified', true )
-          // setError(res.error)
+          toast.success('Verification Completed')
+          window.close()
         })
         .catch(error => {
           setErrorMessage(error)
@@ -113,15 +97,8 @@ const OTPPhoneVerification = ({
     } else if (e.nativeEvent.inputType === 'deleteContentBackward') {
       newOtp[index] = ''
       setOtp(newOtp)
-
-      // if(index > 0 && document.getElementById(`otp-input-${index - 1}`).value ===''  ){
-      //   document.getElementById(`otp-input-${index}`).focus();
-      //   document.getElementById(`otp-input-${index}`).select();
-      // }
       if (index > 0 && document.getElementById(`otp-input-${index - 1}`).value !== '') {
         document.getElementById(`otp-input-${index}`).focus()
-
-        // document.getElementById(`otp-input-${index}`).select();
       }
     } else if (value !== '' && document.getElementById(`otp-input-${index}`).value !== '') {
       document.getElementById(`otp-input-${index}`).select()
@@ -158,24 +135,16 @@ const OTPPhoneVerification = ({
   }
 
   const handleResendOtp = () => {
-    // Implement logic to resend OTP to the user's phone number
-    // You may want to set a cool down to prevent frequent requests
-    setTimer(60) // Reset the timer
-    setError('') // Clear any previous error
-    setOtp(['', '', '', '', '', '']) // Clear the entered OTP
-    document.getElementById('otp-input-0').focus() // Set focus to the first input field
+    setTimer(60)
+    setError('')
+    setOtp(['', '', '', '', '', ''])
+    document.getElementById('otp-input-0').focus()
     otpSMS()
   }
 
   const handleVerifyOtp = () => {
     const enteredOtp = otp.join('')
-
     checkSMS(enteredOtp)
-
-    // Implement logic to send the entered OTP to the backend for verification
-    // You can use a library like axios to make an API request
-
-    // For this example, we'll just log the entered OTP
     console.log('Entered OTP:', enteredOtp)
   }
 

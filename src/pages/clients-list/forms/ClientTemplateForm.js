@@ -809,7 +809,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       label={_labels.issueDate}
                       value={clientIndividualFormik.values?.issueDate}
                       readOnly={editMode && true}
-                      required={true}
                       onChange={clientIndividualFormik.setFieldValue}
                       onClear={() => clientIndividualFormik.setFieldValue('issueDate', '')}
                       disabledDate={!editMode && '>'}
@@ -1301,7 +1300,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         Component: AddressFormShell,
                         props: {
                           readOnly: editMode,
-                          required: true,
+                          optional: true,
                           labels: _labels,
                           setAddress: setAddress,
                           address: address
@@ -1440,6 +1439,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           clientIndividualFormik.setFieldValue('status', newValue?.key)
                         }
                       }}
+                      readOnly={true}
                       error={clientIndividualFormik.touched.status && Boolean(clientIndividualFormik.errors.status)}
                       helperText={clientIndividualFormik.touched.status && clientIndividualFormik.errors.status}
                     />
