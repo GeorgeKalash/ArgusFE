@@ -24,6 +24,7 @@ export const RemittanceOutwardsRepository = {
     del: service + 'delOW',
     close: service + 'closeOW',
     reopen: service + 'reopenOW',
+    post: service + 'postOW',
     snapshot: service + 'snapshotOW'
   },
   Beneficiary: {

@@ -17,6 +17,7 @@ import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import BenificiaryBank from './BenificiaryBank'
 import BenificiaryCash from './BenificiaryCash'
+import InstantCash from './InstantCash'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -31,7 +32,6 @@ import toast from 'react-hot-toast'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { DataSets } from 'src/resources/DataSets'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -43,6 +43,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [isClosed, setIsClosed] = useState(false)
   const { stack } = useWindow()
+  const [isPosted, setIsPosted] = useState(false)
   const { stack: stackError } = useError()
 
   const invalidate = useInvalidate({
@@ -122,7 +123,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     rateCalcMethod: '',
     checked: 'false',
     exchangeRate: '',
-    exchangeRate2: ''
+    exchangeRate2: '',
+    interfaceId: ''
   })
 
   const fillProfessionStore = () => {
@@ -218,6 +220,33 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       toast.success('Record Closed Successfully')
       invalidate()
       setIsClosed(false)
+    }
+  }
+
+  const onPost = async () => {
+    const copy = { ...formik.values }
+    copy.date = formatDateToApi(copy.date)
+    copy.valueDate = formatDateToApi(copy.valueDate)
+    copy.expiryDate = formatDateToApi(copy.expiryDate)
+
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.OutwardsTransfer.post,
+      record: JSON.stringify(copy)
+    })
+
+    if (res?.recordId) {
+      toast.success('Record Posted Successfully')
+      invalidate()
+      setIsPosted(true)
+      if (productFormik.values.interfaceId == 1) {
+        stack({
+          Component: InstantCash,
+          props: {},
+          width: 700,
+          height: 500,
+          title: 'Instant Cash'
+        })
+      }
     }
   }
 
@@ -353,13 +382,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isClosed || !editMode
+      disabled: isClosed || !editMode || isPosted
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3) || isPosted
     },
     {
       key: 'Approval',
@@ -372,6 +401,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       condition: true,
       onClick: () => openReleaventWindow(formik.values),
       disabled: formik.values.dispersalType && formik.values.clientId ? false : true
+    },
+    {
+      key: 'Post',
+      condition: true,
+      onClick: onPost,
+      disabled: !editMode || isPosted || !isClosed
     }
   ]
   function openProductWindow() {
@@ -408,6 +443,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             parameters: `_recordId=${recordId}`
           })
           setIsClosed(res.record.wip === 2 ? true : false)
+          setIsPosted(res.record.status === 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
           formik.setValues(res.record)
           formik.setFieldValue('net', parseInt(res.record.commission) + parseInt(res.record.lcAmount))
@@ -442,6 +478,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         isClosed={isClosed}
         actions={actions}
         functionId={SystemFunction.Outwards}
+        disabledSubmit={isPosted}
       >
         <Grid container sx={{ pt: 2 }}>
           {/* First Column */}
@@ -467,7 +504,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 editMode={editMode}
-                readOnly={isClosed}
+                readOnly={isClosed || isPosted}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -520,7 +557,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 label={labels.valueDate}
                 value={formik?.values?.valueDate}
                 onChange={formik.setFieldValue}
-                readOnly={isClosed}
+                readOnly={isClosed || isPosted}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('valueDate', '')}
                 error={formik.touched.valueDate && Boolean(formik.errors.valueDate)}
@@ -537,7 +574,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   name='countryId'
                   label={labels.Country}
                   required
-                  readOnly={isClosed}
+                  readOnly={isClosed || isPosted}
                   displayField={['countryRef', 'countryName']}
                   columnsInDropDown={[
                     { key: 'countryRef', value: 'Reference' },
@@ -557,7 +594,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
                   label={labels.DispersalType}
                   required
-                  readOnly={isClosed}
+                  readOnly={isClosed || isPosted}
                   name='dispersalType'
                   displayField='dispersalTypeName'
                   valueField='dispersalType'
@@ -585,7 +622,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   ]}
                   valueField='currencyId'
                   values={formik.values}
-                  readOnly={formik.values.dispersalType == '' || isClosed}
+                  readOnly={formik.values.dispersalType == '' || isClosed || isPosted}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('currencyId', newValue?.currencyId)
                   }}
@@ -600,7 +637,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   label={labels.fcAmount}
                   value={formik.values.fcAmount}
                   required
-                  readOnly={!formik.values.dispersalType || isClosed}
+                  readOnly={!formik.values.dispersalType || isClosed || isPosted}
                   maxAccess={maxAccess}
                   onChange={e => {
                     const input = e.target
@@ -758,7 +795,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   numberField={true}
                   label={labels.discount}
                   value={formik.values.discount}
-                  readOnly={isClosed}
+                  readOnly={isClosed || isPosted}
                   maxAccess={maxAccess}
                   error={formik.touched.discount && Boolean(formik.errors.discount)}
                   helperText={formik.touched.discount && formik.errors.discount}
@@ -807,7 +844,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   label={labels.Client}
                   form={formik}
                   required
-                  readOnly={isClosed}
+                  readOnly={isClosed || isPosted}
                   displayFieldWidth={2}
                   valueShow='clientRef'
                   secondValueShow='clientName'
@@ -1088,7 +1125,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 label={labels.Beneficiary}
                 form={formik}
                 required
-                readOnly={!formik.values.clientId || !formik.values.dispersalType || isClosed}
+                readOnly={!formik.values.clientId || !formik.values.dispersalType || isClosed || isPosted}
                 maxAccess={maxAccess}
                 editMode={editMode}
                 secondDisplayField={false}
