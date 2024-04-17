@@ -13,8 +13,10 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form.js'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
-export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourceName }) {
+export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourceName, expanded }) {
+  const { height } = useWindowDimensions()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -183,7 +185,6 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
       <Grid item xs={12} sx={{ pt: 2 }}>
         <Box sx={{ width: '100%' }}>
           <DataGrid
-            height={230}
             onChange={value => {
               detailsFormik.setFieldValue('rows', value)
             }}
@@ -192,6 +193,7 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
+            height={`${expanded ? height - 300 : 230}px`}
           />
         </Box>
       </Grid>

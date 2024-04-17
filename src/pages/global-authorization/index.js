@@ -14,6 +14,7 @@ import ResourceGlobalForm from './forms/ResourceGlobalForm'
 import AccessLevelForm from './forms/AccessLevelForm'
 import FieldGlobalForm from './forms/FieldGlobalForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useEffect } from 'react'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -21,11 +22,11 @@ const GlobalAuthorization = () => {
 
   async function fetchWithFilter({ filters }) {
     // used for both qry and filter since we have same api
-
-    return await getRequest({
-      extension: SystemRepository.ModuleClassRES.qry,
-      parameters: `_filter=${filters.qry ?? ''}&_moduleId=${filters.moduleId}`
-    })
+    if (filters.moduleId)
+      return await getRequest({
+        extension: SystemRepository.ModuleClassRES.qry,
+        parameters: `_filter=${filters.qry ?? ''}&_moduleId=${filters.moduleId}`
+      })
   }
 
   const {
@@ -100,6 +101,10 @@ const GlobalAuthorization = () => {
     })
   }
 
+  useEffect(() => {
+    filters.moduleId = 10
+  }, [])
+
   return (
     <>
       <Box>
@@ -107,7 +112,7 @@ const GlobalAuthorization = () => {
           <GridToolbar
             maxAccess={access}
             onSearch={value => {
-              filterBy('qry', value)
+              filters.moduleId && filterBy('qry', value)
             }}
             onSearchClear={() => {
               clearFilter('qry')
@@ -120,7 +125,7 @@ const GlobalAuthorization = () => {
                 datasetId={DataSets.MODULE}
                 name='moduleId'
                 values={{
-                  moduleId: filters.moduleId ?? 10
+                  moduleId: filters.moduleId
                 }}
                 valueField='key'
                 displayField='value'
@@ -130,7 +135,7 @@ const GlobalAuthorization = () => {
               />
             </Box>
             <Box sx={{ display: 'flex', height: '48px', justifyContent: 'flex-start', pt: 2, pl: 3 }}>
-              <Button variant='contained' onClick={() => openApplyModuleLevel()}>
+              <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
                 <Icon icon='mdi:arrow-expand-right' fontSize={18} />
               </Button>
             </Box>
