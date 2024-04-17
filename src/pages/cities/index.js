@@ -32,7 +32,6 @@ const City = () => {
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -45,12 +44,28 @@ const City = () => {
   const {
     query: { data },
     labels: _labels,
-    access
+    access,
+    search,
+    clear,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.City.page,
-    datasetId: ResourceIds.Cities
+    datasetId: ResourceIds.Cities,
+    search: {
+      endpointId: SystemRepository.City.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: SystemRepository.City.snapshot,
+      parameters: `_filter=${qry}&_stateId=0&_countryId=0`
+    })
+
+    return response
+  }
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.City.page
@@ -101,13 +116,19 @@ const City = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          
-          //api={getGridData}
+          refetch={refetch}
           onEdit={edit}
           onDelete={del}
           maxAccess={access}

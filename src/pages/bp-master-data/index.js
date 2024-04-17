@@ -80,13 +80,28 @@ const BPMasterData = () => {
 
   const {
     query: { data },
+    search,
+    clear,
+    refetch,
     labels: _labels,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: BusinessPartnerRepository.MasterData.qry,
-    datasetId: ResourceIds.BPMasterData
+    datasetId: ResourceIds.BPMasterData,
+    search: {
+      endpointId: BusinessPartnerRepository.MasterData.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: BusinessPartnerRepository.MasterData.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const invalidate = useInvalidate({
     endpointId: BusinessPartnerRepository.MasterData.qry
@@ -135,13 +150,13 @@ const BPMasterData = () => {
     openForm('')
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: BPMasterDataWindow,
       props: {
         labels: _labels,
         maxAccess: access,
-        recordId: recordId? recordId : null,
+        recordId: recordId ? recordId : null
       },
       width: 1200,
       height: 600,
@@ -149,10 +164,8 @@ const BPMasterData = () => {
     })
   }
 
-
   const edit = obj => {
     openForm(obj.recordId)
-
   }
 
   const del = async obj => {
@@ -164,13 +177,17 @@ const BPMasterData = () => {
     toast.success('Record Deleted Successfully')
   }
 
-
-  const [errorMessage, setErrorMessage] = useState(null)
-
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
           gridData={data}
@@ -181,14 +198,9 @@ const BPMasterData = () => {
           pageSize={50}
           paginationType='client'
           maxAccess={access}
+          refetch={refetch}
         />
       </Box>
-
-
-
-
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

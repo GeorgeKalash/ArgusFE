@@ -908,7 +908,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <CustomTextField
                       name='cellPhone'
                       type={showAsPasswordPhone && clientIndividualFormik.values?.cellPhone ? 'password' : 'text'}
-                      phone={true}
                       label={_labels.cellPhone}
                       value={clientIndividualFormik.values?.cellPhone}
                       readOnly={editMode && true}
@@ -942,7 +941,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       }
                       label={_labels.confirmCell}
                       value={clientIndividualFormik.values?.cellPhoneRepeat}
-                      phone={true}
                       required
                       readOnly={editMode && true}
                       maxLength='15'

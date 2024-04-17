@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -25,7 +25,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -36,32 +36,44 @@ const NumberRange = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-
       extension: SystemRepository.NumberRange.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
- const {
+  const {
     query: { data },
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    search,
+    clear
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.NumberRange.qry,
-    datasetId: ResourceIds.NumberRange
+    datasetId: ResourceIds.NumberRange,
+    search: {
+      endpointId: SystemRepository.NumberRange.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: SystemRepository.NumberRange.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.NumberRange.qry
   })
 
-   const columns = [
+  const columns = [
     {
       field: 'reference',
       headerName: _labels.reference,
@@ -94,7 +106,6 @@ const NumberRange = () => {
     }
   ]
 
-
   const add = () => {
     setWindowOpen(true)
   }
@@ -106,18 +117,24 @@ const NumberRange = () => {
 
   const del = async obj => {
     await postRequest({
-      extension:SystemRepository.NumberRange.del,
+      extension: SystemRepository.NumberRange.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
           gridData={data}
@@ -142,7 +159,6 @@ const NumberRange = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
-        
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
@@ -150,8 +166,4 @@ const NumberRange = () => {
   )
 }
 
-
-
-
 export default NumberRange
-
