@@ -270,7 +270,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               readOnly={readOnly}
               required={required}
               maxLength='15'
-              type='text'
+              phone={true}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
@@ -284,6 +284,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               label={labels.phone2}
               value={addressValidation.values.phone2}
               maxLength='15'
+              phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone2', '')}
@@ -298,6 +299,7 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               label={labels.phone3}
               value={addressValidation.values.phone3}
               maxLength='15'
+              phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone3', '')}

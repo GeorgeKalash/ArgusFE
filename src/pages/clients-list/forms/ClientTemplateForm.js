@@ -911,6 +911,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       value={clientIndividualFormik.values?.cellPhone}
                       readOnly={editMode && true}
                       required
+                      phone={true}
                       onChange={clientIndividualFormik.handleChange}
                       maxLength='15'
                       autoComplete='off'
@@ -944,6 +945,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       readOnly={editMode && true}
                       maxLength='15'
                       autoComplete='off'
+                      phone={true}
                       onChange={e => {
                         clientIndividualFormik.handleChange(e)
                       }}
@@ -1048,7 +1050,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         onChange={clientIndividualFormik.handleChange}
                         maxLength='10'
                         readOnly={editMode && true}
-                        dir='rtl' // Set direction to right-to-left
+                        dir='rtl'
+                        language='arabic'
                         onClear={() => clientIndividualFormik.setFieldValue('fl_firstName', '')}
                         error={
                           clientIndividualFormik.touched.fl_firstName &&
@@ -1067,7 +1070,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         value={clientIndividualFormik.values?.fl_middleName}
                         onChange={clientIndividualFormik.handleChange}
                         readOnly={editMode && true}
-                        dir='rtl' // Set direction to right-to-left
+                        dir='rtl'
+                        language='arabic'
                         onClear={() => clientIndividualFormik.setFieldValue('fl_familyName', '')}
                         error={
                           clientIndividualFormik.touched.fl_middleName &&
@@ -1086,7 +1090,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         value={clientIndividualFormik.values?.fl_lastName}
                         onChange={clientIndividualFormik.handleChange}
                         maxLength='10'
-                        dir='rtl' // Set direction to right-to-left
+                        dir='rtl'
+                        language='arabic'
                         readOnly={editMode && true}
                         onClear={() => clientIndividualFormik.setFieldValue('fl_lastName', '')}
                         error={
@@ -1106,7 +1111,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         value={clientIndividualFormik.values?.fl_familyName}
                         onChange={clientIndividualFormik.handleChange}
                         readOnly={editMode && true}
-                        dir='rtl' // Set direction to right-to-left
+                        dir='rtl'
+                        language='arabic'
                         onClear={() => clientIndividualFormik.setFieldValue('fl_familyName', '')}
                         error={
                           clientIndividualFormik.touched.fl_familyName &&
@@ -1164,13 +1170,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.setFieldValue('coveredFace', false)
                         if (newValue) {
                           clientIndividualFormik.setFieldValue('gender', newValue?.key)
-
-                          // if (newValue.key === "2") {
-                          //   clientIndividualFormik.setFieldValue(
-                          //     "coveredFace",
-                          //     true
-                          //   );
-                          // }
                         } else {
                           clientIndividualFormik.setFieldValue('gender', '')
                         }
@@ -1323,7 +1322,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       label={_labels.salaryRange}
                       valueField='recordId'
                       displayField={['min', '->', 'max']}
-                      // displayBetween=' -> '
                       columnsInDropDown={[
                         { key: 'min', value: 'min' },
                         { key: 'max', value: 'max' }

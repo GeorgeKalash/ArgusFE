@@ -69,13 +69,16 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMes
         record: JSON.stringify(data)
       })
         .then(res => {
+          formValidation.setFieldValue('OTPVerified', true)
+          formValidation.setFieldValue('mobileVerified', 1)
+          formValidation.setFieldValue('status', 1)
+
           toast.success('Verification Completed')
           window.close()
         })
         .catch(error => {
           setErrorMessage(error)
         })
-      formValidation.setFieldValue('OTPVerified', true)
     } else {
       setError('All Fields Required')
     }
