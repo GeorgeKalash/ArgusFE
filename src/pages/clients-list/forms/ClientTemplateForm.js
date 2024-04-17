@@ -399,10 +399,10 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
     validationSchema: yup.object({
       reference: referenceRequired && yup.string().required('This field is required'),
       isResident: yup.string().required('This field is required'),
-      birthDate: yup.string().required('This field is required'),
+      birthDate: yup.date().required('This field is required'),
       idtId: yup.string().required('This field is required'),
       idNo: yup.string().required('This field is required'),
-      expiryDate: !editMode && yup.string().required('This field is required'),
+      expiryDate: yup.date().required('This field is required'),
       countryId: yup.string().required('This field is required'),
       cityId: yup.string().required('This field is required'),
       idCountry: yup.string().required('This field is required'),
@@ -443,7 +443,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       cellPhone: obj.cellPhone,
       createdDate: formatDateToApiFunction(date.toISOString()),
       expiryDate: formatDateToApiFunction(obj.expiryDate),
-      issueDate: formatDateToApiFunction(obj.issueDate), // test
+      issueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate), // test
 
       otpVerified: obj.otpVerified,
       plantName: obj.plantName,
@@ -460,7 +460,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       idCountryId: obj.idCountry,
       idtId: obj.idtId, //5
       idExpiryDate: formatDateToApiFunction(obj.expiryDate),
-      idIssueDate: formatDateToApiFunction(obj.issueDate),
+      idIssueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate),
       idCityId: obj.idCity,
       isDiplomat: obj.isDiplomat
     }
@@ -637,7 +637,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       form={clientIndividualFormik}
       maxAccess={maxAccess}
       editMode={editMode}
-      disabledSubmit={editMode}
+      disabledSubmit={!editMode}
     >
       <Grid container spacing={4}>
         <Grid container xs={12} spacing={2} sx={{ padding: '20px' }}>
@@ -1471,6 +1471,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       readOnly={editMode && true}
                       onChange={clientIndividualFormik.handleChange}
                       maxLength='15'
+                      phone={true}
                       onClear={() => clientIndividualFormik.setFieldValue('whatsAppNo', '')}
                       error={
                         clientIndividualFormik.touched.whatsAppNo && Boolean(clientIndividualFormik.errors.whatsAppNo)
