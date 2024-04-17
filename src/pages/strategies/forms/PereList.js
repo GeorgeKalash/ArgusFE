@@ -26,10 +26,9 @@ import CodeForm from './CodeForm'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
-import { ResourceIds } from 'src/resources/ResourceIds'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import PereForm from './PereForm'
 
-const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
+const PereList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -44,13 +43,12 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
 
   const getValueGridData = recordId => {
     getRequest({
-      extension: DocumentReleaseRepository.StrategyCode.qry,
-      parameters: `_strategyId=${recordId}`
+      extension: DocumentReleaseRepository.StrategyPrereq.qry,
+      parameters: `&_strategyId=${recordId}`
     })
       .then(res => {
         setValueGridData(res)
         console.log('resss', res)
-        console.log('ggggg', groupId)
       })
       .catch(error => {
         setErrorMessage(error)
@@ -72,13 +70,13 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
 
   const columns = [
     {
-      field: 'name',
+      field: 'code',
       headerName: labels.code,
       flex: 1
     },
     {
-      field: 'code',
-      headerName: labels.name,
+      field: 'prerequisiteCode',
+      headerName: labels.prerequisite,
       flex: 1
     }
   ]
@@ -89,7 +87,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
 
   const delCode = async obj => {
     await postRequest({
-      extension: DocumentReleaseRepository.StrategyCode.del,
+      extension: DocumentReleaseRepository.StrategyPrereq.del,
       record: JSON.stringify(obj)
     })
     setRefresh(prev => !prev)
@@ -99,13 +97,12 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
 
   function openForm2(recordId) {
     stack({
-      Component: CodeForm,
+      Component: PereForm,
       props: {
         labels: labels,
         recordId: recordId ? recordId : null,
         maxAccess,
         store,
-        strategiesFormik,
         setRefresh
       },
       width: 500,
@@ -126,7 +123,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
       <Table
         columns={columns}
         gridData={valueGridData}
-        rowId={['codeId']}
+        rowId={['code']}
         isLoading={false}
         pageSize={50}
         pagination={false}
@@ -138,4 +135,4 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
   )
 }
 
-export default CodeList
+export default PereList

@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { useFormik } from 'formik'
+import { Form, useFormik } from 'formik'
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -13,27 +13,28 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { grid } from '@mui/system'
-import { ResetTvRounded } from '@mui/icons-material'
 
-const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh, strategiesFormik }) => {
+const PereForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+
+  const [selectedCodeId, setSelectedCodeId] = useState('')
 
   const { recordId: grId } = store
 
   const [initialValues, setInitialData] = useState({
-    codeId: '0',
-    groupId: strategiesFormik.values.groupId,
-    strategyId: grId
+    codeId: '',
+    prerequisiteId: '',
+    StrategyId: grId
   })
 
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues,
-
+    validationSchema: yup.object({
+      codeId: yup.string().required('This field is required')
+    }),
     onSubmit: values => {
-      console.log(values)
       postGroups(values)
     }
   })
@@ -43,7 +44,7 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
 
     try {
       const res = await postRequest({
-        extension: DocumentReleaseRepository.StrategyCode.set,
+        extension: DocumentReleaseRepository.StrategyPrereq.set,
         record: JSON.stringify(obj)
       })
 
@@ -56,7 +57,6 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
         setEditMode(true)
       } else {
         toast.success('Record Edited Successfully')
-        console.log('qbcd', strategiesFormik.values.groupId)
         setInitialData(prevData => ({
           ...prevData,
 
@@ -73,11 +73,11 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
   }, [recordId])
 
   const getGroupId = codeId => {
-    const defaultParams = `_codeId=${codeId}&_groupId=${strategiesFormik.values.groupId}`
+    const defaultParams = `_codeId=${codeId}&_groupId=${grId}`
     var parameters = defaultParams
     getRequest({
-      extension: DocumentReleaseRepository.GroupCode.qry,
-      parameters: `_groupId=${strategiesFormik.values.groupId}`
+      extension: DocumentReleaseRepository.StrategyCode.get,
+      parameters: `_groupId=${recordId}`
     })
       .then(res => {
         setInitialData(res.record)
@@ -97,25 +97,41 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <ResourceComboBox
-            endpointId={DocumentReleaseRepository.GroupCode.qry}
-            parameters={`_groupId=${strategiesFormik.values.groupId}`}
+            endpointId={DocumentReleaseRepository.StrategyCode.qry}
+            parameters={`_startAt=${0}&_pageSize=${100}&_strategyId=${grId}`}
             name='codeId'
-            label={'codeId'}
-            valueField='recordId'
-            displayField='codeName'
-            columnsInDropDown={[
-              { key: 'codeRef', value: 'Reference' },
-              { key: 'codeName', value: 'Name' }
-            ]}
+            label={labels.code}
+            valueField='codeId'
+            displayField='code'
             values={formik.values}
             required
             readOnly={editMode}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              console.log(newValue)
-              formik.setFieldValue('codeId', newValue?.codeId)
+              formik && formik.setFieldValue('codeId', newValue?.codeId)
+              setSelectedCodeId(newValue?.codeId)
             }}
             error={formik.touched.codeId && Boolean(formik.errors.codeId)}
+            helperText={formik.touched.codeId && formik.errors.codeId}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={formik.values.codeId && DocumentReleaseRepository.StrategyCode.qry}
+            parameters={formik.values.codeId && `_strategyId=${grId}`}
+            name='prerequisiteId'
+            label={labels.prere}
+            valueField='codeId'
+            displayField='code'
+            values={formik.values}
+            readOnly={editMode}
+            maxAccess={maxAccess}
+            excludeValue={selectedCodeId}
+            onChange={(event, newValue) => {
+              formik && formik.setFieldValue('prerequisiteId', newValue?.codeId)
+            }}
+            error={formik.touched.prerequisiteId && Boolean(formik.errors.prerequisiteId)}
+            helperText={formik.touched.prerequisiteId && formik.errors.prerequisiteId}
           />
         </Grid>
       </Grid>
@@ -123,4 +139,4 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
   )
 }
 
-export default CodeForm
+export default PereForm
