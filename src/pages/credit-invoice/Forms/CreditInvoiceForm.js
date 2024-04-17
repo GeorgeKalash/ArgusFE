@@ -302,7 +302,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
   const columns = [
     {
       component: 'resourcecombobox',
-      label: _labels[8],
+      label: _labels.currency,
       name: 'currencyRef',
       props: {
         endpointId: SystemRepository.Currency.qry,
@@ -381,7 +381,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     },
     {
       component: 'textfield',
-      label: _labels[9],
+      label: _labels.name,
       name: 'currencyName',
       props: {
         readOnly: true,
@@ -391,7 +391,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     },
     {
       component: 'numberfield',
-      label: _labels[14],
+      label: _labels.quantity,
       name: 'qty',
       props: {
         mandatory: true,
@@ -426,7 +426,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     },
     {
       component: 'numberfield',
-      label: _labels[23],
+      label: _labels.defaultRate,
       name: 'defaultRate',
       props: {
         readOnly: true,
@@ -437,7 +437,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     },
     {
       component: 'numberfield',
-      label: _labels[15],
+      label: _labels.exRate,
       name: 'exRate',
       props: {
         mandatory: true,
@@ -713,7 +713,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             <CustomDatePicker
               name='date'
               required
-              label={_labels[2]}
+              label={_labels.date}
               readOnly={isPosted || isCancelled}
               value={formik?.values?.date}
               onChange={formik.setFieldValue}
@@ -729,7 +729,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             <ResourceComboBox
               endpointId={SystemRepository.Plant.qry}
               name='plantId'
-              label={_labels[3]}
+              label={_labels.plant}
               readOnly={true}
               values={formik.values}
               valueField='recordId'
@@ -751,7 +751,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           <Grid item style={{ marginRight: '10px', width: '190px' }}>
             <CustomTextField
               name='reference'
-              label={_labels[4]}
+              label={_labels.reference}
               value={formik?.values?.reference}
               maxAccess={maxAccess}
               maxLength='30'
@@ -772,7 +772,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 valueField='reference'
                 displayField='name'
                 name='corId'
-                label={_labels[16]}
+                label={_labels.correspondent}
                 form={formik}
                 firstFieldWidth='30%'
                 required
@@ -808,7 +808,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             displayField='name'
             name='cashAccountId'
             required
-            label={_labels[22]}
+            label={_labels.cashAccount}
             form={formik}
             readOnly={isPosted || isCancelled}
             valueShow='cashAccountRef'
@@ -837,13 +837,13 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             <FormControlLabel
               value={SystemFunction.CreditInvoicePurchase}
               control={<Radio />}
-              label={_labels[6]}
+              label={_labels.purchase}
               disabled={detailsFormik?.values?.rows[0]?.currencyId}
             />
             <FormControlLabel
               value={SystemFunction.CreditInvoiceSales}
               control={<Radio />}
-              label={_labels[7]}
+              label={_labels.sale}
               disabled={detailsFormik?.values?.rows[0]?.currencyId}
             />
           </RadioGroup>
@@ -874,7 +874,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
           <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
             <CustomTextArea
               name='notes'
-              label={_labels[11]}
+              label={_labels.notes}
               value={formik.values.notes}
               rows={3}
               readOnly={isPosted || isCancelled}
