@@ -15,9 +15,6 @@ const SystemChecks = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { height } = useWindowDimensions()
   const { getAllKvsByDataset } = useContext(CommonContext)
-
-  //states
-  const [checkStore, setCheckStore] = useState([])
   const [data, setData] = useState([])
 
   const { labels: _labels, access } = useResourceParams({
@@ -28,25 +25,32 @@ const SystemChecks = () => {
     postChecks()
   }
 
-  function getAllSystems() {
-    getAllKvsByDataset({
-      _dataset: DataSets.SYSTEM_CHECKS,
-      callback: setCheckStore
+  async function getAllSystems() {
+    return new Promise((resolve, reject) => {
+      getAllKvsByDataset({
+        _dataset: DataSets.SYSTEM_CHECKS,
+        callback: result => {
+          if (result) resolve(result)
+          else reject()
+        }
+      })
     })
   }
 
   useEffect(() => {
-    if (checkStore) {
+    ;(async function () {
+      const systemCheckData = await getAllSystems()
+
       const resCheckedSystems = getRequest({
         extension: SystemRepository.SystemChecks.qry,
         parameters: `_scope=1`
       })
 
       Promise.all([resCheckedSystems]).then(([checkedSystems]) => {
-        const mergedSYCheckedList = checkStore.map(x => {
+        const mergedSYCheckedList = systemCheckData.map(systemCheckItem => {
           const item = {
-            checkId: x.key,
-            checkName: x.value,
+            checkId: systemCheckItem.key,
+            checkName: systemCheckItem.value,
             checked: false,
             value: false
           }
@@ -59,13 +63,7 @@ const SystemChecks = () => {
 
         setData({ list: mergedSYCheckedList })
       })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkStore])
-
-  useEffect(() => {
-    getAllSystems()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    })()
   }, [])
 
   const columns = [
@@ -81,7 +79,7 @@ const SystemChecks = () => {
     }
   ]
 
-  const postChecks = () => {
+  const postChecks = async () => {
     const checkedObjects = data.list.filter(obj => obj.checked)
     checkedObjects.forEach(obj => {
       obj.scope = 1
@@ -95,14 +93,11 @@ const SystemChecks = () => {
       items: checkedObjects
     }
 
-    postRequest({
+    await postRequest({
       extension: SystemRepository.SystemChecks.set,
       record: JSON.stringify(resultObject)
     })
-      .then(res => {
-        toast.success('Record Updated Successfully')
-      })
-      .catch(error => {})
+    toast.success('Record Updated Successfully')
   }
 
   return (
