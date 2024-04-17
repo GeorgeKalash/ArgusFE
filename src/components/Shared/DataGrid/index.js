@@ -23,6 +23,7 @@ export function DataGrid({
   onChange,
   allowDelete = true,
   allowAddNewLine = true,
+  onSelectionChange,
   disabled = false
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
@@ -258,6 +259,13 @@ export function DataGrid({
     handleRowChange(updatedRow)
   }
 
+  const handleRowClick = params => {
+    const selectedRow = value.find(row => row.id === params.row.id)
+    if (onSelectionChange) {
+      onSelectionChange(selectedRow)
+    }
+  }
+
   return (
     <Box sx={{ height: height ? height : 'auto', width: '100%', overflow: 'auto' }}>
       {/* Container with scroll */}
@@ -269,6 +277,7 @@ export function DataGrid({
         disableColumnMenu
         disableColumnSelector
         disableSelectionOnClick
+        disableMultipleSelection
         getRowId={row => row[idName]}
         onStateChange={state => {
           if (Object.entries(state.editRows)[0]) {
@@ -312,6 +321,7 @@ export function DataGrid({
             padding: '0 !important'
           }
         }}
+        onRowClick={handleRowClick} // Handle row click event
         columns={[
           ...columns.map(column => ({
             field: column.name,

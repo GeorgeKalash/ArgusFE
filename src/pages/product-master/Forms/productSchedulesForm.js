@@ -1,4 +1,4 @@
-import { Grid, Box, Checkbox } from '@mui/material'
+import { Grid, Box } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 
@@ -55,7 +55,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
           dispersalType: '',
           dispersalTypeName: '',
           isInactive: false,
-          saved: false
+          saved: false,
+          select: false
         }
       ]
     },
@@ -85,21 +86,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
   }
 
   const columns = [
-    {
-      component: 'button',
-      label: labels.select,
-      name: 'saved',
-      onClick: (e, row) => {
-        setStore(prevStore => ({
-          ...prevStore,
-          plantId: row.plantId,
-          currencyId: row.currencyId,
-          countryId: row.countryId,
-          dispersalId: row.dispersalId,
-          _seqNo: row.seqNo
-        }))
-      }
-    },
     {
       component: 'resourcecombobox',
       label: labels.country,
@@ -284,6 +270,17 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
               value={formik.values.schedules}
               error={formik.errors.schedules}
               columns={columns}
+              onSelectionChange={row =>
+                row &&
+                setStore(prevStore => ({
+                  ...prevStore,
+                  plantId: row.plantId,
+                  currencyId: row.currencyId,
+                  countryId: row.countryId,
+                  dispersalId: row.dispersalId,
+                  _seqNo: row.seqNo
+                }))
+              }
               height={`${expanded ? `calc(100vh - 300px)` : `${height - 160}px`}`}
             />
           </Grid>
