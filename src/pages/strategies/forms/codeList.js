@@ -72,12 +72,12 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
 
   const columns = [
     {
-      field: 'name',
+      field: 'code',
       headerName: labels.code,
       flex: 1
     },
     {
-      field: 'code',
+      field: 'name',
       headerName: labels.name,
       flex: 1
     }
