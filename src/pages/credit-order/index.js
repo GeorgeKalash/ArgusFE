@@ -112,9 +112,7 @@ const CreditOrder = () => {
         } else {
           throw new Error('The user does not have a default plant')
         }
-      } catch (error) {
-        console.error(error)
-      }
+      } catch (error) {}
     } else {
       openForm(recordId)
     }

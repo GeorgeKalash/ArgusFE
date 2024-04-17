@@ -108,9 +108,7 @@ const CreditInvoice = () => {
         } else {
           throw new Error('The user does not have a default plant')
         }
-      } catch (error) {
-        console.error(error)
-      }
+      } catch (error) {}
     } else {
       openForm(recordId)
     }
@@ -126,7 +124,7 @@ const CreditInvoice = () => {
         recordId
       },
       width: 900,
-      height: 600,
+      height: 650,
       title: _labels.creditInvoice
     })
   }
