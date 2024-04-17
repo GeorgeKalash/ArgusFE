@@ -54,9 +54,9 @@ const CustomComboBox = ({
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
-            .map(header => option[header])
-            .filter(item => item)
-            .join(' ')
+            .map(header => (option[header]?.toString() ? option[header]?.toString() : header))
+            ?.filter(item => item)
+            ?.join(' ')
 
           if (text) return text
         }
@@ -75,26 +75,13 @@ const CustomComboBox = ({
           return options.filter(option =>
             columnsInDropDown
               .map(header => header.key)
-              .some(field =>
-                typeof option[field] === 'string'
-                  ? option[field]?.toLowerCase()?.includes(inputValue?.toLowerCase())
-                  : option[field]?.includes(inputValue)
-              )
+              .some(field => option[field]?.toString()?.toLowerCase()?.toString()?.includes(inputValue?.toLowerCase()))
           )
         } else {
-          var displayFields = ''
-          if (Array.isArray(displayField)) {
-            displayFields = displayField
-          } else {
-            displayFields = [displayField]
-          }
+          var displayFields = Array.isArray(displayField) ? displayField : [displayField]
 
           return options.filter(option =>
-            displayFields.some(field =>
-              typeof option[field] === 'string'
-                ? option[field]?.toLowerCase().includes(inputValue?.toLowerCase())
-                : option[field].includes(inputValue)
-            )
+            displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
           )
         }
       }}

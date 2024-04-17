@@ -1323,6 +1323,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       label={_labels.salaryRange}
                       valueField='recordId'
                       displayField={['min', '->', 'max']}
+                      // displayBetween=' -> '
                       columnsInDropDown={[
                         { key: 'min', value: 'min' },
                         { key: 'max', value: 'max' }
