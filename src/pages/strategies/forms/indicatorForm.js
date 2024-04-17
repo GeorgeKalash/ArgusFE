@@ -41,7 +41,7 @@ const IndicatorForm = ({
 
   const formik = useFormik({
     initialValues: {
-      strategyId: 28,
+      strategyId: 26,
       indicatorData: [
         {
           id: 1,
@@ -85,24 +85,18 @@ const IndicatorForm = ({
       return
     }
 
-    const firstItem = obj
-
-    obj = obj.map(({ strategyId, ...rest }, index) => ({
-      strategyId: 28,
-
-      ...rest
-    }))
-
-    console.log('strategiesFormik.values:', strategiesFormik.values)
-    postRequest({
-      extension: DocumentReleaseRepository.StrategyIndicator.set,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        if (res) toast.success('Record Edited Successfully')
-        getCountries(recordId)
+    obj = obj.map(item => {
+      const { id, indicatorRef, indicatorName, ...itemWithoutId } = item
+      itemWithoutId.strategyId = 26
+      postRequest({
+        extension: DocumentReleaseRepository.StrategyIndicator.set,
+        record: JSON.stringify(itemWithoutId)
       })
-      .catch(error => {})
+        .then(res => {
+          if (res) toast.success('Record Edited Successfully')
+        })
+        .catch(error => {})
+    })
   }
 
   const getValueGridData = recordId => {
@@ -118,6 +112,7 @@ const IndicatorForm = ({
         setErrorMessage(error)
       })
   }
+
   useEffect(() => {
     recordId && getValueGridData(recordId)
   }, [recordId, refresh])
