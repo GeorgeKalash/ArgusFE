@@ -17,8 +17,8 @@ const MfAccounts = () => {
   const {
     query: { data },
     labels: _labels,
-    search,
-    clear,
+    filterBy,
+    clearFilter,
     paginationParameters,
     invalidate,
     access,
@@ -27,15 +27,16 @@ const MfAccounts = () => {
     queryFn: fetchGridData,
     endpointId: FinancialRepository.Account.page,
     datasetId: ResourceIds.Accounts,
-    search: {
-      searchFn: fetchWithSearch
+    filter: {
+      endpointId: FinancialRepository.Account.snapshot,
+      filterFn: fetchWithSearch
     }
   })
 
-  async function fetchWithSearch({ qry }) {
+  async function fetchWithSearch({ filters }) {
     return await getRequest({
       extension: FinancialRepository.Account.snapshot,
-      parameters: `_filter=${qry}`
+      parameters: `_filter=${filters.qry}`
     })
   }
 
@@ -115,8 +116,12 @@ const MfAccounts = () => {
         <GridToolbar 
           onAdd={addAccounts} 
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
           labels={_labels}
           inputSearch={true}
         />
