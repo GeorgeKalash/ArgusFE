@@ -101,8 +101,8 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
             parameters={`_groupId=${strategiesFormik.values.groupId}`}
             name='codeId'
             label={'codeId'}
-            valueField='recordId'
-            displayField='codeName'
+            valueField='codeId'
+            displayField='codeRef'
             columnsInDropDown={[
               { key: 'codeRef', value: 'Reference' },
               { key: 'codeName', value: 'Name' }

@@ -20,7 +20,9 @@ const IndicatorForm = ({
   editMode,
   height,
   maxAccess,
+  recordId,
   store,
+
   setStore,
   onApply
 }) => {
@@ -35,15 +37,15 @@ const IndicatorForm = ({
   const [refresh, setRefresh] = useState(false)
   const { getRequest } = useContext(RequestsContext)
 
-  const { recordId } = store
+  // const gid = strategiesFormik.values.recordId
 
   const formik = useFormik({
     initialValues: {
-      codeId: 4,
+      strategyId: 28,
       indicatorData: [
         {
           id: 1,
-          codeId: 4,
+          codeId: 1,
 
           seqNo: '',
 
@@ -72,6 +74,7 @@ const IndicatorForm = ({
     // }),
     onSubmit: values => {
       submitIndicators(values.indicatorData)
+      console.log(strategiesFormik.values.recordId)
     }
   })
 
@@ -82,19 +85,18 @@ const IndicatorForm = ({
       return
     }
 
-    // Assuming obj is an array and you want the first item only
-    const firstItem = obj[0]
+    const firstItem = obj
 
-    const data = {
-      strategyId: recordId,
-      seqNo: 1,
-      ...firstItem
-    }
+    obj = obj.map(({ strategyId, ...rest }, index) => ({
+      strategyId: 28,
 
-    console.log('strategiesFormik.values:', strategiesFormik.values.groupId)
+      ...rest
+    }))
+
+    console.log('strategiesFormik.values:', strategiesFormik.values)
     postRequest({
       extension: DocumentReleaseRepository.StrategyIndicator.set,
-      record: JSON.stringify(data)
+      record: JSON.stringify(obj)
     })
       .then(res => {
         if (res) toast.success('Record Edited Successfully')
@@ -185,7 +187,6 @@ const IndicatorForm = ({
           columns={columns}
           height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
           allowDelete={false}
-          allowAddNewLine={false}
         />
       </Box>
     </FormShell>
