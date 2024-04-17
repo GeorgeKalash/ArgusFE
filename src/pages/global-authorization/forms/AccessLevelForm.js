@@ -73,7 +73,6 @@ export default function AccessLevelForm({ labels, maxAccess, data, moduleId }) {
               formik.setFieldValue('accessLevel', newValue?.key)
             }}
             error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
-            editable={false}
           />
         </Grid>
       </Grid>

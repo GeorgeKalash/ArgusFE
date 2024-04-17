@@ -18,8 +18,6 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function ResourceGlobalForm({ labels, maxAccess, resourceName, resourceId, moduleId }) {
-  const [isLoading, setIsLoading] = useState(false)
-
   const [initialValues, setInitialData] = useState({
     resourceId: resourceId,
     resourceName: resourceName,
@@ -56,15 +54,12 @@ export default function ResourceGlobalForm({ labels, maxAccess, resourceName, re
   useEffect(() => {
     ;(async function () {
       if (resourceId) {
-        setIsLoading(true)
-
         const res = await getRequest({
           extension: AccessControlRepository.AuthorizationResourceGlobal.get,
           parameters: `_resourceId=${resourceId}`
         })
         if (res.record) setInitialData(res.record)
       }
-      setIsLoading(false)
     })()
   }, [])
 
@@ -120,7 +115,6 @@ export default function ResourceGlobalForm({ labels, maxAccess, resourceName, re
               formik.setFieldValue('accessLevel', newValue?.key || '')
             }}
             error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
-            editable={false}
           />
         </Grid>
       </Grid>

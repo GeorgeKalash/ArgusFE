@@ -32,16 +32,12 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
       resourceName: resourceName
     },
     onSubmit: async obj => {
-      console.log(detailsFormik.values.rows)
-
       const updatedRows = detailsFormik.values.rows
         .filter(obj => obj.accessLevel != null && obj.accessLevel !== '')
-        .map(({ ...rest }) => ({
+        .map(control => ({
           resourceId: resourceId,
-          ...rest
+          ...control
         }))
-
-      console.log(detailsFormik.values.rows)
 
       // Create the resultObject
       const resultObject = {
@@ -132,9 +128,9 @@ export default function FieldGlobalForm({ labels, maxAccess, resourceId, resourc
 
         detailsFormik.setValues({
           ...detailsFormik.values,
-          rows: finalList.map(({ ...rest }, index) => ({
+          rows: finalList.map((control, index) => ({
             id: index + 1,
-            ...rest
+            ...control
           }))
         })
       }
