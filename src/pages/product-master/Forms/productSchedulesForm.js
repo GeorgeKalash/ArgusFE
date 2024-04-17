@@ -15,7 +15,6 @@ import toast from 'react-hot-toast'
 
 const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expanded, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRow, setSelectRow] = useState()
   const { recordId: pId, countries } = store
 
   const formik = useFormik({
