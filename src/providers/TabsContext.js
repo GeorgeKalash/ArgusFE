@@ -133,7 +133,7 @@ const TabsProvider = ({ children }) => {
       const newValue = (index === activeTabsLength - 1) ? index - 1 : index;
       setValue(newValue);
 
-      router.push(activeTabs[newValue].route);
+      router.push(activeTabs[newValue + 1].route);
     } else if (index < value) {
       setValue((currentValue) => currentValue - 1);
     }
@@ -147,7 +147,13 @@ const TabsProvider = ({ children }) => {
       setLength(1)
     } else {
     if (initialLoadDone && router.asPath != '/default/') {
-      const isTabOpen = activeTabs.some((activeTab, index) => {
+      if(closing && value){
+      if(activeTabs[value]?.route!=router.asPath){
+        router.push(activeTabs[value]?.route)
+      }
+    }
+
+        const isTabOpen = activeTabs.some((activeTab, index) => {
         if (activeTab.page === children || activeTab.route === router.asPath) {
           setValue(index);
           
@@ -178,12 +184,6 @@ const TabsProvider = ({ children }) => {
     if(router.asPath === '/default/'){
       return;
     } else {
-        if(closing && value){
-        if(activeTabs[value]?.route!=router.asPath){
-          router.push(activeTabs[value]?.route)
-        }
-      }
-
       if (!activeTabs[0] && router.route != '/default/' && router.asPath && menu.length > 0) {
         setActiveTabs([
           {
