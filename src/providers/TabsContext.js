@@ -56,8 +56,15 @@ const TabsProvider = ({ children }) => {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
 
+  const OpenItems = (event, i) => {
+    setTabsIndex(i)
+    event.preventDefault()
+    setAnchorEl(event.currentTarget)
+  };
+
   const handleClose = () => {
     setAnchorEl(null)
+    
     setTabsIndex()
   };
 
@@ -78,15 +85,12 @@ const TabsProvider = ({ children }) => {
 
   // ** States
   const [activeTabs, setActiveTabs] = useState([])
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [value, setValue] = useState(0)
   const [TabsIndex, setTabsIndex] = useState()
+  const [length, setLength] = useState(1)
   const [closing, setClosing] = useState(false)
 
-  const OpenItems = (event, i) => {
-    setTabsIndex(i)   
-    event.preventDefault()
-    setAnchorEl(event.currentTarget)
-  };
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
@@ -94,66 +98,104 @@ const TabsProvider = ({ children }) => {
 
   const handleCloseAllTabs =  () => {
     router.push('/default/');
+    setActiveTabs([]);
+    setLength(0);
     setValue()
   };
 
   const handleCloseOtherTab = (Tab) => {
     const tab = activeTabs[Tab]
-      setActiveTabs([])
-      setValue(0)
-      setActiveTabs([tab])
-      router.push(tab.route)
+    router.push(tab.route)
+    setActiveTabs([])
+    setActiveTabs([tab])
+    setLength(0)
+    setValue(0)
 
   }
 
   const closeTab = (tabRoute) => {
-    setClosing(true)
+    setClosing(true);
+  
     const index = activeTabs.findIndex((tab) => tab.route === tabRoute);
-    const lastValue = activeTabs.length;
-
-    if (lastValue === 1) {
-      router.push('/default/');
-    } else {
-      if (index === lastValue - 1) {
-        const newValue = index > 0 ? index - 1 : 0;
-        if (activeTabs[newValue]) {
-          router.push(activeTabs[newValue].route);
-        }
-        setValue(newValue);
-      } else if (value === lastValue - 1) {
-        setValue(lastValue - 2);
-      }
-      
-      setActiveTabs((prevState) => {
-        return prevState.filter((tab) => tab.route !== tabRoute);
-      });
-    }
-  };
-
-  useEffect(() => { console.log(activeTabs)
+    const activeTabsLength = activeTabs.length;
     
-    if(closing && value){
-      if(activeTabs[value].route!=router.asPath){
-        router.push(activeTabs[value].route)
-      }
+    setActiveTabs((prevState) => {
+      return prevState.filter((tab) => tab.route !== tabRoute);
+    });
+  
+    if (activeTabsLength === 1) {
+      handleCloseAllTabs();
+      
+      return; 
     }
-    const currentPath = router.asPath;
+  
+    if (value === index) {
+      const newValue = (index === activeTabsLength - 1) ? index - 1 : index;
+      setValue(newValue);
 
-    if(currentPath==='/default/'){
-      setActiveTabs([]);
-
-    } else if ( currentPath !== '/default/' && menu.length > 0) {
-      const isTabOpen = activeTabs.some((tab) => tab.route === currentPath);
-      if (!isTabOpen) {
-        setActiveTabs((prevTabs) => [...prevTabs, {
-          page: children,
-          route: currentPath,
-          label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
-        }]);
-        setValue(activeTabs.length);
-      }
+      router.push(activeTabs[newValue].route);
+    } else if (index < value) {
+      setValue((currentValue) => currentValue - 1);
     }
-  }, [router.asPath, value]);
+  
+    setClosing(false);
+  };  
+
+  useEffect(() => {
+    if(router.asPath === '/default/'){
+      setActiveTabs([])
+      setLength(1)
+    } else {
+    if (initialLoadDone && router.asPath != '/default/') {
+      const isTabOpen = activeTabs.some((activeTab, index) => {
+        if (activeTab.page === children || activeTab.route === router.asPath) {
+          setValue(index);
+          
+          return true;
+        }
+        
+          return false;
+      })
+      if (isTabOpen) return
+      else {
+        const newValueState = activeTabs.length
+        setActiveTabs(prevState => {
+          return [
+            ...prevState,
+            {
+              page: children,
+              route: router.asPath,
+              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
+            }
+          ]
+        })
+        setValue(newValueState)
+      }
+    }}
+  }, [children, router.asPath])
+
+  useEffect(() => {
+    if(router.asPath === '/default/'){
+      return;
+    } else {
+        if(closing && value){
+        if(activeTabs[value]?.route!=router.asPath){
+          router.push(activeTabs[value]?.route)
+        }
+      }
+
+      if (!activeTabs[0] && router.route != '/default/' && router.asPath && menu.length > 0) {
+        setActiveTabs([
+          {
+            page: children,
+            route: router.asPath,
+            label: findNode(menu, router.asPath.replace(/\/$/, ''))
+          }
+        ])
+        setInitialLoadDone(true)
+      } setClosing(false)
+    }
+  }, [activeTabs, router, menu])
 
   return (
     <>
