@@ -9,6 +9,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { useFormik } from 'formik'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function InstantCash() {
   const { labels: _labels, maxAccess } = useResourceQuery({
@@ -117,6 +118,17 @@ export default function InstantCash() {
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
+          <FormGrid item hideonempty xs={12}>
+            <CustomTextField
+              name='partnerReference'
+              label={_labels.reference}
+              value={formik.values.partnerReference}
+              maxAccess={maxAccess}
+              maxLength='30'
+              error={formik.touched.partnerReference && Boolean(formik.errors.partnerReference)}
+              helperText={formik.touched.partnerReference && formik.errors.partnerReference}
+            />
+          </FormGrid>
           <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={RemittanceBankInterface.Combos.qry}
@@ -136,6 +148,33 @@ export default function InstantCash() {
               maxAccess={maxAccess}
               error={formik.touched.deliveryModeId && Boolean(formik.errors.deliveryModeId)}
               helperText={formik.touched.deliveryModeId && formik.errors.deliveryModeId}
+            />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <ResourceComboBox
+              endpointId={
+                formik.values.deliveryModeId && formik.values.toCountryId && RemittanceBankInterface.PayingAgent.qry
+              }
+              parameters={
+                formik.values.deliveryModeId &&
+                formik.values.toCountryId &&
+                `_receivingCountry=${formik.values.deliveryModeId}&_toCountryId=${formik.values.toCountryId}`
+              }
+              name='fromCountryId'
+              label={_labels.fromCountry}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  formik.setFieldValue('fromCountryId', newValue?.recordId)
+                } else {
+                  formik.setFieldValue('fromCountryId', '')
+                }
+              }}
+              maxAccess={maxAccess}
+              error={formik.touched.fromCountryId && Boolean(formik.errors.fromCountryId)}
+              helperText={formik.touched.fromCountryId && formik.errors.fromCountryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -215,7 +254,7 @@ export default function InstantCash() {
               endpointId={RemittanceBankInterface.Combos.qry}
               parameters={`_combo=3`}
               name='type'
-              label={_labels.type}
+              label={_labels.types}
               valueField='recordId'
               displayField='name'
               values={formik.values.remitter.primaryId}
@@ -236,7 +275,7 @@ export default function InstantCash() {
               endpointId={RemittanceBankInterface.Combos.qry}
               parameters={`_combo=4`}
               name='employerStatus'
-              label={_labels.employerStatus}
+              label={_labels.employeeStatus}
               valueField='recordId'
               displayField='name'
               values={formik.values.remitter}
@@ -292,6 +331,18 @@ export default function InstantCash() {
               maxAccess={maxAccess}
               error={formik.touched.sourceOfFundsId && Boolean(formik.errors.sourceOfFundsId)}
               helperText={formik.touched.sourceOfFundsId && formik.errors.sourceOfFundsId}
+            />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <CustomTextField
+              name='sourceAmount'
+              numberField={true}
+              label={_labels.sourceAmount}
+              value={formik.values.sourceAmount}
+              maxAccess={maxAccess}
+              onClear={() => formik.setFieldValue('sourceAmount', '')}
+              error={formik.touched.sourceAmount && Boolean(formik.errors.sourceAmount)}
+              helperText={formik.touched.sourceAmount && formik.errors.sourceAmount}
             />
           </FormGrid>
         </Grid>
