@@ -422,6 +422,15 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       height: 400
     })
   }
+  function openBankWindow() {
+    stack({
+      Component: InstantCash,
+      props: {},
+      width: 900,
+      height: 650,
+      title: 'Instant Cash'
+    })
+  }
   async function getDefaultVAT() {
     var parameters = `_filter=&_key=vatPct`
 
@@ -652,7 +661,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={2}>
-                <Button sx={{ backgroundColor: '#D3D3D3', color: '#000000' }} onClick={() => openProductWindow()}>
+                <Button sx={{ backgroundColor: '#908c8c', color: '#000000' }} onClick={() => openProductWindow()}>
                   Product
                 </Button>
               </Grid>
@@ -1123,6 +1132,22 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 }}
                 errorCheck={'beneficiaryId'}
               />
+            </Grid>
+            <Grid item xs={2}>
+              <Button
+                sx={{
+                  backgroundColor: '#908c8c',
+                  color: '#000000',
+                  '&:disabled': {
+                    backgroundColor: '#eaeaea',
+                    color: '#000000'
+                  }
+                }}
+                disabled={!formik.values.beneficiaryId}
+                onClick={() => openBankWindow()}
+              >
+                Bank API
+              </Button>
             </Grid>
             <Grid item xs={5}>
               <ResourceComboBox

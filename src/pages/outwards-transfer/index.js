@@ -7,7 +7,6 @@ import { Box } from '@mui/material'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import InstantCash from './Tabs/InstantCash'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -184,7 +183,7 @@ const OutwardsTransfer = () => {
   }
 
   function openOutWardsWindow(plantId, cashAccountId, recordId) {
-    /*stack({
+    stack({
       Component: OutwardsTab,
       props: {
         plantId: plantId,
@@ -197,13 +196,6 @@ const OutwardsTransfer = () => {
       width: 1100,
       height: 600,
       title: 'Outwards'
-    })*/
-    stack({
-      Component: InstantCash,
-      props: {},
-      width: 900,
-      height: 650,
-      title: 'Instant Cash'
     })
   }
 
