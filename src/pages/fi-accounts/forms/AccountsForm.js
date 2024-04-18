@@ -17,7 +17,6 @@ const AccountsForms = ({
   labels,
   editMode,
   maxAccess,
-  setEditMode,
   setStore,
   store
 }) => {
@@ -65,7 +64,6 @@ const AccountsForms = ({
     })
       .then(res => {
         if (!recordId) {
-          setEditMode(true)
           setStore(prevStore => ({
             ...prevStore,
             recordId: res.recordId
@@ -91,7 +89,6 @@ const AccountsForms = ({
     })
       .then(res => {
         formik.setValues(res.record)
-        setEditMode(true)
       })
   }
 

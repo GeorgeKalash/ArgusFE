@@ -13,7 +13,7 @@ const AccountsWindow = ({
   expanded
 }) => {
   const [activeTab , setActiveTab] = useState(0)
-  const [editMode, setEditMode] = useState(recordId)
+  const editMode = !!recordId
 
   const [store , setStore] = useState({
     recordId : recordId || null,
@@ -33,7 +33,6 @@ const AccountsWindow = ({
         <AccountsForm
           store={store}
           setStore={setStore}
-          setEditMode={setEditMode}
           labels={labels}
           maxAccess={maxAccess}
           height={height}

@@ -28,7 +28,6 @@ const MfAccounts = () => {
     endpointId: FinancialRepository.Account.page,
     datasetId: ResourceIds.Accounts,
     filter: {
-      endpointId: FinancialRepository.Account.snapshot,
       filterFn: fetchWithSearch
     }
   })
