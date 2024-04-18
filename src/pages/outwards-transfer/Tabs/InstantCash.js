@@ -1,5 +1,5 @@
-import { Grid } from '@mui/material'
-import { useForm } from 'react-hook-form'
+import { FormControl, Grid, TextField } from '@mui/material'
+import { Controller, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -10,6 +10,9 @@ import { DataSets } from 'src/resources/DataSets'
 import { useFormik } from 'formik'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import FieldSet from 'src/components/Shared/FieldSet'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function InstantCash() {
   const { labels: _labels, maxAccess } = useResourceQuery({
@@ -118,7 +121,7 @@ export default function InstantCash() {
       <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
-          <FormGrid item hideonempty xs={12}>
+          <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='partnerReference'
               label={_labels.reference}
@@ -346,6 +349,156 @@ export default function InstantCash() {
             />
           </FormGrid>
         </Grid>
+      </Grid>
+      <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 5 }}>
+        <FieldSet title='Remitter'>
+          {/* First Column */}
+          <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
+            <Grid item hideonempty xs={12}>
+              <CustomTextField
+                name='cardNo'
+                label={_labels.cardNo}
+                value={formik.values.remitter.cardNo}
+                maxAccess={maxAccess}
+                error={formik.touched.cardNo && Boolean(formik.errors.cardNo)}
+                helperText={formik.touched.cardNo && formik.errors.cardNo}
+              />
+            </Grid>
+            <Grid container xs={12} spacing={2} sx={{ pl: '10px', pt: 2 }}>
+              <Grid item xs={4}>
+                <CustomTextField
+                  name='firstName'
+                  label={_labels.firstName}
+                  value={formik.values?.remitter.firstName}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  onClear={() => formik.setFieldValue('firstName', '')}
+                  error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <CustomTextField
+                  name='middleName'
+                  label={_labels.middleName}
+                  value={formik.values?.remitter.middleName}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  onClear={() => formik.setFieldValue('middleName', '')}
+                  error={formik.touched.middleName && Boolean(formik.errors.middleName)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <CustomTextField
+                  name='lastName'
+                  label={_labels.lastName}
+                  value={formik.values?.remitter.lastName}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='20'
+                  onClear={() => formik.setFieldValue('lastName', '')}
+                  error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='mobileNumber'
+                phone={true}
+                label={_labels.mobileNumber}
+                value={formik.values?.remitter.mobileNumber}
+                readOnly
+                onChange={formik.handleChange}
+                maxLength='15'
+                autoComplete='off'
+                onBlur={e => {
+                  formik.handleBlur(e)
+                }}
+                onClear={() => formik.setFieldValue('mobileNumber', '')}
+                error={formik.touched.mobileNumber && Boolean(formik.errors.mobileNumber)}
+                helperText={formik.touched.mobileNumber && formik.errors.mobileNumber}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='phoneNumber'
+                phone={true}
+                label={_labels.phoneNumber}
+                value={formik.values?.remitter.phoneNumber}
+                readOnly
+                onChange={formik.handleChange}
+                maxLength='15'
+                autoComplete='off'
+                onBlur={e => {
+                  formik.handleBlur(e)
+                }}
+                onClear={() => formik.setFieldValue('phoneNumber', '')}
+                error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
+                helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='email'
+                  label={_labels.email}
+                  value={formik.values.remitter.email}
+                  type='email'
+                  required
+                  placeholder='johndoe@email.com'
+                  readOnly
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+          {/* Second Column */}
+          <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
+            <FieldSet title='Address'>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SystemRepository.City.snapshot}
+                  parameters={{
+                    _countryId: formik.values.remitter.address.country,
+                    _stateId: formik.values.remitter.address.state ? formik.values.remitter.address.state : 0
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  name='city'
+                  label={_labels.city}
+                  readOnly
+                  form={formik}
+                  secondDisplayField={false}
+                  errorCheck={'city'}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SystemRepository.CityDistrict.snapshot}
+                  parameters={{
+                    _cityId: formik.values.remitter.address.city
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  name='district'
+                  label={_labels.cityDistrict}
+                  readOnly
+                  form={formik}
+                  secondDisplayField={false}
+                  errorCheck={'cityDistrictId'}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+            </FieldSet>
+          </Grid>
+        </FieldSet>
       </Grid>
     </FormShell>
   )
