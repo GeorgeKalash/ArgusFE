@@ -1,29 +1,25 @@
 import { Box } from '@mui/material'
-import { useFormik } from 'formik'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
 import { useResourceQuery } from 'src/hooks/resource'
 
-const GlobalIntegration = ({
-  editMode,
-  height,
-  expanded
-}) => {
+const GlobalIntegration = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { postTypes, setPostTypes } = useState([])
 
   const {
     query: { data },
     labels: _labels,
     access,
-    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: GeneralLedgerRepository.GlobalIntegration.qry,
+    endpointId: GeneralLedgerRepository.IntegrationPostTypes.qry,
     datasetId: ResourceIds.IntegrationAccount,
   })
 
@@ -34,107 +30,158 @@ const GlobalIntegration = ({
     var parameters = defaultParams
 
      const response =  await getRequest({
-      extension: GeneralLedgerRepository.GlobalIntegration.page,
+      extension: GeneralLedgerRepository.IntegrationPostTypes.page,
       parameters: parameters
     })
 
     return {...response,  _startAt: _startAt}
   }
 
-  const formik = useFormik({
+  const {formik} = useForm({
+      maxAccess:access,
       enableReinitialize: false,
       validateOnChange: true,
       initialValues: {
-        postTypeId:null,
-        accountId: null,
-        accountRef: null,
-        accountName: ''
+        masterSource:null,
+        masterId: null,
+        Integrations:[
+          {
+            id: 1, 
+            postTypeId: null,
+            ptName: '',
+            accountId: null,
+            accountRef: null,
+            accountName: ''
+          }
+        ]
       },
       onSubmit: values => {
-        postCurrencies(values.currencies)
+        postIntegrations(values)
       }
     })
 
-    const postCurrencies = obj => {
+    const postIntegrations = obj => { console.log(formik.values)
 
-      const filteredObj = obj.filter(({ limit }) => limit > 0);
+      const res = obj.Integrations.relations.map(({ rest }) => ({
+        ...rest
+      }))
 
-      const saveCurrency = filteredObj.map(currency => {
-        const data = {
-          accountId: currency.accountId,
-          currencyName: currency.currencyName,
-          currencyId: currency.currencyId,
-          limit: currency.limit
-        };
-    
-        return postRequest({
-          extension: GeneralLedgerRepository.AccountCreditLimit.set,
-          record: JSON.stringify(data)
-        })
-      });
-      Promise.all(saveCurrency)
-      .then(res => {
-         toast.success('Record Edited Successfully')
+    const data = { 
+      masterSource: obj.values.masterSource ,
+      masterId: obj.values.masterId,
+      integrationAccounts: res
+    }
+  
+      postRequest({
+        extension: GeneralLedgerRepository.IntegrationPostTypes.set2,
+        record: JSON.stringify(data)
       })
-      .catch(error => { })
+        .then(res => {
+          toast.success('Record Successfully')
+        })
+        .catch(error => {})
     }
 
     const column = [
       {
         component: 'textfield',
-        label: _labels.currency,
-        name: 'currencyName',
+        label: '_labels.postTypeId',
+        name: 'postTypeId',
         props:{readOnly: true}
       },
       {
         component: 'textfield',
-        label: _labels.CreditLimits,
-        name: 'limit',
-        props:{type:'number'}
+        label: '_labels.ptName',
+        name: 'ptName',
+        props:{readOnly: true}
+      },
+      {
+        component: 'textfield',
+        label: '_labels.accountName',
+        name: 'accountName',
+        props:{readOnly: true}
+      },
+      {
+        component: 'resourcecombobox',
+        label: 'labels.accountRef',
+        name: 'accountRef',
+        props: {
+          endpointId: GeneralLedgerRepository.IntegrationAccounts.qry,
+          valueField: 'accountId',
+          displayField: 'accountRef',
+          mapping: [ { from: 'accountName', to: 'accountName' } ,
+          { from: 'accountRef', to: 'accountRef' },
+          { from: 'accountId', to: 'accountId' } ],
+          columnsInDropDown: [
+            { key: 'accountRef', value: 'accountRef' },
+            { key: 'accountName', value: 'accountName' },
+          ]
+        }
       }
     ]
 
-    const getCurrencies = accountId => {
-      const defaultParams = `_accountId=${accountId}`
-      var parameters = defaultParams
-      getRequest({
-        extension: GeneralLedgerRepository.AccountCreditLimit.qry,
-        parameters: parameters
-      })
-        .then(res => {
-          if (res.list.length > 0){
-            const currencies = res.list.map(( currency , index) => ({
-                id : index,
-                ...currency
-            }))
-            formik.setValues({ currencies: currencies})
+    useEffect(() => {
+      getPostTypes();
+    }, []); 
 
-          setStore(prevStore => ({
-            ...prevStore,
-            currencies: currencies,
+    const getPostTypes = () => {
+      getRequest({
+        extension: GeneralLedgerRepository.IntegrationPostTypes.qry
+      })
+      .then(res => {
+        if (res.list.length > 0) {
+          const postTypes = res.list.map((record, index) => ({
+            id: index,
+            recordId: record.recordId,
+            name: record.name
           }));
-          }
-        })
-        .catch(error => {
-        })
-    }
+          setPostTypes({ postTypes });
+        }
+      })
+      .catch(error => {
+      });
+      
+      getIntegrations()
+    }  
+
+    const getIntegrations = () => {
+      console.log(postTypes)
+      getRequest({
+        extension: GeneralLedgerRepository.IntegrationAccounts.qry,
+        parameters:`_recordId=0&_classId=0`
+      })
+      .then(res => {
+        formik.setValues({ masterSource: res.masterSource });
+        formik.setValues({ masterId: res.masterId });
+        if (res.list.length > 0) {
+          const Integrations = res.list.map((rest, index) => ({
+            id: index,
+            ...rest
+          }));
+          
+          formik.setValues({ Integrations: Integrations });
+        }
+      })
+      .catch(error => {
+      });
+    }    
 
   return (
     <FormShell 
       form={formik}
       resourceId={ResourceIds.Accounts}
-      maxAccess={access}
-      infoVisible={false}
-      editMode={editMode}>
+
+      // maxAccess={access}
+      infoVisible={false}>
+        
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
         <DataGrid   
-           onChange={value => formik.setFieldValue('currencies', value)}
-           value={formik.values}
-           error={formik.errors}
+           onChange={value => formik.setFieldValue('Integrations', value)}
+           value={formik.values.Integrations}
+           error={formik.errors.Integrations}
            columns={column}
            allowDelete={false}
            allowAddNewLine={false}
-           height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
 
         />
       </Box>
