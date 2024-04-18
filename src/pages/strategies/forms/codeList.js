@@ -1,15 +1,12 @@
 // ** React Imports
 import { useState, useContext } from 'react'
-import { useFormik } from 'formik'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
+
 import { useWindow } from 'src/windows'
 
 // ** MUI Imports
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import * as yup from 'yup'
 
 import { useEffect } from 'react'
 
@@ -21,13 +18,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 import CodeForm from './CodeForm'
-
-// ** Helpers
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
-import { ResourceIds } from 'src/resources/ResourceIds'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

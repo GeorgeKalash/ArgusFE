@@ -5,13 +5,10 @@ import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { reference } from '@popperjs/core'
-import Strategy from 'src/pages/strategies'
 
 const IndicatorForm = ({
   labels,
@@ -30,6 +27,8 @@ const IndicatorForm = ({
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
 
+  const [applyTrigger, setApplyTrigger] = useState(0)
+
   const formik = useFormik({
     initialValues: {
       indicatorData: [
@@ -46,48 +45,43 @@ const IndicatorForm = ({
       ]
     },
 
-    // validationSchema: yup.object({
-    //   indicatorData: yup
-    //     .array()
-    //     .of(
-    //       yup.object().shape({
-    //         seqNo: yup
-    //           .number()
-    //           .min(1, 'Sequence number must be greater than 0')
-    //           .required('Sequence number is required'),
-    //         name: yup.string().required('Indicator name is required'),
-    //         indicatorId: yup.string().required('Indicator ID is required'),
-    //         indicatorName: yup.string().required('Indicator ID is required')
-    //       })
-    //     )
-    //     .required('Indicator data array is required')
-    // }),
+    validationSchema: yup.object({
+      indicatorData: yup
+        .array()
+        .of(
+          yup.object()?.shape({
+            indicatorName: yup.string().required('Indicator Name is required')
+          })
+        )
+        .required('Indicator data array is required')
+    }),
     onSubmit: values => {
       submitIndicators(values.indicatorData)
-
-      console.log('strt', strategiesFormik.values)
     }
   })
 
   const submitIndicators = obj => {
     if (obj.length === 0) {
-      console.error('No data to submit')
-
       return
     }
 
-    obj = obj.map(item => {
+    const requests = obj.map(item => {
       const { id, indicatorRef, indicatorName, ...itemWithoutId } = item
       itemWithoutId.strategyId = recordId
-      postRequest({
+
+      return postRequest({
         extension: DocumentReleaseRepository.StrategyIndicator.set,
         record: JSON.stringify(itemWithoutId)
       })
-        .then(res => {
-          if (res) toast.success('Record Edited Successfully')
-        })
-        .catch(error => {})
     })
+
+    Promise.all(requests)
+      .then(results => {
+        toast.success('Records Edited Successfully')
+      })
+      .catch(error => {
+        toast.error('An error occurred while editing records')
+      })
   }
 
   const getValueGridData = recordId => {
@@ -106,6 +100,7 @@ const IndicatorForm = ({
           strtategyId: item.strategyId
         }))
         setValueGridData(gridData)
+        formik.setValues({ indicatorData: gridData })
       })
       .catch(error => {
         console.error(error)
@@ -113,9 +108,11 @@ const IndicatorForm = ({
       })
   }
 
-  // useEffect(() => {
-  //   recordId && getValueGridData(recordId)
-  // }, [recordId, refresh])
+  useEffect(() => {
+    if (recordId) {
+      getValueGridData(recordId)
+    }
+  }, [recordId, applyTrigger])
 
   const applyStrategy = async () => {
     try {
@@ -126,27 +123,12 @@ const IndicatorForm = ({
         record: JSON.stringify(valuesWithoutGroupName)
       })
       toast.success('Strategy Applied Successfully')
-      getValueGridData(store.recordId) // Refresh the grid data after applying the strategy
+
+      setApplyTrigger(prev => prev + 1)
     } catch (error) {
       toast.error('An error occurred during apply')
     }
   }
-
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! REMOOOOOOOOOVVVVVVVVVVEEEEEEEEEE UUUUUUUSSSSSSSSSEEEEEEEEEEE EEEEEFFFFFFFFEEEEEEEECCCCCTTTTTTTT
-  // const applyStrategy = async () => {
-  //   try {
-  //     const { groupName, ...valuesWithoutGroupName } = strategiesFormik.values;
-
-  //     const res = await postRequest({
-  //       extension: DocumentReleaseRepository.ApplySTG.apply,
-  //       record: JSON.stringify(valuesWithoutGroupName)
-  //     });
-  //     toast.success('Strategy Applied Successfully');
-  //     getValueGridData(store.recordId); // Refresh the grid data after applying the strategy
-  //   } catch (error) {
-  //     toast.error('An error occurred during apply');
-  //   }
-  // }
 
   const columns = [
     {
@@ -158,7 +140,10 @@ const IndicatorForm = ({
     {
       component: 'textfield',
       label: labels.name,
-      name: 'name'
+      name: 'name',
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'resourcecombobox',
@@ -207,7 +192,7 @@ const IndicatorForm = ({
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow: 'hidden' }}>
         <DataGrid
           onChange={value => formik.setFieldValue('indicatorData', value)}
-          value={valueGridData}
+          value={formik.values.indicatorData}
           error={formik.errors.indicatorData}
           columns={columns}
           height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
@@ -219,9 +204,3 @@ const IndicatorForm = ({
 }
 
 export default IndicatorForm
-
-// DR.asmx/applySTG
-// {"name":"test react","groupId":1,"type":1,"recordId":"19"}
-// DR.asmx/setSTG
-// {"strategyId":20,"codeId":4,"seqNo":1,"indicatorId":3,"name":"Factory Manager"}
-// {"strategyId":1,"codeId":1,"seqNo":2,"indicatorId":1,"name":"code 1"}

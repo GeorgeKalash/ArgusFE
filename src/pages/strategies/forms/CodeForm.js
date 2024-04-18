@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react'
 import { useFormik } from 'formik'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -8,13 +8,10 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 import { useEffect } from 'react'
 
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import * as yup from 'yup'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { grid } from '@mui/system'
-import { ResetTvRounded } from '@mui/icons-material'
 
 const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh, strategiesFormik }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -22,7 +19,7 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
   const { recordId: grId } = store
 
   const [initialValues, setInitialData] = useState({
-    codeId: '0',
+    codeId: '',
     groupId: strategiesFormik.values.groupId,
     strategyId: grId
   })
@@ -30,10 +27,12 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues,
 
+    initialValues,
+    validationSchema: yup.object({
+      codeId: yup.string().required('This field is required')
+    }),
     onSubmit: values => {
-      console.log(values)
       postGroups(values)
     }
   })
@@ -56,7 +55,7 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
         setEditMode(true)
       } else {
         toast.success('Record Edited Successfully')
-        console.log('qbcd', strategiesFormik.values.groupId)
+
         setInitialData(prevData => ({
           ...prevData,
 
@@ -100,7 +99,7 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
             endpointId={DocumentReleaseRepository.GroupCode.qry}
             parameters={`_groupId=${strategiesFormik.values.groupId}`}
             name='codeId'
-            label={'codeId'}
+            label={labels.code}
             valueField='codeId'
             displayField='codeRef'
             columnsInDropDown={[
@@ -111,8 +110,8 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
             required
             readOnly={editMode}
             maxAccess={maxAccess}
+            onClear={() => formik.setFieldValue('codeId', '')}
             onChange={(event, newValue) => {
-              console.log(newValue)
               formik.setFieldValue('codeId', newValue?.codeId)
             }}
             error={formik.touched.codeId && Boolean(formik.errors.codeId)}

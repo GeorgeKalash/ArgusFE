@@ -8,7 +8,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 import { useEffect } from 'react'
 
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
 import * as yup from 'yup'
@@ -32,7 +31,8 @@ const PereForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      codeId: yup.string().required('This field is required')
+      codeId: yup.string().required('This field is required'),
+      prerequisiteId: yup.string().required('This field is required')
     }),
     onSubmit: values => {
       postGroups(values)
@@ -106,13 +106,13 @@ const PereForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
             values={formik.values}
             required
             readOnly={editMode}
+            onClear={() => formik.setFieldValue('codeId', '')}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
               formik && formik.setFieldValue('codeId', newValue?.codeId)
               setSelectedCodeId(newValue?.codeId)
             }}
             error={formik.touched.codeId && Boolean(formik.errors.codeId)}
-            helperText={formik.touched.codeId && formik.errors.codeId}
           />
         </Grid>
         <Grid item xs={12}>
@@ -131,7 +131,6 @@ const PereForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
               formik && formik.setFieldValue('prerequisiteId', newValue?.codeId)
             }}
             error={formik.touched.prerequisiteId && Boolean(formik.errors.prerequisiteId)}
-            helperText={formik.touched.prerequisiteId && formik.errors.prerequisiteId}
           />
         </Grid>
       </Grid>

@@ -130,13 +130,13 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
             displayField='name'
             values={strategiesFormik.values}
             required
+            readOnly={editMode}
             maxAccess={maxAccess}
+            onClear={() => formik.setFieldValue('codeId', '')}
             onChange={(event, newValue) => {
               strategiesFormik && strategiesFormik.setFieldValue('groupId', newValue?.recordId)
-              console.log('griddd', newValue.recordId)
             }}
             error={strategiesFormik.touched.groupId && Boolean(strategiesFormik.errors.groupId)}
-            helperText={strategiesFormik.touched.groupId && strategiesFormik.errors.groupId}
           />
         </Grid>
         <Grid item xs={12}>
