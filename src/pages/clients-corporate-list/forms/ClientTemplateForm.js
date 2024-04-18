@@ -193,9 +193,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
         setEditMode(true)
         getClient(res.recordId)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   async function getClient(_recordId) {
@@ -259,9 +257,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
           })
         }
       }
-    } catch (error) {
-      setErrorMessage(error)
-    }
+    } catch (error) {}
   }
 
   useEffect(() => {

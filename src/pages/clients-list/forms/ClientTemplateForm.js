@@ -866,6 +866,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       labels={_labels}
                       addressValidation={clientIndividualFormik}
                       readOnly={editMode && true}
+                      access={maxAccess}
                     />
                   </FieldSet>
                 </Grid>
@@ -1276,7 +1277,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           optional: true,
                           labels: _labels,
                           setAddress: setAddress,
-                          address: address
+                          address: address,
+                          maxAccess: maxAccess
                         },
                         width: 500,
                         height: 400,
