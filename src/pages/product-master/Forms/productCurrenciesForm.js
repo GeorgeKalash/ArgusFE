@@ -13,32 +13,27 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 
-const ProductCurrenciesForm = ({
-  store,
-  labels,
-  editMode,
-  height,
-  expanded,
-  maxAccess
-}) => {
-
-  const {recordId : pId , countries} = store
+const ProductCurrenciesForm = ({ store, labels, editMode, height, expanded, maxAccess }) => {
+  const { recordId: pId, countries } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const formik = useFormik({
-    validationSchema: yup.object({ currencies: yup
-      .array()
-      .of(
-        yup.object().shape({
+    validationSchema: yup.object({
+      currencies: yup
+        .array()
+        .of(
+          yup.object().shape({
             countryId: yup.string().required('currency  is required'),
             countryId: yup.string().required('Country  is required'),
             dispersalType: yup.string().required('Dispersal Type  is required')
-        })
-
-      ).required('Operations array is required') }),
-      initialValues: {
+          })
+        )
+        .required('Operations array is required')
+    }),
+    initialValues: {
       currencies: [
-        { id:1,
+        {
+          id: 1,
           productId: pId,
           countryId: '',
           countryRef: '',
@@ -62,11 +57,10 @@ const ProductCurrenciesForm = ({
   const post = obj => {
     const data = {
       productId: pId,
-      productMonetaries: obj.map(
-        ({ id,  productId,...rest} ) => ({
-            productId: pId,
-            ...rest
-        }))
+      productMonetaries: obj.map(({ id, productId, ...rest }) => ({
+        productId: pId,
+        ...rest
+      }))
     }
     postRequest({
       extension: RemittanceSettingsRepository.ProductMonetaries.set2,
@@ -90,10 +84,15 @@ const ProductCurrenciesForm = ({
         valueField: 'countryId',
         displayField: 'countryRef',
         displayFieldWidth: 2,
-        mapping: [  { from: 'countryId', to: 'countryId' }, { from: 'countryName', to: 'countryName' } ,, { from: 'countryRef', to: 'countryRef' }  ],
+        mapping: [
+          { from: 'countryId', to: 'countryId' },
+          { from: 'countryName', to: 'countryName' },
+          ,
+          { from: 'countryRef', to: 'countryRef' }
+        ],
         columnsInDropDown: [
           { key: 'countryRef', value: 'Reference' },
-          { key: 'countryName', value: 'Name' },
+          { key: 'countryName', value: 'Name' }
         ]
       }
     },
@@ -101,8 +100,9 @@ const ProductCurrenciesForm = ({
       component: 'textfield',
       label: labels.name,
       name: 'countryName',
-      mandatory: false,
-      readOnly: true
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'resourcecombobox',
@@ -112,21 +112,25 @@ const ProductCurrenciesForm = ({
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        mapping: [{ from: 'recordId', to: 'currencyId' }, { from: 'reference', to: 'currencyRef' } , { from: 'name', to: 'currencyName' } ],
+        mapping: [
+          { from: 'recordId', to: 'currencyId' },
+          { from: 'reference', to: 'currencyRef' },
+          { from: 'name', to: 'currencyName' }
+        ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
+          { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 2
-
       }
     },
     {
       component: 'textfield',
       label: labels.name,
       name: 'currencyName',
-      mandatory: false,
-      readOnly: true
+      props: {
+        readOnly: true
+      }
     },
 
     {
@@ -134,14 +138,15 @@ const ProductCurrenciesForm = ({
       label: labels.dispersalType,
       name: 'dispersalType',
       props: {
-        datasetId:  DataSets.RT_Dispersal_Type,
+        datasetId: DataSets.RT_Dispersal_Type,
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
-        mapping: [{ from: 'key', to: 'dispersalType' }, { from: 'value', to: 'dispersalTypeName' }],
-
+        mapping: [
+          { from: 'key', to: 'dispersalType' },
+          { from: 'value', to: 'dispersalTypeName' }
+        ]
       }
-
     },
     {
       component: 'checkbox',
@@ -150,46 +155,46 @@ const ProductCurrenciesForm = ({
     }
   ]
 
-  useEffect(()=>{
-    pId  && getMonetaries(pId)
+  useEffect(() => {
+    pId && getMonetaries(pId)
   }, [pId])
 
   const getMonetaries = pId => {
-
     const defaultParams = `_productId=${pId}`
     var parameters = defaultParams
     getRequest({
       extension: RemittanceSettingsRepository.ProductMonetaries.qry,
       parameters: parameters
+    }).then(res => {
+      if (res.list.length > 0)
+        formik.setValues({
+          currencies: res.list.map(({ ...rest }, index) => ({
+            id: index,
+            ...rest
+          }))
+        })
     })
-      .then(res => {
-        if (res.list.length > 0)
-         formik.setValues({ currencies: res.list.map(({  ...rest } , index) => ({
-          id : index,
-          ...rest
-       })) })
-      })
   }
 
-return (
-  <FormShell form={formik}
-   resourceId={ResourceIds.ProductMaster}
-   maxAccess={maxAccess}
-   infoVisible={false}
-   editMode={editMode}>
+  return (
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.ProductMaster}
+      maxAccess={maxAccess}
+      infoVisible={false}
+      editMode={editMode}
+    >
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
         <DataGrid
           onChange={value => formik.setFieldValue('currencies', value)}
           value={formik.values.currencies}
           error={formik.errors.currencies}
           columns={columns}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
-
+          height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
         />
       </Box>
     </FormShell>
   )
 }
-
 
 export default ProductCurrenciesForm
