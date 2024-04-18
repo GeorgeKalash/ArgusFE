@@ -26,6 +26,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
 import { useWindow } from 'src/windows'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
   const { stack } = useWindow()
@@ -245,8 +246,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
             inward: obj.clientCorporate?.inward,
 
             //address
-
-            //address
             countryId: obj.addressView?.countryId,
             cityId: obj.addressView?.cityId,
             city: obj.addressView?.city,
@@ -439,7 +438,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                           values={formik.values}
                           valueField='key'
                           displayField='value'
-                          readOnly={editMode && true}
+                          readOnly={true}
                           onChange={(event, newValue) => {
                             if (newValue) {
                               formik.setFieldValue('status', newValue?.key)
@@ -540,17 +539,15 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                         />
                       </Grid>
                       <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
-                        <CustomTextField
+                        <CustomNumberField
                           name='capital'
                           label={_labels.capital}
                           value={formik.values?.capital}
                           readOnly={editMode && true}
-                          type='number'
                           required
                           onChange={formik.handleChange}
                           onClear={() => formik.setFieldValue('capital', '')}
-                          error={formik.touched.capital && Boolean(formik.errors.capital)}
-                          helperText={formik.touched.capital && formik.errors.capital}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                       <Grid item xs={12}>

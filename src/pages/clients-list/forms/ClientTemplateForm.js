@@ -1528,6 +1528,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   label={_labels.mobileVerified}
                   valueField='key'
                   displayField='value'
+                  readOnly={true}
                   values={clientIndividualFormik.values}
                   onChange={(event, newValue) => {
                     clientIndividualFormik.setFieldValue('mobileVerified', newValue?.recordId)

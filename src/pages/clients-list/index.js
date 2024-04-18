@@ -150,9 +150,7 @@ const ClientsList = () => {
       } else {
         setErrorMessage({ error: 'The user does not have a default plant' })
       }
-    } catch (error) {
-      console.error(error)
-    }
+    } catch (error) {}
   }
 
   const getPlantId = async () => {
