@@ -16,7 +16,7 @@ export default function NumberfieldEdit({ column: { props }, id, field, value, u
         update({
           id,
           field,
-          value: e.target.value
+          value: Number(e.target.value)
         })
       }}
       onClear={() =>

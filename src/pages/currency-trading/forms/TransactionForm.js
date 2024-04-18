@@ -1,5 +1,4 @@
 import { Button, Checkbox, FormControlLabel, Grid, Radio, RadioGroup } from '@mui/material'
-import dayjs from 'dayjs'
 import { useFormik } from 'formik'
 import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -11,7 +10,6 @@ import FieldSet from 'src/components/Shared/FieldSet'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
-import { CommonContext } from 'src/providers/CommonContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
@@ -21,7 +19,6 @@ import { useWindow } from 'src/windows'
 import * as yup from 'yup'
 import { DataSets } from 'src/resources/DataSets'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import useIdType from 'src/hooks/useIdType'
 import { useInvalidate } from 'src/hooks/resource'
 import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationOnSubmit'
@@ -29,6 +26,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const FormContext = React.createContext(null)
 
@@ -94,15 +92,12 @@ function FormProvider({ formik, maxAccess, labels, children }) {
 
 export default function TransactionForm({ recordId, labels, maxAccess, plantId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
   const [idInfoAutoFilled, setIDInfoAutoFilled] = useState(false)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const [idTypeStore, setIdTypeStore] = useState([])
-  const [typeStore, setTypeStore] = useState([])
-  const [creditCardStore, setCreditCardStore] = useState([])
   const [getValue] = useIdType()
   const [rateType, setRateType] = useState(null)
   const [idNumberOne, setIdNumber] = useState(null)
@@ -186,7 +181,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     status: '1',
     type: -1,
     wip: 1,
-    functionId: '3502',
+    functionId: !editMode && '3502',
     idNoConfirm: '',
     cellPhoneConfirm: '',
     otp: false,
@@ -222,8 +217,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
               })
               .required('Currency is required'),
             exRate: yup.string().nullable().required('Rate is required'),
-            fcAmount: yup.string().required('FcAmount is required'),
-            lcAmount: yup.string().required('LcAmount is required')
+            fcAmount: yup.number().required('FcAmount is required'),
+            lcAmount: yup.number().required('LcAmount is required')
           })
         )
         .required('Operations array is required'),
@@ -237,7 +232,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 key: yup.string().required('Currency recordId is required')
               })
               .required('Currency is required'),
-            amount: yup.string().nullable().required('amount is required')
+            amount: yup.number().nullable().required('amount is required')
           })
         )
         .required('Operations array is required')
@@ -250,7 +245,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   async function setOperationType(type) {
     if (type === '3502' || type === '3503') {
       const res = await getRequest({
-        extension: 'SY.asmx/getDE',
+        extension: SystemRepository.Defaults.get,
         parameters:
           type === '3502'
             ? '_key=ct_cash_purchase_ratetype_id'
@@ -263,7 +258,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     }
   }
 
-  const [currencyStore, setCurrencyStore] = useState([])
   const [showAsPasswordIDNumber, setShowAsPasswordIDNumber] = useState(false)
   const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(false)
 
@@ -281,30 +275,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       })
   }
 
-  const fillCreditCard = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: CashBankRepository.CreditCard.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCreditCardStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillCATypeStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.CA_CASH_ACCOUNT_TYPE,
-      callback: setTypeStore
-    })
-  }
   useEffect(() => {
     fillType()
-    fillCATypeStore()
-    fillCreditCard()
     ;(async function () {
       setEditMode(false)
 
@@ -318,8 +290,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         setEditMode(true)
         getData(recordId)
       }
-
-      setCurrencyStore(response.list)
     })()
   }, [])
 
@@ -327,7 +297,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     const _recordId = recordId ? recordId : id
 
     const { record } = await getRequest({
-      extension: 'CTTRX.asmx/get2CIV',
+      extension: CTTRXrepository.CurrencyTrading.get2CIV,
       parameters: `_recordId=${_recordId}`
     })
     if (!recordId) {
@@ -347,14 +317,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
               name: currencyName,
               reference: currencyRef
             },
-            lcAmount: getFormattedNumber(lcAmount),
-            fcAmount: getFormattedNumber(fcAmount),
+            lcAmount: lcAmount,
+            fcAmount: fcAmount,
             minRate,
             maxRate,
             ...rest
           })
         ),
-        amount: record.cash.map(({ seqNo, amount, type, typeName, ccId, ccName, ...rest }) => ({
+        amount: record.cash.map(({ seqNo, type, typeName, ccId, ccName, ...rest }) => ({
           id: seqNo,
           types: {
             key: type,
@@ -364,7 +334,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
             recordId: ccId,
             name: ccName
           },
-          amount: getFormattedNumber(amount),
           ...rest
         })),
         clientType: record.clientMaster.category,
@@ -425,7 +394,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     const values = formik.values
 
     const { record: cashAccountRecord } = await getRequest({
-      extension: `SY.asmx/getUD`,
+      extension: SystemRepository.UserDefaults.get,
       parameters: `_userId=${userId}&_key=cashAccountId`
     })
 
@@ -458,7 +427,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     const values = formik.values
 
     const { record: cashAccountRecord } = await getRequest({
-      extension: `SY.asmx/getUD`,
+      extension: SystemRepository.UserDefaults.get,
       parameters: `_userId=${userId}&_key=cashAccountId`
     })
 
@@ -490,18 +459,21 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   }
 
   const total = formik.values.operations.reduce((acc, { lcAmount }) => {
-    return acc + lcAmount
+    return acc + (lcAmount || 0)
   }, 0)
 
   const receivedTotal = formik.values.amount.reduce((acc, { amount }) => {
-    return acc + amount
+    return acc + (amount || 0)
   }, 0)
 
-  const Balance = total - receivedTotal
+  const balance = total - receivedTotal
+
   async function onSubmit(values) {
+    console.log(values)
     if (
-      (!values.idNoConfirm && values.clientId) ||
-      (!values.confirmIdNo && !values.clientId && !values.cellPhoneConfirm)
+      ((!values?.idNoConfirm && values?.clientId) ||
+        (!values?.confirmIdNo && !values?.clientId && !values.cellPhoneConfirm)) &&
+      !editMode
     ) {
       stack({
         Component: ConfirmationOnSubmit,
@@ -516,18 +488,19 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       })
     } else {
       const { record: recordFunctionId } = await getRequest({
-        extension: `SY.asmx/getUFU`,
+        extension: SystemRepository.UserFunction.get,
         parameters: `_userId=${userId}&_functionId=${values.functionId}`
       })
 
       const { dtId } = recordFunctionId
 
       const { record: cashAccountRecord } = await getRequest({
-        extension: `SY.asmx/getUD`,
+        extension: SystemRepository.UserDefaults.get,
         parameters: `_userId=${userId}&_key=cashAccountId`
       })
 
       const clientId = values.clientId || 0
+      console.log(clientId)
 
       const payload = {
         header: {
@@ -542,7 +515,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           cashAccountId: cashAccountRecord.value,
           poeId: values.purpose_of_exchange,
           wip: values.wip,
-          amount: String(total || '').replaceAll(',', ''),
+          amount: total,
           notes: values.remarks
         },
         items: values.operations.map(
@@ -554,7 +527,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
             rateCalcMethod,
             minRate,
             maxRate,
-            fcAmount: String(fcAmount || '').replaceAll(',', ''),
+            fcAmount: fcAmount,
             lcAmount: lcAmount
           })
         ),
@@ -605,20 +578,19 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           formik.values.amount.map(
             ({ id, types, creditCards, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
               seqNo: id,
-
               type: types.key,
-
-              ccId: creditCards.recordId,
+              ccId: creditCards?.recordId,
               bankFees,
-              amount: String(amount || '').replaceAll(',', ''),
+              amount: amount,
               receiptRef,
-              cashAccountId: cashAccountRecord.value
+              cashAccountId: cashAccountRecord.value,
+              ...rest
             })
           )
       }
 
       const response = await postRequest({
-        extension: 'CTTRX.asmx/set2CIV',
+        extension: CTTRXrepository.CurrencyTrading.set2CIV,
         record: JSON.stringify(payload)
       })
 
@@ -686,14 +658,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     return response.record
   }
 
-  // function onClose (){
-
-  // }
-
-  // function onReopen() {
-
-  // }
-
   const actions = [
     {
       key: 'Close',
@@ -726,7 +690,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       resourceId={35208}
       editMode={editMode}
       isClosed={isClosed}
-      disabledSubmit={Balance && true}
+      disabledSubmit={balance && true}
       previewReport={editMode}
     >
       <FormProvider formik={formik} labels={labels} maxAccess={maxAccess}>
@@ -749,7 +713,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   helperText={formik.touched.date && formik.errors.date}
                   maxAccess={maxAccess}
                 />
-                {/* <FormField name='date' Component={CustomDatePicker}  required readOnly={editMode} /> */}
               </FormGrid>
               <Grid item xs={4}>
                 <FormField
@@ -879,9 +842,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
                         const lcAmount =
                           rateCalcMethod === 1
-                            ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) * exRate
+                            ? newRow.fcAmount * exRate
                             : rateCalcMethod === 2
-                            ? parseFloat(newRow.fcAmount.toString().replace(/,/g, '')) / exRate
+                            ? newRow.fcAmount / exRate
                             : 0
 
                         exchange.rate && update({ lcAmount: lcAmount })
@@ -904,7 +867,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     label: labels.fcAmount,
                     name: 'fcAmount',
                     async onChange({ row: { update, newRow } }) {
-                      const fcAmount = parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
+                      const fcAmount = newRow.fcAmount
                       !isNaN(fcAmount) &&
                         update({
                           lcAmount: newRow.exRate * fcAmount
@@ -920,7 +883,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       readOnly: false
                     },
                     async onChange({ row: { update, newRow } }) {
-                      const fcAmount = parseFloat(newRow.fcAmount?.toString().replace(/,/g, ''))
+                      const fcAmount = newRow.fcAmount
 
                       if (newRow.exRate >= newRow.minRate && newRow.exRate <= newRow.maxRate) {
                         !isNaN(newRow.exRate * fcAmount) &&
@@ -949,7 +912,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       readOnly: false
                     },
                     async onChange({ row: { update, newRow } }) {
-                      const lcAmount = parseFloat(newRow.lcAmount?.toString().replace(/,/g, ''))
+                      const lcAmount = newRow.lcAmount
                       const fcAmount = lcAmount ? lcAmount / newRow.exRate : ''
                       if (fcAmount && newRow.exRate)
                         update({
@@ -1297,12 +1260,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         {
                           component: 'numberfield',
                           name: 'amount',
-                          async onChange({ row: { update, newRow } }) {
-                            update({
-                              lcAmount: newRow.exRate * newRow.fcAmount
-                            })
-                          },
-                          defaultValue: ''
+                          label: labels.amount
                         },
                         {
                           component: 'resourcecombobox',
@@ -1317,15 +1275,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         },
                         {
                           component: 'numberfield',
-                          header: labels.receiptRef,
-                          name: 'bankFees',
-                          label: labels.BanKFees
+                          label: labels.receiptRef,
+                          name: 'bankFees'
                         },
                         {
                           component: 'numberfield',
-                          header: labels.receiptRef,
-                          name: 'receiptRef',
-                          label: labels.receiptRef
+                          label: labels.receiptRef,
+                          name: 'receiptRef'
                         }
                       ]}
                     />
@@ -1335,13 +1291,18 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
               <Grid container xs={3} spacing={2} sx={{ p: 4 }}>
                 <Grid item xs={12}>
-                  <CustomTextField label='Net Amount' value={getFormattedNumber(total)} readOnly />
+                  <CustomNumberField label={labels.netAmount} value={total} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField label='Amount Recieved' value={getFormattedNumber(receivedTotal)} readOnly />
+                  <CustomNumberField label={labels.amountReceived} value={receivedTotal} readOnly />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField label='Balance To Pay' value={getFormattedNumber(Balance) ?? '0'} readOnly />
+                  <CustomNumberField
+                    format={value => (value === 0 ? '0.00' : value)}
+                    label={labels.balanceToPay}
+                    value={balance}
+                    readOnly
+                  />
                 </Grid>
               </Grid>
             </Grid>
