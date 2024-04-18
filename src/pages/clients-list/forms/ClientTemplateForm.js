@@ -629,7 +629,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   onChange={clientIndividualFormik.handleChange}
                   onClear={() => clientIndividualFormik.setFieldValue('reference', '')}
                   error={clientIndividualFormik.touched.reference && Boolean(clientIndividualFormik.errors.reference)}
-                  helperText={clientIndividualFormik.touched.reference && clientIndividualFormik.errors.reference}
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -657,7 +656,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   disabledDate={'>='}
                   readOnly={editMode && true}
                   error={clientIndividualFormik.touched.birthDate && Boolean(clientIndividualFormik.errors.birthDate)}
-                  helperText={clientIndividualFormik.touched.birthDate && clientIndividualFormik.errors.birthDate}
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -689,7 +687,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.setFieldValue('idNo', '')
                       }}
                       error={clientIndividualFormik.touched.idNo && Boolean(clientIndividualFormik.errors.idNo)}
-                      helperText={clientIndividualFormik.touched.idNo && clientIndividualFormik.errors.idNo}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -724,7 +721,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         }
                       }}
                       error={clientIndividualFormik.touched.idtId && Boolean(clientIndividualFormik.errors.idtId)}
-                      helperText={clientIndividualFormik.touched.idtId && clientIndividualFormik.errors.idtId}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -772,7 +768,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       error={
                         clientIndividualFormik.touched.expiryDate && Boolean(clientIndividualFormik.errors.expiryDate)
                       }
-                      helperText={clientIndividualFormik.touched.expiryDate && clientIndividualFormik.errors.expiryDate}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -789,7 +784,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       error={
                         clientIndividualFormik.touched.issueDate && Boolean(clientIndividualFormik.errors.issueDate)
                       }
-                      helperText={clientIndividualFormik.touched.issueDate && clientIndividualFormik.errors.issueDate}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -825,7 +819,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       error={
                         clientIndividualFormik.touched.idCountry && Boolean(clientIndividualFormik.errors.idCountry)
                       }
-                      helperText={clientIndividualFormik.touched.idCountry && clientIndividualFormik.errors.idCountry}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -856,7 +849,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         }
                       }}
                       error={clientIndividualFormik.touched.idCity && Boolean(clientIndividualFormik.errors.idCity)}
-                      helperText={clientIndividualFormik.touched.idCity && clientIndividualFormik.errors.idCity}
                     />
                   </Grid>
                 </FieldSet>
@@ -957,7 +949,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         error={
                           clientIndividualFormik.touched.firstName && Boolean(clientIndividualFormik.errors.firstName)
                         }
-                        helperText={clientIndividualFormik.touched.firstName && clientIndividualFormik.errors.firstName}
                         maxAccess={maxAccess}
                       />
                     </Grid>
@@ -972,9 +963,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         onClear={() => clientIndividualFormik.setFieldValue('middleName', '')}
                         error={
                           clientIndividualFormik.touched.middleName && Boolean(clientIndividualFormik.errors.middleName)
-                        }
-                        helperText={
-                          clientIndividualFormik.touched.middleName && clientIndividualFormik.errors.middleName
                         }
                         maxAccess={maxAccess}
                       />
@@ -992,7 +980,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         error={
                           clientIndividualFormik.touched.lastName && Boolean(clientIndividualFormik.errors.lastName)
                         }
-                        helperText={clientIndividualFormik.touched.lastName && clientIndividualFormik.errors.lastName}
                         maxAccess={maxAccess}
                       />
                     </Grid>
@@ -1007,9 +994,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         onClear={() => clientIndividualFormik.setFieldValue('familyName', '')}
                         error={
                           clientIndividualFormik.touched.familyName && Boolean(clientIndividualFormik.errors.familyName)
-                        }
-                        helperText={
-                          clientIndividualFormik.touched.familyName && clientIndividualFormik.errors.familyName
                         }
                         maxAccess={maxAccess}
                       />
@@ -1052,9 +1036,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           clientIndividualFormik.touched.fl_middleName &&
                           Boolean(clientIndividualFormik.errors.fl_middleName)
                         }
-                        helperText={
-                          clientIndividualFormik.touched.fl_middleName && clientIndividualFormik.errors.fl_middleName
-                        }
                         maxAccess={maxAccess}
                       />
                     </Grid>
@@ -1073,9 +1054,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           clientIndividualFormik.touched.fl_lastName &&
                           Boolean(clientIndividualFormik.errors.fl_lastName)
                         }
-                        helperText={
-                          clientIndividualFormik.touched.fl_lastName && clientIndividualFormik.errors.fl_lastName
-                        }
                         maxAccess={maxAccess}
                       />
                     </Grid>
@@ -1093,9 +1071,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           clientIndividualFormik.touched.fl_familyName &&
                           Boolean(clientIndividualFormik.errors.fl_familyName)
                         }
-                        helperText={
-                          clientIndividualFormik.touched.fl_familyName && clientIndividualFormik.errors.fl_familyName
-                        }
+                        maxAccess={maxAccess}
                       />
                     </Grid>
                   </Grid>
@@ -1125,9 +1101,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.touched.nationalityId &&
                         Boolean(clientIndividualFormik.errors.nationalityId)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.nationalityId && clientIndividualFormik.errors.nationalityId
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1150,7 +1124,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         }
                       }}
                       error={clientIndividualFormik.touched.gender && Boolean(clientIndividualFormik.errors.gender)}
-                      helperText={clientIndividualFormik.touched.gender && clientIndividualFormik.errors.gender}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1173,9 +1147,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.touched.educationLevel &&
                         Boolean(clientIndividualFormik.errors.educationLevel)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.educationLevel && clientIndividualFormik.errors.educationLevel
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1205,9 +1177,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.touched.incomeSourceId &&
                         Boolean(clientIndividualFormik.errors.incomeSourceId)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.incomeSourceId && clientIndividualFormik.errors.incomeSourceId
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1223,9 +1193,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       error={
                         clientIndividualFormik.touched.sponsorName && Boolean(clientIndividualFormik.errors.sponsorName)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.sponsorName && clientIndividualFormik.errors.sponsorName
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1260,9 +1228,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.touched.professionId &&
                         Boolean(clientIndividualFormik.errors.professionId)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.professionId && clientIndividualFormik.errors.professionId
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 </FieldSet>
@@ -1315,9 +1281,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.touched.salaryRangeId &&
                         Boolean(clientIndividualFormik.errors.salaryRangeId)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.salaryRangeId && clientIndividualFormik.errors.salaryRangeId
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1344,7 +1308,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       error={
                         clientIndividualFormik.touched.riskLevel && Boolean(clientIndividualFormik.errors.riskLevel)
                       }
-                      helperText={clientIndividualFormik.touched.riskLevel && clientIndividualFormik.errors.riskLevel}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1368,9 +1332,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       error={
                         clientIndividualFormik.touched.smsLanguage && Boolean(clientIndividualFormik.errors.smsLanguage)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.smsLanguage && clientIndividualFormik.errors.smsLanguage
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1393,9 +1355,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       error={
                         clientIndividualFormik.touched.civilStatus && Boolean(clientIndividualFormik.errors.civilStatus)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.civilStatus && clientIndividualFormik.errors.civilStatus
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1416,7 +1376,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       }}
                       readOnly={true}
                       error={clientIndividualFormik.touched.status && Boolean(clientIndividualFormik.errors.status)}
-                      helperText={clientIndividualFormik.touched.status && clientIndividualFormik.errors.status}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1433,9 +1393,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.touched.oldReference &&
                         Boolean(clientIndividualFormik.errors.oldReference)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.oldReference && clientIndividualFormik.errors.oldReference
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1452,7 +1410,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       error={
                         clientIndividualFormik.touched.whatsAppNo && Boolean(clientIndividualFormik.errors.whatsAppNo)
                       }
-                      helperText={clientIndividualFormik.touched.whatsAppNo && clientIndividualFormik.errors.whatsAppNo}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
 
@@ -1473,7 +1431,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         }
                       }}
                       error={clientIndividualFormik.touched.title && Boolean(clientIndividualFormik.errors.title)}
-                      helperText={clientIndividualFormik.touched.title && clientIndividualFormik.errors.title}
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 </Grid>
@@ -1513,9 +1471,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     clientIndividualFormik.touched.mobileVerified &&
                     Boolean(clientIndividualFormik.errors.mobileVerified)
                   }
-                  helperText={
-                    clientIndividualFormik.touched.mobileVerified && clientIndividualFormik.errors.mobileVerified
-                  }
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -1593,10 +1549,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         clientIndividualFormik.touched.relativeDiplomatInfo &&
                         Boolean(clientIndividualFormik.errors.relativeDiplomatInfo)
                       }
-                      helperText={
-                        clientIndividualFormik.touched.relativeDiplomatInfo &&
-                        clientIndividualFormik.errors.relativeDiplomatInfo
-                      }
+                      maxAccess={maxAccess}
                     />
                   </Grid>
                 </FieldSet>
