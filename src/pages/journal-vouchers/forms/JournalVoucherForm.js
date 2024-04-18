@@ -12,13 +12,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-import {
-  formatDateToApi,
-  formatDateToApiFunction,
-  formatDateFromApi,
-  formatDateDefault,
-  formatDateFromApiInline
-} from 'src/lib/date-helper'
+import { formatDateToApi, formatDateFromApi } from 'src/lib/date-helper'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -26,7 +20,6 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { Today } from '@mui/icons-material'
 
 export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -46,8 +39,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.JournalVoucher.qry
@@ -78,17 +69,17 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
         if (!recordId) {
           toast.success('Record Added Successfully')
 
-          setInitialData({
-            ...obj,
-            recordId: response.recordId
+          const res = await getRequest({
+            extension: GeneralLedgerRepository.JournalVoucher.get,
+            parameters: `_recordId=${response.recordId}`
           })
+
+          formik.setValues(res.record)
         } else toast.success('Record Edited Successfully')
         setEditMode(true)
 
         invalidate()
-      } catch (error) {
-        toast('Something went wrong')
-      }
+      } catch (error) {}
     }
   })
 
@@ -103,16 +94,13 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData({
+          formik.setValues({
             ...res.record,
 
             date: formatDateFromApi(res.record.date)
           })
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 
@@ -120,7 +108,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
     {
       key: 'GL',
       condition: true,
-      onClick: 'newHandler',
+      onClick: 'onClickGL',
       disabled: !editMode
     }
   ]

@@ -104,7 +104,7 @@ export default function FormShell({
               title: 'Transaction Log'
             })
           }
-          newHandler={() =>
+          onClickGL={() =>
             stack({
               Component: GeneralLedger,
               props: {

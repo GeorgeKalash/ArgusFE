@@ -24,8 +24,9 @@ import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
 
 import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
+import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
 
-const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) => {
+const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [formik, setformik] = useState(null)
   const { user, setUser } = useContext(AuthContext)
@@ -104,12 +105,6 @@ const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) 
         const data = {
           transactions: values.generalAccount.map(({ id, exRate, tpAccount, functionId, ...rest }) => ({
             seqNo: id,
-
-            exRate,
-
-            functionId,
-            rateCalcMethod: 1,
-
             ...rest
           })),
           date: formatDateToApi(values.date),
@@ -233,6 +228,7 @@ const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) 
         signName: row.signName,
         notes: row.notes,
         exRate: row.exRate,
+        rateCalcMethod: row.rateCalcMethod,
         amount: row.amount,
         baseAmount: row.baseAmount
       }))
@@ -299,8 +295,9 @@ const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) 
     <FormShell
       resourceId={ResourceIds.GeneralLedger}
       form={formik2}
-      maxAccess={maxAccess}
+      maxAccess={access}
       disabledSubmit={baseGridData.balance !== 0}
+      infoVisible={false}
     >
       <Box>
         {formik && (
@@ -325,6 +322,8 @@ const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) 
           value={formik2.values.generalAccount}
           error={formik2.errors.generalAccount}
           height={`${expanded ? `calc(100vh - 400px)` : `${height - 250}px`}`}
+          name='glTransactions'
+          maxAccess={access}
           columns={[
             {
               component: 'resourcelookup',
@@ -364,21 +363,17 @@ const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) 
                     const exRate = exRateValue
                     const rateCalcMethod = result2.rateCalcMethod
 
-                    if (newRow?.amount) {
-                      const amount =
-                        rateCalcMethod === 1
-                          ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * exRate
-                          : rateCalcMethod === 2
-                          ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / exRate
-                          : 0
-                      update({
-                        baseAmount: amount
-                      })
-                    }
-
-                    update({
+                    const updatedRateRow = getRate({
+                      amount: newRow?.amount,
                       exRate: exRate,
-                      rateCalcMethod: rateCalcMethod
+                      baseAmount: newRow?.baseAmount,
+                      rateCalcMethod: rateCalcMethod,
+                      dirtyField: DIRTYFIELD_RATE
+                    })
+                    update({
+                      exRate: updatedRateRow.exRate,
+                      amount: updatedRateRow.amount,
+                      baseAmount: updatedRateRow.baseAmount
                     })
                   }
                 }
@@ -507,35 +502,59 @@ const GeneralLedger = ({ functionId, formValues, maxAccess, height, expanded }) 
             {
               component: 'numberfield',
               label: _labels.exRate,
-              name: 'exRate'
+              name: 'exRate',
+              async onChange({ row: { update, oldRow, newRow } }) {
+                const updatedRateRow = getRate({
+                  amount: newRow?.amount,
+                  exRate: newRow?.exRate,
+                  baseAmount: newRow?.baseAmount,
+                  rateCalcMethod: newRow?.rateCalcMethod,
+                  dirtyField: DIRTYFIELD_RATE
+                })
+                update({
+                  exRate: updatedRateRow.exRate,
+                  amount: updatedRateRow.amount,
+                  baseAmount: updatedRateRow.baseAmount
+                })
+              }
             },
             {
               component: 'numberfield',
               label: _labels.amount,
               name: 'amount',
-
               async onChange({ row: { update, oldRow, newRow } }) {
-                if (!newRow?.amount) {
-                  return
-                }
-
-                if (newRow?.amount && newRow?.exRate) {
-                  const amount =
-                    newRow.rateCalcMethod === 1
-                      ? parseFloat(newRow.amount.toString().replace(/,/g, '')) * newRow?.exRate
-                      : newRow.rateCalcMethod === 2
-                      ? parseFloat(newRow.amount.toString().replace(/,/g, '')) / newRow?.exRate
-                      : 0
-                  update({
-                    baseAmount: amount
-                  })
-                }
+                const updatedRateRow = getRate({
+                  amount: newRow?.amount,
+                  exRate: newRow?.exRate,
+                  baseAmount: newRow?.baseAmount,
+                  rateCalcMethod: newRow?.rateCalcMethod,
+                  dirtyField: DIRTYFIELD_AMOUNT
+                })
+                update({
+                  exRate: updatedRateRow.exRate,
+                  amount: updatedRateRow.amount,
+                  baseAmount: updatedRateRow.baseAmount
+                })
               }
             },
             {
               component: 'numberfield',
               label: _labels.baseAmount,
-              name: 'baseAmount'
+              name: 'baseAmount',
+              async onChange({ row: { update, oldRow, newRow } }) {
+                const updatedRateRow = getRate({
+                  amount: newRow?.amount,
+                  exRate: newRow?.exRate,
+                  baseAmount: newRow?.baseAmount,
+                  rateCalcMethod: newRow?.rateCalcMethod,
+                  dirtyField: DIRTYFIELD_BASE_AMOUNT
+                })
+                update({
+                  exRate: updatedRateRow.exRate,
+                  amount: updatedRateRow.amount,
+                  baseAmount: updatedRateRow.baseAmount
+                })
+              }
             }
           ]}
         />
