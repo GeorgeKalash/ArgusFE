@@ -859,7 +859,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 formik.values.functionId &&
                 (formik.values.functionId != SystemFunction.CreditInvoicePurchase ? '#C7F6C7' : 'rgb(245, 194, 193)')
               }
-              scrollHeight={`${expanded ? height - 430 : 200}px`}
+              height={190}
             />
           </Box>
         </Grid>

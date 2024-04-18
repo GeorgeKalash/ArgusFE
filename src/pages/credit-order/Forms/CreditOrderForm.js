@@ -437,7 +437,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         if (!exchange?.rate) {
           update({
             exRate: 0,
-            defaultRate: 0,
             amount: 0,
             baseAmount: 0
           })
@@ -566,7 +565,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         if (!newRow.exRate) {
           update({
             exRate: '',
-            defaultRate: '',
             amount: 0,
             baseAmount: 0
           })
@@ -596,7 +594,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                 : 0
             update({
               exRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(5),
-              defaultRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(5),
               amount: getFormattedNumber(qtyToCur.toFixed(2)),
               baseAmount: getFormattedNumber(curToBase.toFixed(2))
             })
@@ -607,7 +604,6 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
             if (nv) {
               update({
                 exRate: '',
-                defaultRate: '',
                 amount: 0,
                 baseAmount: 0
               })
@@ -939,7 +935,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                     ? '#C7F6C7'
                     : 'rgb(245, 194, 193)')
                 }
-                scrollHeight={`${expanded ? height - 430 : 200}px`}
+                height={190}
               />
             </Box>
           </Grid>
