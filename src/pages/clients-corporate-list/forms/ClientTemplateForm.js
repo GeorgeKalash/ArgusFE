@@ -24,17 +24,12 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
-import OTPPhoneVerification from 'src/components/Shared/OTPPhoneVerification'
-import { useWindow } from 'src/windows'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
-  const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [editMode, setEditMode] = useState(!!recordId)
-
-  // const [otpShow, setOtpShow] = useState(false);
 
   const [initialValues, setInitialData] = useState({
     //ClientCorporate
@@ -96,8 +91,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
-
-    // validateOnBlur: true,
     validate: values => {
       const errors = {}
 
@@ -197,9 +190,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
     })
       .then(res => {
         toast.success('Record Successfully')
-
-        // setOtpShow(true);
-
         setEditMode(true)
         getClient(res.recordId)
       })
@@ -207,22 +197,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
         setErrorMessage(error)
       })
   }
-
-  // useEffect(() => {
-  //   if (formik.values.clientId && otpShow)
-  //     stack({
-  //       Component: OTPPhoneVerification,
-  //       props: {
-  //         formValidation: formik,
-  //         functionId: 3600,
-  //         setEditMode: setEditMode,
-  //         setErrorMessage: setErrorMessage,
-  //       },
-  //       width: 400,
-  //       height: 400,
-  //       title: "Verify My Account",
-  //     });
-  // }, [formik.values.clientId]);
 
   async function getClient(_recordId) {
     try {
@@ -291,7 +265,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
   }
 
   useEffect(() => {
-    console.log(recordId)
     getClient(recordId)
   }, [recordId])
 
