@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Grid, FormControlLabel, Checkbox, Button, DialogActions } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox, Button } from '@mui/material'
 
 import { useEffect, useState, useContext } from 'react'
 
@@ -300,7 +300,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           wip: obj.clientRemittance?.wip,
           workAddressId: obj.clientRemittance?.workAddressId,
           title: obj.clientRemittance?.title,
-          mobileVerified: obj.clientRemittance?.mobileVerifiedStatus,
+          mobileVerified: obj.clientRemittance?.mobileVerificationStatus,
           isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat
         })
 
@@ -467,7 +467,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       gender: obj.gender,
       title: obj.title,
       civilStatus: obj.civilStatus,
-      mobileVerificationStatus: 1,
+      mobileVerificationStatus: obj.mobileVerified,
       educationLevel: obj.educationLevel,
       isDiplomat: obj.isDiplomat,
       isRelativeDiplomat: obj.isRelativeDiplomat,
@@ -558,7 +558,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           formValidation: clientIndividualFormik,
           functionId: 3600,
           setEditMode: setEditMode,
-          setErrorMessage: setErrorMessage
+          setErrorMessage: setErrorMessage,
+          getData: getClient
         },
         width: 400,
         height: 400,
@@ -943,6 +944,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         value={clientIndividualFormik.values?.firstName}
                         required
                         onChange={clientIndividualFormik.handleChange}
+                        language='english'
                         maxLength='10'
                         readOnly={editMode && true}
                         onClear={() => clientIndividualFormik.setFieldValue('firstName', '')}
@@ -958,6 +960,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         label={_labels.middle}
                         value={clientIndividualFormik.values?.middleName}
                         onChange={clientIndividualFormik.handleChange}
+                        language='english'
                         maxLength='10'
                         readOnly={editMode && true}
                         onClear={() => clientIndividualFormik.setFieldValue('middleName', '')}
@@ -974,6 +977,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         value={clientIndividualFormik.values?.lastName}
                         required
                         onChange={clientIndividualFormik.handleChange}
+                        language='english'
                         maxLength='10'
                         readOnly={editMode && true}
                         onClear={() => clientIndividualFormik.setFieldValue('lastName', '')}
@@ -989,6 +993,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         label={_labels.family}
                         value={clientIndividualFormik.values?.familyName}
                         onChange={clientIndividualFormik.handleChange}
+                        language='english'
                         maxLength='10'
                         readOnly={editMode && true}
                         onClear={() => clientIndividualFormik.setFieldValue('familyName', '')}
@@ -1454,7 +1459,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   label={_labels?.OTPVerified}
                 />
               </Grid>
-
               <Grid item xs={12}>
                 <ResourceComboBox
                   datasetId={DataSets.MOBILE_VERIFIED}

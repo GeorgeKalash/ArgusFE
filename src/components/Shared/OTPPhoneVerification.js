@@ -7,7 +7,7 @@ import styles from '../../../styles/phoneVerification.module.css'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import toast from 'react-hot-toast'
 
-const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMessage, window }) => {
+const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMessage, getData, window }) => {
   const { postRequest } = useContext(RequestsContext)
 
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
@@ -69,11 +69,8 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMes
         record: JSON.stringify(data)
       })
         .then(res => {
-          formValidation.setFieldValue('OTPVerified', true)
-          formValidation.setFieldValue('mobileVerified', 1)
-          formValidation.setFieldValue('status', 1)
-
           toast.success('Verification Completed')
+          getData(formValidation?.values?.clientId)
           window.close()
         })
         .catch(error => {
