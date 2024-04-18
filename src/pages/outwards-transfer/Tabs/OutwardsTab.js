@@ -483,7 +483,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         <Grid container sx={{ pt: 2 }}>
           {/* First Column */}
           <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 2, pb: 2 }}>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2.4}>
               <CustomTextField
                 name='reference'
                 label={labels.Reference}
@@ -496,7 +496,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 helperText={formik.touched.reference && formik.errors.reference}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2.4}>
               <CustomDatePicker
                 name='date'
                 required
@@ -511,7 +511,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 helperText={formik.touched.date && formik.errors.date}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2.4}>
               <ResourceComboBox
                 datasetId={DataSets.DOCUMENT_STATUS}
                 name='docStatus'
@@ -527,19 +527,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 error={formik.touched.docStatus && Boolean(formik.errors.docStatus)}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
-              <CustomTextField
-                name='tokenNo'
-                label={labels.tokenNo}
-                value={formik.values?.tokenNo}
-                readOnly
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('tokenNo', '')}
-                error={formik.touched.tokenNo && Boolean(formik.errors.tokenNo)}
-                maxAccess={maxAccess}
-              />
-            </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2.4}>
               <CustomTextField
                 name='ttNo'
                 label={labels.ttNo}
@@ -551,7 +539,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 maxAccess={maxAccess}
               />
             </FormGrid>
-            <FormGrid item hideonempty xs={3}>
+            <FormGrid item hideonempty xs={2.4}>
               <CustomDatePicker
                 name='valueDate'
                 label={labels.valueDate}
