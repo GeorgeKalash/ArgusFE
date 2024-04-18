@@ -55,8 +55,7 @@ const ClientsCorporateList = () => {
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1,
-      editable: false
+      flex: 1
     },
 
     {
@@ -196,10 +195,12 @@ const ClientsCorporateList = () => {
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
-          rowId={['clientId']}
+          rowId={['recordId']}
           isLoading={false}
           maxAccess={access}
           onEdit={editClient}
+          pageSize={50}
+          paginationType='client'
         />
         {errorMessage?.error && (
           <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
