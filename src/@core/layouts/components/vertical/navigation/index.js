@@ -287,6 +287,8 @@ const Navigation = props => {
             onClickAction={(GearItem) => {
               router.push(GearItem?.path);
               setLastOpenedPage(GearItem);
+              console.log(GearItem)
+
             }}
             map={gear.gear}
             navCollapsed={navCollapsed}
