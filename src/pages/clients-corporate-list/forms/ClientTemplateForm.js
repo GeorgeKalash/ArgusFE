@@ -113,20 +113,20 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       return errors
     },
     validationSchema: yup.object({
-      reference: referenceRequired && yup.string().required('This field is required'),
-      expiryDate: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required'),
-      cityId: yup.string().required('This field is required'),
-      name1: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      nationalityId: yup.string().required('This field is required'),
-      cellPhone: yup.string().required('This field is required'),
-      capital: yup.string().required('This field is required'),
-      lgsId: yup.string().required('This field is required'),
-      industry: yup.string().required('This field is required'),
-      activityId: yup.string().required('This field is required'),
-      street1: yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
+      reference: referenceRequired && yup.string().required(' '),
+      expiryDate: yup.date().required(' '),
+      countryId: yup.string().required(' '),
+      cityId: yup.string().required(' '),
+      name1: yup.string().required(' '),
+      name: yup.string().required(' '),
+      nationalityId: yup.string().required(' '),
+      cellPhone: yup.string().required(' '),
+      capital: yup.string().required(' '),
+      lgsId: yup.string().required(' '),
+      industry: yup.string().required(' '),
+      activityId: yup.string().required(' '),
+      street1: yup.string().required(' '),
+      phone: yup.string().required(' ')
     }),
     onSubmit: values => {
       postRtDefault(values)
@@ -253,7 +253,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
             stateId: obj.addressView?.stateId,
             cityDistrictId: obj.addressView?.cityDistrictId,
             cityDistrict: obj.addressView?.cityDistrict,
-
             email1: obj.addressView?.email1,
             email2: obj.addressView?.email2,
             name: obj.addressView?.name,
@@ -277,13 +276,13 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
             flName: obj.clientMaster?.flName,
             keyword: obj.clientMaster?.keyword,
             nationalityId: obj.clientMaster?.nationalityId,
-            expiryDate: obj.clientMaster?.expiryDate && formatDateFromApi(obj.addressView?.expiryDate),
-            createdDate: obj.addressView?.createdDate && formatDateFromApi(obj.addressView?.createdDate),
-            status: obj.addressView?.status,
-            addressId: obj.addressView?.addressId,
-            plantId: obj.addressView?.plantId,
-            cellPhone: obj.addressView?.cellPhone,
-            otp: obj.addressView?.otp
+            expiryDate: obj.clientMaster?.expiryDate && formatDateFromApi(obj.clientMaster?.expiryDate),
+            createdDate: obj.clientMaster?.createdDate && formatDateFromApi(obj.clientMaster?.createdDate),
+            status: obj.clientMaster?.status,
+            addressId: obj.clientMaster?.addressId,
+            plantId: obj.clientMaster?.plantId,
+            cellPhone: obj.clientMaster?.cellPhone,
+            otp: obj.clientMaster?.otp
           })
         }
       }
@@ -336,6 +335,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                   onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
                   helperText={formik.touched.reference && formik.errors.reference}
+                  maxAccess={maxAccess}
                 />
               </Grid>
 
@@ -350,7 +350,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                   onClear={() => formik.setFieldValue('expiryDate', '')}
                   disabledDate={!editMode && '<'}
                   error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
-                  helperText={formik.touched.expiryDate && formik.errors.expiryDate}
+                  maxAccess={maxAccess}
                 />
               </Grid>
 
@@ -370,7 +370,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                           maxLength='15'
                           onClear={() => formik.setFieldValue('cellPhone', '')}
                           error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-                          helperText={formik.touched.cellPhone && formik.errors.cellPhone}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
 
@@ -384,7 +384,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                           readOnly={editMode && true}
                           onClear={() => formik.setFieldValue('name1', '')}
                           error={formik.touched.name1 && Boolean(formik.errors.name1)}
-                          helperText={formik.touched.name1 && formik.errors.name1}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
 
@@ -398,7 +398,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                           readOnly={editMode && true}
                           onClear={() => formik.setFieldValue('flName', '')}
                           error={formik.touched.flName && Boolean(formik.errors.flName)}
-                          helperText={formik.touched.flName && formik.errors.flName}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
 
@@ -427,7 +427,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             }
                           }}
                           error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
-                          helperText={formik.touched.nationalityId && formik.errors.nationalityId}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
 
@@ -448,7 +448,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             }
                           }}
                           error={formik.touched.status && Boolean(formik.errors.status)}
-                          helperText={formik.touched.status && formik.errors.status}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
 
@@ -462,7 +462,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                           maxLength='10'
                           onClear={() => formik.setFieldValue('oldReference', '')}
                           error={formik.touched.oldReference && Boolean(formik.errors.oldReference)}
-                          helperText={formik.touched.oldReference && formik.errors.oldReference}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
 
@@ -489,7 +489,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             }
                           }}
                           error={formik.touched.lgsId && Boolean(formik.errors.lgsId)}
-                          helperText={formik.touched.lgsId && formik.errors.lgsId}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -510,7 +510,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             }
                           }}
                           error={formik.touched.industry && Boolean(formik.errors.industry)}
-                          helperText={formik.touched.industry && formik.errors.industry}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
 
@@ -536,7 +536,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
                             }
                           }}
                           error={formik.touched.activityId && Boolean(formik.errors.activityId)}
-                          helperText={formik.touched.activityId && formik.errors.activityId}
+                          maxAccess={maxAccess}
                         />
                       </Grid>
                       <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
@@ -600,7 +600,7 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
           </Grid>
           <Grid item xs={6}>
             <FieldSet title={_labels.address}>
-              <AddressTab labels={_labels} addressValidation={formik} readOnly={editMode && true} />
+              <AddressTab labels={_labels} access={maxAccess} addressValidation={formik} readOnly={editMode && true} />
             </FieldSet>
 
             <Grid item xs={12}>

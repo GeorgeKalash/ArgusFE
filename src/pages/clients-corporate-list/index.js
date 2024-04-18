@@ -1,13 +1,9 @@
-
-import React, { useContext, useEffect } from 'react'
-import { Box, Grid } from '@mui/material'
+import React, { useContext } from 'react'
+import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
-import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import toast from 'react-hot-toast'
+
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { formatDateDefault } from 'src/lib/date-helper'
@@ -37,25 +33,25 @@ const ClientsCorporateList = () => {
     labels: _labels,
     access
   } = useResourceQuery({
-    endpointId: CTCLRepository.ClientCorporate.snapshot,
     datasetId: ResourceIds.ClientCorporate,
     filter: {
       endpointId: CTCLRepository.ClientCorporate.snapshot,
       filterFn: fetchWithSearch,
-      default : {category : 2}
+      default: { category: 2 }
     }
   })
 
-  async function fetchWithSearch({options = {}, filters}) {
-    return await getRequest({
-          extension: CTCLRepository.ClientCorporate.snapshot,
-          parameters: `_filter=${filters.qry}&_category=2`
-        })
+  async function fetchWithSearch({ options = {}, filters }) {
+    return (
+      filters.qry &&
+      (await getRequest({
+        extension: CTCLRepository.ClientCorporate.snapshot,
+        parameters: `_filter=${filters.qry}&_category=2`
+      }))
+    )
   }
 
-
   const columns = [
-
     {
       field: 'reference',
       headerName: _labels.reference,
@@ -69,7 +65,6 @@ const ClientsCorporateList = () => {
       flex: 1,
       editable: false
     },
-
 
     {
       field: 'cellPhone',
@@ -91,9 +86,7 @@ const ClientsCorporateList = () => {
 
       headerName: _labels.status,
       flex: 1,
-      editable: false,
-
-
+      editable: false
     },
 
     {
@@ -103,7 +96,6 @@ const ClientsCorporateList = () => {
       flex: 1,
       editable: false,
       valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
-
     },
 
     {
@@ -112,74 +104,65 @@ const ClientsCorporateList = () => {
       headerName: _labels.expiryDate,
       flex: 1,
       editable: false,
-      valueGetter: ({ row }) =>formatDateDefault(row?.expiryDate)
-
-
-    },
-
-
+      valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
+    }
   ]
 
-
-
-  const addClient = async (obj) => {
-
+  const addClient = async obj => {
     try {
-      const plantId = await getPlantId();
+      const plantId = await getPlantId()
 
       if (plantId !== '') {
-        setEditMode(false);
+        setEditMode(false)
 
         openForm('')
-
       } else {
-        setErrorMessage({ error: 'The user does not have a default plant' });
+        setErrorMessage({ error: 'The user does not have a default plant' })
       }
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  };
+  }
 
   const getPlantId = async () => {
     const userData = window.sessionStorage.getItem('userData')
       ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null;
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
+      : null
+    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
 
     try {
       const res = await getRequest({
         extension: SystemRepository.UserDefaults.get,
-        parameters: parameters,
-      });
+        parameters: parameters
+      })
 
       if (res.record.value) {
-        return res.record.value;
+        return res.record.value
       }
 
-      return '';
+      return ''
     } catch (error) {
       // Handle errors if needed
-      setErrorMessage(error);
+      setErrorMessage(error)
 
-       return '';
+      return ''
     }
-  };
+  }
 
-  const editClient= obj => {
+  const editClient = obj => {
     setEditMode(true)
     const _recordId = obj.recordId
     openForm(_recordId)
-
   }
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: ClientTemplateForm,
       props: {
         setErrorMessage: setErrorMessage,
-        _labels : _labels,
+        _labels: _labels,
         maxAccess: access,
         editMode: editMode,
-        recordId: recordId ? recordId : null ,
+        recordId: recordId ? recordId : null,
         maxAccess: access
       },
       width: 1100,
@@ -188,11 +171,7 @@ const ClientsCorporateList = () => {
     })
   }
 
-
-
-
-
-return (
+  return (
     <>
       <Box
         sx={{
@@ -201,31 +180,31 @@ return (
           height: '100%'
         }}
       >
-
-
-<GridToolbar onAdd={addClient} maxAccess={access}  onSearch={value => {
-              filterBy('qry', value)
-            }}
-            onSearchClear={() => {
-              clearFilter('qry')
-            }}
-
-            labels={_labels}  inputSearch={true}  />
-
+        <GridToolbar
+          onAdd={addClient}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
 
         <Table
           columns={columns}
-          gridData={data ? data : {list: []}}
+          gridData={data ? data : { list: [] }}
           rowId={['clientId']}
           isLoading={false}
           maxAccess={access}
           onEdit={editClient}
         />
-<ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage}  />
-
+        {errorMessage?.error && (
+          <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+        )}
       </Box>
-
-
     </>
   )
 }
