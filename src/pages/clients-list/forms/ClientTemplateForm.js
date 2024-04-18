@@ -38,12 +38,9 @@ import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 
 const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAccess }) => {
   const { stack } = useWindow()
-
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const [showAsPassword, setShowAsPassword] = useState(false)
   const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(false)
-
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(false)
   const [referenceRequired, setReferenceRequired] = useState(true)
   const [professionStore, setProfessionStore] = useState([])
@@ -208,8 +205,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       .then(res => {
         const obj = res?.record
         obj?.workAddressView && setAddress(obj.workAddressView)
-
-        // getPlantId()
         setInitialData({
           //clientIDView
           reference: obj.clientMaster.reference,
@@ -222,11 +217,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           idNoRepeat: obj.clientIDView.idNo,
           idNoEncrypt: obj.clientIDView.idNo && obj.clientIDView.idNo,
           idNoRepeatEncrypt: obj.clientIDView.idNo && obj.clientIDView.idNo,
-
           idtId: obj.clientIDView.idtId,
           isDiplomat: obj.clientIDView.isDiplomat,
-
-          // country: obj.clientIDView.countryName,
           cityName: obj.clientIDView.idCityName,
 
           //address
@@ -236,7 +228,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           stateId: obj.addressView?.stateId,
           cityDistrictId: obj.addressView?.cityDistrictId,
           cityDistrict: obj.addressView?.cityDistrict,
-
           email1: obj.addressView?.email1,
           email2: obj.addressView?.email2,
           name: obj.addressView?.name,
@@ -251,9 +242,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           bldgNo: obj.addressView?.bldgNo,
 
           //end address
-
-          // whatsappNo: obj.whatsappNo,
-          // sponsorName: obj.sponsorName,
 
           //clientIndividual
           birthDate: obj.clientIndividual.birthDate && formatDateFromApi(obj.clientIndividual.birthDate),
@@ -282,13 +270,9 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           cellPhoneRepeatEncrypt: obj.clientMaster.cellPhone && obj.clientMaster.cellPhone,
           cellPhoneRepeat: obj.clientMaster.cellPhone,
           createdDate: obj.clientMaster.createdDate,
-
-          // expiryDate  :obj.clientMaster.expiryDate,
           flName: obj.clientMaster.flName,
           keyword: obj.clientMaster.keyword,
           otp: obj.clientMaster.otp,
-
-          // status: obj.clientMaster.status,
           plantId: obj.clientMaster.plantId,
           name: obj.clientMaster.name,
           oldReference: obj.clientMaster.oldReference,
@@ -322,9 +306,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
 
         setEditMode(true)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const fillProfessionStore = cId => {
@@ -337,9 +319,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
         setProfessionStore(res.list)
         setProfessionFilterStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const checkIdNumber = id => {
@@ -351,12 +331,10 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       })
         .then(res => {
           if (res.record) {
-            setErrorMessage(' the ID number exists.')
+            setErrorMessage('the ID number exists.')
           }
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch(error => {})
   }
 
   const fillType = () => {
@@ -368,9 +346,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       .then(res => {
         setIdTypeStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const clientIndividualFormik = useFormik({
@@ -397,30 +373,30 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       return errors
     },
     validationSchema: yup.object({
-      reference: referenceRequired && yup.string().required('This field is required'),
-      isResident: yup.string().required('This field is required'),
-      birthDate: yup.date().required('This field is required'),
-      idtId: yup.string().required('This field is required'),
-      idNo: yup.string().required('This field is required'),
-      expiryDate: yup.date().required('This field is required'),
-      countryId: yup.string().required('This field is required'),
-      cityId: yup.string().required('This field is required'),
-      idCountry: yup.string().required('This field is required'),
-      name: yup.string().required('This field is required'),
-      firstName: yup.string().required('This field is required'),
-      lastName: yup.string().required('This field is required'),
-      nationalityId: yup.string().required('This field is required'),
-      professionId: yup.string().required('This field is required'),
-      cellPhone: yup.string().required('This field is required'),
+      reference: referenceRequired && yup.string().required(' '),
+      isResident: yup.string().required(' '),
+      birthDate: yup.date().required(' '),
+      idtId: yup.string().required(' '),
+      idNo: yup.string().required(' '),
+      expiryDate: yup.date().required(' '),
+      countryId: yup.string().required(' '),
+      cityId: yup.string().required(' '),
+      idCountry: yup.string().required(' '),
+      name: yup.string().required(' '),
+      firstName: yup.string().required(' '),
+      lastName: yup.string().required(' '),
+      nationalityId: yup.string().required(' '),
+      professionId: yup.string().required(' '),
+      cellPhone: yup.string().required(' '),
       cellPhoneRepeat: yup
         .string()
         .required('Repeat Password is required')
         .oneOf([yup.ref('cellPhone'), null], 'Cell phone must match'),
-      smsLanguage: yup.string().required('This field is required'),
-      incomeSourceId: yup.string().required('This field is required'),
-      gender: yup.string().required('This field is required'),
-      street1: yup.string().required('This field is required'),
-      phone: yup.string().required('This field is required')
+      smsLanguage: yup.string().required(' '),
+      incomeSourceId: yup.string().required(' '),
+      gender: yup.string().required(' '),
+      street1: yup.string().required(' '),
+      phone: yup.string().required(' ')
     }),
     onSubmit: values => {
       postRtDefault(values)
@@ -458,7 +434,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       idNo: obj.idNo,
       plantId: clientIndividualFormik.values.plantId,
       idCountryId: obj.idCountry,
-      idtId: obj.idtId, //5
+      idtId: obj.idtId,
       idExpiryDate: formatDateToApiFunction(obj.expiryDate),
       idIssueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate),
       idCityId: obj.idCity,
@@ -491,7 +467,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       gender: obj.gender,
       title: obj.title,
       civilStatus: obj.civilStatus,
-      mobileVerificationStatus: 1, //obj.mobileVerified,
+      mobileVerificationStatus: 1,
       educationLevel: obj.educationLevel,
       isDiplomat: obj.isDiplomat,
       isRelativeDiplomat: obj.isRelativeDiplomat,
@@ -570,9 +546,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           setEditMode(true)
         }
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -867,7 +841,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       label={_labels.issusPlace}
                       form={clientIndividualFormik}
                       valueField='name'
-                      displayField='name' // onLookup={lookupCity}
+                      displayField='name'
                       firstValue={clientIndividualFormik.values.cityName}
                       secondDisplayField={false}
                       readOnly={(editMode || !clientIndividualFormik.values.idCountry) && true}

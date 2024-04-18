@@ -55,7 +55,8 @@ const ClientsCorporateList = () => {
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: 1
+      flex: 1,
+      editable: false
     },
 
     {
@@ -165,7 +166,7 @@ const ClientsCorporateList = () => {
         maxAccess: access
       },
       width: 1100,
-      height: 500,
+      height: 650,
       title: _labels.clientCorporate
     })
   }

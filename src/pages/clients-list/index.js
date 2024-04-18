@@ -14,7 +14,6 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
-import useResourceParams from 'src/hooks/useResourceParams'
 import { useResourceQuery } from 'src/hooks/resource'
 
 const ClientsList = () => {
