@@ -30,9 +30,9 @@ const IdFieldsForm = ({
         .array()
         .of(
           yup.object().shape({
-            accessLevel: yup.string().required('Access Level recordId is required')
+            accessLevel: yup.string().required(' ')
           })
-        ).required('Operations array is required') }),
+        ).required(' ') }),
       initialValues: {
         IdField: [
           { id :1,
@@ -99,11 +99,9 @@ const IdFieldsForm = ({
     }, [idtId])
 
     const getIdField = idtId => {
-      const defaultParams = `_idtId=${idtId}`
-      var parameters = defaultParams
       getRequest({
         extension: CurrencyTradingSettingsRepository.IdFields.qry,
-        parameters: parameters
+        parameters: `_idtId=${idtId}`
       })
         .then(res => {
           if (res.list.length > 0){
