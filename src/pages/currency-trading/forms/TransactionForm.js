@@ -41,7 +41,7 @@ export async function Country(getRequest) {
   return res.record.value
 }
 
-function FormField({ type, name, Component, valueField, onFocus, language, ...rest }) {
+function FormField({ type, name, Component, valueField, onFocus, language, phone, ...rest }) {
   const { formik, labels } = useContext(FormContext)
   const { getRequest } = useContext(RequestsContext)
 
@@ -62,7 +62,8 @@ function FormField({ type, name, Component, valueField, onFocus, language, ...re
         error: formik.errors[name],
         errors: formik.errors,
         valueField: valueField,
-        language: language
+        language: language,
+        phone: phone
       }}
       onChange={(e, v) => {
         if (name === 'id_type' && v && v['type'] && (v['type'] === 1 || v['type'] === 2)) {
@@ -297,7 +298,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     const _recordId = recordId ? recordId : id
 
     const { record } = await getRequest({
-      extension: CTTRXrepository.CurrencyTrading.get2CIV,
+      extension: CTTRXrepository.CurrencyTrading.get2,
       parameters: `_recordId=${_recordId}`
     })
     if (!recordId) {
@@ -777,7 +778,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                             formik.setFieldValue('issue_country', info.clientIDView.idCountryId)
                             formik.setFieldValue('id_type', info.clientIDView.idtId)
                             formik.setFieldValue('nationality', info.clientMaster.nationalityId)
-                            formik.setFieldValue('cell_phone', parseInt(info.clientMaster.cellPhone))
+                            formik.setFieldValue('cell_phone', info.clientMaster.cellPhone)
                             formik.setFieldValue('expiry_date', formatDateFromApi(info.clientIDView.idExpiryDate))
 
                             setIDInfoAutoFilled(true)
@@ -1073,6 +1074,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     type={showAsPasswordPhone && formik.values['cell_phone'] ? 'password' : 'text'}
                     name='cell_phone'
                     Component={CustomTextField}
+                    phone={true}
                     required
                     readOnly={editMode || isClosed || idInfoAutoFilled}
                     onBlur={e => {
