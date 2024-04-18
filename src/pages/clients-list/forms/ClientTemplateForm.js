@@ -637,7 +637,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       form={clientIndividualFormik}
       maxAccess={maxAccess}
       editMode={editMode}
-      disabledSubmit={!editMode}
+      disabledSubmit={editMode}
     >
       <Grid container spacing={4}>
         <Grid container xs={12} spacing={2} sx={{ padding: '20px' }}>
