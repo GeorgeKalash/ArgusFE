@@ -82,14 +82,6 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId, setErrorM
     })()
   }, [])
 
-  const actions = [
-    {
-      key: 'Tree',
-      condition: true,
-      onClick: 'Tree'
-    }
-  ]
-
   return (
     <FormShell
       resourceId={ResourceIds.PlantGroups}
@@ -97,7 +89,6 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId, setErrorM
       height={300}
       maxAccess={maxAccess}
       editMode={editMode}
-      actions={actions}
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>

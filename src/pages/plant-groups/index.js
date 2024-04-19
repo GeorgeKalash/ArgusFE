@@ -6,8 +6,10 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
+import Tree from 'src/components/Shared/Tree'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useWindow } from 'src/windows'
 
 // ** Windows
 import PlantWindow from './Windows/PlantGroupsWindow'
@@ -27,6 +29,8 @@ const Plant = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -76,6 +80,17 @@ const Plant = () => {
     setWindowOpen(true)
   }
 
+  const onTreeClick = () => {
+    stack({
+      Component: Tree,
+      props: { data: data },
+
+      width: 400,
+      height: 400,
+      title: 'Tree'
+    })
+  }
+
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
@@ -93,7 +108,7 @@ const Plant = () => {
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onTree={onTreeClick} />
         <Table
           columns={columns}
           gridData={data}

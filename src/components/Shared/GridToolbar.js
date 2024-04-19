@@ -11,6 +11,7 @@ const GridToolbar = ({
   initialLoad,
   onAdd,
   openRPB,
+  onTree,
   disableRPB = false,
   onGo,
   paramsArray,
@@ -72,6 +73,17 @@ const GridToolbar = ({
               onSearch={onSearch}
               search={true}
             />
+          </Box>
+        )}
+        {onTree && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+            <Button
+              onClick={onTree}
+              variant='contained'
+              style={{ backgroundColor: 'black', border: '1px solid #4eb558' }}
+            >
+              TREE
+            </Button>
           </Box>
         )}
         {openRPB && (

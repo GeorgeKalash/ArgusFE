@@ -68,6 +68,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Print',
+    color: '#231f20',
+    image: 'beneficiary.png',
+    main: false
+  },
+  {
     key: 'Invoice',
     color: '#231f20',
     image: 'invoice.png',

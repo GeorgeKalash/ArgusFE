@@ -18,6 +18,7 @@ const WindowToolbar = ({
   newHandler,
   onGenerateReport,
   disabledSubmit,
+  print,
   disabledApply,
   editMode = false,
   infoVisible = true,
@@ -28,11 +29,11 @@ const WindowToolbar = ({
   setSelectedReport,
   selectedReport,
   previewReport,
-  onTree,
   actions = []
 }) => {
   const functionMapping = {
     actions,
+    print,
     isSaved,
     isInfo,
     isCleared,
