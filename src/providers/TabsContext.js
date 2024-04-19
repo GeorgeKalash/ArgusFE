@@ -35,7 +35,7 @@ CustomTabPanel.propTypes = {
 
 const TabsProvider = ({ children }) => {
   const router = useRouter()
-  const { menu, lastOpenedPage } = useContext(MenuContext)
+  const { menu, gear, lastOpenedPage } = useContext(MenuContext)
 
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
@@ -154,7 +154,7 @@ const TabsProvider = ({ children }) => {
             {
               page: children,
               route: router.asPath,
-              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
+              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
             }
           ]
         })
@@ -172,13 +172,13 @@ const TabsProvider = ({ children }) => {
           {
             page: children,
             route: router.asPath,
-            label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
+            label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
           }
         ])
         setInitialLoadDone(true)
       } setClosing(false)
     }
-  }, [activeTabs, router, menu])
+  }, [activeTabs, router, menu , gear])
 
   return (
     <>

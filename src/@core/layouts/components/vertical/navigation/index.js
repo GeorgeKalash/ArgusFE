@@ -287,8 +287,6 @@ const Navigation = props => {
             onClickAction={(GearItem) => {
               router.push(GearItem?.path);
               setLastOpenedPage(GearItem);
-              console.log(GearItem)
-
             }}
             map={gear.gear}
             navCollapsed={navCollapsed}
@@ -307,7 +305,6 @@ const Navigation = props => {
           )}
         </Box>
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
-          {/* @ts-ignore */}
           <ScrollWrapper
             {...(hidden
               ? {
