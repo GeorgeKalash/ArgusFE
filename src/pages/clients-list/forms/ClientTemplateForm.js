@@ -467,7 +467,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       gender: obj.gender,
       title: obj.title,
       civilStatus: obj.civilStatus,
-      mobileVerificationStatus: obj.mobileVerified,
+      mobileVerificationStatus: obj.mobileVerified || 0,
       educationLevel: obj.educationLevel,
       isDiplomat: obj.isDiplomat,
       isRelativeDiplomat: obj.isRelativeDiplomat,
