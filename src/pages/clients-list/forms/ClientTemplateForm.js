@@ -209,6 +209,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
     })
       .then(res => {
         const obj = res?.record
+        setIsClosed(obj.clientRemittance.wip === 2 ? true : false)
+
         obj?.workAddressView && setAddress(obj.workAddressView)
         setInitialData({
           //clientIDView
@@ -643,7 +645,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       props: { clientId: recordId },
       width: 1100,
       height: 500,
-      title: 'Beneficiaries'
+      title: _labels.beneficiaries
     })
   }
 
