@@ -28,6 +28,7 @@ const WindowToolbar = ({
   setSelectedReport,
   selectedReport,
   previewReport,
+  onTree,
   actions = []
 }) => {
   const functionMapping = {

@@ -91,7 +91,10 @@ export const SystemRepository = {
     del: service + ''
   },
   PlantGroup: {
-    qry: service + 'qryPLG'
+    qry: service + 'qryPLG',
+    get: service + 'getPLG',
+    set: service + 'setPLG',
+    del: service + 'delPLG'
   },
   SMSTemplate: {
     qry: service + 'qrySMT',

@@ -2,6 +2,7 @@ import { DialogContent, Box } from '@mui/material'
 import { useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
+import Tree from './Tree'
 import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
@@ -74,7 +75,9 @@ export default function FormShell({
 
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0  }}><Box sx={{mt:1}}>{children}</Box></DialogContent>
+      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>
+        <Box sx={{ mt: 1 }}>{children}</Box>
+      </DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
           print={print}
@@ -90,6 +93,14 @@ export default function FormShell({
             form.setFieldValue('isTFRClicked', true)
             form.handleSubmit()
           }}
+          onTree={() =>
+            stack({
+              Component: Tree,
+              width: 600,
+              height: 600,
+              title: 'Tree'
+            })
+          }
           onInfo={() =>
             stack({
               Component: TransactionLog,
