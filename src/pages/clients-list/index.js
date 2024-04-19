@@ -78,12 +78,6 @@ const ClientsList = () => {
       editable: false
     },
     {
-      field: 'plantName',
-      headerName: _labels.plant,
-      flex: 1,
-      editable: false
-    },
-    {
       field: 'nationalityName',
       headerName: _labels.nationality,
       flex: 1,
@@ -113,6 +107,12 @@ const ClientsList = () => {
     {
       field: 'otp',
       headerName: _labels.otp,
+      flex: 1,
+      editable: false
+    },
+    {
+      field: 'wipName',
+      headerName: _labels.wipName,
       flex: 1,
       editable: false
     }

@@ -6,10 +6,15 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import styles from '../../../styles/phoneVerification.module.css'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import toast from 'react-hot-toast'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMessage, getData, window }) => {
   const { postRequest } = useContext(RequestsContext)
 
+  const { labels: labels, access } = useResourceParams({
+    datasetId: ResourceIds.OTPVerify
+  })
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [timer, setTimer] = useState(60)
   const [error, setError] = useState('')
@@ -147,7 +152,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMes
   return (
     <div width={500} height={300} onClose={onClose}>
       <Grid className={styles.phoneVerificationContainer}>
-        <h2>Verify My Account</h2>
+        <h2>{labels.OTPVerification}</h2>
         <Grid className={styles.otpInputContainer}>
           {otp.map((digit, index) => (
             <input
@@ -163,17 +168,23 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMes
           ))}
         </Grid>
         <Grid className={styles.timerContainer}>
-          {timer > 0 ? <p>Time remaining: {timer}s</p> : <p className={styles.expiredTimer}>OTP expired</p>}
+          {timer > 0 ? (
+            <p>
+              {labels.timeRemaining}: {timer}s
+            </p>
+          ) : (
+            <p className={styles.expiredTimer}>{labels.OTPExpired}</p>
+          )}
         </Grid>
         <button className={styles.resendButton} onClick={handleResendOtp} disabled={timer > 0}>
-          Resend OTP
+          {labels.resendOTP}
         </button>
         <button
           className={styles.verifyButton}
           onClick={handleVerifyOtp}
           disabled={timer === 0 || disabled < 5 ? true : false}
         >
-          Verify OTP
+          {labels.verifyOTP}
         </button>
         {error && <p className={styles.errorMessage}>{error}</p>}
       </Grid>

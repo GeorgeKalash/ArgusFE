@@ -35,6 +35,7 @@ import Confirmation from 'src/components/Shared/Confirmation'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
+import { useInvalidate } from 'src/hooks/resource'
 
 const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAccess }) => {
   const { stack } = useWindow()
@@ -49,6 +50,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
   const [editMode, setEditMode] = useState(null)
   const [idTypeStore, setIdTypeStore] = useState([])
   const [otpShow, setOtpShow] = useState(false)
+  const [isClosed, setIsClosed] = useState(false)
 
   const [initialValues, setInitialData] = useState({
     //clientIDView
@@ -159,6 +161,9 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
 
   const [getValue] = UseIdType()
 
+  const invalidate = useInvalidate({
+    endpointId: CTCLRepository.CtClientIndividual.snapshot
+  })
   async function checkTypes(value) {
     if (!value) {
       clientIndividualFormik.setFieldValue('idtId', '')
@@ -273,12 +278,12 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           flName: obj.clientMaster.flName,
           keyword: obj.clientMaster.keyword,
           otp: obj.clientMaster.otp,
-          plantId: obj.clientMaster.plantId,
+          plantId: obj.plantId,
           name: obj.clientMaster.name,
           oldReference: obj.clientMaster.oldReference,
 
           //clientRemittance
-          recordId: recordId,
+          recordId: obj?.clientRemittance?.recordId,
           otpVerified: obj.clientRemittance?.otpVerified,
           addressId: obj.clientRemittance?.addressId,
           batchId: obj.clientRemittance?.batchId,
@@ -563,7 +568,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
         },
         width: 400,
         height: 400,
-        title: 'Verify My Account'
+        title: _labels.OTPVerification
       })
   }, [clientIndividualFormik.values.clientId])
 
@@ -580,6 +585,37 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       setProfessionFilterStore(filteredList)
     }
   }
+  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
+
+  const onClose = async () => {
+    const values = clientIndividualFormik.values
+    try {
+      const { record: cashAccountRecord } = await getRequest({
+        extension: `SY.asmx/getUD`,
+        parameters: `_userId=${userId}&_key=cashAccountId`
+      })
+
+      const data = {
+        recordId: values?.recordId || null,
+        functionId: 3600,
+        plantId: plantId || values?.plantId,
+        reference: values?.reference,
+        clientId: values.clientId,
+        status: values.status,
+        cashAccountId: cashAccountRecord.value
+      }
+
+      const res = await postRequest({
+        extension: RTCLRepository.CtClientIndividual.close,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        toast.success('Record Closed Successfully')
+        invalidate()
+        setIsClosed(true)
+      }
+    } catch {}
+  }
 
   const actions = [
     {
@@ -593,6 +629,12 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       condition: true,
       onClick: () => openBeneficiaryWindow(),
       disabled: !editMode
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
     }
   ]
   function openBeneficiaryWindow() {
@@ -613,6 +655,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={editMode}
+      on
     >
       <Grid container spacing={4}>
         <Grid container xs={12} spacing={2} sx={{ padding: '20px' }}>

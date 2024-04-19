@@ -4,7 +4,8 @@ export const RTCLRepository = {
   CtClientIndividual: {
     get: service + 'get2KYC',
     get3: service + 'get3KYC',
-    set2: service + 'set2KYC'
+    set2: service + 'set2KYC',
+    close: service + 'closeKYC'
   },
   ClientRelation: {
     qry: service + 'qryREL',

@@ -35,6 +35,7 @@ import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
+import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
 
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -169,6 +170,14 @@ const DocumentsOnHold = () => {
         windowHeight = 600
         windowWidth = 1200
         title = labels.cashInvoice
+        break
+      case SystemFunction.KYC:
+        relevantComponent = ClientTemplateForm
+        labels = await getLabels(ResourceIds.ClientList)
+        relevantAccess = await getAccess(ResourceIds.ClientMaster)
+        windowHeight = 600
+        windowWidth = 1100
+        title = labels.pageTitle
         break
 
       case SystemFunction.Outwards:
