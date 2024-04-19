@@ -65,6 +65,7 @@ export const GeneralLedgerRepository = {
     qry: service + 'qryIA',
     get: service + 'getIA',
     set: service + 'setIA',
+    set2: service + 'set2IA',
     page: service + 'pageIA',
     del: service + 'delIA'
   }
