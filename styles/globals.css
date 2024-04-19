@@ -1,6 +1,7 @@
 html,
 body {
   min-height: 100%;
+  zoom:0.7
 }
 
 #__next {
