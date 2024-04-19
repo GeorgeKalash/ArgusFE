@@ -32,5 +32,16 @@ export const AccessControlRepository = {
   ModuleDeactivation: {
     qry: service + 'qryMOD',
     set2: service + 'set2MOD'
+  },
+  AuthorizationResourceGlobal: {
+    qry: service + 'qryRGL',
+    get: service + 'getRGL',
+    set: service + 'setRGL'
+  },
+  GlobalControlAuthorizationPack: {
+    set2: service + 'set2CGL'
+  },
+  GlobalControlAuthorizationView: {
+    qry: service + 'qryCGL'
   }
 }

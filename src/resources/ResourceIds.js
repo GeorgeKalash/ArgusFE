@@ -109,5 +109,6 @@ export const ResourceIds = {
   CashAccounts: 33102,
   CorrespondentControl: 36119,
   CashTransfer: 33309,
-  IntegrationAccount: 30102
+  IntegrationAccount: 30102,
+  GlobalAuthorization: 23105
 }
