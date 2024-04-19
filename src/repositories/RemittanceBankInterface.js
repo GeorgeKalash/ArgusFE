@@ -9,5 +9,8 @@ export const RemittanceBankInterface = {
   },
   PayingAgent: {
     qry: service + 'qryAGT'
+  },
+  Bank: {
+    snapshot: service + 'snapshotBank'
   }
 }

@@ -425,9 +425,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   function openBankWindow() {
     stack({
       Component: InstantCash,
-      props: {},
-      width: 900,
-      height: 650,
+      props: { clientId: formik.values.clientId, beneficiaryId: formik.values.beneficiaryId },
+      width: 1000,
+      height: 720,
       title: 'Instant Cash'
     })
   }
