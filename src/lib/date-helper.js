@@ -57,7 +57,8 @@ function formatDateDefault(date) {
 
   return formattedDate
 }
-
+;('/Date(1767225600000)/')
+;('/Date(1767225600000)/')
 function formatTimestampToDate(timestamp) {
   if (!timestamp) return
 

@@ -53,12 +53,6 @@ const ClientsList = () => {
 
   const columns = [
     {
-      field: 'categoryName',
-      headerName: _labels?.category,
-      flex: 1,
-      editable: false
-    },
-    {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1,

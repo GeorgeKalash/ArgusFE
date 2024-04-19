@@ -209,8 +209,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           //clientIDView
           reference: obj.clientMaster.reference,
           clientId: obj.clientIDView.clientId,
-          expiryDate: formatDateFromApi(obj.clientIDView.idExpiryDate),
-          issueDate: obj.clientIDView.idIssueDate && formatDateFromApi(obj.clientIDView.idIssueDate),
+          expiryDate: formatDateFromApi(obj.clientMaster.expiryDate),
+          issueDate: obj.clientIDView.idIssueDate && formatDateFromApi(obj.clientIDView.issueDate),
           idCountry: obj.clientIDView.idCountryId,
           idCity: obj.clientIDView.idCityId,
           idNo: obj.clientIDView.idNo,
@@ -467,7 +467,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       gender: obj.gender,
       title: obj.title,
       civilStatus: obj.civilStatus,
-      mobileVerificationStatus: obj.mobileVerified || 0,
+      mobileVerificationStatus: 0,
       educationLevel: obj.educationLevel,
       isDiplomat: obj.isDiplomat,
       isRelativeDiplomat: obj.isRelativeDiplomat,
@@ -1457,25 +1457,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     />
                   }
                   label={_labels?.OTPVerified}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  datasetId={DataSets.MOBILE_VERIFIED}
-                  name='mobileVerified'
-                  label={_labels.mobileVerified}
-                  valueField='key'
-                  displayField='value'
-                  readOnly={true}
-                  values={clientIndividualFormik.values}
-                  onChange={(event, newValue) => {
-                    clientIndividualFormik.setFieldValue('mobileVerified', newValue?.recordId)
-                  }}
-                  error={
-                    clientIndividualFormik.touched.mobileVerified &&
-                    Boolean(clientIndividualFormik.errors.mobileVerified)
-                  }
-                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
