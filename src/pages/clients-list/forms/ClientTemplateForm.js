@@ -210,7 +210,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           reference: obj.clientMaster.reference,
           clientId: obj.clientIDView.clientId,
           expiryDate: formatDateFromApi(obj.clientMaster.expiryDate),
-          issueDate: obj.clientIDView.idIssueDate && formatDateFromApi(obj.clientIDView.issueDate),
+          issueDate: obj.clientIDView.idIssueDate && formatDateFromApi(obj.clientIDView.idIssueDate),
           idCountry: obj.clientIDView.idCountryId,
           idCity: obj.clientIDView.idCityId,
           idNo: obj.clientIDView.idNo,
@@ -1459,6 +1459,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   label={_labels?.OTPVerified}
                 />
               </Grid>
+
               <Grid item xs={12}>
                 <FormControlLabel
                   control={
