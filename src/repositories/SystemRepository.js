@@ -157,6 +157,5 @@ export const SystemRepository = {
   },
   UserFunction: {
     get: service + 'getUFU'
-
   }
 }
