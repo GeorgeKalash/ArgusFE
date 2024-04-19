@@ -146,7 +146,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       {
         id: 1,
         cashAccountId: '',
-        cashInvoiceId: null,
         type: '',
         typeName: '',
         ccName: '',
@@ -228,13 +227,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         .array()
         .of(
           yup.object().shape({
-            types: yup
-              .object()
-              .shape({
-                key: yup.string().required('Currency recordId is required')
-              })
-              .required('Currency is required'),
-            amount: yup.number().nullable().required('amount is required')
+            type: yup.string().required(' '),
+            amount: yup.number().nullable().required(' ')
           })
         )
         .required('Operations array is required')
@@ -502,7 +496,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       })
 
       const clientId = values.clientId || 0
-      console.log(clientId)
 
       const payload = {
         header: {
@@ -577,16 +570,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
         cash:
           formik.values.amount.length > 0 &&
-          formik.values.amount.map(
-            ({ id, types, creditCards, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
-              seqNo: id,
-              bankFees,
-              amount: amount,
-              receiptRef,
-              cashAccountId: cashAccountRecord.value,
-              ...rest
-            })
-          )
+          formik.values.amount.map(({ id, types, creditCards, cashAccountId, ...rest }) => ({
+            seqNo: id,
+            cashAccountId: cashAccountRecord.value,
+            ...rest
+          }))
       }
 
       const response = await postRequest({
@@ -1250,15 +1238,14 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                         {
                           component: 'resourcecombobox',
                           label: labels.type,
-                          name: 'types',
+                          name: 'type',
                           props: {
                             datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
                             displayField: 'value',
                             valueField: 'key',
                             mapping: [
-                              { from: 'countryId', to: 'countryId' },
-                              { from: 'countryName', to: 'countryName' },
-                              { from: 'countryRef', to: 'countryRef' }
+                              { from: 'key', to: 'type' },
+                              { from: 'value', to: 'typeName' }
                             ],
                             filter: item => (formik.values.functionId === '3502' ? item.key === '2' : true)
                           }
