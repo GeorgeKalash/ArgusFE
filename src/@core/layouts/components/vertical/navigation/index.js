@@ -2,9 +2,6 @@
 import { useEffect, useRef, useState, useContext } from 'react'
 import * as React from 'react';
 
-// ** Next Imports
-import Image from 'next/image';
-
 // ** MUI Imports
 import List from '@mui/material/List'
 import Box from '@mui/material/Box'
