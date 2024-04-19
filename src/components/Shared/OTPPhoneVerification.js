@@ -50,9 +50,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMes
       .then(res => {
         setError(res.error)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const checkSMS = value => {
@@ -73,9 +71,7 @@ const OTPPhoneVerification = ({ formValidation, functionId, onClose, setErrorMes
           getData(formValidation?.values?.clientId)
           window.close()
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch(error => {})
     } else {
       setError('All Fields Required')
     }
