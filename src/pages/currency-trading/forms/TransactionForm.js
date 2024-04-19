@@ -27,6 +27,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
 const FormContext = React.createContext(null)
 
@@ -1188,7 +1189,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='purpose_of_exchange'
                       Component={ResourceComboBox}
-                      endpointId={'CTSET.asmx/qryPEX'}
+                      endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
                       valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
@@ -1203,7 +1204,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='source_of_income'
                       Component={ResourceComboBox}
-                      endpointId={'RTSET.asmx/qrySI'}
+                      endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
                       valueField='recordId'
                       displayField={['reference', 'name']}
                       columnsInDropDown={[
@@ -1218,7 +1219,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     <FormField
                       name='profession'
                       Component={ResourceComboBox}
-                      endpointId={'RTSET.asmx/qryPFN'}
+                      endpointId={RemittanceSettingsRepository.Profession.qry}
                       required
                       valueField='recordId'
                       displayField={['reference', 'name']}
