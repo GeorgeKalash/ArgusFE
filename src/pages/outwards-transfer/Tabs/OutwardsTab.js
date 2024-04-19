@@ -9,6 +9,7 @@ import { useWindow } from 'src/windows'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -37,7 +38,6 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
-  const [position, setPosition] = useState()
   const [productsStore, setProductsStore] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -74,7 +74,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     corName: '',
     commission: '',
     lcAmount: '',
-    net: '',
+    amount: '',
     exRate: '',
     rateCalcMethod: '',
     wip: '',
@@ -101,8 +101,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     ttNo: '',
     tokenNo: '',
     valueDate: null,
-    vatRate: '',
-    discount: '',
+    vatAmount: '',
+    tdAmount: '',
     giftCode: '',
     details: '',
     paymentMethod: ''
@@ -122,8 +122,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     baseAmount: '',
     rateCalcMethod: '',
     checked: 'false',
-    exchangeRate: '',
-    exchangeRate2: '',
+    exRate2: '',
     interfaceId: ''
   })
 
@@ -259,13 +258,14 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       formik.setFieldValue('productId', selectedRowData?.productId)
       formik.setFieldValue('commission', selectedRowData?.fees)
       formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
-      formik.setFieldValue('productId', selectedRowData?.productId)
       formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
       formik.setFieldValue('exRate', selectedRowData?.exRate)
       formik.setFieldValue('rateCalcMethod', selectedRowData?.rateCalcMethod)
-      formik.setFieldValue('net', selectedRowData?.fees + selectedRowData?.baseAmount || '')
-      formik.setFieldValue('exchangeRate', selectedRowData?.exRate)
-      formik.setFieldValue('exchangeRate2', (1 / selectedRowData?.exRate).toFixed(5))
+      formik.setFieldValue('corId', selectedRowData?.corId)
+      formik.setFieldValue('corRef', selectedRowData?.corRef)
+      formik.setFieldValue('corName', selectedRowData?.corName)
+
+      calcAmount(formik, formik.values.tdAmount)
       window.close()
     }
   })
@@ -316,7 +316,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             formik.setFieldValue('dispersalId', '')
             formik.setFieldValue('exRate', '')
             formik.setFieldValue('rateCalcMethod', '')
-            formik.setFieldValue('net', '')
+            formik.setFieldValue('amount', '')
           }
         })
         .catch(error => {})
@@ -332,7 +332,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         props: {
           clientId: formik.values.clientId,
           dispersalType: formik.values.dispersalType,
-          corId: formik.values.corId,
+          corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
           beneficiaryId: formik.values.beneficiaryId
         },
@@ -346,7 +346,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         props: {
           clientId: formik.values.clientId,
           dispersalType: formik.values.dispersalType,
-          corId: formik.values.corId,
+          corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
           beneficiaryId: formik.values.beneficiaryId
         },
@@ -418,7 +418,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         form: productFormik,
         labels: labels
       },
-      width: 800,
+      width: 900,
       height: 400
     })
   }
@@ -431,6 +431,16 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       title: 'Instant Cash'
     })
   }
+
+  const calcAmount = (formFields, tdAmount) => {
+    const lcAmount = formFields.values.lcAmount
+    const commission = formFields.values.commission
+    const vatAmount = (commission * formFields.values.vatAmount) / 100
+    const discount = tdAmount ? tdAmount : 0
+
+    const amount = lcAmount + (commission + vatAmount - discount)
+    formFields.setFieldValue('amount', amount)
+  }
   async function getDefaultVAT() {
     var parameters = `_filter=&_key=vatPct`
 
@@ -440,7 +450,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })
     const vatPct = res.record.value
 
-    formik.setFieldValue('vatRate', parseInt(vatPct))
+    formik.setFieldValue('vatAmount', parseInt(vatPct))
   }
 
   useEffect(() => {
@@ -454,8 +464,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           setIsClosed(res.record.wip === 2 ? true : false)
           setIsPosted(res.record.status === 3 ? true : false)
           res.record.date = formatDateFromApi(res.record.date)
-          formik.setValues(res.record)
-          formik.setFieldValue('net', parseInt(res.record.commission) + parseInt(res.record.lcAmount))
+
+          //res.record.exRate2 = formik.setValues(res.record)
+          //formik.setFieldValue('net', parseInt(res.record.commission) + parseInt(res.record.lcAmount))
           res.record.checked = true
           productDataFill(res.record)
           getClientInfo(res.record.clientId)
@@ -627,37 +638,20 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  position={position}
+                <CustomNumberField
                   name='fcAmount'
-                  numberField={true}
+                  type='text'
                   label={labels.fcAmount}
                   value={formik.values.fcAmount}
                   required
-                  readOnly={!formik.values.dispersalType || isClosed || isPosted}
                   maxAccess={maxAccess}
-                  onChange={e => {
-                    const input = e.target
-                    const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-                    // Save current cursor position
-                    const currentPosition = input.selectionStart
-
-                    // Update field value
-                    formik.setFieldValue('fcAmount', formattedValue)
-
-                    // Calculate the new cursor position based on the formatted value
-                    const newCursorPosition =
-                      currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-                    setPosition(newCursorPosition)
-                  }}
+                  onChange={e => formik.setFieldValue('fcAmount', e.target.value)}
+                  onClear={() => formik.setFieldValue('fcAmount', '')}
                   onBlur={() => {
                     if (formik.values.fcAmount) productDataFill(formik.values)
                   }}
-                  onClear={() => formik.setFieldValue('fcAmount', '')}
                   error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
-                  helperText={formik.touched.fcAmount && formik.errors.fcAmount}
+                  maxLength={10}
                 />
               </Grid>
               <Grid item xs={2}>
@@ -696,133 +690,109 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               </Grid>
               <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
                 <Grid item xs={6}>
-                  <CustomTextField
-                    name='exchangeRate'
+                  <CustomNumberField
+                    name='exRate'
+                    type='text'
                     label={labels.exchangeRate}
-                    value={formik.values?.exchangeRate}
+                    value={formik.values.exRate}
+                    required
                     readOnly
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('exchangeRate', '')}
-                    error={formik.touched.exchangeRate && Boolean(formik.errors.exchangeRate)}
                     maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('exRate', e.target.value)}
+                    onClear={() => formik.setFieldValue('exRate', '')}
+                    error={formik.touched.exRate && Boolean(formik.errors.exRate)}
+                    maxLength={10}
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomTextField
-                    name='exchangeRate2'
+                  <CustomNumberField
+                    name='exRate2'
+                    type='text'
                     label={labels.exchangeRate}
-                    value={formik.values?.exchangeRate2}
+                    value={formik?.values?.exRate ? 1 / formik.values.exRate : null}
+                    required
                     readOnly
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('exchangeRate2', '')}
-                    error={formik.touched.exchangeRate2 && Boolean(formik.errors.exchangeRate2)}
                     maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('exRate2', e.target.value)}
+                    onClear={() => formik.setFieldValue('exRate2', '')}
+                    error={formik.touched.exRate2 && Boolean(formik.errors.exRate2)}
+                    maxLength={10}
                   />
                 </Grid>
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  position={position}
+                <CustomNumberField
                   name='lcAmount'
-                  numberField={true}
+                  type='text'
                   label={labels.lcAmount}
                   value={formik.values.lcAmount}
                   required
                   readOnly
                   maxAccess={maxAccess}
-                  onChange={e => {
-                    const input = e.target
-                    const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-                    // Save current cursor position
-                    const currentPosition = input.selectionStart
-
-                    // Calculate the new cursor position based on the formatted value
-                    const newCursorPosition =
-                      currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-                    setPosition(newCursorPosition)
-                  }}
+                  onChange={e => formik.setFieldValue('lcAmount', e.target.value)}
+                  onClear={() => formik.setFieldValue('lcAmount', '')}
                   error={formik.touched.lcAmount && Boolean(formik.errors.lcAmount)}
-                  helperText={formik.touched.lcAmount && formik.errors.lcAmount}
+                  maxLength={10}
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  position={position}
+                <CustomNumberField
                   name='commission'
-                  numberField={true}
+                  type='text'
                   label={labels.commission}
                   value={formik.values.commission}
                   required
                   readOnly
                   maxAccess={maxAccess}
-                  onChange={e => {
-                    const input = e.target
-                    const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-                    // Save current cursor position
-                    const currentPosition = input.selectionStart
-
-                    // Calculate the new cursor position based on the formatted value
-                    const newCursorPosition =
-                      currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-                    setPosition(newCursorPosition)
-                  }}
+                  onChange={e => formik.setFieldValue('commission', e.target.value)}
+                  onClear={() => formik.setFieldValue('commission', '')}
                   error={formik.touched.commission && Boolean(formik.errors.commission)}
-                  helperText={formik.touched.commission && formik.errors.commission}
+                  maxLength={10}
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  name='vatRate'
-                  numberField={true}
+                <CustomNumberField
+                  name='vatAmount'
+                  type='text'
                   label={labels.vatRate}
-                  value={formik.values.vatRate}
+                  value={formik.values.vatAmount}
                   readOnly
                   maxAccess={maxAccess}
-                  error={formik.touched.vatRate && Boolean(formik.errors.vatRate)}
-                  helperText={formik.touched.vatRate && formik.errors.vatRate}
+                  onChange={e => formik.setFieldValue('vatAmount', e.target.value)}
+                  onClear={() => formik.setFieldValue('vatAmount', '')}
+                  error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
+                  maxLength={10}
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  name='discount'
-                  numberField={true}
+                <CustomNumberField
+                  name='tdAmount'
+                  type='text'
                   label={labels.discount}
-                  value={formik.values.discount}
-                  readOnly={isClosed || isPosted}
+                  value={formik.values.tdAmount}
                   maxAccess={maxAccess}
-                  error={formik.touched.discount && Boolean(formik.errors.discount)}
-                  helperText={formik.touched.discount && formik.errors.discount}
+                  onChange={e => {
+                    formik.setFieldValue('tdAmount', e.target.value)
+                    calcAmount(formik, e.target.value)
+                  }}
+                  onClear={() => formik.setFieldValue('tdAmount', '')}
+                  error={formik.touched.tdAmount && Boolean(formik.errors.tdAmount)}
+                  maxLength={10}
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  position={position}
-                  name='net'
-                  numberField={true}
+                <CustomNumberField
+                  name='amount'
+                  type='text'
                   label={labels.NetToPay}
-                  value={formik.values.net}
+                  value={formik.values.amount}
                   required
                   readOnly
                   maxAccess={maxAccess}
-                  onChange={e => {
-                    const input = e.target
-                    const formattedValue = input.value ? getFormattedNumberMax(input.value, 8, 2) : input.value
-
-                    // Save current cursor position
-                    const currentPosition = input.selectionStart
-
-                    // Calculate the new cursor position based on the formatted value
-                    const newCursorPosition =
-                      currentPosition + (formattedValue && formattedValue.length - input.value.length)
-
-                    setPosition(newCursorPosition)
-                  }}
-                  error={formik.touched.net && Boolean(formik.errors.net)}
-                  helperText={formik.touched.net && formik.errors.net}
+                  onChange={e => formik.setFieldValue('amount', e.target.value)}
+                  onClear={() => formik.setFieldValue('amount', '')}
+                  error={formik.touched.amount && Boolean(formik.errors.amount)}
+                  maxLength={10}
                 />
               </Grid>
             </FieldSet>
