@@ -580,8 +580,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           formik.values.amount.map(
             ({ id, types, creditCards, bankFees, amount, receiptRef, cashAccountId, ...rest }) => ({
               seqNo: id,
-              type: types.key,
-              ccId: creditCards?.recordId,
               bankFees,
               amount: amount,
               receiptRef,
@@ -592,7 +590,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       }
 
       const response = await postRequest({
-        extension: CTTRXrepository.CurrencyTrading.set2CIV,
+        extension: CTTRXrepository.CurrencyTrading.set2,
         record: JSON.stringify(payload)
       })
 
@@ -1257,6 +1255,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                             datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
                             displayField: 'value',
                             valueField: 'key',
+                            mapping: [
+                              { from: 'countryId', to: 'countryId' },
+                              { from: 'countryName', to: 'countryName' },
+                              { from: 'countryRef', to: 'countryRef' }
+                            ],
                             filter: item => (formik.values.functionId === '3502' ? item.key === '2' : true)
                           }
                         },
