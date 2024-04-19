@@ -386,18 +386,16 @@ export default function InstantCash() {
               />
             </Grid>
             <Grid item xs={12}>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='email'
-                  label={_labels.email}
-                  value={formik.values.remitter.email}
-                  type='email'
-                  required
-                  placeholder='johndoe@email.com'
-                  readOnly
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                />
-              </Grid>
+              <CustomTextField
+                name='email'
+                label={_labels.email}
+                value={formik.values.remitter.email}
+                type='email'
+                required
+                placeholder='johndoe@email.com'
+                readOnly
+                error={formik.touched.email && Boolean(formik.errors.email)}
+              />
             </Grid>
             <Grid item xs={12}>
               <CustomDatePicker
@@ -422,6 +420,45 @@ export default function InstantCash() {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
+                endpointId={SystemRepository.Country.qry}
+                name='nationality'
+                label={_labels.country}
+                valueField='recordId'
+                displayFieldWidth={2}
+                values={formik.values.remitter}
+                readOnly
+                maxAccess={maxAccess}
+                displayField={['reference', 'name']}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Country.qry}
+                name='countryOfBirth'
+                label={_labels.countryOfBirth}
+                valueField='recordId'
+                displayFieldWidth={2}
+                values={formik.values.remitter}
+                readOnly
+                maxAccess={maxAccess}
+                displayField={['reference', 'name']}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Country.qry}
+                name='countryOfResidence'
+                label={_labels.countryOfResidence}
+                valueField='recordId'
+                displayFieldWidth={2}
+                values={formik.values.remitter}
+                readOnly
+                maxAccess={maxAccess}
+                displayField={['reference', 'name']}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={RemittanceBankInterface.Combos.qry}
                 parameters={`_combo=2`}
                 name='relation'
@@ -439,6 +476,22 @@ export default function InstantCash() {
                 maxAccess={maxAccess}
                 error={formik.touched.relation && Boolean(formik.errors.relation)}
                 helperText={formik.touched.relation && formik.errors.relation}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='otherRelation'
+                label={_labels.email}
+                value={formik.values.remitter.otherRelation}
+                error={formik.touched.otherRelation && Boolean(formik.errors.otherRelation)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='employerName'
+                label={_labels.employerName}
+                value={formik.values.remitter.employerName}
+                error={formik.touched.employerName && Boolean(formik.errors.employerName)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -462,6 +515,109 @@ export default function InstantCash() {
                 helperText={formik.touched.employerStatus && formik.errors.employerStatus}
               />
             </Grid>
+            <FieldSet title='Beneficiary'>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='cardNo'
+                  label={_labels.cardNo}
+                  value={formik.values.remitter.beneficiary.cardNo}
+                  maxAccess={maxAccess}
+                  error={formik.touched.cardNo && Boolean(formik.errors.cardNo)}
+                  helperText={formik.touched.cardNo && formik.errors.cardNo}
+                />
+              </Grid>
+              <Grid container xs={12} spacing={2} sx={{ pl: '10px', pt: 2 }}>
+                <Grid item xs={4}>
+                  <CustomTextField
+                    name='firstName'
+                    label={_labels.firstName}
+                    value={formik.values?.remitter.beneficiary.firstName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    onClear={() => formik.setFieldValue('firstName', '')}
+                    error={formik.touched.firstName && Boolean(formik.errors.firstName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <CustomTextField
+                    name='middleName'
+                    label={_labels.middleName}
+                    value={formik.values?.remitter.beneficiary.middleName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    onClear={() => formik.setFieldValue('middleName', '')}
+                    error={formik.touched.middleName && Boolean(formik.errors.middleName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <CustomTextField
+                    name='lastName'
+                    label={_labels.lastName}
+                    value={formik.values?.remitter.beneficiary.lastName}
+                    readOnly
+                    onChange={formik.handleChange}
+                    maxLength='20'
+                    onClear={() => formik.setFieldValue('lastName', '')}
+                    error={formik.touched.lastName && Boolean(formik.errors.lastName)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='mobileNumber'
+                  phone={true}
+                  label={_labels.mobileNumber}
+                  value={formik.values?.remitter.beneficiary.mobileNumber}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='15'
+                  autoComplete='off'
+                  onBlur={e => {
+                    formik.handleBlur(e)
+                  }}
+                  onClear={() => formik.setFieldValue('mobileNumber', '')}
+                  error={formik.touched.mobileNumber && Boolean(formik.errors.mobileNumber)}
+                  helperText={formik.touched.mobileNumber && formik.errors.mobileNumber}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='phoneNumber'
+                  phone={true}
+                  label={_labels.phoneNumber}
+                  value={formik.values?.remitter.beneficiary.phoneNumber}
+                  readOnly
+                  onChange={formik.handleChange}
+                  maxLength='15'
+                  autoComplete='off'
+                  onBlur={e => {
+                    formik.handleBlur(e)
+                  }}
+                  onClear={() => formik.setFieldValue('phoneNumber', '')}
+                  error={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
+                  helperText={formik.touched.phoneNumber && formik.errors.phoneNumber}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='email'
+                  label={_labels.email}
+                  value={formik.values.remitter.beneficiary.email}
+                  type='email'
+                  required
+                  placeholder='johndoe@email.com'
+                  readOnly
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                />
+              </Grid>
+            </FieldSet>
           </Grid>
           {/* Second Column */}
           <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
@@ -539,7 +695,7 @@ export default function InstantCash() {
                 />
               </Grid>
             </FieldSet>
-            <FieldSet title='Address'>
+            <FieldSet title='Remitter Address'>
               <Grid item xs={12}>
                 <ResourceLookup
                   endpointId={SystemRepository.City.snapshot}
@@ -613,6 +769,89 @@ export default function InstantCash() {
                   name='postalCode'
                   label={_labels.postalCode}
                   value={formik.values.remitter[0].address.postalCode}
+                  error={formik.touched.postalCode && Boolean(formik.errors.postalCode)}
+                  maxAccess={maxAccess}
+                  readOnly
+                />
+              </Grid>
+            </FieldSet>
+            <FieldSet title='Beneficiary Address'>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SystemRepository.City.snapshot}
+                  parameters={{
+                    _countryId: formik.values.remitter[0].beneficiary[0].address.country,
+                    _stateId: formik.values.remitter[0].beneficiary[0].address.state
+                      ? formik.values.remitter[0].beneficiary[0].address.state
+                      : 0
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  name='city'
+                  label={_labels.city}
+                  readOnly
+                  form={formik}
+                  secondDisplayField={false}
+                  errorCheck={'city'}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={SystemRepository.CityDistrict.snapshot}
+                  parameters={{
+                    _cityId: formik.values.remitter[0].beneficiary[0].address.city
+                  }}
+                  valueField='name'
+                  displayField='name'
+                  name='district'
+                  label={_labels.cityDistrict}
+                  readOnly
+                  form={formik}
+                  secondDisplayField={false}
+                  errorCheck={'cityDistrictId'}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Country.qry}
+                  name='country'
+                  label={_labels.country}
+                  valueField='recordId'
+                  displayFieldWidth={2}
+                  values={formik.values.remitter[0].beneficiary[0].address.country}
+                  error={
+                    formik.values.remitter[0].beneficiary[0].address.country &&
+                    Boolean(formik.values.remitter[0].beneficiary[0].address.country)
+                  }
+                  readOnly
+                  maxAccess={maxAccess}
+                  displayField={['reference', 'name']}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={formik.values.remitter[0].beneficiary[0].address.country && SystemRepository.State.qry}
+                  parameters={
+                    formik.values.remitter[0].beneficiary[0].address.country &&
+                    `_countryId=${formik.values.remitter[0].beneficiary[0].address.country || 0}`
+                  }
+                  name='state'
+                  label={_labels.state}
+                  valueField='recordId'
+                  displayField='name'
+                  readOnly
+                  values={formik.values.remitter[0].beneficiary[0].address.country}
+                  error={formik.touched.stateId && Boolean(formik.errors.stateId)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='postalCode'
+                  label={_labels.postalCode}
+                  value={formik.values.remitter[0].beneficiary[0].address.postalCode}
                   error={formik.touched.postalCode && Boolean(formik.errors.postalCode)}
                   maxAccess={maxAccess}
                   readOnly
