@@ -36,6 +36,8 @@ import { DataSets } from 'src/resources/DataSets'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
@@ -106,6 +108,22 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     giftCode: '',
     details: '',
     paymentMethod: ''
+
+    /*   amount: [
+      {
+        id: 1,
+        outwardId: '',
+        seqNo: '',
+        cashAccountId: '',
+        cashAccount: '',
+        ccId: '',
+        ccName: '',
+        type: '',
+        amount: '',
+        bankFees: '',
+        receiptRef: ''
+      }
+    ]*/
   })
 
   const [initialValues2, setInitialData2] = useState({
@@ -477,13 +495,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  /*  useEffect(() => {
-    if (formik.values.beneficiaryId) {
-      console.log('enter cond')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values.beneficiaryId])*/
 
   return (
     <>
@@ -1134,6 +1145,72 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
               />
             </Grid>
+
+            <FieldSet title='Amount'>
+              {/* 
+              <Grid width={'100%'}>
+                <DataGrid
+                  onChange={value => formik.setFieldValue('amount', value)}
+                  value={formik.values.amount}
+                  error={formik.errors.amount}
+                  disabled={isClosed}
+                  columns={[
+                    {
+                      component: 'resourcecombobox',
+                      label: labels.type,
+                      name: 'types',
+                      props: {
+                        datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
+                        displayField: 'value',
+                        valueField: 'key',
+                        filter: item => (formik.values.functionId === SystemFunction.Outwards ? item.key === '2' : true)
+                      }
+                    },
+                    {
+                      component: 'numberfield',
+                      name: 'amount',
+                      label: labels.amount,
+                      defaultValue: ''
+                    },
+                    {
+                      component: 'resourcecombobox',
+                      name: 'cashAccountId',
+                      label: labels.cashAccount,
+                      props: {
+                        endpointId: CashBankRepository.CashAccount.qry,
+                        parameters: '_startAt=0&_pageSize=1000&_type=2',
+                        valueField: 'recordId',
+                        displayField: 'reference'
+                      }
+                    },
+                    {
+                      component: 'resourcecombobox',
+                      name: 'creditCards',
+                      editable: false,
+                      label: labels.creditCard,
+                      props: {
+                        endpointId: CashBankRepository.CreditCard.qry,
+                        valueField: 'recordId',
+                        displayField: 'name'
+                      }
+                    },
+                    {
+                      component: 'numberfield',
+                      header: labels.receiptRef,
+                      name: 'bankFees',
+                      label: labels.BanKFees
+                    },
+                    {
+                      component: 'numberfield',
+                      header: labels.receiptRef,
+                      name: 'receiptRef',
+                      label: labels.receiptRef
+                    }
+                  ]}
+                />
+              </Grid>
+                */}
+            </FieldSet>
           </Grid>
         </Grid>
       </FormShell>
