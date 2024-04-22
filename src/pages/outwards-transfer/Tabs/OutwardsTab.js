@@ -110,7 +110,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     tdAmount: 0,
     giftCode: '',
     details: '',
-    paymentMethod: '',
     amountRows: [
       {
         id: 1,
@@ -191,19 +190,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           return {
             ...amountDetails,
             seqNo: seqNo,
+            cashAccountId: cashAccountId,
             outwardId: formik.values.recordId || 0
           }
         })
         if (updatedRows.length == 1 && !updatedRows[0].type) {
           stackError({
             message: `Amount grid not filled. Please fill the grid before saving.`
-          })
-
-          return
-        }
-        if (Balance > 0) {
-          stackError({
-            message: `Net to pay should be equal to amount received`
           })
 
           return
@@ -393,8 +386,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }
   }
 
-  const fillAmountGridData = async data => {
-    const modifiedList = data.map((item, index) => ({
+  const fillAmountGridData = async (cash, header) => {
+    const modifiedList = cash.map((item, index) => ({
       ...item,
       id: index + 1,
       bankFees: parseFloat(item.bankFees).toFixed(2),
@@ -402,11 +395,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }))
 
     formik.setValues({
-      ...formik.values,
-      amountRows: modifiedList
+      ...header, // Fill formik fields with values from header
+      amountRows: modifiedList // Update amountRows separately
     })
   }
-
   function openReleaventWindow(formValues) {
     if (formValues.dispersalType === 1) {
       stack({
@@ -550,12 +542,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           res.record.checked = true
-          formik.setValues(res.record.headerView)
-          console.log('headerView ', res.record.headerView)
-          fillAmountGridData(res.record.cash)
           productDataFill(res.record.headerView)
           getClientInfo(res.record.headerView.clientId)
           fillProfessionStore()
+          fillAmountGridData(res.record.cash, res.record.headerView)
         }
         getDefaultVAT()
       } catch (error) {}
@@ -1203,21 +1193,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               >
                 Bank API
               </Button>
-            </Grid>
-            <Grid item xs={5}>
-              <ResourceComboBox
-                datasetId={DataSets.PAYMENT_METHOD}
-                name='paymentMethod'
-                label={labels.paymentMethod}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                onClear={() => formik.setFieldValue('paymentMethod', '')}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('paymentMethod', newValue?.key || '')
-                }}
-                error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
-              />
             </Grid>
 
             <FieldSet title='Amount'>

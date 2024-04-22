@@ -128,6 +128,11 @@ const OutwardsTransfer = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'countryRef',
       headerName: _labels.CountryRef,
       flex: 1
