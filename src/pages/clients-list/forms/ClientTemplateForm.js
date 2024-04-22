@@ -314,7 +314,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           mobileVerified: obj.clientRemittance?.mobileVerificationStatus,
           isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat
         })
-
         setEditMode(true)
       })
       .catch(error => {})
@@ -635,6 +634,13 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       condition: !isClosed,
       onClick: onClose,
       disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+
+      // onClick: onReopen,
+      disabled: true
     }
   ]
   function openBeneficiaryWindow() {
@@ -654,6 +660,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       form={clientIndividualFormik}
       maxAccess={maxAccess}
       editMode={editMode}
+      isClosed={isClosed}
+      onClose={onClose}
       disabledSubmit={editMode}
     >
       <Grid container spacing={4}>
