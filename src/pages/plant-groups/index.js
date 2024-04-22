@@ -20,6 +20,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { HighlightTwoTone } from '@mui/icons-material'
 
 const Plant = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -84,9 +85,9 @@ const Plant = () => {
     stack({
       Component: Tree,
       props: { data: data },
+      width: 300,
+      height: 600,
 
-      width: 400,
-      height: 400,
       title: 'Tree'
     })
   }

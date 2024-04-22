@@ -6,7 +6,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useReactToPrint } from 'react-to-print'
 import WindowToolbar from './WindowToolbar'
-import { padding } from '@mui/system'
 
 const getAllNodeIds = nodes => {
   let nodeIds = []
