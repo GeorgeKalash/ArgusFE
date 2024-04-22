@@ -93,14 +93,6 @@ export default function FormShell({
             form.setFieldValue('isTFRClicked', true)
             form.handleSubmit()
           }}
-          onTree={() =>
-            stack({
-              Component: Tree,
-              width: 600,
-              height: 600,
-              title: 'Tree'
-            })
-          }
           onInfo={() =>
             stack({
               Component: TransactionLog,
