@@ -22,7 +22,6 @@ export const GeneralLedgerRepository = {
     qry: service + 'qryIPT',
     get: service + 'getIPT',
     set: service + 'setIPT',
-    set2: service + 'set2IPT',
     del: service + 'delIPT'
   },
   GLAccountGroups: {
@@ -63,10 +62,6 @@ export const GeneralLedgerRepository = {
   },
   IntegrationAccounts: {
     qry: service + 'qryIA',
-    get: service + 'getIA',
-    set: service + 'setIA',
     set2: service + 'set2IA',
-    page: service + 'pageIA',
-    del: service + 'delIA'
   }
 }
