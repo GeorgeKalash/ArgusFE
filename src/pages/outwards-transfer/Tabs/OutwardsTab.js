@@ -316,7 +316,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
   const getClientInfo = async clientId => {
     const res = await getRequest({
-      extension: RTCLRepository.CtClientIndividual.get,
+      extension: RTCLRepository.CtClientIndividual.get2,
       parameters: `_clientId=${clientId}`
     })
     formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)

@@ -36,6 +36,7 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
 import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
+import { RTCLRepository } from 'src/repositories/RTCLRepository'
 
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -172,12 +173,20 @@ const DocumentsOnHold = () => {
         title = labels.cashInvoice
         break
       case SystemFunction.KYC:
+        await getRequest({
+          extension: RTCLRepository.CtClientIndividual.get,
+          parameters: `_recordId=${obj.recordId}`
+        }).then(res => {
+          obj.recordId = res.record.clientId
+        })
+
         relevantComponent = ClientTemplateForm
-        labels = await getLabels(ResourceIds.ClientList)
+        labels = await getLabels(ResourceIds.ClientMaster)
         relevantAccess = await getAccess(ResourceIds.ClientMaster)
         windowHeight = 600
         windowWidth = 1100
         title = labels.pageTitle
+
         break
 
       case SystemFunction.Outwards:

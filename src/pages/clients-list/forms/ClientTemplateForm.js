@@ -206,7 +206,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
     const defaultParams = `_clientId=${recordId}`
     var parameters = defaultParams
     await getRequest({
-      extension: RTCLRepository.CtClientIndividual.get,
+      extension: RTCLRepository.CtClientIndividual.get2,
       parameters: parameters
     })
       .then(res => {
