@@ -1224,7 +1224,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       component: 'numberfield',
                       name: 'amount',
                       label: labels.amount,
-                      defaultValue: ''
+                      defaultValue: '',
+                      updateOn: 'blur',
+                      async onChange({ row: { update, newRow } }) {}
                     },
                     {
                       component: 'resourcecombobox',
