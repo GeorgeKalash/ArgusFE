@@ -12,8 +12,6 @@ export default function ResourceComboBox({
   values = {},
   parameters = '_filter=',
   filter = () => true,
-  excludeValue,
-
   value,
   ...rest
 }) {

@@ -83,11 +83,11 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
 
   useEffect(() => {
     if (recordId) {
-      getGroupId(recordId)
+      getStrategyId(recordId)
     }
   }, [recordId, getRequest])
 
-  const getGroupId = recordId => {
+  const getStrategyId = recordId => {
     const defaultParams = `_recordId=${recordId}`
     getRequest({
       extension: DocumentReleaseRepository.Strategy.get,

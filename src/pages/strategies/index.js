@@ -14,8 +14,6 @@ import StrategiesWindow from './windows/strategiesWindow'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-
 // ** Windows
 
 // ** Helpers
@@ -45,19 +43,13 @@ const Strategies2 = () => {
     })
   }
 
-  async function fetchWithSearch({ qry }) {
-    return await getRequest({
-      extension: DocumentReleaseRepository.Strategy.snapshot,
-      parameters: `_filter=${qry}`
-    })
-  }
-
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
-    refetch,
+
     search,
+    refetch,
     clear,
     access
   } = useResourceQuery({
@@ -69,6 +61,13 @@ const Strategies2 = () => {
       searchFn: fetchWithSearch
     }
   })
+
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: DocumentReleaseRepository.Strategy.snapshot,
+      parameters: `_filter=${qry}`
+    })
+  }
 
   const invalidate = useInvalidate({
     endpointId: DocumentReleaseRepository.Strategy.qry

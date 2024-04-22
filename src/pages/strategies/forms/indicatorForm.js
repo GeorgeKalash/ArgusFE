@@ -92,17 +92,15 @@ const IndicatorForm = ({
       .then(res => {
         const gridData = res.list.map((item, index) => ({
           id: index + 1,
-          seqNo: item.seqNo,
-          name: item.name,
-          indicatorName: item.indicatorName,
-          indicatorId: item.indicatorId,
-          codeId: item.codeId,
+          ...item,
           strtategyId: item.strategyId
         }))
         setValueGridData(gridData)
         formik.setValues({ indicatorData: gridData })
       })
-      .catch()
+      .catch(error => {
+        console.error('Error fetching grid data:', error)
+      })
   }
 
   useEffect(() => {
