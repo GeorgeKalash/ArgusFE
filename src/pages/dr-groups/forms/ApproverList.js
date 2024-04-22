@@ -22,13 +22,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 import ApproverForm from './ApproverForm'
 
-// ** Helpers
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
-import { ResourceIds } from 'src/resources/ResourceIds'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-
 const ApproverList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
@@ -58,16 +51,6 @@ const ApproverList = ({ store, labels, maxAccess }) => {
     recordId && getValueGridData(recordId)
   }, [recordId, refresh])
 
-  // const {
-  //   query: { data },
-  //   labels: _labels,
-  //   access
-  // } = useResourceQuery({
-  //   queryFn: fetchGridData,
-  //   endpointId: DocumentReleaseRepository.GroupCode.qry,
-  //   datasetId: ResourceIds.DRGroups
-  // })
-
   const columns = [
     {
       field: 'codeRef',
@@ -82,7 +65,7 @@ const ApproverList = ({ store, labels, maxAccess }) => {
   ]
 
   const addApprover = () => {
-    openForm2()
+    openForm()
   }
 
   const delApprover = async obj => {
@@ -95,7 +78,7 @@ const ApproverList = ({ store, labels, maxAccess }) => {
     toast.success('Record Deleted Successfully')
   }
 
-  function openForm2(recordId) {
+  function openForm(recordId) {
     stack({
       Component: ApproverForm,
       props: {

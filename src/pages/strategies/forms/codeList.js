@@ -46,16 +46,6 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
     recordId && getValueGridData(recordId)
   }, [recordId, refresh])
 
-  // const {
-  //   query: { data },
-  //   labels: _labels,
-  //   access
-  // } = useResourceQuery({
-  //   queryFn: fetchGridData,
-  //   endpointId: DocumentReleaseRepository.GroupCode.qry,
-  //   datasetId: ResourceIds.DRGroups
-  // })
-
   const columns = [
     {
       field: 'code',
@@ -88,7 +78,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
       Component: CodeForm,
       props: {
         labels: labels,
-        recordId: recordId ? recordId : null,
+        recordId: recordId,
         maxAccess,
         store,
         strategiesFormik,
