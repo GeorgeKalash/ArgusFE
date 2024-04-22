@@ -478,7 +478,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           amount: total,
           notes: values.remarks
         },
-        items: values.operations.map(({ id, currencyId, ...rest }) => ({
+        items: values.operations.map(({ id, ...rest }) => ({
           seqNo: id,
           ...rest
         })),
@@ -526,7 +526,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
         cash:
           formik.values.amount.length > 0 &&
-          formik.values.amount.map(({ id, types, creditCards, cashAccountId, ...rest }) => ({
+          formik.values.amount.map(({ id, types, cashAccountId, ...rest }) => ({
             seqNo: id,
             cashAccountId: cashAccountRecord.value,
             ...rest
