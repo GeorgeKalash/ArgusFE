@@ -197,6 +197,7 @@ const IndicatorForm = ({
           columns={columns}
           height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
           allowDelete={false}
+          allowAddNewLine={false}
         />
       </Box>
     </FormShell>

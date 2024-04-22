@@ -13,7 +13,7 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
-const PereForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
+const PereqForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const [selectedCodeId, setSelectedCodeId] = useState('')
@@ -138,4 +138,4 @@ const PereForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
   )
 }
 
-export default PereForm
+export default PereqForm

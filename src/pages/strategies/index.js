@@ -101,7 +101,7 @@ const Strategies2 = () => {
       },
       width: 600,
       height: 400,
-      title: _labels.group
+      title: _labels.strategy
     })
   }
 

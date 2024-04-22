@@ -13,7 +13,17 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 
 import toast from 'react-hot-toast'
 
-const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh, strategiesFormik }) => {
+const CodeForm = ({
+  labels,
+  editMode,
+  maxAccess,
+  setEditMode,
+  recordId,
+  store,
+  setRefresh,
+  strategiesFormik,
+  window
+}) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const { recordId: grId } = store
@@ -32,8 +42,14 @@ const CodeForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, s
     validationSchema: yup.object({
       codeId: yup.string().required('This field is required')
     }),
-    onSubmit: values => {
-      postGroups(values)
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        await postGroups(values)
+        window.close()
+      } catch (error) {
+        toast.error('An error occurred')
+        setSubmitting(false)
+      }
     }
   })
 
