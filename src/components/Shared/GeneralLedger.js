@@ -566,10 +566,10 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               maxAccess={access}
               height={'150'}
               columns={[
-                { field: 'base', headerName: _labels.base },
-                { field: 'credit', headerName: _labels.credit, align: 'right' },
-                { field: 'debit', headerName: _labels.debit, align: 'right' },
-                { field: 'balance', headerName: _labels.balance, align: 'right' }
+                { field: 'base', headerName: _labels.base, flex: 1.5 },
+                { field: 'credit', headerName: _labels.credit, align: 'right', flex: 1.5 },
+                { field: 'debit', headerName: _labels.debit, align: 'right', flex: 1.5 },
+                { field: 'balance', headerName: _labels.balance, align: 'right', flex: 1.5 }
               ]}
               rowId={['seqNo']}
               pagination={false}
@@ -577,16 +577,15 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
           </Grid>
           <Grid xs={6} sx={{ p: 1 }}>
             <Table
-              pagination={false}
-              gridData={{ count: currencyGridData.length, list: currencyGridData }}
               columns={[
-                { field: 'currency', headerName: 'Currency' },
-                { field: 'debit', headerName: 'Debit', align: 'right' },
-                { field: 'credit', headerName: 'Credit', align: 'right' },
-                { field: 'balance', headerName: 'Balance', align: 'right' }
+                { field: 'currency', headerName: 'Currency', flex: 1.5 },
+                { field: 'debit', headerName: 'Debit', align: 'right', flex: 1.5 },
+                { field: 'credit', headerName: 'Credit', align: 'right', flex: 1.5 },
+                { field: 'balance', headerName: 'Balance', align: 'right', flex: 1.5 }
               ]}
-              height={'150'}
-              rowId={['currency']}
+              gridData={{ count: currencyGridData.length, list: currencyGridData }}
+              rowId={['recordId']}
+              paginationType='client'
               maxAccess={access}
             />
           </Grid>
