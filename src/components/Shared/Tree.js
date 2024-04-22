@@ -45,7 +45,7 @@ const PrintableTree = ({ nodes }) => {
 const StyledTreeView = styled(TreeView)({
   flexGrow: 1,
   maxWidth: '100%',
-  height: 280,
+  height: 260,
   overflowY: 'auto',
 
   '@media print': {
