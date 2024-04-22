@@ -147,13 +147,12 @@ const IndicatorForm = ({
       name: 'indicatorName',
       props: {
         endpointId: DocumentReleaseRepository.ReleaseIndicator.qry,
+        parameters: `_startAt=0&_pageSize=50`,
         valueField: 'recordId',
         displayField: 'name',
-        parameters: `_startAt=0&_pageSize=50`,
         mapping: [
           { from: 'name', to: 'indicatorName' },
           { from: 'reference', to: 'indicatorRef' },
-
           { from: 'recordId', to: 'indicatorId' }
         ],
         columnsInDropDown: [
