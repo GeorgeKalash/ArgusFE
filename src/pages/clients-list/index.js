@@ -29,7 +29,7 @@ const ClientsList = () => {
     query: { data },
     filterBy,
     clearFilter,
-    labels: _labels,
+    labels: labels,
     access
   } = useResourceQuery({
     endpointId: CTCLRepository.CtClientIndividual.snapshot,
@@ -55,65 +55,65 @@ const ClientsList = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1,
       editable: false
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1,
       editable: false
     },
 
     {
       field: 'flName',
-      headerName: _labels.flName,
+      headerName: labels.flName,
       flex: 1,
       editable: false
     },
     {
       field: 'cellPhone',
-      headerName: _labels.cellPhone,
+      headerName: labels.cellPhone,
       flex: 1,
       editable: false
     },
     {
       field: 'nationalityName',
-      headerName: _labels.nationality,
+      headerName: labels.nationality,
       flex: 1,
       editable: false
     },
     {
       field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       flex: 1,
       editable: false
     },
 
     {
       field: 'createdDate',
-      headerName: _labels.createdDate,
+      headerName: labels.createdDate,
       flex: 1,
       editable: false,
       valueGetter: ({ row }) => formatDateDefault(row?.createdDate)
     },
     {
       field: 'expiryDate',
-      headerName: _labels.expiryDate,
+      headerName: labels.expiryDate,
       flex: 1,
       editable: false,
       valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
     },
     {
       field: 'otp',
-      headerName: _labels.otp,
+      headerName: labels.otp,
       flex: 1,
       editable: false
     },
     {
       field: 'wipName',
-      headerName: _labels.wipName,
+      headerName: labels.wipName,
       flex: 1,
       editable: false
     }
@@ -124,7 +124,7 @@ const ClientsList = () => {
       Component: ClientTemplateForm,
       props: {
         setErrorMessage: setErrorMessage,
-        _labels: _labels,
+        labels: labels,
         maxAccess: access,
         recordId: recordId ? recordId : null,
         plantId: _plantId,
@@ -132,7 +132,7 @@ const ClientsList = () => {
       },
       width: 1100,
       height: 600,
-      title: _labels.pageTitle
+      title: labels.pageTitle
     })
   }
 
@@ -194,7 +194,7 @@ const ClientsList = () => {
           onSearchClear={() => {
             clearFilter('qry')
           }}
-          labels={_labels}
+          labels={labels}
           inputSearch={true}
         />
         <Table

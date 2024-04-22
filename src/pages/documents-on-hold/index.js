@@ -136,6 +136,7 @@ const DocumentsOnHold = () => {
 
   const popupComponent = async obj => {
     let relevantComponent
+    let recordId = obj.recordId
     let labels
     let relevantAccess
     let windowHeight
@@ -177,7 +178,7 @@ const DocumentsOnHold = () => {
           extension: RTCLRepository.CtClientIndividual.get,
           parameters: `_recordId=${obj.recordId}`
         }).then(res => {
-          obj.recordId = res.record.clientId
+          recordId = res.record.clientId
         })
 
         relevantComponent = ClientTemplateForm
@@ -206,7 +207,7 @@ const DocumentsOnHold = () => {
       stack({
         Component: relevantComponent,
         props: {
-          recordId: obj.recordId,
+          recordId: recordId,
           labels: labels,
           maxAccess: relevantAccess
         },

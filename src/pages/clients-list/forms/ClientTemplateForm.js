@@ -39,7 +39,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import SystemDefaults from 'src/pages/system-defaults'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAccess }) => {
+const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAccess }) => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [showAsPassword, setShowAsPassword] = useState(false)
@@ -573,7 +573,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
         },
         width: 400,
         height: 400,
-        title: _labels.OTPVerification
+        title: labels.OTPVerification
       })
   }, [clientIndividualFormik.values.clientId])
 
@@ -649,7 +649,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       props: { clientId: recordId },
       width: 1100,
       height: 500,
-      title: _labels.beneficiaries
+      title: labels.beneficiaries
     })
   }
 
@@ -673,7 +673,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   endpointId={CurrencyTradingSettingsRepository.Defaults.get}
                   param={'ct-nra-individual'}
                   name='reference'
-                  label={_labels.reference}
+                  label={labels.reference}
                   editMode={editMode}
                   value={clientIndividualFormik.values?.reference}
                   setReferenceRequired={setReferenceRequired}
@@ -693,13 +693,13 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       disabled={editMode && true}
                     />
                   }
-                  label={_labels.isResident}
+                  label={labels.isResident}
                 />
               </Grid>
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='birthDate'
-                  label={_labels.birthDate}
+                  label={labels.birthDate}
                   value={clientIndividualFormik.values?.birthDate}
                   required={true}
                   onChange={clientIndividualFormik.setFieldValue}
@@ -712,11 +712,11 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
               </Grid>
               <Grid container xs={12}></Grid>
               <Grid item xs={12}>
-                <FieldSet title={_labels.id}>
+                <FieldSet title={labels.id}>
                   <Grid item xs={12}>
                     <CustomTextField
                       name='idNo'
-                      label={_labels.id_number}
+                      label={labels.id_number}
                       type={showAsPassword && 'password'}
                       value={clientIndividualFormik.values?.idNo}
                       required
@@ -744,7 +744,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   <Grid item xs={12}>
                     <CustomComboBox
                       name='idtId'
-                      label={_labels.id_type}
+                      label={labels.id_type}
                       valueField='recordId'
                       displayField='name'
                       readOnly={editMode && true}
@@ -786,9 +786,9 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                             idTypeStore: idTypeStore,
                             formik: clientIndividualFormik,
                             setErrorMessage: setErrorMessage,
-                            labels: _labels
+                            labels: labels
                           },
-                          title: _labels.fetch,
+                          title: labels.fetch,
                           width: 400,
                           height: 400
                         })
@@ -802,14 +802,14 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           : false
                       }
                     >
-                      {_labels.fetch}
+                      {labels.fetch}
                     </Button>
                   </Grid>
 
                   <Grid item xs={12}>
                     <CustomDatePicker
                       name='expiryDate'
-                      label={_labels.expiryDate}
+                      label={labels.expiryDate}
                       value={clientIndividualFormik.values?.expiryDate}
                       readOnly={editMode && true}
                       required={true}
@@ -826,7 +826,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   <Grid item xs={12}>
                     <CustomDatePicker
                       name='issueDate'
-                      label={_labels.issueDate}
+                      label={labels.issueDate}
                       value={clientIndividualFormik.values?.issueDate}
                       readOnly={editMode && true}
                       onChange={clientIndividualFormik.setFieldValue}
@@ -843,7 +843,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       endpointId={SystemRepository.Country.qry}
                       name='idCountry'
-                      label={_labels.issusCountry}
+                      label={labels.issusCountry}
                       valueField='recordId'
                       displayField={['reference', 'name', 'flName']}
                       readOnly={editMode && true}
@@ -882,7 +882,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         _stateId: 0
                       }}
                       name='idCity'
-                      label={_labels.issusPlace}
+                      label={labels.issusPlace}
                       form={clientIndividualFormik}
                       valueField='name'
                       displayField='name'
@@ -904,9 +904,9 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   </Grid>
                 </FieldSet>
                 <Grid item xs={12} sx={{ marginTop: '20px' }}>
-                  <FieldSet title={_labels.address}>
+                  <FieldSet title={labels.address}>
                     <AddressTab
-                      labels={_labels}
+                      labels={labels}
                       addressValidation={clientIndividualFormik}
                       readOnly={editMode && true}
                       access={maxAccess}
@@ -920,12 +920,12 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           <Grid item xs={6}>
             <Grid container xs={12} spacing={2}>
               <Grid container xs={12}>
-                <FieldSet title={_labels.customerInformation}>
+                <FieldSet title={labels.customerInformation}>
                   <Grid item xs={6} sx={{ position: 'relative', width: '100%' }}>
                     <CustomTextField
                       name='cellPhone'
                       type={showAsPasswordPhone && clientIndividualFormik.values?.cellPhone ? 'password' : 'text'}
-                      label={_labels.cellPhone}
+                      label={labels.cellPhone}
                       value={clientIndividualFormik.values?.cellPhone}
                       readOnly={editMode && true}
                       required
@@ -957,7 +957,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           ? 'password'
                           : 'text'
                       }
-                      label={_labels.confirmCell}
+                      label={labels.confirmCell}
                       value={clientIndividualFormik.values?.cellPhoneRepeat}
                       required
                       readOnly={editMode && true}
@@ -990,7 +990,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <Grid item xs={3}>
                       <CustomTextField
                         name='firstName'
-                        label={_labels.first}
+                        label={labels.first}
                         value={clientIndividualFormik.values?.firstName}
                         required
                         onChange={clientIndividualFormik.handleChange}
@@ -1007,7 +1007,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <Grid item xs={3}>
                       <CustomTextField
                         name='middleName'
-                        label={_labels.middle}
+                        label={labels.middle}
                         value={clientIndividualFormik.values?.middleName}
                         onChange={clientIndividualFormik.handleChange}
                         language='english'
@@ -1023,7 +1023,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <Grid item xs={3}>
                       <CustomTextField
                         name='lastName'
-                        label={_labels.last}
+                        label={labels.last}
                         value={clientIndividualFormik.values?.lastName}
                         required
                         onChange={clientIndividualFormik.handleChange}
@@ -1040,7 +1040,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <Grid item xs={3}>
                       <CustomTextField
                         name='familyName'
-                        label={_labels.family}
+                        label={labels.family}
                         value={clientIndividualFormik.values?.familyName}
                         onChange={clientIndividualFormik.handleChange}
                         language='english'
@@ -1059,7 +1059,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <Grid item xs={3}>
                       <CustomTextField
                         name='fl_firstName'
-                        label={_labels.fl_first}
+                        label={labels.fl_first}
                         value={clientIndividualFormik.values?.fl_firstName}
                         onChange={clientIndividualFormik.handleChange}
                         maxLength='10'
@@ -1080,7 +1080,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <Grid item xs={3}>
                       <CustomTextField
                         name='fl_middleName'
-                        label={_labels.fl_middle}
+                        label={labels.fl_middle}
                         value={clientIndividualFormik.values?.fl_middleName}
                         onChange={clientIndividualFormik.handleChange}
                         readOnly={editMode && true}
@@ -1097,7 +1097,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <Grid item xs={3}>
                       <CustomTextField
                         name='fl_lastName'
-                        label={_labels.fl_last}
+                        label={labels.fl_last}
                         value={clientIndividualFormik.values?.fl_lastName}
                         onChange={clientIndividualFormik.handleChange}
                         maxLength='10'
@@ -1115,7 +1115,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <Grid item xs={3}>
                       <CustomTextField
                         name='fl_familyName'
-                        label={_labels.fl_family}
+                        label={labels.fl_family}
                         value={clientIndividualFormik.values?.fl_familyName}
                         onChange={clientIndividualFormik.handleChange}
                         readOnly={editMode && true}
@@ -1134,7 +1134,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       endpointId={SystemRepository.Country.qry}
                       name='nationalityId'
-                      label={_labels.nationality}
+                      label={labels.nationality}
                       valueField='recordId'
                       displayField={['reference', 'name', 'flName']}
                       columnsInDropDown={[
@@ -1164,7 +1164,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       datasetId={DataSets.GENDER}
                       name='gender'
-                      label={_labels.gender}
+                      label={labels.gender}
                       valueField='key'
                       displayField='value'
                       required
@@ -1186,7 +1186,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       datasetId={DataSets.EDUCATION_LEVEL}
                       name='educationLevel'
-                      label={_labels.educationLevel}
+                      label={labels.educationLevel}
                       valueField='key'
                       displayField='value'
                       readOnly={editMode && true}
@@ -1210,7 +1210,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       endpointId={RemittanceSettingsRepository.SourceOfIncome.qry}
                       name='incomeSourceId'
-                      label={_labels.incomeSource}
+                      label={labels.incomeSource}
                       valueField='recordId'
                       readOnly={editMode && true}
                       displayField={['reference', 'name', 'flName']}
@@ -1239,7 +1239,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   <Grid item xs={12}>
                     <CustomTextField
                       name='sponsorName'
-                      label={_labels.sponsorName}
+                      label={labels.sponsorName}
                       value={clientIndividualFormik.values?.sponsorName}
                       readOnly={editMode && true}
                       onChange={clientIndividualFormik.handleChange}
@@ -1254,7 +1254,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   <Grid item xs={12}>
                     <CustomComboBox
                       name='professionId'
-                      label={_labels.profession}
+                      label={labels.profession}
                       valueField='recordId'
                       displayField={['reference', 'name', 'flName']}
                       columnsInDropDown={[
@@ -1296,18 +1296,18 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                         props: {
                           readOnly: editMode,
                           optional: true,
-                          labels: _labels,
+                          labels: labels,
                           setAddress: setAddress,
                           address: address,
                           maxAccess: maxAccess
                         },
                         width: 500,
                         height: 400,
-                        title: _labels.workAddress
+                        title: labels.workAddress
                       })
                     }
                   >
-                    {_labels.workAddress}
+                    {labels.workAddress}
                   </Button>
                 </Grid>
 
@@ -1316,7 +1316,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       endpointId={RemittanceSettingsRepository.SalaryRange.qry}
                       name='salaryRangeId'
-                      label={_labels.salaryRange}
+                      label={labels.salaryRange}
                       valueField='recordId'
                       displayField={['min', '->', 'max']}
                       columnsInDropDown={[
@@ -1344,7 +1344,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       endpointId={CurrencyTradingSettingsRepository.RiskLevel.qry}
                       name='riskLevel'
-                      label={_labels.riskLevel}
+                      label={labels.riskLevel}
                       readOnly={editMode && true}
                       valueField='recordId'
                       displayField={['reference', 'name']}
@@ -1371,7 +1371,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       datasetId={DataSets.LANGUAGE}
                       name='smsLanguage'
-                      label={_labels.smsLanguage}
+                      label={labels.smsLanguage}
                       valueField='key'
                       displayField='value'
                       values={clientIndividualFormik.values}
@@ -1395,7 +1395,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       datasetId={DataSets.CIVIL_STATUS}
                       name='civilStatus'
-                      label={_labels.civilStatus}
+                      label={labels.civilStatus}
                       valueField='key'
                       displayField='value'
                       values={clientIndividualFormik.values}
@@ -1417,7 +1417,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   <Grid item xs={12}>
                     <ResourceComboBox
                       name='status'
-                      label={_labels.status}
+                      label={labels.status}
                       datasetId={DataSets.ACTIVE_STATUS}
                       values={clientIndividualFormik.values}
                       valueField='key'
@@ -1438,7 +1438,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   <Grid item xs={12}>
                     <CustomTextField
                       name='oldReference'
-                      label={_labels.oldReference}
+                      label={labels.oldReference}
                       value={clientIndividualFormik.values?.oldReference}
                       readOnly={editMode && true}
                       onChange={clientIndividualFormik.handleChange}
@@ -1455,7 +1455,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                   <Grid item xs={12}>
                     <CustomTextField
                       name='whatsAppNo'
-                      label={_labels.whatsapp}
+                      label={labels.whatsapp}
                       value={clientIndividualFormik.values?.whatsAppNo}
                       readOnly={editMode && true}
                       onChange={clientIndividualFormik.handleChange}
@@ -1473,7 +1473,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                     <ResourceComboBox
                       datasetId={DataSets.TITLE}
                       name='title'
-                      label={_labels.title}
+                      label={labels.title}
                       valueField='key'
                       displayField='value'
                       readOnly={editMode && true}
@@ -1506,7 +1506,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       onChange={clientIndividualFormik.handleChange}
                     />
                   }
-                  label={_labels?.OTPVerified}
+                  label={labels?.OTPVerified}
                 />
               </Grid>
 
@@ -1520,7 +1520,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       onChange={clientIndividualFormik.handleChange}
                     />
                   }
-                  label={_labels?.coveredFace}
+                  label={labels?.coveredFace}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -1533,14 +1533,14 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                       onChange={clientIndividualFormik.handleChange}
                     />
                   }
-                  label={_labels?.isEmployed}
+                  label={labels?.isEmployed}
                 />
               </Grid>
             </Grid>
 
             <Grid container xs={6} spacing={2} sx={{ pt: 5 }}>
               <Grid container xs={12}>
-                <FieldSet title={_labels.diplomat}>
+                <FieldSet title={labels.diplomat}>
                   <Grid item xs={12}>
                     <FormControlLabel
                       control={
@@ -1551,7 +1551,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           onChange={clientIndividualFormik.handleChange}
                         />
                       }
-                      label={_labels?.isDiplomat}
+                      label={labels?.isDiplomat}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -1567,13 +1567,13 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
                           }}
                         />
                       }
-                      label={_labels?.isDiplomatRelative}
+                      label={labels?.isDiplomatRelative}
                     />
                   </Grid>
                   <Grid item xs={12}>
                     <CustomTextField
                       name='relativeDiplomatInfo'
-                      label={_labels.relativeDiplomatInfo}
+                      label={labels.relativeDiplomatInfo}
                       onBlur={clientIndividualFormik.handleBlur}
                       value={clientIndividualFormik.values?.relativeDiplomatInfo}
                       readOnly={editMode || (!clientIndividualFormik.values?.isRelativeDiplomat && true)}
