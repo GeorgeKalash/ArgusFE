@@ -41,7 +41,7 @@ export default function ResourceComboBox({
           })
   }, [parameters])
 
-  const filteredStore = data ? data : store.filter(item => item[valueField] !== excludeValue)
+  const filteredStore = data ? data : store.filter(filter)
 
   const _value =
     (typeof values[name] === 'object'

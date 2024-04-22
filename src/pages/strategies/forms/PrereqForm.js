@@ -13,33 +13,35 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 
-const PereqForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
+const PreReqsForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const [selectedCodeId, setSelectedCodeId] = useState('')
 
-  const { recordId: grId } = store
+  const { recordId: stgId } = store
 
   const [initialValues, setInitialData] = useState({
     codeId: '',
     prerequisiteId: '',
-    StrategyId: grId
+    StrategyId: stgId
+  })
+
+  const validationSchema = yup.object({
+    codeId: yup.number().required(),
+    prerequisiteId: yup.number().required()
   })
 
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
     initialValues,
-    validationSchema: yup.object({
-      codeId: yup.string().required('This field is required'),
-      prerequisiteId: yup.string().required('This field is required')
-    }),
+    validationSchema,
     onSubmit: values => {
-      postGroups(values)
+      postPreReq(values)
     }
   })
 
-  const postGroups = async obj => {
+  const postPreReq = async obj => {
     const isNewRecord = !obj?.codeId
 
     try {
@@ -69,11 +71,13 @@ const PereqForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, 
     }
   }
   useEffect(() => {
-    recordId && getGroupId(recordId)
+    recordId && getCodeId(recordId)
   }, [recordId])
 
-  const getGroupId = codeId => {
-    const defaultParams = `_codeId=${codeId}&_groupId=${grId}`
+  const excludeSelectedCode = item => item.codeId !== selectedCodeId
+
+  const getCodeId = codeId => {
+    const defaultParams = `_codeId=${codeId}&_groupId=${stgId}`
     var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.StrategyCode.get,
@@ -98,7 +102,7 @@ const PereqForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, 
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={DocumentReleaseRepository.StrategyCode.qry}
-            parameters={`_startAt=${0}&_pageSize=${100}&_strategyId=${grId}`}
+            parameters={`_startAt=${0}&_pageSize=${100}&_strategyId=${stgId}`}
             name='codeId'
             label={labels.code}
             valueField='codeId'
@@ -106,11 +110,15 @@ const PereqForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, 
             values={formik.values}
             required
             readOnly={editMode}
-            onClear={() => formik.setFieldValue('codeId', '')}
+            onClear={() => {
+              formik.setFieldValue('codeId', '')
+              formik.setFieldTouched('codeId', false)
+            }}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik && formik.setFieldValue('codeId', newValue?.codeId)
-              setSelectedCodeId(newValue?.codeId)
+              const newCodeId = newValue ? newValue.codeId : ''
+              formik.setFieldValue('codeId', newCodeId)
+              setSelectedCodeId(newCodeId)
             }}
             error={formik.touched.codeId && Boolean(formik.errors.codeId)}
           />
@@ -118,7 +126,7 @@ const PereqForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, 
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={formik.values.codeId && DocumentReleaseRepository.StrategyCode.qry}
-            parameters={formik.values.codeId && `_strategyId=${grId}`}
+            parameters={formik.values.codeId && `_strategyId=${stgId}`}
             name='prerequisiteId'
             label={labels.prere}
             valueField='codeId'
@@ -126,9 +134,14 @@ const PereqForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, 
             values={formik.values}
             readOnly={editMode}
             maxAccess={maxAccess}
-            excludeValue={selectedCodeId}
+            filter={excludeSelectedCode}
+            onClear={() => {
+              formik.setFieldValue('prerequisiteId', '')
+              formik.setFieldTouched('prerequisiteId', false)
+            }}
             onChange={(event, newValue) => {
-              formik && formik.setFieldValue('prerequisiteId', newValue?.codeId)
+              const newPrerequisiteId = newValue ? newValue.codeId : ''
+              formik.setFieldValue('prerequisiteId', newPrerequisiteId)
             }}
             error={formik.touched.prerequisiteId && Boolean(formik.errors.prerequisiteId)}
           />
@@ -138,4 +151,4 @@ const PereqForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, 
   )
 }
 
-export default PereqForm
+export default PreReqsForm

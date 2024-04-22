@@ -4,7 +4,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import CodeList from '../forms/codeList.js'
 import StrategiesForm from '../forms/strategiesForm.js'
-import PereqList from '../forms/PrereqList.js'
+import PreReqsList from '../forms/PreReqList.js'
 import IndicatorForm from '../forms/indicatorForm.js'
 
 const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApply }) => {
@@ -53,7 +53,13 @@ const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApp
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab}>
-        <PereqList labels={labels} setEditMode={setEditMode} setStore={setStore} maxAccess={maxAccess} store={store} />
+        <PreReqsList
+          labels={labels}
+          setEditMode={setEditMode}
+          setStore={setStore}
+          maxAccess={maxAccess}
+          store={store}
+        />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={3} value={activeTab} onApply={onApply}>
         <IndicatorForm

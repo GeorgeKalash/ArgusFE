@@ -18,9 +18,9 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 // ** Resources
-import PereqForm from './PrereqForm'
+import PreReqsForm from './PreReqForm'
 
-const PereqList = ({ store, labels, maxAccess }) => {
+const PreReqsList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const [selectedRecordId, setSelectedRecordId] = useState(null)
@@ -78,7 +78,7 @@ const PereqList = ({ store, labels, maxAccess }) => {
 
   function openForm2(recordId) {
     stack({
-      Component: PereqForm,
+      Component: PreReqsForm,
       props: {
         labels: labels,
         recordId: recordId ? recordId : null,
@@ -88,7 +88,7 @@ const PereqList = ({ store, labels, maxAccess }) => {
       },
       width: 500,
       height: 400,
-      title: labels.code
+      title: labels.prere
     })
   }
 
@@ -116,4 +116,4 @@ const PereqList = ({ store, labels, maxAccess }) => {
   )
 }
 
-export default PereqList
+export default PreReqsList

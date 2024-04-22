@@ -26,12 +26,12 @@ const CodeForm = ({
 }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
-  const { recordId: grId } = store
+  const { recordId: stgId } = store
 
   const [initialValues, setInitialData] = useState({
     codeId: '',
     groupId: strategiesFormik.values.groupId,
-    strategyId: grId
+    strategyId: stgId
   })
 
   const formik = useFormik({
@@ -40,7 +40,7 @@ const CodeForm = ({
 
     initialValues,
     validationSchema: yup.object({
-      codeId: yup.string().required('This field is required')
+      codeId: yup.string().required()
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {

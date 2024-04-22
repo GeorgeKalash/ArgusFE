@@ -50,10 +50,10 @@ const IndicatorForm = ({
         .array()
         .of(
           yup.object()?.shape({
-            indicatorName: yup.string().required('Indicator Name is required')
+            indicatorName: yup.string().required()
           })
         )
-        .required('Indicator data array is required')
+        .required()
     }),
     onSubmit: values => {
       submitIndicators(values.indicatorData)
