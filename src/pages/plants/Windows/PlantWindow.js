@@ -8,69 +8,50 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import toast from 'react-hot-toast'
 import AddressForm from 'src/components/Shared/AddressForm'
 
-const PlantWindow = ({
-  labels,
-  editMode,
-  maxAccess,
-  recordId,
-  height
-}) => {
-
-  const [store , setStore] = useState({
-    recordId : recordId || null,
+const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
+  const [store, setStore] = useState({
+    recordId: recordId || null,
     plant: null,
-    address: null,
+    address: null
   })
 
-  const [activeTab , setActiveTab] = useState(0)
-  const tabs = [{ label: labels.plant }, { label: labels.address , disabled: !store.recordId }]
+  const [activeTab, setActiveTab] = useState(0)
+  const tabs = [{ label: labels.plant }, { label: labels.address, disabled: !store.recordId }]
   const { postRequest } = useContext(RequestsContext)
 
-  async function onSubmit (address){
-
+  async function onSubmit(address) {
     const addressId = address.addressId
-    if(!store.plant.addressId){
-
-    const res = { ...store.plant , addressId : addressId}
-    if(res){
-    const data = {...res  , recordId:  store?.recordId}
-     await  postRequest({
-      extension: SystemRepository.Plant.set,
-      record: JSON.stringify(data)
-    })
-      .then(result => {
-        if (!addressId) {
-          toast.success('Record Added Successfully')
-        }
-        else toast.success('Record Edited Successfully')
-      })
-      .catch(error => {
-      })}
-
-  }else{
-    toast.success('Record Added Successfully')
+    if (!store.plant.addressId) {
+      const res = { ...store.plant, addressId: addressId }
+      if (res) {
+        const data = { ...res, recordId: store?.recordId }
+        await postRequest({
+          extension: SystemRepository.Plant.set,
+          record: JSON.stringify(data)
+        })
+          .then(result => {
+            if (!addressId) {
+              toast.success('Record Added Successfully')
+            } else toast.success('Record Edited Successfully')
+          })
+          .catch(error => {})
+      }
+    } else {
+      toast.success('Record Added Successfully')
+    }
   }
-
-}
-   function setAddress(res){
+  function setAddress(res) {
     setStore(prevStore => ({
       ...prevStore,
       address: res
-    }));
-   }
+    }))
+  }
 
-return (
+  return (
     <>
-      <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-        <CustomTabPanel height={height} index={0} value={activeTab}>
-        <PlantForm
-          _labels={labels}
-          maxAccess={maxAccess}
-          store={store}
-          setStore={setStore}
-          editMode={store.recordId}
-
-        />
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabPanel height={height} index={0} value={activeTab}>
+        <PlantForm _labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} editMode={store.recordId} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
         <AddressForm
@@ -83,7 +64,6 @@ return (
           onSubmit={onSubmit}
         />
       </CustomTabPanel>
-
     </>
   )
 }
