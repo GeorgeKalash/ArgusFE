@@ -19,6 +19,7 @@ const CustomNumberField = ({
   helperText,
   hasBorder = true,
   maxLength = 1000,
+  thousandSeparator = ',',
   min = '',
   max = '',
   ...props
@@ -67,7 +68,7 @@ const CustomNumberField = ({
     <NumericFormat
       label={label}
       allowLeadingZeros
-      thousandSeparator=','
+      thousandSeparator={thousandSeparator}
       decimalSeparator='.'
       decimalScale={decimalScale}
       value={value}
