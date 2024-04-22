@@ -134,6 +134,7 @@ export default function InstantCash({ clientId, beneficiaryId }) {
           getClientInfo(clientId)
           if (beneficiaryId) getBeneficiary(clientId, beneficiaryId)
         }
+        getDefaultCountry()
       } catch (error) {}
     })()
   }, [])
@@ -151,6 +152,21 @@ export default function InstantCash({ clientId, beneficiaryId }) {
     formik.setFieldValue('remitter[0].primaryId[0].expiryDate', formatDateFromApi(res.record.clientIDView.idExpiryDate))
     formik.setFieldValue('remitter[0].primaryId[0].placeOfIssue', res.record.clientIDView.idCountryId)
     formik.setFieldValue('remitter[0].primaryId[0].placeOfIssueName', res.record.clientIDView.idCountryName)
+  }
+
+  const getDefaultCountry = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.Defaults.get,
+      parameters: `_filter=&_key=countryId`
+    })
+    if (res.record.value) {
+      const countryRes = await getRequest({
+        extension: SystemRepository.Country.get,
+        parameters: `_recordId=${res.record.value}`
+      })
+      formik.setFieldValue('fromCountryId', countryRes.record.recordId)
+      formik.setFieldValue('fromCountryName', countryRes.record.reference)
+    }
   }
 
   const getBeneficiary = async (clientId, beneficiaryId) => {
@@ -200,34 +216,6 @@ export default function InstantCash({ clientId, beneficiaryId }) {
           </Grid>
           <Grid hideonempty xs={12}>
             <ResourceComboBox
-              endpointId={
-                formik.values.deliveryModeId && formik.values.toCountryId && RemittanceBankInterface.PayingAgent.qry
-              }
-              parameters={
-                formik.values.deliveryModeId &&
-                formik.values.toCountryId &&
-                `_deliveryMode=${formik.values.deliveryModeId}&_receivingCountry=${formik.values.toCountryId}`
-              }
-              name='fromCountryId'
-              label={_labels.fromCountry}
-              valueField='recordId'
-              displayField='fromCountryName'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('fromCountryId', newValue?.recordId)
-                  formik.setFieldValue('fromCountryName', newValue?.destinationCountryName)
-                } else {
-                  formik.setFieldValue('fromCountryId', '')
-                }
-              }}
-              maxAccess={maxAccess}
-              error={formik.touched.fromCountryId && Boolean(formik.errors.fromCountryId)}
-              helperText={formik.touched.fromCountryId && formik.errors.fromCountryId}
-            />
-          </Grid>
-          <Grid hideonempty xs={12}>
-            <ResourceComboBox
               endpointId={formik.values.deliveryModeId && RemittanceBankInterface.ReceivingCountries.qry}
               parameters={formik.values.deliveryModeId && `_deliveryMode=${formik.values.deliveryModeId}`}
               name='toCountryId'
@@ -247,9 +235,6 @@ export default function InstantCash({ clientId, beneficiaryId }) {
               helperText={formik.touched.toCountryId && formik.errors.toCountryId}
             />
           </Grid>
-        </Grid>
-        {/* Second Column */}
-        <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
           <Grid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={
@@ -279,6 +264,9 @@ export default function InstantCash({ clientId, beneficiaryId }) {
               helperText={formik.touched.payingAgent && formik.errors.payingAgent}
             />
           </Grid>
+        </Grid>
+        {/* Second Column */}
+        <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2, height: '50%' }}>
           <Grid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={RemittanceBankInterface.Combos.qry}

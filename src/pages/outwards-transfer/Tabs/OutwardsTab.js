@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 // ** MUI Imports
 import { Grid, Button } from '@mui/material'
-import { getFormattedNumberMax } from 'src/lib/numberField-helper'
+import { getFormattedNumber, getFormattedNumberMax } from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useWindow } from 'src/windows'
@@ -75,6 +75,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     corRef: '',
     corName: '',
     commission: '',
+    defaultCommission: '',
     lcAmount: '',
     amount: '',
     exRate: '',
@@ -102,19 +103,20 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     docStatus: '',
     ttNo: '',
     tokenNo: '',
-    valueDate: null,
+    trackingNo: '',
+    valueDate: new Date(),
+    defaultValueDate: new Date(),
     vatAmount: '',
-    tdAmount: '',
+    tdAmount: 0,
     giftCode: '',
     details: '',
-    paymentMethod: ''
-
-    /*   amount: [
+    paymentMethod: '',
+    amountRows: [
       {
         id: 1,
         outwardId: '',
         seqNo: '',
-        cashAccountId: '',
+        cashAccountId: cashAccountId,
         cashAccount: '',
         ccId: '',
         ccName: '',
@@ -123,7 +125,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         bankFees: '',
         receiptRef: ''
       }
-    ]*/
+    ]
   })
 
   const [initialValues2, setInitialData2] = useState({
@@ -161,6 +163,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
+      valueDate: yup.string().required('This field is required'),
       countryId: yup.string().required('This field is required'),
       dispersalType: yup.string().required('This field is required'),
       currencyId: yup.string().required('This field is required'),
@@ -172,31 +175,75 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }),
     onSubmit: async values => {
       const copy = { ...values }
+      delete copy.amountRows
       copy.date = formatDateToApi(copy.date)
+      copy.valueDate = formatDateToApi(copy.valueDate)
+      copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
 
       // Default values for properties if they are empty
       copy.wip = copy.wip === '' ? 1 : copy.wip
       copy.status = copy.status === '' ? 1 : copy.status
 
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.OutwardsTransfer.set,
-        record: JSON.stringify(copy)
-      })
+      if (values.amountRows) {
+        const updatedRows = formik.values.amountRows.map((amountDetails, index) => {
+          const seqNo = index + 1 // Adding 1 to make it 1-based index
 
-      if (res.recordId) {
-        toast.success('Record Updated Successfully')
-        formik.setFieldValue('recordId', res.recordId)
-        setEditMode(true)
-
-        const res2 = await getRequest({
-          extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
-          parameters: `_recordId=${res.recordId}`
+          return {
+            ...amountDetails,
+            seqNo: seqNo,
+            outwardId: formik.values.recordId || 0
+          }
         })
-        formik.setFieldValue('reference', res2.record.reference)
-        invalidate()
+        if (updatedRows.length == 1 && !updatedRows[0].type) {
+          stackError({
+            message: `Amount grid not filled. Please fill the grid before saving.`
+          })
+
+          return
+        }
+        if (Balance > 0) {
+          stackError({
+            message: `Net to pay should be equal to amount received`
+          })
+
+          return
+        }
+
+        const amountGridData = {
+          header: copy,
+          cash: updatedRows
+        }
+
+        const amountRes = await postRequest({
+          extension: RemittanceOutwardsRepository.OutwardsTransfer.set2,
+          record: JSON.stringify(amountGridData)
+        })
+
+        if (amountRes.recordId) {
+          toast.success('Record Updated Successfully')
+          formik.setFieldValue('recordId', amountRes.recordId)
+          setEditMode(true)
+
+          const res2 = await getRequest({
+            extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+            parameters: `_recordId=${amountRes.recordId}`
+          })
+          formik.setFieldValue('reference', res2.record.headerView.reference)
+          invalidate()
+        }
       }
     }
   })
+
+  const total = parseFloat(formik.values.amount || 0)
+
+  const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
+    const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+
+    return sumAmount + curValue
+  }, 0)
+
+  const Balance = total - receivedTotal
 
   const onClose = async () => {
     const obj = formik.values
@@ -244,6 +291,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     const copy = { ...formik.values }
     copy.date = formatDateToApi(copy.date)
     copy.valueDate = formatDateToApi(copy.valueDate)
+    copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
     copy.expiryDate = formatDateToApi(copy.expiryDate)
 
     const res = await postRequest({
@@ -275,6 +323,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       const selectedRowData = productsStore?.list?.find(row => row.checked)
       formik.setFieldValue('productId', selectedRowData?.productId)
       formik.setFieldValue('commission', selectedRowData?.fees)
+      formik.setFieldValue('defaultCommission', selectedRowData?.fees)
       formik.setFieldValue('lcAmount', selectedRowData?.baseAmount)
       formik.setFieldValue('dispersalId', selectedRowData?.dispersalId)
       formik.setFieldValue('exRate', selectedRowData?.exRate)
@@ -329,6 +378,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           } else {
             formik.setFieldValue('productId', '')
             formik.setFieldValue('commission', '')
+            formik.setFieldValue('defaultCommission', '')
             formik.setFieldValue('lcAmount', '')
             formik.setFieldValue('productId', '')
             formik.setFieldValue('dispersalId', '')
@@ -341,6 +391,20 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     } else {
       setProductsStore([])
     }
+  }
+
+  const fillAmountGridData = async data => {
+    const modifiedList = data.map((item, index) => ({
+      ...item,
+      id: index + 1,
+      bankFees: parseFloat(item.bankFees).toFixed(2),
+      amount: parseFloat(item.amount).toFixed(2)
+    }))
+
+    formik.setValues({
+      ...formik.values,
+      amountRows: modifiedList
+    })
   }
 
   function openReleaventWindow(formValues) {
@@ -456,8 +520,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     const vatAmount = (commission * formFields.values.vatAmount) / 100
     const discount = tdAmount ? tdAmount : 0
 
+    console.log('formFields ', formFields)
     const amount = lcAmount + (commission + vatAmount - discount)
-    formFields.setFieldValue('amount', amount)
+    formik.setFieldValue('amount', amount)
   }
   async function getDefaultVAT() {
     var parameters = `_filter=&_key=vatPct`
@@ -476,18 +541,20 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       try {
         if (recordId) {
           const res = await getRequest({
-            extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
+            extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
             parameters: `_recordId=${recordId}`
           })
-          setIsClosed(res.record.wip === 2 ? true : false)
-          setIsPosted(res.record.status === 3 ? true : false)
-          res.record.date = formatDateFromApi(res.record.date)
-
-          //res.record.exRate2 = formik.setValues(res.record)
-          //formik.setFieldValue('net', parseInt(res.record.commission) + parseInt(res.record.lcAmount))
+          setIsClosed(res.record.headerView.wip === 2 ? true : false)
+          setIsPosted(res.record.headerView.status === 3 ? true : false)
+          res.record.headerView.date = formatDateFromApi(res.record.headerView.date)
+          res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
+          res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           res.record.checked = true
-          productDataFill(res.record)
-          getClientInfo(res.record.clientId)
+          formik.setValues(res.record.headerView)
+          console.log('headerView ', res.record.headerView)
+          fillAmountGridData(res.record.cash)
+          productDataFill(res.record.headerView)
+          getClientInfo(res.record.headerView.clientId)
           fillProfessionStore()
         }
         getDefaultVAT()
@@ -577,6 +644,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 value={formik?.values?.valueDate}
                 onChange={formik.setFieldValue}
                 readOnly={isClosed || isPosted}
+                required
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('valueDate', '')}
                 error={formik.touched.valueDate && Boolean(formik.errors.valueDate)}
@@ -805,6 +873,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   error={formik.touched.amount && Boolean(formik.errors.amount)}
                   maxLength={10}
                 />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField label='Amount Recieved' value={getFormattedNumber(receivedTotal)} readOnly />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField label='Balance To Pay' value={getFormattedNumber(Balance) ?? '0'} readOnly />
               </Grid>
             </FieldSet>
           </Grid>
@@ -1147,22 +1221,27 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             </Grid>
 
             <FieldSet title='Amount'>
-              {/* 
               <Grid width={'100%'}>
                 <DataGrid
-                  onChange={value => formik.setFieldValue('amount', value)}
-                  value={formik.values.amount}
-                  error={formik.errors.amount}
+                  onChange={value => formik.setFieldValue('amountRows', value)}
+                  value={formik.values.amountRows}
+                  error={formik.errors.amountRows}
                   disabled={isClosed}
+                  maxAccess={maxAccess}
+                  name='amountRows'
                   columns={[
                     {
                       component: 'resourcecombobox',
                       label: labels.type,
-                      name: 'types',
+                      name: 'typeName',
                       props: {
                         datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
                         displayField: 'value',
                         valueField: 'key',
+                        mapping: [
+                          { from: 'key', to: 'type' },
+                          { from: 'value', to: 'typeName' }
+                        ],
                         filter: item => (formik.values.functionId === SystemFunction.Outwards ? item.key === '2' : true)
                       }
                     },
@@ -1174,24 +1253,22 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                     },
                     {
                       component: 'resourcecombobox',
-                      name: 'cashAccountId',
-                      label: labels.cashAccount,
-                      props: {
-                        endpointId: CashBankRepository.CashAccount.qry,
-                        parameters: '_startAt=0&_pageSize=1000&_type=2',
-                        valueField: 'recordId',
-                        displayField: 'reference'
-                      }
-                    },
-                    {
-                      component: 'resourcecombobox',
-                      name: 'creditCards',
+                      name: 'ccName',
                       editable: false,
                       label: labels.creditCard,
                       props: {
                         endpointId: CashBankRepository.CreditCard.qry,
                         valueField: 'recordId',
-                        displayField: 'name'
+                        displayField: 'name',
+                        mapping: [
+                          { from: 'recordId', to: 'ccId' },
+                          { from: 'name', to: 'ccName' }
+                        ],
+                        columnsInDropDown: [
+                          { key: 'reference', value: 'Reference' },
+                          { key: 'name', value: 'Name' }
+                        ],
+                        displayFieldWidth: 2
                       }
                     },
                     {
@@ -1209,7 +1286,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   ]}
                 />
               </Grid>
-                */}
             </FieldSet>
           </Grid>
         </Grid>
