@@ -560,54 +560,35 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
         />
 
         <Grid container marginTop={3.7}>
-          <Grid xs={6}>
-            <Box
-              paddingInlineEnd={2}
-              sx={{
-                width: '25.9rem',
-                overflow: 'hidden',
-                marginLeft: '3rem'
-              }}
-            >
-              <Table
-                gridData={{ count: 1, list: [baseGridData] }}
-                maxAccess={access}
-                height={'150'}
-                columns={[
-                  { field: 'base', headerName: _labels.base },
-                  { field: 'credit', headerName: _labels.credit, align: 'right' },
-                  { field: 'debit', headerName: _labels.debit, align: 'right' },
-                  { field: 'balance', headerName: _labels.balance, align: 'right' }
-                ]}
-                rowId={['seqNo']}
-                pagination={false}
-              />
-            </Box>
+          <Grid xs={6} sx={{ p: 1 }}>
+            <Table
+              gridData={{ count: 1, list: [baseGridData] }}
+              maxAccess={access}
+              height={'150'}
+              columns={[
+                { field: 'base', headerName: _labels.base },
+                { field: 'credit', headerName: _labels.credit, align: 'right' },
+                { field: 'debit', headerName: _labels.debit, align: 'right' },
+                { field: 'balance', headerName: _labels.balance, align: 'right' }
+              ]}
+              rowId={['seqNo']}
+              pagination={false}
+            />{' '}
           </Grid>
-          <Grid xs={6}>
-            <Box
-              paddingInlineStart={2}
-              sx={{
-                width: '26rem',
-                overflow: 'hidden',
-                position: 'relative',
-                marginLeft: '1rem'
-              }}
-            >
-              <Table
-                pagination={false}
-                gridData={{ count: currencyGridData.length, list: currencyGridData }}
-                columns={[
-                  { field: 'currency', headerName: 'Currency' },
-                  { field: 'debit', headerName: 'Debit', align: 'right' },
-                  { field: 'credit', headerName: 'Credit', align: 'right' },
-                  { field: 'balance', headerName: 'Balance', align: 'right' }
-                ]}
-                height={'150'}
-                rowId={['currency']}
-                maxAccess={access}
-              />
-            </Box>
+          <Grid xs={6} sx={{ p: 1 }}>
+            <Table
+              pagination={false}
+              gridData={{ count: currencyGridData.length, list: currencyGridData }}
+              columns={[
+                { field: 'currency', headerName: 'Currency' },
+                { field: 'debit', headerName: 'Debit', align: 'right' },
+                { field: 'credit', headerName: 'Credit', align: 'right' },
+                { field: 'balance', headerName: 'Balance', align: 'right' }
+              ]}
+              height={'150'}
+              rowId={['currency']}
+              maxAccess={access}
+            />
           </Grid>
         </Grid>
         <GridToolbar maxAccess={access} />
