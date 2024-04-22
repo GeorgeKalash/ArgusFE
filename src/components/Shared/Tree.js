@@ -7,6 +7,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useReactToPrint } from 'react-to-print'
 import WindowToolbar from './WindowToolbar'
 
+import { Box, Grid } from '@mui/material'
+
 const getAllNodeIds = nodes => {
   let nodeIds = []
   nodes.forEach(node => {
@@ -41,10 +43,11 @@ const PrintableTree = ({ nodes }) => {
 }
 
 const StyledTreeView = styled(TreeView)({
-  height: 280,
   flexGrow: 1,
-  maxWidth: 400,
+  maxWidth: '100%',
+  height: 280,
   overflowY: 'auto',
+
   '@media print': {
     height: 'auto',
     maxHeight: '100%',
@@ -107,23 +110,42 @@ function Tree({ data }) {
   ]
 
   return (
-    <div>
-      <div ref={componentRef}>
-        <StyledTreeView
-          aria-label='plant tree'
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-        >
-          {treeData.map(node => renderTree(node))}
-        </StyledTreeView>
-      </div>
-      <div style={{ display: 'none' }}>
-        <div ref={printComponentRef}>
-          <PrintableTree nodes={treeData} />
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+      }}
+    >
+      <div>
+        <div ref={componentRef}>
+          <StyledTreeView
+            aria-label='plant tree'
+            defaultCollapseIcon={<ExpandMoreIcon />}
+            defaultExpandIcon={<ChevronRightIcon />}
+          >
+            {treeData.map(node => renderTree(node))}
+          </StyledTreeView>
+        </div>
+        <div style={{ display: 'none', visibility: 'hidden' }}>
+          <div ref={printComponentRef}>
+            <PrintableTree nodes={treeData} />
+          </div>
         </div>
       </div>
-      <WindowToolbar actions={actions} isCleared={false} isSaved={false} isInfo={false} />
-    </div>
+      <Grid
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+
+          textAlign: 'center'
+        }}
+      >
+        <WindowToolbar actions={actions} isCleared={false} isSaved={false} isInfo={false} />
+      </Grid>
+    </Box>
   )
 }
 

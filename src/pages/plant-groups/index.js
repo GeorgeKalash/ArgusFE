@@ -13,6 +13,7 @@ import { useWindow } from 'src/windows'
 
 // ** Windows
 import PlantWindow from './Windows/PlantGroupsWindow'
+import TreeWindow from './Windows/TreeWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -29,6 +30,7 @@ const Plant = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
+  const [treeWindowOpen, setTreeWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
   const { stack } = useWindow()
@@ -82,14 +84,7 @@ const Plant = () => {
   }
 
   const onTreeClick = () => {
-    stack({
-      Component: Tree,
-      props: { data: data },
-      width: 400,
-      height: 400,
-
-      title: 'Tree'
-    })
+    setTreeWindowOpen(true)
   }
 
   const edit = obj => {
@@ -134,6 +129,14 @@ const Plant = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
+        />
+      )}
+      {treeWindowOpen && (
+        <TreeWindow
+          onClose={() => {
+            setTreeWindowOpen(false)
+          }}
+          data={data}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
