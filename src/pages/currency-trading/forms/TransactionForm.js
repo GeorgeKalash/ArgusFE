@@ -182,7 +182,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     status: '1',
     type: -1,
     wip: 1,
-    functionId: !editMode && '3502',
+    functionId: !editMode && 3502,
     idNoConfirm: '',
     cellPhoneConfirm: '',
     otp: false,
@@ -192,7 +192,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [initialValues, setInitialValues] = useState(initial)
 
   const formik = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
@@ -211,12 +211,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         .array()
         .of(
           yup.object().shape({
-            currency: yup
-              .object()
-              .shape({
-                recordId: yup.string().required('Currency recordId is required')
-              })
-              .required('Currency is required'),
+            currencyId: yup.string().required('Currency recordId is required'),
             exRate: yup.string().nullable().required('Rate is required'),
             fcAmount: yup.number().required('FcAmount is required'),
             lcAmount: yup.number().required('LcAmount is required')
@@ -239,16 +234,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   })
 
   async function setOperationType(type) {
-    if (type === '3502' || type === '3503') {
+    if (type) {
       const res = await getRequest({
         extension: SystemRepository.Defaults.get,
         parameters:
-          type === '3502'
-            ? '_key=ct_cash_purchase_ratetype_id'
-            : type === '3503'
-            ? '_key=ct_cash_sales_ratetype_id'
-            : ''
+          type === 3502 ? '_key=ct_cash_purchase_ratetype_id' : type === 3503 ? '_key=ct_cash_sales_ratetype_id' : ''
       })
+
       setRateType(res.record.value)
       formik.setFieldValue('functionId', type)
     }
@@ -276,12 +268,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     ;(async function () {
       setEditMode(false)
 
-      const response = await getRequest({
-        extension: SystemRepository.Currency.qry,
-        parameters: '_filter='
-      })
-      setOperationType(formik?.values?.functionId)
-
       if (recordId) {
         setEditMode(true)
         getData(recordId)
@@ -299,37 +285,15 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     if (!recordId) {
       formik.setFieldValue('reference', record.headerView.reference)
     } else {
-      setOperationType(record.headerView.functionId)
-
       formik.setValues({
         recordId: _recordId,
         reference: record.headerView.reference,
-        operations: record.items.map(
-          ({ seqNo, currencyId, currencyName, currencyRef, lcAmount, fcAmount, minRate, maxRate, ...rest }) => ({
-            id: seqNo,
-            currencyId: currencyId,
-            currency: {
-              recordId: currencyId,
-              name: currencyName,
-              reference: currencyRef
-            },
-            lcAmount: lcAmount,
-            fcAmount: fcAmount,
-            minRate,
-            maxRate,
-            ...rest
-          })
-        ),
-        amount: record.cash.map(({ seqNo, type, typeName, ccId, ccName, ...rest }) => ({
+        operations: record.items.map(({ seqNo, ...rest }) => ({
           id: seqNo,
-          types: {
-            key: type,
-            value: typeName
-          },
-          creditCards: {
-            recordId: ccId,
-            name: ccName
-          },
+          ...rest
+        })),
+        amount: record.cash.map(({ seqNo, ...rest }) => ({
+          id: seqNo,
           ...rest
         })),
         clientType: record.clientMaster.category,
@@ -362,6 +326,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         cell_phone: record.clientMaster.cellPhone,
         status: record.headerView.status
       })
+
+      setOperationType(record.headerView.functionId)
     }
     setIsClosed(record.headerView.wip === 2 ? true : false)
   }
@@ -465,7 +431,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const balance = total - receivedTotal
 
   async function onSubmit(values) {
-    console.log(values)
     if (
       ((!values?.idNoConfirm && values?.clientId) ||
         (!values?.confirmIdNo && !values?.clientId && !values.cellPhoneConfirm)) &&
@@ -513,19 +478,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
           amount: total,
           notes: values.remarks
         },
-        items: values.operations.map(
-          ({ id, currencyId, exRate, defaultRate, minRate, maxRate, rateCalcMethod, fcAmount, lcAmount, ...rest }) => ({
-            seqNo: id,
-            currencyId,
-            exRate,
-            defaultRate,
-            rateCalcMethod,
-            minRate,
-            maxRate,
-            fcAmount: fcAmount,
-            lcAmount: lcAmount
-          })
-        ),
+        items: values.operations.map(({ id, currencyId, ...rest }) => ({
+          seqNo: id,
+          ...rest
+        })),
         clientMaster: {
           category: values.clientType,
           reference: null,
@@ -584,10 +540,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
 
       if (!values.recordId) {
         toast.success('Record Added Successfully')
-        setInitialValues({
-          ...values,
-          recordId: response.recordId
-        })
+        formik.setFieldTouched(recordId, response.recordId)
         getData(response.recordId)
 
         setEditMode(true)
@@ -713,7 +666,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                 />
               </Grid>
               <Grid item xs={4}>
-                <RadioGroup row value={formik.values.functionId} onChange={e => setOperationType(e.target.value)}>
+                <RadioGroup
+                  row
+                  value={formik.values.functionId}
+                  onChange={e => setOperationType(parseInt(e.target.value))}
+                >
                   <FormControlLabel
                     value={'3502'}
                     control={<Radio />}
@@ -802,24 +759,46 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                   {
                     component: 'resourcecombobox',
                     label: labels.currency,
-                    name: 'currency',
+                    name: 'currencyId',
                     props: {
                       endpointId: SystemRepository.Currency.qry,
                       displayField: ['reference', 'name'],
                       valueField: 'recordId',
+                      mapping: [
+                        { from: 'recordId', to: 'currencyId' },
+                        { from: 'name', to: 'currencyName' },
+                        { from: 'reference', to: 'currencyRef' }
+                      ],
                       columnsInDropDown: [
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]
                     },
                     async onChange({ row: { update, oldRow, newRow } }) {
-                      if (!newRow?.currency?.recordId) {
+                      if (!newRow?.currencyId) {
+                        update({
+                          currencyId: '',
+                          exRate: '',
+                          defaultRate: '',
+                          rateCalcMethod: '',
+                          minRate: '',
+                          maxRate: ''
+                        })
+
                         return
                       }
-                      const exchange = await fetchRate({ currencyId: newRow?.currency?.recordId })
+                      const exchange = await fetchRate({ currencyId: newRow?.currencyId })
                       if (!exchange?.rate) {
+                        update({
+                          currencyId: '',
+                          exRate: '',
+                          defaultRate: '',
+                          rateCalcMethod: '',
+                          minRate: '',
+                          maxRate: ''
+                        })
                         stackError({
-                          message: `Rate not defined for ${newRow.currency.name}.`
+                          message: `Rate not defined for ${newRow.currencyName}.`
                         })
 
                         return
@@ -839,7 +818,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                       }
 
                       update({
-                        currencyId: newRow.currency.recordId,
+                        currencyId: newRow.currencyId,
                         exRate: exchange?.rate,
                         defaultRate: exchange?.rate,
                         rateCalcMethod: exchange?.rateCalcMethod,
@@ -1263,7 +1242,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           props: {
                             endpointId: CashBankRepository.CreditCard.qry,
                             valueField: 'recordId',
-                            displayField: 'name'
+                            displayField: 'name',
+                            mapping: [
+                              { from: 'recordId', to: 'ccId' },
+                              { from: 'name', to: 'ccName' }
+                            ]
                           }
                         },
                         {
