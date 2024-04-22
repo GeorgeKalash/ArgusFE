@@ -86,6 +86,7 @@ export const ResourceIds = {
   CommissionSchedule: 51118,
   CbCashGroups: 33100,
   CbBanks: 33101,
+  OTPVerify: 35209,
   SystemDefaults: 20108,
   ProductionClass: 42108,
   carrierSite: 40203,
