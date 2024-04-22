@@ -27,7 +27,7 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
   const [initialValues, setInitialData] = useState({
     recordId: null,
     name: '',
-    group: '',
+
     type: '',
     groupId: ''
   })
@@ -37,9 +37,9 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      groupId: yup.string().required('This field is required'),
-      type: yup.string().required('This field is required')
+      name: yup.string().required(),
+      groupId: yup.string().required(),
+      type: yup.string().required()
     }),
     onSubmit: values => {
       postGroups(values)
@@ -78,9 +78,7 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
       }
       setEditMode(true)
       invalidate()
-    } catch (error) {
-      toast.error('An error occurred')
-    }
+    } catch {}
   }
 
   useEffect(() => {
@@ -99,9 +97,7 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
         setInitialData(res.record)
         setEditMode(true)
       })
-      .catch(error => {
-        console.error('Error fetching group ID:', error)
-      })
+      .catch(error => {})
   }
 
   return (
@@ -132,7 +128,6 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
             required
             readOnly={editMode}
             maxAccess={maxAccess}
-            onClear={() => formik.setFieldValue('codeId', '')}
             onChange={(event, newValue) => {
               strategiesFormik && strategiesFormik.setFieldValue('groupId', newValue?.recordId)
             }}

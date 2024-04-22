@@ -102,10 +102,7 @@ const IndicatorForm = ({
         setValueGridData(gridData)
         formik.setValues({ indicatorData: gridData })
       })
-      .catch(error => {
-        console.error(error)
-        setErrorMessage(error)
-      })
+      .catch()
   }
 
   useEffect(() => {

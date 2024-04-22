@@ -40,9 +40,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
       .then(res => {
         setValueGridData(res)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
   useEffect(() => {
     recordId && getValueGridData(recordId)
@@ -72,7 +70,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
   ]
 
   const addCode = () => {
-    openForm2()
+    openForm()
   }
 
   const delCode = async obj => {
@@ -85,7 +83,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
     toast.success('Record Deleted Successfully')
   }
 
-  function openForm2(recordId) {
+  function openForm(recordId) {
     stack({
       Component: CodeForm,
       props: {

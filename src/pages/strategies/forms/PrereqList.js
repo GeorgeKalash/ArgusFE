@@ -23,15 +23,13 @@ import PreReqsForm from './PrereqForm'
 const PreReqsList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
+
   const { stack } = useWindow()
   const [valueGridData, setValueGridData] = useState()
 
   const [refresh, setRefresh] = useState(false)
 
   //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   const getValueGridData = recordId => {
     getRequest({
@@ -41,9 +39,7 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
       .then(res => {
         setValueGridData(res)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
   useEffect(() => {
     recordId && getValueGridData(recordId)
@@ -63,7 +59,7 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
   ]
 
   const addCode = () => {
-    openForm2()
+    openForm()
   }
 
   const delCode = async obj => {
@@ -76,7 +72,7 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
     toast.success('Record Deleted Successfully')
   }
 
-  function openForm2(recordId) {
+  function openForm(recordId) {
     stack({
       Component: PreReqsForm,
       props: {
