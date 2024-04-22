@@ -18,7 +18,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 // ** Resources
-import PreReqsForm from './PreReqForm'
+import PreReqsForm from './PrereqForm'
 
 const PreReqsList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

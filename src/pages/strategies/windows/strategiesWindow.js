@@ -4,7 +4,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import CodeList from '../forms/codeList.js'
 import StrategiesForm from '../forms/strategiesForm.js'
-import PreReqsList from '../forms/PreReqList.js'
+import PreReqsList from '../forms/PrereqList.js'
 import IndicatorForm from '../forms/indicatorForm.js'
 
 const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApply }) => {
