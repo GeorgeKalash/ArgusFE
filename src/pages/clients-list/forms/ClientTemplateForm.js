@@ -280,12 +280,13 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           flName: obj.clientMaster.flName,
           keyword: obj.clientMaster.keyword,
           otp: obj.clientMaster.otp,
-          plantId: obj.plantId,
+          plantId: obj.clientRemittance.plantId,
           name: obj.clientMaster.name,
           oldReference: obj.clientMaster.oldReference,
 
           //clientRemittance
-          recordId: obj?.clientRemittance?.recordId,
+          recordId: recordId,
+          recordIdRemittance: obj.clientRemittance?.recordId,
           otpVerified: obj.clientRemittance?.otpVerified,
           addressId: obj.clientRemittance?.addressId,
           batchId: obj.clientRemittance?.batchId,
@@ -587,24 +588,12 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       setProfessionFilterStore(filteredList)
     }
   }
-  const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   const onClose = async () => {
     const values = clientIndividualFormik.values
     try {
-      const { record: cashAccountRecord } = await getRequest({
-        extension: `SY.asmx/getUD`,
-        parameters: `_userId=${userId}&_key=cashAccountId`
-      })
-
       const data = {
-        recordId: values?.recordId || null,
-        functionId: 3600,
-        plantId: plantId || values?.plantId,
-        reference: values?.reference,
-        clientId: values.clientId,
-        status: values.status,
-        cashAccountId: cashAccountRecord.value
+        recordId: values?.recordIdRemittance
       }
 
       const res = await postRequest({
@@ -657,7 +646,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       maxAccess={maxAccess}
       editMode={editMode}
       disabledSubmit={editMode}
-      on
     >
       <Grid container spacing={4}>
         <Grid container xs={12} spacing={2} sx={{ padding: '20px' }}>
