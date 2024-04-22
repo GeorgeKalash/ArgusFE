@@ -267,7 +267,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     fillType()
     ;(async function () {
       setEditMode(false)
-
+      setOperationType(formik.values.functionId)
       if (recordId) {
         setEditMode(true)
         getData(recordId)
@@ -849,9 +849,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                     props: {
                       readOnly: false
                     },
+                    updateOn: 'blur',
                     async onChange({ row: { update, newRow } }) {
                       const fcAmount = newRow.fcAmount
-
                       if (newRow.exRate >= newRow.minRate && newRow.exRate <= newRow.maxRate) {
                         !isNaN(newRow.exRate * fcAmount) &&
                           update({
