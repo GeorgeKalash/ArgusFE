@@ -36,6 +36,8 @@ import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 import { useInvalidate } from 'src/hooks/resource'
+import SystemDefaults from 'src/pages/system-defaults'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAccess }) => {
   const { stack } = useWindow()
@@ -214,6 +216,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
         obj?.workAddressView && setAddress(obj.workAddressView)
         setInitialData({
           //clientIDView
+          functionId: SystemFunction.KYC,
           reference: obj.clientMaster.reference,
           clientId: obj.clientIDView.clientId,
           expiryDate: formatDateFromApi(obj.clientMaster.expiryDate),
@@ -564,7 +567,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
         props: {
           idTypeStore: idTypeStore,
           formValidation: clientIndividualFormik,
-          functionId: 3600,
+          functionId: clientIndividualFormik.values.functionId,
           setEditMode: setEditMode,
           setErrorMessage: setErrorMessage,
           getData: getClient
@@ -620,6 +623,12 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
       condition: true,
       onClick: () => openBeneficiaryWindow(),
       disabled: !editMode
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
     },
     {
       key: 'Close',

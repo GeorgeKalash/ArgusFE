@@ -32,6 +32,7 @@ const ClientsList = () => {
     labels: _labels,
     access
   } = useResourceQuery({
+    endpointId: CTCLRepository.CtClientIndividual.snapshot,
     datasetId: ResourceIds.ClientMaster,
     filter: {
       endpointId: CTCLRepository.CtClientIndividual.snapshot,
