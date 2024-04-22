@@ -577,6 +577,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
           </Grid>
           <Grid xs={6} sx={{ p: 1 }}>
             <Table
+              height={'150'}
               columns={[
                 { field: 'currency', headerName: 'Currency', flex: 1.5 },
                 { field: 'debit', headerName: 'Debit', align: 'right', flex: 1.5 },
@@ -587,6 +588,7 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               rowId={['recordId']}
               paginationType='client'
               maxAccess={access}
+              pagination={false}
             />
           </Grid>
         </Grid>
