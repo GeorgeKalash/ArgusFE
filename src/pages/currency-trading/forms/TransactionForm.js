@@ -60,7 +60,7 @@ function FormField({ type, name, Component, valueField, onFocus, language, phone
         label: labels[name],
         values: formik.values,
         value: formik.values[name],
-        error: formik.errors[name],
+        error: formik.touched[name] && formik.errors[name],
         errors: formik.errors,
         valueField: valueField,
         language: language,
@@ -192,32 +192,33 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   const [initialValues, setInitialValues] = useState(initial)
 
   const formik = useFormik({
+    initialValues,
     enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
-      date: yup.string().required(),
-      id_type: yup.number().required(),
-      id_number: yup.number().required(),
-      birth_date: yup.string().required(),
-      firstName: yup.string().required(),
-      lastName: yup.string().required(),
-      expiry_date: yup.string().required(),
-      issue_country: yup.string().required(),
-      nationality: yup.string().required(),
-      cell_phone: yup.string().required(),
-      profession: yup.string().required(),
+      date: yup.string().required(' '),
+      id_type: yup.number().required(' '),
+      id_number: yup.number().required(' '),
+      birth_date: yup.string().required(' '),
+      firstName: yup.string().required(' '),
+      lastName: yup.string().required(' '),
+      expiry_date: yup.string().required(' '),
+      issue_country: yup.string().required(' '),
+      nationality: yup.string().required(' '),
+      cell_phone: yup.string().required(' '),
+      profession: yup.string().required(' '),
       operations: yup
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required('Currency recordId is required'),
-            exRate: yup.string().nullable().required('Rate is required'),
-            fcAmount: yup.number().required('FcAmount is required'),
-            lcAmount: yup.number().required('LcAmount is required')
+            currencyId: yup.string().required(' '),
+            exRate: yup.string().nullable().required(' '),
+            fcAmount: yup.number().required(' '),
+            lcAmount: yup.number().required(' ')
           })
         )
-        .required('Operations array is required'),
+        .required(' '),
       amount: yup
         .array()
         .of(
@@ -226,10 +227,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
             amount: yup.number().nullable().required(' ')
           })
         )
-        .required('Operations array is required')
+        .required(' ')
     }),
-
-    initialValues,
     onSubmit
   })
 
