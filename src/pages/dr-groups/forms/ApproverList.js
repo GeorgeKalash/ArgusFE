@@ -12,6 +12,7 @@ const ApproverList = ({ store, labels, maxAccess }) => {
   const { recordId } = store
   const [valueGridData, setValueGridData] = useState()
   const [refresh, setRefresh] = useState(false)
+  const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
   const { stack } = useWindow()

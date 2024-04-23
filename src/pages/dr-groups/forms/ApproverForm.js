@@ -1,85 +1,64 @@
-import { useState, useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { useFormik } from 'formik'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-import { useEffect } from 'react'
-
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
   const { recordId: grId } = store
-
-  const [initialValues, setInitialData] = useState({
-    codeId: '',
-    groupId: grId
-  })
 
   const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues,
+    initialValues: {
+      codeId: '',
+      groupId: grId
+    },
     validationSchema: yup.object({
-      codeId: yup.string().required()
+      codeId: yup.string().required('Code ID is required')
     }),
     onSubmit: values => {
       postGroups(values)
     }
   })
 
-  const postGroups = async obj => {
-    const isNewRecord = !obj?.codeId
+  useEffect(() => {
+    if (recordId) {
+      getGroupId(recordId)
+    }
+  }, [recordId])
 
+  const getGroupId = async codeId => {
+    const defaultParams = `_codeId=${codeId}&_groupId=${grId}`
+    try {
+      const res = await getRequest({
+        extension: DocumentReleaseRepository.GroupCode.get,
+        parameters: `_groupId=${recordId}`
+      })
+      formik.setValues({
+        ...formik.values,
+        codeId: res.record.codeId,
+        groupId: res.record.groupId
+      })
+      setEditMode(true)
+    } catch {}
+  }
+
+  const postGroups = async obj => {
     try {
       const res = await postRequest({
         extension: DocumentReleaseRepository.GroupCode.set,
         record: JSON.stringify(obj)
       })
-
-      if (isNewRecord) {
-        toast.success('Record Added Successfully')
-        setInitialData(prevData => ({
-          ...prevData,
-          ...obj
-        }))
-        setEditMode(true)
-      } else {
-        toast.success('Record Edited Successfully')
-        setInitialData(prevData => ({
-          ...prevData,
-
-          ...obj
-        }))
-      }
+      toast.success('Record Successfully Updated')
       setRefresh(prev => !prev)
-    } catch (error) {
-      toast.error('An error occurred')
-    }
-  }
-  useEffect(() => {
-    recordId && getGroupId(recordId)
-  }, [recordId])
-
-  const getGroupId = codeId => {
-    const defaultParams = `_codeId=${codeId}&_groupId=${grId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: DocumentReleaseRepository.GroupCode.get,
-      parameters: `_groupId=${recordId}`
-    })
-      .then(res => {
-        setInitialData(res.record)
-        setEditMode(true)
-      })
-      .catch(error => {})
+    } catch {}
   }
 
   return (
