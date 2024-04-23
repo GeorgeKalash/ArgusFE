@@ -42,10 +42,10 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
-  const { getRequest, postRequest } = useContext(RequestsContext)
   const [isClosed, setIsClosed] = useState(false)
-  const { stack } = useWindow()
   const [isPosted, setIsPosted] = useState(false)
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
   const { stack: stackError } = useError()
 
   const invalidate = useInvalidate({
@@ -183,51 +183,150 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       copy.wip = copy.wip === '' ? 1 : copy.wip
       copy.status = copy.status === '' ? 1 : copy.status
 
-      if (values.amountRows) {
-        const updatedRows = formik.values.amountRows.map((amountDetails, index) => {
-          const seqNo = index + 1 // Adding 1 to make it 1-based index
+      const updatedRows = formik.values.amountRows.map((amountDetails, index) => {
+        const seqNo = index + 1 // Adding 1 to make it 1-based index
 
-          return {
-            ...amountDetails,
-            seqNo: seqNo,
-            cashAccountId: cashAccountId,
-            outwardId: formik.values.recordId || 0
-          }
-        })
-        if (updatedRows.length == 1 && !updatedRows[0].type) {
-          stackError({
-            message: `Amount grid not filled. Please fill the grid before saving.`
-          })
-
-          return
+        return {
+          ...amountDetails,
+          seqNo: seqNo,
+          cashAccountId: cashAccountId,
+          outwardId: formik.values.recordId || 0
         }
-
-        const amountGridData = {
-          header: copy,
-          cash: updatedRows
-        }
-
-        const amountRes = await postRequest({
-          extension: RemittanceOutwardsRepository.OutwardsTransfer.set2,
-          record: JSON.stringify(amountGridData)
+      })
+      if (updatedRows.length == 1 && !updatedRows[0].type) {
+        stackError({
+          message: `Amount grid not filled. Please fill the grid before saving.`
         })
 
-        if (amountRes.recordId) {
-          toast.success('Record Updated Successfully')
-          formik.setFieldValue('recordId', amountRes.recordId)
-          setEditMode(true)
+        return
+      }
 
-          const res2 = await getRequest({
-            extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
-            parameters: `_recordId=${amountRes.recordId}`
-          })
-          formik.setFieldValue('reference', res2.record.headerView.reference)
-          invalidate()
-        }
+      const amountGridData = {
+        header: copy,
+        cash: updatedRows
+      }
+
+      const amountRes = await postRequest({
+        extension: RemittanceOutwardsRepository.OutwardsTransfer.set2,
+        record: JSON.stringify(amountGridData)
+      })
+
+      if (amountRes.recordId) {
+        toast.success('Record Updated Successfully')
+        formik.setFieldValue('recordId', amountRes.recordId)
+        setEditMode(true)
+
+        const res2 = await getRequest({
+          extension: RemittanceOutwardsRepository.OutwardsTransfer.get2,
+          parameters: `_recordId=${amountRes.recordId}`
+        })
+        formik.setFieldValue('reference', res2.record.headerView.reference)
+        invalidate()
       }
     }
   })
 
+  const instantCashFormik = useFormik({
+    //maxAccess,
+    initialValues: {
+      payingAgent: '',
+      deliveryModeId: '',
+      currency: '',
+      partnerReference: '',
+      sourceAmount: '',
+      fromCountryId: '',
+      fromCountryName: '',
+      toCountryId: '',
+      sourceOfFundsId: '',
+      remittancePurposeId: '',
+      totalTransactionAmountPerAnnum: '25000',
+      transactionsPerAnnum: '200',
+      remitter: [
+        {
+          cardNo: '',
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          mobileNumber: '',
+          phoneNumber: '',
+          email: '',
+          address: [
+            {
+              addressLine1: '',
+              addressLine2: '',
+              district: '',
+              city: '',
+              postCode: '',
+              state: '',
+              country: ''
+            }
+          ],
+          primaryId: [
+            {
+              type: '',
+              number: '',
+              issueDate: null,
+              expiryDate: null,
+              placeOfIssue: ''
+            }
+          ],
+          dateOfBirth: '',
+          gender: '',
+          nationality: '',
+          countryOfBirth: '',
+          countryOfResidence: '',
+          relation: '',
+          otherRelation: '',
+          profession: '',
+          employerName: '',
+          employerStatus: ''
+        }
+      ],
+      beneficiary: [
+        {
+          cardNo: '',
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          mobileNumber: '',
+          phoneNumber: '',
+          email: '',
+          address: [
+            {
+              addressLine1: '',
+              addressLine2: '',
+              district: '',
+              city: '',
+              postCode: '',
+              state: '',
+              country: ''
+            }
+          ],
+          dateOfBirth: '',
+          gender: '',
+          nationality: '',
+          countryOfBirth: '',
+          bankDetails: [
+            {
+              bankId: '',
+              bankCode: '',
+              bankName: '',
+              bankAddress1: '',
+              bankAccountNumber: ''
+            }
+          ]
+        }
+      ]
+    },
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      // name: yup.string().required(' ')
+    }),
+    onSubmit: values => {
+      console.log('instant check', instantCashFormik.values)
+    }
+  })
   const total = parseFloat(formik.values.amount || 0)
 
   const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
@@ -239,17 +338,11 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   const Balance = total - receivedTotal
 
   const onClose = async () => {
-    const obj = formik.values
-    const copy = { ...obj }
-    copy.date = formatDateToApi(copy.date)
-
-    // Default values for properties if they are empty
-    copy.wip = copy.wip === '' ? 1 : copy.wip
-    copy.status = copy.status === '' ? 1 : copy.status
-
     const res = await postRequest({
       extension: RemittanceOutwardsRepository.OutwardsTransfer.close,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({
+        recordId: formik.values.recordId
+      })
     })
 
     if (res.recordId) {
@@ -260,9 +353,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   }
 
   const onReopen = async () => {
-    const obj = formik.values
-    const copy = { ...obj }
+    const copy = { ...formik.values }
+    delete copy.amountRows
     copy.date = formatDateToApi(copy.date)
+    copy.valueDate = formatDateToApi(copy.valueDate)
+    copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
+    copy.expiryDate = formatDateToApi(copy.expiryDate)
 
     // Default values for properties if they are empty
     copy.wip = copy.wip === '' ? 1 : copy.wip
@@ -296,15 +392,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       toast.success('Record Posted Successfully')
       invalidate()
       setIsPosted(true)
-      if (productFormik.values.interfaceId == 1) {
-        stack({
-          Component: InstantCash,
-          props: {},
-          width: 700,
-          height: 500,
-          title: 'Instant Cash'
-        })
-      }
     }
   }
 
@@ -390,7 +477,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     const modifiedList = cash.map((item, index) => ({
       ...item,
       id: index + 1,
-      bankFees: parseFloat(item.bankFees).toFixed(2),
+      bankFees: item.bankFees ? parseFloat(item.bankFees).toFixed(2) : null,
       amount: parseFloat(item.amount).toFixed(2)
     }))
 
@@ -499,9 +586,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   function openBankWindow() {
     stack({
       Component: InstantCash,
-      props: { clientId: formik.values.clientId, beneficiaryId: formik.values.beneficiaryId },
+      props: {
+        clientId: formik.values.clientId,
+        beneficiaryId: formik.values.beneficiaryId,
+        formik: instantCashFormik
+      },
       width: 1000,
-      height: 720,
+      height: 660,
       title: 'Instant Cash'
     })
   }
@@ -1223,10 +1314,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                     {
                       component: 'numberfield',
                       name: 'amount',
-                      label: labels.amount,
-                      defaultValue: '',
-                      updateOn: 'blur',
-                      async onChange({ row: { update, newRow } }) {}
+                      label: labels.Amount,
+                      defaultValue: ''
                     },
                     {
                       component: 'resourcecombobox',
@@ -1250,12 +1339,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                     },
                     {
                       component: 'numberfield',
-                      header: labels.receiptRef,
+                      header: labels.bankFees,
                       name: 'bankFees',
-                      label: labels.BanKFees
+                      label: labels.bankFees
                     },
                     {
-                      component: 'numberfield',
+                      component: 'textfield',
                       header: labels.receiptRef,
                       name: 'receiptRef',
                       label: labels.receiptRef
