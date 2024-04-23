@@ -12,7 +12,6 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { LabelSharp } from '@mui/icons-material'
 
 const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -29,7 +28,7 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({
-      codeId: yup.string().required('This field is required')
+      codeId: yup.string().required()
     }),
     onSubmit: values => {
       postGroups(values)
@@ -59,7 +58,6 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
 
           ...obj
         }))
-        console.log('ooooooooooooooooooooooooooo', obj.codeId)
       }
       setRefresh(prev => !prev)
     } catch (error) {
@@ -98,9 +96,9 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
             endpointId={DocumentReleaseRepository.ReleaseCode.qry}
             parameters={`_startAt=${0}&_pageSize=${100}`}
             name='codeId'
-            label={labels.code}
+            label={'codeId'}
             valueField='recordId'
-            displayField='reference'
+            displayField='name'
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' }
