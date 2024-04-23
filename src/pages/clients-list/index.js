@@ -104,18 +104,6 @@ const ClientsList = () => {
       flex: 1,
       editable: false,
       valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
-    },
-    {
-      field: 'otp',
-      headerName: labels.otp,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'wipName',
-      headerName: labels.wipName,
-      flex: 1,
-      editable: false
     }
   ]
 
