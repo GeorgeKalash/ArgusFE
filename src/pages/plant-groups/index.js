@@ -13,7 +13,6 @@ import { useWindow } from 'src/windows'
 
 // ** Windows
 import PlantWindow from './Windows/PlantGroupsWindow'
-import TreeWindow from './Windows/TreeWindow'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -30,7 +29,7 @@ const Plant = () => {
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
-  const [treeWindowOpen, setTreeWindowOpen] = useState(false)
+
   const [errorMessage, setErrorMessage] = useState(null)
 
   const { stack } = useWindow()
@@ -83,10 +82,6 @@ const Plant = () => {
     setWindowOpen(true)
   }
 
-  const onTreeClick = () => {
-    setTreeWindowOpen(true)
-  }
-
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
@@ -99,6 +94,19 @@ const Plant = () => {
     })
     invalidate()
     toast.success('Record Deleted Successfully')
+  }
+
+  function onTreeClick() {
+    stack({
+      Component: Tree,
+
+      props: {
+        data: data
+      },
+      width: 500,
+      height: 400,
+      title: 'Tree'
+    })
   }
 
   return (
@@ -131,14 +139,7 @@ const Plant = () => {
           setSelectedRecordId={setSelectedRecordId}
         />
       )}
-      {treeWindowOpen && (
-        <TreeWindow
-          onClose={() => {
-            setTreeWindowOpen(false)
-          }}
-          data={data}
-        />
-      )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

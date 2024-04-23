@@ -42,10 +42,10 @@ const PrintableTree = ({ nodes }) => {
   )
 }
 
-const StyledTreeView = styled(TreeView)({
+const StyledTreeView = styled(TreeView)(({ height }) => ({
   flexGrow: 1,
   maxWidth: '100%',
-  height: 260,
+  height: height,
   overflowY: 'auto',
 
   '@media print': {
@@ -55,7 +55,8 @@ const StyledTreeView = styled(TreeView)({
     maxWidth: '100%',
     overflowY: 'visible'
   }
-})
+}))
+console.log('Streeview', StyledTreeView)
 
 const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
   '&.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label': {
@@ -67,7 +68,7 @@ const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
   }
 }))
 
-function Tree({ data }) {
+function Tree({ data, expanded, height }) {
   const [treeData, setTreeData] = useState([])
   const componentRef = useRef()
   const printComponentRef = useRef()
@@ -120,6 +121,7 @@ function Tree({ data }) {
       <div>
         <div ref={componentRef}>
           <StyledTreeView
+            height={`${expanded ? `calc(100vh - 180px)` : `${height}px`}`}
             aria-label='plant tree'
             defaultCollapseIcon={<ExpandMoreIcon />}
             defaultExpandIcon={<ChevronRightIcon />}

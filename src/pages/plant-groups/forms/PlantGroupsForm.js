@@ -10,12 +10,10 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function PlantGroupsForm({ labels, maxAccess, recordId, setErrorMessage }) {
+export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -38,8 +36,8 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId, setErrorM
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -75,9 +73,7 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId, setErrorM
 
           setInitialData(res.record)
         }
-      } catch (error) {
-        setErrorMessage(error)
-      }
+      } catch (error) {}
       setIsLoading(false)
     })()
   }, [])
