@@ -1,7 +1,39 @@
 html,
 body {
-  min-height: 100%;
-  zoom:0.7
+  min-height: 100vh; /* Ensure full viewport height */
+  zoom: var(--zoom) ;
+  --zoom:1 ;
+  --vh: calc(1vh / var(--zoom)) ;
+  --vw: calc(1vw / var(--zoom))
+}      /* Media queries for different screen zoom levels */
+@media screen and (-moz-device-pixel-ratio: 0.5),
+  screen and (-webkit-min-device-pixel-ratio: 0.5),
+  screen and (-o-min-device-pixel-ratio: 1/2),
+  screen and (max-resolution: 96dpi) {
+  body {
+    --zoom: 2; /* Set zoom to 200% when screen zoom level is 200% or higher */
+  }
+}      @media screen and (-moz-device-pixel-ratio: 1),
+  screen and (-webkit-min-device-pixel-ratio: 1),
+  screen and (-o-min-device-pixel-ratio: 1/1),
+  screen and (min-resolution: 1dppx) {
+  body {
+    --zoom: 1; /* Set zoom to 100% when screen zoom level is 100% */
+  }
+}      @media screen and (-moz-device-pixel-ratio: 1.5),
+  screen and (-webkit-min-device-pixel-ratio: 1.5),
+  screen and (-o-min-device-pixel-ratio: 3/2),
+  screen and (min-resolution: 1.5dppx) {
+  body {
+    --zoom: 0.67; /* Set zoom to approximately 150% when screen zoom level is 150% */
+  }
+}      @media screen and (-moz-device-pixel-ratio: 2),
+  screen and (-webkit-min-device-pixel-ratio: 2),
+  screen and (-o-min-device-pixel-ratio: 2/1),
+  screen and (min-resolution: 2dppx) {
+  body {
+    --zoom: 0.5; /* Set zoom to 50% when screen zoom level is 50% */
+  }
 }
 
 #__next {

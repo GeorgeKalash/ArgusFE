@@ -25,6 +25,7 @@ import BPMasterDataWindow from './Windows/BPMasterDataWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 // function SampleWindow() {
 //   const { stack } = useWindow()
@@ -199,6 +200,8 @@ const BPMasterData = () => {
           paginationType='client'
           maxAccess={access}
           refetch={refetch}
+
+          // addedHeight={'80px'}
         />
       </Box>
     </>
