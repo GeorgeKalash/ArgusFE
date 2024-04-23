@@ -119,7 +119,11 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
             name='parentId'
             label={labels.parent}
             valueField='recordId'
-            displayField='name'
+            displayField={'name'}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
             values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('parentId', newValue?.recordId)
