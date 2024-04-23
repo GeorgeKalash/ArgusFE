@@ -84,10 +84,10 @@ const GlobalIntegrationGrid = ({ masterSource, masterId}) => {
           ],
           columnsInDropDown: 
           [
-            { key: 'accountRef', value: 'accountRef' },
-            { key: 'name', value: 'accountName' },
+            { key: 'accountRef', value: 'Reference' },
+            { key: 'name', value: 'Name' }
           ],
-        },
+        }
       },
       {
         component: 'textfield',
