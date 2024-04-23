@@ -86,7 +86,7 @@ const Defaults = () => {
         res.list.forEach(obj => {
           if (arrayAllow.includes(obj.key)) {
             myObject[obj.key] = obj.value ? parseInt(obj.value) : null
-            formik.setFieldValue(obj.key, parseInt(obj.value))
+            formik.setFieldValue(obj.key, obj.value ? parseInt(obj.value) : null)
           }
         })
 
