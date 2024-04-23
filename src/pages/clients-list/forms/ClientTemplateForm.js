@@ -211,27 +211,27 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
     })
       .then(res => {
         const obj = res?.record
-        setIsClosed(obj.clientRemittance.wip === 2 ? true : false)
+        setIsClosed(obj?.clientRemittance?.wip === 2 ? true : false)
 
-        obj?.workAddressView && setAddress(obj.workAddressView)
+        obj?.workAddressView && setAddress(obj?.workAddressView)
         setInitialData({
           //clientIDView
           functionId: SystemFunction.KYC,
-          reference: obj.clientMaster.reference,
-          clientId: obj.clientIDView.clientId,
-          expiryDate: formatDateFromApi(obj.clientMaster.expiryDate),
-          issueDate: obj.clientIDView.idIssueDate && formatDateFromApi(obj.clientIDView.idIssueDate),
-          idCountry: obj.clientIDView.idCountryId,
-          idCity: obj.clientIDView.idCityId,
-          idNo: obj.clientIDView.idNo,
-          idNoRepeat: obj.clientIDView.idNo,
-          idNoEncrypt: obj.clientIDView.idNo && obj.clientIDView.idNo,
-          idNoRepeatEncrypt: obj.clientIDView.idNo && obj.clientIDView.idNo,
-          idtId: obj.clientIDView.idtId,
-          isDiplomat: obj.clientIDView.isDiplomat,
-          cityName: obj.clientIDView.idCityName,
+          reference: obj.clientMaster?.reference,
+          clientId: obj.clientIDView?.clientId,
+          expiryDate: formatDateFromApi(obj.clientMaster?.expiryDate),
+          issueDate: obj.clientIDView?.idIssueDate && formatDateFromApi(obj.clientIDView?.idIssueDate),
+          idCountry: obj.clientIDView?.idCountryId,
+          idCity: obj.clientIDView?.idCityId,
+          idNo: obj.clientIDView?.idNo,
+          idNoRepeat: obj.clientIDView?.idNo,
+          idNoEncrypt: obj.clientIDView?.idNo && obj.clientIDView?.idNo,
+          idNoRepeatEncrypt: obj.clientIDView?.idNo && obj.clientIDView?.idNo,
+          idtId: obj.clientIDView?.idtId,
+          isDiplomat: obj.clientIDView?.isDiplomat,
+          cityName: obj.clientIDView?.idCityName,
 
-          //address
+          // //address
           countryId: obj.addressView?.countryId,
           cityId: obj.addressView?.cityId,
           city: obj.addressView?.city,
@@ -251,43 +251,43 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, _labels, plantId, maxAc
           unitNo: obj.addressView?.unitNo,
           bldgNo: obj.addressView?.bldgNo,
 
-          //end address
+          // //end address
 
-          //clientIndividual
-          birthDate: obj.clientIndividual.birthDate && formatDateFromApi(obj.clientIndividual.birthDate),
-          firstName: obj.clientIndividual.firstName,
-          lastName: obj.clientIndividual.lastName,
-          middleName: obj.clientIndividual.middleName,
-          familyName: obj.clientIndividual.familyName,
-          fl_firstName: obj.clientIndividual.fl_firstName,
-          fl_lastName: obj.clientIndividual.fl_lastName,
-          fl_middleName: obj.clientIndividual.fl_middleName,
-          fl_familyName: obj.clientIndividual.fl_familyName,
-          isResident: obj.clientIndividual.isResident,
-          professionId: obj.clientIndividual.professionId,
-          incomeSourceId: obj.clientIndividual.incomeSourceId,
-          sponsorName: obj.clientIndividual.sponsorName,
+          // //clientIndividual
+          birthDate: obj.clientIndividual?.birthDate && formatDateFromApi(obj.clientIndividual.birthDate),
+          firstName: obj.clientIndividual?.firstName,
+          lastName: obj.clientIndividual?.lastName,
+          middleName: obj.clientIndividual?.middleName,
+          familyName: obj.clientIndividual?.familyName,
+          fl_firstName: obj.clientIndividual?.fl_firstName,
+          fl_lastName: obj.clientIndividual?.fl_lastName,
+          fl_middleName: obj.clientIndividual?.fl_middleName,
+          fl_familyName: obj.clientIndividual?.fl_familyName,
+          isResident: obj.clientIndividual?.isResident,
+          professionId: obj.clientIndividual?.professionId,
+          incomeSourceId: obj.clientIndividual?.incomeSourceId,
+          sponsorName: obj.clientIndividual?.sponsorName,
 
-          // end clientIndividual
+          // // end clientIndividual
 
           //clientMaster
           addressId: obj.clientMaster.addressId,
-          category: obj.clientMaster.category,
-          nationalityId: obj.clientMaster.nationalityId,
-          nationality: obj.clientMaster.nationality,
-          cellPhone: obj.clientMaster.cellPhone,
-          cellPhoneEncrypt: obj.clientMaster.cellPhone && obj.clientMaster.cellPhone,
-          cellPhoneRepeatEncrypt: obj.clientMaster.cellPhone && obj.clientMaster.cellPhone,
-          cellPhoneRepeat: obj.clientMaster.cellPhone,
-          createdDate: obj.clientMaster.createdDate,
-          flName: obj.clientMaster.flName,
-          keyword: obj.clientMaster.keyword,
-          otp: obj.clientMaster.otp,
-          plantId: obj.clientRemittance.plantId,
-          name: obj.clientMaster.name,
-          oldReference: obj.clientMaster.oldReference,
+          category: obj.clientMaster?.category,
+          nationalityId: obj.clientMaster?.nationalityId,
+          nationality: obj.clientMaster?.nationality,
+          cellPhone: obj.clientMaster?.cellPhone,
+          cellPhoneEncrypt: obj.clientMaster?.cellPhone && obj.clientMaster?.cellPhone,
+          cellPhoneRepeatEncrypt: obj.clientMaster?.cellPhone && obj.clientMaster?.cellPhone,
+          cellPhoneRepeat: obj.clientMaster?.cellPhone,
+          createdDate: obj.clientMaster?.createdDate,
+          flName: obj.clientMaster?.flName,
+          keyword: obj.clientMaster?.keyword,
+          otp: obj.clientMaster?.otp,
+          plantId: obj.clientRemittance?.plantId,
+          name: obj.clientMaster?.name,
+          oldReference: obj.clientMaster?.oldReference,
 
-          //clientRemittance
+          // //clientRemittance
           recordId: recordId,
           recordIdRemittance: obj.clientRemittance?.recordId,
           otpVerified: obj.clientRemittance?.otpVerified,
