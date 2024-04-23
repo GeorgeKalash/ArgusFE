@@ -70,7 +70,7 @@ export const Buttons = [
   {
     key: 'Print',
     color: '#231f20',
-    image: 'beneficiary.png',
+    image: 'print.png',
     main: false
   },
   {

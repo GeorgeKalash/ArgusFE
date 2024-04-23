@@ -82,7 +82,7 @@ const GridToolbar = ({
               variant='contained'
               style={{ backgroundColor: 'black', border: '1px solid #4eb558' }}
             >
-              TREE
+              <img src='/images/buttonsIcons/tree.png' alt='tree' />
             </Button>
           </Box>
         )}
@@ -123,3 +123,27 @@ const GridToolbar = ({
 }
 
 export default GridToolbar
+
+{
+  /* <Tooltip title={button.key} key={index}>
+<Button
+  onClick={handleClick}
+  variant='contained'
+  sx={{
+    mr: 1,
+    backgroundColor: button.color,
+    '&:hover': {
+      backgroundColor: button.color,
+      opacity: 0.8
+    },
+    border: button.border,
+    width: 20,
+    height: 35,
+    objectFit: 'contain'
+  }}
+  disabled={isDisabled}
+>
+  <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
+</Button>
+</Tooltip> */
+}

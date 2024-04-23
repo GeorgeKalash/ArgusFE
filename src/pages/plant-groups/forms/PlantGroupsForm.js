@@ -126,7 +126,6 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
             }}
             error={formik.touched.parent && Boolean(formik.errors.parent)}
             maxAccess={maxAccess}
-            required
           />
         </Grid>
       </Grid>
