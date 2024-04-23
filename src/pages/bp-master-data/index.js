@@ -200,8 +200,6 @@ const BPMasterData = () => {
           paginationType='client'
           maxAccess={access}
           refetch={refetch}
-
-          // addedHeight={'80px'}
         />
       </Box>
     </>
