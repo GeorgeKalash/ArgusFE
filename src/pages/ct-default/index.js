@@ -207,9 +207,9 @@ const Defaults = () => {
               secondValue={formik.values['ct-nra-individual-description']}
               onChange={(event, newValue) => {
                 if (newValue) {
-                  formik.setFieldValue('ct-nra-individual', newValue?.recordId || '')
-                  formik.setFieldValue('ct-nra-individual-ref', newValue?.reference || '')
-                  formik.setFieldValue('ct-nra-individual-description', newValue?.description || '')
+                  formik.setFieldValue('ct-nra-individual', newValue?.recordId)
+                  formik.setFieldValue('ct-nra-individual-ref', newValue?.reference)
+                  formik.setFieldValue('ct-nra-individual-description', newValue?.description)
                 } else {
                   formik.setFieldValue('ct-nra-individual', '')
                   formik.setFieldValue('ct-nra-individual-ref', '')
@@ -218,7 +218,6 @@ const Defaults = () => {
               }}
               error={formik.touched['ct-nra-individual'] && Boolean(formik.errors['ct-nra-individual'])}
               helperText={formik.touched['ct-nra-individual'] && formik.errors['ct-nra-individual']}
-              maxAccess={access}
             />
           </Grid>
 
@@ -270,7 +269,6 @@ const Defaults = () => {
               }}
               error={formik.touched['ct-nra-corporate'] && Boolean(formik.errors['ct-nra-corporate'])}
               helperText={formik.touched['ct-nra-corporate'] && formik.errors['ct-nra-corporate']}
-              maxAccess={access}
             />
           </Grid>
 
