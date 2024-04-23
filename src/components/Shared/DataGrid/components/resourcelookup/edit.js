@@ -16,7 +16,7 @@ export default function ResourceLookupEdit({ id, value, updateRow, column: { pro
       form={{
         values: {}
       }}
-      secondDisplayField={false}
+      secondDisplayField={props.columnsInDropDown.length > 1}
       onChange={(e, value) => {
         if (props?.mapping) {
           let changes = props.mapping
