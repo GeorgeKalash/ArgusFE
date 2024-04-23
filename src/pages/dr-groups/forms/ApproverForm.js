@@ -8,24 +8,26 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
 
 const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId: grId } = store
 
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
+  const { formik } = useForm({
     initialValues: {
       codeId: '',
       groupId: grId
     },
     validationSchema: yup.object({
-      codeId: yup.string().required('Code ID is required')
+      codeId: yup.string().required()
     }),
     onSubmit: values => {
       postGroups(values)
-    }
+    },
+    validateOnChange: true,
+    enableReinitialize: true,
+    maxAccess
   })
 
   useEffect(() => {
