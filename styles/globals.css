@@ -35,6 +35,22 @@ body {
     --zoom: 0.5; /* Set zoom to 50% when screen zoom level is 50% */
   }
 }
+  @media screen and (-moz-device-pixel-ratio: 1.1),
+  screen and (-webkit-min-device-pixel-ratio: 1.1),
+  screen and (-o-min-device-pixel-ratio: 1.1/1),
+  screen and (min-resolution: 1.1dppx) {
+    body {
+      --zoom: 0.91; /* Adjust zoom for 110% screen zoom level */
+    }
+  }
+  @media screen and (-moz-device-pixel-ratio: 1.25),
+  screen and (-webkit-min-device-pixel-ratio: 1.25),
+  screen and (-o-min-device-pixel-ratio: 1.25/1),
+  screen and (min-resolution: 1.25dppx) {
+    body {
+      --zoom: 0.8; /* Adjust zoom for 125% screen zoom level */
+    }
+}
 
 #__next {
   height: 100%;
