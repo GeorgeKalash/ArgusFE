@@ -1,59 +1,57 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-
-// ** Windows
-import AccountsWindow from './Windows/AccountsWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import AccountsWindow from './Windows/AccountsWindow'
+import { useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: FinancialRepository.Account.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
-  }
+  const { stack } = useWindow()
 
   const {
     query: { data },
     labels: _labels,
-    access
+    filterBy,
+    clearFilter,
+    paginationParameters,
+    invalidate,
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.Account.page,
-    datasetId: ResourceIds.Accounts
+    datasetId: ResourceIds.Accounts,
+    filter: {
+      filterFn: fetchWithSearch
+    }
   })
 
-  const invalidate = useInvalidate({
-    endpointId: FinancialRepository.Account.page
-  })
+  async function fetchWithSearch({ filters }) {
+    return await getRequest({
+      extension: FinancialRepository.Account.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
+  }
+
+  async function fetchGridData(options={}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
+
+     const response =  await getRequest({
+      extension: FinancialRepository.Account.page,
+      parameters: parameters
+    })
+
+    return {...response,  _startAt: _startAt}
+  }
 
   const columns = [
     {
@@ -67,73 +65,79 @@ const MfAccounts = () => {
       flex: 1
     },
     {
-      field: 'groupId',
+      field: 'groupName',
       headerName: _labels.accountGroup,
       flex: 1
     },
     {
-      field: 'type',
+      field: 'typeName',
       headerName: _labels.type,
       flex: 1
     },
   ]
 
-
-  const add = () => {
-    setWindowOpen(true)
+  const delAccounts = obj => {
+    postRequest({
+      extension: FinancialRepository.Account.del,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        toast.success('Record Deleted Successfully')
+        invalidate()
+      })
   }
 
-  const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+  const addAccounts = () => {
+    openForm()
   }
 
-  const del = async (obj) => {
-    try {
-      await postRequest({
-          extension: FinancialRepository.AccountSpecification.del,
-          record: JSON.stringify({ AccountId: obj.recordId })
-      })
-      await postRequest({
-          extension: FinancialRepository.Account.del,
-          record: JSON.stringify(obj)
-      })
-      toast.success('Record Deleted Successfully')
-      invalidate();
-    } catch (error) {
-        setErrorMessage(error);
-    }
+  function openForm (recordId){
+    stack({
+      Component: AccountsWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId? recordId : null,
+        maxAccess: access,
+      },
+      width: 600,
+      height: 600,
+      title: _labels.Accounts
+    })
+  }
+
+  const popup = obj => {
+    openForm(obj?.recordId )
   }
 
   return (
     <>
       <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar 
+          onAdd={addAccounts} 
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
+          onEdit={popup}
+          onDelete={delAccounts}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
-        <AccountsWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

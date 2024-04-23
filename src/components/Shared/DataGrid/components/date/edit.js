@@ -1,9 +1,6 @@
-import { useGridApiContext } from '@mui/x-data-grid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
-export default function DateEdit({ column: { props }, id, field, value , update}) {
-  const api = useGridApiContext()
-
+export default function DateEdit({ column: { props }, id, field, value, update }) {
   return (
     <CustomDatePicker
       autoFocus
