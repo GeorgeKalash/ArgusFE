@@ -181,12 +181,13 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
         </Grid>
         <Grid item xs={6} sx={{ mt: 1 }}>
           <ResourceComboBox
-            endpointId={SystemRepository.Country.qry}
+            endpointId={RemittanceSettingsRepository.CorrespondentCountry.qry}
             name='countryId'
             label={labels.country}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
+              { key: 'name', value: 'Name' },
+              { key: 'recordId', value: 'Name' }
             ]}
             values={formik.values}
             valueField='recordId'

@@ -203,32 +203,6 @@ const DocumentTypeMaps = () => {
               maxAccess={access}
             />
           </Grid>
-
-          {/* <ResourceLookup
-              endpointId={SystemRepository.NumberRange.snapshot}
-              form={formik}
-              valueField='reference'
-              displayField='description'
-              name='ct-nra-individual'
-              firstValue={formik.values['ct-nra-individual-ref']}
-              label={_labels['ct-nra-individual']}
-              
-              secondValue={formik.values['ct-nra-individual-description']}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('ct-nra-individual', newValue?.recordId)
-                  formik.setFieldValue('ct-nra-individual-ref', newValue?.reference)
-                  formik.setFieldValue('ct-nra-individual-description', newValue?.description)
-                } else {
-                  formik.setFieldValue('ct-nra-individual', '')
-                  formik.setFieldValue('ct-nra-individual-ref', '')
-                  formik.setFieldValue('ct-nra-individual-description', '')
-                }
-              }}
-              error={formik.touched['ct-nra-individual'] && Boolean(formik.errors['ct-nra-individual'])}
-              helperText={formik.touched['ct-nra-individual'] && formik.errors['ct-nra-individual']}
-            />
-          </Grid> */}
         </Grid>
         <Grid
           sx={{

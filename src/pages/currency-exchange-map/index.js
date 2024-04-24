@@ -270,7 +270,7 @@ const NumberRange = () => {
                   name='countryId'
                   label={_labels.country}
                   columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
+                    { key: 'reference', value: 'Currency Ref' },
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
