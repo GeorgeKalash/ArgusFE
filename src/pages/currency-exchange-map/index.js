@@ -21,6 +21,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -264,19 +265,20 @@ const NumberRange = () => {
           <Grid container>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={6}>
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={SystemRepository.Country.qry}
                   name='countryId'
                   label={_labels.country}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
                   columnsInDropDown={[
-                    { key: 'reference', value: 'Currency Ref' },
+                    { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  store={countryStore}
-                  value={countryStore?.filter(item => item.recordId === (formik.values && formik.values.countryId))[0]} // Ensure the value matches an option or set it to null
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
                   required
+                  maxAccess={access}
                   onChange={(event, newValue) => {
                     const selectedCurrencyId = newValue?.recordId || ''
                     formik.setFieldValue('countryId', selectedCurrencyId)
@@ -286,8 +288,10 @@ const NumberRange = () => {
                   helperText={formik.touched.countryId && formik.errors.countryId}
                 />
               </Grid>
+
               <Grid item xs={6}>
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
                   label={_labels.currency}
                   valueField='recordId'
@@ -296,9 +300,9 @@ const NumberRange = () => {
                     { key: 'reference', value: 'Currency Ref' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  store={currencyStore}
-                  value={currencyStore.filter(item => item.recordId === (formik.values && formik.values.currencyId))[0]} // Ensure the value matches an option or set it to null
+                  values={formik.values}
                   required
+                  maxAccess={access}
                   onChange={(event, newValue) => {
                     const selectedCurrencyId = newValue?.recordId || ''
                     formik.setFieldValue('currencyId', selectedCurrencyId)

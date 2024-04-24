@@ -20,6 +20,7 @@ import toast from 'react-hot-toast'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const UpdateExchangeRates = () => {
   const [countryStore, setCountryStore] = useState([])
@@ -343,19 +344,20 @@ const UpdateExchangeRates = () => {
           <Grid container>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={6}>
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={SystemRepository.Country.qry}
                   name='countryId'
                   label={_labels.country}
-                  valueField='recordId'
-                  displayField={['reference', 'name', 'flName']}
-                  store={countryStore}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  value={countryStore?.filter(item => item.recordId === (formik.values && formik.values.countryId))[0]} // Ensure the value matches an option or set it to null
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
                   required
+                  maxAccess={access}
                   onChange={(event, newValue) => {
                     const selectedCountryId = newValue?.recordId || ''
                     formik.setFieldValue('countryId', selectedCountryId)
@@ -377,18 +379,19 @@ const UpdateExchangeRates = () => {
               </Grid>
 
               <Grid item xs={6}>
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
                   label={_labels.currency}
                   valueField='recordId'
-                  displayField='name'
-                  store={currencyStore}
+                  displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Currency Ref' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  value={currencyStore.filter(item => item.recordId === (formik.values && formik.values.currencyId))[0]} // Ensure the value matches an option or set it to null
+                  values={formik.values}
                   required
+                  maxAccess={access}
                   onChange={(event, newValue) => {
                     const selectedCurrencyId = newValue?.recordId || ''
                     formik.setFieldValue('currencyId', selectedCurrencyId)

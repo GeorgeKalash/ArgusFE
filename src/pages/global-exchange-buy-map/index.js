@@ -20,6 +20,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -230,7 +231,8 @@ const GlobalExchangeBuyMap = () => {
           <Grid container>
             <Grid container xs={12} spacing={4}>
               <Grid item xs={6}>
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
                   label={_labels.currency}
                   valueField='recordId'
@@ -239,9 +241,9 @@ const GlobalExchangeBuyMap = () => {
                     { key: 'reference', value: 'Currency Ref' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  store={currencyStore}
-                  value={currencyStore.filter(item => item.recordId === formik.values.currencyId)[0]} // Ensure the value matches an option or set it to null
+                  values={formik.values}
                   required
+                  maxAccess={access}
                   onChange={(event, newValue) => {
                     const selectedCurrencyId = newValue?.recordId || ''
                     formik.setFieldValue('currencyId', selectedCurrencyId)
