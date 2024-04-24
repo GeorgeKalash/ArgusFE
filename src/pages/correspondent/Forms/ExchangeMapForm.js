@@ -6,7 +6,7 @@ import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -182,6 +182,7 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
         <Grid item xs={6} sx={{ mt: 1 }}>
           <ResourceComboBox
             endpointId={RemittanceSettingsRepository.CorrespondentCountry.qry}
+            parameters={`_corId=${recordId}`}
             name='countryId'
             label={labels.country}
             columnsInDropDown={[
