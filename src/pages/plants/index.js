@@ -65,7 +65,7 @@ const Plants = () => {
     var parameters = defaultParams
 
     const response = await getRequest({
-      extension: SystemRepository.Plant.pages,
+      extension: SystemRepository.Plant.page,
       parameters: parameters
     })
 
