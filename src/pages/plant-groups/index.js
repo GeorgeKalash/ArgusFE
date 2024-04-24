@@ -24,8 +24,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 const Plant = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [errorMessage, setErrorMessage] = useState(null)
-
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -73,7 +71,7 @@ const Plant = () => {
   ]
 
   const add = () => {
-    openForm('')
+    openForm()
   }
 
   const del = async obj => {
@@ -134,8 +132,6 @@ const Plant = () => {
           maxAccess={access}
         />
       </Box>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

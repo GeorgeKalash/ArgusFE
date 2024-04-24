@@ -56,7 +56,6 @@ const StyledTreeView = styled(TreeView)(({ height }) => ({
     overflowY: 'visible'
   }
 }))
-console.log('Streeview', StyledTreeView)
 
 const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
   '&.Mui-selected > .MuiTreeItem-content .MuiTreeItem-label': {
