@@ -142,13 +142,15 @@ const App = props => {
                               <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
                                 <PrimeReactProvider>
                                   {getLayout(
-                                    <WindowProvider key={typeof window !== 'undefined' ? window.location.pathname : ''}>
-                                      <RequestsProvider
+                                    <RequestsProvider
+                                      key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                    >
+                                      <WindowProvider
                                         key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                       >
                                         <Component {...pageProps} />
-                                      </RequestsProvider>
-                                    </WindowProvider>
+                                      </WindowProvider>
+                                    </RequestsProvider>
                                   )}
                                 </PrimeReactProvider>
                               </AclGuard>
