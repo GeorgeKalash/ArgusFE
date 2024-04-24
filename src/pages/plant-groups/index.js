@@ -20,15 +20,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { HighlightTwoTone } from '@mui/icons-material'
 
 const Plant = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
 
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -79,12 +73,7 @@ const Plant = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
-  }
-
-  const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm('')
   }
 
   const del = async obj => {
@@ -94,6 +83,20 @@ const Plant = () => {
     })
     invalidate()
     toast.success('Record Deleted Successfully')
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: PlantWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
+      },
+      width: 400,
+      height: 350,
+      title: _labels.plantGroup
+    })
   }
 
   function onTreeClick() {
@@ -107,6 +110,10 @@ const Plant = () => {
       height: 400,
       title: 'Tree'
     })
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   return (
@@ -127,18 +134,6 @@ const Plant = () => {
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
-        <PlantWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
 
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
