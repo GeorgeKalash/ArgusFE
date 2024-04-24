@@ -317,7 +317,7 @@ const Table = ({
         const isWIP = row.wip === 2
 
         return (
-          <>
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center'}}>
             {props.onEdit && (
               <IconButton size='small' onClick={() => props.onEdit(params.row)}>
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
@@ -333,7 +333,7 @@ const Table = ({
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
             )}
-          </>
+          </Box>
         )
       }
     })
