@@ -1,9 +1,6 @@
-import { useGridApiContext } from '@mui/x-data-grid'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function NumberfieldEdit({ column: { props }, id, field, value, update }) {
-  const api = useGridApiContext()
-
   return (
     <CustomNumberField
       value={value}
