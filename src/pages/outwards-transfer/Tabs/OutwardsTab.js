@@ -70,16 +70,16 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     clientRef: '',
     clientName: '',
     nationalityId: '',
-    fcAmount: '',
+    fcAmount: null,
     corId: '',
     corRef: '',
     corName: '',
-    commission: '',
-    defaultCommission: '',
-    lcAmount: '',
-    amount: '',
-    exRate: '',
-    rateCalcMethod: '',
+    commission: null,
+    defaultCommission: null,
+    lcAmount: null,
+    amount: null,
+    exRate: null,
+    rateCalcMethod: null,
     wip: '',
     status: '',
     statusName: '',
@@ -106,7 +106,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     trackingNo: '',
     valueDate: new Date(),
     defaultValueDate: new Date(),
-    vatAmount: '',
+    vatAmount: null,
+    vatRate: null,
     tdAmount: 0,
     giftCode: '',
     details: '',
@@ -162,15 +163,16 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      valueDate: yup.string().required('This field is required'),
-      countryId: yup.string().required('This field is required'),
-      dispersalType: yup.string().required('This field is required'),
-      currencyId: yup.string().required('This field is required'),
-      idNo: yup.string().required('This field is required'),
-      fcAmount: yup.string().required('This field is required'),
-      productId: yup.string().required('This field is required'),
-      commission: yup.string().required('This field is required'),
-      lcAmount: yup.string().required('This field is required')
+      valueDate: yup.string().required(' '),
+      countryId: yup.string().required(' '),
+      dispersalType: yup.string().required(' '),
+      currencyId: yup.string().required(' '),
+      idNo: yup.string().required(' '),
+      fcAmount: yup.string().required(' '),
+      productId: yup.string().required(' '),
+      commission: yup.string().required(' '),
+      lcAmount: yup.string().required(' '),
+      beneficiaryId: yup.string().required(' ')
     }),
     onSubmit: async values => {
       const copy = { ...values }
@@ -409,8 +411,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       formik.setFieldValue('corId', selectedRowData?.corId)
       formik.setFieldValue('corRef', selectedRowData?.corRef)
       formik.setFieldValue('corName', selectedRowData?.corName)
-
-      calcAmount(formik, formik.values.tdAmount)
+      const vatAmount = calcVatAmount(formik, selectedRowData)
+      calcAmount(selectedRowData?.baseAmount, selectedRowData?.fees, vatAmount, formik.values.tdAmount)
       window.close()
     }
   })
@@ -455,14 +457,14 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             }
           } else {
             formik.setFieldValue('productId', '')
-            formik.setFieldValue('commission', '')
-            formik.setFieldValue('defaultCommission', '')
-            formik.setFieldValue('lcAmount', '')
+            formik.setFieldValue('commission', null)
+            formik.setFieldValue('defaultCommission', null)
+            formik.setFieldValue('lcAmount', null)
             formik.setFieldValue('productId', '')
             formik.setFieldValue('dispersalId', '')
-            formik.setFieldValue('exRate', '')
-            formik.setFieldValue('rateCalcMethod', '')
-            formik.setFieldValue('amount', '')
+            formik.setFieldValue('exRate', null)
+            formik.setFieldValue('rateCalcMethod', null)
+            formik.setFieldValue('amount', null)
           }
         })
         .catch(error => {})
@@ -595,13 +597,19 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })
   }
 
-  const calcAmount = (formFields, tdAmount) => {
-    const lcAmount = formFields.values.lcAmount
-    const commission = formFields.values.commission
-    const vatAmount = formFields.values.vatAmount
+  const calcVatAmount = (formik, selectedRowData) => {
+    const commission = selectedRowData?.fees
+    const vatAmount = (commission * formik.values.vatRate) / 100
+    formik.setFieldValue('vatAmount', vatAmount)
+
+    return vatAmount
+  }
+
+  const calcAmount = (lcAmount, commission, vatAmount, tdAmount) => {
     const discount = tdAmount ? tdAmount : 0
 
     const amount = lcAmount + (commission + vatAmount - discount)
+    console.log(amount)
     formik.setFieldValue('amount', amount)
   }
   async function getDefaultVAT() {
@@ -731,7 +739,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             </FormGrid>
           </Grid>
 
-          <Grid container rowGap={2} xs={4} spacing={2} sx={{ px: 2, pt: 2 }}>
+          <Grid container rowGap={2} xs={4.5} sx={{ pt: 2 }}>
             <FieldSet title='Transaction Details'>
               <Grid item xs={12}>
                 <ResourceComboBox
@@ -901,9 +909,11 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   required
                   readOnly
                   maxAccess={maxAccess}
-                  onChange={e => formik.setFieldValue('commission', e.target.value)}
                   onClear={() => formik.setFieldValue('commission', '')}
                   error={formik.touched.commission && Boolean(formik.errors.commission)}
+                  onChange={e => {
+                    formik.setFieldValue('commission', e.target.value)
+                  }}
                   maxLength={10}
                 />
               </Grid>
@@ -916,13 +926,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                     value={formik.values.vatRate}
                     readOnly
                     maxAccess={maxAccess}
-                    onChange={e => {
-                      formik.setFieldValue('vatRate', e.target.value)
-                      const commission = formFields?.values?.commission
-                      const vatAmount = (commission * e.target.valuet) / 100
-
-                      formik.setFieldValue('vatAmount', vatAmount)
-                    }}
                     onClear={() => formik.setFieldValue('vatRate', '')}
                     error={formik.touched.vatRate && Boolean(formik.errors.vatRate)}
                     maxLength={10}
@@ -932,7 +935,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   <CustomNumberField
                     name='vatAmount'
                     type='text'
-                    label={labels.vatRate}
+                    label={labels.vatAmount}
                     value={formik.values.vatAmount}
                     readOnly
                     maxAccess={maxAccess}
@@ -952,7 +955,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   maxAccess={maxAccess}
                   onChange={e => {
                     formik.setFieldValue('tdAmount', e.target.value)
-                    calcAmount(formik, e.target.value)
+                    calcAmount(
+                      formik.values.lcAmount,
+                      formik.values.commission,
+                      formik.values.vatAmount,
+                      e.target.value
+                    )
                   }}
                   onClear={() => formik.setFieldValue('tdAmount', '')}
                   error={formik.touched.tdAmount && Boolean(formik.errors.tdAmount)}
@@ -982,7 +990,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               </Grid>
             </FieldSet>
           </Grid>
-          <Grid container rowGap={2} xs={8} spacing={2} sx={{ px: 2, pt: 2 }}>
+          <Grid container rowGap={2} xs={7.5} sx={{ pt: 2 }}>
             <FieldSet title='Client Details'>
               <Grid item xs={12}>
                 <ResourceLookup
