@@ -10,7 +10,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 const AccountBalanceForm = (
  { 
   labels,
-  height,
   maxAccess,
   store,
 }) => {
@@ -56,18 +55,15 @@ const AccountBalanceForm = (
 
   return (
     <>
-      <Box>
-        <GridToolbar maxAccess={maxAccess} />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['currencyId']}
-          isLoading={false}
-          maxAccess={maxAccess}
-          pagination={false}
-          height={height-50}
-        />
-      </Box>
+      <Table
+        columns={columns}
+        gridData={{list: [...data.list, ...data.list, ...data.list]}}
+        rowId={['currencyId']}
+        isLoading={false}
+        maxAccess={maxAccess}
+        pagination={false}
+        autoHeight={true}
+      />
     </>
   )
 }

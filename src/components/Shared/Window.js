@@ -16,6 +16,7 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
+import { padding } from '@mui/system'
 
 const Window = ({
   children,
@@ -58,9 +59,9 @@ const Window = ({
   //   }
   // }
 
-  const containerWidth = `calc(100vw - ${navCollapsed ? '68px' : '300px'})`
-  const containerHeight = `calc(100vh - 48px)`
-  const containerHeightPanel = `calc(100vh - 180px)`
+  const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '68px' : '300px'})`
+  const containerHeight = `calc(calc(100 * var(--vh)) - 48px)`
+  const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
   const heightPanel = height- 120
 
 
@@ -89,7 +90,7 @@ return (
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
       }}
     >
       <Draggable
@@ -161,7 +162,7 @@ return (
             )}
             {!controlled ? (
               <>
-                <DialogContent sx={{ height: expanded ? `calc(100vh - 48px - 180px)` : height, p: 0 }}>
+                <DialogContent sx={{ height: expanded ? `calc(calc(100 * var(--vh)) - 48px - 180px)` : height, p: 0 }}>
                   {children}
                 </DialogContent>
                 {windowToolbarVisible && (

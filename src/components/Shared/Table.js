@@ -91,8 +91,6 @@ const TableContainer = styled(Box)({
 
 const PaginationContainer = styled(Box)({
   width: '100%',
-  position: 'fixed',
-  bottom: '0',
   backgroundColor: '#fff',
   borderTop: '1px solid #ccc'
 })
@@ -101,7 +99,9 @@ const Table = ({
   pagination = true,
   paginationType = 'api',
   handleCheckedRows,
+  autoHeight = false,
   height,
+  addedHeight = '0px',
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
@@ -340,13 +340,14 @@ const Table = ({
     })
   }
 
-  const paginationHeight = pagination ? '41px' : '10px'
+  const paginationHeight = pagination ? '9px' : '10px'
 
-  const tableHeight = height
+  const tableHeight = autoHeight ? '100%': 
+  height
     ? typeof height === 'string' && height?.includes('calc')
       ? height
       : `${height}px`
-    : `calc(100vh - 48px - 48px - ${paginationHeight})`
+    : `calc(calc(100 * var(--vh)) - 49px - 49px - ${paginationHeight} - ${addedHeight})`
 
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
@@ -371,29 +372,15 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
-          <TableContainer
-            sx={
-              props.style
-                ? props.style
-                : {
-                    zIndex: 0
-
-                    // marginBottom: 0,
-                    // pb: 0,
-                    // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
-                  }
-            }
-          >
-            {/* <ScrollableTable> */}
             <StripedDataGrid
               rows={
                 gridData?.list
                   ? page < 2 && paginationType === 'api'
-                    ? gridData?.list.slice(0, 50)
+                    ? gridData?.list.slice(0, 50) 
                     : gridData?.list
                   : []
               }
-              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
+              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative' }}
               density='compact'
               components={{
                 LoadingOverlay: LinearProgress,
@@ -435,11 +422,6 @@ const Table = ({
                 ...filteredColumns
               ]}
             />
-            {/* </ScrollableTable> */}
-            {/* <PaginationContainer>
-                    <CustomPagination />
-                </PaginationContainer> */}
-          </TableContainer>
           <DeleteDialog
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen([false, {}])}
