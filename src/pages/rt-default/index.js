@@ -13,7 +13,6 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 // ** API
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CommonContext } from 'src/providers/CommonContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -180,7 +179,7 @@ const DocumentTypeMaps = () => {
             <ResourceLookup
               endpointId={SystemRepository.NumberRange.snapshot}
               form={rtDefaultFormValidation}
-              name='rt-nra-product'
+              name='nraId'
               label={_labels.nuRange}
               valueField='reference'
               displayField='description'
@@ -193,10 +192,10 @@ const DocumentTypeMaps = () => {
                   rtDefaultFormValidation.setFieldValue('nraRef', newValue?.reference)
                   rtDefaultFormValidation.setFieldValue('nraDescription', newValue?.description)
                 } else {
-                  rtDefaultValidation.setFieldValue('rt-nra-product', null)
-                  rtDefaultFormValidation.setFieldValue('nraId', null)
-                  rtDefaultFormValidation.setFieldValue('nraRef', null)
-                  rtDefaultFormValidation.setFieldValue('nraDescription', null)
+                  rtDefaultValidation.setFieldValue('rt-nra-product', '')
+                  rtDefaultFormValidation.setFieldValue('nraId', '')
+                  rtDefaultFormValidation.setFieldValue('nraRef', '')
+                  rtDefaultFormValidation.setFieldValue('nraDescription', '')
                 }
               }}
               error={rtDefaultFormValidation.touched.nraId && Boolean(rtDefaultFormValidation.errors.nraId)}

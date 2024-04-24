@@ -25,6 +25,7 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const Defaults = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -86,7 +87,7 @@ const Defaults = () => {
         res.list.forEach(obj => {
           if (arrayAllow.includes(obj.key)) {
             myObject[obj.key] = obj.value ? parseInt(obj.value) : null
-            formik.setFieldValue(obj.key, obj.value ? parseInt(obj.value) : null)
+            formik.setFieldValue(obj.key, parseInt(obj.value))
           }
         })
 
@@ -200,7 +201,7 @@ const Defaults = () => {
               form={formik}
               valueField='reference'
               displayField='description'
-              name='ct-nra-individual'
+              name='ct-nra-individual-ref'
               firstValue={formik.values['ct-nra-individual-ref']}
               label={_labels['ct-nra-individual']}
               secondDisplayField={true}
@@ -248,7 +249,7 @@ const Defaults = () => {
           <Grid item xs={12}>
             <ResourceLookup
               endpointId={SystemRepository.NumberRange.snapshot}
-              name='ct-nra-corporate'
+              name='ct-nra-corporate-ref'
               form={formik}
               label={_labels['ct-nra-corporate']}
               valueField='reference'
@@ -273,37 +274,43 @@ const Defaults = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
               name='ct_cash_sales_ratetype_id'
               label={_labels.cash_sales_ratetype}
               valueField='recordId'
               displayField='name'
-              store={store}
-              value={
-                formik.values.ct_cash_sales_ratetype_id
-                  ? store.filter(item => item.recordId === formik.values.ct_cash_sales_ratetype_id)[0]
-                  : ''
-              }
+              maxAccess={access}
               onChange={(event, newValue) => {
-                if (newValue) formik && formik.setFieldValue('ct_cash_sales_ratetype_id', newValue?.recordId)
-                else formik.setFieldValue('ct_cash_sales_ratetype_id', null)
+                formik && formik.setFieldValue('ct_cash_sales_ratetype_id', newValue?.recordId)
               }}
               error={formik.touched.ct_cash_sales_ratetype_id && Boolean(formik.errors.ct_cash_sales_ratetype_id)}
               helperText={formik.touched.ct_cash_sales_ratetype_id && formik.errors.ct_cash_sales_ratetype_id}
             />
           </Grid>
+
+          {/* <ResourceComboBox
+                        endpointId={MultiCurrencyRepository.RateType.qry}
+                        name='mc_defaultRTFI'
+                        label={_labels.mc_defaultRTFI}
+                        valueField='recordId'
+                        displayField='name'
+                        values={formik.values}
+                        onChange={(event, newValue) => {
+                            formik && formik.setFieldValue('mc_defaultRTFI', newValue?.recordId)
+                        }}
+                        error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
+
+                        // helperText={formik.touched.mc_defaultRTFI && formik.errors.mc_defaultRTFI}
+                        /> */}
+
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
               name='ct_cash_purchase_ratetype_id'
               label={_labels.cash_purchase_ratetype}
               valueField='recordId'
               displayField='name'
-              store={store}
-              value={
-                formik.values.ct_cash_purchase_ratetype_id
-                  ? store.filter(item => item.recordId === formik.values.ct_cash_purchase_ratetype_id)[0]
-                  : ''
-              }
               onChange={(event, newValue) => {
                 if (newValue) formik && formik.setFieldValue('ct_cash_purchase_ratetype_id', newValue?.recordId)
                 else formik.setFieldValue('ct_cash_purchase_ratetype_id', null)
@@ -313,17 +320,12 @@ const Defaults = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
               name='ct_credit_sales_ratetype_id'
               label={_labels.credit_sales_ratetype}
               valueField='recordId'
               displayField='name'
-              store={store}
-              value={
-                formik.values.ct_credit_sales_ratetype_id
-                  ? store.filter(item => item.recordId === formik.values.ct_credit_sales_ratetype_id)[0]
-                  : ''
-              }
               onChange={(event, newValue) => {
                 if (newValue) formik && formik.setFieldValue('ct_credit_sales_ratetype_id', newValue?.recordId)
                 else formik && formik.setFieldValue('ct_credit_sales_ratetype_id', '')
@@ -333,17 +335,12 @@ const Defaults = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
               name='ct_credit_purchase_ratetype_id'
               label={_labels.credit_purchase_ratetype}
               valueField='recordId'
               displayField='name'
-              store={store}
-              value={
-                formik.values.ct_credit_purchase_ratetype_id
-                  ? store.filter(item => item.recordId === formik.values.ct_credit_purchase_ratetype_id)[0]
-                  : ''
-              }
               onChange={(event, newValue) => {
                 if (newValue) formik && formik.setFieldValue('ct_credit_purchase_ratetype_id', newValue?.recordId)
                 else formik && formik.setFieldValue('ct_credit_purchase_ratetype_id', '')
@@ -355,17 +352,13 @@ const Defaults = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomComboBox
+            <ResourceComboBox
+              endpointId={MultiCurrencyRepository.RateType.qry}
               name='ct_credit_eval_ratetype_id'
               label={_labels.credit_eval_ratetype}
               valueField='recordId'
               displayField='name'
               store={store}
-              value={
-                formik.values.ct_credit_eval_ratetype_id
-                  ? store.filter(item => item.recordId === formik.values.ct_credit_eval_ratetype_id)[0]
-                  : ''
-              }
               onChange={(event, newValue) => {
                 if (newValue) formik && formik.setFieldValue('ct_credit_eval_ratetype_id', newValue?.recordId)
                 else formik && formik.setFieldValue('ct_credit_eval_ratetype_id', '')

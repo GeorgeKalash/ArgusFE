@@ -11,6 +11,7 @@ import Table from './Table'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import ResourceComboBox from './ResourceComboBox'
 
 const TransactionLog = props => {
   const { recordId, resourceId, onInfoClose } = props
@@ -122,12 +123,12 @@ const TransactionLog = props => {
       <CustomTabPanel>
         <Grid container xs={12} sx={{ paddingBottom: '25px' }}>
           <Grid item xs={5}>
-            <CustomComboBox
+            <ResourceComboBox
+              datasetId={DataSets.TRX_TYPE}
               name='idtId'
               label={_labels.trxType}
               valueField='key'
               displayField='value'
-              store={transactionTypeStore}
               value={transactionTypeStore?.filter(item => item.recordId === transactionType)[0]}
               required
               onChange={(event, newValue) => {
@@ -139,6 +140,7 @@ const TransactionLog = props => {
               }}
             />
           </Grid>
+
           <Grid container xs={2}></Grid>
           <Grid container xs={4} spacing={4}>
             <Grid container xs={12}>

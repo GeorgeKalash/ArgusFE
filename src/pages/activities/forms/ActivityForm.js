@@ -25,9 +25,8 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     recordId: null,
     name: '',
     reference: '',
-    flName:'',
-    industry:''
-
+    flName: '',
+    industry: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,7 +34,7 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
   //const editMode = !!recordId
 
   const invalidate = useInvalidate({
-    endpointId:CurrencyTradingSettingsRepository.Activity.qry
+    endpointId: CurrencyTradingSettingsRepository.Activity.qry
   })
 
   const formik = useFormik({
@@ -45,7 +44,7 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       name: yup.string().required('This field is required'),
       reference: yup.string().required('This field is required'),
-      industry:yup.string().required('This field is required')
+      industry: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -89,13 +88,7 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Activity}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.Activity} form={formik} height={300} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
@@ -133,27 +126,25 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.flName && Boolean(formik.errors.flName)}
-          
           />
         </Grid>
         <Grid item xs={12}>
-        <ResourceComboBox
-              datasetId={DataSets.INDUSTRY}
-              name='industry'
-              label={labels.indId}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              required
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('industry', newValue?.key)
-              }}
-              error={formik.touched.industry && Boolean(formik.errors.industry)}
-            />
+          <ResourceComboBox
+            datasetId={DataSets.INDUSTRY}
+            name='industry'
+            label={labels.indId}
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            required
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('industry', newValue?.key)
+            }}
+            error={formik.touched.industry && Boolean(formik.errors.industry)}
+          />
         </Grid>
       </Grid>
     </FormShell>
   )
 }
-
