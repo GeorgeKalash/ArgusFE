@@ -148,6 +148,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId}) => {
            columns={column}
            allowDelete={false}
            allowAddNewLine={false}
+           height={`calc(100vh - 150px)`}
 
         />
         <Grid sx={{
