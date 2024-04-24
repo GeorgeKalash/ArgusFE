@@ -101,34 +101,19 @@ const SystemChecks = () => {
   }
 
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
-      <Box sx={{ width: '100%' }}>
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['checkId']}
-          isLoading={false}
-          maxAccess={access}
-          showCheckboxColumn={true}
-          handleCheckedRows={() => {}}
-          pagination={false}
-        />
-      </Box>
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: -20,
-          left: 0,
-          width: '100%',
-          margin: 0
-        }}
-      >
-        <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
-      </Box>
+    <Box>
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['checkId']}
+        isLoading={false}
+        maxAccess={access}
+        showCheckboxColumn={true}
+        handleCheckedRows={() => {}}
+        pagination={false}
+        addedHeight={'18px'}
+      />
+      <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
     </Box>
   )
 }
