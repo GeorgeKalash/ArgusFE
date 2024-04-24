@@ -1,55 +1,90 @@
 html,
 body {
-  min-height: 100vh; /* Ensure full viewport height */
-  zoom: var(--zoom) ;
-  --zoom:1 ;
-  --vh: calc(1vh / var(--zoom)) ;
-  --vw: calc(1vw / var(--zoom))
-}      /* Media queries for different screen zoom levels */
-@media screen and (-moz-device-pixel-ratio: 0.5),
-  screen and (-webkit-min-device-pixel-ratio: 0.5),
-  screen and (-o-min-device-pixel-ratio: 1/2),
-  screen and (max-resolution: 96dpi) {
+  min-height: 100vh;
+  zoom: var(--zoom);
+  --zoom: 1;
+  --vh: calc(1vh / var(--zoom));
+  --vw: calc(1vw / var(--zoom));
+}
+
+/* Largest screens */
+@media screen and (max-width: 2560px) and (max-height: 1440px) {
   body {
-    --zoom: 2; /* Set zoom to 200% when screen zoom level is 200% or higher */
-  }
-}      @media screen and (-moz-device-pixel-ratio: 1),
-  screen and (-webkit-min-device-pixel-ratio: 1),
-  screen and (-o-min-device-pixel-ratio: 1/1),
-  screen and (min-resolution: 1dppx) {
-  body {
-    --zoom: 1; /* Set zoom to 100% when screen zoom level is 100% */
-  }
-}      @media screen and (-moz-device-pixel-ratio: 1.5),
-  screen and (-webkit-min-device-pixel-ratio: 1.5),
-  screen and (-o-min-device-pixel-ratio: 3/2),
-  screen and (min-resolution: 1.5dppx) {
-  body {
-    --zoom: 0.67; /* Set zoom to approximately 150% when screen zoom level is 150% */
-  }
-}      @media screen and (-moz-device-pixel-ratio: 2),
-  screen and (-webkit-min-device-pixel-ratio: 2),
-  screen and (-o-min-device-pixel-ratio: 2/1),
-  screen and (min-resolution: 2dppx) {
-  body {
-    --zoom: 0.5; /* Set zoom to 50% when screen zoom level is 50% */
+    --zoom: 1.0;
   }
 }
-  @media screen and (-moz-device-pixel-ratio: 1.1),
-  screen and (-webkit-min-device-pixel-ratio: 1.1),
-  screen and (-o-min-device-pixel-ratio: 1.1/1),
-  screen and (min-resolution: 1.1dppx) {
-    body {
-      --zoom: 0.91; /* Adjust zoom for 110% screen zoom level */
-    }
+
+@media screen and (max-width: 1920px) and (max-height: 1080px) {
+  body {
+    --zoom: 0.9;
   }
-  @media screen and (-moz-device-pixel-ratio: 1.25),
-  screen and (-webkit-min-device-pixel-ratio: 1.25),
-  screen and (-o-min-device-pixel-ratio: 1.25/1),
-  screen and (min-resolution: 1.25dppx) {
-    body {
-      --zoom: 0.8; /* Adjust zoom for 125% screen zoom level */
-    }
+}
+
+@media screen and (max-width: 1680px) and (max-height: 1050px) {
+  body {
+    --zoom: 0.85;
+  }
+}
+
+@media screen and (max-width: 1600px) and (max-height: 900px) {
+  body {
+    --zoom: 0.75;
+  }
+}
+
+@media screen and (max-width: 1440px) and (max-height: 900px) {
+  body {
+    --zoom: 0.7;
+  }
+}
+
+@media screen and (max-width: 1366px) and (max-height: 768px) {
+  body {
+    --zoom: 0.67;
+  }
+}
+
+/* Smaller screens */
+@media screen and (max-width: 1280px) and (max-height: 1024px) {
+  body {
+    --zoom: 0.8;
+  }
+}
+
+@media screen and (max-width: 1280px) and (max-height: 800px) {
+  body {
+    --zoom: 0.7;
+  }
+}
+
+@media screen and (max-width: 1024px) and (max-height: 768px) {
+  body {
+    --zoom: 0.7;
+  }
+}
+
+@media screen and (max-width: 800px) and (max-height: 600px) {
+  body {
+    --zoom: 0.55;
+  }
+}
+
+@media screen and (max-width: 640px) and (max-height: 480px) {
+  body {
+    --zoom: 0.45;
+  }
+}
+
+@media screen and (max-width: 480px) and (max-height: 320px) {
+  body {
+    --zoom: 0.35;
+  }
+}
+
+@media screen and (max-width: 320px) and (max-height: 240px) {
+  body {
+    --zoom: 0.30;
+  }
 }
 
 #__next {

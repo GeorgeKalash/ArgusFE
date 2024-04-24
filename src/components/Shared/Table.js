@@ -345,7 +345,7 @@ const Table = ({
     ? typeof height === 'string' && height?.includes('calc')
       ? height
       : `${height}px`
-    : `calc(calc(100 * var(--vh)) - 48px - 48px - ${paginationHeight} - ${addedHeight})`
+    : `calc(calc(100 * var(--vh)) - 49px - 49px - ${paginationHeight} - ${addedHeight})`
 
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
