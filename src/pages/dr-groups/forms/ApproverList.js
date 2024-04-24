@@ -6,36 +6,36 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import ApproverForm from './ApproverForm'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const ApproverList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
-  const [valueGridData, setValueGridData] = useState()
-  const [refresh, setRefresh] = useState(false)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   const { stack } = useWindow()
 
-  const fetchGridData = async recordId => {
-    const parameters = `_filter=&_groupId=${recordId}`
-    try {
-      const response = await getRequest({
-        extension: DocumentReleaseRepository.GroupCode.qry,
-        parameters
-      })
-      setValueGridData(response)
-    } catch (error) {
-      setErrorMessage('Error fetching data')
-      toast.error('Error fetching data')
-    }
+  async function fetchGridData() {
+    const response = await getRequest({
+      extension: DocumentReleaseRepository.GroupCode.qry,
+
+      parameters: `_filter=&_groupId=${recordId}`
+    })
+
+    return response
   }
 
-  useEffect(() => {
-    if (recordId) {
-      fetchGridData(recordId)
-    }
-  }, [recordId, refresh])
+  const {
+    query: { data },
+    labels: _labels,
+
+    refetch
+  } = useResourceQuery({
+    enabled: !!recordId,
+    datasetId: ResourceIds.DRGroups,
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.GroupCode.qry
+  })
 
   const columns = [
     { field: 'codeRef', headerName: labels.reference, flex: 1 },
@@ -45,7 +45,7 @@ const ApproverList = ({ store, labels, maxAccess }) => {
   const openForm = (recordId = null) => {
     stack({
       Component: ApproverForm,
-      props: { labels, recordId, maxAccess, store, setRefresh },
+      props: { labels, recordId, maxAccess, store },
       width: 500,
       height: 400,
       title: labels.approver
@@ -58,7 +58,7 @@ const ApproverList = ({ store, labels, maxAccess }) => {
         extension: DocumentReleaseRepository.GroupCode.del,
         record: JSON.stringify(obj)
       })
-      setRefresh(prev => !prev)
+      refetch()
       toast.success('Record Deleted Successfully')
     } catch (error) {}
   }
@@ -68,9 +68,8 @@ const ApproverList = ({ store, labels, maxAccess }) => {
       <GridToolbar onAdd={() => openForm()} maxAccess={maxAccess} />
       <Table
         columns={columns}
-        gridData={valueGridData}
+        gridData={data}
         rowId={['codeId']}
-        isLoading={!valueGridData}
         pageSize={50}
         pagination={false}
         onDelete={obj => delApprover(obj)}

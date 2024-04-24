@@ -9,10 +9,15 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import { useInvalidate } from 'src/hooks/resource'
 
-const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
+const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId: grId } = store
+
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.GroupCode.qry
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -59,7 +64,7 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
         record: JSON.stringify(obj)
       })
       toast.success('Record Successfully Updated')
-      setRefresh(prev => !prev)
+      invalidate()
     } catch {}
   }
 
@@ -77,7 +82,7 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
             endpointId={DocumentReleaseRepository.ReleaseCode.qry}
             parameters={`_startAt=${0}&_pageSize=${100}`}
             name='codeId'
-            label={'codeId'}
+            label={labels.code}
             valueField='recordId'
             displayField='name'
             columnsInDropDown={[
