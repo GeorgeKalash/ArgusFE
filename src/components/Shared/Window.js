@@ -16,6 +16,7 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
+import { padding } from '@mui/system'
 
 const Window = ({
   children,
@@ -89,7 +90,7 @@ return (
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
       }}
     >
       <Draggable

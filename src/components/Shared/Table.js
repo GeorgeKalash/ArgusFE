@@ -99,6 +99,7 @@ const Table = ({
   pagination = true,
   paginationType = 'api',
   handleCheckedRows,
+  autoHeight = false,
   height,
   addedHeight = '0px',
   actionColumnHeader = null,
@@ -341,7 +342,8 @@ const Table = ({
 
   const paginationHeight = pagination ? '9px' : '10px'
 
-  const tableHeight = height
+  const tableHeight = autoHeight ? '100%': 
+  height
     ? typeof height === 'string' && height?.includes('calc')
       ? height
       : `${height}px`
@@ -370,15 +372,6 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
-          <TableContainer
-            sx={
-              props.style
-                ? props.style
-                : {
-                    zIndex: 0
-                  }
-            }
-          >
             <StripedDataGrid
               rows={
                 gridData?.list
@@ -429,7 +422,6 @@ const Table = ({
                 ...filteredColumns
               ]}
             />
-          </TableContainer>
           <DeleteDialog
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen([false, {}])}
