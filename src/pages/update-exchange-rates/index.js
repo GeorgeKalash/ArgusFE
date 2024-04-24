@@ -384,7 +384,7 @@ const UpdateExchangeRates = () => {
                   name='currencyId'
                   label={_labels.currency}
                   valueField='recordId'
-                  displayField={['reference', 'name']}
+                  displayField='name'
                   columnsInDropDown={[
                     { key: 'reference', value: 'Currency Ref' },
                     { key: 'name', value: 'Name' }
