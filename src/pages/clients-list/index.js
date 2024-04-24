@@ -11,19 +11,17 @@ import { formatDateDefault } from 'src/lib/date-helper'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
 import { useResourceQuery } from 'src/hooks/resource'
+import Error from 'src/components/Shared/Error'
+import { useError } from 'src/error'
 
 const ClientsList = () => {
   const { stack } = useWindow()
-
-  //control
   const { getRequest } = useContext(RequestsContext)
-
-  //error
   const [errorMessage, setErrorMessage] = useState(null)
+  const { stack: stackError } = useError()
 
   const {
     query: { data },
@@ -41,8 +39,6 @@ const ClientsList = () => {
     }
   })
   async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
     return (
       filters.qry &&
       (await getRequest({
@@ -130,7 +126,9 @@ const ClientsList = () => {
       if (plantId !== '') {
         openForm('', plantId)
       } else {
-        setErrorMessage({ error: 'The user does not have a default plant' })
+        stackError({
+          message: 'The user does not have a default plant'
+        })
       }
     } catch (error) {}
   }
@@ -152,11 +150,7 @@ const ClientsList = () => {
       }
 
       return ''
-    } catch (error) {
-      setErrorMessage(error)
-
-      return ''
-    }
+    } catch (error) {}
   }
 
   const editClient = obj => {
@@ -196,7 +190,7 @@ const ClientsList = () => {
           paginationType='client'
         />
         {errorMessage?.error && (
-          <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+          <Error open={errorMessage} height={100} onClose={() => setErrorMessage(null)} message={errorMessage} />
         )}{' '}
       </Box>
     </>

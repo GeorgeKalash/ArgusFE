@@ -145,11 +145,15 @@ const App = props => {
                                     <RequestsProvider
                                       key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                     >
-                                      <WindowProvider
+                                      <ErrorProvider
                                         key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                       >
-                                        <Component {...pageProps} />
-                                      </WindowProvider>
+                                        <WindowProvider
+                                          key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                        >
+                                          <Component {...pageProps} />
+                                        </WindowProvider>
+                                      </ErrorProvider>
                                     </RequestsProvider>
                                   )}
                                 </PrimeReactProvider>

@@ -7,6 +7,7 @@ import jwt from 'jwt-decode'
 
 import { AuthContext } from 'src/providers/AuthContext'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import Error from 'src/components/Shared/Error'
 
 const RequestsContext = createContext()
 
@@ -189,7 +190,7 @@ const RequestsProvider = ({ children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {error && <ErrorWindow open={true} onClose={() => setError(false)} message={error} />}
+      {error && <Error height={400} open={true} onClose={() => setError(false)} message={error} />}
     </>
   )
 }

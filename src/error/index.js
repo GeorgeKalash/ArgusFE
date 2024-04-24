@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react'
+import Error from 'src/components/Shared/Error'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const ErrorContext = React.createContext(null)
@@ -22,7 +23,7 @@ export function ErrorProvider({ children }) {
     >
       {children}
       {stack.map((props, index) => (
-        <ErrorWindow key={index} open={stack[index]} onClose={closeWindow} {...props} />
+        <Error key={index} height={props.height ?? 100} open={stack[index]} onClose={closeWindow} {...props} />
       ))}
     </ErrorContext.Provider>
   )
