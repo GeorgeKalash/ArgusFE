@@ -600,7 +600,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   const calcAmount = (formFields, tdAmount) => {
     const lcAmount = formFields.values.lcAmount
     const commission = formFields.values.commission
-    const vatAmount = (commission * formFields.values.vatAmount) / 100
+    const vatAmount = formFields.values.vatAmount
     const discount = tdAmount ? tdAmount : 0
 
     console.log('formFields ', formFields)
@@ -616,7 +616,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })
     const vatPct = res.record.value
 
-    formik.setFieldValue('vatAmount', parseInt(vatPct))
+    formik.setFieldValue('vatRate', parseInt(vatPct))
   }
 
   useEffect(() => {
@@ -910,19 +910,41 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   maxLength={10}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='vatAmount'
-                  type='text'
-                  label={labels.vatRate}
-                  value={formik.values.vatAmount}
-                  readOnly
-                  maxAccess={maxAccess}
-                  onChange={e => formik.setFieldValue('vatAmount', e.target.value)}
-                  onClear={() => formik.setFieldValue('vatAmount', '')}
-                  error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
-                  maxLength={10}
-                />
+              <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='vatRate'
+                    type='text'
+                    label={labels.vatRate}
+                    value={formik.values.vatRate}
+                    readOnly
+                    maxAccess={maxAccess}
+                    onChange={e => {
+                      formik.setFieldValue('vatRate', e.target.value)
+                      const commission = formFields?.values?.commission
+                      const vatAmount = (commission * e.target.valuet) / 100
+
+                      formik.setFieldValue('vatAmount', vatAmount)
+                    }}
+                    onClear={() => formik.setFieldValue('vatRate', '')}
+                    error={formik.touched.vatRate && Boolean(formik.errors.vatRate)}
+                    maxLength={10}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='vatAmount'
+                    type='text'
+                    label={labels.vatRate}
+                    value={formik.values.vatAmount}
+                    readOnly
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('vatAmount', e.target.value)}
+                    onClear={() => formik.setFieldValue('vatAmount', '')}
+                    error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
+                    maxLength={10}
+                  />
+                </Grid>
               </Grid>
               <Grid item xs={12}>
                 <CustomNumberField
