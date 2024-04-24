@@ -186,8 +186,7 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
             label={labels.country}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' },
-              { key: 'recordId', value: 'Name' }
+              { key: 'name', value: 'Name' }
             ]}
             values={formik.values}
             valueField='recordId'
