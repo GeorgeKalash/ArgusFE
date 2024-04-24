@@ -17,15 +17,15 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
     validate: values => {
       const errors = {}
 
-      if (!values.cellPhoneRepeat) {
+      if (!formik.values.clientId && !values.cellPhoneRepeat) {
         errors.cellPhoneRepeat = 'Cell Phone Confirm is required'
-      } else if (values.cellPhone !== values.cellPhoneRepeat) {
+      } else if (!formik.values.clientId && values.cellPhone !== values.cellPhoneRepeat) {
         errors.cellPhoneRepeat = 'Cell Phone must match'
       }
 
       if (!values.idNoRepeat) {
         errors.idNoRepeat = 'Id number Confirm is required'
-      } else if (values.idNo.toString() !== values.idNoRepeat.toString()) {
+      } else if (values.idNo.toString() != values.idNoRepeat.toString()) {
         errors.idNoRepeat = 'Id Number  must match'
       }
 
