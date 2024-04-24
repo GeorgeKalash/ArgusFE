@@ -15,7 +15,7 @@ const WindowToolbar = ({
   isCleared,
   recordId,
   onApproval,
-  newHandler,
+  onClickGL,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
@@ -48,7 +48,7 @@ const WindowToolbar = ({
     onApply,
     onApproval,
     onClientRelation,
-    newHandler: () => newHandler(recordId)
+    onClickGL: () => onClickGL(recordId)
   }
   const { getRequest } = useContext(RequestsContext)
 
