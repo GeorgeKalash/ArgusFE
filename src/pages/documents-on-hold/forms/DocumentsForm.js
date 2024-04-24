@@ -104,9 +104,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
 
           date: formatDateFromApi(res.record.date)
         })
-      } catch (exception) {
-        setErrorMessage(error)
-      }
+      } catch (exception) {}
       setIsLoading(false)
     })()
   }, [])

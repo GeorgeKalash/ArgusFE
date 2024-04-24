@@ -147,7 +147,10 @@ export const SystemRepository = {
   FiscalYears: {
     qry: service + 'qryFY'
   },
-  ResourceControls: {
+  ModuleClassRES: {
+    qry: service + 'qryRES'
+  },
+  ResourceControl: {
     qry: service + 'qryResourceControls'
   },
   UserFunction: {
