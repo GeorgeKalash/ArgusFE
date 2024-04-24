@@ -1,6 +1,3 @@
-// ** MUI Imports
-
-// ** Custom Imports
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { useContext, useEffect } from 'react'
@@ -22,19 +19,16 @@ const AddressForm = ({ recordId, address, setAddress, editMode, onSubmit }) => {
     })
   }
   useEffect(() => {
-    setAddress([])
-    if (recordId) {
-      var parameters = `_filter=` + '&_recordId=' + recordId
-      getRequest({
-        extension: SystemRepository.Address.get,
-        parameters: parameters
-      })
-        .then(res => {
-          var result = res.record
-          setAddress(result)
+    ;(async function () {
+      setAddress([])
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.Address.get,
+          parameters: `_filter=` + '&_recordId=' + recordId
         })
-        .catch(error => {})
-    }
+        setAddress(res.record)
+      }
+    })
   }, [recordId])
 
   return (
