@@ -355,7 +355,7 @@ const UpdateExchangeRates = () => {
                   ]}
                   values={formik.values}
                   valueField='recordId'
-                  displayField={['reference', 'name']}
+                  displayField={['reference', 'name', 'flName']}
                   required
                   maxAccess={access}
                   onChange={(event, newValue) => {

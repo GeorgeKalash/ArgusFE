@@ -191,7 +191,7 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
             ]}
             values={formik.values}
             valueField='recordId'
-            displayField='name'
+            displayField={['countryRef', 'countryName']}
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
