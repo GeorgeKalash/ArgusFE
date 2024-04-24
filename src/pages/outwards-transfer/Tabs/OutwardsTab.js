@@ -227,7 +227,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   })
 
   const instantCashFormik = useFormik({
-    //maxAccess,
     initialValues: {
       payingAgent: '',
       deliveryModeId: '',
@@ -235,7 +234,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       partnerReference: '',
       sourceAmount: '',
       fromCountryId: '',
-      fromCountryName: '',
       toCountryId: '',
       sourceOfFundsId: '',
       remittancePurposeId: '',
@@ -603,7 +601,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     const vatAmount = (commission * formFields.values.vatAmount) / 100
     const discount = tdAmount ? tdAmount : 0
 
-    console.log('formFields ', formFields)
     const amount = lcAmount + (commission + vatAmount - discount)
     formik.setFieldValue('amount', amount)
   }
