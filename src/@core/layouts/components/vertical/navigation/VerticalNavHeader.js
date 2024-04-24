@@ -79,7 +79,7 @@ const VerticalNavHeader = props => {
       display:'flex',
       flexDirection : navCollapsed ? 'column' : 'row',
     }}>
-      <Box sx={{ minHeight: 48, display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ minHeight: 40, display: 'flex', alignItems: 'center' }}>
         {userNavMenuBranding ? (
           userNavMenuBranding(props)
         ) : (
@@ -89,7 +89,7 @@ const VerticalNavHeader = props => {
                 !navCollapsed ? '/images/logos/ArgusLogo.png' : '/images/logos/ArgusA.png'
               }
               alt='Argus'
-              style={{ maxHeight: '30px' }}
+              style={{ maxHeight: '25px' }}
             />
             {/* <svg
             width={30}
@@ -163,7 +163,7 @@ const VerticalNavHeader = props => {
           onClick={toggleNavVisibility}
           sx={{ p: 0, backgroundColor: 'transparent !important' }}
         >
-          <Icon icon='mdi:close' fontSize={20} />
+          <Icon icon='mdi:close' fontSize={15} />
         </IconButton>
       ) : userMenuLockedIcon === null && userMenuUnlockedIcon === null ? null : (
         <IconButton
@@ -175,7 +175,7 @@ const VerticalNavHeader = props => {
             color: 'text.primary',
             backgroundColor: 'transparent !important',
             '& svg': {
-              fontSize: '1.15rem',
+              fontSize: '1rem',
               ...menuCollapsedStyles,
               transition: 'opacity .25s ease-in-out'
             }
