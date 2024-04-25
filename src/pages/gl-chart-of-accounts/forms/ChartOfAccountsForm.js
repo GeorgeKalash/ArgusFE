@@ -321,6 +321,7 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
             onChange={e => handleChange(index, e)}
             onKeyDown={e => handleKeyDown(index, e)}
             maxLength={segment.value}
+            placeholder={new Array(segment.value).fill('_').join('')}
           />
           {index !== segments.length - 1 && <span style={dashStyle}>-</span>}
         </React.Fragment>
