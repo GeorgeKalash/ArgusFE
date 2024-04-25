@@ -143,6 +143,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
               { key: 'name', value: 'Name' },
               { key: 'flName', value: 'Foreign Language' }
             ]}
+
             values={formik.values}
             required
             maxAccess={maxAccess}
