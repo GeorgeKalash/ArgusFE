@@ -139,11 +139,10 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
             valueField='recordId'
             displayField={['reference', 'name', 'flName']}
             columnsInDropDown={[
-              { key: 'reference', value: 'Currency Ref' },
+              { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' },
               { key: 'flName', value: 'Foreign Language' }
             ]}
-
             values={formik.values}
             required
             maxAccess={maxAccess}
@@ -199,6 +198,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
             valueField='recordId'
             displayField={['name', 'flName']}
             columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' },
               { key: 'flName', value: 'Foreign Language' }
             ]}
