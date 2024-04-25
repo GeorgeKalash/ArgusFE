@@ -16,7 +16,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Windows
-import CityWindow from './Windows/CityWindow'
+import CityForm from 'src/pages/cities/Forms/CityForm'
 import { useWindow } from 'src/windows'
 
 // ** Helpers
@@ -111,7 +111,7 @@ const City = () => {
 
   function openForm(recordId) {
     stack({
-      Component: CityWindow,
+      Component: CityForm,
       props: {
         labels: _labels,
         recordId: recordId,
