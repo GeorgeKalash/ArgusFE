@@ -1,18 +1,20 @@
-import React, { useEffect, useContext, useState } from 'react'
+import React, { useEffect, useContext } from 'react'
 import FormShell from './FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { DataGrid } from './DataGrid'
 import * as yup from 'yup'
-import { useForm } from 'react-hook-form'
+import { useForm } from 'src/hooks/form'
 import { DataSets } from 'src/resources/DataSets'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { CommonContext } from 'src/providers/CommonContext'
 
-export const InterfacesForm = ({ recordId }) => {
+export const InterfacesForm = ({ recordId, expanded, height }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
 
   const { labels: _labels, access } = useResourceParams({
     datasetId: ResourceIds.InterfaceMap
@@ -22,8 +24,9 @@ export const InterfacesForm = ({ recordId }) => {
     initialValues: {
       rows: [
         {
+          id: 1,
           recordId: recordId,
-          resourceId: ResourceIds.IdTypes,
+          resourceId: ResourceIds.InterfaceMap,
           interfaceId: '',
           interfaceName: '',
           reference: ''
@@ -33,50 +36,69 @@ export const InterfacesForm = ({ recordId }) => {
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
-      /* const rows = obj.relations.map(({ recordId, activationDate, expiryDate, ...rest }, index) => ({
+      const rows = formik.values.rows.map(rest => ({
         recordId: recordId,
-        seqNo: index + 1,
-        activationDate: activationDate && formatDateToApiFunction(activationDate),
-        expiryDate: expiryDate && formatDateToApiFunction(expiryDate),
+        resourceId: ResourceIds.IdTypes,
         ...rest
       }))
 
       const data = {
         recordId: recordId,
+        resourceId: ResourceIds.IdTypes,
         items: rows
       }
 
       const res = await postRequest({
-        extension: RTCLRepository.ClientRelation.set2,
+        extension: RemittanceSettingsRepository.InterfaceMaps.set2,
         record: JSON.stringify(data)
       })
-      if (res.recordId) toast.success('Record Successfully')*/
+      if (res.recordId) toast.success('Record Successfully')
     }
   })
-
-  useEffect(() => {
-    getGridData(recordId)
-  }, [recordId])
-
-  async function getGridData(recordId) {
-    var parameters = `_recordId=${recordId}`
-
-    await getRequest({
-      extension: RTCLRepository.ClientRelation.qry,
-      parameters: parameters
+  async function getAllInterfaces() {
+    return new Promise((resolve, reject) => {
+      getAllKvsByDataset({
+        _dataset: DataSets.ALL_INTERFACES,
+        callback: result => {
+          if (result) resolve(result)
+          else reject()
+        }
+      })
     })
-
-    /*const result = res.list
-
-    const processedData = result.map((item, index) => ({
-      ...item,
-      id: index + 1,
-      seqNo: index + 1,
-      activationDate: formatDateFromApi(item?.activationDate),
-      expiryDate: formatDateFromApi(item?.expiryDate)
-    }))
-    res.list.length > 0 && formik.setValues({ relations: processedData })*/
   }
+  useEffect(() => {
+    ;(async function () {
+      const interfaceData = await getAllInterfaces()
+
+      const resInterfaces = getRequest({
+        extension: RemittanceSettingsRepository.InterfaceMaps.qry,
+        parameters: `_recordId=${recordId}&_resourceId=${ResourceIds.IdTypes}`
+      })
+
+      Promise.all([resInterfaces]).then(([interfaces]) => {
+        const mergedInterfaces = interfaceData.map(interfaceItem => {
+          const item = {
+            interfaceId: interfaceItem.key,
+            interfaceName: interfaceItem.value,
+            reference: ''
+          }
+          const matchingInterface = interfaces.list.find(y => item.interfaceId == y.interfaceId)
+
+          matchingInterface && (item.reference = matchingInterface.reference)
+
+          return item
+        })
+
+        formik.setValues({
+          ...formik.values,
+          rows: mergedInterfaces.map((items, index) => ({
+            ...items,
+            id: index + 1
+          }))
+        })
+      })
+    })()
+  }, [recordId])
 
   const columns = [
     {
@@ -103,16 +125,21 @@ export const InterfacesForm = ({ recordId }) => {
   ]
 
   return (
-    <FormShell form={formik}>
-      <Grid spacing={4} sx={{ mt: 1 }}>
-        <DataGrid
-          onChange={value => formik.setFieldValue('rows', value)}
-          value={formik.values.rows}
-          error={formik.errors.rows}
-          columns={columns}
-          height={`calc(100vh - 330px)`}
-        />
-      </Grid>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.InterfaceMap}
+      maxAccess={access}
+      infoVisible={false}
+      editMode={true}
+    >
+      <DataGrid
+        onChange={value => formik.setFieldValue('rows', value)}
+        value={formik.values.rows}
+        error={formik.errors.rows}
+        columns={columns}
+        height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
+        allowDelete={false}
+      />
     </FormShell>
   )
 }

@@ -40,6 +40,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
+  const [cashData, setCashData] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -174,7 +175,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       beneficiaryId: yup.string().required(' ')
     }),
     onSubmit: async values => {
-      const copy = { ...values }
+      /* const copy = { ...values }
       delete copy.amountRows
       copy.date = formatDateToApi(copy.date)
       copy.valueDate = formatDateToApi(copy.valueDate)
@@ -223,7 +224,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         })
         formik.setFieldValue('reference', res2.record.headerView.reference)
         invalidate()
-      }
+      }*/
+      console.log('check json ', JSON.stringify(cashData))
     }
   })
 
@@ -488,7 +490,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       Component: InstantCash,
       props: {
         clientId: formik.values.clientId,
-        beneficiaryId: formik.values.beneficiaryId
+        beneficiaryId: formik.values.beneficiaryId,
+        onInstantCashSubmit: onInstantCashSubmit
       },
       width: 1000,
       height: 660,
@@ -508,7 +511,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     const discount = tdAmount ? tdAmount : 0
 
     const amount = lcAmount + (commission + vatAmount - discount)
-    console.log(amount)
     formik.setFieldValue('amount', amount)
   }
   async function getDefaultVAT() {
@@ -521,6 +523,17 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     const vatPct = res.record.value
 
     formik.setFieldValue('vatRate', parseInt(vatPct))
+  }
+  function onInstantCashSubmit(obj) {
+    obj.remitter.primaryId.expiryDate = obj.remitter.primaryId.expiryDate
+      ? formatDateToApi(obj.remitter.primaryId.expiryDate)
+      : null
+    obj.remitter.primaryId.issueDate = obj.remitter.primaryId.issueDate
+      ? formatDateToApi(obj.remitter.primaryId.issueDate)
+      : null
+    obj.remitter.dateOfBirth = obj.remitter.dateOfBirth ? formatDateToApi(obj.remitter.dateOfBirth) : null
+    obj.beneficiary.dateOfBirth = obj.beneficiary.dateOfBirth ? formatDateToApi(obj.beneficiary.dateOfBirth) : null
+    setCashData(obj)
   }
 
   useEffect(() => {
