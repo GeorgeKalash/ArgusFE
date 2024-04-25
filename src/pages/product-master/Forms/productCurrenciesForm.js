@@ -13,7 +13,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 
-const ProductCurrenciesForm = ({ store, labels, editMode, height, expanded, maxAccess }) => {
+const ProductCurrenciesForm = ({ store, setStore, labels, editMode, height, expanded, maxAccess }) => {
   const { recordId: pId, countries } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -68,6 +68,7 @@ const ProductCurrenciesForm = ({ store, labels, editMode, height, expanded, maxA
     })
       .then(res => {
         if (res) toast.success('Record Edited Successfully')
+        getMonetaries(pId)
       })
       .catch(error => {
         // setErrorMessage(error)
@@ -166,13 +167,18 @@ const ProductCurrenciesForm = ({ store, labels, editMode, height, expanded, maxA
       extension: RemittanceSettingsRepository.ProductMonetaries.qry,
       parameters: parameters
     }).then(res => {
-      if (res.list.length > 0)
+      if (res?.list.length > 0)
         formik.setValues({
           currencies: res.list.map(({ ...rest }, index) => ({
             id: index,
             ...rest
           }))
         })
+
+      setStore(prevStore => ({
+        ...prevStore,
+        currencies: res.list
+      }))
     })
   }
 
