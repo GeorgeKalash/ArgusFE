@@ -124,9 +124,9 @@ export const Buttons = [
     key: 'RecordRemarks',
     condition: 'isRecordRemark',
     onClick: 'onRecordRemarks',
-    color: '#4eb558',
+    color: '#90278e',
     disabled: 'disabledSubmit || isPosted || isClosed',
-    image: 'save.png',
+    image: 'notes.png',
     main: true
   }
 ]

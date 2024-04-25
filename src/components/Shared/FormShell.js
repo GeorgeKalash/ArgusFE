@@ -123,11 +123,12 @@ export default function FormShell({
               Component: RecordRemarks,
 
               props: {
-                recordId: form.values?.recordId
+                recordId: form.values?.recordId,
+                resourceId: resourceId
               },
-              width: 1000,
+              width: 800,
               height: 500,
-              title: 'Preview Report'
+              title: 'Record Remarks'
             })
           }
           onClientRelation={() =>
