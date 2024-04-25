@@ -194,29 +194,14 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
-            <ResourceLookup
-              endpointId={CashBankRepository.CashAccount.snapshot}
-              parameters={{
-                _type: 1
-              }}
-              valueField='accountNo'
-              displayField='name'
-              name='accountId'
+            <CustomTextField
+              name='accountRef'
               label={_labels.accountRef}
+              value={formik.values.accountRef}
+              onChange={formik.handleChange}
+              maxLength='50'
+              error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
               maxAccess={maxAccess}
-              form={formik}
-              valueShow='accountRef'
-              secondDisplayField={false}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('accountId', newValue?.recordId)
-                  formik.setFieldValue('accountRef', newValue?.accountNo)
-                } else {
-                  formik.setFieldValue('accountId', null)
-                  formik.setFieldValue('accountRef', null)
-                }
-              }}
-              errorCheck={'accountId'}
             />
           </FormGrid>
 
@@ -294,11 +279,12 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               name='nationalityId'
               label={_labels.country}
               valueField='recordId'
-              displayField={['reference', 'name']}
-              displayFieldWidth={2}
+              displayField={['reference', 'name', 'flName']}
+              displayFieldWidth={1.25}
               columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
+                { key: 'name', value: 'Name' },
+                { key: 'flName', value: 'FL Name' }
               ]}
               maxAccess={maxAccess}
               values={formik.values}
