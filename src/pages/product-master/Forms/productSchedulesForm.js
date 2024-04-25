@@ -17,6 +17,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId, countries, currencies } = store
   const [filters, setFilters] = useState(currencies)
+  const [rowSelectionModel, setRowSelectionModel] = useState([])
 
   const formik = useFormik({
     enableReinitialize: false,
@@ -66,6 +67,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
   })
 
   const post = obj => {
+    const lastObject = obj[obj.length - 1]
+
     const data = {
       productId: pId,
       productSchedules: obj.map(({ id, seqNo, productId, saved, ...rest }, index) => ({
@@ -80,6 +83,15 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
     })
       .then(res => {
         if (res) toast.success('Record Edited Successfully')
+        setStore(prevStore => ({
+          ...prevStore,
+          plantId: lastObject.plantId,
+          currencyId: lastObject.currencyId,
+          countryId: lastObject.countryId,
+          dispersalId: lastObject.dispersalId,
+          _seqNo: lastObject.seqNo
+        }))
+        setRowSelectionModel(lastObject.id)
         getProductSchedules(pId)
       })
       .catch(error => {})
@@ -273,6 +285,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
               value={formik.values.schedules}
               error={formik.errors.schedules}
               columns={columns}
+              rowSelectionModel={rowSelectionModel}
               onSelectionChange={row => {
                 if (row) {
                   setStore(prevStore => ({
