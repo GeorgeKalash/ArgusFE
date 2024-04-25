@@ -115,14 +115,12 @@ const CreditLimitsForm = ({
       editMode={editMode}>
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
         <DataGrid
-           onChange={value => formik.setFieldValue('currencies', value)}
-           value={formik.values.currencies}
-           error={formik.errors.currencies}
-           columns={column}
-           allowDelete={false}
-           allowAddNewLine={false}
-           height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
-
+          onChange={value => formik.setFieldValue('currencies', value)}
+          value={formik.values.currencies}
+          error={formik.errors.currencies}
+          columns={column}
+          allowDelete={false}
+          allowAddNewLine={false}
         />
       </Box>
     </FormShell>
