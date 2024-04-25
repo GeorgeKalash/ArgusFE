@@ -12,11 +12,17 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { useForm } from 'src/hooks/form'
+import { useInvalidate } from 'src/hooks/resource'
 
-const PreReqsForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store, setRefresh }) => {
+const PreReqsForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const [selectedCodeId, setSelectedCodeId] = useState('')
+
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.StrategyPrereq.qry
+  })
 
   const { recordId: stgId } = store
 
@@ -31,10 +37,11 @@ const PreReqsForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store
     prerequisiteId: yup.number().required()
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
+    initialValues,
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues,
     validationSchema,
     onSubmit: values => {
       postPreReq(values)
@@ -52,20 +59,12 @@ const PreReqsForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store
 
       if (isNewRecord) {
         toast.success('Record Added Successfully')
-        setInitialData(prevData => ({
-          ...prevData,
-          ...obj
-        }))
+
         setEditMode(true)
       } else {
         toast.success('Record Edited Successfully')
-        setInitialData(prevData => ({
-          ...prevData,
-
-          ...obj
-        }))
       }
-      setRefresh(prev => !prev)
+      invalidate()
     } catch (error) {
       toast.error('An error occurred')
     }

@@ -8,8 +8,6 @@ import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
-import { useEffect } from 'react'
-
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -19,31 +17,36 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 
 // ** Resources
 import PreReqsForm from './PrereqForm'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const PreReqsList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
 
   const { stack } = useWindow()
-  const [valueGridData, setValueGridData] = useState()
 
-  const [refresh, setRefresh] = useState(false)
-
-  //states
-
-  const getValueGridData = recordId => {
-    getRequest({
+  async function fetchGridData() {
+    const response = await getRequest({
       extension: DocumentReleaseRepository.StrategyPrereq.qry,
+
       parameters: `&_strategyId=${recordId}`
     })
-      .then(res => {
-        setValueGridData(res)
-      })
-      .catch(error => {})
+
+    return response
   }
-  useEffect(() => {
-    recordId && getValueGridData(recordId)
-  }, [recordId, refresh])
+
+  const {
+    query: { data },
+    labels: _labels,
+
+    refetch
+  } = useResourceQuery({
+    enabled: !!recordId,
+    datasetId: ResourceIds.Strategies,
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.StrategyPrereq.qry
+  })
 
   const columns = [
     {
@@ -67,7 +70,7 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
       extension: DocumentReleaseRepository.StrategyPrereq.del,
       record: JSON.stringify(obj)
     })
-    setRefresh(prev => !prev)
+    refetch()
 
     toast.success('Record Deleted Successfully')
   }
@@ -79,8 +82,7 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
         labels: labels,
         recordId: recordId ? recordId : null,
         maxAccess,
-        store,
-        setRefresh
+        store
       },
       width: 500,
       height: 400,
@@ -99,7 +101,7 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
       <GridToolbar onAdd={addCode} maxAccess={maxAccess} />
       <Table
         columns={columns}
-        gridData={valueGridData}
+        gridData={data}
         rowId={['code']}
         isLoading={false}
         pageSize={50}

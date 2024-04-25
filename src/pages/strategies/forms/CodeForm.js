@@ -12,6 +12,8 @@ import * as yup from 'yup'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 
 import toast from 'react-hot-toast'
+import { useForm } from 'src/hooks/form'
+import { useInvalidate } from 'src/hooks/resource'
 
 const CodeForm = ({
   labels,
@@ -20,11 +22,15 @@ const CodeForm = ({
   setEditMode,
   recordId,
   store,
-  setRefresh,
+
   strategiesFormik,
   window
 }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
+
+  const invalidate = useInvalidate({
+    endpointId: DocumentReleaseRepository.StrategyCode.qry
+  })
 
   const { recordId: stgId } = store
 
@@ -34,14 +40,15 @@ const CodeForm = ({
     strategyId: stgId
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
+    initialValues,
     enableReinitialize: true,
     validateOnChange: true,
-
-    initialValues,
     validationSchema: yup.object({
       codeId: yup.string().required()
     }),
+
     onSubmit: async (values, { setSubmitting }) => {
       try {
         await postGroups(values)
@@ -64,21 +71,12 @@ const CodeForm = ({
 
       if (isNewRecord) {
         toast.success('Record Added Successfully')
-        setInitialData(prevData => ({
-          ...prevData,
-          ...obj
-        }))
+
         setEditMode(true)
       } else {
         toast.success('Record Edited Successfully')
-
-        setInitialData(prevData => ({
-          ...prevData,
-
-          ...obj
-        }))
       }
-      setRefresh(prev => !prev)
+      invalidate()
     } catch (error) {
       toast.error('An error occurred')
     }

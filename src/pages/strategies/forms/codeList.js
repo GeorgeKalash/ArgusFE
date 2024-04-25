@@ -18,33 +18,37 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 import CodeForm from './CodeForm'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useResourceQuery } from 'src/hooks/resource'
 
 const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
+
   const { stack } = useWindow()
   const [valueGridData, setValueGridData] = useState()
 
-  const [refresh, setRefresh] = useState(false)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  const getValueGridData = recordId => {
-    getRequest({
+  async function fetchGridData() {
+    const response = await getRequest({
       extension: DocumentReleaseRepository.StrategyCode.qry,
-      parameters: `_strategyId=${recordId}`
+
+      parameters: `&_strategyId=${recordId}`
     })
-      .then(res => {
-        setValueGridData(res)
-      })
-      .catch(error => {})
+
+    return response
   }
-  useEffect(() => {
-    recordId && getValueGridData(recordId)
-  }, [recordId, refresh])
+
+  const {
+    query: { data },
+    labels: _labels,
+
+    refetch
+  } = useResourceQuery({
+    enabled: !!recordId,
+    datasetId: ResourceIds.Strategies,
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.StrategyCode.qry
+  })
 
   const columns = [
     {
@@ -68,7 +72,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
       extension: DocumentReleaseRepository.StrategyCode.del,
       record: JSON.stringify(obj)
     })
-    setRefresh(prev => !prev)
+    refetch()
 
     toast.success('Record Deleted Successfully')
   }
@@ -81,8 +85,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
         recordId: recordId,
         maxAccess,
         store,
-        strategiesFormik,
-        setRefresh
+        strategiesFormik
       },
       width: 500,
       height: 400,
@@ -101,7 +104,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
       <GridToolbar onAdd={addCode} maxAccess={maxAccess} />
       <Table
         columns={columns}
-        gridData={valueGridData}
+        gridData={data}
         rowId={['codeId']}
         isLoading={false}
         pageSize={50}

@@ -9,6 +9,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
 
 const IndicatorForm = ({
   labels,
@@ -23,13 +24,16 @@ const IndicatorForm = ({
 }) => {
   const [valueGridData, setValueGridData] = useState([])
   const { postRequest } = useContext(RequestsContext)
-  const [refresh, setRefresh] = useState(false)
+
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
 
   const [applyTrigger, setApplyTrigger] = useState(0)
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
+    enableReinitialize: true,
+    validateOnChange: true,
     initialValues: {
       indicatorData: [
         {
