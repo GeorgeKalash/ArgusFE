@@ -8,6 +8,7 @@ import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
+import RecordRemarks from './RecordRemarks'
 
 export default function FormShell({
   form,
@@ -117,6 +118,18 @@ export default function FormShell({
               title: 'General Ledger'
             })
           }
+          onRecordRemarks={() =>
+            stack({
+              Component: RecordRemarks,
+
+              props: {
+                recordId: form.values?.recordId
+              },
+              width: 1000,
+              height: 500,
+              title: 'Preview Report'
+            })
+          }
           onClientRelation={() =>
             stack({
               Component: ClientRelationForm,
@@ -151,6 +164,7 @@ export default function FormShell({
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
+          isRecordRemark={true}
           postVisible={postVisible}
           isPosted={isPosted}
           isClosed={isClosed}
