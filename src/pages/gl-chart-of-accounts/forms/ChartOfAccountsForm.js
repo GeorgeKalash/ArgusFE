@@ -58,14 +58,11 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true)
 
-      // Convert isCostElement to boolean if needed
       values.isCostElement = !!values.isCostElement
 
-      // Split accountRef to get segments array
       const segments = values.accountRef.split('-')
 
       try {
-        // Submit the values to your endpoint
         const payload = {
           ...values,
           segments: segments
@@ -76,7 +73,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
           record: JSON.stringify(payload)
         })
 
-        // Handle the response
         if (!values.recordId) {
           toast.success('Record Added Successfully')
           setInitialData({
@@ -89,7 +85,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         setEditMode(true)
         invalidate()
       } catch (error) {
-        // Handle error here, such as displaying an error message
       } finally {
         setSubmitting(false)
       }
@@ -266,8 +261,8 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
 import React, { createRef } from 'react'
 
 const segmentedInputStyle = {
-  background: '#FFFFFF', // Replace with your desired background color
-  border: '1px solid #D9D9D9', // Replace with your desired border color
+  background: '#FFFFFF',
+  border: '1px solid #D9D9D9',
   padding: '8px',
   borderRadius: '4px',
   display: 'flex',
@@ -275,24 +270,17 @@ const segmentedInputStyle = {
   justifyContent: 'flex-start'
 }
 
-const inputStyle = {
+const inputBaseStyle = {
   border: 'none',
   outline: 'none',
   textAlign: 'center',
-  fontSize: '16px', // Adjust as necessary
-  minWidth: '40px', // This ensures that the input is never narrower than 40px
-  width: '4ch', // This should be based on the width you want for each segment
-  marginRight: '4px' // Adjust the space between segments
-}
-
-const lastInputStyle = {
-  ...inputStyle,
-  marginRight: '0'
+  fontSize: '16px',
+  marginRight: '4px'
 }
 
 const dashStyle = {
-  color: '#000000', // Replace with your desired dash color
-  userSelect: 'none' // This prevents the dash from being selected
+  color: '#000000',
+  userSelect: 'none'
 }
 
 const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
@@ -309,8 +297,12 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
   }
 
   const handleKeyDown = (index, event) => {
-    if (event.key === 'Backspace' && (event.target.value.length === 0 || index > 0)) {
-      inputRefs[Math.max(0, index - 1)].current.focus()
+    if (event.key === 'Backspace' && event.target.value.length === 0 && index > 0) {
+      event.preventDefault()
+      const previousInput = inputRefs[index - 1].current
+      previousInput.focus()
+      previousInput.value = previousInput.value.slice(0, -1)
+      handleChange(index - 1, { target: previousInput })
     }
   }
 
@@ -319,7 +311,11 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
       {segments.map((segment, index) => (
         <React.Fragment key={index}>
           <input
-            style={index !== segments.length - 1 ? inputStyle : lastInputStyle}
+            style={{
+              ...inputBaseStyle,
+              width: `calc(${segment.value}ch + 5px)`,
+              marginRight: index !== segments.length - 1 ? '4px' : '0'
+            }}
             ref={inputRefs[index]}
             value={values[index] || ''}
             onChange={e => handleChange(index, e)}
