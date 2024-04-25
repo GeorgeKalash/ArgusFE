@@ -672,7 +672,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     {
       key: 'GL',
       condition: true,
-      onClick: 'newHandler',
+      onClick: 'onClickGL',
       disabled: !editMode
     },
     {

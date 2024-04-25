@@ -22,7 +22,6 @@ export default function FormShell({
   postVisible = false,
   resourceId,
   functionId,
-  NewComponentVisible = false,
   maxAccess,
   isPosted = false,
   isClosed = false,
@@ -105,17 +104,16 @@ export default function FormShell({
               title: 'Transaction Log'
             })
           }
-          newHandler={() =>
+          onClickGL={() =>
             stack({
               Component: GeneralLedger,
               props: {
                 formValues: form.values,
-
                 recordId: form.values?.recordId,
                 functionId: functionId
               },
               width: 1000,
-              height: 600,
+              height: 620,
               title: 'General Ledger'
             })
           }
@@ -153,7 +151,6 @@ export default function FormShell({
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
-          NewComponentVisible={NewComponentVisible}
           postVisible={postVisible}
           isPosted={isPosted}
           isClosed={isClosed}
@@ -164,6 +161,7 @@ export default function FormShell({
           setSelectedReport={setSelectedReport}
           previewReport={previewReport}
           visibleClear={visibleClear}
+          functionId={functionId}
         />
       )}
       {windowInfo && (

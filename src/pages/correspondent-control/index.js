@@ -86,7 +86,7 @@ const BeneficiaryFields = () => {
       return { list: [] }
     } else if (dispersalType !== '' && corId !== '') {
       const controllRES = await getRequest({
-        extension: SystemRepository.ResourceControls.qry,
+        extension: SystemRepository.ResourceControl.qry,
         parameters: `_resourceId=${dispersalType}`
       })
 
@@ -132,7 +132,7 @@ const BeneficiaryFields = () => {
   } = useResourceQuery({
     datasetId: ResourceIds.CorrespondentControl,
     filter: {
-      endpointId: SystemRepository.ResourceControls.qry,
+      endpointId: SystemRepository.ResourceControl.qry,
       filterFn: fetchWithFilter
     }
   })
