@@ -196,7 +196,11 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
             name='rateAgainstCurrencyId'
             label={labels.rateAgainstCurrencyId}
             valueField='recordId'
-            displayField='name'
+            displayField={['name', 'flName']}
+            columnsInDropDown={[
+              { key: 'name', value: 'Name' },
+              { key: 'flName', value: 'Foreign Language' }
+            ]}
             values={formik.values}
             required
             maxAccess={maxAccess}
