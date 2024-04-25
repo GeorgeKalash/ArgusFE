@@ -1218,6 +1218,17 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                     />
                   </Grid>
                   <Grid item xs={6} sx={{ pl: 2 }}>
+                    <CustomTextField
+                      name='giftCode'
+                      label={labels.giftCode}
+                      value={formik.values?.giftCode}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('giftCode', '')}
+                      error={formik.touched.giftCode && Boolean(formik.errors.giftCode)}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
                       name='purposeOfExchange'
@@ -1228,7 +1239,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
                       ]}
-                      readOnly
                       values={formik.values}
                       onChange={(event, newValue) => {
                         if (newValue) {
@@ -1239,17 +1249,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       }}
                       error={formik.touched.purposeOfExchange && Boolean(formik.errors.purposeOfExchange)}
                       helperText={formik.touched.purposeOfExchange && formik.errors.purposeOfExchange}
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <CustomTextField
-                      name='giftCode'
-                      label={labels.giftCode}
-                      value={formik.values?.giftCode}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('giftCode', '')}
-                      error={formik.touched.giftCode && Boolean(formik.errors.giftCode)}
-                      maxAccess={maxAccess}
                     />
                   </Grid>
                 </Grid>
