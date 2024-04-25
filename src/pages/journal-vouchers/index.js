@@ -46,10 +46,11 @@ const JournalVoucher = () => {
   const {
     query: { data },
     labels: _labels,
-    access,
     search,
     clear,
-    refetch
+
+    paginationParameters,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.JournalVoucher.qry,
@@ -133,8 +134,8 @@ const JournalVoucher = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          refetch={refetch}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
           maxAccess={access}
         />
       </Box>
