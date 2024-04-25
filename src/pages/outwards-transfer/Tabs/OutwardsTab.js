@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react'
 
 // ** MUI Imports
 import { Grid, Button } from '@mui/material'
-import { getFormattedNumber, getFormattedNumberMax } from 'src/lib/numberField-helper'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -226,105 +225,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }
   })
 
-  const instantCashFormik = useFormik({
-    initialValues: {
-      payingAgent: '',
-      deliveryModeId: '',
-      currency: '',
-      partnerReference: '',
-      sourceAmount: '',
-      fromCountryId: '',
-      toCountryId: '',
-      sourceOfFundsId: '',
-      remittancePurposeId: '',
-      totalTransactionAmountPerAnnum: '25000',
-      transactionsPerAnnum: '200',
-      remitter: [
-        {
-          cardNo: '',
-          firstName: '',
-          middleName: '',
-          lastName: '',
-          mobileNumber: '',
-          phoneNumber: '',
-          email: '',
-          address: [
-            {
-              addressLine1: '',
-              addressLine2: '',
-              district: '',
-              city: '',
-              postCode: '',
-              state: '',
-              country: ''
-            }
-          ],
-          primaryId: [
-            {
-              type: '',
-              number: '',
-              issueDate: null,
-              expiryDate: null,
-              placeOfIssue: ''
-            }
-          ],
-          dateOfBirth: '',
-          gender: '',
-          nationality: '',
-          countryOfBirth: '',
-          countryOfResidence: '',
-          relation: '',
-          otherRelation: '',
-          profession: '',
-          employerName: '',
-          employerStatus: ''
-        }
-      ],
-      beneficiary: [
-        {
-          cardNo: '',
-          firstName: '',
-          middleName: '',
-          lastName: '',
-          mobileNumber: '',
-          phoneNumber: '',
-          email: '',
-          address: [
-            {
-              addressLine1: '',
-              addressLine2: '',
-              district: '',
-              city: '',
-              postCode: '',
-              state: '',
-              country: ''
-            }
-          ],
-          dateOfBirth: '',
-          gender: '',
-          nationality: '',
-          countryOfBirth: '',
-          bankDetails: [
-            {
-              bankId: '',
-              bankCode: '',
-              bankName: '',
-              bankAddress1: '',
-              bankAccountNumber: ''
-            }
-          ]
-        }
-      ]
-    },
-    enableReinitialize: true,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      // name: yup.string().required(' ')
-    }),
-    onSubmit: values => {
-      console.log('instant check', instantCashFormik.values)
-    }
-  })
   const total = parseFloat(formik.values.amount || 0)
 
   const receivedTotal = formik.values.amountRows.reduce((sumAmount, row) => {
@@ -586,8 +486,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       Component: InstantCash,
       props: {
         clientId: formik.values.clientId,
-        beneficiaryId: formik.values.beneficiaryId,
-        formik: instantCashFormik
+        beneficiaryId: formik.values.beneficiaryId
       },
       width: 1000,
       height: 660,
@@ -795,9 +694,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField
+                <CustomTextField
+                  numberField={true}
                   name='fcAmount'
-                  type='text'
                   label={labels.fcAmount}
                   value={formik.values.fcAmount}
                   required
@@ -847,9 +746,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               </Grid>
               <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
                 <Grid item xs={6}>
-                  <CustomNumberField
+                  <CustomTextField
+                    numberField={true}
                     name='exRate'
-                    type='text'
                     label={labels.exchangeRate}
                     value={formik.values.exRate}
                     required
@@ -862,9 +761,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomNumberField
+                  <CustomTextField
+                    numberField={true}
                     name='exRate2'
-                    type='text'
                     label={labels.exchangeRate}
                     value={formik?.values?.exRate ? 1 / formik.values.exRate : null}
                     required
@@ -878,9 +777,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 </Grid>
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField
+                <CustomTextField
+                  numberField={true}
                   name='lcAmount'
-                  type='text'
                   label={labels.lcAmount}
                   value={formik.values.lcAmount}
                   required
@@ -893,9 +792,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField
+                <CustomTextField
+                  numberField={true}
                   name='commission'
-                  type='text'
                   label={labels.commission}
                   value={formik.values.commission}
                   required
@@ -909,9 +808,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               </Grid>
               <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
                 <Grid item xs={6}>
-                  <CustomNumberField
+                  <CustomTextField
+                    numberField={true}
                     name='vatRate'
-                    type='text'
                     label={labels.vatRate}
                     value={formik.values.vatRate}
                     readOnly
@@ -929,9 +828,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomNumberField
+                  <CustomTextField
+                    numberField={true}
                     name='vatAmount'
-                    type='text'
                     label={labels.vatRate}
                     value={formik.values.vatAmount}
                     readOnly
@@ -944,9 +843,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 </Grid>
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField
+                <CustomTextField
+                  numberField={true}
                   name='tdAmount'
-                  type='text'
                   label={labels.discount}
                   value={formik.values.tdAmount}
                   maxAccess={maxAccess}
@@ -960,9 +859,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField
+                <CustomTextField
+                  numberField={true}
                   name='amount'
-                  type='text'
                   label={labels.NetToPay}
                   value={formik.values.amount}
                   required
@@ -975,10 +874,20 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField label='Amount Recieved' value={getFormattedNumber(receivedTotal)} readOnly />
+                <CustomTextField
+                  numberField={true}
+                  label='Amount Recieved'
+                  value={getFormattedNumber(receivedTotal)}
+                  readOnly
+                />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField label='Balance To Pay' value={getFormattedNumber(Balance) ?? '0'} readOnly />
+                <CustomTextField
+                  numberField={true}
+                  label='Balance To Pay'
+                  value={getFormattedNumber(Balance) ?? '0'}
+                  readOnly
+                />
               </Grid>
             </FieldSet>
           </Grid>
