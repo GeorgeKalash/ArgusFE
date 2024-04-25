@@ -19,16 +19,6 @@ export default function CityForm({ labels, recordId, maxAccess }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    countryId: null,
-    stateId: null,
-    countryName: '',
-    stateName: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -36,7 +26,15 @@ export default function CityForm({ labels, recordId, maxAccess }) {
   })
 
   const { formik } = useForm({
-    initialValues,
+    initialValues: {
+      recordId: null,
+      name: '',
+      reference: '',
+      countryId: null,
+      stateId: null,
+      countryName: '',
+      stateName: ''
+    },
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
@@ -55,10 +53,6 @@ export default function CityForm({ labels, recordId, maxAccess }) {
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj,
-          recordId: response.recordId
-        })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
 
@@ -77,7 +71,7 @@ export default function CityForm({ labels, recordId, maxAccess }) {
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
       } catch {}
       setIsLoading(false)
