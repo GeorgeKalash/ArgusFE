@@ -13,14 +13,114 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 
-export default function InstantCash({ clientId, beneficiaryId, formik }) {
+export default function InstantCash({ clientId, beneficiaryId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: _labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.InstantCash
   })
 
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      payingAgent: '',
+      deliveryModeId: '',
+      currency: '',
+      partnerReference: '',
+      sourceAmount: '',
+      fromCountryId: '',
+      toCountryId: '',
+      sourceOfFundsId: '',
+      remittancePurposeId: '',
+      totalTransactionAmountPerAnnum: '25000',
+      transactionsPerAnnum: '200',
+      remitter: [
+        {
+          cardNo: '',
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          mobileNumber: '',
+          phoneNumber: '',
+          email: '',
+          address: [
+            {
+              addressLine1: '',
+              addressLine2: '',
+              district: '',
+              city: '',
+              postCode: '',
+              state: '',
+              country: ''
+            }
+          ],
+          primaryId: [
+            {
+              type: '',
+              number: '',
+              issueDate: null,
+              expiryDate: null,
+              placeOfIssue: ''
+            }
+          ],
+          dateOfBirth: '',
+          gender: '',
+          nationality: '',
+          countryOfBirth: '',
+          countryOfResidence: '',
+          relation: '',
+          otherRelation: '',
+          profession: '',
+          employerName: '',
+          employerStatus: ''
+        }
+      ],
+      beneficiary: [
+        {
+          cardNo: '',
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          mobileNumber: '',
+          phoneNumber: '',
+          email: '',
+          address: [
+            {
+              addressLine1: '',
+              addressLine2: '',
+              district: '',
+              city: '',
+              postCode: '',
+              state: '',
+              country: ''
+            }
+          ],
+          dateOfBirth: '',
+          gender: '',
+          nationality: '',
+          countryOfBirth: '',
+          bankDetails: [
+            {
+              bankId: '',
+              bankCode: '',
+              bankName: '',
+              bankAddress1: '',
+              bankAccountNumber: ''
+            }
+          ]
+        }
+      ]
+    },
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({}),
+    onSubmit: values => {
+      console.log('instant check', instantCashFormik.values)
+    }
+  })
   useEffect(() => {
     ;(async function () {
       try {
@@ -90,7 +190,6 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
     formik.setFieldValue('beneficiary[0].address[0].addressLine1', res.record.addressLine1)
     formik.setFieldValue('beneficiary[0].address[0].addressLine2', res.record.addressLine2)
   }
-  console.log('formik check ', formik)
 
   return (
     <FormShell resourceId={ResourceIds.InstantCash} form={formik} height={480} maxAccess={maxAccess}>
@@ -156,8 +255,8 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
               name='payingAgent'
               label={_labels.payingAgent}
               readOnly={!(formik.values.deliveryModeId && formik.values.toCountryId)}
-              valueField='deliveryModeDescription'
-              displayField='deliveryModeDescription'
+              valueField='description'
+              displayField='description'
               values={formik.values}
               onChange={(event, newValue) => {
                 if (newValue) {
