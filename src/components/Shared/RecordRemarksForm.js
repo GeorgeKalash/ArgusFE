@@ -21,7 +21,11 @@ const RecordRemarksForm = () => {
     }
   })
 
-  return <FormShell form={formik}>RecordRemarksForm</FormShell>
+  return (
+    <FormShell form={formik} res>
+      RecordRemarksForm
+    </FormShell>
+  )
 }
 
 export default RecordRemarksForm
