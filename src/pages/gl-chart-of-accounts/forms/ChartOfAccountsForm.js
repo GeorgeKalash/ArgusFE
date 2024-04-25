@@ -61,11 +61,19 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
       // Convert isCostElement to boolean if needed
       values.isCostElement = !!values.isCostElement
 
+      // Split accountRef to get segments array
+      const segments = values.accountRef.split('-')
+
       try {
         // Submit the values to your endpoint
+        const payload = {
+          ...values,
+          segments: segments
+        }
+
         const response = await postRequest({
           extension: GeneralLedgerRepository.ChartOfAccounts.set,
-          record: JSON.stringify(values)
+          record: JSON.stringify(payload)
         })
 
         // Handle the response
@@ -81,6 +89,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         setEditMode(true)
         invalidate()
       } catch (error) {
+        // Handle error here, such as displaying an error message
       } finally {
         setSubmitting(false)
       }
@@ -256,16 +265,43 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
 
 import React, { createRef } from 'react'
 
+const segmentedInputStyle = {
+  background: '#FFFFFF', // Replace with your desired background color
+  border: '1px solid #D9D9D9', // Replace with your desired border color
+  padding: '8px',
+  borderRadius: '4px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-start'
+}
+
+const inputStyle = {
+  border: 'none',
+  outline: 'none',
+  textAlign: 'center',
+  fontSize: '16px', // Adjust as necessary
+  minWidth: '40px', // This ensures that the input is never narrower than 40px
+  width: '4ch', // This should be based on the width you want for each segment
+  marginRight: '4px' // Adjust the space between segments
+}
+
+const lastInputStyle = {
+  ...inputStyle,
+  marginRight: '0'
+}
+
+const dashStyle = {
+  color: '#000000', // Replace with your desired dash color
+  userSelect: 'none' // This prevents the dash from being selected
+}
+
 const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
   const inputRefs = segments.map(() => createRef())
 
   const handleChange = (index, event) => {
     const newValues = [...values]
     newValues[index] = event.target.value.slice(0, segments[index].value)
-    setFieldValue('segments', newValues)
-
-    const finalInput = newValues.join('-')
-    setFieldValue(name, finalInput)
+    setFieldValue(name, newValues.join('-'))
 
     if (event.target.value.length >= segments[index].value && index < segments.length - 1) {
       inputRefs[index + 1].current.focus()
@@ -273,39 +309,24 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
   }
 
   const handleKeyDown = (index, event) => {
-    if (event.key === 'Backspace') {
-      if (!values[index] || values[index].length === 0) {
-        event.preventDefault()
-        if (index > 0) {
-          const previousIndex = index - 1
-          const previousValue = values[previousIndex]
-
-          if (previousValue && previousValue.length > 0) {
-            const input = inputRefs[previousIndex].current
-            input.focus()
-            const len = input.value.length
-            input.setSelectionRange(len, len)
-          }
-        }
-      }
+    if (event.key === 'Backspace' && (event.target.value.length === 0 || index > 0)) {
+      inputRefs[Math.max(0, index - 1)].current.focus()
     }
   }
 
   return (
-    <div>
+    <div style={segmentedInputStyle}>
       {segments.map((segment, index) => (
         <React.Fragment key={index}>
           <input
-            className={styles.inputText}
+            style={index !== segments.length - 1 ? inputStyle : lastInputStyle}
             ref={inputRefs[index]}
             value={values[index] || ''}
             onChange={e => handleChange(index, e)}
             onKeyDown={e => handleKeyDown(index, e)}
             maxLength={segment.value}
-
-            // style={{ margin: '8px', width: `${segment.value + 3}ch`,borderRadius:"5px",border:'1px solid grey',padding:'9px' }}
           />
-          {index !== segments.length - 1 && '-'}
+          {index !== segments.length - 1 && <span style={dashStyle}>-</span>}
         </React.Fragment>
       ))}
     </div>
