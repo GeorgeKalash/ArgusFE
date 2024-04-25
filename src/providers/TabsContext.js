@@ -28,7 +28,7 @@ function CustomTabPanel(props) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      sx={{ height: '100%' }}
+      sx={{display: 'flex', flexDirection: 'column', width: '100%',flex :'0'}}
       {...other}
     >
       {children}
@@ -199,8 +199,8 @@ const TabsProvider = ({ children }) => {
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%',flex :'0' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider'}}>
           <Tabs
             value={value}
             onChange={handleChange}

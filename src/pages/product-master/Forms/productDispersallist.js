@@ -116,7 +116,8 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,hei
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          height: '100%'
+          height: '100%',
+          paddingBottom:5
         }}
       >
         <GridToolbar onAdd={add} maxAccess={maxAccess} />
@@ -130,7 +131,7 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,hei
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height-100}`}`}
+          autoHeight={true}
           />
       </Box>
     </>

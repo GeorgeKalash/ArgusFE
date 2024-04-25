@@ -105,7 +105,7 @@ return (
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
-            sx={{
+            sx={{ 
               ...(controlled
                 ? {
                     height: expanded ? containerHeight : height // Expand height to 100% when expanded

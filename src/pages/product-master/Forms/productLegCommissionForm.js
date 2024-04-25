@@ -169,7 +169,6 @@ return (
              error={formik.errors.productLegCommission}
              columns={columns}
              allowDelete={false}
-             height={`${expanded ? `calc(100vh - 330px)` : `${height-50}px`}`}
              allowAddNewLine={false}/>
             </Grid>
           </Grid>

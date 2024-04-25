@@ -280,7 +280,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
                   _seqNo: row.seqNo
                 }))
               }
-              height={`${expanded ? `calc(100vh - 300px)` : `${height - 160}px`}`}
             />
           </Grid>
         </Grid>

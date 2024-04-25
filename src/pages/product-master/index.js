@@ -120,7 +120,12 @@ const ProductMaster = () => {
 
   return (
     <>
-      <Box>
+      <Box 
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%'
+        }} >
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}

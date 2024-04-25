@@ -137,7 +137,6 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
           value={formik.values.countries}
           error={formik.errors.countries}
           columns={column}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
         />
       </Box>
     </FormShell>

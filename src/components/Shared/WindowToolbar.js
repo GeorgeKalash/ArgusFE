@@ -86,7 +86,7 @@ const WindowToolbar = ({
 
   return (
     <DialogActions>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flex: '0', paddingTop:4 }}>
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Autocomplete

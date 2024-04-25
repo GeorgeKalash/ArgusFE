@@ -99,7 +99,6 @@ const Table = ({
   pagination = true,
   paginationType = 'api',
   handleCheckedRows,
-  autoHeight = false,
   height,
   addedHeight = '0px',
   actionColumnHeader = null,
@@ -342,13 +341,6 @@ const Table = ({
 
   const paginationHeight = pagination ? '9px' : '10px'
 
-  const tableHeight = autoHeight ? '100%': 
-  height
-    ? typeof height === 'string' && height?.includes('calc')
-      ? height
-      : `${height}px`
-    : `calc(calc(100 * var(--vh)) - 49px - 49px - ${paginationHeight} - ${addedHeight})`
-
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
       var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
@@ -380,7 +372,7 @@ const Table = ({
                     : gridData?.list
                   : []
               }
-              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', paddingBottom: pagination ? 0 : 2 }}
+              sx={{ overflow: 'auto', position: 'relative', display:'flex', flex: 1 }}
               density='compact'
               components={{
                 LoadingOverlay: LinearProgress,
