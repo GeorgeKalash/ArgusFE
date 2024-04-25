@@ -130,15 +130,13 @@ const IdFieldsForm = ({
       infoVisible={false}
       editMode={editMode}
     >
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow:'hidden' }}>
-        <DataGrid
-          onChange={value => formik.setFieldValue('IdField', value)}
-          value={formik.values.IdField}
-          error={formik.errors.IdField}
-          columns={column}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
-        />
-      </Box>
+      <DataGrid
+        onChange={value => formik.setFieldValue('IdField', value)}
+        value={formik.values.IdField}
+        error={formik.errors.IdField}
+        columns={column}
+        height={`${expanded ? `calc(100vh - 280px)` : `${height-100}px`}`}
+      />
     </FormShell>
   )
 }

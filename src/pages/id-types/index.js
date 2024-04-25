@@ -38,7 +38,7 @@ const IdTypes = () => {
       parameters: parameters
     })
 
-    return {...response,  _startAt: _startAt}
+    return {...response}
   }
 
   const columns = [

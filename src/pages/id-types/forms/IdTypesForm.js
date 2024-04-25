@@ -218,7 +218,7 @@ return (
           displayField='value'
           values={formik.values}
           onChange={(event, newValue) => {
-            formik && formik.setFieldValue('type', newValue?.key || null)
+            formik && formik.setFieldValue('type', newValue?.key)
           }}
           error={formik.touched.type && Boolean(formik.errors.type)}
         />
