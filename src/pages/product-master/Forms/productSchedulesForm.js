@@ -117,8 +117,9 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
           { key: 'countryName', value: 'Name' }
         ]
       },
-      onChange: row => {
-        setFilters(currencies.filter(item => item.countryId === row.countryId))
+
+      async onChange({ row: { update, oldRow, newRow } }) {
+        setFilters(currencies.filter(item => item.countryId === newRow.countryId))
       }
     },
     {
