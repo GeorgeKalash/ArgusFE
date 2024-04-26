@@ -168,7 +168,7 @@ const TransactionLog = props => {
           onEdit={showInfo}
           pagination={false}
         />
-        <Grid data-unique-id item xs={4} sx={{ display:'flex !important', flex:'0 !important', paddingBottom: '15px', height: '18vh', overflow: 'auto' }}>
+        <Grid data-unique-id item xs={4} sx={{ display:'flex !important', flexDirection: 'column', flex:'1 !important', margin: '5px !important', overflow: 'auto' }}>
           {Object.entries(info).map(([key, value]) => (
             <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
               <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
