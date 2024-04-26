@@ -297,6 +297,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
                     dispersalId: row.dispersalId,
                     _seqNo: row.seqNo
                   }))
+                  setRowSelectionModel(row.id)
                   if (row.countryId) {
                     setFilters(currencies.filter(item => item.countryId === row.countryId))
                   }
