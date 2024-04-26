@@ -167,7 +167,9 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
         extension: SystemRepository.Country.get,
         parameters: `_recordId=${res.record.value}`
       })
-      formik.setFieldValue('fromCountryId', countryRes.record.reference)
+
+      //formik.setFieldValue('fromCountryId', countryRes.record.reference)
+      formik.setFieldValue('fromCountryId', 'AE')
     }
   }
 
@@ -176,12 +178,17 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
       extension: RemittanceOutwardsRepository.Beneficiary.get,
       parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
     })
-    formik.setFieldValue('beneficiary.firstName', res.record.benName)
+    var nameArray = res.record?.benName?.split(' ')
+    var first = nameArray[0]
+    var last = nameArray?.slice(1).join(' ')
+
+    formik.setFieldValue('beneficiary.firstName', first ?? '')
+    formik.setFieldValue('beneficiary.lastName', last ?? '')
     formik.setFieldValue('beneficiary.nationality', res.record.nationalityRef)
     formik.setFieldValue('beneficiary.gender', res.record.genderName)
     formik.setFieldValue('beneficiary.address.addressLine1', res.record.addressLine1)
     formik.setFieldValue('beneficiary.address.addressLine2', res.record.addressLine2)
-    formik.setFieldValue('beneficiary.bankDetails.bankAccountNumber', res.record.accountReference)
+    formik.setFieldValue('beneficiary.bankDetails.bankAccountNumber', res.record.IBAN)
   }
 
   return (
