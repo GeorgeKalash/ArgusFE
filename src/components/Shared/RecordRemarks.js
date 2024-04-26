@@ -69,10 +69,10 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
         labels={labels}
         masterRef={recordId}
         maxAccess={access}
-        seqNo={data?.list?.length}
+        seqNo={data?.list?.length + 1}
       />
       <Grid container sx={{ px: 5 }}>
-        <TableContainer sx={{ height: `${expanded ? `calc(100vh - 300px)` : '250px'}`, pt: 2 }}>
+        <TableContainer sx={{ height: `${expanded ? `calc(100vh - 300px)` : '250px'}`, pt: 2, px: 5 }}>
           <Table>
             <TableBody>
               {data?.list?.map((row, index) => (
@@ -84,8 +84,9 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
                   }}
                 >
                   <TableCell component='th' scope='row' width={'900'}>
-                    <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-                      <Box fontWeight='bold'>{row.userName}</Box> - <Box>{formatDateDefault(row.eventDate)}</Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'row' }} fontSize={14}>
+                      <Box fontWeight='bold'>{row.userName}</Box> -{' '}
+                      <Box sx={{ mx: 1 }}>{formatDateDefault(row.eventDate)}</Box>
                     </Box>
                     {row.notes}
                   </TableCell>

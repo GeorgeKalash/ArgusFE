@@ -13,23 +13,16 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 
-const AccountsForms = ({
-  labels,
-  editMode,
-  maxAccess,
-  setStore,
-  store
-}) => {
-
-  const { postRequest, getRequest} = useContext(RequestsContext)
-  const {recordId} = store
+const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { recordId } = store
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.Account.qry
   })
 
   const { formik } = useForm({
-    initialValues:{
+    initialValues: {
       recordId: null,
       groupId: null,
       groupename: '',
@@ -68,32 +61,38 @@ const AccountsForms = ({
             ...prevStore,
             recordId: res.recordId
           }))
-          formik.setFieldValue('recordId', res.recordId )
+          formik.setFieldValue('recordId', res.recordId)
           toast.success('Record Added Successfully')
           invalidate()
         } else toast.success('Record Edited Successfully')
       })
-      .catch(error => { })
+      .catch(error => {})
   }
 
-  useEffect(()=>{
-    recordId  && getAccountsById(recordId)
-  },[recordId])
+  useEffect(() => {
+    recordId && getAccountsById(recordId)
+  }, [recordId])
 
-  const getAccountsById =  recordId => {
+  const getAccountsById = recordId => {
     const defaultParams = `_recordId=${recordId}`
     var parameters = defaultParams
-     getRequest({
+    getRequest({
       extension: FinancialRepository.Account.get,
       parameters: parameters
+    }).then(res => {
+      formik.setValues(res.record)
     })
-      .then(res => {
-        formik.setValues(res.record)
-      })
   }
 
-return (
-    <FormShell resourceId={ResourceIds.Accounts} form={formik} height={600} maxAccess={maxAccess} editMode={editMode}>
+  return (
+    <FormShell
+      resourceId={ResourceIds.Accounts}
+      form={formik}
+      height={600}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isRecordRemark={true}
+    >
       <Grid container>
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
