@@ -158,7 +158,6 @@ return (
             value={formik.values.agents}
             error={formik.errors.agents}
             columns={columns}
-            height={`${expanded ? `calc(100vh - 330px)` : `${height-150}px`}`}
             />
           </Grid>
         </Grid>

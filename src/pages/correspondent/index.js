@@ -129,23 +129,20 @@ const Correspondent = () => {
 
   return (
     <>
-      <Box>
-        <GridToolbar onAdd={addCorrespondent} maxAccess={access} />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          refetch={refetch}
-          onEdit={popup}
-          onDelete={delCorrespondent}
-          isLoading={false}
-          pageSize={50}
-          maxAccess={access}
-        />
-      </Box>
-
+      <GridToolbar onAdd={addCorrespondent} maxAccess={access} />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        paginationParameters={paginationParameters}
+        paginationType='api'
+        refetch={refetch}
+        onEdit={popup}
+        onDelete={delCorrespondent}
+        isLoading={false}
+        pageSize={50}
+        maxAccess={access}
+      />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

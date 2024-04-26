@@ -20,15 +20,12 @@ const TabsContext = createContext()
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
 
-  //NOTE: EVERY PAGE PADDING CAN BE ADDED HERE
-
   return (
     <Box
       role='tabpanel'
-      hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      sx={{display: 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important'}}
+      sx={{display: value !== index ? 'none !important' : 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important'}}
       {...other}
     >
       {children}

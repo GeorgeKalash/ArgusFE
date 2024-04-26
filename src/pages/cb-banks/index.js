@@ -93,7 +93,6 @@ const CbBank = () => {
 
   return (
     <>
-      <Box>
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
@@ -106,7 +105,6 @@ const CbBank = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
       {windowOpen && (
         <CbBanksWindow
           onClose={() => {

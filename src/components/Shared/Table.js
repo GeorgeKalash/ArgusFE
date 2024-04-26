@@ -82,13 +82,6 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   }
 }))
 
-const TableContainer = styled(Box)({
-  // height: '600px', // Change this value as needed
-  // flex: 1,
-  // overflow: 'auto', // Enable scrolling within the container
-  position: 'relative'
-})
-
 const PaginationContainer = styled(Box)({
   width: '100%',
   backgroundColor: '#fff',
@@ -110,7 +103,6 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
-  const [filteredRows, setFilteredRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   const pageSize = props.pageSize ? props.pageSize : 50
@@ -339,8 +331,6 @@ const Table = ({
     })
   }
 
-  const paginationHeight = pagination ? '9px' : '10px'
-
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
       var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
@@ -376,8 +366,6 @@ const Table = ({
               density='compact'
               components={{
                 LoadingOverlay: LinearProgress,
-
-                // Pagination: pagination ? CustomPagination : null,
                 Footer: CustomPagination,
                 NoRowsOverlay: () => (
                   <Stack height='100%' alignItems='center' justifyContent='center'>
