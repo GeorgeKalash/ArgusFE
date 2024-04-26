@@ -1,7 +1,7 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox, Box, TextField } from '@mui/material'
 import { InputAdornment } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -174,7 +174,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             segments={segments}
             name='accountRef'
             setFieldValue={formik.setFieldValue}
-            values={formik.values.accountRef.split('-')}
+            values={formik.values.accountRef}
             error={formik.touched.name && Boolean(formik.errors.name)}
           />
         </Grid>
@@ -263,8 +263,8 @@ import React, { createRef } from 'react'
 const segmentedInputStyle = {
   background: '#FFFFFF',
   border: '1px solid #D9D9D9',
-  padding: '8px',
-  borderRadius: '4px',
+  padding: '8.5px 14px',
+  borderRadius: '8px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-start'
@@ -273,59 +273,55 @@ const segmentedInputStyle = {
 const inputBaseStyle = {
   border: 'none',
   outline: 'none',
-  textAlign: 'center',
+
+  // textAlign: 'center',
   fontSize: '16px',
   marginRight: '4px'
 }
 
-const dashStyle = {
-  color: '#000000',
-  userSelect: 'none'
-}
+import InputMask from 'react-input-mask'
 
 const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
-  const inputRefs = segments.map(() => createRef())
-
-  const handleChange = (index, event) => {
-    const newValues = [...values]
-    newValues[index] = event.target.value.slice(0, segments[index].value)
-    setFieldValue(name, newValues.join('-'))
-
-    if (event.target.value.length >= segments[index].value && index < segments.length - 1) {
-      inputRefs[index + 1].current.focus()
-    }
+  const handleInputChange = event => {
+    // Update your state and the cursor position
+    const { value } = event.target
+    setFieldValue(name, value)
   }
 
-  const handleKeyDown = (index, event) => {
-    if (event.key === 'Backspace' && event.target.value.length === 0 && index > 0) {
-      event.preventDefault()
-      const previousInput = inputRefs[index - 1].current
-      previousInput.focus()
-      previousInput.value = previousInput.value.slice(0, -1)
-      handleChange(index - 1, { target: previousInput })
+  function createMask() {
+    let mask = ''
+    let note = ''
+    for (let i = 0; i < segments.length; i++) {
+      for (let j = 0; j < segments[i].value; j++) {
+        console.log(i, j)
+        mask += '*'
+        note += 'x'
+      }
+      mask += '-'
+      note += '-'
     }
+
+    mask = mask.substring(0, mask.length - 1)
+    note = note.substring(0, note.length - 1)
+
+    return { mask, note }
   }
+
+  const { mask } = createMask()
 
   return (
     <div style={segmentedInputStyle}>
-      {segments.map((segment, index) => (
-        <React.Fragment key={index}>
-          <input
-            style={{
-              ...inputBaseStyle,
-              width: `calc(${segment.value}ch + 5px)`,
-              marginRight: index !== segments.length - 1 ? '4px' : '0'
-            }}
-            ref={inputRefs[index]}
-            value={values[index] || ''}
-            onChange={e => handleChange(index, e)}
-            onKeyDown={e => handleKeyDown(index, e)}
-            maxLength={segment.value}
-            placeholder={new Array(segment.value).fill('_').join('')}
-          />
-          {index !== segments.length - 1 && <span style={dashStyle}>-</span>}
-        </React.Fragment>
-      ))}
+      <React.Fragment>
+        <InputMask
+          mask={mask}
+          value={values}
+          onChange={e => handleInputChange(e)}
+          style={{
+            ...inputBaseStyle
+          }}
+          alwaysShowMask
+        />
+      </React.Fragment>
     </div>
   )
 }
