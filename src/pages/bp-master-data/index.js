@@ -179,12 +179,6 @@ const BPMasterData = () => {
 
   return (
     <>
-      <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height:'calc(calc(100 * var(--vh)) - 50px)'
-      }}>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -205,7 +199,6 @@ const BPMasterData = () => {
           maxAccess={access}
           refetch={refetch}
         />
-      </Box>
     </>
   )
 }

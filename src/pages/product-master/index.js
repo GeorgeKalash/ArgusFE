@@ -120,27 +120,20 @@ const ProductMaster = () => {
 
   return (
     <>
-      <Box 
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }} >
-        <GridToolbar onAdd={add} maxAccess={access} />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          refetch={refetch}
-          onEdit={edit}
-          onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          maxAccess={access}
-        />
-      </Box>
+      <GridToolbar onAdd={add} maxAccess={access} />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        paginationParameters={paginationParameters}
+        paginationType='api'
+        refetch={refetch}
+        onEdit={edit}
+        onDelete={del}
+        isLoading={false}
+        pageSize={50}
+        maxAccess={access}
+      />
     </>
   )
 }

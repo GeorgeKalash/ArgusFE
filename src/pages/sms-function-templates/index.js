@@ -148,7 +148,6 @@ const SmsFunctionTemplate = () => {
             <Grid sx={{ width: '100%' }}>
               <Box sx={{ width: '100%' }}>
                 <DataGrid
-                  height={`calc(100vh - 150px)`}
                   onChange={value => {
                     formik.setFieldValue('rows', value)
                   }}
