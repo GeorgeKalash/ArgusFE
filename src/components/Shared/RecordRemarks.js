@@ -3,9 +3,11 @@ import Grid from '@mui/system/Unstable_Grid/Grid'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateDefault } from 'src/lib/date-helper'
-import { Box, IconButton, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
+import { Box, IconButton, TableBody, Table, TableCell, TableContainer, TableRow } from '@mui/material'
 import Icon from 'src/@core/components/icon'
+import moment from 'moment'
+
+// import Table from 'src/components/Shared/Table'
 
 import { useResourceQuery } from 'src/hooks/resource'
 import RecordRemarksForm from './RecordRemarksForm'
@@ -25,6 +27,13 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
       extension: SystemRepository.RecordRemarks.qry,
       parameters: parameters
     })
+  }
+
+  const date = date => {
+    const eventDate = moment(date)
+    const formattedDate = eventDate.calendar()
+
+    return formattedDate
   }
 
   const {
@@ -52,6 +61,17 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
     })
   }
 
+  console.log(data)
+
+  const dataTable = {
+    ...data,
+    list: (data?.list || []).map(({ notes, eventDate, userName, ...rest }) => ({
+      notes: '<b>' + userName + '</b> ' + date(eventDate) + '<br/><br />' + notes,
+      ...rest
+    }))
+  }
+  console.log(dataTable)
+
   const onDelete = async obj => {
     await postRequest({
       extension: SystemRepository.RecordRemarks.del,
@@ -71,7 +91,27 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
         maxAccess={access}
         seqNo={data?.list?.length + 1}
       />
-      <Grid container sx={{ px: 5 }}>
+      <Grid sx={{ p: 5 }}>
+        {/* <Table
+          columns={[
+            {
+              field: 'notes',
+              flex: 6,
+              valueGetter: ({ row }) => {
+                return <div dangerouslySetInnerHTML={{ __html: row.notes }}></div>
+              }
+            }
+          ]}
+          gridData={dataTable}
+          rowId={['seqNo']}
+          pagination={false}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          isLoading={false}
+          pageSize={50}
+          maxAccess={access}
+        /> */}
+
         <TableContainer sx={{ height: `${expanded ? `calc(100vh - 300px)` : '250px'}`, pt: 2, px: 5 }}>
           <Table>
             <TableBody>
@@ -80,13 +120,12 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
                   key={index}
                   sx={{
                     '&:last-child td, &:last-child th': { border: 0 },
-                    background: (row.seqNo % 2 !== 0 || !row.seqNo) && '#DDDDDD'
+                    background: (row.seqNo % 2 !== 0 || !row.seqNo) && '#EEEEEE'
                   }}
                 >
                   <TableCell component='th' scope='row' width={'900'}>
                     <Box sx={{ display: 'flex', flexDirection: 'row' }} fontSize={14}>
-                      <Box fontWeight='bold'>{row.userName}</Box> -{' '}
-                      <Box sx={{ mx: 1 }}>{formatDateDefault(row.eventDate)}</Box>
+                      <Box fontWeight='bold'>{row.userName}</Box> - <Box sx={{ mx: 1 }}>{date(row.eventDate)}</Box>
                     </Box>
                     {row.notes}
                   </TableCell>
@@ -107,6 +146,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
           </Table>
         </TableContainer>
       </Grid>
+
       <DeleteDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen([false, {}])}
