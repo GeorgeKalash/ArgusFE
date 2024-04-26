@@ -1,35 +1,23 @@
-import React, { useContext, useState, useEffect } from 'react'
-import Window from './Window'
-import CustomTabPanel from './CustomTabPanel'
-import { CommonContext } from 'src/providers/CommonContext'
-import { DataSets } from 'src/resources/DataSets'
+import React, { useContext, useState } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
-import CustomComboBox from '../Inputs/CustomComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateFromApi } from 'src/lib/date-helper'
-import { Box, Button, Icon, IconButton, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
-import FormShell from './FormShell'
-import CustomTextArea from '../Inputs/CustomTextArea'
-import { useForm } from 'src/hooks/form'
+import { formatDateDefault } from 'src/lib/date-helper'
+import { Box, IconButton, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material'
+import Icon from 'src/@core/components/icon'
+
 import { useResourceQuery } from 'src/hooks/resource'
+import RecordRemarksForm from './RecordRemarksForm'
+import { useWindow } from 'src/windows'
+import DeleteDialog from './DeleteDialog'
 
-const RecordRemarks = props => {
-  const { recordId, resourceId } = props
-  const { getRequest } = useContext(RequestsContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
+const RecordRemarks = ({ recordId, resourceId, expanded }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
+  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
 
-  // const { formik } = useForm({
-  //   maxAccess,
-  //   initialValues: {
-  //     Remarks: null
-  //   },
-  //   enableReinitialize: true,
-  //   validateOnChange: true,
-  //   onSubmit: async obj => {}
-  // })
   const fetchGridData = () => {
     var parameters = `_resourceId=${resourceId}&_masterRef=${recordId}`
 
@@ -41,7 +29,7 @@ const RecordRemarks = props => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels: labels,
     access
   } = useResourceQuery({
     enabled: !!recordId,
@@ -49,33 +37,83 @@ const RecordRemarks = props => {
     queryFn: fetchGridData,
     endpointId: SystemRepository.RecordRemarks.qry
   })
-  console.log('data', data)
+
+  const onEdit = obj => {
+    stack({
+      Component: RecordRemarksForm,
+      props: {
+        data: obj,
+        labels,
+        userId
+      },
+      width: 800,
+      height: 300,
+      title: labels.resourceRecordRemarks
+    })
+  }
+
+  const onDelete = async obj => {
+    await postRequest({
+      extension: SystemRepository.RecordRemarks.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
+  }
 
   return (
-    <Box sx={{ p: 5 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-        <CustomTextArea />
-        <Button variant='contained' sx={{ mt: -11 }}>
-          Add
-        </Button>
-      </Box>
-      <Grid container>
-        <TableContainer>
-          <Table sx={{ minWidth: 650 }} aria-label='simple table'>
+    <Box>
+      <RecordRemarksForm
+        userId={userId}
+        resourceId={resourceId}
+        labels={labels}
+        masterRef={recordId}
+        maxAccess={access}
+        seqNo={data?.list?.length}
+      />
+      <Grid container sx={{ px: 5 }}>
+        <TableContainer sx={{ height: `${expanded ? `calc(100vh - 300px)` : '250px'}`, pt: 2 }}>
+          <Table>
             <TableBody>
-              {data?.list?.map(row => (
-                <TableRow key={1} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell component='th' scope='row'>
-                    {row.userName}
-                    {row.remark}
+              {data?.list?.map((row, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    background: (row.seqNo % 2 !== 0 || !row.seqNo) && '#DDDDDD'
+                  }}
+                >
+                  <TableCell component='th' scope='row' width={'900'}>
+                    <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                      <Box fontWeight='bold'>{row.userName}</Box> - <Box>{formatDateDefault(row.eventDate)}</Box>
+                    </Box>
+                    {row.notes}
                   </TableCell>
-                  <TableCell align='right'>{}</TableCell>
+                  <TableCell align='right'>
+                    <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                      <IconButton size='small'>
+                        <Icon icon='mdi:application-edit-outline' fontSize={18} onClick={() => onEdit(row)} />
+                      </IconButton>
+
+                      <IconButton size='small' onClick={() => setDeleteDialogOpen([true, row])} color='error'>
+                        <Icon icon='mdi:delete-forever' fontSize={18} />
+                      </IconButton>
+                    </Box>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Grid>
+      <DeleteDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen([false, {}])}
+        onConfirm={obj => {
+          setDeleteDialogOpen([false, {}])
+          onDelete(obj)
+        }}
+      />
     </Box>
   )
 }

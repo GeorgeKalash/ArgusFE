@@ -157,6 +157,8 @@ export const SystemRepository = {
   },
   RecordRemarks: {
     qry: service + 'qryRMK',
-    get: service + 'getRMK'
+    set: service + 'setRMK',
+    get: service + 'getRMK',
+    del: service + 'delRMK'
   }
 }

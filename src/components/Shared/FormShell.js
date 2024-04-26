@@ -29,6 +29,7 @@ export default function FormShell({
   clientRelation = false,
   setErrorMessage,
   previewReport = false,
+  isRecordRemark = false,
   setIDInfoAutoFilled,
   visibleClear,
   actions
@@ -69,6 +70,19 @@ export default function FormShell({
       width: 1000,
       height: 500,
       title: 'Approvals'
+    })
+  }
+
+  function onRecordRemarks() {
+    stack({
+      Component: RecordRemarks,
+      props: {
+        recordId: form.values?.recordId,
+        resourceId: resourceId
+      },
+      width: 800,
+      height: 500,
+      title: 'Resource Record Remarks'
     })
   }
 
@@ -118,19 +132,6 @@ export default function FormShell({
               title: 'General Ledger'
             })
           }
-          onRecordRemarks={() =>
-            stack({
-              Component: RecordRemarks,
-
-              props: {
-                recordId: form.values?.recordId,
-                resourceId: resourceId
-              },
-              width: 800,
-              height: 500,
-              title: 'Record Remarks'
-            })
-          }
           onClientRelation={() =>
             stack({
               Component: ClientRelationForm,
@@ -162,10 +163,11 @@ export default function FormShell({
           isCleared={isCleared}
           actions={actions}
           onApproval={onApproval}
+          onRecordRemarks={onRecordRemarks}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
-          isRecordRemark={true}
+          isRecordRemark={isRecordRemark}
           postVisible={postVisible}
           isPosted={isPosted}
           isClosed={isClosed}

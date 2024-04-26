@@ -1,30 +1,75 @@
-import React from 'react'
-import FormShell from './FormShell'
+import React, { useContext, useEffect } from 'react'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomTextArea from '../Inputs/CustomTextArea'
+import { Box, Button } from '@mui/material'
+import toast from 'react-hot-toast'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
+import { formatDateToApi } from 'src/lib/date-helper'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
 
-const RecordRemarksForm = () => {
+const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterRef, labels, window }) => {
+  const { postRequest } = useContext(RequestsContext)
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.RecordRemarks.qry
+  })
+
   const { formik } = useForm({
     maxAccess,
-    initialValues,
+    initialValues: {
+      seqNo: data?.seqNo ?? seqNo,
+      masterRef: data?.masterRef ?? masterRef,
+      notes: data?.notes ?? null,
+      resourceId: data?.resourceId ?? resourceId,
+      eventDate: data?.eventDate,
+      userId: userId
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      accessLevel: yup.string().required(' ')
+      // accessLevel: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
-        extension: AccessControlRepository.AuthorizationResourceGlobal.set,
+      const date = new Date()
+      obj.eventDate = formatDateToApi(date)
+
+      await postRequest({
+        extension: SystemRepository.RecordRemarks.set,
         record: JSON.stringify(obj)
       })
-
-      toast.success('Record Edited Successfully')
+      if (data) {
+        toast.success('Record Edited Successfully')
+        window.close()
+      } else {
+        toast.success('Record Add Successfully')
+        formik.setFieldValue('note', '')
+      }
       invalidate()
     }
   })
+  console.log(data?.list)
+  const disabled = (data?.userId && data?.userId !== userId) || !formik.values.notes
 
   return (
-    <FormShell form={formik} res>
-      RecordRemarksForm
-    </FormShell>
+    <Box sx={{ px: 5, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+      <CustomTextArea
+        name='notes'
+        label={labels.note}
+        value={formik.values.notes}
+        place
+        rows={5}
+        editMode={disabled}
+        maxAccess={maxAccess}
+        onChange={e => formik.setFieldValue('notes', e.target.value)}
+        onClear={() => formik.setFieldValue('notes', '')}
+      />
+      <Button disabled={disabled} variant='contained' sx={{ mt: -11 }} onClick={() => formik.handleSubmit()}>
+        {data?.seqNo ? 'Edit' : 'Add'}
+      </Button>
+    </Box>
   )
 }
 
