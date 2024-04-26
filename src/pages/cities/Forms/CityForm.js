@@ -16,7 +16,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function CityForm({ labels, recordId, maxAccess }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,8 +63,6 @@ export default function CityForm({ labels, recordId, maxAccess }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: SystemRepository.City.get,
             parameters: `_recordId=${recordId}`
@@ -74,7 +71,6 @@ export default function CityForm({ labels, recordId, maxAccess }) {
           formik.setValues(res.record)
         }
       } catch {}
-      setIsLoading(false)
     })()
   }, [])
 
@@ -124,12 +120,7 @@ export default function CityForm({ labels, recordId, maxAccess }) {
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('stateId', null)
-              if (newValue) {
-                formik.setFieldValue('countryId', newValue?.recordId)
-              } else {
-                formik.setFieldValue('countryId', '')
-              }
+              formik.setFieldValue('countryId', newValue?.recordId || '')
             }}
             error={formik.touched.countryId && Boolean(formik.errors.countryId)}
           />

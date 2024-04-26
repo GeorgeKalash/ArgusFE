@@ -42,7 +42,6 @@ const City = () => {
     access,
     search,
     clear,
-    refetch,
 
     paginationParameters
   } = useResourceQuery({
@@ -138,11 +137,9 @@ const City = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          refetch={refetch}
           onEdit={edit}
           onDelete={del}
           maxAccess={access}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
