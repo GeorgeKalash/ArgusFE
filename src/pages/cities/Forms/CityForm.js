@@ -37,6 +37,7 @@ export default function CityForm({ labels, recordId, maxAccess }) {
     maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
+
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required(),
@@ -87,7 +88,7 @@ export default function CityForm({ labels, recordId, maxAccess }) {
             readOnly={editMode}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
+            error={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -100,7 +101,7 @@ export default function CityForm({ labels, recordId, maxAccess }) {
             readOnly={editMode}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
+            error={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
@@ -122,7 +123,7 @@ export default function CityForm({ labels, recordId, maxAccess }) {
             onChange={(event, newValue) => {
               formik.setFieldValue('countryId', newValue?.recordId || '')
             }}
-            error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+            error={formik.touched.countryId && formik.errors.countryId}
           />
         </Grid>
         <Grid item xs={12}>
@@ -138,7 +139,6 @@ export default function CityForm({ labels, recordId, maxAccess }) {
             onChange={(event, newValue) => {
               formik.setFieldValue('stateId', newValue?.recordId)
             }}
-            error={formik.touched.stateId && Boolean(formik.errors.stateId)}
             maxAccess={maxAccess}
           />
         </Grid>
