@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { VerticalLayout } from 'src/components/Shared/Layouts/VerticalLayout'
+import { VerticalLayout } from 'src/components/Shared/Layouts/VertLayout'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
