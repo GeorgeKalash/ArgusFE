@@ -17,6 +17,7 @@ import { formatDateDefault } from 'src/lib/date-helper'
 
 // ** Windows
 import JournalVoucherWindow from './Windows/JournalVoucherWindow'
+import DeleteConfirmation from 'src/components/Shared/DeleteConfirmation'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -25,6 +26,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
+import { Expand } from '@mui/icons-material'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -106,13 +108,16 @@ const JournalVoucher = () => {
 
   function openDelete(recordId) {
     stack({
-      Component: DeleteComponent,
+      Component: DeleteConfirmation,
       props: {
         recordId: recordId,
-        maxAccess: access
+        maxAccess: access,
+        invalidateEndpoint: GeneralLedgerRepository.JournalVoucher.qry,
+        deleteEndpoint: GeneralLedgerRepository.JournalVoucher.del
       },
-      width: 600,
-      height: 600
+      width: 500,
+      height: 300,
+      title: 'Delete Confirmation'
     })
   }
 
@@ -141,7 +146,7 @@ const JournalVoucher = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
+          onDelete2={del}
           isLoading={false}
           pageSize={50}
           paginationType='api'

@@ -18,6 +18,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'deleteConfirmation',
+    color: '#231f20',
+    image: 'workflow.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',

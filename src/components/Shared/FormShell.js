@@ -7,6 +7,8 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
+import DeleteComponent from 'src/components/Shared/GeneralLedger'
+
 import Approvals from './Approvals'
 
 export default function FormShell({

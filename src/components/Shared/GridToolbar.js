@@ -20,6 +20,7 @@ const GridToolbar = ({
   inputSearch,
   search,
   onSearch,
+
   onSearchClear,
   ...props
 }) => {

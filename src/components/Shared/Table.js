@@ -101,12 +101,15 @@ const Table = ({
   pagination = true,
   paginationType = 'api',
   handleCheckedRows,
+
   height,
+  onDelete2,
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
   ...props
 }) => {
+  const [deleteComponentOpen, setDeleteComponentOpen] = useState([false, {}])
   const [gridData, setGridData] = useState(props.gridData)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
@@ -305,8 +308,10 @@ const Table = ({
 
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
-  if (props.onEdit || props.onDelete || props.popupComponent) {
+  if (props.onEdit || props.onDelete || props.popupComponent || onDelete2) {
+    // Added onDelete2 condition
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
+    const delete2BtnVisible = maxAccess ? onDelete2 && maxAccess > TrxType.EDIT : onDelete2 ? true : false // New condition for Delete2
     filteredColumns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,
@@ -334,6 +339,13 @@ const Table = ({
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
             )}
+            {!isStatus3 &&
+              delete2BtnVisible &&
+              !isWIP && ( // Render Delete2 button
+                <IconButton size='small' onClick={() => onDelete2(params.row)} color='error'>
+                  <Icon icon='mdi:delete-forever' fontSize={18} />
+                </IconButton>
+              )}
           </Box>
         )
       }
