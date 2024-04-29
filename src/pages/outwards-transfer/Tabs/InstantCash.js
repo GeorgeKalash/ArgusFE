@@ -17,7 +17,7 @@ import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubmit }) {
+export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubmit, cashData = [] }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: _labels, maxAccess } = useResourceQuery({
@@ -104,7 +104,18 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({}),
+    validationSchema: yup.object({
+      /*   deliveryModeId: yup.string().required(' '),
+      toCountryId: yup.string().required(' '),
+      payingAgent: yup.string().required(' '),
+      profession: yup.string().required(' '),
+      sourceOfFundsId: yup.string().required(' '),
+      remittancePurposeId: yup.string().required(' '),
+      sourceAmount: yup.string().required(' '),
+      employerName: yup.string().required(' '),
+      employerStatus: yup.string().required(' '),
+      bankCode: yup.string().required(' ')*/
+    }),
     onSubmit: values => {
       onInstantCashSubmit(values)
       window.close()
@@ -118,6 +129,9 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
           if (beneficiaryId) getBeneficiary(clientId, beneficiaryId)
         }
         getDefaultCountry()
+        if (cashData.deliveryModeId) {
+          formik.setValues(cashData)
+        }
       } catch (error) {}
     })()
   }, [])
@@ -217,6 +231,7 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
               valueField='recordId'
               displayField='name'
               values={formik.values}
+              required
               onChange={(event, newValue) => {
                 if (newValue) {
                   formik.setFieldValue('deliveryModeId', newValue?.recordId)
@@ -228,7 +243,6 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
               }}
               maxAccess={maxAccess}
               error={formik.touched.deliveryModeId && Boolean(formik.errors.deliveryModeId)}
-              helperText={formik.touched.deliveryModeId && formik.errors.deliveryModeId}
             />
           </Grid>
           <Grid hideonempty xs={12}>
@@ -251,7 +265,6 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
               }}
               maxAccess={maxAccess}
               error={formik.touched.toCountryId && Boolean(formik.errors.toCountryId)}
-              helperText={formik.touched.toCountryId && formik.errors.toCountryId}
             />
           </Grid>
           <Grid hideonempty xs={12}>
@@ -281,7 +294,6 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
               }}
               maxAccess={maxAccess}
               error={formik.touched.payingAgent && Boolean(formik.errors.payingAgent)}
-              helperText={formik.touched.payingAgent && formik.errors.payingAgent}
             />
           </Grid>
           <Grid hideonempty xs={12}>
@@ -302,7 +314,6 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
               }}
               maxAccess={maxAccess}
               error={formik.touched.profession && Boolean(formik.errors.profession)}
-              helperText={formik.touched.profession && formik.errors.profession}
             />
           </Grid>
         </Grid>
@@ -326,7 +337,6 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
               }}
               maxAccess={maxAccess}
               error={formik.touched.remittancePurposeId && Boolean(formik.errors.remittancePurposeId)}
-              helperText={formik.touched.remittancePurposeId && formik.errors.remittancePurposeId}
             />
           </Grid>
           <Grid hideonempty xs={12}>
@@ -347,7 +357,6 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
               }}
               maxAccess={maxAccess}
               error={formik.touched.sourceOfFundsId && Boolean(formik.errors.sourceOfFundsId)}
-              helperText={formik.touched.sourceOfFundsId && formik.errors.sourceOfFundsId}
             />
           </Grid>
 
@@ -386,7 +395,6 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.relation && Boolean(formik.errors.relation)}
-                helperText={formik.touched.relation && formik.errors.relation}
               />
             </Grid>
             <Grid item xs={12}>
@@ -425,7 +433,6 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
                 }}
                 maxAccess={maxAccess}
                 error={formik.touched.employerStatus && Boolean(formik.errors.employerStatus)}
-                helperText={formik.touched.employerStatus && formik.errors.employerStatus}
               />
             </Grid>
           </FieldSet>
@@ -459,7 +466,7 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
             <Grid item xs={12}>
               <CustomTextField
                 name='beneficiary.postCode'
-                onChange={formik.setFieldValue('formik.values.beneficiary.address.postCode')}
+                onChange={event => formik.setFieldValue('beneficiary.address.postCode', event.target.value)}
                 label={_labels.postalCode}
                 numberField={true}
                 value={formik.values.beneficiary.address.postCode}

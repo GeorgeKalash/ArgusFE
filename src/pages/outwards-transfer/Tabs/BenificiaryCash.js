@@ -460,7 +460,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
               rows={3}
               maxLength='100'
               maxAccess={maxAccess}
-              onChange={e => formik.setFieldValue('addressLine1', e.target.value)}
+              onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
             />
@@ -473,7 +473,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
               rows={3}
               maxLength='100'
               maxAccess={maxAccess}
-              onChange={e => formik.setFieldValue('addressLine2', e.target.value)}
+              onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
             />
