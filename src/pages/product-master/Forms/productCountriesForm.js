@@ -94,6 +94,7 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
         endpointId: MultiCurrencyRepository.RateType.qry,
         valueField: 'recordId',
         displayField: 'name',
+        displayFieldWidth: 1.5,
         mapping: [
           { from: 'name', to: 'rateTypeName' },
           { from: 'reference', to: 'rateTypeRef' },
