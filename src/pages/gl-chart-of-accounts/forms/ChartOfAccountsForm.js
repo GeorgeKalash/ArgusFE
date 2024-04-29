@@ -51,7 +51,8 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(' '),
-      description: yup.string().required(' ')
+      description: yup.string().required(' '),
+      accountRef: yup.string().required()
     }),
     onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true)
@@ -173,7 +174,9 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             name='accountRef'
             setFieldValue={formik.setFieldValue}
             values={formik.values.accountRef}
-            error={formik.touched.name && Boolean(formik.errors.name)}
+            label='Account Reference'
+            required
+            error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
           />
         </Grid>
         <Grid item xs={12}>
@@ -258,65 +261,45 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
 
 import React, { createRef } from 'react'
 
-const segmentedInputStyle = {
-  background: '#FFFFFF',
-  border: '1px solid #D9D9D9',
-  padding: '8.5px 14px',
-  borderRadius: '8px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-start'
-}
+import { FormControl, InputLabel, OutlinedInput, FormHelperText, styled } from '@mui/material'
 
-const inputBaseStyle = {
-  border: 'none',
-  outline: 'none',
-
-  // textAlign: 'center',
-  fontSize: '16px',
-  marginRight: '4px'
-}
-
-const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
+const SegmentedInput = ({ segments, name, setFieldValue, values, label, error, helperText, required }) => {
   const handleInputChange = event => {
     const { value } = event.target
     setFieldValue(name, value)
   }
 
-  function createMask() {
+  const createMask = () => {
     let mask = ''
-    let note = ''
-    for (let i = 0; i < segments.length; i++) {
-      for (let j = 0; j < segments[i].value; j++) {
-        console.log(i, j)
-        mask += '*'
-        note += 'x'
-      }
-      mask += '-'
-      note += '-'
-    }
+    segments.forEach(segment => {
+      mask += '*'.repeat(segment.value) + '-'
+    })
 
-    mask = mask.substring(0, mask.length - 1)
-    note = note.substring(0, note.length - 1)
-
-    return { mask, note }
+    return mask.slice(0, -1)
   }
 
-  const { mask } = createMask()
+  const mask = createMask()
 
   return (
-    <div style={segmentedInputStyle}>
-      <React.Fragment>
-        <InputMask
-          mask={mask}
-          value={values}
-          onChange={e => handleInputChange(e)}
-          style={{
-            ...inputBaseStyle
-          }}
-          alwaysShowMask
-        />
-      </React.Fragment>
-    </div>
+    <FormControl variant='outlined' fullWidth error={error} size='small' required={required}>
+      <InputLabel htmlFor={name} size='small'>
+        {label}
+      </InputLabel>
+      <OutlinedInput
+        id={name}
+        value={values}
+        onChange={handleInputChange}
+        label={label}
+        notched={false}
+        inputComponent={InputMask}
+        inputProps={{
+          mask: mask,
+          alwaysShowMask: true,
+          guide: false
+        }}
+        required={required}
+      />
+      {error && <FormHelperText>{helperText}</FormHelperText>}
+    </FormControl>
   )
 }
