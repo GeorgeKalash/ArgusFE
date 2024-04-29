@@ -24,6 +24,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindow } from 'src/windows'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,6 +34,8 @@ const JournalVoucher = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -101,18 +104,25 @@ const JournalVoucher = () => {
     setWindowOpen(true)
   }
 
+  function openDelete(recordId) {
+    stack({
+      Component: DeleteComponent,
+      props: {
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 600
+    })
+  }
+
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: GeneralLedgerRepository.JournalVoucher.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+  const del = obj => {
+    openDelete(obj?.recordId)
   }
 
   return (
