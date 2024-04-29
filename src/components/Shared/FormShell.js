@@ -29,7 +29,6 @@ export default function FormShell({
   clientRelation = false,
   setErrorMessage,
   previewReport = false,
-  isRecordRemark = false,
   setIDInfoAutoFilled,
   visibleClear,
   actions
@@ -167,7 +166,6 @@ export default function FormShell({
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}
-          isRecordRemark={isRecordRemark}
           postVisible={postVisible}
           isPosted={isPosted}
           isClosed={isClosed}

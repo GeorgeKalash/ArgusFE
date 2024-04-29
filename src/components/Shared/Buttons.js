@@ -86,6 +86,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'RecordRemarks',
+    color: '#90278e',
+    image: 'notes.png',
+    main: false
+  },
+  {
     key: 'Apply',
     condition: 'onApply',
     onClick: 'onApply',
@@ -101,14 +107,6 @@ export const Buttons = [
     color: '#f44336',
     image: 'clear.png',
     main: true
-  },
-  {
-    key: 'RecordRemarks',
-    condition: 'onRecordRemarks',
-    onClick: 'onRecordRemarks',
-    color: '#90278e',
-    image: 'notes.png',
-    main: false
   },
   {
     key: 'Info',
