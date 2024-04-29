@@ -11,6 +11,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 
 const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expanded, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -83,6 +84,25 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
       name: 'countryName',
       props: {
         readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.rateType,
+      name: 'rateTypeId',
+      props: {
+        endpointId: MultiCurrencyRepository.RateType.qry,
+        valueField: 'recordId',
+        displayField: 'name',
+        mapping: [
+          { from: 'name', to: 'rateTypeName' },
+          { from: 'reference', to: 'rateTypeRef' },
+          { from: 'recordId', to: 'rateTypeId' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
       }
     },
     {
