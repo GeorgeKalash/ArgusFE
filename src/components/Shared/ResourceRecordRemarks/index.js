@@ -98,7 +98,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
                     {row.notes}
                   </TableCell>
                   <TableCell align='right'>
-                    <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                    <Box sx={{ display: 'flex', width: '100%', justifyContent: 'flex-start' }}>
                       <IconButton size='small'>
                         <Icon icon='mdi:application-edit-outline' fontSize={18} onClick={() => onEdit(row)} />
                       </IconButton>
