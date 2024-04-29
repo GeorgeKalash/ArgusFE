@@ -1,24 +1,11 @@
-// ** React Importsport
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import CharacteristicsWindow from './Windows/CharacteristicsWindow'
-
-// ** Helpers
+import { VerticalLayout } from 'src/components/Shared/Layouts/VerticalLayout'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
@@ -110,24 +97,22 @@ const Characteristics = () => {
   }
 
   return (
-    <>
-      <Box>
-        <GridToolbar onAdd={addCharacteristics} maxAccess={access} />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          refetch={refetch}
-          onEdit={popup}
-          onDelete={delCharacteristics}
-          isLoading={false}
-          pageSize={50}
-          maxAccess={access}
-        />
-      </Box>
-    </>
+    <VerticalLayout>
+      <GridToolbar onAdd={addCharacteristics} maxAccess={access} />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        paginationParameters={paginationParameters}
+        paginationType='api'
+        refetch={refetch}
+        onEdit={popup}
+        onDelete={delCharacteristics}
+        isLoading={false}
+        pageSize={50}
+        maxAccess={access}
+      />
+    </VerticalLayout>
   )
 }
 

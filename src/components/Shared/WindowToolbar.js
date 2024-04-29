@@ -125,7 +125,7 @@ const WindowToolbar = ({
 
             return (
               isVisible && (
-                <Tooltip title={button.key} key={index}>
+                <Tooltip placement='top' title={button.key} key={index}>
                   <Button
                     onClick={handleClick}
                     variant='contained'
@@ -160,7 +160,7 @@ const WindowToolbar = ({
 
             return (
               isVisible && (
-                <Tooltip title={button.key} key={index}>
+                <Tooltip placement='top' title={button.key} key={index}>
                   <Button
                     onClick={handleClick}
                     variant='contained'
