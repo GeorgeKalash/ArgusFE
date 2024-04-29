@@ -11,9 +11,10 @@ const CustomTabPanel = (props) => {
 
 return (
         <Box
-            role="tabpanel"            
-            hidden={value !== index}
+            role="tabpanel"
             id={`simple-tabpanel-${index}`}
+            sx={{display: value !== index ? 'none !important' : 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important'}}
+
             aria-labelledby={`simple-tab-${index}`}
             {...other}
         >

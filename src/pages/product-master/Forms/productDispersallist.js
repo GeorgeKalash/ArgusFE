@@ -105,7 +105,6 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,hei
         getGridData,
       },
       width: 500,
-      height: 400,
       title: labels?.dispersal
     })
   }
@@ -123,7 +122,6 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess, expanded,hei
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          autoHeight={true}
           />
     </>
   )

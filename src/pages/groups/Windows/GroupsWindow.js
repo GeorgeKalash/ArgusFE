@@ -15,17 +15,12 @@ const GroupsWindow = ({
       Title={labels.bpGroups}
       controlled={true}
       onClose={onClose}
-      width={500}
-      height={300}
     >
-      <CustomTabPanel>
         <GroupsForm
           labels={labels}
           maxAccess={maxAccess}
           recordId={recordId}
         />
-       
-      </CustomTabPanel>
     </Window>
   )
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const VerticalLayout = ({ children }) => (
+export const VertLayout = ({ children }) => (
   <>
     {children}
   </>

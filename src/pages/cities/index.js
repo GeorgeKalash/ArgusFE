@@ -5,7 +5,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { VerticalLayout } from 'src/components/Shared/Layouts/VerticalLayout'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CityWindow from './Windows/CityWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
@@ -100,7 +100,7 @@ const City = () => {
   }
 
   return (
-    <VerticalLayout>
+    <VertLayout>
       <GridToolbar
         onAdd={add}
         maxAccess={access}
@@ -134,7 +134,7 @@ const City = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </VerticalLayout>
+    </VertLayout>
   )
 }
 
