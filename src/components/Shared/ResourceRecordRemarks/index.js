@@ -7,9 +7,6 @@ import { Box, IconButton, TableBody, Table, TableCell, TableContainer, TableRow 
 import Icon from 'src/@core/components/icon'
 import moment from 'moment'
 import toast from 'react-hot-toast'
-
-// import Table from 'src/components/Shared/Table'
-
 import { useResourceQuery } from 'src/hooks/resource'
 import RecordRemarksForm from './RecordRemarksForm'
 import { useWindow } from 'src/windows'
@@ -63,15 +60,6 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
     })
   }
 
-  // const dataTable = {
-  //   ...data,
-  //   list: (data?.list || []).map(({ seqNo, ...rest }, index) => ({
-  //     seqNo: index + 1,
-  //     ...rest
-  //   }))
-  // }
-  // console.log(dataTable)
-
   const onDelete = async obj => {
     await postRequest({
       extension: SystemRepository.RecordRemarks.del,
@@ -92,26 +80,6 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
         seqNo={data?.list?.length + 1}
       />
       <Grid sx={{ p: 5 }}>
-        {/* <Table
-          columns={[
-            {
-              field: 'notes',
-              flex: 6,
-              valueGetter: ({ row }) => {
-                return <div dangerouslySetInnerHTML={{ __html: row.notes }}></div>
-              }
-            }
-          ]}
-          gridData={dataTable}
-          rowId={['seqNo']}
-          pagination={false}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          isLoading={false}
-          pageSize={50}
-          maxAccess={access}
-        /> */}
-
         <TableContainer sx={{ height: `${expanded ? `calc(100vh - 300px)` : '250px'}`, pt: 2, px: 5 }}>
           <Table>
             <TableBody>

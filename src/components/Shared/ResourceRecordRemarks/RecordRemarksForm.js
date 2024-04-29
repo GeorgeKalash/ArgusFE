@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomTextArea from '../../Inputs/CustomTextArea'
 import { Box, Button } from '@mui/material'
@@ -8,7 +8,6 @@ import * as yup from 'yup'
 import { formatDateDefault, formatDateToApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { useWindow } from 'src/windows'
 
 const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterRef, labels, window }) => {
   const { postRequest } = useContext(RequestsContext)
