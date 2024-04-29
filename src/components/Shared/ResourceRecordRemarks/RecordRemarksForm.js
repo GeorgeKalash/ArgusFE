@@ -73,14 +73,14 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
           value={formik.values.notes}
           rows={5}
           maxLength='500'
-          paddingRight={15}
+          paddingRight={formik.values.userId !== userId ? 45 : 15}
           readOnly={formik.values.userId !== userId}
           editMode={disabled}
           maxAccess={maxAccess}
           onChange={e => formik.setFieldValue('notes', e.target.value)}
           onClear={() => formik.setFieldValue('notes', '')}
         />
-        <Button disabled={disabled} variant='contained' sx={{ mt: -11 }} onClick={() => formik.handleSubmit()}>
+        <Button disabled={disabled} variant='contained' sx={{ mt: -10 }} onClick={() => formik.handleSubmit()}>
           {data?.seqNo ? 'Edit' : 'Add'}
         </Button>
       </Box>

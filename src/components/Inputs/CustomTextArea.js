@@ -71,7 +71,6 @@ const CustomTextArea = ({
           }
         }}
         autoComplete={autoComplete}
-        style={{ textAlign: 'right' }}
         InputProps={{
           endAdornment: !readOnly &&
             value && ( // Only show the clear icon if readOnly is false
