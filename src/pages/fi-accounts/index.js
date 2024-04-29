@@ -111,7 +111,12 @@ const MfAccounts = () => {
 
   return (
     <>
-      <Box>
+      <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+      }}>
         <GridToolbar 
           onAdd={addAccounts} 
           maxAccess={access}

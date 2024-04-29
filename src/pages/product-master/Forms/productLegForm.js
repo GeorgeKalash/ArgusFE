@@ -232,7 +232,6 @@ return (
                value={formik.values.productLegs}
                error={formik.errors.productLegs}
                columns={columns}
-               height={`${expanded ? `calc(100vh - 330px)` : `${height-150}px`}`}
 
             />
           </Grid>

@@ -228,7 +228,6 @@ return (
                     columns={columns}
                     allowDelete={false}
                     allowAddNewLine={false}
-                    height={`${expanded ? `calc(100vh - 330px)` : `${height-100}px`}`}
 
                   />}
 

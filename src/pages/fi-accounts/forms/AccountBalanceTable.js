@@ -57,12 +57,11 @@ const AccountBalanceForm = (
     <>
       <Table
         columns={columns}
-        gridData={{list: [...data.list, ...data.list, ...data.list]}}
+        gridData={data}
         rowId={['currencyId']}
         isLoading={false}
         maxAccess={maxAccess}
         pagination={false}
-        autoHeight={true}
       />
     </>
   )

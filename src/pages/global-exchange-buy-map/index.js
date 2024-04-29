@@ -261,7 +261,6 @@ const GlobalExchangeBuyMap = () => {
                       value={formik.values.rows}
                       error={formik.errors.rows}
                       columns={columns}
-                      height={`calc(100vh - 180px)`}
                     />
                   )}
                 </Box>

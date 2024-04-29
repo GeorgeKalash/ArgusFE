@@ -90,20 +90,18 @@ const CbCashGroup = () => {
 
   return (
     <>
-      <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          paginationType='client'
-          maxAccess={access}
-        />
-      </Box>
+      <GridToolbar onAdd={add} maxAccess={access} />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        onEdit={edit}
+        onDelete={del}
+        isLoading={false}
+        pageSize={50}
+        paginationType='client'
+        maxAccess={access}
+      />
       {windowOpen && (
         <CbCashGroupsWindow
           onClose={() => {

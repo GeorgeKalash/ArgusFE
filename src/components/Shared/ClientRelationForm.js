@@ -209,7 +209,6 @@ export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage,
           value={formik.values.relations}
           error={formik.errors.relations}
           columns={columns}
-          height={`${expanded ? `calc(100vh - 330px)` : `${height - 160}px`}`}
         />
       </Grid>
     </FormShell>

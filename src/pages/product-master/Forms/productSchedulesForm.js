@@ -255,36 +255,23 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
       infoVisible={false}
       editMode={editMode}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <Grid container gap={2}>
-          <Grid xs={12}>
-            <DataGrid
-              onChange={value => formik.setFieldValue('schedules', value)}
-              value={formik.values.schedules}
-              error={formik.errors.schedules}
-              columns={columns}
-              onSelectionChange={row =>
-                row &&
-                setStore(prevStore => ({
-                  ...prevStore,
-                  plantId: row.plantId,
-                  currencyId: row.currencyId,
-                  countryId: row.countryId,
-                  dispersalId: row.dispersalId,
-                  _seqNo: row.seqNo
-                }))
-              }
-              height={`${expanded ? `calc(100vh - 300px)` : `${height - 160}px`}`}
-            />
-          </Grid>
-        </Grid>
-      </Box>
+      <DataGrid
+        onChange={value => formik.setFieldValue('schedules', value)}
+        value={formik.values.schedules}
+        error={formik.errors.schedules}
+        columns={columns}
+        onSelectionChange={row =>
+          row &&
+          setStore(prevStore => ({
+            ...prevStore,
+            plantId: row.plantId,
+            currencyId: row.currencyId,
+            countryId: row.countryId,
+            dispersalId: row.dispersalId,
+            _seqNo: row.seqNo
+          }))
+        }
+      />
     </FormShell>
   )
 }

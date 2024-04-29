@@ -114,55 +114,39 @@ const ProductAgentForm = ({
   }
 
 return (
-  <FormShell form={formik}
-   resourceId={ResourceIds.ProductMaster}
-   maxAccess={maxAccess}
-   infoVisible={false}
-   editMode={editMode}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <Grid container gap={2}>
-          <Grid container xs={12} spacing={2}>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                name='dispersalId'
-                label={labels.dispersal}
-                store={dispersals}
-                valueField='recordId'
-                displayField= {['reference', 'name']}
-                columnsInDropDown= {[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' },
-                ]}
-                values={_dispersalId}
-                required
-                onChange={(event, newValue) => {
-
-                  setDispersalId({dispersalId : newValue?.recordId});
-                  onDispersalSelection(newValue?.recordId)
-
-                }}
-                error={Boolean(formik.errors.dispersalId)}
-                helperText={formik.errors.dispersalId}
-              />
-            </Grid>
-          </Grid>
-          <Grid xs={12}>
-            <DataGrid
-            onChange={value => formik.setFieldValue('agents', value)}
-            value={formik.values.agents}
-            error={formik.errors.agents}
-            columns={columns}
-            height={`${expanded ? `calc(100vh - 330px)` : `${height-150}px`}`}
-            />
-          </Grid>
-        </Grid>
-      </Box>
+  <FormShell 
+    form={formik}
+    resourceId={ResourceIds.ProductMaster}
+    maxAccess={maxAccess}
+    infoVisible={false}
+    editMode={editMode}
+  >
+     
+    <ResourceComboBox
+      name='dispersalId'
+      label={labels.dispersal}
+      store={dispersals}
+      valueField='recordId'
+      displayField= {['reference', 'name']}
+      columnsInDropDown= {[
+        { key: 'reference', value: 'Reference' },
+        { key: 'name', value: 'Name' },
+      ]}
+      values={_dispersalId}
+      required
+      onChange={(event, newValue) => {
+        setDispersalId({dispersalId : newValue?.recordId});
+        onDispersalSelection(newValue?.recordId)
+      }}
+      error={Boolean(formik.errors.dispersalId)}
+      helperText={formik.errors.dispersalId}
+    />
+    <DataGrid
+      onChange={value => formik.setFieldValue('agents', value)}
+      value={formik.values.agents}
+      error={formik.errors.agents}
+      columns={columns}
+    />
     </FormShell>
   )
 }

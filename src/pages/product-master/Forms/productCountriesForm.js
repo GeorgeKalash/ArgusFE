@@ -131,15 +131,12 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
       infoVisible={false}
       editMode={editMode}
     >
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow: 'hidden' }}>
         <DataGrid
           onChange={value => formik.setFieldValue('countries', value)}
           value={formik.values.countries}
           error={formik.errors.countries}
           columns={column}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
         />
-      </Box>
     </FormShell>
   )
 }

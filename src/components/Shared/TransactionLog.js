@@ -11,6 +11,7 @@ import Table from './Table'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import Box from '@mui/material/Box'
 
 const TransactionLog = props => {
   const { recordId, resourceId, onInfoClose } = props
@@ -118,9 +119,8 @@ const TransactionLog = props => {
   ]
 
   return (
-    <div onClose={onInfoClose} Title={_labels.title}>
-      <CustomTabPanel>
-        <Grid container xs={12} sx={{ paddingBottom: '25px' }}>
+    <Box sx={{padding:'10px !important',display:'flex !important', flex: '1 !important', flexDirection:'column'}} onClose={onInfoClose} Title={_labels.title}>
+        <Grid container xs={12} sx={{ display:'flex !important', flex: '0 !important', paddingBottom: '25px' }}>
           <Grid item xs={5}>
             <CustomComboBox
               name='idtId'
@@ -160,7 +160,6 @@ const TransactionLog = props => {
           </Grid>
         </Grid>
         <Table
-          height={200}
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
@@ -169,7 +168,7 @@ const TransactionLog = props => {
           onEdit={showInfo}
           pagination={false}
         />
-        <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px', height: '18vh', overflow: 'auto' }}>
+        <Grid data-unique-id item xs={4} sx={{ display:'flex !important', flexDirection: 'column', flex:'1 !important', margin: '5px !important', overflow: 'auto' }}>
           {Object.entries(info).map(([key, value]) => (
             <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
               <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
@@ -177,8 +176,7 @@ const TransactionLog = props => {
             </Grid>
           ))}
         </Grid>
-      </CustomTabPanel>
-    </div>
+    </Box>
   )
 }
 

@@ -11,7 +11,7 @@ const CustomTabPanel = (props) => {
 
 return (
         <Box
-            role="tabpanel"
+            role="tabpanel"            
             hidden={value !== index}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}

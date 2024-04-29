@@ -179,7 +179,6 @@ const BPMasterData = () => {
 
   return (
     <>
-      <Box>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -200,7 +199,6 @@ const BPMasterData = () => {
           maxAccess={access}
           refetch={refetch}
         />
-      </Box>
     </>
   )
 }

@@ -137,29 +137,27 @@ const CashAccounts = () => {
 
   return (
     <>
-      <Box>
-        <GridToolbar 
-            onAdd={add} 
-            maxAccess={access}
-            onSearch={search}
-            labels={_labels}
-            onSearchClear={clear}
-            inputSearch={true}
-        />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
-          isLoading={false}
-          pageSize={50}
+      <GridToolbar 
+          onAdd={add} 
           maxAccess={access}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-        />
-      </Box>
+          onSearch={search}
+          labels={_labels}
+          onSearchClear={clear}
+          inputSearch={true}
+      />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        onEdit={edit}
+        onDelete={del}
+        isLoading={false}
+        pageSize={50}
+        maxAccess={access}
+        refetch={refetch}
+        paginationParameters={paginationParameters}
+        paginationType='api'
+      />
       {windowOpen && (
         <CashAccountWindow
           onClose={() => {

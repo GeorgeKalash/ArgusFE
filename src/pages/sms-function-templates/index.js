@@ -18,6 +18,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -142,27 +143,17 @@ const SmsFunctionTemplate = () => {
 
   return (
     <>
-      <Box sx={{ height: `calc(100vh - 50px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-        <FormShell form={formik} isCleared={false} isInfo={false}>
-          <Grid container>
-            <Grid sx={{ width: '100%' }}>
-              <Box sx={{ width: '100%' }}>
-                <DataGrid
-                  height={`calc(100vh - 150px)`}
-                  onChange={value => {
-                    formik.setFieldValue('rows', value)
-                  }}
-                  value={formik.values.rows}
-                  error={formik.errors.rows}
-                  columns={columns}
-                  allowDelete={false}
-                  allowAddNewLine={false}
-                />
-              </Box>
-            </Grid>
-          </Grid>
-        </FormShell>
-      </Box>
+      <DataGrid
+        onChange={value => {
+          formik.setFieldValue('rows', value)
+        }}
+        value={formik.values.rows}
+        error={formik.errors.rows}
+        columns={columns}
+        allowDelete={false}
+        allowAddNewLine={false}
+      />
+      <WindowToolbar isSaved={true} form={formik} />
     </>
   )
 }
