@@ -8,7 +8,7 @@ import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
-import RecordRemarks from './RecordRemarks'
+import ResourceRecordRemarks from './ResourceRecordRemarks'
 
 export default function FormShell({
   form,
@@ -75,7 +75,7 @@ export default function FormShell({
 
   function onRecordRemarks() {
     stack({
-      Component: RecordRemarks,
+      Component: ResourceRecordRemarks,
       props: {
         recordId: form.values?.recordId,
         resourceId: resourceId

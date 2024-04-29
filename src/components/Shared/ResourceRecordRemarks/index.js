@@ -6,13 +6,14 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { Box, IconButton, TableBody, Table, TableCell, TableContainer, TableRow } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import moment from 'moment'
+import toast from 'react-hot-toast'
 
 // import Table from 'src/components/Shared/Table'
 
 import { useResourceQuery } from 'src/hooks/resource'
 import RecordRemarksForm from './RecordRemarksForm'
 import { useWindow } from 'src/windows'
-import DeleteDialog from './DeleteDialog'
+import DeleteDialog from '../DeleteDialog'
 
 const RecordRemarks = ({ recordId, resourceId, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -39,7 +40,8 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
   const {
     query: { data },
     labels: labels,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     enabled: !!recordId,
     datasetId: ResourceIds.RecordRemarks,
@@ -61,24 +63,22 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
     })
   }
 
-  console.log(data)
-
-  const dataTable = {
-    ...data,
-    list: (data?.list || []).map(({ notes, eventDate, userName, ...rest }) => ({
-      notes: '<b>' + userName + '</b> ' + date(eventDate) + '<br/><br />' + notes,
-      ...rest
-    }))
-  }
-  console.log(dataTable)
+  // const dataTable = {
+  //   ...data,
+  //   list: (data?.list || []).map(({ seqNo, ...rest }, index) => ({
+  //     seqNo: index + 1,
+  //     ...rest
+  //   }))
+  // }
+  // console.log(dataTable)
 
   const onDelete = async obj => {
     await postRequest({
       extension: SystemRepository.RecordRemarks.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
     toast.success('Record Deleted Successfully')
+    invalidate()
   }
 
   return (
@@ -120,7 +120,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
                   key={index}
                   sx={{
                     '&:last-child td, &:last-child th': { border: 0 },
-                    background: (row.seqNo % 2 !== 0 || !row.seqNo) && '#EEEEEE'
+                    background: ((index + 1) % 2 !== 0 || !(index + 1)) && '#EEEEEE'
                   }}
                 >
                   <TableCell component='th' scope='row' width={'900'}>

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import CustomTextArea from '../Inputs/CustomTextArea'
+import CustomTextArea from '../../Inputs/CustomTextArea'
 import { Box, Button } from '@mui/material'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'

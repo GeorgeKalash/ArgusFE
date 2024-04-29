@@ -21,7 +21,7 @@ const WindowToolbar = ({
   disabledApply,
   editMode = false,
   infoVisible = true,
-  isRecordRemark = true,
+  isRecordRemark = false,
   onRecordRemarks,
   isClosed = false,
   onClientRelation = false,
