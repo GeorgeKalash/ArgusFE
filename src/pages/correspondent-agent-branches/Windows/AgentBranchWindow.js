@@ -1,74 +1,73 @@
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import AgentBranchTab from 'src/pages/correspondent-agent-branches/Tabs/AgentBranchTab'
-import AddressTab from 'src/components/Shared/AddressTab'
+import AgentBranchForm from 'src/pages/correspondent-agent-branches/Tabs/AgentBranchForm'
+import AddressForm from 'src/components/Shared/AddressForm'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import { useState } from 'react'
+import { useContext } from 'react'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-const AgentBranchWindow = ({
-  onClose,
-  width,
-  height,
-  tabs,
-  activeTab,
-  setActiveTab,
-  onSave,
-  agentBranchValidation,
-  labels,
-  agentStore,
-  setAgentStore,
-  fillStateStore,
-  fillCountryStore,
-  countryStore,
-  stateStore,
-  lookupCity,
-  cityStore,
-  setCityStore,
-  maxAccess,
-  lookupCityDistrict,
-  cityDistrictStore,
-  setCityDistrictStore,
-}) => {
+const AgentBranchWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
+  const [store, setStore] = useState({
+    recordId: recordId || null,
+    agentBranch: null,
+    address: null
+  })
+
+  const [activeTab, setActiveTab] = useState(0)
+  const tabs = [{ label: labels.agentBranch }, { label: labels.address, disabled: !store.recordId }]
+  const { postRequest } = useContext(RequestsContext)
+
+  async function onSubmit(address) {
+    const addressId = address.addressId
+    if (!store.agentBranch.addressId) {
+      const res = { ...store.agentBranch, addressId: addressId }
+      if (res) {
+        const data = { ...res, recordId: store?.recordId }
+        await postRequest({
+          extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
+          record: JSON.stringify(data)
+        })
+        if (!addressId) {
+          toast.success('Record Added Successfully')
+        }
+      }
+    } else {
+      toast.success('Record Added Successfully')
+    }
+  }
+
+  function setAddress(res) {
+    setStore(prevStore => ({
+      ...prevStore,
+      address: res
+    }))
+  }
+
   return (
-    <Window
-      id='AgentWindow'
-      Title={labels.title}
-      tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      onClose={onClose}
-      width={width}
-      height={height}
-      onSave={onSave}
-      agentBranchValidation={agentBranchValidation}
-    >
-      <CustomTabPanel index={0} value={activeTab}>
-        <AgentBranchTab
-          labels={labels}
-          setAgentStore={setAgentStore}
-          agentBranchValidation={agentBranchValidation}
+    <>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabPanel height={height} index={0} value={activeTab}>
+        <AgentBranchForm
+          _labels={labels}
           maxAccess={maxAccess}
-          agentStore={agentStore}
+          store={store}
+          setStore={setStore}
+          editMode={store.recordId}
         />
       </CustomTabPanel>
-
-      <CustomTabPanel index={1} value={activeTab}>
-        <AddressTab
-          countryStore={countryStore}
-          stateStore={stateStore}
-          labels={labels}
-          lookupCity={lookupCity}
-          fillStateStore={fillStateStore}
-          cityStore={cityStore}
-          setCityStore={setCityStore}
-          fillCountryStore={fillCountryStore}
-          addressValidation={agentBranchValidation}
+      <CustomTabPanel height={height} index={1} value={activeTab}>
+        <AddressForm
+          _labels={labels}
           maxAccess={maxAccess}
-          lookupCityDistrict={lookupCityDistrict}
-          cityDistrictStore={cityDistrictStore}
-          setCityDistrictStore={setCityDistrictStore}
+          editMode={editMode}
+          recordId={store?.agentBranch?.addressId}
+          address={store.address}
+          setAddress={setAddress}
+          onSubmit={onSubmit}
         />
       </CustomTabPanel>
-    </Window>
+    </>
   )
 }
 

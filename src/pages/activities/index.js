@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -25,7 +25,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const Activities = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -36,17 +36,15 @@ const Activities = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-
-      extension:CurrencyTradingSettingsRepository.Activity.qry,
+      extension: CurrencyTradingSettingsRepository.Activity.qry,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
- const {
+  const {
     query: { data },
     labels: _labels,
     paginationParameters,
@@ -80,7 +78,6 @@ const Activities = () => {
     }
   ]
 
-
   const add = () => {
     setWindowOpen(true)
   }
@@ -92,13 +89,12 @@ const Activities = () => {
 
   const del = async obj => {
     await postRequest({
-      extension:CurrencyTradingSettingsRepository.Activity.del,
+      extension: CurrencyTradingSettingsRepository.Activity.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>
@@ -135,18 +131,8 @@ const Activities = () => {
   )
 }
 
-
-
 export default Activities
-
-
 
 // dataset: DataSets.INDUSTRY,
 // Activity
 // extension: CurrencyTradingSettingsRepository.Activity.qry
-
-
-
-
-
-

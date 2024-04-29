@@ -17,7 +17,7 @@ import { ResourceLookup } from 'src/components/Shared//ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function ProductionClassForm({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordId, editMode, setEditMode }) {
+export default function ProductionClassForm({ labels, maxAccess, recordId, setErroreMssage, setSelectedRecordId, editMode, setEditMode }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [initialValues, setInitialData] = useState({
