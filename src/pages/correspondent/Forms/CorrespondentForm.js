@@ -95,13 +95,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Correspondent}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isRecordRemark={true}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.Correspondent} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField

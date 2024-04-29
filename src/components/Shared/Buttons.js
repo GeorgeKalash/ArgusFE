@@ -104,12 +104,11 @@ export const Buttons = [
   },
   {
     key: 'RecordRemarks',
-    condition: 'isRecordRemark',
+    condition: 'onRecordRemarks',
     onClick: 'onRecordRemarks',
     color: '#90278e',
-    disabled: '!editMode',
     image: 'notes.png',
-    main: true
+    main: false
   },
   {
     key: 'Info',
