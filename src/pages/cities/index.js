@@ -1,25 +1,12 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
+import { VerticalLayout } from 'src/components/Shared/Layouts/VerticalLayout'
 import CityWindow from './Windows/CityWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
@@ -28,7 +15,6 @@ const City = () => {
 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -114,29 +100,27 @@ const City = () => {
   }
 
   return (
-    <>
-      <Box>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-        />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          refetch={refetch}
-          onEdit={edit}
-          onDelete={del}
-          maxAccess={access}
-          isLoading={false}
-          pageSize={50}
-          paginationType='client' //check
-        />
-      </Box>
+    <VerticalLayout>
+      <GridToolbar
+        onAdd={add}
+        maxAccess={access}
+        onSearch={search}
+        onSearchClear={clear}
+        labels={_labels}
+        inputSearch={true}
+      />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        refetch={refetch}
+        onEdit={edit}
+        onDelete={del}
+        maxAccess={access}
+        isLoading={false}
+        pageSize={50}
+        paginationType='client' //check
+      />
       {windowOpen && (
         <CityWindow
           onClose={() => {
@@ -150,7 +134,7 @@ const City = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VerticalLayout>
   )
 }
 

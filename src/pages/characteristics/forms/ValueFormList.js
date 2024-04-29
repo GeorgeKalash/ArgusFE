@@ -101,20 +101,17 @@ const ValueFormList = (
 
   return (
     <>
-      <Box>
-        <GridToolbar onAdd={addValue} maxAccess={maxAccess} />
-        <Table
-          columns={columns}
-          gridData={valueGridData}
-          rowId={['seqNo']}
-          onEdit={editValue}
-          onDelete={delValue}
-          isLoading={false}
-          maxAccess={maxAccess}
-          pagination={false}
-          height={height-100}
-        />
-      </Box>
+      <GridToolbar onAdd={addValue} maxAccess={maxAccess} />
+      <Table
+        columns={columns}
+        gridData={valueGridData}
+        rowId={['seqNo']}
+        onEdit={editValue}
+        onDelete={delValue}
+        isLoading={false}
+        maxAccess={maxAccess}
+        pagination={false}
+      />
     </>
   )
 }

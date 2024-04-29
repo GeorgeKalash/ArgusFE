@@ -1,22 +1,12 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
+import { VerticalLayout } from 'src/components/Shared/Layouts/VerticalLayout'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
 import { useWindow } from 'src/windows'
 import CashTransferTab from './Tabs/CashTransferTab'
 import toast from 'react-hot-toast'
@@ -229,36 +219,33 @@ const CashTransfer = () => {
   }
 
   return (
-    <>
-      <Box>
-        <GridToolbar
-          onAdd={addCashTFR}
-          maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          labels={_labels}
-          inputSearch={true}
-        />
-        <Table
-          columns={columns}
-          gridData={data ? data : { list: [] }}
-          rowId={['recordId']}
-          onEdit={editCashTFR}
-          onDelete={delCashTFR}
-          isLoading={false}
-          pageSize={50}
-          refetch={refetch}
-          paginationType='client'
-          maxAccess={access}
-        />
-      </Box>
-
+    <VerticalLayout>
+      <GridToolbar
+        onAdd={addCashTFR}
+        maxAccess={access}
+        onSearch={value => {
+          filterBy('qry', value)
+        }}
+        onSearchClear={() => {
+          clearFilter('qry')
+        }}
+        labels={_labels}
+        inputSearch={true}
+      />
+      <Table
+        columns={columns}
+        gridData={data ? data : { list: [] }}
+        rowId={['recordId']}
+        onEdit={editCashTFR}
+        onDelete={delCashTFR}
+        isLoading={false}
+        pageSize={50}
+        refetch={refetch}
+        paginationType='client'
+        maxAccess={access}
+      />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VerticalLayout>
   )
 }
 

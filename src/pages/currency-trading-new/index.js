@@ -1,10 +1,9 @@
-import { Box } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { Layout2 } from 'src/components/Shared/Layouts/Layou2'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -63,8 +62,8 @@ export default function CurrencyTrading() {
    },[accessADJ])
 
   return (
-    <Box sx={{height: `calc(100vh - 48px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
-   {plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} maxAccess={accessADJ}  plantId={plantId} />}
-    </Box>
+    <Layout2>
+      {plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} maxAccess={accessADJ}  plantId={plantId} />}
+    </Layout2>
   )
 }

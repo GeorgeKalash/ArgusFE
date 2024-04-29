@@ -718,7 +718,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
   return (
     <FormShell
       actions={actions}
-      height={400}
       form={formik}
       initialValues={initial}
       setEditMode={setEditMode}
