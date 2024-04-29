@@ -394,7 +394,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         Component: BenificiaryCash,
         props: {
           clientId: formik.values.clientId,
-          dispersalType: formik.values.dispersalType,
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
           beneficiaryId: formik.values.beneficiaryId
@@ -491,6 +490,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       props: {
         clientId: formik.values.clientId,
         beneficiaryId: formik.values.beneficiaryId,
+        dispersalType: formik.values.dispersalType,
         onInstantCashSubmit: onInstantCashSubmit
       },
       width: 1000,
@@ -687,6 +687,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   onChange={(event, newValue) => {
                     formik.setFieldValue('dispersalType', newValue?.dispersalType)
                     formik.setFieldValue('dispersalTypeName', newValue?.dispersalTypeName)
+                    formik.setFieldValue('beneficiaryId', '')
+                    formik.setFieldValue('beneficiaryName', '')
                   }}
                   error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                 />

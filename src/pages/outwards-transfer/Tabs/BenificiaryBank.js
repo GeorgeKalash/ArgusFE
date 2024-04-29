@@ -75,8 +75,6 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           swiftCode: RTBEB?.record?.swiftCode,
           branchCode: RTBEB?.record?.branchCode,
           branchName: RTBEB?.record?.branchName,
-          stateId: RTBEB?.record?.stateId,
-          cityId: RTBEB?.record?.cityId,
           state: RTBEB?.record?.state,
           city: RTBEB?.record?.city,
           zipcode: RTBEB?.record?.zipcode,
@@ -115,9 +113,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     swiftCode: '',
     branchCode: '',
     branchName: '',
-    stateId: '',
     state: '',
-    cityId: '',
     city: '',
     zipcode: '',
     remarks: ''
@@ -160,8 +156,6 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         swiftCode: values.swiftCode,
         branchCode: values.branchCode,
         branchName: values.branchName,
-        cityId: values.cityId,
-        stateId: values.stateId,
         city: values.city,
         state: values.state,
         zipcode: values.zipcode
@@ -298,7 +292,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               rows={3}
               maxLength='100'
               maxAccess={maxAccess}
-              onChange={formik.handleChange}
+              onChange={e => formik.setFieldValue('addressLine1', e.target.value)}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
             />
@@ -311,7 +305,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               rows={3}
               maxLength='100'
               maxAccess={maxAccess}
-              onChange={formik.handleChange}
+              onChange={e => formik.setFieldValue('addressLine2', e.target.value)}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
             />
@@ -332,9 +326,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               maxAccess={maxAccess}
               values={formik.values}
               onChange={(event, newValue) => {
-                formik.setFieldValue('stateId', null)
                 formik.setFieldValue('state', '')
-                formik.setFieldValue('cityId', '')
                 formik.setFieldValue('city', '')
                 formik.setFieldValue('nationalityId', newValue ? newValue.recordId : '')
               }}
@@ -342,50 +334,23 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
-            <ResourceComboBox
-              endpointId={formik.values.nationalityId && SystemRepository.State.qry}
-              parameters={formik.values.nationalityId && `_countryId=${formik.values.nationalityId}`}
-              name='stateId'
+            <CustomTextField
+              name='state'
               label={_labels.state}
-              valueField='recordId'
-              displayField='name'
-              readOnly={!formik.values.nationalityId}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                console.log('fireeee')
-                formik.setFieldValue('stateId', newValue?.recordId)
-                formik.setFieldValue('state', newValue?.name)
-                formik.setFieldValue('cityId', '')
-                formik.setFieldValue('city', '')
-              }}
-              error={formik.touched.stateId && Boolean(formik.errors.stateId)}
+              value={formik.values.state}
+              onChange={formik.handleChange}
+              error={formik.touched.state && Boolean(formik.errors.state)}
               maxAccess={maxAccess}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
-            <ResourceLookup
-              endpointId={SystemRepository.City.snapshot}
-              parameters={{
-                _countryId: formik.values.nationalityId,
-                _stateId: formik.values.stateId ?? 0
-              }}
-              valueField='name'
-              displayField='name'
+            <CustomTextField
               name='city'
               label={_labels.city}
-              readOnly={!formik.values.stateId}
-              form={formik}
+              value={formik.values.city}
+              onChange={formik.handleChange}
+              error={formik.touched.city && Boolean(formik.errors.city)}
               maxAccess={maxAccess}
-              secondDisplayField={false}
-              onChange={(event, newValue) => {
-                newValue
-                  ? (formik.setFieldValue('cityId', newValue?.recordId), formik.setFieldValue('city', newValue?.name))
-                  : (formik.setFieldValue('cityId', ''), formik.setFieldValue('city', ''))
-
-                formik.setFieldValue('cityDistrictId', '')
-                formik.setFieldValue('cityDistrict', '')
-              }}
-              errorCheck={'cityId'}
             />
           </FormGrid>
         </Grid>

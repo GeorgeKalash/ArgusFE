@@ -134,7 +134,8 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
     formik.setFieldValue('remitter.dateOfBirth', formatDateFromApi(res.record?.clientIndividual?.birthDate) || '')
     formik.setFieldValue('remitter.email', res.record?.addressView?.email1 || '')
     formik.setFieldValue('remitter.gender', res.record?.clientRemittance?.genderName || '')
-    formik.setFieldValue('remitter.countryOfBirth', '') //res.record?.clientIDView.idCountryId (id might be ikama so we can't assume that id country is countryofBirth)
+    console.log('test clientsss ', res.record?.clientRemittance.cobRef)
+    formik.setFieldValue('remitter.countryOfBirth', res.record?.clientRemittance.cobRef)
     formik.setFieldValue('remitter.countryOfResidence', res.record?.addressView?.countryRef || '')
     formik.setFieldValue('remitter.address.country', res.record?.addressView?.countryRef || '')
     formik.setFieldValue('remitter.address.state', res.record?.addressView?.stateName || '')
@@ -178,17 +179,28 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
       extension: RemittanceOutwardsRepository.Beneficiary.get,
       parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
     })
+
+    const bankRes = await getRequest({
+      extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
+      parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+    })
+
     var nameArray = res.record?.benName?.split(' ')
-    var first = nameArray[0]
-    var last = nameArray?.slice(1).join(' ')
+    var first = nameArray[0] ?? ''
+    var last = nameArray?.slice(1).join(' ') ?? ''
 
     formik.setFieldValue('beneficiary.firstName', first ?? '')
     formik.setFieldValue('beneficiary.lastName', last ?? '')
     formik.setFieldValue('beneficiary.nationality', res.record.nationalityRef)
     formik.setFieldValue('beneficiary.gender', res.record.genderName)
+    formik.setFieldValue('beneficiary.countryOfBirth', res.record.cobRef)
+    formik.setFieldValue('beneficiary.mobileNumber', res.record.cellPhone)
+    formik.setFieldValue('beneficiary.phoneNumber', res.record.cellPhone)
+    formik.setFieldValue('beneficiary.dateOfBirth', formatDateFromApi(res.record.birthDate))
+    formik.setFieldValue('beneficiary.address.city', bankRes?.record?.city)
     formik.setFieldValue('beneficiary.address.addressLine1', res.record.addressLine1)
     formik.setFieldValue('beneficiary.address.addressLine2', res.record.addressLine2)
-    formik.setFieldValue('beneficiary.bankDetails.bankAccountNumber', res.record.IBAN)
+    formik.setFieldValue('beneficiary.bankDetails.bankAccountNumber', bankRes.record.IBAN)
   }
 
   return (
@@ -447,7 +459,7 @@ export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubm
             <Grid item xs={12}>
               <CustomTextField
                 name='beneficiary.postCode'
-                onChange={formik.values.beneficiary.address.postCode}
+                onChange={formik.setFieldValue('formik.values.beneficiary.address.postCode')}
                 label={_labels.postalCode}
                 numberField={true}
                 value={formik.values.beneficiary.address.postCode}
