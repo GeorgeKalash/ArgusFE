@@ -84,6 +84,15 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
     })
   }
 
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    }
+  ]
+
   return (
     <FormShell
       resourceId={ResourceIds.Accounts}
@@ -91,7 +100,7 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       height={600}
       maxAccess={maxAccess}
       editMode={editMode}
-      isRecordRemark={true}
+      actions={actions}
     >
       <Grid container>
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
