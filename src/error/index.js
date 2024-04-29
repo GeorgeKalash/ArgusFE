@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react'
 import Error from 'src/components/Shared/Error'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 const ErrorContext = React.createContext(null)
 

@@ -4,9 +4,7 @@ import { createContext, useContext, useState } from 'react'
 // ** 3rd Party Imports
 import axios from 'axios'
 import jwt from 'jwt-decode'
-
 import { AuthContext } from 'src/providers/AuthContext'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import Error from 'src/components/Shared/Error'
 
 const RequestsContext = createContext()

@@ -74,7 +74,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
   }
 
   useEffect(() => {
-    var parameters = `_filter=` + '&_recordIds=' + recordId
+    var parameters = `_filter=` + '&_recordId=' + recordId
     if (recordId) {
       getRequest({
         extension: SystemRepository.Plant.get,
