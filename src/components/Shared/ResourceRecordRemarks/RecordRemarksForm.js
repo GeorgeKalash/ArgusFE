@@ -24,32 +24,31 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
       notes: data?.notes ?? null,
       resourceId: data?.resourceId ?? resourceId,
       eventDate: data?.eventDate,
-      userId: userId
+      userId: data?.userId ?? userId
     },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       // accessLevel: yup.string().required(' ')
     }),
-    onSubmit: async obj => {
+    onSubmit: async values => {
       const date = new Date()
-      obj.eventDate = formatDateToApi(date)
+      values.eventDate = formatDateToApi(date)
 
       await postRequest({
         extension: SystemRepository.RecordRemarks.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(values)
       })
       if (data) {
         toast.success('Record Edited Successfully')
         window.close()
       } else {
         toast.success('Record Add Successfully')
-        formik.setFieldValue('note', '')
+        formik.setFieldValue('notes', '')
       }
       invalidate()
     }
   })
-  console.log(data?.list)
   const disabled = (data?.userId && data?.userId !== userId) || !formik.values.notes
 
   return (
@@ -66,14 +65,16 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
         >
           <Box fontWeight='bold'>{data.userName}</Box> - <Box sx={{ mx: 1 }}>{formatDateDefault(data.eventDate)}</Box>
         </Box>
-      )}{' '}
+      )}
       <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
         <CustomTextArea
           name='notes'
           label={labels.note}
           value={formik.values.notes}
-          place
           rows={5}
+          maxLength='500'
+          paddingRight={15}
+          readOnly={formik.values.userId !== userId}
           editMode={disabled}
           maxAccess={maxAccess}
           onChange={e => formik.setFieldValue('notes', e.target.value)}

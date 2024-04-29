@@ -103,9 +103,11 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
                         <Icon icon='mdi:application-edit-outline' fontSize={18} onClick={() => onEdit(row)} />
                       </IconButton>
 
-                      <IconButton size='small' onClick={() => setDeleteDialogOpen([true, row])} color='error'>
-                        <Icon icon='mdi:delete-forever' fontSize={18} />
-                      </IconButton>
+                      {row.userId === userId && (
+                        <IconButton size='small' onClick={() => setDeleteDialogOpen([true, row])} color='error'>
+                          <Icon icon='mdi:delete-forever' fontSize={18} />
+                        </IconButton>
+                      )}
                     </Box>
                   </TableCell>
                 </TableRow>
