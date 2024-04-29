@@ -26,7 +26,8 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
         .array()
         .of(
           yup.object().shape({
-            countryId: yup.string().required('Country recordId is required')
+            countryId: yup.string().required(' '),
+            rateTypeId: yup.string().required(' ')
           })
         )
         .required('Operations array is required')
