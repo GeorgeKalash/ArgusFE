@@ -13,14 +13,103 @@ import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
+import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-export default function InstantCash({ clientId, beneficiaryId, formik }) {
+export default function InstantCash({ clientId, beneficiaryId, onInstantCashSubmit }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: _labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.InstantCash
   })
 
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      payingAgent: '',
+      deliveryModeId: '',
+      currency: '',
+      partnerReference: '',
+      sourceAmount: '',
+      fromCountryId: '',
+      toCountryId: '',
+      sourceOfFundsId: '',
+      remittancePurposeId: '',
+      totalTransactionAmountPerAnnum: '25000',
+      transactionsPerAnnum: '200',
+      remitter: {
+        cardNo: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        mobileNumber: '',
+        phoneNumber: '',
+        email: '',
+        address: {
+          addressLine1: '',
+          addressLine2: '',
+          district: '',
+          city: '',
+          postCode: '',
+          state: '',
+          country: ''
+        },
+        primaryId: {
+          type: '',
+          number: '',
+          issueDate: null,
+          expiryDate: null,
+          placeOfIssue: ''
+        },
+        dateOfBirth: '',
+        gender: '',
+        nationality: '',
+        countryOfBirth: '',
+        countryOfResidence: '',
+        relation: '',
+        otherRelation: '',
+        profession: '',
+        employerName: '',
+        employerStatus: ''
+      },
+      beneficiary: {
+        cardNo: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        mobileNumber: '',
+        phoneNumber: '',
+        email: '',
+        address: {
+          addressLine1: '',
+          addressLine2: '',
+          district: '',
+          city: '',
+          postCode: '',
+          state: '',
+          country: ''
+        },
+        dateOfBirth: null,
+        gender: '',
+        nationality: '',
+        countryOfBirth: '',
+        bankDetails: {
+          bankCode: '',
+          bankName: '',
+          bankAddress1: '',
+          bankAccountNumber: ''
+        }
+      }
+    },
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({}),
+    onSubmit: values => {
+      onInstantCashSubmit(values)
+      window.close()
+    }
+  })
   useEffect(() => {
     ;(async function () {
       try {
@@ -38,31 +127,34 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
       extension: RTCLRepository.CtClientIndividual.get2,
       parameters: `_clientId=${clientId}`
     })
-    formik.setFieldValue('remitter[0].firstName', res.record?.clientIndividual?.firstName || '')
-    formik.setFieldValue('remitter[0].middleName', res.record?.clientIndividual?.middleName || '')
-    formik.setFieldValue('remitter[0].lastName', res.record?.clientIndividual?.lastName || '')
-    formik.setFieldValue('remitter[0].mobileNumber', res.record?.clientMaster?.cellPhone || '')
-    formik.setFieldValue('remitter[0].dateOfBirth', formatDateFromApi(res.record?.clientIndividual?.birthDate) || '')
-    formik.setFieldValue('remitter[0].email', res.record?.addressView?.email1 || '')
-    formik.setFieldValue('remitter[0].gender', res.record?.clientRemittance?.genderName || '')
-    formik.setFieldValue('remitter[0].countryOfBirth', '') //res.record?.clientIDView.idCountryId (id might be ikama so we can't assume that id country is countryofBirth)
-    formik.setFieldValue('remitter[0].countryOfResidence', res.record?.addressView?.countryRef || '')
-    formik.setFieldValue('remitter[0].address[0].country', res.record?.addressView?.countryRef || '')
-    formik.setFieldValue('remitter[0].address[0].state', res.record?.addressView?.stateName || '')
-    formik.setFieldValue('remitter[0].address[0].city', res.record?.addressView?.city || '')
-    formik.setFieldValue('remitter[0].address[0].district', res.record?.addressView?.cityDistrictName || '')
-    formik.setFieldValue('remitter[0].address[0].postCode', res.record?.addressView?.postalCode || '')
-    formik.setFieldValue('remitter[0].nationality', res.record?.clientMaster?.nationalityRef || '')
-    formik.setFieldValue('remitter[0].primaryId[0].number', res.record?.clientIDView?.idNo || '')
-    formik.setFieldValue(
-      'remitter[0].primaryId[0].issueDate',
-      formatDateFromApi(res.record?.clientIDView?.idIssueDate) || ''
-    )
-    formik.setFieldValue(
-      'remitter[0].primaryId[0].expiryDate',
-      formatDateFromApi(res.record?.clientMaster?.expiryDate) || ''
-    )
-    formik.setFieldValue('remitter[0].primaryId[0].placeOfIssue', res.record?.clientIDView?.idCountryRef || '')
+    formik.setFieldValue('remitter.firstName', res.record?.clientIndividual?.firstName || '')
+    formik.setFieldValue('remitter.middleName', res.record?.clientIndividual?.middleName || '')
+    formik.setFieldValue('remitter.lastName', res.record?.clientIndividual?.lastName || '')
+    formik.setFieldValue('remitter.mobileNumber', res.record?.clientMaster?.cellPhone || '')
+    formik.setFieldValue('remitter.dateOfBirth', formatDateFromApi(res.record?.clientIndividual?.birthDate) || '')
+    formik.setFieldValue('remitter.email', res.record?.addressView?.email1 || '')
+    formik.setFieldValue('remitter.gender', res.record?.clientRemittance?.genderName || '')
+    formik.setFieldValue('remitter.countryOfBirth', '') //res.record?.clientIDView.idCountryId (id might be ikama so we can't assume that id country is countryofBirth)
+    formik.setFieldValue('remitter.countryOfResidence', res.record?.addressView?.countryRef || '')
+    formik.setFieldValue('remitter.address.country', res.record?.addressView?.countryRef || '')
+    formik.setFieldValue('remitter.address.state', res.record?.addressView?.stateName || '')
+    formik.setFieldValue('remitter.address.city', res.record?.addressView?.city || '')
+    formik.setFieldValue('remitter.address.district', res.record?.addressView?.cityDistrictName || '')
+    formik.setFieldValue('remitter.address.postCode', res.record?.addressView?.postalCode || '')
+    formik.setFieldValue('remitter.nationality', res.record?.clientMaster?.nationalityRef || '')
+    formik.setFieldValue('remitter.primaryId.number', res.record?.clientIDView?.idNo || '')
+    formik.setFieldValue('remitter.primaryId.issueDate', formatDateFromApi(res.record?.clientIDView?.idIssueDate) || '')
+    formik.setFieldValue('remitter.primaryId.expiryDate', formatDateFromApi(res.record?.clientMaster?.expiryDate) || '')
+    formik.setFieldValue('remitter.primaryId.placeOfIssue', res.record?.clientIDView?.idCountryRef || '')
+    if (res.record?.clientIDView?.idtId) {
+      const getIdType = await getRequest({
+        extension: RemittanceSettingsRepository.InterfaceMaps.get,
+        parameters: `_recordId=${res.record.clientIDView.idtId}&_resourceId=${ResourceIds.IdTypes}&_interfaceId=1`
+      })
+      console.log('check type ', getIdType.record?.reference)
+      if (getIdType.record?.reference)
+        formik.setFieldValue('remitter.primaryId.type', getIdType.record?.reference || '')
+    }
   }
 
   const getDefaultCountry = async () => {
@@ -75,7 +167,9 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
         extension: SystemRepository.Country.get,
         parameters: `_recordId=${res.record.value}`
       })
-      formik.setFieldValue('fromCountryId', countryRes.record.reference)
+
+      //formik.setFieldValue('fromCountryId', countryRes.record.reference)
+      formik.setFieldValue('fromCountryId', 'AE')
     }
   }
 
@@ -84,13 +178,18 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
       extension: RemittanceOutwardsRepository.Beneficiary.get,
       parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
     })
-    formik.setFieldValue('beneficiary[0].firstName', res.record.benName)
-    formik.setFieldValue('beneficiary[0].nationality', res.record.nationalityRef)
-    formik.setFieldValue('beneficiary[0].gender', res.record.genderName)
-    formik.setFieldValue('beneficiary[0].address[0].addressLine1', res.record.addressLine1)
-    formik.setFieldValue('beneficiary[0].address[0].addressLine2', res.record.addressLine2)
+    var nameArray = res.record?.benName?.split(' ')
+    var first = nameArray[0]
+    var last = nameArray?.slice(1).join(' ')
+
+    formik.setFieldValue('beneficiary.firstName', first ?? '')
+    formik.setFieldValue('beneficiary.lastName', last ?? '')
+    formik.setFieldValue('beneficiary.nationality', res.record.nationalityRef)
+    formik.setFieldValue('beneficiary.gender', res.record.genderName)
+    formik.setFieldValue('beneficiary.address.addressLine1', res.record.addressLine1)
+    formik.setFieldValue('beneficiary.address.addressLine2', res.record.addressLine2)
+    formik.setFieldValue('beneficiary.bankDetails.bankAccountNumber', res.record.IBAN)
   }
-  console.log('formik check ', formik)
 
   return (
     <FormShell resourceId={ResourceIds.InstantCash} form={formik} height={480} maxAccess={maxAccess}>
@@ -156,8 +255,8 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
               name='payingAgent'
               label={_labels.payingAgent}
               readOnly={!(formik.values.deliveryModeId && formik.values.toCountryId)}
-              valueField='deliveryModeDescription'
-              displayField='deliveryModeDescription'
+              valueField='description'
+              displayField='description'
               values={formik.values}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -177,16 +276,16 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
             <ResourceComboBox
               endpointId={RemittanceBankInterface.Combos.qry}
               parameters={`_combo=7`}
-              name='remitter[0].profession'
+              name='remitter.profession'
               label={_labels.profession}
               valueField='recordId'
               displayField='name'
               values={formik.values}
               onChange={(event, newValue) => {
                 if (newValue) {
-                  formik.setFieldValue('remitter[0].profession', newValue?.recordId)
+                  formik.setFieldValue('remitter.profession', newValue?.recordId)
                 } else {
-                  formik.setFieldValue('remitter[0].profession', '')
+                  formik.setFieldValue('remitter.profession', '')
                 }
               }}
               maxAccess={maxAccess}
@@ -261,16 +360,16 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
               <ResourceComboBox
                 endpointId={RemittanceBankInterface.Combos.qry}
                 parameters={`_combo=2`}
-                name='remitter[0].relation'
+                name='remitter.relation'
                 label={_labels.relationship}
                 valueField='recordId'
                 displayField='name'
-                values={formik.values.remitter[0].relation}
+                values={formik.values.remitter.relation}
                 onChange={(event, newValue) => {
                   if (newValue) {
-                    formik.setFieldValue('remitter[0].relation', newValue?.recordId)
+                    formik.setFieldValue('remitter.relation', newValue?.recordId)
                   } else {
-                    formik.setFieldValue('remitter[0].relation', '')
+                    formik.setFieldValue('remitter.relation', '')
                   }
                 }}
                 maxAccess={maxAccess}
@@ -280,19 +379,19 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                name='remitter[0].otherRelation'
+                name='remitter.otherRelation'
                 onChange={formik.handleChange}
                 label={_labels.otherRelation}
-                value={formik.values.remitter[0].otherRelation}
+                value={formik.values.remitter.otherRelation}
                 error={formik.touched.otherRelation && Boolean(formik.errors.otherRelation)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                name='remitter[0].employerName'
+                name='remitter.employerName'
                 onChange={formik.handleChange}
                 label={_labels.employerName}
-                value={formik.values.remitter[0].employerName}
+                value={formik.values.remitter.employerName}
                 error={formik.touched.employerName && Boolean(formik.errors.employerName)}
               />
             </Grid>
@@ -300,16 +399,16 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
               <ResourceComboBox
                 endpointId={RemittanceBankInterface.Combos.qry}
                 parameters={`_combo=4`}
-                name='remitter[0].employerStatus'
+                name='remitter.employerStatus'
                 label={_labels.employerStatus}
                 valueField='recordId'
                 displayField='name'
-                values={formik.values.remitter[0].employerStatus}
+                values={formik.values.remitter.employerStatus}
                 onChange={(event, newValue) => {
                   if (newValue) {
-                    formik.setFieldValue('remitter[0].employerStatus', newValue?.name)
+                    formik.setFieldValue('remitter.employerStatus', newValue?.name)
                   } else {
-                    formik.setFieldValue('remitter[0].employerStatus', '')
+                    formik.setFieldValue('remitter.employerStatus', '')
                   }
                 }}
                 maxAccess={maxAccess}
@@ -329,32 +428,30 @@ export default function InstantCash({ clientId, beneficiaryId, formik }) {
                   _payingAgent: formik.values.payingAgent,
                   _deliveryMode: formik.values.deliveryModeId
                 }}
-                valueField='bankName'
+                valueField='name'
                 displayField='bankName'
-                name='beneficiary[0].bankName'
+                name='beneficiary.bankName'
                 label={_labels.bank}
                 form={formik}
                 readOnly={!(formik.values.deliveryModeId && formik.values.toCountryId && formik.values.payingAgent)}
                 maxAccess={maxAccess}
                 secondDisplayField={false}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('beneficiary[0].bankDetails[0].bankId', newValue?.recordId)
-                  formik.setFieldValue('beneficiary[0].bankDetails[0].bankName', newValue?.bankName)
-                  formik.setFieldValue('beneficiary[0].bankDetails[0].bankCode', newValue?.bankName)
-                  formik.setFieldValue('beneficiary[0].bankDetails[0].bankAddress1', newValue?.bankName)
-                  formik.setFieldValue('beneficiary[0].bankDetails[0].bankAccountNumber', newValue?.bankName)
+                  formik.setFieldValue('beneficiary.bankDetails.bankName', newValue?.name)
+                  formik.setFieldValue('beneficiary.bankDetails.bankCode', newValue?.recordId)
+                  formik.setFieldValue('beneficiary.bankDetails.bankAddress1', newValue?.address1)
                 }}
-                errorCheck={'bankId'}
+                errorCheck={'bankCode'}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                name='beneficiary[0].postalCode'
-                onChange={formik.handleChange}
+                name='beneficiary.postCode'
+                onChange={formik.values.beneficiary.address.postCode}
                 label={_labels.postalCode}
                 numberField={true}
-                value={formik.values.beneficiary[0].address[0].postalCode}
-                error={formik.touched.postalCode && Boolean(formik.errors.postalCode)}
+                value={formik.values.beneficiary.address.postCode}
+                error={formik.touched.postCode && Boolean(formik.errors.postCode)}
                 maxAccess={maxAccess}
               />
             </Grid>

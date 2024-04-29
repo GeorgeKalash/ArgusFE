@@ -149,11 +149,6 @@ const OutwardsTransfer = () => {
       flex: 1
     },
     {
-      field: 'agentName',
-      headerName: _labels.Agents,
-      flex: 1
-    },
-    {
       field: 'rsName',
       headerName: _labels.ReleaseStatus,
       flex: 1

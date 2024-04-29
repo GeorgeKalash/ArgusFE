@@ -363,6 +363,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={(event, newValue) => {
                 if (newValue) {
                   formik.setFieldValue('gender', newValue?.key)
+                  console.log('check gender ', newValue.key)
                 } else {
                   formik.setFieldValue('gender', '')
                 }
