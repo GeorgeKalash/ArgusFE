@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, DialogActions, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, Box, Button, DialogActions, TextField } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -53,6 +53,8 @@ const WindowToolbar = ({
   const { getRequest } = useContext(RequestsContext)
 
   const [reportStore, setReportStore] = useState([])
+  const [showToast, setShowToast] = useState(false)
+  const [toastText, setToastText] = useState('')
 
   const getReportLayout = () => {
     setReportStore([])
@@ -84,8 +86,42 @@ const WindowToolbar = ({
     getReportLayout()
   }, [])
 
-  return (
+  const handleButtonMouseEnter = text => {
+    setToastText(text)
+    setShowToast(true)
+  }
+
+  const handleButtonMouseLeave = () => {
+    setShowToast(false)
+  }
+  
+return (
     <DialogActions>
+      <style>
+        {`
+          .button-container {
+            position: relative;
+            display: inline-block;
+          }
+          .toast {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333333ad;
+            color: white;
+            padding: 3px 7px;
+            border-radius: 7px;
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+            z-index: 1;
+          }
+          .button-container:hover .toast {
+            opacity: 1;
+            top: -40px;
+          }
+        `}
+      </style>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flex: '0', paddingTop:4 }}>
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -108,9 +144,14 @@ const WindowToolbar = ({
               onClick={onGenerateReport}
               size='small'
             >
-              <Tooltip title='Preview'>
+              <div
+                className='button-container'
+                onMouseEnter={() => handleButtonMouseEnter('Preview')}
+                onMouseLeave={handleButtonMouseLeave}
+              >
                 <img src='/images/buttonsIcons/preview.png' alt='Preview' />
-              </Tooltip>
+                {showToast && <div className='toast'>{toastText}</div>}
+              </div>
             </Button>
           </Box>
         ) : (
@@ -125,7 +166,12 @@ const WindowToolbar = ({
 
             return (
               isVisible && (
-                <Tooltip placement='top' title={button.key} key={index}>
+                <div
+                  className='button-container'
+                  onMouseEnter={() => isDisabled? null : handleButtonMouseEnter(button.key)}
+                  onMouseLeave={handleButtonMouseLeave}
+                  key={index}
+                >
                   <Button
                     onClick={handleClick}
                     variant='contained'
@@ -145,7 +191,8 @@ const WindowToolbar = ({
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                </Tooltip>
+                  {showToast && <div className='toast'>{toastText}</div>}
+                </div>
               )
             )
           })}
@@ -160,7 +207,12 @@ const WindowToolbar = ({
 
             return (
               isVisible && (
-                <Tooltip placement='top' title={button.key} key={index}>
+                <div
+                  className='button-container'
+                  onMouseEnter={() => isDisabled? null : handleButtonMouseEnter(button.key)}
+                  onMouseLeave={handleButtonMouseLeave}
+                  key={index}
+                >
                   <Button
                     onClick={handleClick}
                     variant='contained'
@@ -180,7 +232,8 @@ const WindowToolbar = ({
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                </Tooltip>
+                  {showToast && <div className='toast'>{toastText}</div>}
+                </div>
               )
             )
           })}

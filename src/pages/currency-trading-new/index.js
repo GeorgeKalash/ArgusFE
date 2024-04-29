@@ -4,6 +4,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { Layout2 } from 'src/components/Shared/Layouts/Layou2'
+import { VerticalLayout } from 'src/components/Shared/Layouts/VerticalLayout'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -62,8 +63,8 @@ export default function CurrencyTrading() {
    },[accessADJ])
 
   return (
-    <Layout2>
+    <VerticalLayout>
       {plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} maxAccess={accessADJ}  plantId={plantId} />}
-    </Layout2>
+    </VerticalLayout>
   )
 }
