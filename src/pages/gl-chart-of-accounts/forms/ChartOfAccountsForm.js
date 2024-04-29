@@ -11,12 +11,10 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-
-import styles from 'styles/phoneVerification.module.css'
+import InputMask from 'react-input-mask'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
@@ -279,11 +277,8 @@ const inputBaseStyle = {
   marginRight: '4px'
 }
 
-import InputMask from 'react-input-mask'
-
 const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
   const handleInputChange = event => {
-    // Update your state and the cursor position
     const { value } = event.target
     setFieldValue(name, value)
   }
