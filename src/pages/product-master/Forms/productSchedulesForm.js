@@ -96,6 +96,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
       })
       .catch(error => {})
   }
+  console.log(filters)
 
   const columns = [
     {

@@ -175,9 +175,13 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, height, expa
           }))
         })
 
+      const uniqueCurrencies = res.list.filter(
+        (item, index, self) =>
+          index === self.findIndex(t => t.currencyId === item.currencyId && t.countryId === item.countryId)
+      )
       setStore(prevStore => ({
         ...prevStore,
-        currencies: res.list
+        currencies: uniqueCurrencies
       }))
     })
   }
