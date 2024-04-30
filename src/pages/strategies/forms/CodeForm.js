@@ -19,7 +19,7 @@ const CodeForm = ({
   labels,
   editMode,
   maxAccess,
-  setEditMode,
+
   recordId,
   store,
 
@@ -49,13 +49,12 @@ const CodeForm = ({
       codeId: yup.string().required()
     }),
 
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async values => {
       try {
         await postGroups(values)
         window.close()
       } catch (error) {
         toast.error('An error occurred')
-        setSubmitting(false)
       }
     }
   })
@@ -71,15 +70,11 @@ const CodeForm = ({
 
       if (isNewRecord) {
         toast.success('Record Added Successfully')
-
-        setEditMode(true)
       } else {
         toast.success('Record Edited Successfully')
       }
       invalidate()
-    } catch (error) {
-      toast.error('An error occurred')
-    }
+    } catch {}
   }
   useEffect(() => {
     recordId && getGroupId(recordId)
@@ -94,7 +89,6 @@ const CodeForm = ({
     })
       .then(res => {
         setInitialData(res.record)
-        setEditMode(true)
       })
       .catch(error => {})
   }

@@ -15,7 +15,7 @@ import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 
-const PreReqsForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store }) => {
+const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const [selectedCodeId, setSelectedCodeId] = useState('')
@@ -59,8 +59,6 @@ const PreReqsForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store
 
       if (isNewRecord) {
         toast.success('Record Added Successfully')
-
-        setEditMode(true)
       } else {
         toast.success('Record Edited Successfully')
       }
@@ -84,7 +82,6 @@ const PreReqsForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store
     })
       .then(res => {
         setInitialData(res.record)
-        setEditMode(true)
       })
       .catch(error => {})
   }
