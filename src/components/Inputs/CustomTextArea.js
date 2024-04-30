@@ -53,6 +53,7 @@ const CustomTextArea = ({
         multiline
         rows={rows} // You can adjust the number of rows as needed
         inputRef={inputRef}
+        name={name}
         type={type}
         variant={variant}
         value={value}

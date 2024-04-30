@@ -74,7 +74,6 @@ export const ResourceLookup = ({
           secondValue: _secondValue,
           error,
           onKeyUp,
-          helperText,
           name,
           ...rest
         }}

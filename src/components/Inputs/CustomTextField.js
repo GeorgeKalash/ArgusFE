@@ -66,13 +66,16 @@ const CustomTextField = ({
 
     if (phone) {
       const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue?.replace(/\D/g, '')
+      e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
+
       props?.onChange(e)
     }
+
     if (language === 'number') {
       e.target.value = inputValue?.replace(/[^0-9.]/g, '')
       props?.onChange(e)
     }
+
     if (language === 'arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
       props?.onChange(e)
