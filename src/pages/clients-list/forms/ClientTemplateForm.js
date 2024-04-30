@@ -147,6 +147,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
     salary: '',
     salaryRange: '',
     smsLanguage: '',
+    sponsorName: '',
 
     // status: "",
     whatsAppNo: '',
@@ -1023,7 +1024,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                         onChange={clientIndividualFormik.handleChange}
                         language='english'
                         maxLength='10'
-                        readOnly={editMode && !allowEdit}
+                        readOnly={editMode}
                         onClear={() => clientIndividualFormik.setFieldValue('firstName', '')}
                         error={
                           clientIndividualFormik.touched.firstName && Boolean(clientIndividualFormik.errors.firstName)
@@ -1194,7 +1195,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                         { key: 'name', value: 'Name' },
                         { key: 'flName', value: 'Foreign Language Name' }
                       ]}
-                      readOnly={editMode && !allowEdit}
+                      readOnly={editMode}
                       values={clientIndividualFormik.values}
                       required
                       onChange={(event, newValue) => {
