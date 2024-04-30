@@ -48,8 +48,6 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
     }
   })
 
-  console.log('ppppp', formik)
-
   useEffect(() => {
     onChange(formik.values)
   }, [formik.values])
