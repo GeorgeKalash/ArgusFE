@@ -247,8 +247,8 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
       editMode={formik?.values?.beneficiaryId}
       maxAccess={maxAccess}
     >
-      <Grid container>
-        <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 2 }}>
+      <Grid container rowGap={2}>
+        <Grid container xs={12}>
           <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='name'
@@ -265,7 +265,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
             />
           </FormGrid>
         </Grid>
-        <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 2 }}>
+        <Grid container xs={12} spacing={2}>
           <FormGrid item hideonempty xs={3}>
             <CustomTextField
               name='firstName'
@@ -322,7 +322,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           </FormGrid>
         </Grid>
 
-        <Grid container rowGap={2} xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', px: 2, pt: 2 }}>
+        <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', pt: 2, pl: '10px' }}>
           <FormGrid hideonempty xs={3}>
             <CustomTextField
               name='fl_firstName'

@@ -128,7 +128,7 @@ const CTExchangeRates = () => {
       ]
     },
     onSubmit: values => {
-      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId)
+      postExchangeMaps(values, formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId)
     }
   })
 
@@ -172,6 +172,8 @@ const CTExchangeRates = () => {
   })
 
   const postExchangeMaps = (obj, currencyId, raCurrencyId, rateTypeId) => {
+    console.log('rateTypeId ', rateTypeId)
+
     const data = {
       currencyId: currencyId,
       rateTypeId: rateTypeId,

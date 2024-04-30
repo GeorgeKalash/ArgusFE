@@ -128,6 +128,11 @@ const OutwardsTransfer = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'countryRef',
       headerName: _labels.CountryRef,
       flex: 1
@@ -141,11 +146,6 @@ const OutwardsTransfer = () => {
     {
       field: 'currencyRef',
       headerName: _labels.Currency,
-      flex: 1
-    },
-    {
-      field: 'agentName',
-      headerName: _labels.Agents,
       flex: 1
     },
     {

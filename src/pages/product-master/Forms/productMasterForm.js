@@ -1,7 +1,6 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
-
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -18,20 +17,14 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-const ProductMasterForm = ({
-  store,
-  setStore,
-  labels,
-  editMode,
-  setEditMode,
-  maxAccess
-}) => {
+const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const {recordId : pId } = store
-  const[ type, setType] = useState('')
+  const { recordId: pId } = store
+  const [type, setType] = useState('')
 
-  const[ initialValues, setData] = useState({
+  const [initialValues, setData] = useState({
     recordId: null,
     name: null,
     reference: null,
@@ -41,6 +34,7 @@ const ProductMasterForm = ({
     corName: null,
     corRef: null,
     languages: null,
+    valueDays: null,
     commissionBase: null,
     interfaceId: null,
     posMsg: null,
@@ -57,14 +51,14 @@ const ProductMasterForm = ({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference:  yup.string().required('This field is required'),
-      name:  yup.string().required('This field is required'),
-      type:  yup.string().required('This field is required'),
-      functionId:  yup.string().required('This field is required'),
-      interfaceId:  yup.string().required('This field is required'),
-      commissionBase:  yup.string().required('This field is required'),
-      isInactive:  yup.string().required('This field is required'),
-      corId : type==="1" ? yup.string().required('This field is required') : yup.string().notRequired()
+      reference: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required'),
+      type: yup.string().required('This field is required'),
+      functionId: yup.string().required('This field is required'),
+      interfaceId: yup.string().required('This field is required'),
+      commissionBase: yup.string().required('This field is required'),
+      isInactive: yup.string().required('This field is required'),
+      corId: type === '1' ? yup.string().required('This field is required') : yup.string().notRequired()
     }),
     onSubmit: values => {
       postProductMaster(values)
@@ -78,29 +72,25 @@ const ProductMasterForm = ({
       record: JSON.stringify(obj)
     })
       .then(res => {
-
-        if (!recordId){
+        if (!recordId) {
           formik.setFieldValue('recordId', res.recordId)
 
           toast.success('Record Added Successfully')
           setEditMode(true)
           setStore(prevStore => ({
             ...prevStore,
-              recordId: res.recordId
-          }));
-
-        }else{
+            recordId: res.recordId
+          }))
+        } else {
           toast.success('Record Editted Successfully')
         }
 
         invalidate()
-
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     pId && getProductMasterById(pId)
   }, [pId])
 
@@ -120,11 +110,10 @@ const ProductMasterForm = ({
       })
   }
 
-return (
-  <FormShell form={formik}
-   resourceId={ResourceIds.ProductMaster}
-   maxAccess={maxAccess}
-   editMode={editMode} >      <Grid container>
+  return (
+    <FormShell form={formik} resourceId={ResourceIds.ProductMaster} maxAccess={maxAccess} editMode={editMode}>
+      {' '}
+      <Grid container>
         {/* First Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
@@ -163,7 +152,7 @@ return (
               values={formik.values}
               required
               onChange={(event, newValue) => {
-                formik && formik.setFieldValue('type', newValue?.key);
+                formik && formik.setFieldValue('type', newValue?.key)
                 setType(newValue?.key)
               }}
               error={formik.touched.type && Boolean(formik.errors.type)}
@@ -187,12 +176,24 @@ return (
             />
           </Grid>
           <Grid item xs={12}>
+            <CustomNumberField
+              name='valueDays'
+              label={labels.valueDays}
+              value={formik.values.valueDays}
+              maxLength={1}
+              decimalScale={0}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('valueDays', '')}
+              error={formik.touched.valueDays && Boolean(formik.errors.valueDays)}
+            />
+          </Grid>
+          <Grid item xs={12}>
             <ResourceLookup
               name='corId'
               endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
               label={labels.correspondent}
               form={formik}
-              required={formik.values.type === "1" ? true : false}
+              required={formik.values.type === '1' ? true : false}
               valueField='reference'
               displayField='name'
               firstValue={formik.values.corRef}
@@ -209,17 +210,11 @@ return (
                   formik.setFieldValue('corName', null)
                 }
               }}
-              error={
-                formik.touched.corId &&
-                Boolean(formik.errors.corId)
-              }
-              helperText={
-                formik.touched.corId && formik.errors.corId
-              }
+              error={formik.touched.corId && Boolean(formik.errors.corId)}
+              helperText={formik.touched.corId && formik.errors.corId}
               maxAccess={maxAccess}
             />
           </Grid>
-
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
@@ -240,7 +235,7 @@ return (
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-              endpointId={ RemittanceSettingsRepository.Interface.qry}
+              endpointId={RemittanceSettingsRepository.Interface.qry}
               name='interfaceId'
               label={labels.interface}
               valueField='recordId'
@@ -250,11 +245,10 @@ return (
               onChange={(event, newValue) => {
                 formik.setFieldValue('interfaceId', newValue?.recordId)
               }}
-              error={ formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
+              error={formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
               helperText={formik.touched.interfaceId && formik.errors.interfaceId}
             />
           </Grid>
-
 
           <Grid item xs={12}>
             <ResourceComboBox
@@ -266,7 +260,7 @@ return (
               values={formik.values}
               required
               onChange={(event, newValue) => {
-             formik.setFieldValue('commissionBase', newValue?.key)
+                formik.setFieldValue('commissionBase', newValue?.key)
               }}
               error={formik.touched.commissionBase && Boolean(formik.errors.commissionBase)}
               helperText={formik.touched.commissionBase && formik.errors.commissionBase}
@@ -280,7 +274,7 @@ return (
               readOnly={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('posMsg', '')}
-              error={ formik.errors && Boolean(formik.errors.posMsg)}
+              error={formik.errors && Boolean(formik.errors.posMsg)}
               helperText={formik.errors && formik.errors.posMsg}
             />
           </Grid>
@@ -294,17 +288,12 @@ return (
                 />
               }
               label={labels.activateCounterMessage}
-
             />
           </Grid>
           <Grid item xs={12}>
             <FormControlLabel
               control={
-                <Checkbox
-                  name='isInactive'
-                  checked={formik.values?.isInactive}
-                  onChange={formik.handleChange}
-                />
+                <Checkbox name='isInactive' checked={formik.values?.isInactive} onChange={formik.handleChange} />
               }
               label={labels.isInactive}
             />
