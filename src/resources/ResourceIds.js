@@ -112,5 +112,6 @@ export const ResourceIds = {
   CashTransfer: 33309,
   InstantCash: 36306,
   GlobalAuthorization: 23105,
-  InterfaceMap: 36120
+  InterfaceMap: 36120,
+  FiOpeningBalances: 31301
 }
