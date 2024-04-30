@@ -9,17 +9,19 @@ import IndicatorForm from '../forms/indicatorForm.js'
 
 const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApply }) => {
   const [activeTab, setActiveTab] = useState(0)
-  const [editMode, setEditMode] = useState(recordId)
 
-  const [strategiesFormik, setStrategiesFormik] = useState(null)
-
-  const handleUpdateFormik = formik => {
-    setStrategiesFormik(formik)
-  }
+  const editMode = !!recordId
 
   const [store, setStore] = useState({
     recordId: recordId || null
   })
+
+  function onStrategiesChange(values) {
+    setStore({
+      ...store,
+      ...values
+    })
+  }
 
   const tabs = [
     { label: labels.strategy },
@@ -34,32 +36,18 @@ const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApp
       <CustomTabPanel height={height} index={0} value={activeTab} disabledApply={!editMode && true}>
         <StrategiesForm
           labels={labels}
-          setEditMode={setEditMode}
           setStore={setStore}
           store={store}
           editMode={editMode}
           maxAccess={maxAccess}
-          onUpdateFormik={handleUpdateFormik}
+          onChange={onStrategiesChange}
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
-        <CodeList
-          labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
-          maxAccess={maxAccess}
-          store={store}
-          strategiesFormik={strategiesFormik}
-        />
+        <CodeList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab}>
-        <PreReqsList
-          labels={labels}
-          setEditMode={setEditMode}
-          setStore={setStore}
-          maxAccess={maxAccess}
-          store={store}
-        />
+        <PreReqsList labels={labels} setStore={setStore} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={3} value={activeTab} onApply={onApply}>
         <IndicatorForm
@@ -67,10 +55,8 @@ const StrategiesWindow = ({ height, recordId, labels, maxAccess, expanded, onApp
           labels={labels}
           height={height}
           expanded={expanded}
-          setEditMode={setEditMode}
           setStore={setStore}
           maxAccess={maxAccess}
-          strategiesFormik={strategiesFormik}
           store={store}
         />
       </CustomTabPanel>

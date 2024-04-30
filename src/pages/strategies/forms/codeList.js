@@ -21,7 +21,7 @@ import CodeForm from './CodeForm'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 
-const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
+const CodeList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
 
@@ -84,8 +84,7 @@ const CodeList = ({ store, labels, maxAccess, strategiesFormik }) => {
         labels: labels,
         recordId: recordId,
         maxAccess,
-        store,
-        strategiesFormik
+        store
       },
       width: 500,
       height: 400,

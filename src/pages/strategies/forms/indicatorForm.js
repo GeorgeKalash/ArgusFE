@@ -13,7 +13,7 @@ import { useForm } from 'src/hooks/form'
 
 const IndicatorForm = ({
   labels,
-  strategiesFormik,
+
   expanded,
   editMode,
   height,
@@ -115,7 +115,7 @@ const IndicatorForm = ({
 
   const applyStrategy = async () => {
     try {
-      const { groupName, ...valuesWithoutGroupName } = strategiesFormik.values
+      const { groupName, ...valuesWithoutGroupName } = store
 
       const res = await postRequest({
         extension: DocumentReleaseRepository.ApplySTG.apply,

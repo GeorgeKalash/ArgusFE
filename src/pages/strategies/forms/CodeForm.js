@@ -23,7 +23,6 @@ const CodeForm = ({
   recordId,
   store,
 
-  strategiesFormik,
   window
 }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -36,7 +35,7 @@ const CodeForm = ({
 
   const [initialValues, setInitialData] = useState({
     codeId: '',
-    groupId: strategiesFormik.values.groupId,
+    groupId: store.groupId,
     strategyId: stgId
   })
 
@@ -81,11 +80,11 @@ const CodeForm = ({
   }, [recordId])
 
   const getGroupId = codeId => {
-    const defaultParams = `_codeId=${codeId}&_groupId=${strategiesFormik.values.groupId}`
+    const defaultParams = `_codeId=${codeId}&_groupId=${store.groupId}`
     var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.GroupCode.qry,
-      parameters: `_groupId=${strategiesFormik.values.groupId}`
+      parameters: `_groupId=${store.groupId}`
     })
       .then(res => {
         setInitialData(res.record)
@@ -105,7 +104,7 @@ const CodeForm = ({
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={DocumentReleaseRepository.GroupCode.qry}
-            parameters={`_groupId=${strategiesFormik.values.groupId}`}
+            parameters={`_groupId=${store.groupId}`}
             name='codeId'
             label={labels.code}
             valueField='codeId'

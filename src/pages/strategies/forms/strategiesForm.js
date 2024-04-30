@@ -8,15 +8,16 @@ import toast from 'react-hot-toast'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
-import { useFormik } from 'formik'
+
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect, useState, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { useForm } from 'src/hooks/form'
 
-const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store, onUpdateFormik }) => {
+const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId } = store
 
@@ -32,10 +33,11 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
     groupId: ''
   })
 
-  const strategiesFormik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
+    initialValues,
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues,
     validationSchema: yup.object({
       name: yup.string().required(),
       groupId: yup.string().required(),
@@ -46,18 +48,11 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
     }
   })
 
-  const prevValuesRef = useRef()
+  console.log('ppppp', formik)
 
   useEffect(() => {
-    if (prevValuesRef.current && formikValuesHaveChanged(prevValuesRef.current, strategiesFormik.values)) {
-      onUpdateFormik(strategiesFormik)
-    }
-    prevValuesRef.current = strategiesFormik.values
-  }, [strategiesFormik.values, onUpdateFormik])
-
-  const formikValuesHaveChanged = (prevValues, newValues) => {
-    return JSON.stringify(prevValues) !== JSON.stringify(newValues)
-  }
+    onChange(formik.values)
+  }, [formik.values])
 
   const postGroups = async obj => {
     const isNewRecord = !obj?.recordId
@@ -76,7 +71,7 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
           recordId: res.recordId
         }))
       }
-      setEditMode(true)
+
       invalidate()
     } catch {}
   }
@@ -95,25 +90,24 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
     })
       .then(res => {
         setInitialData(res.record)
-        setEditMode(true)
       })
       .catch(error => {})
   }
 
   return (
-    <FormShell form={strategiesFormik} resourceId={ResourceIds.Strategies} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell form={formik} resourceId={ResourceIds.Strategies} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
             name='name'
             label={labels.name}
-            value={strategiesFormik.values.name}
+            value={formik.values.name}
             required
             maxLength='50'
             maxAccess={maxAccess}
-            onChange={strategiesFormik.handleChange}
-            onClear={() => strategiesFormik.setFieldValue('name', '')}
-            error={strategiesFormik.touched.name && Boolean(strategiesFormik.errors.name)}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('name', '')}
+            error={formik.touched.name && Boolean(formik.errors.name)}
           />
         </Grid>
         <Grid item xs={12}>
@@ -124,14 +118,14 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
             label={labels.groupStrat}
             valueField='recordId'
             displayField='name'
-            values={strategiesFormik.values}
+            values={formik.values}
             required
             readOnly={editMode}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              strategiesFormik && strategiesFormik.setFieldValue('groupId', newValue?.recordId)
+              formik && formik.setFieldValue('groupId', newValue?.recordId)
             }}
-            error={strategiesFormik.touched.groupId && Boolean(strategiesFormik.errors.groupId)}
+            error={formik.touched.groupId && Boolean(formik.errors.groupId)}
           />
         </Grid>
         <Grid item xs={12}>
@@ -141,13 +135,13 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, st
             label={labels.type}
             valueField='key'
             displayField='value'
-            values={strategiesFormik.values}
+            values={formik.values}
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              strategiesFormik.setFieldValue('type', newValue?.key)
+              formik.setFieldValue('type', newValue?.key)
             }}
-            error={strategiesFormik.touched.type && Boolean(strategiesFormik.errors.type)}
+            error={formik.touched.type && Boolean(formik.errors.type)}
           />
         </Grid>
       </Grid>
