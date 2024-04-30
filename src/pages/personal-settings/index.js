@@ -2,7 +2,6 @@ import { useEffect, useState, useContext } from 'react'
 import { Grid, Box } from '@mui/material'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -12,9 +11,10 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useResourceQuery } from 'src/hooks/resource'
 import { DataSets } from 'src/resources/DataSets'
 import * as yup from 'yup'
+import { Center } from 'devextreme-react/map'
+import { getStorageData } from 'src/storage/storageData'
 
 const PersonalSettings = () => {
-  const [errorMessage, setErrorMessage] = useState(null)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [initialValues, setInitialValues] = useState({
@@ -33,18 +33,15 @@ const PersonalSettings = () => {
   useEffect(() => {
     ;(async function () {
       try {
-          const userData = window.sessionStorage.getItem('userData')
-          ? JSON.parse(window.sessionStorage.getItem('userData'))
-          : null;
-          const _userId = userData && userData.userId;
+        const userData = getStorageData('userData')
+        const _userId = userData && userData.userId
 
-          const res = await getRequest({
-            extension: SelfServiceRepository.SSUserInfo.get,
-            parameters: `_recordId=${_userId}`
-          })
+        const res = await getRequest({
+          extension: SelfServiceRepository.SSUserInfo.get,
+          parameters: `_recordId=${_userId}`
+        })
 
-          setInitialValues(res.record)
-        
+        setInitialValues(res.record)
       } catch (exception) {}
     })()
   }, [])
@@ -62,19 +59,16 @@ const PersonalSettings = () => {
       languageId: yup.string().required(' ')
     }),
     onSubmit: values => {
-        postPersonalSettings(values)
+      postPersonalSettings(values)
     }
   })
-  
-  const postPersonalSettings = obj => {
-   
-    postRequest({
+
+  const postPersonalSettings = async obj => {
+    await postRequest({
       extension: SelfServiceRepository.SSUserInfo.set,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        if (res) toast.success('Record Added Successfully')
-      })
+    toast.success('Record Added Successfully')
   }
 
   const handleSubmit = () => {
@@ -83,14 +77,7 @@ const PersonalSettings = () => {
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          marginTop: '10px'
-        }}
-      >
+      <Box display='flex' height='100%' marginTop='10px' flexDirection='column'>
         <Grid container spacing={5} sx={{ pl: '10px' }} lg={4} md={7} sm={7} xs={12}>
           <Grid item xs={12}>
             <CustomTextField
@@ -111,9 +98,9 @@ const PersonalSettings = () => {
               valueField='key'
               displayField='value'
               values={formik.values}
-              required     
+              required
               onChange={(event, newValue) => {
-                formik && formik.setFieldValue('languageId', newValue?.key ?? '')
+                formik.setFieldValue('languageId', newValue?.key ?? '')
               }}
               error={formik.touched.languageId && Boolean(formik.errors.languageId)}
             />
@@ -127,25 +114,15 @@ const PersonalSettings = () => {
               displayField='value'
               values={formik.values}
               onChange={(event, newValue) => {
-                formik && formik.setFieldValue('menuTheme', newValue?.key)
+                formik.setFieldValue('menuTheme', newValue?.key)
               }}
               error={formik.touched.menuTheme && Boolean(formik.errors.menuTheme)}
             />
           </Grid>
-          <Grid
-            sx={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              padding: 3,
-              textAlign: 'center'
-            }}
-          >
+          <Grid position='fixed' bottom={0} left={0} width='100%' padding={3} textAlign='center'>
             <WindowToolbar onSave={handleSubmit} isSaved={true} />
           </Grid>
         </Grid>
-        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
       </Box>
     </>
   )
