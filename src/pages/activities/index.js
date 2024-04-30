@@ -1,34 +1,20 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
 import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-
-// ** Windows
 import ActivityWindow from './Windows/ActivityWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const Activities = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -101,23 +87,21 @@ const Activities = () => {
   
 
   return (
-    <>
-      <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          maxAccess={access}
-        />
-      </Box>
+    <VertLayout>
+      <GridToolbar onAdd={add} maxAccess={access} />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        onEdit={edit}
+        onDelete={del}
+        isLoading={false}
+        pageSize={50}
+        refetch={refetch}
+        paginationParameters={paginationParameters}
+        paginationType='api'
+        maxAccess={access}
+      />
       {windowOpen && (
         <ActivityWindow
           onClose={() => {
@@ -131,22 +115,11 @@ const Activities = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </ VertLayout>
+
   )
 }
 
 
 
 export default Activities
-
-
-
-// dataset: DataSets.INDUSTRY,
-// Activity
-// extension: CurrencyTradingSettingsRepository.Activity.qry
-
-
-
-
-
-

@@ -93,7 +93,6 @@ const Table = ({
   paginationType = 'api',
   handleCheckedRows,
   height,
-  addedHeight = '0px',
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
