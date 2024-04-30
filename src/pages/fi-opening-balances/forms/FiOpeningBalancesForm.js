@@ -1,41 +1,22 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    accountId: null,
-    fiscalYear: null,
-    amount: null,
-    baseAmount: null,
-    currencyId: null,
-    plantId: null
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FiOpeningBalance.qry
@@ -49,10 +30,11 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
       amount: null,
       baseAmount: null,
       currencyId: null,
-      plantId: null
+      plantId: null,
+      plantName: '',
+      plantRef:''
     },
     maxAccess: maxAccess,
-
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -72,9 +54,9 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId 
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -94,7 +76,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
       } catch (exception) {
         setErrorMessage(error)
@@ -118,12 +100,11 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             readOnly={editMode}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
+              formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
             }}
             error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
           />
         </Grid>
-
         <Grid item xs={12}>
           <ResourceLookup
             endpointId={FinancialRepository.Account.snapshot}
@@ -138,9 +119,12 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             required
             readOnly={editMode}
             form={formik}
-            secondDisplayField={true}
             firstValue={formik.values.accountRef}
             secondValue={formik.values.accountName}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
             onChange={(event, newValue) => {
               if (newValue) {
                 formik.setFieldValue('accountId', newValue?.recordId)
@@ -156,13 +140,12 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             maxAccess={maxAccess}
           />
         </Grid>
-
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={SystemRepository.Currency.qry}
             name='currencyId'
             label={labels.currencyName}
-            valueField='currencyId'
+            valueField='recordId'
             displayField='name'
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
@@ -173,18 +156,17 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             readOnly={editMode}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('currencyId', newValue?.currencyId)
+              formik.setFieldValue('currencyId', newValue?.recordId || null)
             }}
             error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
           />
         </Grid>
-
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={SystemRepository.Plant.qry}
             name='plantId'
             label={labels.plant}
-            valueField='plantId'
+            valueField='recordId'
             displayField='name'
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
@@ -193,39 +175,45 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             values={formik.values}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('plantId', newValue?.plantId)
+              if (newValue) {
+                formik.setFieldValue('plantId', newValue?.recordId)
+                formik.setFieldValue('plantRef', newValue?.reference)
+                formik.setFieldValue('plantName', newValue?.name)
+              } else {
+                formik.setFieldValue('plantId', '')
+                formik.setFieldValue('plantRef', null)
+                formik.setFieldValue('plantName', null)
+              }
             }}
-            error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+            error={formik.touched.plantId && Boolean(formik.errors.recordId)}
           />
         </Grid>
-
         <Grid item xs={12}>
-          <CustomTextField
+          <CustomNumberField
             name='amount'
+            type='text'
             label={labels.amount}
             value={formik.values.amount}
             required
-            maxLength='15'
             maxAccess={maxAccess}
-            onChange={formik.handleChange}
+            onChange={e => formik.setFieldValue('amount', e.target.value)}
             onClear={() => formik.setFieldValue('amount', '')}
-            type='number'
             error={formik.touched.amount && Boolean(formik.errors.amount)}
+            maxLength={10}
           />
         </Grid>
-
         <Grid item xs={12}>
-          <CustomTextField
+        <CustomNumberField
             name='baseAmount'
+            type='text'
             label={labels.baseAmount}
             value={formik.values.baseAmount}
             required
-            maxLength='15'
             maxAccess={maxAccess}
-            onChange={formik.handleChange}
+            onChange={e => formik.setFieldValue('baseAmount', e.target.value)}
             onClear={() => formik.setFieldValue('baseAmount', '')}
-            type='number'
             error={formik.touched.baseAmount && Boolean(formik.errors.baseAmount)}
+            maxLength={10}
           />
         </Grid>
       </Grid>
