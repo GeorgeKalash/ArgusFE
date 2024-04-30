@@ -41,7 +41,8 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
-  const [cashData, setCashData] = useState([])
+  const [cashData, setCashData] = useState({})
+  const [interfaceId, setInterfaceId] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -147,18 +148,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     interfaceId: ''
   })
 
-  const fillProfessionStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: RemittanceSettingsRepository.Profession.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setProfessionFilterStore(res.list)
-      })
-      .catch(error => {})
-  }
-
   const formik = useFormik({
     initialValues,
     enableReinitialize: true,
@@ -184,7 +173,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       return errors
     },
     onSubmit: async values => {
-      /* const copy = { ...values }
+      const copy = { ...values }
       delete copy.amountRows
       copy.date = formatDateToApi(copy.date)
       copy.valueDate = formatDateToApi(copy.valueDate)
@@ -214,7 +203,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
       const amountGridData = {
         header: copy,
-        cash: updatedRows
+        cash: updatedRows,
+        bankType: interfaceId,
+        ICRequest: cashData
       }
 
       const amountRes = await postRequest({
@@ -233,8 +224,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         })
         formik.setFieldValue('reference', res2.record.headerView.reference)
         invalidate()
-      }*/
-      console.log('check json ', JSON.stringify(cashData))
+      }
     }
   })
 
@@ -328,7 +318,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }
   })
 
-  const productDataFill = formFields => {
+  const productDataFill = async formFields => {
     //get products list
     var type = 2
     var functionId = 1
@@ -340,45 +330,44 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     var parameters = `_type=${type}&_functionId=${functionId}&_plantId=${plant}&_countryId=${countryId}&_dispersalType=${dispersalType}&_currencyId=${currencyId}&_amount=${amount}&_agentId=8`
 
     if (plant && countryId && currencyId && dispersalType) {
-      getRequest({
+      const res = await getRequest({
         extension: RemittanceOutwardsRepository.ProductDispersalEngine.qry,
         parameters: parameters
       })
-        .then(res => {
-          if (res.list.length > 0) {
-            const newList = { list: res.list }
-            setProductsStore(newList)
+      if (res.list.length > 0) {
+        const newList = { list: res.list }
+        setProductsStore(newList)
 
-            if (formFields.recordId) {
-              if (!formFields.productId) {
-                stackError({
-                  message: `There's no checked product`
-                })
-              } else {
-                const updatedList = res.list.map(product => {
-                  if (product.productId === formFields.productId) {
-                    return { ...product, checked: true }
-                  }
-
-                  return product
-                })
-                const newUpdatedList = { list: updatedList }
-                setProductsStore(newUpdatedList)
-              }
-            }
+        if (formFields.recordId) {
+          if (!formFields.productId) {
+            stackError({
+              message: `There's no checked product`
+            })
           } else {
-            formik.setFieldValue('productId', '')
-            formik.setFieldValue('commission', null)
-            formik.setFieldValue('defaultCommission', null)
-            formik.setFieldValue('lcAmount', null)
-            formik.setFieldValue('productId', '')
-            formik.setFieldValue('dispersalId', '')
-            formik.setFieldValue('exRate', null)
-            formik.setFieldValue('rateCalcMethod', null)
-            formik.setFieldValue('amount', null)
+            const updatedList = res.list.map(product => {
+              if (product.productId === formFields.productId) {
+                setInterfaceId(product.interfaceId)
+
+                return { ...product, checked: true }
+              }
+
+              return product
+            })
+            const newUpdatedList = { list: updatedList }
+            setProductsStore(newUpdatedList)
           }
-        })
-        .catch(error => {})
+        }
+      } else {
+        formik.setFieldValue('productId', '')
+        formik.setFieldValue('commission', null)
+        formik.setFieldValue('defaultCommission', null)
+        formik.setFieldValue('lcAmount', null)
+        formik.setFieldValue('productId', '')
+        formik.setFieldValue('dispersalId', '')
+        formik.setFieldValue('exRate', null)
+        formik.setFieldValue('rateCalcMethod', null)
+        formik.setFieldValue('amount', null)
+      }
     } else {
       setProductsStore([])
     }
@@ -403,7 +392,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         Component: BenificiaryCash,
         props: {
           clientId: formik.values.clientId,
-          dispersalType: formik.values.dispersalType,
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
           beneficiaryId: formik.values.beneficiaryId
@@ -506,7 +494,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       props: {
         clientId: formik.values.clientId,
         beneficiaryId: formik.values.beneficiaryId,
-        onInstantCashSubmit: onInstantCashSubmit
+        dispersalType: formik.values.dispersalType,
+        onInstantCashSubmit: onInstantCashSubmit,
+        cashData: cashData
       },
       width: 1000,
       height: 660,
@@ -567,7 +557,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           res.record.checked = true
           productDataFill(res.record.headerView)
           getClientInfo(res.record.headerView.clientId)
-          fillProfessionStore()
           fillAmountGridData(res.record.cash, res.record.headerView)
         }
         getDefaultVAT()
@@ -702,6 +691,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   onChange={(event, newValue) => {
                     formik.setFieldValue('dispersalType', newValue?.dispersalType)
                     formik.setFieldValue('dispersalTypeName', newValue?.dispersalTypeName)
+                    formik.setFieldValue('beneficiaryId', '')
+                    formik.setFieldValue('beneficiaryName', '')
                   }}
                   error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                 />
