@@ -158,7 +158,21 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       commission: yup.string().required(' '),
       lcAmount: yup.string().required(' '),
       clientId: yup.string().required(' '),
-      beneficiaryId: yup.string().required(' ')
+      beneficiaryId: yup.string().required(' '),
+      amountRows: yup
+        .array()
+        .of(
+          yup.object().shape({
+            types: yup
+              .object()
+              .shape({
+                key: yup.string().required('Type is required')
+              })
+              .required('Type is required'),
+            amount: yup.string().nullable().required('amount is required')
+          })
+        )
+        .required('Cash array is required')
     }),
     validate: values => {
       const errors = {}
@@ -1214,11 +1228,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                     disabled={isClosed}
                     maxAccess={maxAccess}
                     name='amountRows'
+                    height={170}
                     columns={[
                       {
                         component: 'resourcecombobox',
                         label: labels.type,
-                        name: 'typeName',
+                        name: 'type',
                         props: {
                           datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
                           displayField: 'value',
@@ -1226,9 +1241,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                           mapping: [
                             { from: 'key', to: 'type' },
                             { from: 'value', to: 'typeName' }
-                          ],
-                          filter: item =>
-                            formik.values.functionId === SystemFunction.Outwards ? item.key === '2' : true
+                          ]
                         }
                       },
                       {
