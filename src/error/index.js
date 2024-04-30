@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import Error from 'src/components/Shared/Error'
+import Error from 'src/components/Shared/PageErrors'
 
 const ErrorContext = React.createContext(null)
 

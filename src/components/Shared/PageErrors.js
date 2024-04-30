@@ -2,7 +2,7 @@ import React from 'react'
 import Window from './Window'
 import { Box, Button } from '@mui/material'
 
-const Error = ({ onClose, message, height = 100 }) => {
+const PageErrors = ({ onClose, message, height = 100 }) => {
   const errorMessage =
     typeof message === 'string'
       ? message
@@ -51,4 +51,4 @@ const Error = ({ onClose, message, height = 100 }) => {
   )
 }
 
-export default Error
+export default PageErrors
