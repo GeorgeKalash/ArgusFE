@@ -1,30 +1,14 @@
-// ** React Importsport
-import React, { useState, useContext, use } from 'react'
-
-// ** MUI Imports
-import { Box, Button } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import React, { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 // function SampleWindow() {
 //   const { stack } = useWindow()
@@ -178,28 +162,28 @@ const BPMasterData = () => {
   }
 
   return (
-    <>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-        />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          paginationType='client'
-          maxAccess={access}
-          refetch={refetch}
-        />
-    </>
+    <VertLayout>
+      <GridToolbar
+        onAdd={add}
+        maxAccess={access}
+        onSearch={search}
+        onSearchClear={clear}
+        labels={_labels}
+        inputSearch={true}
+      />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        onEdit={edit}
+        onDelete={del}
+        isLoading={false}
+        pageSize={50}
+        paginationType='client'
+        maxAccess={access}
+        refetch={refetch}
+      />
+    </ VertLayout>
   )
 }
 

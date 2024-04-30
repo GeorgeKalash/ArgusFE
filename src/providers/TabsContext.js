@@ -1,18 +1,11 @@
-// ** React Imports
 import React, { createContext, useEffect, useState, useContext } from 'react';
-
-// ** Next Import
 import { useRouter } from 'next/router'
-
-// ** MUI Imports
 import { Tabs, Tab, Box } from '@mui/material'
 import { IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-
-// ** Context
 import { MenuContext } from 'src/providers/MenuContext'
 
 const TabsContext = createContext()
