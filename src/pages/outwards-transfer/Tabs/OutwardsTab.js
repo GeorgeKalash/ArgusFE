@@ -140,7 +140,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     rateCalcMethod: '',
     checked: 'false',
     exRate2: '',
-    interfaceId: ''
+    interfaceId: '',
+    valueDays: ''
   })
 
   const formik = useFormik({
@@ -533,6 +534,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     obj.beneficiary.dateOfBirth = obj.beneficiary.dateOfBirth ? formatDateToApi(obj.beneficiary.dateOfBirth) : null
     setCashData(obj)
   }
+  function calculateValueDate() {
+    if (productFormik.values.valueDays) {
+    }
+  }
 
   useEffect(() => {
     ;(async function () {
@@ -730,6 +735,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   onClear={() => formik.setFieldValue('fcAmount', '')}
                   onBlur={() => {
                     if (formik.values.fcAmount) productDataFill(formik.values)
+                    calculateValueDate()
                   }}
                   error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
                   maxLength={10}
