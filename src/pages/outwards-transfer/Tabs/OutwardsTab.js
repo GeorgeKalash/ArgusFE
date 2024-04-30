@@ -41,7 +41,6 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
   const [cashData, setCashData] = useState({})
-  const [interfaceId, setInterfaceId] = useState([])
   const [editMode, setEditMode] = useState(!!recordId)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -195,7 +194,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       const amountGridData = {
         header: copy,
         cash: updatedRows,
-        bankType: interfaceId,
+        bankType: productFormik.values.interfaceId,
         ICRequest: cashData
       }
 
@@ -337,8 +336,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           } else {
             const updatedList = res.list.map(product => {
               if (product.productId === formFields.productId) {
-                setInterfaceId(product.interfaceId)
-
                 return { ...product, checked: true }
               }
 
@@ -346,6 +343,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             })
             const newUpdatedList = { list: updatedList }
             setProductsStore(newUpdatedList)
+            productFormik.setValues(newUpdatedList?.list[0])
           }
         }
       } else {
