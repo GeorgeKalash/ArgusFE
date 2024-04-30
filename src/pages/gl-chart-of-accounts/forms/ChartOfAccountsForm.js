@@ -23,6 +23,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
+  const [segments, setSegments] = useState([])
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -52,34 +53,33 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       name: yup.string().required(' '),
       description: yup.string().required(' '),
-      accountRef: yup.string().required()
+      accountRef: yup
+        .string()
+        .required()
+        .test(
+          'is-mask-filled',
+          'Account Reference is incomplete',
+          value => /^[\d-]+$/.test(value) && !/^_*-_*-_$/.test(value)
+        )
     }),
     onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true)
 
-      values.isCostElement = !!values.isCostElement
-
-      const segments = values.accountRef.split('-')
-
+      const payload = {
+        ...values,
+        segments: values.accountRef.split('-')
+      }
       try {
-        const payload = {
-          ...values,
-          segments: segments
-        }
-
         const response = await postRequest({
           extension: GeneralLedgerRepository.ChartOfAccounts.set,
           record: JSON.stringify(payload)
         })
-
+        toast.success(`Record ${values.recordId ? 'Edited' : 'Added'} Successfully`)
         if (!values.recordId) {
-          toast.success('Record Added Successfully')
           setInitialData({
             ...values,
             recordId: response.recordId
           })
-        } else {
-          toast.success('Record Edited Successfully')
         }
         setEditMode(true)
         invalidate()
@@ -91,57 +91,48 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
   })
 
   useEffect(() => {
-    ;(async function () {
-      try {
-        getDataResult()
-        if (recordId) {
-          setIsLoading(true)
-
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.ChartOfAccounts.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
-    })()
-  }, [])
-
-  const [segments, setSegments] = useState([])
+    if (recordId) {
+      setIsLoading(true)
+      getRequest({
+        extension: GeneralLedgerRepository.ChartOfAccounts.get,
+        parameters: `_recordId=${recordId}`
+      })
+        .then(res => {
+          formik.setValues(res.record)
+          setSegments(
+            res.record.accountRef.split('-').map((seg, index) => ({
+              key: `GLACSeg${index}`,
+              value: seg.length
+            }))
+          )
+          setIsLoading(false)
+        })
+        .catch(error => {
+          toast.error('Failed to fetch record')
+          setIsLoading(false)
+        })
+    } else {
+      getDataResult()
+    }
+  }, [recordId])
 
   const getDataResult = () => {
-    const parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Defaults.qry,
-      parameters: parameters
+      parameters: '_filter='
     })
       .then(res => {
-        const filteredList = res.list
-          .filter(obj => {
-            return (
-              obj.key === 'GLACSeg0' ||
-              obj.key === 'GLACSeg1' ||
-              obj.key === 'GLACSeg2' ||
-              obj.key === 'GLACSeg3' ||
-              obj.key === 'GLACSeg4'
-            )
-          })
-          .map(obj => {
-            obj.value = parseInt(obj.value)
-
-            return obj
-          })
+        const defaultSegments = res.list
+          .filter(obj => ['GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4'].includes(obj.key))
+          .map(obj => ({
+            key: obj.key,
+            value: parseInt(obj.value)
+          }))
           .filter(obj => obj.value)
 
-        setSegments(filteredList)
+        setSegments(defaultSegments)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch()
   }
 
   return (
