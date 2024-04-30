@@ -37,6 +37,7 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
@@ -155,13 +156,21 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       countryId: yup.string().required(' '),
       dispersalType: yup.string().required(' '),
       currencyId: yup.string().required(' '),
-      idNo: yup.string().required(' '),
       fcAmount: yup.string().required(' '),
       productId: yup.string().required(' '),
       commission: yup.string().required(' '),
       lcAmount: yup.string().required(' '),
+      clientId: yup.string().required(' '),
       beneficiaryId: yup.string().required(' ')
     }),
+    validate: values => {
+      const errors = {}
+      if (values.tdAmount > values.commission) {
+        errors.tdAmount = ' '
+      }
+
+      return errors
+    },
     onSubmit: async values => {
       const copy = { ...values }
       delete copy.amountRows
@@ -456,6 +465,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       condition: true,
       onClick: onPost,
       disabled: !editMode || isPosted || !isClosed
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      disabled: !editMode
     }
   ]
   function openProductWindow() {
@@ -756,8 +771,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               </Grid>
               <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
                 <Grid item xs={6}>
-                  <CustomTextField
-                    numberField={true}
+                  <CustomNumberField
                     name='exRate'
                     label={labels.exchangeRate}
                     value={formik.values.exRate}
@@ -771,8 +785,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomTextField
-                    numberField={true}
+                  <CustomNumberField
                     name='exRate2'
                     label={labels.exchangeRate}
                     value={formik?.values?.exRate ? 1 / formik.values.exRate : null}
@@ -787,8 +800,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 </Grid>
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  numberField={true}
+                <CustomNumberField
                   name='lcAmount'
                   label={labels.lcAmount}
                   value={formik.values.lcAmount}
@@ -802,8 +814,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  numberField={true}
+                <CustomNumberField
                   name='commission'
                   label={labels.commission}
                   value={formik.values.commission}
@@ -819,22 +830,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid container xs={12} spacing={1} sx={{ pt: 2, pl: 2 }}>
-                <Grid item xs={6}>
-                  <CustomTextField
-                    numberField={true}
-                    name='vatRate'
-                    label={labels.vatRate}
-                    value={formik.values.vatRate}
-                    readOnly
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('vatRate', '')}
-                    error={formik.touched.vatRate && Boolean(formik.errors.vatRate)}
-                    maxLength={10}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <CustomTextField
-                    numberField={true}
+                <Grid item xs={12}>
+                  <CustomNumberField
                     name='vatAmount'
                     label={labels.vatRate}
                     value={formik.values.vatAmount}
@@ -848,8 +845,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 </Grid>
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  numberField={true}
+                <CustomNumberField
                   name='tdAmount'
                   label={labels.discount}
                   value={formik.values.tdAmount}
@@ -869,8 +865,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  numberField={true}
+                <CustomNumberField
                   name='amount'
                   label={labels.NetToPay}
                   value={formik.values.amount}
@@ -884,20 +879,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  numberField={true}
-                  label='Amount Recieved'
-                  value={getFormattedNumber(receivedTotal)}
-                  readOnly
-                />
+                <CustomNumberField label='Amount Recieved' value={getFormattedNumber(receivedTotal)} readOnly />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  numberField={true}
-                  label='Balance To Pay'
-                  value={getFormattedNumber(Balance) ?? '0'}
-                  readOnly
-                />
+                <CustomNumberField label='Balance To Pay' value={getFormattedNumber(Balance) ?? '0'} readOnly />
               </Grid>
             </FieldSet>
           </Grid>
@@ -1074,7 +1059,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       name='idNo'
                       label={labels.IdNo}
                       value={formik.values.idNo}
-                      required
                       onChange={formik.handleChange}
                       readOnly
                       onClear={() => formik.setFieldValue('idNo', '')}
@@ -1089,6 +1073,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       name='expiryDate'
                       label={labels.expiryDate}
                       value={formik.values?.expiryDate}
+                      readOnly
                       error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
                       maxAccess={maxAccess}
                     />
