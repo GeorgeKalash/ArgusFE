@@ -1,14 +1,10 @@
 import React, { useContext, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
 import WindowToolbar from './WindowToolbar'
-import { useInvalidate } from 'src/hooks/resource'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import toast from 'react-hot-toast'
 
-const DeleteConfirmation = ({ recordId, invalidateEndpoint, deleteEndpoint, window }) => {
+const DeleteConfirmation = ({ window, props, obj }) => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [isDeleteDisabled, setIsDeleteDisabled] = useState(true)
-  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const handleChange = event => {
     const value = event.target.value
@@ -23,24 +19,9 @@ const DeleteConfirmation = ({ recordId, invalidateEndpoint, deleteEndpoint, wind
 
   const handleSubmit = async () => {
     if (deleteConfirmation.toLowerCase() === 'delete') {
-      const obj = { recordId }
-      await del(obj)
+      props.onDeleteConfirmation(obj)
       window.close()
     }
-  }
-
-  const invalidate = useInvalidate({
-    endpointId: invalidateEndpoint
-  })
-
-  const del = async obj => {
-    await postRequest({
-      extension: deleteEndpoint,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-
-    toast.success('Record Deleted Successfully')
   }
 
   const actions = [

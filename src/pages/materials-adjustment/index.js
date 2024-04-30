@@ -40,7 +40,7 @@ const MaterialsAdjustment = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_size=50&_params=&_dgId=0&_sortBy=recordId&_trxType=1`
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -129,13 +129,13 @@ const MaterialsAdjustment = () => {
 
   return (
     <>
-      <Box sx={{mt:10}}>
+      <Box sx={{ mt: 10 }}>
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
+          onDeleteConfirmation={del}
           isLoading={false}
           pageSize={50}
           refetch={refetch}

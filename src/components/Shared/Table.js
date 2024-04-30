@@ -20,6 +20,8 @@ import DeleteDialog from './DeleteDialog'
 // ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
+import { useWindow } from 'src/windows'
+import DeleteConfirmation from './DeleteConfirmation'
 
 const ODD_OPACITY = 0.2
 
@@ -101,14 +103,14 @@ const Table = ({
   pagination = true,
   paginationType = 'api',
   handleCheckedRows,
-
   height,
-  onDelete2,
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
   ...props
 }) => {
+  const { stack } = useWindow()
+
   const [gridData, setGridData] = useState(props.gridData)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
@@ -299,6 +301,16 @@ const Table = ({
     })
   }
 
+  function openDeleteConfirmation(obj) {
+    stack({
+      Component: DeleteConfirmation,
+      props: { props, obj },
+      width: 500,
+      height: 300,
+      title: 'Delete Confirmation'
+    })
+  }
+
   const shouldRemoveColumn = column => {
     const match = columnsAccess && columnsAccess.find(item => item.controlId === column.id)
 
@@ -307,10 +319,9 @@ const Table = ({
 
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
-  if (props.onEdit || props.onDelete || props.popupComponent || onDelete2) {
-    // Added onDelete2 condition
+  if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
-    const delete2BtnVisible = maxAccess ? onDelete2 && maxAccess > TrxType.EDIT : onDelete2 ? true : false // New condition for Delete2
+
     filteredColumns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,
@@ -338,13 +349,11 @@ const Table = ({
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
             )}
-            {!isStatus3 &&
-              delete2BtnVisible &&
-              !isWIP && ( // Render Delete2 button
-                <IconButton size='small' onClick={() => onDelete2(params.row)} color='error'>
-                  <Icon icon='mdi:delete-forever' fontSize={18} />
-                </IconButton>
-              )}
+            {props.onDeleteConfirmation && !isStatus3 && !isWIP && (
+              <IconButton size='small' onClick={() => openDeleteConfirmation(params.row)} color='error'>
+                <Icon icon='mdi:delete-forever' fontSize={18} />
+              </IconButton>
+            )}
           </Box>
         )
       }

@@ -106,28 +106,18 @@ const JournalVoucher = () => {
     setWindowOpen(true)
   }
 
-  function openDelete(recordId) {
-    stack({
-      Component: DeleteConfirmation,
-      props: {
-        recordId: recordId,
-        maxAccess: access,
-        invalidateEndpoint: GeneralLedgerRepository.JournalVoucher.qry,
-        deleteEndpoint: GeneralLedgerRepository.JournalVoucher.del
-      },
-      width: 500,
-      height: 300,
-      title: 'Delete Confirmation'
-    })
-  }
-
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
 
-  const del = obj => {
-    openDelete(obj?.recordId)
+  const del = async obj => {
+    await postRequest({
+      extension: GeneralLedgerRepository.JournalVoucher.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
   }
 
   return (
@@ -146,7 +136,7 @@ const JournalVoucher = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete2={del}
+          onDeleteConfirmation={del}
           isLoading={false}
           pageSize={50}
           paginationType='api'
