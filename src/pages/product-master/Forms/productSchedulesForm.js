@@ -1,6 +1,6 @@
 import { Grid, Box } from '@mui/material'
 import { useFormik } from 'formik'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 // ** Custom Imports
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -15,7 +15,9 @@ import toast from 'react-hot-toast'
 
 const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expanded, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId: pId, countries } = store
+  const { recordId: pId, countries, currencies } = store
+  const [filters, setFilters] = useState(currencies)
+  const [rowSelectionModel, setRowSelectionModel] = useState([])
 
   const formik = useFormik({
     enableReinitialize: false,
@@ -65,6 +67,8 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
   })
 
   const post = obj => {
+    const lastObject = obj[obj.length - 1]
+
     const data = {
       productId: pId,
       productSchedules: obj.map(({ id, seqNo, productId, saved, ...rest }, index) => ({
@@ -79,10 +83,20 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
     })
       .then(res => {
         if (res) toast.success('Record Edited Successfully')
+        setStore(prevStore => ({
+          ...prevStore,
+          plantId: lastObject.plantId,
+          currencyId: lastObject.currencyId,
+          countryId: lastObject.countryId,
+          dispersalId: lastObject.dispersalId,
+          _seqNo: lastObject.seqNo
+        }))
+        setRowSelectionModel(lastObject.id)
         getProductSchedules(pId)
       })
       .catch(error => {})
   }
+  console.log(filters)
 
   const columns = [
     {
@@ -103,6 +117,10 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
           { key: 'countryRef', value: 'Reference' },
           { key: 'countryName', value: 'Name' }
         ]
+      },
+
+      async onChange({ row: { update, oldRow, newRow } }) {
+        setFilters(currencies.filter(item => item.countryId === newRow.countryId))
       }
     },
     {
@@ -146,18 +164,18 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
       label: labels.currency,
       name: 'currencyId',
       props: {
-        endpointId: SystemRepository.Currency.qry,
-        valueField: 'recordId',
-        displayField: 'reference',
+        store: filters,
+        valueField: 'currencyId',
+        displayField: 'currencyRef',
         displayFieldWidth: 4,
         mapping: [
-          { from: 'recordId', to: 'currencyId' },
-          { from: 'name', to: 'currencyName' },
-          { from: 'reference', to: 'currencyRef' }
+          { from: 'currencyId', to: 'currencyId' },
+          { from: 'currencyName', to: 'currencyName' },
+          { from: 'currencyRef', to: 'currencyRef' }
         ],
         columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'currencyRef', value: 'Reference' },
+          { key: 'currencyName', value: 'Name' }
         ]
       }
     },
@@ -269,18 +287,24 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
               value={formik.values.schedules}
               error={formik.errors.schedules}
               columns={columns}
-              onSelectionChange={row =>
-                row &&
-                setStore(prevStore => ({
-                  ...prevStore,
-                  plantId: row.plantId,
-                  currencyId: row.currencyId,
-                  countryId: row.countryId,
-                  dispersalId: row.dispersalId,
-                  _seqNo: row.seqNo
-                }))
-              }
-              height={`${expanded ? `calc(100vh - 300px)` : `${height - 160}px`}`}
+              rowSelectionModel={rowSelectionModel}
+              onSelectionChange={row => {
+                if (row) {
+                  setStore(prevStore => ({
+                    ...prevStore,
+                    plantId: row.plantId,
+                    currencyId: row.currencyId,
+                    countryId: row.countryId,
+                    dispersalId: row.dispersalId,
+                    _seqNo: row.seqNo
+                  }))
+                  setRowSelectionModel(row.id)
+                  if (row.countryId) {
+                    setFilters(currencies.filter(item => item.countryId === row.countryId))
+                  }
+                }
+              }}
+              height={`${expanded ? `calc(100vh - 300px)` : `${height - 100}px`}`}
             />
           </Grid>
         </Grid>
