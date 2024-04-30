@@ -109,7 +109,6 @@ const Table = ({
   checkTitle = '',
   ...props
 }) => {
-  const [deleteComponentOpen, setDeleteComponentOpen] = useState([false, {}])
   const [gridData, setGridData] = useState(props.gridData)
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)

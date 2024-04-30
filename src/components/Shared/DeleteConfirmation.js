@@ -45,7 +45,7 @@ const DeleteConfirmation = ({ recordId, invalidateEndpoint, deleteEndpoint, wind
 
   const actions = [
     {
-      key: 'deleteConfirmation',
+      key: 'Delete',
       condition: true,
       onClick: handleSubmit,
       disabled: isDeleteDisabled

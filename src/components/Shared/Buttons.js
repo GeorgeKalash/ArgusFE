@@ -18,9 +18,9 @@ export const Buttons = [
     main: false
   },
   {
-    key: 'deleteConfirmation',
+    key: 'Delete',
     color: '#231f20',
-    image: 'workflow.png',
+    image: 'delete-icon.png',
     main: false
   },
   {
