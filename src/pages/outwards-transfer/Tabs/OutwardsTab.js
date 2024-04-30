@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react'
-
-// ** MUI Imports
 import { Grid, Button } from '@mui/material'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useWindow } from 'src/windows'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -100,8 +96,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     expiryDate: null,
     professionId: '',
     cellPhone: '',
-    purposeOfExchange: '',
-    docStatus: '',
+    poeId: '',
+    status: 1,
     ttNo: '',
     tokenNo: '',
     trackingNo: '',
@@ -380,8 +376,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }))
 
     formik.setValues({
-      ...header, // Fill formik fields with values from header
-      amountRows: modifiedList // Update amountRows separately
+      ...header,
+      amountRows: modifiedList
     })
   }
   function openReleaventWindow(formValues) {
@@ -416,23 +412,25 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   }
 
   const getClientInfo = async clientId => {
-    const res = await getRequest({
-      extension: RTCLRepository.CtClientIndividual.get2,
-      parameters: `_clientId=${clientId}`
-    })
-    formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
-    formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
-    formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
-    formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
-    formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
-    formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
-    formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
-    formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
-    formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-    formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
-    formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
-    formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
-    formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+    if (clientId) {
+      const res = await getRequest({
+        extension: RTCLRepository.CtClientIndividual.get2,
+        parameters: `_clientId=${clientId}`
+      })
+      formik.setFieldValue('idNo', res?.record?.clientIDView?.idNo)
+      formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView?.idExpiryDate))
+      formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
+      formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
+      formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
+      formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
+      formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
+      formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
+      formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
+      formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
+      formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
+      formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
+      formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+    }
   }
 
   const actions = [
@@ -490,9 +488,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     stack({
       Component: InstantCash,
       props: {
-        clientId: formik.values.clientId,
-        beneficiaryId: formik.values.beneficiaryId,
-        dispersalType: formik.values.dispersalType,
         onInstantCashSubmit: onInstantCashSubmit,
         cashData: cashData
       },
@@ -575,6 +570,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         onReopen={onReopen}
         isClosed={isClosed}
         actions={actions}
+        previewReport={editMode}
         functionId={SystemFunction.Outwards}
         disabledSubmit={isPosted}
       >
@@ -612,17 +608,17 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             <FormGrid item hideonempty xs={2.4}>
               <ResourceComboBox
                 datasetId={DataSets.DOCUMENT_STATUS}
-                name='docStatus'
+                name='status'
                 label={labels.docStatus}
                 readOnly
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                onClear={() => formik.setFieldValue('docStatus', '')}
+                onClear={() => formik.setFieldValue('status', '')}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('docStatus', newValue?.key || '')
+                  formik.setFieldValue('status', newValue?.key || '')
                 }}
-                error={formik.touched.docStatus && Boolean(formik.errors.docStatus)}
+                error={formik.touched.status && Boolean(formik.errors.status)}
               />
             </FormGrid>
             <FormGrid item hideonempty xs={2.4}>
@@ -670,7 +666,11 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   valueField='countryId'
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('countryId', newValue?.countryId)
+                    formik.setFieldValue('countryId', newValue ? newValue?.countryId : '')
+                    if (!newValue) {
+                      formik.setFieldValue('dispersalType', '')
+                      formik.setFieldValue('currencyId', '')
+                    }
                   }}
                   error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                 />
@@ -681,16 +681,17 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   parameters={formik.values.countryId && `_countryId=${formik.values.countryId}`}
                   label={labels.DispersalType}
                   required
-                  readOnly={isClosed || isPosted}
+                  readOnly={isClosed || isPosted || !formik.values.countryId}
                   name='dispersalType'
                   displayField='dispersalTypeName'
                   valueField='dispersalType'
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('dispersalType', newValue?.dispersalType)
-                    formik.setFieldValue('dispersalTypeName', newValue?.dispersalTypeName)
+                    formik.setFieldValue('dispersalType', newValue ? newValue?.dispersalType : '')
+                    formik.setFieldValue('dispersalTypeName', newValue ? newValue?.dispersalTypeName : '')
                     formik.setFieldValue('beneficiaryId', '')
                     formik.setFieldValue('beneficiaryName', '')
+                    if (!newValue) formik.setFieldValue('currencyId', '')
                   }}
                   error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
                 />
@@ -711,7 +712,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   ]}
                   valueField='currencyId'
                   values={formik.values}
-                  readOnly={formik.values.dispersalType == '' || isClosed || isPosted}
+                  readOnly={!formik.values.dispersalType || isClosed || isPosted}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('currencyId', newValue?.currencyId)
                   }}
@@ -719,8 +720,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  numberField={true}
+                <CustomNumberField
                   name='fcAmount'
                   label={labels.fcAmount}
                   value={formik.values.fcAmount}
@@ -756,15 +756,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   editMode={editMode}
                   readOnly
                   onChange={async (event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('corId', newValue?.recordId)
-                      formik.setFieldValue('corName', newValue?.name || '')
-                      formik.setFieldValue('corRef', newValue?.reference || '')
-                    } else {
-                      formik.setFieldValue('corId', null)
-                      formik.setFieldValue('corName', null)
-                      formik.setFieldValue('corRef', null)
-                    }
+                    formik.setFieldValue('corId', newValue ? newValue.recordId : null)
+                    formik.setFieldValue('corName', newValue ? newValue.name : null)
+                    formik.setFieldValue('corRef', newValue ? newValue.reference : null)
                   }}
                   errorCheck={'corId'}
                 />
@@ -907,23 +901,24 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   maxAccess={maxAccess}
                   editMode={editMode}
                   onChange={async (event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('clientId', newValue?.recordId)
-                      formik.setFieldValue('clientName', newValue?.name || '')
-                      formik.setFieldValue('clientRef', newValue?.reference || '')
-                      await getClientInfo(newValue?.recordId)
-                    } else {
-                      formik.setFieldValue('clientId', null)
-                      formik.setFieldValue('clientName', null)
-                      formik.setFieldValue('clientRef', null)
-                      formik.setFieldValue('beneficiaryId', '')
-                      formik.setFieldValue('beneficiaryName', '')
+                    if (newValue?.status == -1) {
+                      stackError({
+                        message: `Chosen Client Must Be Active.`
+                      })
+
+                      return
                     }
+                    formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
+                    formik.setFieldValue('clientName', newValue ? newValue.name : '')
+                    formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
+                    await getClientInfo(newValue?.recordId)
+                    formik.setFieldValue('beneficiaryId', '')
+                    formik.setFieldValue('beneficiaryName', '')
                   }}
                   errorCheck={'clientId'}
                 />
               </Grid>
-              <Grid container xs={12} spacing={2} sx={{ pl: '10px' }}>
+              <Grid container xs={12} spacing={2} sx={{ pl: '10px', pt: 1 }}>
                 <Grid item xs={3}>
                   <CustomTextField
                     name='firstName'
@@ -977,7 +972,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   />
                 </Grid>
               </Grid>
-              <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', pl: '10px' }}>
+              <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', pl: '10px', pt: 1 }}>
                 <Grid item xs={3}>
                   <CustomTextField
                     name='fl_firstName'
@@ -1035,9 +1030,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   />
                 </Grid>
               </Grid>
-              <Grid container>
+              <Grid container xs={12} sx={{ pt: 1, pl: 2 }}>
                 {/* First Column */}
-                <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+                <Grid container rowGap={2} xs={6} sx={{ px: 1 }}>
                   <Grid item xs={6}>
                     <ResourceComboBox
                       endpointId={SystemRepository.Country.qry}
@@ -1127,7 +1122,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={CurrencyTradingSettingsRepository.PurposeExchange.qry}
-                      name='purposeOfExchange'
+                      name='poeId'
                       label={labels.purposeOfExchange}
                       valueField='recordId'
                       displayField={['reference', 'name']}
@@ -1137,27 +1132,22 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       ]}
                       values={formik.values}
                       onChange={(event, newValue) => {
-                        if (newValue) {
-                          formik.setFieldValue('purposeOfExchange', newValue?.recordId)
-                        } else {
-                          formik.setFieldValue('purposeOfExchange', '')
-                        }
+                        formik.setFieldValue('poeId', newValue ? newValue?.recordId : '')
                       }}
-                      error={formik.touched.purposeOfExchange && Boolean(formik.errors.purposeOfExchange)}
-                      helperText={formik.touched.purposeOfExchange && formik.errors.purposeOfExchange}
+                      error={formik.touched.poeId && Boolean(formik.errors.poeId)}
+                      helperText={formik.touched.poeId && formik.errors.poeId}
                     />
                   </Grid>
                 </Grid>
                 {/* Second Column */}
-                <Grid container rowGap={2} sx={{ px: 2, width: '300px' }}>
-                  <Grid item xs={6}>
+                <Grid container rowGap={2} xs={6}>
+                  <Grid item xs={12}>
                     <CustomTextArea
                       name='details'
                       label={labels.details}
                       value={formik.values.details}
                       rows={3}
                       maxLength='100'
-                      sx={{ width: '300px' }}
                       editMode={editMode}
                       maxAccess={maxAccess}
                       onChange={e => formik.setFieldValue('details', e.target.value)}
@@ -1167,7 +1157,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 </Grid>
               </Grid>
             </FieldSet>
-            <Grid item xs={5}>
+            <Grid item xs={5} sx={{ pl: 5 }}>
               <ResourceLookup
                 endpointId={RemittanceOutwardsRepository.Beneficiary.snapshot}
                 parameters={{
@@ -1191,7 +1181,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 errorCheck={'beneficiaryId'}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={2} sx={{ pl: 2 }}>
               <Button
                 sx={{
                   backgroundColor: '#908c8c',
@@ -1208,73 +1198,76 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
               </Button>
             </Grid>
 
-            <FieldSet title='Amount'>
-              <Grid width={'100%'}>
-                <DataGrid
-                  onChange={value => formik.setFieldValue('amountRows', value)}
-                  value={formik.values.amountRows}
-                  error={formik.errors.amountRows}
-                  disabled={isClosed}
-                  maxAccess={maxAccess}
-                  name='amountRows'
-                  columns={[
-                    {
-                      component: 'resourcecombobox',
-                      label: labels.type,
-                      name: 'typeName',
-                      props: {
-                        datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
-                        displayField: 'value',
-                        valueField: 'key',
-                        mapping: [
-                          { from: 'key', to: 'type' },
-                          { from: 'value', to: 'typeName' }
-                        ],
-                        filter: item => (formik.values.functionId === SystemFunction.Outwards ? item.key === '2' : true)
+            <Grid container sx={{ pb: 15 }}>
+              <FieldSet title='Amount'>
+                <Grid width={'100%'}>
+                  <DataGrid
+                    onChange={value => formik.setFieldValue('amountRows', value)}
+                    value={formik.values.amountRows}
+                    error={formik.errors.amountRows}
+                    disabled={isClosed}
+                    maxAccess={maxAccess}
+                    name='amountRows'
+                    columns={[
+                      {
+                        component: 'resourcecombobox',
+                        label: labels.type,
+                        name: 'typeName',
+                        props: {
+                          datasetId: DataSets.CA_CASH_ACCOUNT_TYPE,
+                          displayField: 'value',
+                          valueField: 'key',
+                          mapping: [
+                            { from: 'key', to: 'type' },
+                            { from: 'value', to: 'typeName' }
+                          ],
+                          filter: item =>
+                            formik.values.functionId === SystemFunction.Outwards ? item.key === '2' : true
+                        }
+                      },
+                      {
+                        component: 'numberfield',
+                        name: 'amount',
+                        label: labels.Amount,
+                        defaultValue: ''
+                      },
+                      {
+                        component: 'resourcecombobox',
+                        name: 'ccName',
+                        editable: false,
+                        label: labels.creditCard,
+                        props: {
+                          endpointId: CashBankRepository.CreditCard.qry,
+                          valueField: 'recordId',
+                          displayField: 'name',
+                          mapping: [
+                            { from: 'recordId', to: 'ccId' },
+                            { from: 'name', to: 'ccName' }
+                          ],
+                          columnsInDropDown: [
+                            { key: 'reference', value: 'Reference' },
+                            { key: 'name', value: 'Name' }
+                          ],
+                          displayFieldWidth: 2
+                        }
+                      },
+                      {
+                        component: 'numberfield',
+                        header: labels.bankFees,
+                        name: 'bankFees',
+                        label: labels.bankFees
+                      },
+                      {
+                        component: 'textfield',
+                        header: labels.receiptRef,
+                        name: 'receiptRef',
+                        label: labels.receiptRef
                       }
-                    },
-                    {
-                      component: 'numberfield',
-                      name: 'amount',
-                      label: labels.Amount,
-                      defaultValue: ''
-                    },
-                    {
-                      component: 'resourcecombobox',
-                      name: 'ccName',
-                      editable: false,
-                      label: labels.creditCard,
-                      props: {
-                        endpointId: CashBankRepository.CreditCard.qry,
-                        valueField: 'recordId',
-                        displayField: 'name',
-                        mapping: [
-                          { from: 'recordId', to: 'ccId' },
-                          { from: 'name', to: 'ccName' }
-                        ],
-                        columnsInDropDown: [
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' }
-                        ],
-                        displayFieldWidth: 2
-                      }
-                    },
-                    {
-                      component: 'numberfield',
-                      header: labels.bankFees,
-                      name: 'bankFees',
-                      label: labels.bankFees
-                    },
-                    {
-                      component: 'textfield',
-                      header: labels.receiptRef,
-                      name: 'receiptRef',
-                      label: labels.receiptRef
-                    }
-                  ]}
-                />
-              </Grid>
-            </FieldSet>
+                    ]}
+                  />
+                </Grid>
+              </FieldSet>
+            </Grid>
           </Grid>
         </Grid>
       </FormShell>
