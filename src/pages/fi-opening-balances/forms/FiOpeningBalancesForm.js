@@ -14,7 +14,6 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -30,9 +29,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
       amount: null,
       baseAmount: null,
       currencyId: null,
-      plantId: null,
-      plantName: '',
-      plantRef:''
+      plantId: null
     },
     maxAccess: maxAccess,
     enableReinitialize: true,
@@ -69,7 +66,6 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
 
           const res = await getRequest({
             extension: FinancialRepository.FiOpeningBalance.get,
@@ -78,10 +74,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
 
           formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (e) { }
     })()
   }, [])
 
@@ -146,10 +139,11 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             name='currencyId'
             label={labels.currencyName}
             valueField='recordId'
-            displayField='name'
+            displayField={['name','reference','flName']}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
+              { key: 'name', value: 'Name' },
+              { key: 'flName', value: 'flName' },
             ]}
             values={formik.values}
             required
@@ -177,12 +171,8 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             onChange={(event, newValue) => {
               if (newValue) {
                 formik.setFieldValue('plantId', newValue?.recordId)
-                formik.setFieldValue('plantRef', newValue?.reference)
-                formik.setFieldValue('plantName', newValue?.name)
               } else {
                 formik.setFieldValue('plantId', '')
-                formik.setFieldValue('plantRef', null)
-                formik.setFieldValue('plantName', null)
               }
             }}
             error={formik.touched.plantId && Boolean(formik.errors.recordId)}

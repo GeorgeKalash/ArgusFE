@@ -1,19 +1,19 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import FiOpeningBalancesWindow from './Windows/FiOpeningBalancesWindow'
+import FiOpeningBalancesForm from './forms/FiOpeningBalancesForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindow } from 'src/windows'
 
 const FiOpeningBalance = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-
+  const { stack } = useWindow()
+  
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -80,16 +80,15 @@ const FiOpeningBalance = () => {
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
-  const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+  const popup = obj => {
+    openForm(obj?.recordId )
   }
 
-  const del = async obj => {
-    await postRequest({
+  const del = obj => {
+    postRequest({
       extension: FinancialRepository.FiOpeningBalance.del,
       record: JSON.stringify(obj)
     })
@@ -97,15 +96,28 @@ const FiOpeningBalance = () => {
     toast.success('Record Deleted Successfully')
   }
 
+  function openForm (recordId){
+    stack({
+      Component: FiOpeningBalancesForm,
+      props: {
+        labels: _labels,
+        recordId: recordId? recordId : null,
+        maxAccess: access,
+      },
+      width: 600,
+      height: 600,
+      title: _labels.openingBalance
+    })
+  }
+
   return (
     <>
-      <Box>
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={edit}
+          onEdit={popup}
           onDelete={del}
           isLoading={false}
           pageSize={50}
@@ -114,19 +126,6 @@ const FiOpeningBalance = () => {
           refetch={refetch}
           maxAccess={access}
         />
-      </Box>
-      {windowOpen && (
-        <FiOpeningBalancesWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
     </>
   )
 }
