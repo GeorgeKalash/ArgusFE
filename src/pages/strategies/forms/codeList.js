@@ -68,15 +68,17 @@ const CodeList = ({ store, labels, maxAccess }) => {
   }
 
   const delCode = async obj => {
-    await postRequest({
-      extension: DocumentReleaseRepository.StrategyCode.del,
-      record: JSON.stringify(obj)
-    })
-    refetch()
-
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: DocumentReleaseRepository.StrategyCode.del,
+        record: JSON.stringify(obj)
+      })
+      refetch()
+      toast.success('Record Deleted Successfully')
+    } catch (error) {
+      toast.error('Record cannot be deleted')
+    }
   }
-
   function openForm(recordId) {
     stack({
       Component: CodeForm,
