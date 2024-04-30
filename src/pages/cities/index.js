@@ -15,11 +15,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-// ** Windows
 import CityForm from 'src/pages/cities/Forms/CityForm'
 import { useWindow } from 'src/windows'
 
-// ** Helpers
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 const City = () => {

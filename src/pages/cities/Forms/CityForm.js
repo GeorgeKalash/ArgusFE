@@ -9,7 +9,6 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { SystemRepository } from 'src/repositories/SystemRepository'
