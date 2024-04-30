@@ -537,30 +537,53 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       unitNo: address.unitNo,
       subNo: address.subNo
     }
+    if (allowEdit) {
+      obj4.clientId = recordId
 
-    const data = {
-      plantId: clientIndividualFormik.values.plantId,
-      clientMaster: obj1, //CTCL
-      clientID: obj2, //CTID
-      ClientIndividual: obj3, //CTCLI
-      clientRemittance: obj4,
-      address: obj5,
-      workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
-    }
+      const updateData = {
+        plantId: clientIndividualFormik.values.plantId,
+        clientID: obj2, //CTID
+        ClientIndividual: obj3, //CTCLI
+        clientRemittance: obj4,
+        address: obj5,
+        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+      }
 
-    postRequest({
-      extension: RTCLRepository.CtClientIndividual.set2,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        if (res) {
-          toast.success('Record Successfully')
-          setOtpShow(true)
-          getClient(res.recordId)
-          setEditMode(true)
-        }
+      postRequest({
+        extension: RTCLRepository.CtClientIndividual.update,
+        record: JSON.stringify(updateData)
       })
-      .catch(error => {})
+        .then(res => {
+          if (res) {
+            toast.success('Record Edited Successfully')
+          }
+        })
+        .catch(error => {})
+    } else {
+      const data = {
+        plantId: clientIndividualFormik.values.plantId,
+        clientMaster: obj1, //CTCL
+        clientID: obj2, //CTID
+        ClientIndividual: obj3, //CTCLI
+        clientRemittance: obj4,
+        address: obj5,
+        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+      }
+
+      postRequest({
+        extension: RTCLRepository.CtClientIndividual.set2,
+        record: JSON.stringify(data)
+      })
+        .then(res => {
+          if (res) {
+            toast.success('Record Successfully')
+            setOtpShow(true)
+            getClient(res.recordId)
+            setEditMode(true)
+          }
+        })
+        .catch(error => {})
+    }
   }
 
   useEffect(() => {
@@ -660,7 +683,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
   return (
     <FormShell
       actions={!allowEdit ? actions : []}
-      resourceId={ResourceIds.ClientList}
+      resourceId={ResourceIds.UpdateClientRemittance}
       form={clientIndividualFormik}
       maxAccess={maxAccess}
       editMode={editMode}
