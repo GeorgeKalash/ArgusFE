@@ -273,7 +273,11 @@ const SegmentedInput = ({ segments, name, setFieldValue, values, label, error, h
 
   return (
     <FormControl variant='outlined' fullWidth error={error} size='small' required={required}>
-      <InputLabel htmlFor={name} size='small'>
+      <InputLabel
+        htmlFor={name}
+        size='small'
+        sx={{ background: 'white', paddingInline: '5px', transform: 'translate(9px, -9px) scale(0.75)' }}
+      >
         {label}
       </InputLabel>
       <OutlinedInput
