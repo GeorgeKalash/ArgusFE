@@ -1,10 +1,16 @@
 import React, { useContext, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
 import WindowToolbar from './WindowToolbar'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-const DeleteConfirmation = ({ window, props, obj }) => {
+const DeleteConfirmation = ({ window, props, obj, labels }) => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [isDeleteDisabled, setIsDeleteDisabled] = useState(true)
+
+  const { labels: _labels } = useResourceQuery({
+    datasetId: ResourceIds.SmsTemplates
+  })
 
   const handleChange = event => {
     const value = event.target.value
@@ -47,17 +53,17 @@ const DeleteConfirmation = ({ window, props, obj }) => {
     >
       <div>
         <p style={{ fontWeight: 'bold' }}>
-          Are you sure?
+          {_labels.areYouSure}
           <br />
-          You are about to delete this record.
+          {_labels.youAreAbout}
         </p>
-        <p>Type "Delete" to confirm:</p>
+        <p>{_labels.typeDelete}</p>
         <CustomTextField
           name='deleteConfirmation'
           value={deleteConfirmation}
           onChange={handleChange}
           onClear={handleClear}
-          placeholder="Type 'Delete' here"
+          placeholder={_labels.placeHolder}
           style={{
             borderRadius: '4px',
             padding: '10px',
