@@ -7,6 +7,7 @@ import { Box, Grid } from '@mui/material'
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
+import * as yup from 'yup'
 
 // ** Custom Imports
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -103,6 +104,7 @@ const DocumentTypeMaps = () => {
       nraRef: null,
       nraDescription: null
     },
+
     onSubmit: values => {}
   })
 
@@ -112,6 +114,10 @@ const DocumentTypeMaps = () => {
     initialValues: {
       'rt-nra-product': null
     },
+    validationSchema: yup.object({
+      ['rt-nra-product']: yup.string().required(' ')
+    }),
+
     onSubmit: values => {
       postRtDefault(values)
     }
@@ -154,6 +160,8 @@ const DocumentTypeMaps = () => {
       .catch()
   }
 
+  console.log('rtDefaultFormValidation', rtDefaultFormValidation)
+
   return (
     <>
       <Box
@@ -170,15 +178,16 @@ const DocumentTypeMaps = () => {
             <ResourceLookup
               endpointId={SystemRepository.NumberRange.snapshot}
               form={rtDefaultFormValidation}
-              name='nraId'
+              name='nraRef'
               label={_labels.nuRange}
               valueField='reference'
               displayField='description'
+              requied
               firstValue={rtDefaultFormValidation.values.nraRef}
               secondValue={rtDefaultFormValidation.values.nraDescription}
               onChange={(event, newValue) => {
                 if (newValue) {
-                  rtDefaultValidation.setFieldValue('rt-nra-product', newValue?.recordId)
+                  rtDefaultValidation.setFieldValue('rt-nra-product', newValue?.recordId || '')
                   rtDefaultFormValidation.setFieldValue('nraId', newValue?.recordId)
                   rtDefaultFormValidation.setFieldValue('nraRef', newValue?.reference)
                   rtDefaultFormValidation.setFieldValue('nraDescription', newValue?.description)
@@ -189,7 +198,7 @@ const DocumentTypeMaps = () => {
                   rtDefaultFormValidation.setFieldValue('nraDescription', '')
                 }
               }}
-              error={rtDefaultFormValidation.touched.nraId && Boolean(rtDefaultFormValidation.errors.nraId)}
+              error={rtDefaultFormValidation.touched.nraRef && Boolean(rtDefaultFormValidation.errors.nraRef)}
               maxAccess={access}
             />
           </Grid>

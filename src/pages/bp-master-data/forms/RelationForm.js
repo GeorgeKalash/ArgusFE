@@ -38,8 +38,8 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      toBPId: yup.string().required('This field is required'),
-      relationId: yup.string().required('This field is required')
+      toBPId: yup.string().required(' '),
+      relationId: yup.string().required(' ')
     }),
     onSubmit: values => {
       postRelation(values)
