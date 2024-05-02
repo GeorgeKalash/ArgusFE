@@ -39,9 +39,9 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      groupId: yup.string().required(),
-      type: yup.string().required()
+      name: yup.string().required(' '),
+      groupId: yup.string().required(' '),
+      type: yup.string().required(' ')
     }),
     onSubmit: values => {
       postGroups(values)

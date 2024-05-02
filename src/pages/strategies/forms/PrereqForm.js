@@ -33,8 +33,8 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   })
 
   const validationSchema = yup.object({
-    codeId: yup.number().required(),
-    prerequisiteId: yup.number().required()
+    codeId: yup.number().required(' '),
+    prerequisiteId: yup.number().required(' ')
   })
 
   const { formik } = useForm({
