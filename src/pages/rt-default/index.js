@@ -25,7 +25,6 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
 const DocumentTypeMaps = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { fillDocumentTypeStore } = useContext(CommonContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
   //control
@@ -48,8 +47,6 @@ const DocumentTypeMaps = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
-
-    // getDataResult()
   }, [access])
 
   const _labels = {
@@ -106,9 +103,7 @@ const DocumentTypeMaps = () => {
       nraRef: null,
       nraDescription: null
     },
-    onSubmit: values => {
-      // postRtDefault(values)
-    }
+    onSubmit: values => {}
   })
 
   const rtDefaultValidation = useFormik({
@@ -125,10 +120,8 @@ const DocumentTypeMaps = () => {
   const postRtDefault = obj => {
     var data = []
     Object.entries(obj).forEach(([key, value], i) => {
-      // console.log(`Key: ${key}, Value: ${value}`);
       const newObj = { key: key, value: value }
 
-      // Push the new object into the array
       data.push(newObj)
     })
 
@@ -158,9 +151,7 @@ const DocumentTypeMaps = () => {
       .then(res => {
         setNumberRangeStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch()
   }
 
   return (
@@ -199,7 +190,6 @@ const DocumentTypeMaps = () => {
                 }
               }}
               error={rtDefaultFormValidation.touched.nraId && Boolean(rtDefaultFormValidation.errors.nraId)}
-              helperText={rtDefaultFormValidation.touched.nraId && rtDefaultFormValidation.errors.nraId}
               maxAccess={access}
             />
           </Grid>

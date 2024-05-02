@@ -42,9 +42,9 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      industry: yup.string().required('This field is required')
+      name: yup.string().required(''),
+      reference: yup.string().required(''),
+      industry: yup.string().required('')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -57,8 +57,8 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)

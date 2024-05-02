@@ -1,5 +1,4 @@
 import React from 'react'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { Grid, Box } from '@mui/material'
@@ -11,7 +10,6 @@ import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -23,38 +21,13 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const UpdateExchangeRates = () => {
-  const [countryStore, setCountryStore] = useState([])
-  const [currencyStore, setCurrencyStore] = useState([])
   const [access, setAccess] = useState()
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [exchangeTableStore, setExchangeTableStore] = useState([])
-  const [CrmStore, setCrmSore] = useState([])
   const { getLabels, getAccess } = useContext(ControlContext)
   const [labels, setLabels] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const { width, height } = useWindowDimensions()
-
-  // const formik = useFormik({
-  //   enableReinitialize: false,
-  //   validateOnChange: false,
-  //   validationSchema: yup.object({
-  //     countryId: yup.string().required('This field is required'),
-  //     currencyId: yup.string().required('This field is required')
-  //   }),
-  //   initialValues: {
-  //     currencyId: '',
-  //     countryId: '',
-  //     exchangeId: '',
-  //     exchangeRef: '',
-  //     exchangeName: '',
-  //     rateCalcMethodName: '',
-  //     rateAgainstName: '',
-  //     rateAgainstCurrencyRef: '',
-  //     rate: ''
-  //   },
-  //   onSubmit: values => {}
-  // })
 
   const _labels = {
     country: labels && labels.find(item => item.key === '1') && labels.find(item => item.key === '2').value,
@@ -144,11 +117,11 @@ const UpdateExchangeRates = () => {
         .array()
         .of(
           yup.object().shape({
-            exchangeRef: yup.string().required('exchange  is required'),
+            exchangeRef: yup.string().required(''),
 
-            maxRate: yup.string().required('Country recordId is required'),
-            minRate: yup.string().required('Country recordId is required'),
-            rate: yup.string().required('Country recordId is required')
+            maxRate: yup.string().required(''),
+            minRate: yup.string().required(''),
+            rate: yup.string().required('')
           })
         )
         .required('Operations array is required')
@@ -170,9 +143,7 @@ const UpdateExchangeRates = () => {
       .then(res => {
         if (res) toast.success('Record Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch()
   }
 
   useEffect(() => {
@@ -181,20 +152,11 @@ const UpdateExchangeRates = () => {
     } else {
       if (access.record.maxAccess > 0) {
         getLabels(ResourceIds.updateExchangerRates, setLabels)
-        fillCurrencyStore()
-        fillCountryStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
   }, [access])
-
-  // useEffect(() => {
-  //   if (formik.values && formik.values.currencyId > 0 && formik.values.countryId > 0) {
-  //     getExchangeRates(formik.values.currencyId, formik.values.countryId)
-  //     fillExchangeTableStore(formik.values.currencyId, formik.values.countryId)
-  //   }
-  // }, [formik.values.currencyId, formik.values.countryId])
 
   const getExchangeRates = (cuId, coId) => {
     formik.setFieldValue('rows', [
@@ -239,44 +201,14 @@ const UpdateExchangeRates = () => {
                 })
                 formik.setFieldValue('rows', rows)
               })
-              .catch(error => {
-                setErrorMessage(error)
-              })
+              .catch()
           })
-          .catch(error => {
-            setErrorMessage(error)
-          })
+          .catch()
     }
   }
 
   const handleSubmit = () => {
     formik.handleSubmit()
-  }
-
-  const fillCurrencyStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {})
-  }
-
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCountryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const fillExchangeTableStore = (currencyId, countryId) => {
@@ -310,9 +242,7 @@ const UpdateExchangeRates = () => {
                 formik.setFieldValue('rateAgainstCurrencyRef', res.record.rateAgainstCurrencyRef)
                 formik.setFieldValue('rateCalcMethodName', res.record.rateCalcMethodName)
               })
-              .catch(error => {
-                setErrorMessage(error)
-              })
+              .catch()
 
             const dParams = `_exchangeId=${res?.record?.exchangeId}`
             var parameters = dParams
@@ -323,14 +253,10 @@ const UpdateExchangeRates = () => {
               .then(res => {
                 formik.setFieldValue('rate', res.record?.rate)
               })
-              .catch(error => {
-                setErrorMessage(error)
-              })
+              .catch()
           }
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch()
   }
 
   return (
