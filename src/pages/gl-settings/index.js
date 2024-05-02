@@ -281,6 +281,7 @@ const GLSettings = () => {
               <Grid key={name} item xs={12} sx={{ marginTop: '7px' }}>
                 <CustomTextField
                   name={name}
+                  label={`Segment Name ${idx + 1}`}
                   onBlur={handleBlur}
                   onFocus={e => setFocus(e.target.name)}
                   value={formik.values[name]}
