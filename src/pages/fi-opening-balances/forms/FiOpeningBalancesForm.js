@@ -12,12 +12,15 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+
 export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FiOpeningBalance.page
   })
+
   const { formik } = useForm({
     initialValues: {
       recordId: null,
@@ -40,6 +43,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
+
       const response = await postRequest({
         extension: FinancialRepository.FiOpeningBalance.set,
         record: JSON.stringify(obj)
@@ -68,6 +72,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
       } catch (e) {}
     })()
   }, [])
+
   return (
     <FormShell resourceId={ResourceIds.FiOpeningBalances} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>

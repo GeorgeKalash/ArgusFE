@@ -16,7 +16,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 // ** Helpers
-import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
@@ -42,8 +42,7 @@ const Countries = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    return {...response,  _startAt: _startAt}
-
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -113,7 +112,6 @@ const Countries = () => {
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
-
   }
 
   return (
@@ -140,18 +138,18 @@ const Countries = () => {
         />
       </Box>
       {windowOpen && (
-       <CountryWindow
-       onClose={() => {
-        setWindowOpen(false)
-        setSelectedRecordId(null)
-      }}
-       _labels ={_labels}
-       maxAccess={access}
-       recordId={selectedRecordId}
-       setSelectedRecordId={setSelectedRecordId}
-       onInfo={() => setWindowInfo(true)}
-       />
-       )}
+        <CountryWindow
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
+          _labels={_labels}
+          maxAccess={access}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
+          onInfo={() => setWindowInfo(true)}
+        />
+      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

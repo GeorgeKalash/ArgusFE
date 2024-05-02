@@ -21,6 +21,7 @@ const FiOpeningBalance = () => {
       extension: FinancialRepository.FiOpeningBalance.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
     })
+
     return { ...response, _startAt: _startAt }
   }
 
