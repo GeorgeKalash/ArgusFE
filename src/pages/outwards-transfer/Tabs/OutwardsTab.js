@@ -130,27 +130,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     ]
   })
 
-  const [initialValues2, setInitialData2] = useState({
-    countryId: '',
-    dispersalId: '',
-    dispersalName: '',
-    dipersalRef: '',
-    exRate: '',
-    productId: '',
-    productName: '',
-    productRef: '',
-    corId: '',
-    fees: '',
-    baseAmount: '',
-    rateCalcMethod: '',
-    checked: 'false',
-    exRate2: '',
-    interfaceId: '',
-    valueDays: ''
-  })
-
   const formik = useFormik({
-    initialValues,
+    initialValues: initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -313,12 +294,29 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   }
 
   const productFormik = useFormik({
-    initialValues: initialValues2,
+    initialValues: {
+      countryId: '',
+      dispersalId: '',
+      dispersalName: '',
+      dipersalRef: '',
+      exRate: '',
+      productId: '',
+      productName: '',
+      productRef: '',
+      corId: '',
+      fees: '',
+      baseAmount: '',
+      rateCalcMethod: '',
+      checked: 'false',
+      exRate2: '',
+      interfaceId: '',
+      valueDays: ''
+    },
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: values => {
       const selectedRowData = productsStore?.list?.find(row => row.checked)
-      formik.setFieldValue('hiddenInterfaceId', selectedRowData.interfaceId)
+      productFormik.setValues(selectedRowData)
       formik.setFieldValue('productId', selectedRowData?.productId)
       formik.setFieldValue('commission', selectedRowData?.fees)
       formik.setFieldValue('defaultCommission', selectedRowData?.fees)
@@ -331,14 +329,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       formik.setFieldValue('corName', selectedRowData?.corName)
       const vatAmount = calcVatAmount(formik, selectedRowData)
       calcAmount(selectedRowData?.baseAmount, selectedRowData?.fees, vatAmount, formik.values.tdAmount)
-
-      // calculateValueDate()
+      calculateValueDate(selectedRowData.valueDays)
       window.close()
     }
   })
 
   const productDataFill = async formFields => {
-    //get products list
     var type = 2
     var functionId = 1
     var plant = formFields?.plantId
@@ -509,7 +505,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })
   }
   function openBankWindow() {
-    if (formik.values.hiddenInterfaceId == 1) {
+    if (productFormik.values.interfaceId == 1) {
       stack({
         Component: InstantCash,
         props: {
@@ -520,7 +516,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         height: 660,
         title: 'Instant Cash'
       })
-    } else if (formik.values.hiddenInterfaceId == 2) {
+    } else if (productFormik.values.interfaceId == 2) {
       stack({
         Component: TerraPay,
         props: {},
@@ -567,10 +563,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     obj.beneficiary.dateOfBirth = obj.beneficiary.dateOfBirth ? formatDateToApi(obj.beneficiary.dateOfBirth) : null
     setCashData(obj)
   }
-  function calculateValueDate() {
+  function calculateValueDate(valueDays) {
     const newDate = new Date(formik.values.date)
-    newDate.setDate(newDate.getDate() + productFormik.values.valueDays)
-    console.log('testings ', newDate, ' ', productFormik.values.valueDays)
+    newDate.setDate(newDate.getDate() + valueDays)
     formik.setFieldValue('valueDate', newDate)
   }
   useEffect(() => {
@@ -587,9 +582,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           res.record.checked = true
-          await getClientInfo(res.record.headerView.clientId)
-          await fillAmountGridData(res.record.cash, res.record.headerView)
-          await productDataFill(res.record.headerView)
+          getClientInfo(res.record.headerView.clientId)
+          fillAmountGridData(res.record.cash, res.record.headerView)
+          productDataFill(res.record.headerView)
         }
         getDefaultVAT()
       } catch (error) {}
