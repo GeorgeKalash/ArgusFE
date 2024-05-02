@@ -291,7 +291,6 @@ const UpdateExchangeRates = () => {
                     getExchangeRates(formik.values.currencyId, selectedCountryId)
                   }}
                   error={formik.errors && Boolean(formik.errors.countryId)}
-                  helperText={formik.touched.countryId && formik.errors.countryId}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -325,7 +324,6 @@ const UpdateExchangeRates = () => {
                     fillExchangeTableStore(selectedCurrencyId, formik.values.countryId)
                   }}
                   error={formik.errors && Boolean(formik.errors.currencyId)}
-                  helperText={formik.touched.currencyId && formik.errors.currencyId}
                 />
               </Grid>
               <Grid item xs={6}>

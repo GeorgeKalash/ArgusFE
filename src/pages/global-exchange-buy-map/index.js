@@ -6,7 +6,6 @@ import { Grid, Box } from '@mui/material'
 
 // ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -27,9 +26,6 @@ const GlobalExchangeBuyMap = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
   const { height } = useWindowDimensions()
 
-  //state
-  const [currencyStore, setCurrencyStore] = useState([])
-
   const [errorMessage, setErrorMessage] = useState()
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
@@ -38,26 +34,12 @@ const GlobalExchangeBuyMap = () => {
     if (!access) getAccess(ResourceIds.CorrespondentAgentBranch, setAccess)
     else {
       if (access.record.maxAccess > 0) {
-        fillCurrencyStore()
-
         getLabels(ResourceIds.GlobalExchangeBuyMap, setLabels)
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
   }, [access])
-
-  const fillCurrencyStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {})
-  }
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -68,8 +50,8 @@ const GlobalExchangeBuyMap = () => {
         .array()
         .of(
           yup.object().shape({
-            countryId: yup.string().required('Country recordId is required'),
-            exchangeId: yup.string().required('exchange recordId is required')
+            countryId: yup.string().required(''),
+            exchangeId: yup.string().required('')
           })
         )
         .required('Operations array is required')
@@ -116,9 +98,7 @@ const GlobalExchangeBuyMap = () => {
       .then(res => {
         if (res.statusId) toast.success('Record Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch()
   }
 
   const getCurrenciesExchangeMaps = currencyId => {
@@ -152,9 +132,7 @@ const GlobalExchangeBuyMap = () => {
             )
           }
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch()
   }
 
   //columns
@@ -250,7 +228,6 @@ const GlobalExchangeBuyMap = () => {
                     getCurrenciesExchangeMaps(selectedCurrencyId)
                   }}
                   error={formik.errors && Boolean(formik.errors.currencyId)}
-                  helperText={formik.touched.currencyId && formik.errors.currencyId}
                 />
               </Grid>
             </Grid>
