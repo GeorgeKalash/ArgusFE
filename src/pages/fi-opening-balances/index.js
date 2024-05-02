@@ -6,7 +6,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import FiOpeningBalancesForm from './forms/FiOpeningBalancesForm'
-import { useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 
@@ -25,11 +25,14 @@ const FiOpeningBalance = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  const invalidate = useInvalidate({
+    endpointId: FinancialRepository.FiOpeningBalance.page
+  })
+
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
-    invalidate,
 
     access
   } = useResourceQuery({
@@ -89,8 +92,8 @@ const FiOpeningBalance = () => {
     openForm(obj?.recordId)
   }
 
-  const del = obj => {
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: FinancialRepository.FiOpeningBalance.del,
       record: JSON.stringify(obj)
     })
