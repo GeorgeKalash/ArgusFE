@@ -115,15 +115,12 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                 firstValue={formik.values.toBPRef}
                 secondValue={formik.values.toBPName}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('toBPId', newValue?.recordId)
-                    formik.setFieldValue('toBPRef', newValue?.reference)
-                    formik.setFieldValue('toBPName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('toBPId', null)
-                    formik.setFieldValue('toBPRef', null)
-                    formik.setFieldValue('toBPName', null)
-                  }
+                  formik.setValues({
+                    ...formik.values,
+                    toBPId: newValue?.recordId || '',
+                    toBPRef: newValue?.reference || '',
+                    toBPName: newValue?.name || ''
+                  })
                 }}
                 error={formik.touched.toBPId && Boolean(formik.errors.toBPId)}
                 helperText={formik.touched.toBPId && formik.errors.toBPId}

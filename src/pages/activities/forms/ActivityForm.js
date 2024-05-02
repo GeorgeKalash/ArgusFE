@@ -42,9 +42,9 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(''),
-      reference: yup.string().required(''),
-      industry: yup.string().required('')
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      industry: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -123,8 +123,10 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
             value={formik.values.flName}
             rows={2}
             maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('flName', newValue?.flName || '')
+            }}
+            onClear={() => formik.setFieldValue('flName', '')}
             error={formik.touched.flName && Boolean(formik.errors.flName)}
           />
         </Grid>
@@ -139,7 +141,10 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('industry', newValue?.key)
+              formik.setValues({
+                ...formik.values,
+                industry: newValue?.key || ''
+              })
             }}
             error={formik.touched.industry && Boolean(formik.errors.industry)}
           />

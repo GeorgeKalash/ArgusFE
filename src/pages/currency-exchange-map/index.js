@@ -28,9 +28,7 @@ const NumberRange = () => {
   const { getLabels, getAccess } = useContext(ControlContext)
 
   //state
-  const [currencyStore, setCurrencyStore] = useState([])
-  const [countryStore, setCountryStore] = useState([])
-  const [errorMessage, setErrorMessage] = useState()
+
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
   const { height } = useWindowDimensions()
@@ -56,10 +54,10 @@ const NumberRange = () => {
         .array()
         .of(
           yup.object().shape({
-            exchangeId: yup.string().required('Country recordId is required')
+            exchangeId: yup.string().required(' ')
           })
         )
-        .required('Operations array is required')
+        .required(' ')
     }),
     initialValues: {
       currencyId: '',
@@ -95,37 +93,6 @@ const NumberRange = () => {
       .catch(error => {})
   }
 
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCountryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillExchangeTableStore = id => {
-    setExchangeTableStore({})
-
-    var parameters = `_currencyId=` + id
-    getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.qry2,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res)
-        setExchangeTableStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   const _labels = {
     country: labels && labels.find(item => item.key === '1') && labels.find(item => item.key === '1').value,
     currency: labels && labels.find(item => item.key === '2') && labels.find(item => item.key === '2').value,
@@ -151,9 +118,7 @@ const NumberRange = () => {
       .then(res => {
         if (res.statusId) toast.success('Record Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const getCurrenciesExchangeMaps = (currencyId, countryId) => {
@@ -198,13 +163,9 @@ const NumberRange = () => {
 
               formik.setFieldValue('rows', rows)
             })
-            .catch(error => {
-              setErrorMessage(error)
-            })
+            .catch(error => {})
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch(error => {})
   }
 
   //columns
@@ -285,7 +246,6 @@ const NumberRange = () => {
                     getCurrenciesExchangeMaps(formik.values.currencyId, selectedCurrencyId)
                   }}
                   error={formik.errors && Boolean(formik.errors.countryId)}
-                  helperText={formik.touched.countryId && formik.errors.countryId}
                 />
               </Grid>
 
