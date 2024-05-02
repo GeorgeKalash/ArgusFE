@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 
 // ** MUI Imports
 import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell } from '@mui/material'
-import { DataGrid, gridClasses } from '@mui/x-data-grid'
+import { DataGrid, gridClasses, useGridApiRef } from '@mui/x-data-grid'
 import { alpha, styled } from '@mui/material/styles'
 
 // ** Icons
@@ -23,7 +23,7 @@ import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 const ODD_OPACITY = 0.2
 
-const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+const StripedDataGrid = styled(DataGrid)(({ theme, heightReference }) => ({
   borderRadius: 0,
   borderTop: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
   borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`,
@@ -54,7 +54,8 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
   '& .MuiDataGrid-cell': {
-    color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)'
+    color: theme.palette.mode === 'light' ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,0.65)',
+    whiteSpace: 'pre-line !important'
   },
   '& .MuiPaginationItem-root': {
     borderRadius: 0
@@ -79,11 +80,23 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
         }
       }
     }
+  },
+  '.MuiDataGrid-cell': {
+    position: 'relative',
+    overflow: 'hidden'
+  },
+  '& .MuiDataGrid-cellContent': {
+    position: heightReference ? 'absolute' : 'relative',
+    top: 1,
+    alignItems: 'flex-start'
+  },
+  [`.MuiDataGrid-cell[data-colindex="${heightReference}"] .MuiDataGrid-cellContent`]: {
+    position: 'relative'
   }
 }))
 
 const TableContainer = styled(Box)({
-  // height: '600px', // Change this value as needed
+  //height: '600px', // Change this value as needed
   // flex: 1,
   // overflow: 'auto', // Enable scrolling within the container
   position: 'relative'
@@ -111,7 +124,6 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
-  const [filteredRows, setFilteredRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   const pageSize = props.pageSize ? props.pageSize : 50
@@ -121,9 +133,12 @@ const Table = ({
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
+  const apiRef = useGridApiRef()
+
   const getRowId = row => {
     return props.rowId.map(field => row[field]).join('-')
   }
+  const columnWrap = props.columns?.filter(item => item.wrap === true)?.[0]?.['field']
 
   const CustomPagination = () => {
     if (pagination) {
@@ -393,8 +408,18 @@ const Table = ({
                     : gridData?.list
                   : []
               }
-              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
+              sx={{
+                minHeight: tableHeight,
+                overflow: 'auto',
+                position: 'relative',
+                pb: 2
+              }}
               density='compact'
+              apiRef={apiRef}
+              getRowHeight={() => 'auto'}
+              heightReference={
+                columnWrap && apiRef.current.getColumnIndex && apiRef.current.getColumnIndex(columnWrap, false)
+              }
               components={{
                 LoadingOverlay: LinearProgress,
 
