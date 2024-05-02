@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { VerticalLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -218,7 +218,7 @@ const CashTransfer = () => {
   }
 
   return (
-    <VerticalLayout>
+    <VertLayout>
       <GridToolbar
         onAdd={addCashTFR}
         maxAccess={access}
@@ -244,7 +244,7 @@ const CashTransfer = () => {
         maxAccess={access}
       />
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </VerticalLayout>
+    </VertLayout>
   )
 }
 

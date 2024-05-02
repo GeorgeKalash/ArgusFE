@@ -5,7 +5,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CharacteristicsWindow from './Windows/CharacteristicsWindow'
-import { VerticalLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
@@ -97,7 +97,7 @@ const Characteristics = () => {
   }
 
   return (
-    <VerticalLayout>
+    <VertLayout>
       <GridToolbar onAdd={addCharacteristics} maxAccess={access} />
       <Table
         columns={columns}
@@ -112,7 +112,7 @@ const Characteristics = () => {
         pageSize={50}
         maxAccess={access}
       />
-    </VerticalLayout>
+    </VertLayout>
   )
 }
 
