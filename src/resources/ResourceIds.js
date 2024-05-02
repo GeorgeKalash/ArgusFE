@@ -109,6 +109,8 @@ export const ResourceIds = {
   Beneficiary: 36305,
   CashAccounts: 33102,
   CorrespondentControl: 36119,
+  CashTransfer: 33309,
+  InstantCash: 36306,
   GlobalAuthorization: 23105,
-  CashTransfer: 33309
+  InterfaceMap: 36120
 }

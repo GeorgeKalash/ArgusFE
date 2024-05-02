@@ -32,6 +32,7 @@ const OutwardsTransfer = () => {
   const {
     query: { data },
     filterBy,
+    refetch,
     clearFilter,
     labels: _labels,
     access
@@ -45,11 +46,14 @@ const OutwardsTransfer = () => {
   })
   async function fetchWithSearch({ options = {}, filters }) {
     const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
+    if (!filters.qry) {
+      return { list: [] }
+    } else {
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    }
   }
 
   const invalidate = useInvalidate({
@@ -128,6 +132,11 @@ const OutwardsTransfer = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'countryRef',
       headerName: _labels.CountryRef,
       flex: 1
@@ -141,11 +150,6 @@ const OutwardsTransfer = () => {
     {
       field: 'currencyRef',
       headerName: _labels.Currency,
-      flex: 1
-    },
-    {
-      field: 'agentName',
-      headerName: _labels.Agents,
       flex: 1
     },
     {
@@ -224,6 +228,7 @@ const OutwardsTransfer = () => {
           pageSize={50}
           paginationType='client'
           maxAccess={access}
+          refetch={refetch}
         />
       </Box>
 

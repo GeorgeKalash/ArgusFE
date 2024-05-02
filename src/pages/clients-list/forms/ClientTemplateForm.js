@@ -140,6 +140,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
     idNo: '',
     isDiplomat: false,
     isEmployee: false,
+    cobId: null,
     relativeDiplomatInfo: '',
     releaseStatus: '',
     riskLevel: '',
@@ -301,6 +302,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
           educationLevel: obj.clientRemittance?.educationLevel,
           gender: obj.clientRemittance?.gender,
           isEmployee: obj.clientRemittance?.isEmployee,
+          cobId: obj.clientRemittance?.cobId,
           relativeDiplomatInfo: obj.clientRemittance?.relativeDiplomatInfo,
           releaseStatus: obj.clientRemittance?.releaseStatus,
           riskLevel: obj.clientRemittance?.riskLevel,
@@ -485,6 +487,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       otpVerified: obj.otpVerified,
       coveredFace: obj.coveredFace,
       isEmployee: obj.isEmployee,
+      cobId: obj.cobId,
       idNo: obj.idNo,
       wip: 1,
       releaseStatus: 1,
@@ -1129,6 +1132,31 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                         maxAccess={maxAccess}
                       />
                     </Grid>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.Country.qry}
+                      name='cobId'
+                      label={labels.cob}
+                      valueField='recordId'
+                      displayField={['reference', 'name', 'flName']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' },
+                        { key: 'flName', value: 'Foreign Language Name' }
+                      ]}
+                      readOnly={editMode && true}
+                      values={clientIndividualFormik.values}
+                      onChange={(event, newValue) => {
+                        if (newValue) {
+                          clientIndividualFormik.setFieldValue('cobId', newValue?.recordId)
+                        } else {
+                          clientIndividualFormik.setFieldValue('cobId', '')
+                        }
+                      }}
+                      error={clientIndividualFormik.touched.cobId && Boolean(clientIndividualFormik.errors.cobId)}
+                      maxAccess={maxAccess}
+                    />
                   </Grid>
                   <Grid item xs={12}>
                     <ResourceComboBox

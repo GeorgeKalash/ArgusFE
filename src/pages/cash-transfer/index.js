@@ -123,7 +123,7 @@ const CashTransfer = () => {
       const dtId = await getDefaultDT()
 
       if (plantId !== '' && cashAccountId !== '') {
-        openOutWardsWindow(plantId, cashAccountId, recordId, dtId)
+        openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
       } else {
         if (plantId === '') {
           setErrorMessage({ error: 'The user does not have a default plant' })
@@ -150,7 +150,6 @@ const CashTransfer = () => {
       flex: 1,
       valueGetter: ({ row }) => formatDateDefault(row?.date)
     },
-    ,
     {
       field: 'fromPlantName',
       headerName: _labels.fromPlant,
@@ -201,7 +200,7 @@ const CashTransfer = () => {
     openForm(obj.recordId)
   }
 
-  function openOutWardsWindow(plantId, cashAccountId, recordId, dtId) {
+  function openCashTransferWindow(plantId, cashAccountId, recordId, dtId) {
     stack({
       Component: CashTransferTab,
       props: {
