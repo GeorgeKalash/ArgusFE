@@ -33,15 +33,9 @@ const CodeForm = ({
 
   const { recordId: stgId } = store
 
-  const [initialValues, setInitialData] = useState({
-    codeId: '',
-    groupId: store.groupId,
-    strategyId: stgId
-  })
-
   const { formik } = useForm({
     maxAccess,
-    initialValues,
+    initialValues: { codeId: '', groupId: store.groupId, strategyId: stgId },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -87,7 +81,7 @@ const CodeForm = ({
       parameters: `_groupId=${store.groupId}`
     })
       .then(res => {
-        setInitialData(res.record)
+        formik.setValues(res.record)
       })
       .catch(error => {})
   }

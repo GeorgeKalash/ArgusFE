@@ -25,17 +25,14 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
     endpointId: DocumentReleaseRepository.Strategy.qry
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-
-    type: '',
-    groupId: ''
-  })
-
   const { formik } = useForm({
     maxAccess,
-    initialValues,
+    initialValues: {
+      recordId: null,
+      name: '',
+      type: '',
+      groupId: ''
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -87,7 +84,7 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
       parameters: defaultParams
     })
       .then(res => {
-        setInitialData(res.record)
+        formik.setValues(res.record)
       })
       .catch(error => {})
   }

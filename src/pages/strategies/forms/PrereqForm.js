@@ -26,12 +26,6 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
 
   const { recordId: stgId } = store
 
-  const [initialValues, setInitialData] = useState({
-    codeId: '',
-    prerequisiteId: '',
-    StrategyId: stgId
-  })
-
   const validationSchema = yup.object({
     codeId: yup.number().required(' '),
     prerequisiteId: yup.number().required(' ')
@@ -39,7 +33,7 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
 
   const { formik } = useForm({
     maxAccess,
-    initialValues,
+    initialValues: { codeId: '', prerequisiteId: '', StrategyId: stgId },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema,
@@ -81,7 +75,7 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
       parameters: `_groupId=${recordId}`
     })
       .then(res => {
-        setInitialData(res.record)
+        formik.setValues(res.record)
       })
       .catch(error => {})
   }
