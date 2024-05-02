@@ -11,15 +11,11 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 
-// ** Windows
-import PlantWindow from './Windows/PlantGroupsWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import PlantGroupsForm from './forms/PlantGroupsForm'
 
 const Plant = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -85,7 +81,7 @@ const Plant = () => {
 
   function openForm(recordId) {
     stack({
-      Component: PlantWindow,
+      Component: PlantGroupsForm,
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,

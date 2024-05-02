@@ -1,7 +1,6 @@
 // ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -12,18 +11,11 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { useForm } from 'src/hooks/form'
 
 export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    parentId: '',
-    parentName: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -31,8 +23,14 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
     endpointId: SystemRepository.PlantGroup.qry
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: '',
+      reference: '',
+      parentId: '',
+      parentName: ''
+    },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -49,7 +47,7 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
+        formik.setValues({
           ...obj,
           recordId: response.recordId
         })
@@ -71,7 +69,7 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
       } catch (error) {}
       setIsLoading(false)
