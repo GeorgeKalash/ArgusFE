@@ -143,7 +143,7 @@ const UpdateExchangeRates = () => {
       .then(res => {
         if (res) toast.success('Record Successfully')
       })
-      .catch()
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -201,9 +201,9 @@ const UpdateExchangeRates = () => {
                 })
                 formik.setFieldValue('rows', rows)
               })
-              .catch()
+              .catch(error => {})
           })
-          .catch()
+          .catch(error => {})
     }
   }
 
@@ -242,7 +242,7 @@ const UpdateExchangeRates = () => {
                 formik.setFieldValue('rateAgainstCurrencyRef', res.record.rateAgainstCurrencyRef)
                 formik.setFieldValue('rateCalcMethodName', res.record.rateCalcMethodName)
               })
-              .catch()
+              .catch(error => {})
 
             const dParams = `_exchangeId=${res?.record?.exchangeId}`
             var parameters = dParams
@@ -253,10 +253,10 @@ const UpdateExchangeRates = () => {
               .then(res => {
                 formik.setFieldValue('rate', res.record?.rate)
               })
-              .catch()
+              .catch(error => {})
           }
         })
-        .catch()
+        .catch(error => {})
   }
 
   return (

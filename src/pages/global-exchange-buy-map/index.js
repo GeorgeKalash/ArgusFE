@@ -98,7 +98,7 @@ const GlobalExchangeBuyMap = () => {
       .then(res => {
         if (res.statusId) toast.success('Record Successfully')
       })
-      .catch()
+      .catch(error => {})
   }
 
   const getCurrenciesExchangeMaps = currencyId => {
@@ -132,7 +132,7 @@ const GlobalExchangeBuyMap = () => {
             )
           }
         })
-        .catch()
+        .catch(error => {})
   }
 
   //columns
