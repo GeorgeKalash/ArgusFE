@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
-
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -201,163 +197,158 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
   }, [])
 
   return (
-    <>
       <FormShell
         resourceId={ResourceIds.CashTransfer}
         form={formik}
         editMode={editMode}
-        height={480}
         maxAccess={maxAccess}
         functionId={SystemFunction.CashTransfer}
       >
-        <Grid container sx={{ pt: 2 }}>
-          {/* First Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik?.values?.reference}
-                maxAccess={maxAccess}
-                maxLength='15'
-                readOnly
-                required
-              />
+          <Grid container sx={{ pt: 2 , flex:0}}>
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='reference'
+                  label={labels.reference}
+                  value={formik?.values?.reference}
+                  maxAccess={maxAccess}
+                  maxLength='15'
+                  readOnly
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='fromPlantId'
+                  label={labels.fromPlant}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  readOnly
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('fromPlantId', newValue?.recordId)
+                  }}
+                  error={formik.touched.fromPlantId && Boolean(formik.errors.fromPlantId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={CashBankRepository.CashAccount.snapshot}
+                  parameters={{
+                    _type: 0
+                  }}
+                  firstFieldWidth='40%'
+                  valueField='accountNo'
+                  displayField='name'
+                  name='fromCashAccountId'
+                  displayFieldWidth={2}
+                  required
+                  label={labels.fromCashAcc}
+                  form={formik}
+                  readOnly
+                  valueShow='fromCARef'
+                  secondValueShow='fromCAName'
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      formik.setFieldValue('fromCashAccountId', newValue?.recordId)
+                      formik.setFieldValue('fromCARef', newValue?.accountNo)
+                      formik.setFieldValue('fromCAName', newValue?.name)
+                    } else {
+                      formik.setFieldValue('fromCashAccountId', null)
+                      formik.setFieldValue('fromCARef', null)
+                      formik.setFieldValue('fromCAName', null)
+                    }
+                  }}
+                  error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='fromPlantId'
-                label={labels.fromPlant}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                readOnly
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('fromPlantId', newValue?.recordId)
-                }}
-                error={formik.touched.fromPlantId && Boolean(formik.errors.fromPlantId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                firstFieldWidth='40%'
-                valueField='accountNo'
-                displayField='name'
-                name='fromCashAccountId'
-                displayFieldWidth={2}
-                required
-                label={labels.fromCashAcc}
-                form={formik}
-                readOnly
-                valueShow='fromCARef'
-                secondValueShow='fromCAName'
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('fromCashAccountId', newValue?.recordId)
-                    formik.setFieldValue('fromCARef', newValue?.accountNo)
-                    formik.setFieldValue('fromCAName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('fromCashAccountId', null)
-                    formik.setFieldValue('fromCARef', null)
-                    formik.setFieldValue('fromCAName', null)
-                  }
-                }}
-                error={formik.touched.fromCashAccountId && Boolean(formik.errors.fromCashAccountId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-          </Grid>
-          {/* Second Column */}
-          <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name='date'
-                required
-                label={labels.date}
-                value={formik?.values?.date}
-                onChange={formik.setFieldValue}
-                editMode={editMode}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
-                name='toPlantId'
-                label={labels.toPlant}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  if (newValue) formik.setFieldValue('toPlantId', newValue?.recordId)
-                  else formik.setFieldValue('toPlantId', null)
-                  formik.setFieldValue('toCashAccountId', null)
-                  formik.setFieldValue('toCARef', null)
-                  formik.setFieldValue('toCAName', null)
-                }}
-                error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                firstFieldWidth='40%'
-                valueField='accountNo'
-                displayField='name'
-                name='toCashAccountId'
-                displayFieldWidth={2}
-                required
-                readOnly={!formik.values.toPlantId}
-                label={labels.toCashAcc}
-                form={formik}
-                filter={{ plantId: formik.values.toPlantId }}
-                valueShow='toCARef'
-                secondValueShow='toCAName'
-                viewHelperText={false}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('toCashAccountId', newValue?.recordId)
-                    formik.setFieldValue('toCARef', newValue?.accountNo)
-                    formik.setFieldValue('toCAName', newValue?.name)
-                  } else {
+            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
+              <Grid item xs={12}>
+                <CustomDatePicker
+                  name='date'
+                  required
+                  label={labels.date}
+                  value={formik?.values?.date}
+                  onChange={formik.setFieldValue}
+                  editMode={editMode}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('date', '')}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='toPlantId'
+                  label={labels.toPlant}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    if (newValue) formik.setFieldValue('toPlantId', newValue?.recordId)
+                    else formik.setFieldValue('toPlantId', null)
                     formik.setFieldValue('toCashAccountId', null)
                     formik.setFieldValue('toCARef', null)
                     formik.setFieldValue('toCAName', null)
-                  }
-                }}
-                maxAccess={maxAccess}
-                error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
-              />
+                  }}
+                  error={formik.touched.toPlantId && Boolean(formik.errors.toPlantId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={CashBankRepository.CashAccount.snapshot}
+                  parameters={{
+                    _type: 0
+                  }}
+                  firstFieldWidth='40%'
+                  valueField='accountNo'
+                  displayField='name'
+                  name='toCashAccountId'
+                  displayFieldWidth={2}
+                  required
+                  readOnly={!formik.values.toPlantId}
+                  label={labels.toCashAcc}
+                  form={formik}
+                  filter={{ plantId: formik.values.toPlantId }}
+                  valueShow='toCARef'
+                  secondValueShow='toCAName'
+                  viewHelperText={false}
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      formik.setFieldValue('toCashAccountId', newValue?.recordId)
+                      formik.setFieldValue('toCARef', newValue?.accountNo)
+                      formik.setFieldValue('toCAName', newValue?.name)
+                    } else {
+                      formik.setFieldValue('toCashAccountId', null)
+                      formik.setFieldValue('toCARef', null)
+                      formik.setFieldValue('toCAName', null)
+                    }
+                  }}
+                  maxAccess={maxAccess}
+                  error={formik.touched.toCashAccountId && Boolean(formik.errors.toCashAccountId)}
+                />
+              </Grid>
             </Grid>
           </Grid>
-          <Grid width={'100%'} sx={{ pt: 5 }}>
             <DataGrid
               onChange={value => formik.setFieldValue('transfers', value)}
               value={formik.values.transfers}
               error={formik.errors.transfers}
-              height={220}
               maxAccess={maxAccess}
               columns={[
                 {
@@ -395,15 +386,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
                 }
               ]}
             />
-          </Grid>
-          <Grid
-            container
-            rowGap={1}
-            xs={12}
-            style={{ marginTop: '5px' }}
-            sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
-          >
-            {/* First Column (moved to the left) */}
+          <Grid sx={{ flex:0 }}>
             <FormGrid container rowGap={1} xs={7} style={{ marginTop: '10px' }}>
               <CustomTextArea
                 name='notes'
@@ -418,8 +401,6 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
               />
             </FormGrid>
           </Grid>
-        </Grid>
       </FormShell>
-    </>
   )
 }
