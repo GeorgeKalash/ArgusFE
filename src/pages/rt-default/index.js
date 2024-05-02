@@ -7,14 +7,12 @@ import { Box, Grid } from '@mui/material'
 // ** Third Party Imports
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import * as yup from 'yup'
 
 // ** Custom Imports
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 // ** API
-import { CommonContext } from 'src/providers/CommonContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -114,9 +112,6 @@ const DocumentTypeMaps = () => {
     initialValues: {
       'rt-nra-product': null
     },
-    validationSchema: yup.object({
-      ['rt-nra-product']: yup.string().required(' ')
-    }),
 
     onSubmit: values => {
       postRtDefault(values)
@@ -178,11 +173,10 @@ const DocumentTypeMaps = () => {
             <ResourceLookup
               endpointId={SystemRepository.NumberRange.snapshot}
               form={rtDefaultFormValidation}
-              name='nraRef'
+              name='nraId'
               label={_labels.nuRange}
               valueField='reference'
               displayField='description'
-              requied
               firstValue={rtDefaultFormValidation.values.nraRef}
               secondValue={rtDefaultFormValidation.values.nraDescription}
               onChange={(event, newValue) => {
@@ -190,7 +184,7 @@ const DocumentTypeMaps = () => {
                   rtDefaultValidation.setFieldValue('rt-nra-product', newValue?.recordId || '')
                   rtDefaultFormValidation.setFieldValue('nraId', newValue?.recordId)
                   rtDefaultFormValidation.setFieldValue('nraRef', newValue?.reference)
-                  rtDefaultFormValidation.setFieldValue('nraDescription', newValue?.description)
+                  rtDefaultFormValidation.setFieldValue('nraDescription', newValue?.description || '')
                 } else {
                   rtDefaultValidation.setFieldValue('rt-nra-product', '')
                   rtDefaultFormValidation.setFieldValue('nraId', '')
@@ -198,7 +192,6 @@ const DocumentTypeMaps = () => {
                   rtDefaultFormValidation.setFieldValue('nraDescription', '')
                 }
               }}
-              error={rtDefaultFormValidation.touched.nraRef && Boolean(rtDefaultFormValidation.errors.nraRef)}
               maxAccess={access}
             />
           </Grid>
