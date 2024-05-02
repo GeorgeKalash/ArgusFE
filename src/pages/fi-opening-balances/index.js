@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
+
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -13,14 +13,15 @@ import { useWindow } from 'src/windows'
 const FiOpeningBalance = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: FinancialRepository.FiOpeningBalance.qry,
+    const response = await getRequest({
+      extension: FinancialRepository.FiOpeningBalance.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
     })
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -28,11 +29,11 @@ const FiOpeningBalance = () => {
     labels: _labels,
     paginationParameters,
     invalidate,
-    refetch,
+
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.FiOpeningBalance.qry,
+    endpointId: FinancialRepository.FiOpeningBalance.page,
     datasetId: ResourceIds.FiOpeningBalances
   })
 
@@ -84,7 +85,7 @@ const FiOpeningBalance = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.recordId )
+    openForm(obj?.recordId)
   }
 
   const del = obj => {
@@ -96,36 +97,35 @@ const FiOpeningBalance = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: FiOpeningBalancesForm,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
-        maxAccess: access,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 500,
       title: _labels.openingBalance
     })
   }
 
   return (
     <>
-        <GridToolbar onAdd={add} maxAccess={access} />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={popup}
-          onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          refetch={refetch}
-          maxAccess={access}
-        />
+      <GridToolbar onAdd={add} maxAccess={access} />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        onEdit={popup}
+        onDelete={del}
+        isLoading={false}
+        pageSize={50}
+        paginationParameters={paginationParameters}
+        paginationType='api'
+        maxAccess={access}
+      />
     </>
   )
 }

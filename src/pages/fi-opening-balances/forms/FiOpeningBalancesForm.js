@@ -12,15 +12,12 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-
 export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.FiOpeningBalance.qry
+    endpointId: FinancialRepository.FiOpeningBalance.page
   })
-
   const { formik } = useForm({
     initialValues: {
       recordId: null,
@@ -43,41 +40,34 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
-
       const response = await postRequest({
         extension: FinancialRepository.FiOpeningBalance.set,
         record: JSON.stringify(obj)
       })
-
       if (!recordId) {
         toast.success('Record Added Successfully')
         formik.setValues({
           ...obj,
-          recordId: response.recordId 
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
-
       invalidate()
     }
   })
-
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-
           const res = await getRequest({
             extension: FinancialRepository.FiOpeningBalance.get,
             parameters: `_recordId=${recordId}`
           })
-
           formik.setValues(res.record)
         }
-      } catch (e) { }
+      } catch (e) {}
     })()
   }, [])
-
   return (
     <FormShell resourceId={ResourceIds.FiOpeningBalances} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
@@ -101,10 +91,6 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
         <Grid item xs={12}>
           <ResourceLookup
             endpointId={FinancialRepository.Account.snapshot}
-            parameters={{
-              _countryId: formik.values.accountId,
-              _stateId: 0
-            }}
             valueField='recordId'
             displayField='name'
             name='reference'
@@ -139,11 +125,11 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
             name='currencyId'
             label={labels.currencyName}
             valueField='recordId'
-            displayField={['name','reference','flName']}
+            displayField={['reference', 'name', 'flName']}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' },
-              { key: 'flName', value: 'flName' },
+              { key: 'flName', value: 'flName' }
             ]}
             values={formik.values}
             required
@@ -193,7 +179,7 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
           />
         </Grid>
         <Grid item xs={12}>
-        <CustomNumberField
+          <CustomNumberField
             name='baseAmount'
             type='text'
             label={labels.baseAmount}
