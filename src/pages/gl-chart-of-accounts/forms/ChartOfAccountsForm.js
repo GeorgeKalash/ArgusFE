@@ -1,8 +1,6 @@
 // ** MUI Imports
 import { Grid, FormControlLabel, Checkbox, Box, TextField } from '@mui/material'
-import { InputAdornment } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -25,19 +23,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const [segments, setSegments] = useState([])
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    accountRef: '',
-    name: '',
-    description: '',
-    groupId: '',
-    isCostElement: false,
-    sign: '',
-    groupName: '',
-    activeStatus: '',
-    activeStatusName: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   //const editMode = !!recordId
@@ -46,8 +31,20 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     endpointId: GeneralLedgerRepository.ChartOfAccounts.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      accountRef: '',
+      name: '',
+      description: '',
+      groupId: '',
+      isCostElement: false,
+      sign: '',
+      groupName: '',
+      activeStatus: '',
+      activeStatusName: ''
+    },
+    maxAccess: maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -75,12 +72,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
           record: JSON.stringify(payload)
         })
         toast.success(`Record ${values.recordId ? 'Edited' : 'Added'} Successfully`)
-        if (!values.recordId) {
-          setInitialData({
-            ...values,
-            recordId: response.recordId
-          })
-        }
+
         setEditMode(true)
         invalidate()
       } catch (error) {
@@ -132,7 +124,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
 
         setSegments(defaultSegments)
       })
-      .catch()
+      .catch(error => {})
   }
 
   return (
@@ -253,6 +245,8 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
 import React, { createRef } from 'react'
 
 import { FormControl, InputLabel, OutlinedInput, FormHelperText, styled } from '@mui/material'
+import { useForm } from 'src/hooks/form'
+import { useWindow } from 'src/windows'
 
 const SegmentedInput = ({ segments, name, setFieldValue, values, label, error, helperText, required }) => {
   const handleInputChange = event => {
