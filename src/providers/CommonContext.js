@@ -43,9 +43,7 @@ const CommonProvider = ({ children }) => {
       .then(res => {
         callback(res.list)
       })
-      .catch(error => {
-        // setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const values = {
