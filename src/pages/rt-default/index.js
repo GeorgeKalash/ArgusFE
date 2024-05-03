@@ -9,7 +9,6 @@ import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 // ** API
@@ -29,7 +28,6 @@ const DocumentTypeMaps = () => {
   //control
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
-  const [numberRangeStore, setNumberRangeStore] = useState([])
 
   //stores
 
@@ -70,9 +68,7 @@ const DocumentTypeMaps = () => {
           getNumberRange(myObject['rt-nra-product'])
         }
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const getNumberRange = nraId => {
@@ -82,16 +78,13 @@ const DocumentTypeMaps = () => {
       parameters: parameters
     })
       .then(res => {
-        // console.log(res)
         rtDefaultValidation.setFieldValue('rt-nra-product', res.record.recordId)
 
         rtDefaultFormValidation.setFieldValue('nraId', res.record.recordId)
         rtDefaultFormValidation.setFieldValue('nraRef', res.record.reference)
         rtDefaultFormValidation.setFieldValue('nraDescription', res.record.description)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const rtDefaultFormValidation = useFormik({
@@ -134,25 +127,11 @@ const DocumentTypeMaps = () => {
         console.log(res)
         if (res) toast.success('Record Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const handleSubmit = () => {
     rtDefaultValidation.handleSubmit()
-  }
-
-  const lookupNumberRange = searchQry => {
-    var parameters = `_size=30&_startAt=0&_filter=${searchQry}`
-    getRequest({
-      extension: SystemRepository.NumberRange.snapshot,
-      parameters: parameters
-    })
-      .then(res => {
-        setNumberRangeStore(res.list)
-      })
-      .catch()
   }
 
   console.log('rtDefaultFormValidation', rtDefaultFormValidation)
@@ -209,8 +188,6 @@ const DocumentTypeMaps = () => {
           <WindowToolbar onSave={handleSubmit} isSaved={true} />
         </Grid>
       </Box>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
