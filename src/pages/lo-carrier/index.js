@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -23,6 +23,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const LoCarrier = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -72,17 +75,16 @@ const LoCarrier = () => {
 
   const columns = [
     {
-        field: 'reference',
-        headerName: _labels.reference,
-        flex: 1
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
     },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
+    }
   ]
-
 
   const add = () => {
     setWindowOpen(true)
@@ -101,12 +103,13 @@ const LoCarrier = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -118,7 +121,7 @@ const LoCarrier = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <LoCarriersWindow
           onClose={() => {
@@ -134,8 +137,9 @@ const LoCarrier = () => {
           setBusinessPartnerStore={setBusinessPartnerStore}
         />
       )}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 
