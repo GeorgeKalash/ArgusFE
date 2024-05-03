@@ -171,6 +171,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               label={_labels.toCountry}
               valueField='recordId'
               displayField='name'
+              required
               readOnly={!formik.values.deliveryModeId}
               values={formik.values}
               onChange={(event, newValue) => {
@@ -199,6 +200,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               label={_labels.payingAgent}
               readOnly={!(formik.values.deliveryModeId && formik.values.toCountryId)}
               valueField='recordId'
+              required
               displayField='description'
               columnsInDropDown={[
                 { key: 'description', value: 'Paying Agent' },
@@ -226,6 +228,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               label={_labels.profession}
               valueField='recordId'
               displayField='name'
+              required
               value={formik.values.remitter.profession}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -247,6 +250,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               valueField='recordId'
               displayField='name'
               values={formik.values}
+              required
               onChange={(event, newValue) => {
                 if (newValue) {
                   formik.setFieldValue('remittancePurposeId', newValue?.recordId)
@@ -269,6 +273,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               label={_labels.sourceOfFunds}
               valueField='recordId'
               displayField='name'
+              required
               values={formik.values}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -290,6 +295,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               value={formik.values.sourceAmount}
               error={formik.touched.sourceAmount && Boolean(formik.errors.sourceAmount)}
               maxAccess={maxAccess}
+              required
               onClear={() => formik.setFieldValue('sourceAmount', '')}
             />
           </Grid>
@@ -298,6 +304,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               <CustomNumberField
                 name='totalTransactionAmountPerAnnum'
                 onChange={formik.handleChange}
+                required
                 label={_labels.trxPerYear}
                 value={formik.values.totalTransactionAmountPerAnnum}
                 error={
@@ -312,6 +319,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
                 name='transactionsPerAnnum'
                 onChange={formik.handleChange}
                 label={_labels.trxPerMonth}
+                required
                 value={formik.values.transactionsPerAnnum}
                 error={formik.touched.transactionsPerAnnum && Boolean(formik.errors.transactionsPerAnnum)}
               />
@@ -353,6 +361,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
             <Grid item xs={12}>
               <CustomTextField
                 name='remitter.employerName'
+                required
                 onChange={event => formik.setFieldValue('remitter.employerName', event.target.value)}
                 label={_labels.employerName}
                 onClear={() => formik.setFieldValue('remitter.employerName', '')}
@@ -362,6 +371,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
+                required
                 endpointId={RemittanceBankInterface.Combos.qry}
                 parameters={`_combo=4`}
                 name='remitter.employerStatus'
@@ -392,6 +402,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
                   _payingAgent: formik.values.payingAgent,
                   _deliveryMode: formik.values.deliveryModeId
                 }}
+                required
                 valueField='name'
                 displayField='bankName'
                 name='beneficiary.bankDetails.bankName'
