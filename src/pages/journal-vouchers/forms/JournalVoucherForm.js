@@ -21,7 +21,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function JournalVoucherForm({ labels, maxAccess, recordId, reference }) {
+export default function JournalVoucherForm({ labels, maxAccess, recordId, reference = {} }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [responseValue, setResponseValue] = useState(null)
@@ -37,7 +37,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, refere
     rateCalcMethod: 1,
     exRate: 1
   })
-  console.log(reference)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -58,7 +57,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, refere
       const data = {
         ...obj,
         date: formatDateToApi(obj.date),
-        recordId: initialValues.recordId,
+        recordId: recordId,
         response: responseValue
       }
       try {
@@ -148,7 +147,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, refere
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            readOnly={reference.readOnly}
+            readOnly={reference.readOnly || true}
             required={reference.mandatory}
             maxAccess={maxAccess}
             maxLength='30'

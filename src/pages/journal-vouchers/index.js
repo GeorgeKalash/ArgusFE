@@ -125,8 +125,17 @@ const JournalVoucher = () => {
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    stack({
+      Component: JournalVoucherForm,
+      props: {
+        labels: _labels,
+        maxAccess: access,
+        recordId: obj.recordId
+      },
+      width: 500,
+      height: 500,
+      title: _labels.generalJournal
+    })
   }
 
   const del = async obj => {
