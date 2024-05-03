@@ -738,7 +738,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                   maxAccess={maxAccess}
                   maxLength='30'
                   readOnly
-                  required
                   error={
                     clientIndividualFormik.touched.clientRemittance?.reference &&
                     Boolean(clientIndividualFormik.errors.reference)
