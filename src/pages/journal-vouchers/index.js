@@ -24,9 +24,16 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import reference from 'src/lib/docRefBehaivors'
+import { useWindow } from 'src/windows'
+import JournalVoucherForm from './forms/JournalVoucherForm'
+import { useError } from 'src/error'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
@@ -97,8 +104,24 @@ const JournalVoucher = () => {
     }
   ]
 
-  const add = () => {
-    setWindowOpen(true)
+  const add = async () => {
+    const general = await reference(getRequest, SystemFunction.JournalVoucher)
+
+    !general?.errorMessage
+      ? stack({
+          Component: JournalVoucherForm,
+          props: {
+            labels: _labels,
+            maxAccess: access,
+            recordId: selectedRecordId,
+            setSelectedRecordId: setSelectedRecordId,
+            reference: general.reference
+          },
+          width: 500,
+          height: 500,
+          title: _labels.generalJournal
+        })
+      : stackError({ message: general?.errorMessage })
   }
 
   const edit = obj => {
@@ -139,7 +162,7 @@ const JournalVoucher = () => {
           maxAccess={access}
         />
       </Box>
-      {windowOpen && (
+      {/* {windowOpen && (
         <JournalVoucherWindow
           onClose={() => {
             setWindowOpen(false)
@@ -150,7 +173,7 @@ const JournalVoucher = () => {
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
         />
-      )}
+      )} */}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

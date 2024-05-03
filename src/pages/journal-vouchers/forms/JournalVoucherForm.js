@@ -21,7 +21,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
+export default function JournalVoucherForm({ labels, maxAccess, recordId, reference }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [responseValue, setResponseValue] = useState(null)
@@ -37,7 +37,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
     rateCalcMethod: 1,
     exRate: 1
   })
-
+  console.log(reference)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -49,6 +49,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
+      reference: reference.mandatory && yup.string().required('This field is required'),
       date: yup.string().required('This field is required'),
       currencyId: yup.string().required('This field is required'),
       dtId: yup.string().required('This field is required')
@@ -147,7 +148,8 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            readOnly
+            readOnly={reference.readOnly}
+            required={reference.mandatory}
             maxAccess={maxAccess}
             maxLength='30'
             onChange={formik.handleChange}
