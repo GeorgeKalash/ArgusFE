@@ -1,25 +1,9 @@
 import Window from 'src/components/Shared/Window'
 import MultiCurrencyForm from '../forms/MultiCurrencyForm'
 
-const MultiCurrencyWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId,
-  currencyId,
-  rateTypeId,
-
-}) => {
-  
+const MultiCurrencyWindow = ({ onClose, labels, maxAccess, recordId, currencyId, rateTypeId }) => {
   return (
-    <Window
-      id='MultiCurrencyWindow'
-      Title={labels.mc_mapping}
-      controlled={true}
-      onClose={onClose}
-      width={500}
-      height={300}
-    >
+    <Window id='MultiCurrencyWindow' Title={labels.mc_mapping} controlled={true} onClose={onClose}>
       <MultiCurrencyForm
         labels={labels}
         maxAccess={maxAccess}
