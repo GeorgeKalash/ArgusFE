@@ -20,7 +20,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import TreeViewMultiSelection from 'src/views/components/tree-view/TreeViewMultiSelection'
 
 const MCDefault = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -111,11 +110,7 @@ const MCDefault = () => {
               displayField='name'
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('mc_defaultRTSA', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('mc_defaultRTSA', '')
-                }
+                formik.setFieldValue('mc_defaultRTSA', newValue?.recordId || '')
               }}
               error={formik.touched.mc_defaultRTSA && Boolean(formik.errors.mc_defaultRTSA)}
             />
@@ -129,11 +124,7 @@ const MCDefault = () => {
               displayField='name'
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('mc_defaultRTPU', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('mc_defaultRTPU', '')
-                }
+                formik.setFieldValue('mc_defaultRTPU', newValue?.recordId || '')
               }}
               error={formik.touched.mc_defaultRTPU && Boolean(formik.errors.mc_defaultRTPU)}
             />
@@ -147,11 +138,7 @@ const MCDefault = () => {
               displayField='name'
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('mc_defaultRTMF', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('mc_defaultRTMF', '')
-                }
+                formik.setFieldValue('mc_defaultRTMF', newValue?.recordId || '')
               }}
               error={formik.touched.mc_defaultRTMF && Boolean(formik.errors.mc_defaultRTMF)}
             />
@@ -165,11 +152,7 @@ const MCDefault = () => {
               displayField='name'
               values={formik.values}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('mc_defaultRTFI', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('mc_defaultRTFI', '')
-                }
+                formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
               }}
               error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
             />

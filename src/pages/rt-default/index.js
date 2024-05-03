@@ -124,7 +124,6 @@ const DocumentTypeMaps = () => {
       record: JSON.stringify({ sysDefaults: data })
     })
       .then(res => {
-        console.log(res)
         if (res) toast.success('Record Successfully')
       })
       .catch(error => {})
@@ -133,8 +132,6 @@ const DocumentTypeMaps = () => {
   const handleSubmit = () => {
     rtDefaultValidation.handleSubmit()
   }
-
-  console.log('rtDefaultFormValidation', rtDefaultFormValidation)
 
   return (
     <>
