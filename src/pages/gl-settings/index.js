@@ -250,7 +250,6 @@ const GLSettings = () => {
       }, [formik.values.GLACSegments]);
 
       return(
-        <>
         <FormShell
         resourceId={ResourceIds.GLSettings}
         maxAccess={access}
@@ -347,7 +346,6 @@ const GLSettings = () => {
                 
                 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
             </FormShell>
-        </>
     )
   }
 

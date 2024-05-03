@@ -9,6 +9,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CityForm from 'src/pages/cities/Forms/CityForm'
 import { useWindow } from 'src/windows'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -105,14 +107,14 @@ const City = () => {
         maxAccess: access
       },
       width: 500,
-      height: 400,
       title: _labels.cities
     })
   }
 
   return (
     <VertLayout>
-      <GridToolbar
+      <Fixed>
+        <GridToolbar
           onAdd={add}
           maxAccess={access}
           onSearch={search}
@@ -120,6 +122,8 @@ const City = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -131,6 +135,7 @@ const City = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
         />
+      </Grow>
     </VertLayout>
   )
 }

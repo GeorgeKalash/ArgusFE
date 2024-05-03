@@ -46,7 +46,6 @@ const CharacteristicsWindow = ({
           maxAccess={maxAccess}
           store={store}
           expanded={expanded}
-          height={height}
         />
       </CustomTabPanel>
     </>

@@ -1,5 +1,4 @@
 import { useState, useContext } from 'react'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -13,6 +12,9 @@ import toast from 'react-hot-toast'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -212,37 +214,40 @@ const CashTransfer = () => {
         recordId: recordId ? recordId : null
       },
       width: 950,
-      height: 620,
       title: 'Cash Transfer'
     })
   }
 
   return (
     <VertLayout>
-      <GridToolbar
-        onAdd={addCashTFR}
-        maxAccess={access}
-        onSearch={value => {
-          filterBy('qry', value)
-        }}
-        onSearchClear={() => {
-          clearFilter('qry')
-        }}
-        labels={_labels}
-        inputSearch={true}
-      />
-      <Table
-        columns={columns}
-        gridData={data ? data : { list: [] }}
-        rowId={['recordId']}
-        onEdit={editCashTFR}
-        onDelete={delCashTFR}
-        isLoading={false}
-        pageSize={50}
-        refetch={refetch}
-        paginationType='client'
-        maxAccess={access}
-      />
+      <Fixed>
+        <GridToolbar
+          onAdd={addCashTFR}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data ? data : { list: [] }}
+          rowId={['recordId']}
+          onEdit={editCashTFR}
+          onDelete={delCashTFR}
+          isLoading={false}
+          pageSize={50}
+          refetch={refetch}
+          paginationType='client'
+          maxAccess={access}
+        />
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )

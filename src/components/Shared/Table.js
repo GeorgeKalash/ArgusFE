@@ -37,6 +37,9 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   '& .MuiDataGrid-row:last-child': {
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
+  '& .MuiDataGrid-overlayWrapperInner' :{
+    marginTop: '-1px'
+  },
   '& .MuiDataGrid-virtualScroller': {
     // remove the space left for the header
     marginTop: '0!important'

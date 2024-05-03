@@ -8,6 +8,9 @@ import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
 
 export default function FormShell({
   form,
@@ -72,96 +75,100 @@ export default function FormShell({
   }
 
   return (
-    <>
-      <DialogContent sx={{ display: 'flex !important',flex: 1, zIndex: 0, flexDirection:'column' }}>
-        {children}
-      </DialogContent>
+    <VertLayout>
+      <Grow>
+        <DialogContent sx={{ display: 'flex !important',flex: 1, zIndex: 0, flexDirection:'column' }}>
+          {children}
+        </DialogContent>
+      </Grow>
       {windowToolbarVisible && (
-        <WindowToolbar
-          print={print}
-          onSave={() => form?.handleSubmit()}
-          onClear={() => handleReset()}
-          onPost={() => {
-            // Set a flag in thexpt Formik state before calling handleSubmit
-            form.setFieldValue('isOnPostClicked', true)
-            form.handleSubmit()
-          }}
-          onTFR={() => {
-            // Set  flag in the Formik state before calling handleSubmit
-            form.setFieldValue('isTFRClicked', true)
-            form.handleSubmit()
-          }}
-          onInfo={() =>
-            stack({
-              Component: TransactionLog,
-              props: {
-                recordId: form.values?.recordId ?? form.values.clientId,
-                resourceId: resourceId,
-                setErrorMessage: setErrorMessage
-              },
-              width: 700,
-              title: 'Transaction Log'
-            })
-          }
-          onClickGL={() =>
-            stack({
-              Component: GeneralLedger,
-              props: {
-                formValues: form.values,
-                recordId: form.values?.recordId,
-                functionId: functionId
-              },
-              width: 1000,
-              height: 620,
-              title: 'General Ledger'
-            })
-          }
-          onClientRelation={() =>
-            stack({
-              Component: ClientRelationForm,
-              props: {
-                recordId: form.values?.recordId ?? form.values.clientId,
-                name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
-                reference: form.values.reference,
-                setErrorMessage: setErrorMessage
-              },
-              width: 900,
-              height: 600,
-              title: 'Client Relation'
-            })
-          }
-          onGenerateReport={() =>
-            stack({
-              Component: PreviewReport,
-              props: {
-                selectedReport: selectedReport,
-                recordId: form.values?.recordId
-              },
-              width: 1000,
-              height: 500,
-              title: 'Preview Report'
-            })
-          }
-          isSaved={isSaved}
-          isInfo={isInfo}
-          isCleared={isCleared}
-          actions={actions}
-          onApproval={onApproval}
-          editMode={editMode}
-          disabledSubmit={disabledSubmit}
-          infoVisible={infoVisible}
-          postVisible={postVisible}
-          isPosted={isPosted}
-          isClosed={isClosed}
-          clientRelation={clientRelation}
-          resourceId={resourceId}
-          recordId={form.values?.recordId}
-          selectedReport={selectedReport}
-          setSelectedReport={setSelectedReport}
-          previewReport={previewReport}
-          visibleClear={visibleClear}
-          functionId={functionId}
-        />
+        <Fixed>
+          <WindowToolbar
+            print={print}
+            onSave={() => form?.handleSubmit()}
+            onClear={() => handleReset()}
+            onPost={() => {
+              // Set a flag in thexpt Formik state before calling handleSubmit
+              form.setFieldValue('isOnPostClicked', true)
+              form.handleSubmit()
+            }}
+            onTFR={() => {
+              // Set  flag in the Formik state before calling handleSubmit
+              form.setFieldValue('isTFRClicked', true)
+              form.handleSubmit()
+            }}
+            onInfo={() =>
+              stack({
+                Component: TransactionLog,
+                props: {
+                  recordId: form.values?.recordId ?? form.values.clientId,
+                  resourceId: resourceId,
+                  setErrorMessage: setErrorMessage
+                },
+                width: 700,
+                title: 'Transaction Log'
+              })
+            }
+            onClickGL={() =>
+              stack({
+                Component: GeneralLedger,
+                props: {
+                  formValues: form.values,
+                  recordId: form.values?.recordId,
+                  functionId: functionId
+                },
+                width: 1000,
+                height: 620,
+                title: 'General Ledger'
+              })
+            }
+            onClientRelation={() =>
+              stack({
+                Component: ClientRelationForm,
+                props: {
+                  recordId: form.values?.recordId ?? form.values.clientId,
+                  name: form.values.firstName ? form.values.firstName + ' ' + form.values.lastName : form.values.name,
+                  reference: form.values.reference,
+                  setErrorMessage: setErrorMessage
+                },
+                width: 900,
+                height: 600,
+                title: 'Client Relation'
+              })
+            }
+            onGenerateReport={() =>
+              stack({
+                Component: PreviewReport,
+                props: {
+                  selectedReport: selectedReport,
+                  recordId: form.values?.recordId
+                },
+                width: 1000,
+                height: 500,
+                title: 'Preview Report'
+              })
+            }
+            isSaved={isSaved}
+            isInfo={isInfo}
+            isCleared={isCleared}
+            actions={actions}
+            onApproval={onApproval}
+            editMode={editMode}
+            disabledSubmit={disabledSubmit}
+            infoVisible={infoVisible}
+            postVisible={postVisible}
+            isPosted={isPosted}
+            isClosed={isClosed}
+            clientRelation={clientRelation}
+            resourceId={resourceId}
+            recordId={form.values?.recordId}
+            selectedReport={selectedReport}
+            setSelectedReport={setSelectedReport}
+            previewReport={previewReport}
+            visibleClear={visibleClear}
+            functionId={functionId}
+          />
+        </Fixed>
       )}
       {windowInfo && (
         <TransactionLog
@@ -170,6 +177,6 @@ export default function FormShell({
           recordId={form.values?.recordId}
         />
       )}
-    </>
+    </VertLayout>
   )
 }

@@ -1,7 +1,3 @@
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import useResourceParams from 'src/hooks/useResourceParams'
@@ -16,10 +12,7 @@ const AddressGridTab = ({
   addAddress,
   delAddress,
   editAddress,
-  maxAccess,
-
-  // labels,
- height
+  maxAccess
 
 }) => {
 

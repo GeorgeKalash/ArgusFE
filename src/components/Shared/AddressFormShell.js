@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import FormShell from './FormShell'
 import AddressTab from './AddressTab'
-import { useFormik } from 'formik'
 import { useForm } from 'src/hooks/form'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ResourceIds } from 'src/resources/ResourceIds'
 
 export const AddressFormShell = ({
   setAddress,
@@ -17,9 +14,6 @@ export const AddressFormShell = ({
   optional = false,
   onSubmit
 }) => {
-  // const { labels: labels, access } = useResourceParams({
-  //   datasetId: ResourceIds.Address
-  // })
 
   const [required, setRequired] = useState(!optional)
 

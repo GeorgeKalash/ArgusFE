@@ -24,7 +24,9 @@ export function WindowProvider({ children }) {
       {stack.map(({ Component, title, width = 800, props, onClose }, index) => (
         <Window
           key={index}
-          sx={{display:'flex !important'}}
+          sx={{display:'flex !important',
+            flex:'1'
+          }}
           Title={title}
           controlled={true}
           onClose={() => {

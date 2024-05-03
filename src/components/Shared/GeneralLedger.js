@@ -275,8 +275,6 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     }
   }
 
-  // Function to get system function module
-
   const getSystemFunctionModule = functionId => {
     return Math.floor(functionId / 100)
   }

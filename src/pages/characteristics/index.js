@@ -10,6 +10,8 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Characteristics = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -87,7 +89,6 @@ const Characteristics = () => {
         maxAccess: access,
       },
       width: 600,
-      height: 600,
       title: _labels.characteristics
     })
   }
@@ -98,20 +99,24 @@ const Characteristics = () => {
 
   return (
     <VertLayout>
-      <GridToolbar onAdd={addCharacteristics} maxAccess={access} />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['recordId']}
-        paginationParameters={paginationParameters}
-        paginationType='api'
-        refetch={refetch}
-        onEdit={popup}
-        onDelete={delCharacteristics}
-        isLoading={false}
-        pageSize={50}
-        maxAccess={access}
-      />
+      <Fixed>
+        <GridToolbar onAdd={addCharacteristics} maxAccess={access} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
+          onEdit={popup}
+          onDelete={delCharacteristics}
+          isLoading={false}
+          pageSize={50}
+          maxAccess={access}
+        />
+      </Grow>
     </VertLayout>
   )
 }

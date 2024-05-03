@@ -10,6 +10,8 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Activities = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -88,20 +90,24 @@ const Activities = () => {
 
   return (
     <VertLayout>
-      <GridToolbar onAdd={add} maxAccess={access} />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['recordId']}
-        onEdit={edit}
-        onDelete={del}
-        isLoading={false}
-        pageSize={50}
-        refetch={refetch}
-        paginationParameters={paginationParameters}
-        paginationType='api'
-        maxAccess={access}
-      />
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          pageSize={50}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          maxAccess={access}
+        />
+      </Grow>
       {windowOpen && (
         <ActivityWindow
           onClose={() => {
