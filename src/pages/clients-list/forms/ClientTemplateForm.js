@@ -156,7 +156,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
     title: '',
     mobileVerified: '',
     isRelativeDiplomat: false,
-    professionId: ''
+    professionId: '',
+    clientRemittance: { reference: '' }
   })
 
   const handleCopy = event => {
@@ -315,7 +316,10 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
           workAddressId: obj.clientRemittance?.workAddressId,
           title: obj.clientRemittance?.title,
           mobileVerified: obj.clientRemittance?.mobileVerificationStatus,
-          isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat
+          isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat,
+          clientRemittance: {
+            reference: obj.clientRemittance.reference
+          }
         })
 
         setEditMode(true)
@@ -409,8 +413,9 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       smsLanguage: yup.string().required(' '),
       incomeSourceId: yup.string().required(' '),
       gender: yup.string().required(' '),
-      street1: yup.string().required(' '),
-      phone: yup.string().required(' ')
+      street1: yup.string().required(' ')
+
+      //phone: yup.string().required(' ')
     }),
     onSubmit: values => {
       postRtDefault(values)
@@ -474,6 +479,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
     }
 
     const obj4 = {
+      reference: obj.clientRemittance?.reference,
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
@@ -722,6 +728,21 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                     />
                   }
                   label={labels.isResident}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='clientRemittance.reference'
+                  label={labels.lastKYC}
+                  value={clientIndividualFormik?.values?.clientRemittance?.reference}
+                  maxAccess={maxAccess}
+                  maxLength='30'
+                  readOnly
+                  required
+                  error={
+                    clientIndividualFormik.touched.clientRemittance?.reference &&
+                    Boolean(clientIndividualFormik.errors.reference)
+                  }
                 />
               </Grid>
               <Grid item xs={12}>
