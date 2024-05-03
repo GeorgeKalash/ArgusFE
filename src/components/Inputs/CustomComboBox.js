@@ -1,11 +1,12 @@
-import { Autocomplete, Popper, TextField } from '@mui/material'
+// ** MUI Imports
+import { Autocomplete, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import Paper from '@mui/material/Paper'
 import React, { useEffect, useRef, useState } from 'react'
 
 const CustomComboBox = ({
-  type = 'text',
+  type = 'text', //any valid HTML5 input type
   name,
   label,
   value,
@@ -16,8 +17,8 @@ const CustomComboBox = ({
   onChange,
   error,
   helperText,
-  variant = 'outlined',
-  size = 'small',
+  variant = 'outlined', //outlined, standard, filled
+  size = 'small', //small, medium
   fullWidth = true,
   required = false,
   autoFocus = false,
@@ -45,8 +46,8 @@ const CustomComboBox = ({
       setAnchorEl(ref.current)
     }
   }, [ref])
-  
-return (
+
+  return (
     <div ref={ref}>
       <Autocomplete
         name={name}
@@ -54,15 +55,23 @@ return (
         size={size}
         options={store}
         key={value}
-        PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
         PopperComponent={({ children, ...other }) => (
-          <Popper 
-          {...other}
-          sx={{ 
-            position: 'absolute', width: anchorEl ? anchorEl.clientWidth : 'auto' }}>
+          <Paper
+            {...other}
+            style={{
+              position: 'absolute',
+              width: anchorEl ? anchorEl.clientWidth : 'auto',
+              transformOrigin: 'center top', // Set transform origin for proper positioning
+              transform:
+                anchorEl && window.innerHeight - anchorEl.getBoundingClientRect().bottom < 150
+                  ? 'translateY(-115%)'
+                  : 'none',
+              zIndex: 999999999999999
+            }}
+          >
             <style>{`.css-snrokh-MuiAutocomplete-noOptions { display: none; }`}</style>
             {children}
-          </Popper>
+          </Paper>
         )}
         getOptionLabel={(option, value) => {
           if (typeof displayField == 'object') {
@@ -93,8 +102,8 @@ return (
             )
           } else {
             var displayFields = Array.isArray(displayField) ? displayField : [displayField]
-            
-return options.filter(option =>
+
+            return options.filter(option =>
               displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
             )
           }
@@ -162,7 +171,7 @@ return options.filter(option =>
             sx={{
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
-                  border: !hasBorder && 'none'
+                  border: !hasBorder && 'none' // Hide border
                 }
               }
             }}
