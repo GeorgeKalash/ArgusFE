@@ -144,6 +144,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       commission: yup.string().required(' '),
       lcAmount: yup.string().required(' '),
       clientId: yup.string().required(' '),
+      poeId: yup.string().required(' '),
       beneficiaryId: yup.string().required(' '),
       amountRows: yup
         .array()
@@ -1173,6 +1174,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       onChange={(event, newValue) => {
                         formik.setFieldValue('poeId', newValue ? newValue?.recordId : '')
                       }}
+                      required
                       error={formik.touched.poeId && Boolean(formik.errors.poeId)}
                       helperText={formik.touched.poeId && formik.errors.poeId}
                     />

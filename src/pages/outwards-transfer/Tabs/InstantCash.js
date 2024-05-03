@@ -366,7 +366,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
                 label={_labels.employerName}
                 onClear={() => formik.setFieldValue('remitter.employerName', '')}
                 value={formik.values.remitter.employerName}
-                error={formik.touched.employerName && Boolean(formik.errors.employerName)}
+                error={formik.touched.remitter?.employerName && Boolean(formik.errors.remitter?.employerName)}
               />
             </Grid>
             <Grid item xs={12}>
