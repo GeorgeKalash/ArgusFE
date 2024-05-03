@@ -14,7 +14,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
@@ -26,9 +25,6 @@ const ChartOfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
-
-  //states
-  const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -149,8 +145,6 @@ const ChartOfAccounts = () => {
           maxAccess={access}
         />
       </Box>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

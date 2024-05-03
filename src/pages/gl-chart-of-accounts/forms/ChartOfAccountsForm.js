@@ -19,7 +19,6 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [segments, setSegments] = useState([])
 
@@ -40,24 +39,19 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
       groupId: '',
       isCostElement: false,
       sign: '',
-      groupName: '',
-      activeStatus: '',
-      activeStatusName: ''
+      activeStatus: ''
     },
     maxAccess: maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(' '),
+      activeStatus: yup.string().required(' '),
       description: yup.string().required(' '),
       accountRef: yup
         .string()
-        .required()
-        .test(
-          'is-mask-filled',
-          'Account Reference is incomplete',
-          value => /^[\d-]+$/.test(value) && !/^_*-_*-_$/.test(value)
-        )
+        .required(' ')
+        .matches(/^(?=.*\d)[\d_-]+$/)
     }),
     onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true)
@@ -84,7 +78,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     if (recordId) {
-      setIsLoading(true)
       getRequest({
         extension: GeneralLedgerRepository.ChartOfAccounts.get,
         parameters: `_recordId=${recordId}`
@@ -97,12 +90,8 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
               value: seg.length
             }))
           )
-          setIsLoading(false)
         })
-        .catch(error => {
-          toast.error('Failed to fetch record')
-          setIsLoading(false)
-        })
+        .catch(error => {})
     } else {
       getDataResult()
     }
@@ -154,10 +143,11 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
         <Grid item xs={12}>
           <SegmentedInput
             segments={segments}
+            readOnly={editMode}
             name='accountRef'
             setFieldValue={formik.setFieldValue}
             values={formik.values.accountRef}
-            label='Account Reference'
+            label={labels.accountRef}
             required
             error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
           />
@@ -167,6 +157,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             name='name'
             label={labels.name}
             value={formik.values.name}
+            readOnly={editMode}
             required
             rows={2}
             maxAccess={maxAccess}
@@ -248,10 +239,12 @@ import { FormControl, InputLabel, OutlinedInput, FormHelperText, styled } from '
 import { useForm } from 'src/hooks/form'
 import { useWindow } from 'src/windows'
 
-const SegmentedInput = ({ segments, name, setFieldValue, values, label, error, helperText, required }) => {
+const SegmentedInput = ({ segments, name, setFieldValue, values, label, error, helperText, required, readOnly }) => {
   const handleInputChange = event => {
-    const { value } = event.target
-    setFieldValue(name, value)
+    if (!readOnly) {
+      const { value } = event.target
+      setFieldValue(name, value)
+    }
   }
 
   const createMask = () => {
@@ -284,7 +277,8 @@ const SegmentedInput = ({ segments, name, setFieldValue, values, label, error, h
         inputProps={{
           mask: mask,
           alwaysShowMask: true,
-          guide: false
+          guide: false,
+          readOnly: readOnly
         }}
         required={required}
       />
