@@ -434,7 +434,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       createdDate: formatDateToApiFunction(date.toISOString()),
       expiryDate: formatDateToApiFunction(obj.expiryDate),
       issueDate: obj.issueDate && formatDateToApiFunction(obj.issueDate), // test
-
       otpVerified: obj.otpVerified,
       plantName: obj.plantName,
       nationalityName: obj.nationalityName,
@@ -494,7 +493,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
-      status: obj.status
+      status: allowEdit ? -1 : obj.status
     }
 
     const obj5 = {
@@ -557,6 +556,10 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
         .then(res => {
           if (res) {
             toast.success('Record Edited Successfully')
+            setOtpShow(true)
+
+            // getClient(res.recordId)
+            setEditMode(true)
           }
         })
         .catch(error => {})
@@ -671,6 +674,21 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       disabled: true
     }
   ]
+
+  const actionEdit = [
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    }
+  ]
   function openBeneficiaryWindow() {
     stack({
       Component: BeneficiaryWindow,
@@ -683,12 +701,11 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
 
   return (
     <FormShell
-      actions={!allowEdit ? actions : []}
+      actions={!allowEdit ? actions : actionEdit}
       resourceId={ResourceIds.UpdateClientRemittance}
       form={clientIndividualFormik}
       maxAccess={maxAccess}
       editMode={editMode}
-      isClosed={isClosed}
       onClose={onClose}
       disabledSubmit={editMode && !allowEdit && true}
     >
