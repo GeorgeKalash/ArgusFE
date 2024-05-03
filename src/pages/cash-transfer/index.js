@@ -1,5 +1,4 @@
 import { useState, useContext } from 'react'
-import { VerticalLayout } from 'src/components/Shared/Layouts/VertLayout'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -13,6 +12,9 @@ import toast from 'react-hot-toast'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -123,7 +125,7 @@ const CashTransfer = () => {
       const dtId = await getDefaultDT()
 
       if (plantId !== '' && cashAccountId !== '') {
-        openOutWardsWindow(plantId, cashAccountId, recordId, dtId)
+        openCashTransferWindow(plantId, cashAccountId, recordId, dtId)
       } else {
         if (plantId === '') {
           setErrorMessage({ error: 'The user does not have a default plant' })
@@ -150,7 +152,6 @@ const CashTransfer = () => {
       flex: 1,
       valueGetter: ({ row }) => formatDateDefault(row?.date)
     },
-    ,
     {
       field: 'fromPlantName',
       headerName: _labels.fromPlant,
@@ -201,7 +202,7 @@ const CashTransfer = () => {
     openForm(obj.recordId)
   }
 
-  function openOutWardsWindow(plantId, cashAccountId, recordId, dtId) {
+  function openCashTransferWindow(plantId, cashAccountId, recordId, dtId) {
     stack({
       Component: CashTransferTab,
       props: {
@@ -213,39 +214,42 @@ const CashTransfer = () => {
         recordId: recordId ? recordId : null
       },
       width: 950,
-      height: 620,
       title: 'Cash Transfer'
     })
   }
 
   return (
-    <VerticalLayout>
-      <GridToolbar
-        onAdd={addCashTFR}
-        maxAccess={access}
-        onSearch={value => {
-          filterBy('qry', value)
-        }}
-        onSearchClear={() => {
-          clearFilter('qry')
-        }}
-        labels={_labels}
-        inputSearch={true}
-      />
-      <Table
-        columns={columns}
-        gridData={data ? data : { list: [] }}
-        rowId={['recordId']}
-        onEdit={editCashTFR}
-        onDelete={delCashTFR}
-        isLoading={false}
-        pageSize={50}
-        refetch={refetch}
-        paginationType='client'
-        maxAccess={access}
-      />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={addCashTFR}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={_labels}
+          inputSearch={true}
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data ? data : { list: [] }}
+          rowId={['recordId']}
+          onEdit={editCashTFR}
+          onDelete={delCashTFR}
+          isLoading={false}
+          pageSize={50}
+          refetch={refetch}
+          paginationType='client'
+          maxAccess={access}
+        />
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </VerticalLayout>
+    </VertLayout>
   )
 }
 

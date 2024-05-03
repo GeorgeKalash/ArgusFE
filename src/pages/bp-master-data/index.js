@@ -9,6 +9,8 @@ import BPMasterDataWindow from './Windows/BPMasterDataWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 // function SampleWindow() {
 //   const { stack } = useWindow()
@@ -163,26 +165,30 @@ const BPMasterData = () => {
 
   return (
     <VertLayout>
-      <GridToolbar
-        onAdd={add}
-        maxAccess={access}
-        onSearch={search}
-        onSearchClear={clear}
-        labels={_labels}
-        inputSearch={true}
-      />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['recordId']}
-        onEdit={edit}
-        onDelete={del}
-        isLoading={false}
-        pageSize={50}
-        paginationType='client'
-        maxAccess={access}
-        refetch={refetch}
-      />
+      <Fixed>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          pageSize={50}
+          paginationType='client'
+          maxAccess={access}
+          refetch={refetch}
+        />
+      </Grow>
     </ VertLayout>
   )
 }

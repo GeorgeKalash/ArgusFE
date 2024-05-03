@@ -9,6 +9,8 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Agent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -80,18 +82,22 @@ const Agent = () => {
 
   return (
     <VertLayout>
-      <GridToolbar onAdd={add} maxAccess={access} />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['recordId']}
-        onEdit={edit}
-        onDelete={del}
-        isLoading={false}
-        pageSize={50}
-        paginationType='client'
-        maxAccess={access}
-      />
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          pageSize={50}
+          paginationType='client'
+          maxAccess={access}
+        />
+      </Grow>
       {windowOpen && (
         <AgentWindow
         onClose={() => {

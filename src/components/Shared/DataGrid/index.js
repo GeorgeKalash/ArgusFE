@@ -23,6 +23,7 @@ export function DataGrid({
   allowDelete = true,
   allowAddNewLine = true,
   onSelectionChange,
+  rowSelectionModel,
   disabled = false
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
@@ -254,7 +255,7 @@ export function DataGrid({
   }
 
   return (
-    <Box sx={{ display:'flex !important', flex:'1 !important' }}>
+    <Box sx={{flex:'1 !important' }}>
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
@@ -265,6 +266,7 @@ export function DataGrid({
         disableSelectionOnClick
         disableMultipleSelection
         getRowId={row => row[idName]}
+        rowSelectionModel={[rowSelectionModel]}
         onStateChange={state => {
           if (Object.entries(state.editRows)[0]) {
             const [id, obj] = Object.entries(state.editRows)[0]

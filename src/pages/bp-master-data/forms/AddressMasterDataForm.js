@@ -85,25 +85,16 @@ useEffect(()=>{
 
 return (
 
-  <Box
-  sx={{
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%'
-  }}
->
+    <AddressGridTab
+      addressGridData={addressGridData}
+      addAddress={addAddress}
+      delAddress={delAddress}
+      editAddress={editAddress}
+      labels={labels}
+      maxAccess={maxAccess}
+      {...props}
 
-      <AddressGridTab
-        addressGridData={addressGridData}
-        addAddress={addAddress}
-        delAddress={delAddress}
-        editAddress={editAddress}
-        labels={labels}
-        maxAccess={maxAccess}
-        {...props}
-
-      />
-      </Box>
+    />
 
   )
 }

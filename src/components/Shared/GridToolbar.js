@@ -62,7 +62,7 @@ const GridToolbar = ({
           </Box>
         )}
         {inputSearch && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2, zIndex: 0 }}>
             <CustomTextField
               name='search'
               value={searchValue}

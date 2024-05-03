@@ -1,7 +1,4 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -9,7 +6,8 @@ import { ResourceLookup } from './ResourceLookup'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useEffect } from 'react'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
 const AddressTab = ({ addressValidation, readOnly = false, required = true }) => {
   const { labels: labels, access: maxAccess } = useResourceParams({
@@ -17,10 +15,10 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
   })
 
   return (
-    <>
-      <Grid container sx={{ pt: 1 }}>
-        {/* First Column */}
-        <Grid container rowGap={3} xs={6} sx={{ px: 2 }}>
+    <VertLayout>
+      <Grid container gap={2}>
+        <Grow>
+        <Grid container gap={2}>
           <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='name'
@@ -131,9 +129,10 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               maxAccess={maxAccess}
             />
           </FormGrid>
-        </Grid>
-        {/* Second Column */}
-        <Grid container rowGap={3} xs={6} sx={{ px: 2 }}>
+          </Grid>
+        </Grow>
+        <Grow>
+        <Grid container gap={2}>
           <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
@@ -221,7 +220,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               maxAccess={maxAccess}
             />
           </FormGrid>
-
           <FormGrid hideonempty xs={12}>
             <ResourceLookup
               endpointId={SystemRepository.CityDistrict.snapshot}
@@ -268,7 +266,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               label={labels.phone}
               value={addressValidation.values.phone}
               readOnly={readOnly}
-              required={required}
               maxLength='15'
               phone={true}
               onChange={addressValidation.handleChange}
@@ -307,9 +304,10 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               maxAccess={maxAccess}
             />
           </FormGrid>
-        </Grid>
+          </Grid>
+        </Grow>
       </Grid>
-    </>
+    </VertLayout>
   )
 }
 

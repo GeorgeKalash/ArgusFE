@@ -37,6 +37,9 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   '& .MuiDataGrid-row:last-child': {
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
+  '& .MuiDataGrid-overlayWrapperInner' :{
+    marginTop: '-1px'
+  },
   '& .MuiDataGrid-virtualScroller': {
     // remove the space left for the header
     marginTop: '0!important'
@@ -308,7 +311,7 @@ const Table = ({
         const isWIP = row.wip === 2
 
         return (
-          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center'}}>
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
               <IconButton size='small' onClick={() => props.onEdit(params.row)}>
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
