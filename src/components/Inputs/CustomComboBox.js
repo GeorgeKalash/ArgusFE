@@ -61,12 +61,11 @@ const CustomComboBox = ({
             style={{
               position: 'absolute',
               width: anchorEl ? anchorEl.clientWidth : 'auto',
-              transformOrigin: 'center top', // Set transform origin for proper positioning
+              transformOrigin: 'center top',
               transform:
                 anchorEl && window.innerHeight - anchorEl.getBoundingClientRect().bottom < 150
                   ? 'translateY(-115%)'
-                  : 'none',
-              zIndex: 999999999999999
+                  : 'none'
             }}
           >
             <style>{`.css-snrokh-MuiAutocomplete-noOptions { display: none; }`}</style>
