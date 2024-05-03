@@ -14,13 +14,12 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
 import { useResourceQuery } from 'src/hooks/resource'
-import Error from 'src/components/Shared/PageError'
+import ErrorPage from 'src/components/Shared/PageError'
 import { useError } from 'src/error'
 
 const ClientsList = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
-  const [errorMessage, setErrorMessage] = useState(null)
   const { stack: stackError } = useError()
 
   const {
@@ -107,7 +106,6 @@ const ClientsList = () => {
     stack({
       Component: ClientTemplateForm,
       props: {
-        setErrorMessage: setErrorMessage,
         labels: labels,
         maxAccess: access,
         recordId: recordId ? recordId : null,
@@ -189,9 +187,6 @@ const ClientsList = () => {
           pageSize={50}
           paginationType='client'
         />
-        {errorMessage?.error && (
-          <Error open={errorMessage} height={100} onClose={() => setErrorMessage(null)} message={errorMessage} />
-        )}{' '}
       </Box>
     </>
   )

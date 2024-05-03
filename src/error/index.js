@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import Error from 'src/components/Shared/PageError'
+import ErrorPage from 'src/components/Shared/PageError'
 
 const ErrorContext = React.createContext(null)
 
@@ -22,7 +22,7 @@ export function ErrorProvider({ children }) {
     >
       {children}
       {stack.map((props, index) => (
-        <Error key={index} height={props.height ?? 100} open={stack[index]} onClose={closeWindow} {...props} />
+        <ErrorPage key={index} height={props.height ?? 100} open={stack[index]} onClose={closeWindow} {...props} />
       ))}
     </ErrorContext.Provider>
   )

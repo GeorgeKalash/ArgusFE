@@ -33,7 +33,7 @@ const Window = ({
   editMode = false,
   disabledSubmit,
   disabledInfo,
-  fullScreen = true,
+  canExpand = true,
   onApply,
   disabledApply,
   ...props
@@ -132,7 +132,7 @@ const Window = ({
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>{Title}</Typography>
               </Box>
               <Box>
-                {fullScreen && (
+                {canExpand && (
                   <IconButton
                     tabIndex={-1}
                     edge='end'

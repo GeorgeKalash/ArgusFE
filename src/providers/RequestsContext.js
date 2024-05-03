@@ -5,7 +5,7 @@ import { createContext, useContext, useState } from 'react'
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
-import Error from 'src/components/Shared/PageError'
+import ErrorPage from 'src/components/Shared/PageError'
 
 const RequestsContext = createContext()
 
@@ -188,7 +188,7 @@ const RequestsProvider = ({ children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {error && <Error height={400} open={true} onClose={() => setError(false)} message={error} />}
+      {error && <ErrorPage height={400} open={true} onClose={() => setError(false)} message={error} />}
     </>
   )
 }

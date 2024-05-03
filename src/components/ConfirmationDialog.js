@@ -8,9 +8,9 @@ const ConfirmationDialog = ({
   DialogText,
   okButtonAction,
   cancelButtonAction,
-  fullScreen = true
+  canExpand = true
 }) => {
-  return !fullScreen ? (
+  return !canExpand ? (
     openCondition && (
       <Window Title='Confirmation' width={450} height={120} onClose={closeCondition}>
         <Box
