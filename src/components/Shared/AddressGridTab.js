@@ -6,6 +6,9 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
+import { Grow } from './Layouts/Grow'
 
 const AddressGridTab = ({
   addressGridData,
@@ -66,15 +69,11 @@ const AddressGridTab = ({
   ]
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addAddress} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={addressGridData}
@@ -85,10 +84,9 @@ const AddressGridTab = ({
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={height}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
