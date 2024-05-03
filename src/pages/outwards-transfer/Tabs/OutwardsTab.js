@@ -6,7 +6,6 @@ import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
-import ReferenceDialog from 'src/components/ReferenceDialog'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -43,7 +42,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   const [editMode, setEditMode] = useState(!!recordId)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
-  const [instantReference, setInstantReference] = useState('')
   const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -288,7 +286,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     if (res?.recordId) {
       toast.success('Record Posted Successfully')
       setConfirmationWindowOpen(true)
-      setInstantReference(res.recordId)
+      formik.setFieldValue('ttNo', res.recordId)
       invalidate()
       setIsPosted(true)
     }
@@ -311,6 +309,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       checked: 'false',
       exRate2: '',
       interfaceId: '',
+      interfaceName: '',
       valueDays: ''
     },
     enableReinitialize: true,
@@ -595,11 +594,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
   return (
     <>
-      <ReferenceDialog
-        DialogText={`Instant Cash Referenece: ${instantReference} `}
-        okButtonAction={() => setConfirmationWindowOpen(false)}
-        openCondition={confirmationWindowOpen}
-      />
       <FormShell
         resourceId={ResourceIds.OutwardsTransfer}
         form={formik}
