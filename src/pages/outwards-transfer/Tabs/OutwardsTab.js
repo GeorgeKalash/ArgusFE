@@ -6,6 +6,7 @@ import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
+import ReferenceDialog from 'src/components/ReferenceDialog'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -14,6 +15,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import BenificiaryBank from './BenificiaryBank'
 import BenificiaryCash from './BenificiaryCash'
 import InstantCash from './InstantCash'
+import TerraPay from './TerraPay'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -41,6 +43,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   const [editMode, setEditMode] = useState(!!recordId)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
+  const [instantReference, setInstantReference] = useState('')
+  const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -108,6 +112,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     tdAmount: 0,
     giftCode: '',
     details: '',
+    hiddenInterfaceId: '',
     amountRows: [
       {
         id: 1,
@@ -125,27 +130,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     ]
   })
 
-  const [initialValues2, setInitialData2] = useState({
-    countryId: '',
-    dispersalId: '',
-    dispersalName: '',
-    dipersalRef: '',
-    exRate: '',
-    productId: '',
-    productName: '',
-    productRef: '',
-    corId: '',
-    fees: '',
-    baseAmount: '',
-    rateCalcMethod: '',
-    checked: 'false',
-    exRate2: '',
-    interfaceId: '',
-    valueDays: ''
-  })
-
   const formik = useFormik({
-    initialValues,
+    initialValues: initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -158,17 +144,13 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       commission: yup.string().required(' '),
       lcAmount: yup.string().required(' '),
       clientId: yup.string().required(' '),
+      poeId: yup.string().required(' '),
       beneficiaryId: yup.string().required(' '),
       amountRows: yup
         .array()
         .of(
           yup.object().shape({
-            types: yup
-              .object()
-              .shape({
-                key: yup.string().required('Type is required')
-              })
-              .required('Type is required'),
+            type: yup.string().required('Type is required'),
             amount: yup.string().nullable().required('amount is required')
           })
         )
@@ -294,6 +276,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     copy.defaultValueDate = formatDateToApi(copy.defaultValueDate)
     copy.expiryDate = formatDateToApi(copy.expiryDate)
 
+    // Default values for properties if they are empty
+    copy.wip = copy.wip === '' ? 1 : copy.wip
+    copy.status = copy.status === '' ? 1 : copy.status
+
     const res = await postRequest({
       extension: RemittanceOutwardsRepository.OutwardsTransfer.post,
       record: JSON.stringify(copy)
@@ -301,17 +287,37 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
     if (res?.recordId) {
       toast.success('Record Posted Successfully')
+      setConfirmationWindowOpen(true)
+      setInstantReference(res.recordId)
       invalidate()
       setIsPosted(true)
     }
   }
 
   const productFormik = useFormik({
-    initialValues: initialValues2,
+    initialValues: {
+      countryId: '',
+      dispersalId: '',
+      dispersalName: '',
+      dipersalRef: '',
+      exRate: '',
+      productId: '',
+      productName: '',
+      productRef: '',
+      corId: '',
+      fees: '',
+      baseAmount: '',
+      rateCalcMethod: '',
+      checked: 'false',
+      exRate2: '',
+      interfaceId: '',
+      valueDays: ''
+    },
     enableReinitialize: true,
     validateOnChange: true,
     onSubmit: values => {
       const selectedRowData = productsStore?.list?.find(row => row.checked)
+      productFormik.setValues(selectedRowData)
       formik.setFieldValue('productId', selectedRowData?.productId)
       formik.setFieldValue('commission', selectedRowData?.fees)
       formik.setFieldValue('defaultCommission', selectedRowData?.fees)
@@ -324,12 +330,12 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       formik.setFieldValue('corName', selectedRowData?.corName)
       const vatAmount = calcVatAmount(formik, selectedRowData)
       calcAmount(selectedRowData?.baseAmount, selectedRowData?.fees, vatAmount, formik.values.tdAmount)
+      calculateValueDate(selectedRowData.valueDays)
       window.close()
     }
   })
 
   const productDataFill = async formFields => {
-    //get products list
     var type = 2
     var functionId = 1
     var plant = formFields?.plantId
@@ -500,16 +506,26 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })
   }
   function openBankWindow() {
-    stack({
-      Component: InstantCash,
-      props: {
-        onInstantCashSubmit: onInstantCashSubmit,
-        cashData: cashData
-      },
-      width: 1000,
-      height: 660,
-      title: 'Instant Cash'
-    })
+    if (productFormik.values.interfaceId == 1) {
+      stack({
+        Component: InstantCash,
+        props: {
+          onInstantCashSubmit: onInstantCashSubmit,
+          cashData: cashData
+        },
+        width: 1000,
+        height: 650,
+        title: 'Instant Cash'
+      })
+    } else if (productFormik.values.interfaceId == 2) {
+      stack({
+        Component: TerraPay,
+        props: {},
+        width: 700,
+        height: 500,
+        title: 'Terra Pay'
+      })
+    }
   }
 
   const calcVatAmount = (formik, selectedRowData) => {
@@ -548,11 +564,11 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     obj.beneficiary.dateOfBirth = obj.beneficiary.dateOfBirth ? formatDateToApi(obj.beneficiary.dateOfBirth) : null
     setCashData(obj)
   }
-  function calculateValueDate() {
-    if (productFormik.values.valueDays) {
-    }
+  function calculateValueDate(valueDays) {
+    const newDate = new Date(formik.values.date)
+    newDate.setDate(newDate.getDate() + valueDays)
+    formik.setFieldValue('valueDate', newDate)
   }
-
   useEffect(() => {
     ;(async function () {
       try {
@@ -567,9 +583,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           res.record.checked = true
-          productDataFill(res.record.headerView)
           getClientInfo(res.record.headerView.clientId)
           fillAmountGridData(res.record.cash, res.record.headerView)
+          productDataFill(res.record.headerView)
         }
         getDefaultVAT()
       } catch (error) {}
@@ -579,6 +595,11 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
   return (
     <>
+      <ReferenceDialog
+        DialogText={`Instant Cash Referenece: ${instantReference} `}
+        okButtonAction={() => setConfirmationWindowOpen(false)}
+        openCondition={confirmationWindowOpen}
+      />
       <FormShell
         resourceId={ResourceIds.OutwardsTransfer}
         form={formik}
@@ -748,7 +769,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                   onClear={() => formik.setFieldValue('fcAmount', '')}
                   onBlur={() => {
                     if (formik.values.fcAmount) productDataFill(formik.values)
-                    calculateValueDate()
                   }}
                   error={formik.touched.fcAmount && Boolean(formik.errors.fcAmount)}
                   maxLength={10}
@@ -1153,6 +1173,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                       onChange={(event, newValue) => {
                         formik.setFieldValue('poeId', newValue ? newValue?.recordId : '')
                       }}
+                      required
                       error={formik.touched.poeId && Boolean(formik.errors.poeId)}
                       helperText={formik.touched.poeId && formik.errors.poeId}
                     />
