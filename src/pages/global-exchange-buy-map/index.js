@@ -145,6 +145,7 @@ const GlobalExchangeBuyMap = () => {
         endpointId: SystemRepository.Country.qry,
         valueField: 'recordId',
         displayField: 'reference',
+        displayFieldWidth: 1.2,
         mapping: [
           { from: 'name', to: 'countryName' },
           { from: 'reference', to: 'countryRef' },
@@ -152,7 +153,8 @@ const GlobalExchangeBuyMap = () => {
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { key: 'name', value: 'Name' },
+          { key: 'flName', value: 'Foreign Language Name' }
         ]
       }
     },
@@ -217,7 +219,8 @@ const GlobalExchangeBuyMap = () => {
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Currency Ref' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'Foreign Language Name' }
                   ]}
                   values={formik.values}
                   required
