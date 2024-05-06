@@ -85,13 +85,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.LoCollectors}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.LoCollectors} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

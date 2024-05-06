@@ -13,12 +13,14 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import {ResourceLookup} from 'src/components/Shared/ResourceLookup'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function CashAccountForm ({ labels, recordId, maxAccess }) {
+export default function CashAccountForm({ labels, recordId, maxAccess }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -26,7 +28,7 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
     recordId: null,
     name: '',
     reference: '',
-    accountNo:'',
+    accountNo: '',
     currencyId: null,
     plantId: null,
     activeStatus: null,
@@ -34,7 +36,7 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
     accountName: '',
     accountRef: '',
     accountId: null,
-    type:2
+    type: 2
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,8 +66,8 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, 
-          recordId: response.recordId 
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -95,16 +97,12 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CashAccounts}
-      form={formik}
-      height={400}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-            <CustomTextField
+    <FormShell resourceId={ResourceIds.CashAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
@@ -114,10 +112,10 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 maxLength='40'
                 maxAccess={maxAccess}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <CustomTextField
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
@@ -127,10 +125,10 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 maxLength='10'
                 maxAccess={maxAccess}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceComboBox
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
                 name='currencyId'
                 label={labels.currency}
@@ -140,17 +138,17 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                values={formik.values}   
+                values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('currencyId', '')}
                 onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('currencyId', newValue?.recordId)
+                  formik && formik.setFieldValue('currencyId', newValue?.recordId)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceComboBox
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
                 name='plantId'
                 label={labels.plant}
@@ -160,17 +158,17 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                values={formik.values}   
+                values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('plantId', '')}
                 onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('plantId', newValue?.recordId)
+                  formik && formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceComboBox
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 datasetId={DataSets.ACTIVE_STATUS}
                 name='activeStatus'
                 label={labels.activeStatus}
@@ -180,13 +178,13 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 values={formik.values}
                 onClear={() => formik.setFieldValue('activeStatus', '')}
                 onChange={(event, newValue) => {
-                    formik.setFieldValue('activeStatus', newValue?.key)
+                  formik.setFieldValue('activeStatus', newValue?.key)
                 }}
                 error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceComboBox
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
                 endpointId={CashBankRepository.CbCashGroup.qry}
                 name='groupId'
                 label={labels.groupId}
@@ -196,17 +194,17 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                values={formik.values}   
+                values={formik.values}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('groupId', '')}
                 onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('groupId', newValue?.recordId)
+                  formik && formik.setFieldValue('groupId', newValue?.recordId)
                 }}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-            />
-        </Grid>
-        <Grid item xs={12}>
-            <ResourceLookup
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
                 endpointId={FinancialRepository.Account.snapshot}
                 valueField='reference'
                 displayField='name'
@@ -219,19 +217,21 @@ export default function CashAccountForm ({ labels, recordId, maxAccess }) {
                 errorCheck={'accountId'}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                if (newValue) {
+                  if (newValue) {
                     formik.setFieldValue('accountId', newValue?.recordId)
                     formik.setFieldValue('accountRef', newValue?.reference)
                     formik.setFieldValue('accountName', newValue?.name)
-                } else {
+                  } else {
                     formik.setFieldValue('accountId', '')
                     formik.setFieldValue('accountRef', null)
                     formik.setFieldValue('accountName', null)
-                }
+                  }
                 }}
-            />
-        </Grid>
-      </Grid>
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

@@ -24,6 +24,9 @@ import CashAccountWindow from './Windows/CashAccountWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CashAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -65,9 +68,9 @@ const CashAccounts = () => {
     endpointId: CashBankRepository.CashAccount.qry,
     datasetId: ResourceIds.CashAccounts,
     search: {
-        endpointId: CashBankRepository.CashAccount.snapshot,
-        searchFn: fetchWithSearch
-      }
+      endpointId: CashBankRepository.CashAccount.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
   const invalidate = useInvalidate({
@@ -136,28 +139,32 @@ const CashAccounts = () => {
   }
 
   return (
-    <>
-      <GridToolbar 
-          onAdd={add} 
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={add}
           maxAccess={access}
           onSearch={search}
           labels={_labels}
           onSearchClear={clear}
           inputSearch={true}
-      />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['recordId']}
-        onEdit={edit}
-        onDelete={del}
-        isLoading={false}
-        pageSize={50}
-        maxAccess={access}
-        refetch={refetch}
-        paginationParameters={paginationParameters}
-        paginationType='api'
-      />
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          pageSize={50}
+          maxAccess={access}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+        />
+      </Grow>
       {windowOpen && (
         <CashAccountWindow
           onClose={() => {
@@ -171,7 +178,7 @@ const CashAccounts = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

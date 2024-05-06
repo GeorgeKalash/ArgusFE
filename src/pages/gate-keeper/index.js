@@ -30,6 +30,9 @@ import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { useWindow } from 'src/windows'
 import MaterialsAdjustmentForm from '../materials-adjustment/Forms/MaterialsAdjustmentForm'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -166,39 +169,27 @@ const GateKeeper = () => {
   }, [])
 
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
-      <CustomTabPanel index={0} value={0}>
-        <Box sx={{ width: '100%' }}>
-          <Table
-            columns={columns}
-            gridData={data}
-            rowId={['recordId','seqNo']}
-            isLoading={false}
-            maxAccess={access}
-            showCheckboxColumn={true}
-            handleCheckedRows={handleCheckedRows}
-            pagination={false}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: -20,
-            left: 0,
-            width: '100%',
-            margin: 0
-          }}
-        >
-          <WindowToolbar onSave={handleSubmit} smallBox={true} />
-        </Box>
-      </CustomTabPanel>
+    <VertLayout>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId', 'seqNo']}
+          isLoading={false}
+          maxAccess={access}
+          showCheckboxColumn={true}
+          handleCheckedRows={handleCheckedRows}
+          pagination={false}
+        />
+      </Grow>
+
+      <Fixed>
+        {' '}
+        <WindowToolbar onSave={handleSubmit} smallBox={true} />
+      </Fixed>
 
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </Box>
+    </VertLayout>
   )
 }
 

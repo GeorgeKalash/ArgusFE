@@ -16,25 +16,19 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { useInvalidate} from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const CorrespondentForm = ({
-  labels,
-  editMode,
-  maxAccess,
-  setEditMode,
-  setStore,
-  store
-}) => {
-
-  const { postRequest, getRequest} = useContext(RequestsContext)
-  const {recordId} = store
+const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { recordId } = store
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.Correspondent.qry
   })
 
-  const [initialValues , setInitialData] = useState({
+  const [initialValues, setInitialData] = useState({
     recordId: null,
     name: null,
     reference: null,
@@ -68,33 +62,30 @@ const CorrespondentForm = ({
     })
       .then(res => {
         if (!recordId) {
+          setEditMode(true)
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: res.recordId
+          }))
+          toast.success('Record Added Successfully')
 
-            setEditMode(true)
-            setStore(prevStore => ({
-              ...prevStore,
-              recordId: res.recordId
-            }));
-            toast.success('Record Added Successfully')
-
-            formik.setFieldValue('recordId', res.recordId )
-            invalidate()
-
+          formik.setFieldValue('recordId', res.recordId)
+          invalidate()
         } else {
           toast.success('Record Editted Successfully')
         }
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
-  useEffect(()=>{
-    recordId  && getCorrespondentById(recordId)
-  },[recordId])
+  useEffect(() => {
+    recordId && getCorrespondentById(recordId)
+  }, [recordId])
 
-  const getCorrespondentById =  recordId => {
+  const getCorrespondentById = recordId => {
     const defaultParams = `_recordId=${recordId}`
     var parameters = defaultParams
-     getRequest({
+    getRequest({
       extension: RemittanceSettingsRepository.Correspondent.get,
       parameters: parameters
     })
@@ -102,106 +93,104 @@ const CorrespondentForm = ({
         formik.setValues(res.record)
         setEditMode(true)
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
-return (
-    <FormShell
-    form={formik}
-    resourceId={ResourceIds.Correspondent}
-    maxAccess={maxAccess}
-    editMode={editMode} >
-     <Grid container spacing={4}>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='reference'
-          label={labels.reference}
-          value={formik.values.reference}
-          required
-          onChange={formik.handleChange}
-          maxLength='10'
-          maxAccess={maxAccess}
-          onClear={() => formik.setFieldValue('reference', '')}
-          error={formik.touched.reference && Boolean(formik.errors.reference)}
-          helperText={formik.touched.reference && formik.errors.reference}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='name'
-          label={labels.name}
-          value={formik.values.name}
-          required
-          maxLength='50'
-          maxAccess={maxAccess}
-          onChange={formik.handleChange}
-          onClear={() => formik.setFieldValue('name', '')}
-          error={formik.touched.name && Boolean(formik.errors.name)}
-          helperText={formik.touched.name && formik.errors.name}
-        />
-      </Grid>
+  return (
+    <FormShell form={formik} resourceId={ResourceIds.Correspondent} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                onChange={formik.handleChange}
+                maxLength='10'
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                helperText={formik.touched.reference && formik.errors.reference}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxLength='50'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
 
-         <Grid item xs={12}>
-        <ResourceLookup
-         endpointId={BusinessPartnerRepository.MasterData.snapshot}
-          name='bpRef'
-          required
-          label={labels.businessPartner}
-          valueField='reference'
-          displayField='name'
-          valueShow='bpRef'
-          secondValueShow='bpName'
-          form={formik}
-          onChange={(event, newValue) => {
-            if (newValue) {
-              formik.setFieldValue('bpId', newValue?.recordId)
-              formik.setFieldValue('bpRef', newValue?.reference)
-              formik.setFieldValue('bpName', newValue?.name)
-            } else {
-              formik.setFieldValue('bpId', '')
-              formik.setFieldValue('bpRef', '')
-              formik.setFieldValue('bpName', '')
-            }
-          }}
-          errorCheck={'bpId'}
-          maxAccess={maxAccess}
-        />
-      </Grid>
-         <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Currency.qry}
-              name='currencyId'
-              label={labels.currency}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('currencyId', newValue?.recordId)
-              }}
-              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-              helperText={formik.touched.countryId && formik.errors.countryId}
-            />
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={BusinessPartnerRepository.MasterData.snapshot}
+                name='bpRef'
+                required
+                label={labels.businessPartner}
+                valueField='reference'
+                displayField='name'
+                valueShow='bpRef'
+                secondValueShow='bpName'
+                form={formik}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('bpId', newValue?.recordId)
+                    formik.setFieldValue('bpRef', newValue?.reference)
+                    formik.setFieldValue('bpName', newValue?.name)
+                  } else {
+                    formik.setFieldValue('bpId', '')
+                    formik.setFieldValue('bpRef', '')
+                    formik.setFieldValue('bpName', '')
+                  }
+                }}
+                errorCheck={'bpId'}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId)
+                }}
+                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+                helperText={formik.touched.countryId && formik.errors.countryId}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='isInactive'
+                    checked={formik.values?.isInactive}
+                    onChange={formik.handleChange}
+                    maxAccess={maxAccess}
+                  />
+                }
+                label={labels.isInActive}
+              />
+            </Grid>
           </Grid>
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name='isInactive'
-              checked={formik.values?.isInactive}
-              onChange={formik.handleChange}
-              maxAccess={maxAccess}
-            />
-          }
-          label={labels.isInActive}
-        />
-      </Grid>
-
-    </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

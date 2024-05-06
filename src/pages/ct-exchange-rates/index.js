@@ -20,6 +20,9 @@ import { useResourceQuery } from 'src/hooks/resource'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -316,13 +319,9 @@ const CTExchangeRates = () => {
   }
 
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
-      <CustomTabPanel index={0} value={0}>
-        <Box>
+    <VertLayout>
+      <Fixed>
+        <CustomTabPanel index={0} value={0}>
           <Grid container>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={6}>
@@ -429,8 +428,8 @@ const CTExchangeRates = () => {
                     </Button>
                   </Grid>
                   {formik.values.currencyId != null && formik.values.puRateTypeId != null && (
-                    <Grid xs={12} sx={{ pt: 2 }}>
-                      <Box>
+                    <Grow>
+                      <Grid xs={12} sx={{ pt: 2 }}>
                         <DataGrid
                           onChange={value => puFormik.setFieldValue('rows', value)}
                           value={puFormik.values.rows}
@@ -440,20 +439,8 @@ const CTExchangeRates = () => {
                           height={`${height - 300}px`}
                           allowAddNewLine={false}
                         />
-                      </Box>
-
-                      {/* <Box>
-                        <InlineEditGrid
-                          gridValidation={puFormik}
-                          columns={exchangeRatesInlineGridColumns}
-                          allowDelete={false}
-                          allowAddNewLine={false}
-                          width={'1200'}
-                          scrollable={true}
-                          scrollHeight={`${height - 300}px`}
-                        />
-                      </Box> */}
-                    </Grid>
+                      </Grid>
+                    </Grow>
                   )}
                 </FieldSet>
               </Grid>
@@ -497,51 +484,42 @@ const CTExchangeRates = () => {
                     </Button>
                   </Grid>
                   {formik.values.currencyId != null && formik.values.saRateTypeId != null && (
-                    <Grid xs={12} sx={{ pt: 2 }}>
-                      <DataGrid
-                        onChange={value => saFormik.setFieldValue('rows', value)}
-                        value={saFormik.values.rows}
-                        error={saFormik.errors.rows}
-                        columns={exchangeRatesInlineGridColumns}
-                        allowDelete={false}
-                        height={`${height - 300}px`}
-                        allowAddNewLine={false}
-                      />
-
-                      {/* <Box>
-                        <InlineEditGrid
-                          gridValidation={saFormik}
+                    <Grow>
+                      <Grid xs={12} sx={{ pt: 2 }}>
+                        <DataGrid
+                          onChange={value => saFormik.setFieldValue('rows', value)}
+                          value={saFormik.values.rows}
+                          error={saFormik.errors.rows}
                           columns={exchangeRatesInlineGridColumns}
                           allowDelete={false}
+                          height={`${height - 300}px`}
                           allowAddNewLine={false}
-                          width={'1200'}
-                          scrollable={true}
-                          scrollHeight={`${height - 300}px`}
                         />
-                      </Box> */}
-                    </Grid>
+                      </Grid>
+                    </Grow>
                   )}
                 </FieldSet>
               </Grid>
             </Grid>
           </Grid>
-        </Box>
-        <Grid
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            width: '100%',
-            padding: 0,
-            textAlign: 'center'
-          }}
-        >
-          <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-        </Grid>
-      </CustomTabPanel>
+
+          <Grid
+            sx={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              width: '100%',
+              padding: 0,
+              textAlign: 'center'
+            }}
+          >
+            <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+          </Grid>
+        </CustomTabPanel>
+      </Fixed>
 
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </Box>
+    </VertLayout>
   )
 }
 
