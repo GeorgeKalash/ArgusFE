@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -23,17 +23,18 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Groups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-
-  
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -58,7 +59,6 @@ const Groups = () => {
     endpointId: BusinessPartnerRepository.Groups.page
   })
 
-
   const columns = [
     {
       field: 'reference',
@@ -79,16 +79,14 @@ const Groups = () => {
       editable: false
     },
     {
-      field:'nraDescription',
-      headerName:_labels.numberRange,
+      field: 'nraDescription',
+      headerName: _labels.numberRange,
       flex: 1,
       editable: false
     }
-
   ]
-  
-  const add = () => {
 
+  const add = () => {
     setWindowOpen(true)
   }
 
@@ -96,7 +94,7 @@ const Groups = () => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
-  
+
   const del = async obj => {
     await postRequest({
       extension: BusinessPartnerRepository.Groups.del,
@@ -107,37 +105,39 @@ const Groups = () => {
   }
 
   return (
-    <>
-      <GridToolbar onAdd={add} maxAccess={access} />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['recordId']}
-        onEdit={edit}
-        onDelete={del}
-        isLoading={false}
-        pageSize={50}
-        paginationType='client'
-        maxAccess={access}
-      />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          pageSize={50}
+          paginationType='client'
+          maxAccess={access}
+        />
+      </Grow>
 
       {windowOpen && (
         <GroupsWindow
-        onClose={() => {
-          setWindowOpen(false)
-          setSelectedRecordId(null)
-        }}
-        labels={_labels}
-        maxAccess={access}
-        recordId={selectedRecordId}
-        setSelectedRecordId={setSelectedRecordId}
-      />
-    )}
-    <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-  </>
-)
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
+          labels={_labels}
+          maxAccess={access}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
+        />
+      )}
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+    </VertLayout>
+  )
 }
 
 export default Groups
-
-

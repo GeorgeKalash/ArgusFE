@@ -13,6 +13,8 @@ import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const UndeliveredCreditOrder = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -84,41 +86,41 @@ const UndeliveredCreditOrder = () => {
   }
 
   return (
-    <>
-      <Box>
-        <div style={{ display: 'flex' }}>
-          <GridToolbar
-            maxAccess={access}
-            onSearch={value => {
-              filterBy('qry', value)
-            }}
-            onSearchClear={() => {
-              clearFilter('qry')
-            }}
-            labels={labels}
-            inputSearch={true}
-          >
-            <Box sx={{ display: 'flex', width: '350px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-              <ResourceComboBox
-                endpointId={RemittanceSettingsRepository.Correspondent.qry}
-                label={labels.correspondent}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                name='corId'
-                values={{
-                  corId: filters.corId
-                }}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                onChange={(event, newValue) => {
-                  onChange(newValue?.recordId)
-                }}
-              />
-            </Box>
-          </GridToolbar>
-        </div>
+    <VertLayout>
+      <div style={{ display: 'flex' }}>
+        <GridToolbar
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+        >
+          <Box sx={{ display: 'flex', width: '350px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+            <ResourceComboBox
+              endpointId={RemittanceSettingsRepository.Correspondent.qry}
+              label={labels.correspondent}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              name='corId'
+              values={{
+                corId: filters.corId
+              }}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              onChange={(event, newValue) => {
+                onChange(newValue?.recordId)
+              }}
+            />
+          </Box>
+        </GridToolbar>
+      </div>
+      <Grow>
         <Table
           columns={[
             {
@@ -183,8 +185,8 @@ const UndeliveredCreditOrder = () => {
               : 'api'
           }
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

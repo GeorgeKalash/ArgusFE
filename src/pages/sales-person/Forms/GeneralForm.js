@@ -87,13 +87,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SalesPerson}
-      form={formik}
-      height={700}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.SalesPerson} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
