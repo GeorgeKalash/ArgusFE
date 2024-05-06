@@ -22,7 +22,7 @@ export function ErrorProvider({ children }) {
     >
       {children}
       {stack.map((props, index) => (
-        <ErrorPage key={index} height={props.height ?? 100} open={stack[index]} onClose={closeWindow} {...props} />
+        <ErrorPage key={index} height={props.height} open={stack[index]} onClose={closeWindow} {...props} />
       ))}
     </ErrorContext.Provider>
   )
