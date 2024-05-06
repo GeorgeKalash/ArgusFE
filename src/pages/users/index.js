@@ -864,10 +864,8 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-<<<<<<< HEAD
-=======
+
           //Users
->>>>>>> 24fa74aa24ac18d65e9d1ddfbe72dad44f95e24d
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
           languageStore={languageStore}
@@ -880,6 +878,7 @@ const Users = () => {
           emailPresent={emailPresent}
           passwordState={passwordState}
           setPasswordState={setPasswordState}
+
           //Defaults
           defaultsValidation={defaultsValidation}
           siteStore={siteStore}
@@ -888,11 +887,13 @@ const Users = () => {
           setCashAccStore={setCashAccStore}
           cashAccStore={cashAccStore}
           lookupCashAcc={lookupCashAcc}
+
           //Security Grp
           securityGrpGridData={securityGrpGridData}
           getSecurityGrpGridData={getSecurityGrpGridData}
           delSecurityGrp={delSecurityGrp}
           addSecurityGrp={addSecurityGrp}
+
           //Row Access
           moduleStore={moduleStore}
           rowGridData={rowGridData}
