@@ -14,7 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CbBank = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -49,17 +49,18 @@ const CbBank = () => {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1
-    },{
+    },
+    {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },{
+    },
+    {
       field: 'swiftCode',
       headerName: _labels.swiftCode,
       flex: 1
     }
   ]
-
 
   const add = () => {
     setWindowOpen(true)
@@ -78,7 +79,6 @@ const CbBank = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <VertLayout>
@@ -112,7 +112,6 @@ const CbBank = () => {
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
-
   )
 }
 

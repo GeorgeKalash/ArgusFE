@@ -1,13 +1,19 @@
-
 // ** MUI Imports
-import {Box} from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 
-const SecurityGrpTab = ({ securityGrpGridData, getSecurityGrpGridData, addSecurityGrp, delSecurityGrp, popupSecurityGrp, labels, maxAccess }) => {
-
+const SecurityGrpTab = ({
+  securityGrpGridData,
+  getSecurityGrpGridData,
+  addSecurityGrp,
+  delSecurityGrp,
+  popupSecurityGrp,
+  labels,
+  maxAccess
+}) => {
   const columns = [
     {
       field: 'sgName',

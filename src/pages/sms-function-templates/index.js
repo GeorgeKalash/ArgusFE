@@ -1,24 +1,17 @@
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Box, Grid } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Helpers
 import { useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -142,19 +135,23 @@ const SmsFunctionTemplate = () => {
   }
 
   return (
-    <>
-      <DataGrid
-        onChange={value => {
-          formik.setFieldValue('rows', value)
-        }}
-        value={formik.values.rows}
-        error={formik.errors.rows}
-        columns={columns}
-        allowDelete={false}
-        allowAddNewLine={false}
-      />
-      <WindowToolbar isSaved={true} form={formik} />
-    </>
+    <VertLayout>
+      <Grow>
+        <DataGrid
+          onChange={value => {
+            formik.setFieldValue('rows', value)
+          }}
+          value={formik.values.rows}
+          error={formik.errors.rows}
+          columns={columns}
+          allowDelete={false}
+          allowAddNewLine={false}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar isSaved={true} form={formik} />
+      </Fixed>
+    </VertLayout>
   )
 }
 

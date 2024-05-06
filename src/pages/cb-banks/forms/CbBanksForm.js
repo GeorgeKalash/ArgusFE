@@ -18,7 +18,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
-    reference:'',
+    reference: '',
     name: '',
     swiftCode: ''
   })
@@ -36,8 +36,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       name: yup.string().required(' '),
       reference: yup.string().required(' '),
-      swiftCode: yup
-            .number(),
+      swiftCode: yup.number()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -81,12 +80,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CbBanks}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.CbBanks} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
