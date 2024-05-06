@@ -1,6 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
 import { Grid, Box } from '@mui/material'
-import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -8,52 +7,50 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SelfServiceRepository } from 'src/repositories/SelfServiceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useResourceQuery } from 'src/hooks/resource'
+import useResourceParams from 'src/hooks/useResourceParams'
 import { DataSets } from 'src/resources/DataSets'
 import * as yup from 'yup'
-import { Center } from 'devextreme-react/map'
-import { getStorageData } from 'src/storage/storageData'
+import { getStorageData } from 'src/storage/storage'
+import { useForm } from 'src/hooks/form'
 
 const PersonalSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const [initialValues, setInitialValues] = useState({
-    recordId: null,
-    email: '',
-    activeStatus: '',
-    userType: '',
-    homePage: '',
-    username: '',
-    fullName: '',
-    languageId: '',
-    menuTheme: '',
-    languageName: ''
-  })
 
   useEffect(() => {
     ;(async function () {
       try {
         const userData = getStorageData('userData')
-        const _userId = userData && userData.userId
+        const _userId = userData.userId
 
         const res = await getRequest({
           extension: SelfServiceRepository.SSUserInfo.get,
           parameters: `_recordId=${_userId}`
         })
 
-        setInitialValues(res.record)
+        formik.setValues(res.record)
       } catch (exception) {}
     })()
   }, [])
 
-  const { labels: _labels } = useResourceQuery({
+  const { labels: _labels } = useResourceParams({
     datasetId: ResourceIds.PersonalSettings
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
-    initialValues,
+    initialValues: {
+      recordId: null,
+      email: '',
+      activeStatus: '',
+      userType: '',
+      homePage: '',
+      username: '',
+      fullName: '',
+      languageId: '',
+      menuTheme: '',
+      languageName: ''
+    },
     validationSchema: yup.object({
       fullName: yup.string().required(' '),
       languageId: yup.string().required(' ')
@@ -77,7 +74,7 @@ const PersonalSettings = () => {
 
   return (
     <>
-      <Box display='flex' height='100%' marginTop='10px' flexDirection='column'>
+      <Box marginTop='10px'>
         <Grid container spacing={5} sx={{ pl: '10px' }} lg={4} md={7} sm={7} xs={12}>
           <Grid item xs={12}>
             <CustomTextField
@@ -119,7 +116,7 @@ const PersonalSettings = () => {
               error={formik.touched.menuTheme && Boolean(formik.errors.menuTheme)}
             />
           </Grid>
-          <Grid position='fixed' bottom={0} left={0} width='100%' padding={3} textAlign='center'>
+          <Grid bottom={0} left={0} width='100%' position='fixed'>
             <WindowToolbar onSave={handleSubmit} isSaved={true} />
           </Grid>
         </Grid>
