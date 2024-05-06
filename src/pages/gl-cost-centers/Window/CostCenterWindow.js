@@ -17,7 +17,6 @@ const CostCenterWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
     >
       <CostCenterForm
         labels={labels}

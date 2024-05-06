@@ -436,7 +436,6 @@ const CTExchangeRates = () => {
                           error={puFormik.errors.rows}
                           columns={exchangeRatesInlineGridColumns}
                           allowDelete={false}
-                          height={`${height - 300}px`}
                           allowAddNewLine={false}
                         />
                       </Grid>
@@ -492,7 +491,6 @@ const CTExchangeRates = () => {
                           error={saFormik.errors.rows}
                           columns={exchangeRatesInlineGridColumns}
                           allowDelete={false}
-                          height={`${height - 300}px`}
                           allowAddNewLine={false}
                         />
                       </Grid>

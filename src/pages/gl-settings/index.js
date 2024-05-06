@@ -1,29 +1,14 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box, TextField } from '@mui/material'
-
-// ** Third Party Imports
+import { Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
+import { useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 

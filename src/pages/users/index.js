@@ -36,6 +36,9 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Users = () => {
   const { getRequest, postRequest, getIdentityRequest } = useContext(RequestsContext)
@@ -835,16 +838,12 @@ const Users = () => {
   }, [access])
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addUsers} maxAccess={access} />
-        <Table
+      </Fixed>
+      <Grow>
+      <Table
           columns={columns}
           gridData={gridData}
           rowId={['recordId']}
@@ -856,12 +855,11 @@ const Users = () => {
           maxAccess={access}
           paginationType='client'
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <UsersWindow
           onClose={() => setWindowOpen(false)}
           width={800}
-          height={400}
           onSave={handleSubmit}
           labels={_labels}
           maxAccess={access}
@@ -869,8 +867,6 @@ const Users = () => {
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-
-          //Users
           usersValidation={usersValidation}
           notificationGrpStore={notificationGrpStore}
           languageStore={languageStore}
@@ -921,7 +917,7 @@ const Users = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

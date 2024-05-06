@@ -1,27 +1,16 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-
-// ** Windows
 import SourceOfIncomeWindow from './Windows/SourceOfIncomeWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const SourceOfIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -106,9 +95,11 @@ const SourceOfIncome = () => {
   
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -122,7 +113,7 @@ const SourceOfIncome = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <SourceOfIncomeWindow
           onClose={() => {
@@ -136,7 +127,7 @@ const SourceOfIncome = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </VertLayout>
   )
 }
 
