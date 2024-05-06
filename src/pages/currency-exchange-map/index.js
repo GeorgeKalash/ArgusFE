@@ -1,10 +1,5 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Grid, Box, FormControlLabel, Checkbox, DialogActions } from '@mui/material'
-
-// ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
@@ -21,6 +16,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,7 +30,6 @@ const NumberRange = () => {
   const [errorMessage, setErrorMessage] = useState()
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
-  const { height } = useWindowDimensions()
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.currencyExchangeMap, setAccess)
@@ -254,13 +251,9 @@ const NumberRange = () => {
   }
 
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
+    <VertLayout>
       <CustomTabPanel index={0} value={0}>
-        <Box>
+        <Grow>
           <Grid container>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={6}>
@@ -313,7 +306,7 @@ const NumberRange = () => {
             </Grid>
             {formik.values.currencyId && formik.values.countryId && (
               <Grid xs={12} sx={{ pt: 2 }}>
-                <Box>
+                <Grow>
                   <DataGrid
                     onChange={value => formik.setFieldValue('rows', value)}
                     value={formik.values.rows}
@@ -322,14 +315,13 @@ const NumberRange = () => {
                     allowDelete={false}
                     allowAddNewLine={false}
                   />
-                </Box>
+                </Grow>
               </Grid>
             )}
           </Grid>
-        </Box>
+        </Grow>
         <Grid
           sx={{
-            // height:`${height/10}px`,
             position: 'fixed',
             bottom: 0,
             left: 0,
@@ -341,7 +333,7 @@ const NumberRange = () => {
           <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
         </Grid>
       </CustomTabPanel>
-    </Box>
+    </VertLayout>
   )
 }
 
