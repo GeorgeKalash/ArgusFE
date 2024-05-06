@@ -13,27 +13,19 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 
-const IdTypesForm = ({
-  labels,
-  editMode,
-  maxAccess,
-  setEditMode,
-  setStore,
-  store
-}) => {
-
-  const { postRequest, getRequest} = useContext(RequestsContext)
-  const {recordId} = store
+const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { recordId } = store
 
   const invalidate = useInvalidate({
     endpointId: CurrencyTradingSettingsRepository.IdTypes.qry
   })
 
-  const {formik} = useForm({
+  const { formik } = useForm({
     maxAccess: maxAccess,
     enableReinitialize: false,
     validateOnChange: true,
-    initialValues:{
+    initialValues: {
       recordId: null,
       name: null,
       format: null,
@@ -42,15 +34,15 @@ const IdTypesForm = ({
       clientFileExpiryType: null,
       clientFileLifeTime: null,
       type: null,
-      isDiplomat:false
+      isDiplomat: false
     },
-    validate: (values) => {
-      const errors = {};
+    validate: values => {
+      const errors = {}
       if (values?.type === '1' && !values.clientFileLifeTime) {
-        errors.clientFileLifeTime = " ";
+        errors.clientFileLifeTime = ' '
       }
-      
-      return errors;
+
+      return errors
     },
     validationSchema: yup.object({
       name: yup.string().required(' '),
@@ -67,176 +59,173 @@ const IdTypesForm = ({
 
   const postIdTypes = obj => {
     const recordId = obj?.recordId || ''
-    const date =  obj?.validFrom && formatDateToApi(obj?.validFrom)
-    const data = { ...obj, validFrom : date }
+    const date = obj?.validFrom && formatDateToApi(obj?.validFrom)
+    const data = { ...obj, validFrom: date }
 
     postRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.set,
       record: JSON.stringify(data)
-    })
-      .then(res => {
-        if (!recordId) {
-            setEditMode(true)
-            setStore(prevStore => ({
-              ...prevStore,
-              recordId: res.recordId
-            }));
-            toast.success('Record Added Successfully')
-            
-            formik.setFieldValue('recordId', res.recordId )
-            formik.setFieldValue('validFrom', formatDateFromApi(res.validFrom))
-            invalidate()
+    }).then(res => {
+      if (!recordId) {
+        setEditMode(true)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
+        toast.success('Record Added Successfully')
 
-        } else {
-          invalidate()
-          toast.success('Record Editted Successfully')
-        }
-      })
+        invalidate()
+      } else {
+        invalidate()
+        toast.success('Record Editted Successfully')
+
+        getIdTypesById(res.recordId ?? recordId)
+      }
+    })
   }
 
-  useEffect(()=>{
-    recordId  && getIdTypesById(recordId)
-  },[recordId])
+  useEffect(() => {
+    recordId && getIdTypesById(recordId)
+  }, [recordId])
 
-  const getIdTypesById =  recordId => {
+  const getIdTypesById = recordId => {
     const defaultParams = `_recordId=${recordId}`
     var parameters = defaultParams
-     getRequest({
+    getRequest({
       extension: CurrencyTradingSettingsRepository.IdTypes.get,
       parameters: parameters
+    }).then(res => {
+      res.record.validFrom = formatDateFromApi(res.record.validFrom)
+      formik.setValues(res.record)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.record.recordId,
+        name: res.record.name
+      }))
+      setEditMode(true)
     })
-      .then(res => {
-        res.record.validFrom = formatDateFromApi(res.record.validFrom)
-        formik.setValues(res.record)
-        setEditMode(true)
-      })
   }
 
-return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.IdTypes}
-      maxAccess={maxAccess}
-      editMode={editMode} 
-    >
-     <Grid container spacing={4}>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='name'
-          label={labels.name}
-          value={formik.values.name}
-          required
-          maxLength='50'
-          maxAccess={maxAccess}
-          onChange={formik.handleChange}
-          onClear={() => formik.setFieldValue('name', '')}
-          error={formik.touched.name && Boolean(formik.errors.name)}
-        />
+  return (
+    <FormShell form={formik} resourceId={ResourceIds.IdTypes} maxAccess={maxAccess} editMode={editMode}>
+      <Grid container spacing={4}>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='name'
+            label={labels.name}
+            value={formik.values.name}
+            required
+            maxLength='50'
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('name', '')}
+            error={formik.touched.name && Boolean(formik.errors.name)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='format'
+            label={labels.format}
+            value={formik.values.format}
+            required
+            maxLength='10'
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('format', '')}
+            error={formik.touched.format && Boolean(formik.errors.format)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='length'
+            label={labels.length}
+            value={formik.values.length}
+            required
+            type='number'
+            minLength='1'
+            maxLength='10'
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('length', '')}
+            error={formik.touched.length && Boolean(formik.errors.length)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            datasetId={DataSets.ID_CATEGORY}
+            name='category'
+            label={labels.category}
+            required
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('type', '')
+              formik && formik.setFieldValue('category', parseInt(newValue?.key))
+            }}
+            error={formik.touched.category && Boolean(formik.errors.category)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            datasetId={DataSets.FILE_EMPIRY_TYPE}
+            name='clientFileExpiryType'
+            label={labels.clientFileExpiryType}
+            required
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik && formik.setFieldValue('type', newValue?.key)
+              formik && formik.setFieldValue('clientFileExpiryType', newValue?.key)
+            }}
+            error={formik.touched.clientFileExpiryType && Boolean(formik.errors.clientFileExpiryType)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='clientFileLifeTime'
+            label={labels.clientFileLifeTime}
+            value={formik.values.clientFileLifeTime}
+            required={formik.values.clientFileExpiryType === '1' ? true : false}
+            readOnly={formik.values.clientFileExpiryType === '1' ? false : true}
+            onChange={formik.handleChange}
+            maxLength='10'
+            maxAccess={maxAccess}
+            onClear={() => formik.setFieldValue('clientFileLifeTime', '')}
+            error={formik.touched.clientFileLifeTime && Boolean(formik.errors.clientFileLifeTime)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            datasetId={DataSets.ID_TYPE}
+            name='type'
+            label={labels.type}
+            required={formik.values.category === 1 && true}
+            readOnly={formik.values.category !== 1 && true}
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              formik && formik.setFieldValue('type', newValue?.key)
+            }}
+            error={formik.touched.type && Boolean(formik.errors.type)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='isDiplomat'
+                checked={formik.values?.isDiplomat}
+                onChange={formik.handleChange}
+                maxAccess={maxAccess}
+              />
+            }
+            label={labels.isDiplomat}
+          />
+        </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='format'
-          label={labels.format}
-          value={formik.values.format}
-          required
-          maxLength='10'
-          maxAccess={maxAccess}
-          onChange={formik.handleChange}
-          onClear={() => formik.setFieldValue('format', '')}
-          error={formik.touched.format && Boolean(formik.errors.format)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='length'
-          label={labels.length}
-          value={formik.values.length}
-          required
-          type='number'
-          minLength='1'
-          maxLength='10'
-          maxAccess={maxAccess}
-          onChange={formik.handleChange}
-          onClear={() => formik.setFieldValue('length', '')}
-          error={formik.touched.length && Boolean(formik.errors.length)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <ResourceComboBox
-          datasetId={DataSets.ID_CATEGORY}
-          name='category'
-          label={labels.category}
-          required
-          valueField='key'
-          displayField='value'
-          values={formik.values}
-          onChange={(event, newValue) => {
-            formik.setFieldValue('type', '')
-            formik && formik.setFieldValue('category', parseInt(newValue?.key))
-          }}
-          error={formik.touched.category && Boolean(formik.errors.category)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <ResourceComboBox
-          datasetId={DataSets.FILE_EMPIRY_TYPE}
-          name='clientFileExpiryType'
-          label={labels.clientFileExpiryType}
-          required
-          valueField='key'
-          displayField='value'
-          values={formik.values}
-          onChange={(event, newValue) => { 
-            formik && formik.setFieldValue('type', newValue?.key);
-            formik && formik.setFieldValue('clientFileExpiryType', newValue?.key)
-          }}
-          error={formik.touched.clientFileExpiryType && Boolean(formik.errors.clientFileExpiryType)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='clientFileLifeTime'
-          label={labels.clientFileLifeTime}
-          value={formik.values.clientFileLifeTime}
-          required={formik.values.clientFileExpiryType === "1" ? true : false}
-          readOnly={formik.values.clientFileExpiryType === "1" ? false : true}
-          onChange={formik.handleChange}
-          maxLength='10'
-          maxAccess={maxAccess}
-          onClear={() => formik.setFieldValue('clientFileLifeTime', '')}
-          error={formik.touched.clientFileLifeTime && Boolean(formik.errors.clientFileLifeTime)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <ResourceComboBox
-          datasetId={DataSets.ID_TYPE}
-          name='type'
-          label={labels.type}
-          required={formik.values.category ===1 && true}
-          readOnly={formik.values.category !==1 && true}
-          valueField='key'
-          displayField='value'
-          values={formik.values}
-          onChange={(event, newValue) => {
-            formik && formik.setFieldValue('type', newValue?.key)
-          }}
-          error={formik.touched.type && Boolean(formik.errors.type)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name='isDiplomat'
-              checked={formik.values?.isDiplomat}
-              onChange={formik.handleChange}
-              maxAccess={maxAccess}
-            />
-          }
-          label={labels.isDiplomat}
-        />
-      </Grid>
-    </Grid>
     </FormShell>
   )
 }
