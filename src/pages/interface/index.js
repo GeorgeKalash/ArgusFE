@@ -15,7 +15,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-
 // ** Windows
 import InterfaceWindow from './Windows/InterfaceWindow'
 
@@ -30,7 +29,6 @@ const Interface = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
 
   //states
   const [windowOpen, setWindowOpen] = useState(false)
@@ -60,6 +58,11 @@ const Interface = () => {
   })
 
   const columns = [
+    {
+      field: 'recordId',
+      headerName: _labels.id,
+      flex: 1
+    },
     {
       field: 'reference',
       headerName: _labels.reference,
@@ -91,7 +94,7 @@ const Interface = () => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
-  
+
   const del = async obj => {
     await postRequest({
       extension: RemittanceSettingsRepository.Interface.del,
@@ -119,7 +122,8 @@ const Interface = () => {
       </Box>
       {windowOpen && (
         <InterfaceWindow
-          onClose={() => {setWindowOpen(false)
+          onClose={() => {
+            setWindowOpen(false)
             setSelectedRecordId(null)
           }}
           labels={_labels}

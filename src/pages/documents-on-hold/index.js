@@ -35,6 +35,8 @@ import { KVSRepository } from 'src/repositories/KVSRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
+import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
+import { RTCLRepository } from 'src/repositories/RTCLRepository'
 
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -134,6 +136,7 @@ const DocumentsOnHold = () => {
 
   const popupComponent = async obj => {
     let relevantComponent
+    let recordId = obj.recordId
     let labels
     let relevantAccess
     let windowHeight
@@ -170,13 +173,29 @@ const DocumentsOnHold = () => {
         windowWidth = 1200
         title = labels.cashInvoice
         break
+      case SystemFunction.KYC:
+        await getRequest({
+          extension: RTCLRepository.CtClientIndividual.get,
+          parameters: `_recordId=${obj.recordId}`
+        }).then(res => {
+          recordId = res.record.clientId
+        })
+
+        relevantComponent = ClientTemplateForm
+        labels = await getLabels(ResourceIds.ClientMaster)
+        relevantAccess = await getAccess(ResourceIds.ClientMaster)
+        windowHeight = 600
+        windowWidth = 1100
+        title = labels.pageTitle
+
+        break
 
       case SystemFunction.Outwards:
         relevantComponent = OutwardsTab
         labels = await getLabels(ResourceIds.OutwardsTransfer)
         relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
-        windowHeight = 550
-        windowWidth = 950
+        windowHeight = 600
+        windowWidth = 1100
         title = labels.OutwardsTransfer
 
       default:
@@ -188,7 +207,7 @@ const DocumentsOnHold = () => {
       stack({
         Component: relevantComponent,
         props: {
-          recordId: obj.recordId,
+          recordId: recordId,
           labels: labels,
           maxAccess: relevantAccess
         },

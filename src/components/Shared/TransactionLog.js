@@ -11,6 +11,7 @@ import Table from './Table'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import ResourceComboBox from './ResourceComboBox'
 
 const TransactionLog = props => {
   const { recordId, resourceId, onInfoClose } = props
@@ -18,7 +19,6 @@ const TransactionLog = props => {
   const { getAllKvsByDataset } = useContext(CommonContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
-  const [transactionTypeStore, setTransactionTypeStore] = useState([])
   const [transactionType, setTransactionType] = useState(0)
   const [gridData, setGridData] = useState({})
   const [labels, setLabels] = useState(null)
@@ -32,7 +32,6 @@ const TransactionLog = props => {
       if (access?.record.maxAccess > 0) {
         getGridData()
         getLabels(ResourceIds.TransactionLog, setLabels)
-        fillTransactionTypeStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -49,13 +48,6 @@ const TransactionLog = props => {
     title: labels && labels.find(item => item.key === '7').value
   }
 
-  const fillTransactionTypeStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.TRX_TYPE,
-      callback: setTransactionTypeStore
-    })
-  }
-
   const getGridData = () => {
     var parameters = `_resourceId=${resourceId}&_masterRef=${recordId}&_trxType=${transactionType}`
     getRequest({
@@ -65,9 +57,7 @@ const TransactionLog = props => {
       .then(res => {
         setGridData(res)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const showInfo = obj => {
@@ -79,9 +69,7 @@ const TransactionLog = props => {
       .then(res => {
         setInfo(JSON.parse(res.record.data))
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const formatDate = dateString => {
@@ -122,13 +110,13 @@ const TransactionLog = props => {
       <CustomTabPanel>
         <Grid container xs={12} sx={{ paddingBottom: '25px' }}>
           <Grid item xs={5}>
-            <CustomComboBox
+            <ResourceComboBox
+              datasetId={DataSets.TRX_TYPE}
               name='idtId'
               label={_labels.trxType}
               valueField='key'
               displayField='value'
-              store={transactionTypeStore}
-              value={transactionTypeStore?.filter(item => item.recordId === transactionType)[0]}
+              value={transactionType}
               required
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -139,6 +127,7 @@ const TransactionLog = props => {
               }}
             />
           </Grid>
+
           <Grid container xs={2}></Grid>
           <Grid container xs={4} spacing={4}>
             <Grid container xs={12}>

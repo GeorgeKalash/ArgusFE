@@ -7,9 +7,14 @@ import ResourceComboBox from './ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from './ResourceLookup'
 import FormGrid from 'src/components/form/layout/FormGrid'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useEffect } from 'react'
 
-const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) => {
-  console.log(maxAccess)
+const AddressTab = ({ addressValidation, readOnly = false, required = true }) => {
+  const { labels: labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.Address
+  })
 
   return (
     <>
@@ -22,6 +27,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               label={labels.name}
               value={addressValidation.values.name}
               readOnly={readOnly}
+              required={required}
               maxLength='20'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('name', '')}
@@ -35,6 +41,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               label={labels.street1}
               value={addressValidation.values.street1}
               readOnly={readOnly}
+              required={required}
               maxLength='20'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street1', '')}
@@ -135,6 +142,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               valueField='recordId'
               displayField={['reference', 'name']}
               readOnly={readOnly}
+              required={required}
               displayFieldWidth={2}
               columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
@@ -193,20 +201,20 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               valueField='name'
               displayField='name'
               name='city'
+              required={required}
               label={labels.city}
               readOnly={(readOnly || !addressValidation.values.countryId) && true}
               form={addressValidation}
               secondDisplayField={false}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  addressValidation.setFieldValue('cityId', newValue?.recordId)
-                  addressValidation.setFieldValue('city', newValue?.name)
-                } else {
-                  addressValidation.setFieldValue('cityId', '')
-                  addressValidation.setFieldValue('city', '')
-                }
-                addressValidation.setFieldValue('cityDistrictId', '')
-                addressValidation.setFieldValue('cityDistrict', '')
+                addressValidation.setValues({
+                  ...addressValidation.values,
+                  cityId: newValue?.recordId || '',
+
+                  city: newValue?.name || '',
+                  cityDistrictId: '',
+                  cityDistrict: ''
+                })
               }}
               errorCheck={'cityId'}
               maxAccess={maxAccess}
@@ -260,7 +268,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               value={addressValidation.values.phone}
               readOnly={readOnly}
               maxLength='15'
-              type='text'
+              phone={true}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
@@ -274,6 +282,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               label={labels.phone2}
               value={addressValidation.values.phone2}
               maxLength='15'
+              phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone2', '')}
@@ -288,6 +297,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               label={labels.phone3}
               value={addressValidation.values.phone3}
               maxLength='15'
+              phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone3', '')}
