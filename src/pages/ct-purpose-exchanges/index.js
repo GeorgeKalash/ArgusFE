@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -13,22 +13,17 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import PurposeOfExchangeWindow from './windows/PurposeOfExchangeWindow'
+import { useWindow } from 'src/windows'
 
-
-const PurposeExchange = () =>{
+const PurposeExchange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -46,11 +41,11 @@ const PurposeExchange = () =>{
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page,
-    datasetId: ResourceIds.PurposeOfExchange,
+    datasetId: ResourceIds.PurposeOfExchange
   })
 
   const invalidate = useInvalidate({
-    endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page,
+    endpointId: CurrencyTradingSettingsRepository.PurposeExchange.page
   })
 
   const columns = [
@@ -58,21 +53,34 @@ const PurposeExchange = () =>{
       field: 'reference',
       headerName: _labels.reference,
       flex: 1
-    }, 
+    },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
+    }
   ]
 
+  function openForm(recordId) {
+    stack({
+      Component: PurposeOfExchangeWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
+      },
+      width: 600,
+      height: 600,
+      title: _labels.idTypes
+    })
+  }
+
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj.recordId)
   }
 
   const del = async obj => {
@@ -84,9 +92,9 @@ const PurposeExchange = () =>{
     toast.success('Record Deleted Successfully')
   }
 
-return(
-        <>
-        <Box>
+  return (
+    <>
+      <Box>
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
@@ -99,24 +107,9 @@ return(
           paginationType='client'
           maxAccess={access}
         />
-        </Box>
-
-        {windowOpen && (
-        <PurposeOfExchangeWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-
-        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-        </>
-    )
+      </Box>
+    </>
+  )
 }
 
 export default PurposeExchange
