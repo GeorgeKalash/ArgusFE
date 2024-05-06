@@ -1,14 +1,7 @@
-// ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import PurposeOfExchangeForm from '../forms/PurposeOfExchangeForm'
 
-const PurposeOfExchangeWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId
-}) => {
-  
+const PurposeOfExchangeWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
     <Window
       id='PurposeOfExchangeWindow'
@@ -16,13 +9,8 @@ const PurposeOfExchangeWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
     >
-      <PurposeOfExchangeForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
+      <PurposeOfExchangeForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )
 }
