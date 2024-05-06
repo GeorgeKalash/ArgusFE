@@ -1,12 +1,6 @@
-// ** MUI Imports
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useState, useEffect, useContext } from 'react'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
-// ** Helpers
-
 import AddressTab from 'src/components/Shared/AddressTab'
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -25,6 +19,8 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -277,7 +273,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
     <FormShell
       actions={actions}
       form={formik}
-      height={500}
       resourceId={ResourceIds.ClientCorporate}
       maxAccess={maxAccess}
       recordId={recordId}
@@ -285,9 +280,11 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       editMode={editMode}
       setErrorMessage={setErrorMessage}
     >
+      <VertLayout>
       <Grid container>
-        <Grid container xs={12} spacing={2} sx={{ padding: '30px' }}>
-          <Grid item xs={6} sx={{ padding: '40px' }}>
+        <Grow>
+        <Grid container xs={12} spacing={2} >
+          <Grid item xs={6} >
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <TextFieldReference
@@ -568,7 +565,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
             <FieldSet title={_labels.address}>
               <AddressTab labels={_labels} access={maxAccess} addressValidation={formik} readOnly={editMode && true} />
             </FieldSet>
-
             <Grid item xs={12}>
               <FormControlLabel
                 control={
@@ -584,19 +580,10 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
               />
             </Grid>
           </Grid>
-
-          <Grid
-            sx={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              padding: 3,
-              textAlign: 'center'
-            }}
-          ></Grid>
         </Grid>
+        </Grow>
       </Grid>
+      </VertLayout>
     </FormShell>
   )
 }

@@ -75,14 +75,11 @@ export default function FormShell({
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <DialogContent sx={{ display: 'flex !important',flex: 1, zIndex: 0, flexDirection:'column' }}>
+    <>
+        <DialogContent sx={{ display: 'flex !important',flex: 1, flexDirection:'column', overflow:'auto' }}>
           {children}
         </DialogContent>
-      </Grow>
       {windowToolbarVisible && (
-        <Fixed>
           <WindowToolbar
             print={print}
             onSave={() => form?.handleSubmit()}
@@ -168,7 +165,6 @@ export default function FormShell({
             visibleClear={visibleClear}
             functionId={functionId}
           />
-        </Fixed>
       )}
       {windowInfo && (
         <TransactionLog
@@ -177,6 +173,6 @@ export default function FormShell({
           recordId={form.values?.recordId}
         />
       )}
-    </VertLayout>
+    </>
   )
 }

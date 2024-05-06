@@ -63,7 +63,7 @@ const CustomComboBox = ({
               width: anchorEl ? anchorEl.clientWidth : 'auto',
               transformOrigin: 'center top',
               transform:
-                anchorEl && window.innerHeight - anchorEl.getBoundingClientRect().bottom < 150
+                anchorEl && window.innerHeight - anchorEl.getBoundingClientRect().bottom < window.innerHeight * 0.25
                   ? 'translateY(-115%)'
                   : 'none'
             }}

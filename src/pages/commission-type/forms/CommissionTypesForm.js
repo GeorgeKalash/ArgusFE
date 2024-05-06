@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -8,13 +7,12 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 
 export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
@@ -29,8 +27,6 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
       })
 
     const { getRequest, postRequest } = useContext(RequestsContext)
-
-    //const editMode = !!recordId
 
     const invalidate = useInvalidate({
         endpointId: CurrencyTradingSettingsRepository.CommissionType.page
@@ -89,44 +85,41 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
       }, [])
       
     return (
-        <FormShell 
-            resourceId={ResourceIds.CommissionType}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
-            editMode={editMode}
-        >
-          <Grid container spacing={4}>
-          <Grid item xs={12}>
-                    <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.reference}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='30'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    
-                    // helperText={formik.touched.reference && formik.errors.reference}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CustomTextField
-                    name='name'
-                    label={labels.name}
-                    value={formik.values.name}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-
-                    // helperText={formik.touched.name && formik.errors.name}
-                    />
-                </Grid>
-                <Grid item xs={12}>
+      <FormShell 
+          resourceId={ResourceIds.CommissionType}
+          form={formik}
+          maxAccess={maxAccess} 
+          editMode={editMode}
+      >
+        <VertLayout>
+          <Grow>
+            <Grid container spacing={4}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='reference'
+                  label={labels.reference}
+                  value={formik.values.reference}
+                  required
+                  maxAccess={maxAccess}
+                  maxLength='30'
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('reference', '')}
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='name'
+                  label={labels.name}
+                  value={formik.values.name}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('name', '')}
+                  error={formik.touched.name && Boolean(formik.errors.name)}
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <ResourceComboBox
                   datasetId={DataSets.CT_COMMISSION_TYPES}
                   name='typeName'
@@ -140,11 +133,11 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
                     formik.setFieldValue('typeName', newValue?.key)
                   }}
                   error={formik.touched.typeName && Boolean(formik.errors.typeName)}
-
-                  // helperText={formik.touched.typeName && formik.errors.typeName}
                 />
-                </Grid>
               </Grid>
-        </FormShell>
+            </Grid>
+          </Grow>
+        </VertLayout>
+      </FormShell>
   )
 }

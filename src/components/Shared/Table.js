@@ -364,7 +364,7 @@ const Table = ({
                     : gridData?.list
                   : []
               }
-              sx={{ overflow: 'auto', position: 'relative', display:'flex', flex: 1, marginBottom: pagination? 0:5  }}
+              sx={{ overflow: 'auto', position: 'relative', display:'flex', flex: 1, zIndex:'0 !important', marginBottom: pagination? 0:5  }}
               density='compact'
               components={{
                 LoadingOverlay: LinearProgress,

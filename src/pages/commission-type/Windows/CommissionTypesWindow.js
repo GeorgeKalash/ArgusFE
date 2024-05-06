@@ -15,7 +15,6 @@ const CommissionTypesWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
     >
       <CommissionTypesForm
         labels={labels}
