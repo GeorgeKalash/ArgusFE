@@ -49,7 +49,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: reference.mandatory && yup.string().required('This field is required'),
+      reference: reference?.mandatory && yup.string().required('This field is required'),
       date: yup.string().required('This field is required'),
       currencyId: yup.string().required('This field is required'),
       dtId: yup.string().required('This field is required')
@@ -126,14 +126,14 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>
-          {dtId}
           <ResourceComboBox
             endpointId={SystemRepository.DocumentType.qry}
+            parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
+            filter={editMode ? item => item.activeStatus === 1 : undefined}
             name='dtId'
             label={labels.documentType}
             valueField='recordId'
             displayField='name'
-            parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
             values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('dtId', newValue?.recordId)
@@ -149,8 +149,8 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            readOnly={reference.readOnly || editMode}
-            required={reference.mandatory}
+            readOnly={reference?.readOnly || editMode}
+            required={reference?.mandatory}
             maxAccess={maxAccess}
             maxLength='30'
             onChange={formik.handleChange}
