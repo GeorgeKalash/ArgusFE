@@ -661,7 +661,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
         recordId: formik.values.recordId
       },
       width: 950,
-      height: 600,
       title: 'Workflow'
     })
   }

@@ -1,8 +1,7 @@
 import React from 'react'
-import { createContext, useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { Box } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import * as yup from 'yup'
 import { DataSets } from 'src/resources/DataSets'
@@ -10,7 +9,6 @@ import toast from 'react-hot-toast'
 import { Module } from 'src/resources/Module'
 import { RateDivision } from 'src/resources/RateDivision'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -22,7 +20,6 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { DataGrid } from './DataGrid'
 import { useFormik } from 'formik'
 import { AuthContext } from 'src/providers/AuthContext'
-
 import { formatDateToApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { getRate, DIRTYFIELD_AMOUNT, DIRTYFIELD_BASE_AMOUNT, DIRTYFIELD_RATE } from 'src/utils/RateCalculator'
 
@@ -298,7 +295,6 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
       disabledSubmit={baseGridData.balance !== 0}
       infoVisible={false}
     >
-      <Box>
         {formik && (
           <Grid container spacing={2} padding={1}>
             <Grid item xs={12} sm={6}>
@@ -315,20 +311,17 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             </Grid>
           </Grid>
         )}
-
         <DataGrid
           onChange={value => formik2.setFieldValue('generalAccount', value)}
           value={formik2.values.generalAccount}
           error={formik2.errors.generalAccount}
-          height={`${expanded ? `calc(100vh - 400px)` : `${height - 250}px`}`}
           name='glTransactions'
           maxAccess={access}
+          height={400}
           columns={[
             {
               component: 'resourcelookup',
-
               label: _labels.accountRef,
-
               name: 'accountRef',
               props: {
                 displayFieldWidth: 3,
@@ -457,8 +450,6 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
                   const exRate = result2.exRate
                   const rateCalcMethod = result2.rateCalcMethod
 
-                  // account amount base amount sign curency
-
                   if (newRow?.amount) {
                     const amount =
                       rateCalcMethod === 1
@@ -558,12 +549,12 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
           ]}
         />
 
-        <Grid container marginTop={3.7}>
-          <Grid xs={6} sx={{ p: 1 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
             <Table
               gridData={{ count: 1, list: [baseGridData] }}
               maxAccess={access}
-              height={'150'}
+              height={150}
               columns={[
                 { field: 'base', headerName: _labels.base, flex: 1.5 },
                 { field: 'credit', headerName: _labels.credit, align: 'right', flex: 1.5 },
@@ -572,11 +563,11 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
               ]}
               rowId={['seqNo']}
               pagination={false}
-            />{' '}
+            />
           </Grid>
-          <Grid xs={6} sx={{ p: 1 }}>
+          <Grid item xs={6}>
             <Table
-              height={'150'}
+              height={150}
               columns={[
                 { field: 'currency', headerName: 'Currency', flex: 1.5 },
                 { field: 'debit', headerName: 'Debit', align: 'right', flex: 1.5 },
@@ -591,8 +582,6 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
             />
           </Grid>
         </Grid>
-        <GridToolbar maxAccess={access} />
-      </Box>
     </FormShell>
   )
 }

@@ -16,7 +16,6 @@ const CostCenterGroupWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
     >
         <CostCenterGroupForm
           labels={labels}

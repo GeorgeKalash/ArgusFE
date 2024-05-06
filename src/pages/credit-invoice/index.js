@@ -126,7 +126,6 @@ const CreditInvoice = () => {
         recordId
       },
       width: 900,
-      height: 650,
       title: _labels.creditInvoice
     })
   }

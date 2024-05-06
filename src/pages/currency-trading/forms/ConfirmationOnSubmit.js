@@ -43,7 +43,7 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
 
   return (
     <>
-      <FormShell form={fetchFormik} height={320} infoVisible={false}>
+      <FormShell form={fetchFormik} infoVisible={false}>
         <Grid container spacing={4}>
           <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
             <CustomTextField

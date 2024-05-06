@@ -1,28 +1,23 @@
 import React, { useContext } from 'react'
-import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { formatDateDefault } from 'src/lib/date-helper'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
 import { useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ClientsList = () => {
   const { stack } = useWindow()
-
-  //control
   const { getRequest } = useContext(RequestsContext)
-
-  //error
   const [errorMessage, setErrorMessage] = useState(null)
 
   const {
@@ -119,7 +114,6 @@ const ClientsList = () => {
         maxAccess: access
       },
       width: 1100,
-      height: 600,
       title: labels.pageTitle
     })
   }
@@ -165,26 +159,22 @@ const ClientsList = () => {
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar
-          onAdd={addClient}
-          maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          labels={labels}
-          inputSearch={true}
-        />
+            onAdd={addClient}
+            maxAccess={access}
+            onSearch={value => {
+              filterBy('qry', value)
+            }}
+            onSearchClear={() => {
+              clearFilter('qry')
+            }}
+            labels={labels}
+            inputSearch={true}
+          />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -195,11 +185,11 @@ const ClientsList = () => {
           pageSize={50}
           paginationType='client'
         />
+      </Grow>
         {errorMessage?.error && (
           <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
         )}{' '}
-      </Box>
-    </>
+    </VertLayout>
   )
 }
 

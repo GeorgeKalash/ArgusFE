@@ -15,6 +15,9 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 // ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditOrderForm from './Forms/CreditOrderForm'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -143,9 +146,9 @@ const CreditOrder = () => {
   }
 
   return (
-    <>
-      <Box>
-        <GridToolbar
+    <VertLayout>
+      <Fixed>
+      <GridToolbar
           maxAccess={access}
           onAdd={add}
           onSearch={search}
@@ -153,7 +156,9 @@ const CreditOrder = () => {
           labels={labels}
           inputSearch={true}
         />
-        <Table
+      </Fixed>
+      <Grow>
+      <Table
           columns={[
             {
               field: 'reference',
@@ -215,10 +220,9 @@ const CreditOrder = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
         />
-      </Box>
-
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

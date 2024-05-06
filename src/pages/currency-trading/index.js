@@ -10,7 +10,9 @@ import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
-import useResourceParams from 'src/hooks/useResourceParams'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -94,9 +96,9 @@ export default function CurrencyTrading() {
   }
 
   return (
-    <Box>
-      {labels && access && (
-        <>
+    labels && access && (
+      <VertLayout>
+        <Fixed>
           <GridToolbar
             maxAccess={access}
             onSearch={value => {
@@ -108,7 +110,8 @@ export default function CurrencyTrading() {
             labels={labels}
             inputSearch={true}
           />
-
+        </Fixed>
+        <Grow>
           <Table
             columns={[
               {
@@ -158,9 +161,10 @@ export default function CurrencyTrading() {
             paginationType='client'
             maxAccess={access}
           />
-        </>
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </Box>
+          </Grow>
+        </VertLayout>
+      )
+
+      // <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
   )
 }
