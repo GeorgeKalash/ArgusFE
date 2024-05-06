@@ -3,7 +3,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import RoutingForm from '../forms/RoutingForm'
 import RoutingSeqForm from '../forms/RoutingSeqForm'
 
-const RoutingWindow = ({ 
+const RoutingWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -14,33 +14,38 @@ const RoutingWindow = ({
   setActiveTab,
   editMode,
   setEditMode,
-  setSelectedRecordId }) => {
+  setSelectedRecordId
+}) => {
   return (
     <Window
       id='routing'
       Title={labels.routing}
       controlled={true}
       onClose={onClose}
-      width={600}
-      height={400}
       tabs={tabs}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
     >
       <CustomTabPanel index={0} value={activeTab}>
-        <RoutingForm labels={labels} maxAccess={maxAccess} recordId={recordId} setErrorMessage={setErrorMessage} editMode={editMode}
-           setEditMode={setEditMode}
-           setSelectedRecordId={setSelectedRecordId} />
+        <RoutingForm
+          labels={labels}
+          maxAccess={maxAccess}
+          recordId={recordId}
+          setErrorMessage={setErrorMessage}
+          editMode={editMode}
+          setEditMode={setEditMode}
+          setSelectedRecordId={setSelectedRecordId}
+        />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-          <RoutingSeqForm
-             labels={labels}
-             setErrorMessage={setErrorMessage}
-             maxAccess={maxAccess}
-             recordId={recordId}
-             setSelectedRecordId={setSelectedRecordId}
-          />
-        </CustomTabPanel>
+        <RoutingSeqForm
+          labels={labels}
+          setErrorMessage={setErrorMessage}
+          maxAccess={maxAccess}
+          recordId={recordId}
+          setSelectedRecordId={setSelectedRecordId}
+        />
+      </CustomTabPanel>
     </Window>
   )
 }

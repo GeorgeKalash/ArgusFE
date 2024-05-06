@@ -142,13 +142,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ChartOfAccounts}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.ChartOfAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <ResourceComboBox

@@ -23,6 +23,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ProductionLineWindow from './Windows/ProductionLineWindow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const MfProductionLines = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -96,9 +99,11 @@ const MfProductionLines = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -110,7 +115,7 @@ const MfProductionLines = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
 
       {windowOpen && (
         <ProductionLineWindow
@@ -125,7 +130,7 @@ const MfProductionLines = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

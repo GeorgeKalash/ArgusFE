@@ -24,6 +24,9 @@ import SalesPersonWindow from './Windows/SalesPersonWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const SalesPerson = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -116,9 +119,11 @@ const SalesPerson = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -131,7 +136,8 @@ const SalesPerson = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
         <SalesPersonWindow
           onClose={() => {
@@ -151,7 +157,7 @@ const SalesPerson = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 
