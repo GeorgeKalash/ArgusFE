@@ -114,7 +114,7 @@ const JournalVoucher = () => {
             maxAccess: access,
             recordId: selectedRecordId,
             setSelectedRecordId: setSelectedRecordId,
-            reference: general.reference
+            general
           },
           width: 500,
           height: 500,

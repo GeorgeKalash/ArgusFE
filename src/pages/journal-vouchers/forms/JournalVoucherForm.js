@@ -21,10 +21,11 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function JournalVoucherForm({ labels, maxAccess, recordId, reference = {} }) {
+export default function JournalVoucherForm({ labels, maxAccess, recordId, general = {} }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [responseValue, setResponseValue] = useState(null)
+  const { reference, dtId } = general
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -32,7 +33,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, refere
     date: new Date(),
     notes: '',
     currencyId: '',
-    dtId: '',
+    dtId: dtId,
     status: 1,
     rateCalcMethod: 1,
     exRate: 1
@@ -125,6 +126,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, refere
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>
+          {dtId}
           <ResourceComboBox
             endpointId={SystemRepository.DocumentType.qry}
             name='dtId'

@@ -46,7 +46,8 @@ const fetchData = async (getRequest, id, repository) => {
 }
 
 const reference = async (getRequest, functionId) => {
-  const dtId = await fetchData(getRequest, functionId, 'dtId')?.dtId
+  const documentType = await fetchData(getRequest, functionId, 'dtId')
+  const dtId = documentType?.dtId
   let nraId
   let errorMessage
   let reference
@@ -55,7 +56,7 @@ const reference = async (getRequest, functionId) => {
     const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
     nraId = dcTypNumberRange?.nraId
   }
-  if (!dtId || (dtId && !numberRange)) {
+  if (!dtId || (dtId && !nraId)) {
     const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange')
     nraId = glbSysNumberRange?.nraId
 
@@ -72,6 +73,7 @@ const reference = async (getRequest, functionId) => {
   }
 
   return {
+    dtId,
     reference,
     errorMessage
   }
