@@ -147,7 +147,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, refere
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            readOnly={reference.readOnly || true}
+            readOnly={reference.readOnly || editMode}
             required={reference.mandatory}
             maxAccess={maxAccess}
             maxLength='30'

@@ -1,65 +1,3 @@
-// import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// const getData = async (getRequest, extension, parameters) => {
-//   try {
-//     const res = await getRequest({
-//       extension,
-//       parameters
-//     })
-
-//     return res?.record
-//   } catch (error) {
-//     return null
-//   }
-// }
-
-// const defaultDocumentType = async (getRequest, functionId) => {
-//   const userData =
-//     window && window.sessionStorage.getItem('userData') ? JSON.parse(window.sessionStorage.getItem('userData')) : null
-//   const userId = userData?.userId
-//   const parameters = `_userId=${userId}&_functionId=${functionId}`
-//   const extension = SystemRepository.UserFunction.get
-
-//   return await getData(getRequest, extension, parameters)
-// }
-
-// const getNumberRange = async (getRequest, functionId, extension) => {
-//   const parameters = `_recordId=${functionId}`
-
-//   return await getData(getRequest, extension, parameters)
-// }
-
-// const numberRange = async (getRequest, functionId) => {
-//   const extension = SystemRepository.SystemFunction.get
-
-//   return await getNumberRange(getRequest, functionId, extension)
-// }
-
-// const numberRangeYes = async (getRequest, functionId) => {
-//   const extension = SystemRepository.DocumentType.get
-
-//   return await getNumberRange(getRequest, functionId, extension)
-// }
-
-// const numberRangeInternal = async (getRequest, functionId) => {
-//   const parameters = `_recordId=${functionId}`
-//   const extension = SystemRepository.NumberRange.get
-
-//   return await getData(getRequest, extension, parameters)
-// }
-
-// const general = (getRequest, functionId) => {
-//   const res1 = defaultDocumentType(getRequest, functionId)
-
-//   // const res2 = numberRange(getRequest, functionId)
-//   // const res3 = numberRangeYes(getRequest, functionId)
-
-//   // const res4 = general(getRequest, functionId)
-//   if (res1) return res1
-// }
-
-// export { general, numberRange, numberRangeYes, numberRangeInternal }
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const getData = async (getRequest, extension, parameters) => {
@@ -79,7 +17,7 @@ const fetchData = async (getRequest, id, repository) => {
   let extension, parameters
 
   switch (repository) {
-    case 'UserDefault': //default user
+    case 'dtId': //default user
       const userData =
         window && window.sessionStorage.getItem('userData')
           ? JSON.parse(window.sessionStorage.getItem('userData'))
@@ -88,11 +26,11 @@ const fetchData = async (getRequest, id, repository) => {
       parameters = `_userId=${userId}&_functionId=${id}`
       extension = SystemRepository.UserFunction.get
       break
-    case 'glbSysNumberRange': //get numberRange  if no userDefault
+    case 'glbSysNumberRange': //get numberRange  if no dtId
       parameters = `_recordId=${id}`
       extension = SystemRepository.SystemFunction.get
       break
-    case 'DcTypNumberRange': //get numberRange if user has userDefault
+    case 'DcTypNumberRange': //get numberRange if user has dtId
       parameters = `_recordId=${id}`
       extension = SystemRepository.DocumentType.get
       break
@@ -108,34 +46,32 @@ const fetchData = async (getRequest, id, repository) => {
 }
 
 const reference = async (getRequest, functionId) => {
-  const userDefault = await fetchData(getRequest, functionId, 'UserDefault')
-  let numberRange
+  const dtId = await fetchData(getRequest, functionId, 'dtId')?.dtId
+  let nraId
   let errorMessage
   let reference
   let isExternal
-  if (userDefault) {
-    numberRange = await fetchData(getRequest, userDefault.dtId, 'DcTypNumberRange')
-  } else {
-    numberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange')
-    if (!numberRange.recordId) {
-      errorMessage = 'Assign a number Range to system function'
+  if (dtId) {
+    const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
+    nraId = dcTypNumberRange?.nraId
+  }
+  if (!dtId || (dtId && !numberRange)) {
+    const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange')
+    nraId = glbSysNumberRange?.nraId
+
+    if (!nraId) {
+      errorMessage = 'Assign the document type to a number range'
     }
   }
-  if (numberRange) {
-    isExternal = await fetchData(getRequest, numberRange.nraId, 'isExternal')
-    if (isExternal?.external) {
-      //editable and mandatory
-      reference = { readOnly: false, mandatory: true }
-    } else {
-      //readOnly  and not mandatory
-      reference = { readOnly: true, mandatory: false }
+  if (nraId) {
+    isExternal = await fetchData(getRequest, nraId, 'isExternal')
+    reference = {
+      readOnly: isExternal?.external ? false : true,
+      mandatory: isExternal?.external ? true : false
     }
   }
 
   return {
-    userDefault: userDefault?.dtId,
-    numberRange: numberRange?.nraId,
-    external: isExternal?.external,
     reference,
     errorMessage
   }

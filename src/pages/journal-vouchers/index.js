@@ -106,7 +106,6 @@ const JournalVoucher = () => {
 
   const add = async () => {
     const general = await reference(getRequest, SystemFunction.JournalVoucher)
-
     !general?.errorMessage
       ? stack({
           Component: JournalVoucherForm,
