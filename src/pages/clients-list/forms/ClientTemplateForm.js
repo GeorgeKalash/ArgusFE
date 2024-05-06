@@ -38,6 +38,7 @@ import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 import { useInvalidate } from 'src/hooks/resource'
 import SystemDefaults from 'src/pages/system-defaults'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
@@ -125,7 +126,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
     oldReference: '',
 
     //clientRemittance
-
+    trxCountPerYear: '',
+    trxAmountPerYear: '',
     otpVerified: false,
     addressId: '',
     batchId: '',
@@ -317,6 +319,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
           title: obj.clientRemittance?.title,
           mobileVerified: obj.clientRemittance?.mobileVerificationStatus,
           isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat,
+          trxAmountPerYear: obj.clientRemittance?.trxAmountPerYear,
+          trxCountPerYear: obj.clientRemittance?.trxCountPerYear,
           clientRemittance: {
             reference: obj.clientRemittance.reference
           }
@@ -500,7 +504,9 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
-      status: obj.status
+      status: obj.status,
+      trxCountPerYear: obj.trxCountPerYear,
+      trxAmountPerYear: obj.trxAmountPerYear
     }
 
     const obj5 = {
@@ -1385,6 +1391,30 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                 </Grid>
 
                 <Grid container xs={12} spacing={2} sx={{ p: 5 }}>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='trxCountPerYear'
+                      onChange={clientIndividualFormik.handleChange}
+                      label={labels.trxCountPerYear}
+                      value={clientIndividualFormik.values.trxCountPerYear}
+                      error={
+                        clientIndividualFormik.touched.trxCountPerYear &&
+                        Boolean(clientIndividualFormik.errors.trxCountPerYear)
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='trxAmountPerYear'
+                      onChange={clientIndividualFormik.handleChange}
+                      label={labels.trxAmountPerYear}
+                      value={clientIndividualFormik.values.trxAmountPerYear}
+                      error={
+                        clientIndividualFormik.touched.trxAmountPerYear &&
+                        Boolean(clientIndividualFormik.errors.trxAmountPerYear)
+                      }
+                    />
+                  </Grid>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={RemittanceSettingsRepository.SalaryRange.qry}
