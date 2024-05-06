@@ -63,6 +63,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           cobId: RTBEN?.record?.cobId,
+          shortName: RTBEN?.record?.shortName,
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
 
@@ -101,6 +102,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     cellPhone: '',
     birthDate: null,
     cobId: '',
+    shortName: '',
     addressLine1: '',
     addressLine2: '',
 
@@ -141,6 +143,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         cellPhone: values.cellPhone,
         birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
         cobId: values.cobId,
+        shortName: values.shortName,
         addressLine1: values.addressLine1,
         addressLine2: values.addressLine2
       }
@@ -356,6 +359,17 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
+          <FormGrid hideonempty xs={12}>
+            <CustomTextField
+              name='shortName'
+              label={_labels.shortName}
+              value={formik.values.shortName}
+              onChange={formik.handleChange}
+              maxLength='50'
+              error={formik.touched.shortName && Boolean(formik.errors.shortName)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
           <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='cellPhone'
