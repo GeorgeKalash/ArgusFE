@@ -387,8 +387,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }
   }
 
-  const fillAmountGridData = async (cash, header) => {
-    const modifiedList = cash.map((item, index) => ({
+  const fillFormData = async data => {
+    const modifiedList = data.cash.map((item, index) => ({
       ...item,
       id: index + 1,
       bankFees: item.bankFees ? parseFloat(item.bankFees).toFixed(2) : null,
@@ -396,7 +396,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }))
 
     formik.setValues({
-      ...header,
+      ...data.headerView,
+      ttNo: data.ttNo,
       amountRows: modifiedList
     })
   }
@@ -583,7 +584,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           res.record.checked = true
           getClientInfo(res.record.headerView.clientId)
-          fillAmountGridData(res.record.cash, res.record.headerView)
+          fillFormData(res.record)
           productDataFill(res.record.headerView)
         }
         getDefaultVAT()
