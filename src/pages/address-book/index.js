@@ -10,9 +10,8 @@ import { useWindow } from 'src/windows'
 import AddressForm from 'src/components/Shared/AddressForm'
 
 const AddressBook = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [address, setAddress] = useState([])
 
   async function fetchWithSearch({ qry }) {
     const response = await getRequest({
@@ -97,7 +96,6 @@ const AddressBook = () => {
   })
 
   const editAddress = obj => {
-    setAddress(obj)
     openForm(obj)
   }
 
@@ -107,7 +105,7 @@ const AddressBook = () => {
       props: {
         editMode: true,
         labels: _labels,
-        setAddress: setAddress,
+        setAddress: () => {},
         address: obj,
         recordId: obj.recordId,
         onSubmit: onSubmitFunction
