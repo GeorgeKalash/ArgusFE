@@ -21,15 +21,14 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     recordId: null,
     name: '',
     reference: '',
-    flName:'',
-    industry:''
-
+    flName: '',
+    industry: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext) 
 
   const invalidate = useInvalidate({
-    endpointId:CurrencyTradingSettingsRepository.Activity.qry
+    endpointId: CurrencyTradingSettingsRepository.Activity.qry
   })
 
   const formik = useFormik({
@@ -37,9 +36,9 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      industry:yup.string().required('This field is required')
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      industry: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -52,8 +51,8 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, 
-          recordId: response.recordId 
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -151,4 +150,3 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     </FormShell>
   )
 }
-
