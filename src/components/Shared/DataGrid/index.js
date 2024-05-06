@@ -19,6 +19,7 @@ export function DataGrid({
   value,
   error,
   bg,
+  height,
   onChange,
   allowDelete = true,
   allowAddNewLine = true,
@@ -255,10 +256,11 @@ export function DataGrid({
   }
 
   return (
-    <Box sx={{flex:'1 !important' }}>
+    <Box sx={{height: height ? height : 'auto', flex:'1 !important' }}>
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
+        autoHeight={height ? false : true}
         columnResizable={false}
         disableColumnFilter
         disableColumnMenu

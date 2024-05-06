@@ -56,8 +56,8 @@ return '';
    },[accessADJ])
 
   return (
-    <Box sx={{height: `calc(100vh - 48px)` , display: 'flex',flexDirection: 'column' , zIndex:1}}>
-   {plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} maxAccess={accessADJ}  plantId={plantId} />}
-    </Box>
+    
+   plantId && accessADJ &&  <TransactionForm labels={_labelsADJ} maxAccess={accessADJ}  plantId={plantId} />
+    
   )
 }

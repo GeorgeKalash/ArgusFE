@@ -15,7 +15,6 @@ const GeographicRegionsWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
     >
       <GeographicRegionsForm
         labels={labels}

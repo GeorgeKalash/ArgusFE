@@ -8,9 +8,6 @@ import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import Approvals from './Approvals'
-import { VertLayout } from './Layouts/VertLayout'
-import { Grow } from './Layouts/Grow'
-import { Fixed } from './Layouts/Fixed'
 
 export default function FormShell({
   form,
@@ -115,7 +112,6 @@ export default function FormShell({
                   functionId: functionId
                 },
                 width: 1000,
-                height: 620,
                 title: 'General Ledger'
               })
             }
