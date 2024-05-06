@@ -46,7 +46,7 @@ const fetchData = async (getRequest, id, repository) => {
 }
 
 const reference = async (getRequest, functionId) => {
-  const documentType = await fetchData(getRequest, functionId, 'dtId')
+  const documentType = await fetchData(getRequest, functionId, 'dtId') // ufu
   const dtId = documentType?.dtId
   let nraId
   let errorMessage
@@ -56,13 +56,12 @@ const reference = async (getRequest, functionId) => {
     const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
     nraId = dcTypNumberRange?.nraId
   }
-  if (!dtId || (dtId && !nraId)) {
-    const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange')
+  if (!dtId) {
+    const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
     nraId = glbSysNumberRange?.nraId
-
-    if (!nraId) {
-      errorMessage = 'Assign the document type to a number range'
-    }
+  }
+  if (!nraId) {
+    errorMessage = 'Assign the document type to a number range'
   }
   if (nraId) {
     isExternal = await fetchData(getRequest, nraId, 'isExternal')

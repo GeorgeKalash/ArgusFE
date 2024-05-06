@@ -129,11 +129,12 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
           <ResourceComboBox
             endpointId={SystemRepository.DocumentType.qry}
             parameters={`_dgId=${SystemFunction.JournalVoucher}&_startAt=${0}&_pageSize=${50}`}
-            filter={editMode ? item => item.activeStatus === 1 : undefined}
+            filter={!editMode ? item => item.activeStatus === 1 : undefined}
             name='dtId'
             label={labels.documentType}
             valueField='recordId'
             displayField='name'
+            readOnly={editMode}
             values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('dtId', newValue?.recordId)
