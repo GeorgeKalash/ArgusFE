@@ -32,7 +32,7 @@ const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId, height }) => {
           recordId={store.recordId}
           maxAccess={maxAccess}
           name={store.name}
-        />{' '}
+        />
       </CustomTabPanel>
     </>
   )

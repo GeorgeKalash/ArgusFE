@@ -70,17 +70,19 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
         setEditMode(true)
         setStore(prevStore => ({
           ...prevStore,
-          recordId: res.recordId
+          recordId: res.recordId,
+          name: obj.name
         }))
+
         toast.success('Record Added Successfully')
-
-        invalidate()
       } else {
-        invalidate()
         toast.success('Record Editted Successfully')
-
-        getIdTypesById(res.recordId ?? recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          name: obj.name
+        }))
       }
+      invalidate()
     })
   }
 

@@ -13,8 +13,6 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
@@ -25,9 +23,6 @@ import { useWindow } from 'src/windows'
 const PurposeExchange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -72,8 +67,7 @@ const PurposeExchange = () => {
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access,
-        setSelectedRecordId: setSelectedRecordId
+        maxAccess: access
       },
       width: 600,
       height: 600,
@@ -86,7 +80,6 @@ const PurposeExchange = () => {
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
     openForm(obj.recordId)
   }
 
@@ -115,21 +108,6 @@ const PurposeExchange = () => {
           maxAccess={access}
         />
       </Box>
-
-      {windowOpen && (
-        <PurposeOfExchangeWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

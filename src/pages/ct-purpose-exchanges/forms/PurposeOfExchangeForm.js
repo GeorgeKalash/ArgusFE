@@ -11,12 +11,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, setStore }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
   const [initialValues, setInitialData] = useState({
@@ -48,10 +46,16 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       })
 
       if (!recordId) {
+        setStore({
+          recordId: response.recordId,
+          name: obj.name
+        })
         toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-      getData(response?.recordId ?? recordId)
+      } else {
+        setStore(prev => ({ ...prev, name: obj.name }))
+        toast.success('Record Edited Successfully')
+        setEditMode(true)
+      }
       invalidate()
     }
   })
