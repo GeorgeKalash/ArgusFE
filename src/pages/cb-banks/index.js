@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -25,7 +25,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 
 const CbBank = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -60,17 +60,23 @@ const CbBank = () => {
       field: 'reference',
       headerName: _labels.reference,
       flex: 1
-    },{
+    },
+    {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },{
+    },
+    {
       field: 'swiftCode',
       headerName: _labels.swiftCode,
       flex: 1
+    },
+    {
+      field: 'Country',
+      headerName: _labels.Country,
+      flex: 1
     }
   ]
-
 
   const add = () => {
     setWindowOpen(true)
@@ -89,7 +95,6 @@ const CbBank = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>
