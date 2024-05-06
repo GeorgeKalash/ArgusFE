@@ -53,6 +53,7 @@ export const ResourceIds = {
   DRGroups: 10103,
   ClientMaster: 36201,
   ClientList: 35201,
+  UpdateClientRemittance: 36204,
   Characteristics: 10102,
   Strategies: 10106,
   Classes: 10101,

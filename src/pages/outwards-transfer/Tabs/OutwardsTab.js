@@ -514,7 +514,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           cashData: cashData
         },
         width: 1000,
-        height: 660,
+        height: 650,
         title: 'Instant Cash'
       })
     } else if (productFormik.values.interfaceId == 2) {
