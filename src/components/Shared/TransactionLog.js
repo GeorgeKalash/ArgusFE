@@ -19,7 +19,6 @@ const TransactionLog = props => {
   const { getAllKvsByDataset } = useContext(CommonContext)
   const { getLabels, getAccess } = useContext(ControlContext)
 
-  const [transactionTypeStore, setTransactionTypeStore] = useState([])
   const [transactionType, setTransactionType] = useState(0)
   const [gridData, setGridData] = useState({})
   const [labels, setLabels] = useState(null)
@@ -33,7 +32,6 @@ const TransactionLog = props => {
       if (access?.record.maxAccess > 0) {
         getGridData()
         getLabels(ResourceIds.TransactionLog, setLabels)
-        fillTransactionTypeStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -50,13 +48,6 @@ const TransactionLog = props => {
     title: labels && labels.find(item => item.key === '7').value
   }
 
-  const fillTransactionTypeStore = () => {
-    getAllKvsByDataset({
-      _dataset: DataSets.TRX_TYPE,
-      callback: setTransactionTypeStore
-    })
-  }
-
   const getGridData = () => {
     var parameters = `_resourceId=${resourceId}&_masterRef=${recordId}&_trxType=${transactionType}`
     getRequest({
@@ -66,9 +57,7 @@ const TransactionLog = props => {
       .then(res => {
         setGridData(res)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const showInfo = obj => {
@@ -80,9 +69,7 @@ const TransactionLog = props => {
       .then(res => {
         setInfo(JSON.parse(res.record.data))
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const formatDate = dateString => {
@@ -129,7 +116,7 @@ const TransactionLog = props => {
               label={_labels.trxType}
               valueField='key'
               displayField='value'
-              value={transactionTypeStore?.filter(item => item.recordId === transactionType)[0]}
+              value={transactionType}
               required
               onChange={(event, newValue) => {
                 if (newValue) {
