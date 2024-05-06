@@ -268,7 +268,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               label={labels.phone}
               value={addressValidation.values.phone}
               readOnly={readOnly}
-              required={required}
               maxLength='15'
               phone={true}
               onChange={addressValidation.handleChange}

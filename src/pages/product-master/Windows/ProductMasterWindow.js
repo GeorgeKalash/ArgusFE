@@ -10,31 +10,25 @@ import ProductCountriesForm from '../Forms/productCountriesForm'
 import ProductMasterForm from '../Forms/productMasterForm'
 import ProductDispersalList from '../Forms/productDispersallist'
 
-const ProductMasterWindow = ({
-  labels,
-  recordId,
-  maxAccess,
-  height,
-  expanded
-}) => {
-  const [editMode , setEditMode] = useState(recordId)
-  const [activeTab , setActiveTab] = useState(0)
+const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) => {
+  const [editMode, setEditMode] = useState(recordId)
+  const [activeTab, setActiveTab] = useState(0)
 
-  const [store , setStore] = useState({
-    recordId : recordId || null,
+  const [store, setStore] = useState({
+    recordId: recordId || null,
     countries: null,
     dispersals: null,
     _seqNo: null,
     plantId: null,
-    currencyId:null,
-    countryId:null,
-    dispersalId:null
+    currencyId: null,
+    countryId: null,
+    dispersalId: null
   })
 
   const tabs = [
     { label: labels.main },
     { label: labels.countries, disabled: !editMode },
-    { label: labels.monetary , disabled: !editMode },
+    { label: labels.monetary, disabled: !editMode },
     { label: labels.dispersal, disabled: !editMode },
     { label: labels.schedules, disabled: !editMode },
     { label: labels.amountRange, disabled: !editMode },
@@ -43,8 +37,7 @@ const ProductMasterWindow = ({
 
   return (
     <>
-
-      <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={height} index={0} value={activeTab}>
         <ProductMasterForm
           store={store}
@@ -55,29 +48,19 @@ const ProductMasterWindow = ({
           editMode={editMode}
         />
       </CustomTabPanel>
-     <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab}>
         <ProductCountriesForm
           store={store}
           setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
-           height={height}
-           expanded={expanded}
-           editMode={editMode}
-        />
-      </CustomTabPanel>
-     <CustomTabPanel height={height} index={2} value={activeTab}>
-        <ProductCurrenciesForm
-          store={store}
-          labels={labels}
-          maxAccess={maxAccess}
-          expanded={expanded}
           height={height}
+          expanded={expanded}
           editMode={editMode}
         />
       </CustomTabPanel>
-        <CustomTabPanel height={height} index={3} value={activeTab}>
-       <ProductDispersalList
+      <CustomTabPanel height={height} index={2} value={activeTab}>
+        <ProductCurrenciesForm
           store={store}
           setStore={setStore}
           labels={labels}
@@ -87,7 +70,18 @@ const ProductMasterWindow = ({
           editMode={editMode}
         />
       </CustomTabPanel>
-     <CustomTabPanel  height={height} index={4} value={activeTab}>
+      <CustomTabPanel height={height} index={3} value={activeTab}>
+        <ProductDispersalList
+          store={store}
+          setStore={setStore}
+          labels={labels}
+          maxAccess={maxAccess}
+          expanded={expanded}
+          height={height}
+          editMode={editMode}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={4} value={activeTab}>
         <ProductSchedulesForm
           store={store}
           setStore={setStore}
@@ -98,26 +92,20 @@ const ProductMasterWindow = ({
           editMode={editMode}
         />
       </CustomTabPanel>
-       <CustomTabPanel height={height}  index={5} value={activeTab}>
+      <CustomTabPanel height={height} index={5} value={activeTab}>
         <ProductLegForm
-        store={store}
-        setStore={setStore}
-        labels={labels}
-        maxAccess={maxAccess}
-        expanded={expanded}
-        height={height}
-         editMode={editMode}
-        />
-       </CustomTabPanel>
-
-      <CustomTabPanel height={height} index={6} value={activeTab}>
-        <ProductAgentForm
           store={store}
+          setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
           expanded={expanded}
           height={height}
+          editMode={editMode}
         />
+      </CustomTabPanel>
+
+      <CustomTabPanel height={height} index={6} value={activeTab}>
+        <ProductAgentForm store={store} labels={labels} maxAccess={maxAccess} expanded={expanded} height={height} />
       </CustomTabPanel>
     </>
   )
