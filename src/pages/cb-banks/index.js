@@ -72,7 +72,7 @@ const CbBank = () => {
       flex: 1
     },
     {
-      field: 'Country',
+      field: 'countryRef',
       headerName: _labels.Country,
       flex: 1
     }
