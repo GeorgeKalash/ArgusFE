@@ -6,18 +6,29 @@ import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
+import { Box, CircularProgress } from '@mui/material'
 
 const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const { stack: stackError } = useError() || {}
+  const [loading, setLoading] = useState(0)
 
+  const incrementLoading = () => {
+    setLoading(prevLoading => prevLoading + 1)
+  }
+
+  const decrementLoading = () => {
+    setLoading(prevLoading => Math.max(prevLoading - 1, 0))
+  }
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
+
+    incrementLoading() // Increment loading counter before making request
 
     return axios({
       method: 'GET',
@@ -28,8 +39,13 @@ const RequestsProvider = ({ children }) => {
         LanguageId: user.languageId
       }
     })
-      .then(res => res.data)
+      .then(res => {
+        decrementLoading() // Decrement loading counter after request completes
+
+        return res.data
+      })
       .catch(error => {
+        decrementLoading() // Decrement loading counter if an error occurs
         stackError({ message: error, height: 400 })
         throw error
       })
@@ -185,7 +201,29 @@ const RequestsProvider = ({ children }) => {
     getMicroRequest
   }
 
-  return <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
+  return (
+    <>
+      <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
+      {loading && (
+        <Box
+          style={{
+            position: 'absolute',
+            top: 42,
+            right: 0,
+            width: '80%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)', // Semi-transparent black background
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999 // Ensure it's above other content
+          }}
+        >
+          <CircularProgress color='success' />
+        </Box>
+      )}
+    </>
+  )
 }
 
 export { RequestsContext, RequestsProvider }
