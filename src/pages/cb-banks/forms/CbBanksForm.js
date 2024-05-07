@@ -13,6 +13,8 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function CbBanksForms({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -22,7 +24,8 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
     recordId: null,
     reference: '',
     name: '',
-    swiftCode: ''
+    swiftCode: '',
+    countryId: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,8 +56,8 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -128,8 +131,26 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('swiftCode', '')}
             error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
-
-            // helperText={formik.touched.swiftCode && formik.errors.swiftCode}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={SystemRepository.Country.qry}
+            name='countryId'
+            label={labels.Country}
+            valueField='recordId'
+            displayField={['reference', 'name', 'flName']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'reference' },
+              { key: 'name', value: 'name' },
+              { key: 'flName', value: 'flName' }
+            ]}
+            values={formik.values}
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('countryId', newValue?.recordId || null)
+            }}
+            error={formik.touched.countryId && Boolean(formik.errors.countryId)}
           />
         </Grid>
       </Grid>
