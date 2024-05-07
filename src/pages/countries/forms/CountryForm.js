@@ -34,7 +34,9 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
     currencyRef: null,
     currencyName: null,
     regionRef: null,
-    regionName: null
+    regionName: null,
+    isoCode1: '',
+    isoCode2: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -191,6 +193,30 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
+          <CustomTextField
+            name='isoCode1'
+            label={_labels.IsoCode1}
+            value={formik.values.isoCode1}
+            maxLength='2'
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('isoCode1', '')}
+            error={formik.touched.isoCode1 && Boolean(formik.errors.isoCode1)}
+            maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='isoCode2'
+            label={_labels.IsoCode2}
+            value={formik.values.isoCode2}
+            maxLength='3'
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('isoCode1', '')}
+            error={formik.touched.isoCode2 && Boolean(formik.errors.isoCode2)}
+            maxAccess={maxAccess}
+          />
+        </Grid>
+        <Grid item xs={12}>
           <FormControlLabel
             control={
               <Checkbox
@@ -205,5 +231,5 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
         </Grid>
       </Grid>
     </FormShell>
- )
+  )
 }
