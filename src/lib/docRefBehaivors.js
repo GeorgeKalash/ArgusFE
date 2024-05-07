@@ -51,7 +51,7 @@ const fetchData = async (getRequest, id, repository) => {
 
 const documentType = async (getRequest, functionId, selectNraId = undefined) => {
   console.log(functionId, selectNraId)
-  const docType = await fetchData(getRequest, functionId, 'dtId') // ufu
+  const docType = selectNraId != undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
   let nraId
   let errorMessage
@@ -59,6 +59,7 @@ const documentType = async (getRequest, functionId, selectNraId = undefined) => 
   let isExternal
   let dcTypeRequired
   if (docType && selectNraId === undefined) {
+    // mot select combobox
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
@@ -70,7 +71,7 @@ const documentType = async (getRequest, functionId, selectNraId = undefined) => 
       dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
     }
   }
-  if (selectNraId === null) {
+  if (selectNraId === null || (selectNraId === undefined && !dcTypeRequired)) {
     if (!dtId) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
@@ -79,6 +80,7 @@ const documentType = async (getRequest, functionId, selectNraId = undefined) => 
       errorMessage = 'Assign the document type to a number range'
     }
   }
+
   if (selectNraId > 0 && !nraId) {
     nraId = selectNraId
   }
