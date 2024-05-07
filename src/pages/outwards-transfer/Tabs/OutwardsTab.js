@@ -402,7 +402,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })
   }
   function openReleaventWindow(formValues) {
-    if (formValues.dispersalType === 2) {
+    if (formValues.dispersalType === 1) {
       stack({
         Component: BenificiaryCash,
         props: {
