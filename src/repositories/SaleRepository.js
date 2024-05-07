@@ -5,7 +5,8 @@ export const SaleRepository = {
     qry: service + 'qryPL',
     get: service + 'getPL',
     set: service + 'setPL',
-    del: service + 'delPL'
+    del: service + 'delPL',
+    page: service + 'pagePL'
   },
   SalesPerson: {
     qry: service + 'qrySP',
