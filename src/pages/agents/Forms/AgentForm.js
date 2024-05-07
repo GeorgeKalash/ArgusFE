@@ -12,6 +12,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const AgentForm = ({ labels, maxAccess, recordId }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -87,45 +88,47 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
       editMode={editMode}
     >
       <VertLayout>
-        <Grid container spacing={4}>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='name'
-              label={labels.name}
-              value={formik.values.name}
-              required
-              maxLength='50'
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('name', '')}
-              error={formik.touched.name && Boolean(formik.errors.name)}
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxLength='50'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
 
-              // helperText={formik.touched.name && formik.errors.name}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Country.qry}
-              name='countryId'
-              label={labels.country}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              valueField='recordId'
-              displayField='name'
-              required
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('countryId', newValue?.recordId)
-              }}
-              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+                // helperText={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Country.qry}
+                name='countryId'
+                label={labels.country}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('countryId', newValue?.recordId)
+                }}
+                error={formik.touched.countryId && Boolean(formik.errors.countryId)}
 
-              // helperText={formik.touched.countryId && formik.errors.countryId}
-            />
+                // helperText={formik.touched.countryId && formik.errors.countryId}
+              />
+            </Grid>
           </Grid>
-        </Grid>
+        </Grow>
       </VertLayout>
     </FormShell>
   )

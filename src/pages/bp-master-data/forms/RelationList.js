@@ -1,4 +1,3 @@
-import {Box} from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useContext, useEffect, useState } from 'react'
@@ -12,7 +11,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const RelationList = ({ store , height, labels, editMode, maxAccess }) => {
+const RelationList = ({ store , labels, editMode, maxAccess }) => {
 
 const { recordId } = store
 const [relationGridData, setRelationGridData] = useState([])
@@ -102,7 +101,6 @@ useEffect(()=>{
             getRelationGridData : getRelationGridData
       },
       width: 500,
-      height: 400,
       title: labels.relation
     })
   }

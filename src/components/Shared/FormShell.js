@@ -125,7 +125,6 @@ export default function FormShell({
                   setErrorMessage: setErrorMessage
                 },
                 width: 900,
-                height: 600,
                 title: 'Client Relation'
               })
             }

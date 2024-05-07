@@ -598,6 +598,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
           getData: getClient
         },
         width: 400,
+        height:400,
         title: labels.OTPVerification
       })
   }, [clientIndividualFormik.values.clientId])

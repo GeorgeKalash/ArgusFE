@@ -1,10 +1,6 @@
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect, useState } from 'react'
-
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
@@ -69,7 +65,6 @@ function openForm(id){
 
     },
     width: 600,
-    height: 600,
     title: labels.address
   })
 
@@ -84,7 +79,6 @@ useEffect(()=>{
 },[recordId])
 
 return (
-
     <AddressGridTab
       addressGridData={addressGridData}
       addAddress={addAddress}
@@ -95,7 +89,6 @@ return (
       {...props}
 
     />
-
   )
 }
 

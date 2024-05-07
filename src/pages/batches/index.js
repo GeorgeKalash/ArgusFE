@@ -245,7 +245,6 @@ const Batches = () => {
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                     width={600}
-                    height={400}
                     onSave={handleSubmit}
                 >
                     <CustomTabPanel index={0} value={activeTab}>

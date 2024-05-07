@@ -81,7 +81,6 @@ const UndeliveredCreditOrder = () => {
         userData: userData
       },
       width: 950,
-      height: 600,
       title: labels.creditOrder
     })
   }

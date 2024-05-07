@@ -15,12 +15,10 @@ return (
             hidden={value !== index}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
+            sx={{display: value !== index ? 'none !important' : 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important', overflow:'auto'}}
             {...other}
         >
-            <Box sx={{ p: 3 }}>
-                <Typography sx={{ height : height, display: 'flex',
-                        flexDirection: 'column', }}>{children}</Typography>
-            </Box>
+            {children}
         </Box>
     )
 }

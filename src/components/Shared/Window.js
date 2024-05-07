@@ -162,7 +162,7 @@ return (
             )}
             {!controlled ? (
               <>
-                <DialogContent sx={{ height: expanded ? `calc(calc(100 * var(--vh)) - 48px - 180px)` : height, p: 0 }}>
+                <DialogContent sx={{ p: 0}}>
                   {children}
                 </DialogContent>
                 {windowToolbarVisible && (

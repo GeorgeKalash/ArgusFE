@@ -13,6 +13,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import Box from '@mui/material/Box'
 import ResourceComboBox from './ResourceComboBox'
+import { VertLayout } from './Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
+import { Grow } from './Layouts/Grow'
 
 const TransactionLog = props => {
   const { recordId, resourceId, onInfoClose } = props
@@ -107,8 +110,9 @@ const TransactionLog = props => {
   ]
 
   return (
-    <Box sx={{padding:'10px !important',display:'flex !important', flex: '1 !important', flexDirection:'column'}} onClose={onInfoClose} Title={_labels.title}>
-        <Grid container xs={12} sx={{ display:'flex !important', flex: '0 !important', paddingBottom: '25px' }}>
+    <VertLayout>
+      <Fixed>
+        <Grid container xs={12} spacing={3} sx={{padding:'10px' }}>
           <Grid item xs={5}>
             <ResourceComboBox
               datasetId={DataSets.TRX_TYPE}
@@ -127,13 +131,12 @@ const TransactionLog = props => {
               }}
             />
           </Grid>
-
           <Grid container xs={2}></Grid>
-          <Grid container xs={4} spacing={4}>
+          <Grid container xs={4}>
             <Grid container xs={12}>
               <Grid item xs={6}>
                 {_labels.recordId}
-              </Grid>{' '}
+              </Grid>
               <Grid item xs={6}>
                 {recordId}
               </Grid>
@@ -141,31 +144,36 @@ const TransactionLog = props => {
             <Grid container xs={12}>
               <Grid item xs={6}>
                 {_labels.resourceId}
-              </Grid>{' '}
+              </Grid>
               <Grid tem xs={6}>
                 {resourceId}
               </Grid>
             </Grid>
           </Grid>
         </Grid>
-        <Table
-          columns={columns}
-          gridData={gridData}
-          rowId={['recordId']}
-          isLoading={false}
-          maxAccess={access}
-          onEdit={showInfo}
-          pagination={false}
-        />
-        <Grid data-unique-id item xs={4} sx={{ display:'flex !important', flexDirection: 'column', flex:'1 !important', margin: '5px !important', overflow: 'auto' }}>
-          {Object.entries(info).map(([key, value]) => (
-            <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
-              <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
-              <Grid>{value}</Grid>
-            </Grid>
-          ))}
-        </Grid>
-    </Box>
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={gridData}
+            rowId={['recordId']}
+            isLoading={false}
+            maxAccess={access}
+            onEdit={showInfo}
+            pagination={false}
+          />
+        </Grow>
+        <Grow>
+          <Grid container sx={{padding:'10px', flexDirection:'column'}}>
+            {Object.entries(info).map(([key, value]) => (
+              <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
+                <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
+                <Grid>{value}</Grid>
+              </Grid>
+            ))}
+          </Grid>
+        </Grow>
+    </VertLayout>
   )
 }
 

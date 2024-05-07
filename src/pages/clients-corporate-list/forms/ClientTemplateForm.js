@@ -280,9 +280,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
       editMode={editMode}
       setErrorMessage={setErrorMessage}
     >
-      <VertLayout>
-      <Grid container>
-        <Grow>
         <Grid container xs={12} spacing={2} >
           <Grid item xs={6} >
             <Grid container spacing={3}>
@@ -581,9 +578,6 @@ const ClientTemplateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) =
             </Grid>
           </Grid>
         </Grid>
-        </Grow>
-      </Grid>
-      </VertLayout>
     </FormShell>
   )
 }

@@ -21,12 +21,11 @@ const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId, height }) => {
   return (
     <VertLayout>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab}>
         <PurposeOfExchangeForm labels={labels} maxAccess={maxAccess} recordId={recordId} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <InterfacesForm
-          height={height}
           labels={labels}
           resourceId={ResourceIds.PurposeOfExchange}
           recordId={store.recordId}

@@ -31,6 +31,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId, userData }) {
   const { height } = useWindowDimensions()
@@ -704,8 +705,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       disabledSubmit={isPosted || isCancelled}
     >
       <VertLayout>
-        <Grow>
-          <Grid container>
+          <Fixed>
             <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
               {/* First Column */}
               <Grid item xs={3} style={{ marginRight: '10px' }}>
@@ -847,8 +847,8 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 />
               </RadioGroup>
             </Grid>
-            <Grid container sx={{ pt: 2 }} xs={12}>
-              <Box sx={{ width: '100%' }}>
+            </Fixed>
+            <Grow>
                 <DataGrid
                   onChange={value => detailsFormik.setFieldValue('rows', value)}
                   value={detailsFormik.values.rows}
@@ -860,16 +860,13 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                       ? '#C7F6C7'
                       : 'rgb(245, 194, 193)')
                   }
-                  scrollHeight={`${expanded ? height - 430 : 200}px`}
                 />
-              </Box>
-            </Grid>
+            </Grow>
+            <Fixed>
             <Grid
               container
               rowGap={1}
               xs={12}
-              style={{ marginTop: '5px' }}
-              sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
             >
               {/* First Column (moved to the left) */}
               <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
@@ -909,8 +906,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 </Grid>
               </Grid>
             </Grid>
-          </Grid>
-        </Grow>
+            </Fixed>
       </VertLayout>
     </FormShell>
   )

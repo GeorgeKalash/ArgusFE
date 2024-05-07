@@ -36,6 +36,9 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 import Approvals from 'src/components/Shared/Approvals'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function CreditOrderForm({ labels, maxAccess, recordId, expanded, plantId, userData, window }) {
   const { height } = useWindowDimensions()
@@ -779,7 +782,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
   ]
 
   return (
-    <>
+    <VertLayout>
       <ConfirmationDialog
         DialogText={`Are you sure you want to transfer this order`}
         cancelButtonAction={() => setConfirmationWindowOpen(false)}
@@ -799,7 +802,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
         actions={actions}
         previewReport={editMode}
       >
-        <Grid container>
+        <Fixed>
           <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
             {/* First Column */}
             <FormGrid hideonempty item style={{ marginRight: '10px', width: '205px' }}>
@@ -931,8 +934,8 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               />
             </RadioGroup>
           </Grid>
-          <Grid container sx={{ pt: 2 }} xs={12}>
-            <Box sx={{ width: '100%' }}>
+        </Fixed>
+        <Grow>
               <DataGrid
                 onChange={value => detailsFormik.setFieldValue('rows', value)}
                 value={detailsFormik.values.rows}
@@ -944,18 +947,10 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                     ? '#C7F6C7'
                     : 'rgb(245, 194, 193)')
                 }
-                  
-                // scrollHeight={`${expanded ? height - 430 : 200}px`}
               />
-            </Box>
-          </Grid>
-          <Grid
-            container
-            rowGap={1}
-            xs={12}
-            style={{ marginTop: '5px' }}
-            sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
-          >
+          </Grow>
+          <Fixed>
+          <Grid container rowGap={1} xs={12}>
             {/* First Column (moved to the left) */}
             <FormGrid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
               <CustomTextArea
@@ -996,8 +991,8 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
               </Grid>
             </Grid>
           </Grid>
-        </Grid>
+          </Fixed>
       </FormShell>
-    </>
+    </VertLayout>
   )
 }
