@@ -33,7 +33,7 @@ const FiOpeningBalance = () => {
     query: { data },
     labels: _labels,
     paginationParameters,
-
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -129,6 +129,7 @@ const FiOpeningBalance = () => {
         paginationParameters={paginationParameters}
         paginationType='api'
         maxAccess={access}
+        refetch={refetch}
       />
     </>
   )
