@@ -93,7 +93,7 @@ export default function PriceLevelsForm({ labels, maxAccess, recordId }) {
             onChange={e => formik.setFieldValue('name', e.target.value)}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            maxLength={10}
+            maxLength={30}
           />
         </Grid>
       </Grid>
