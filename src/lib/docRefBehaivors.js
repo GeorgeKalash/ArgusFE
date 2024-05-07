@@ -52,22 +52,26 @@ const reference = async (getRequest, functionId) => {
   let errorMessage
   let reference
   let isExternal
-  if (dtId) {
-    const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
-    nraId = dcTypNumberRange?.nraId
-  }
-  if (!dtId) {
-    const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
-    nraId = glbSysNumberRange?.nraId
-  }
-  if (!nraId) {
-    errorMessage = 'Assign the document type to a number range'
-  }
-  if (nraId) {
-    isExternal = await fetchData(getRequest, nraId, 'isExternal')
-    reference = {
-      readOnly: isExternal?.external ? false : true,
-      mandatory: isExternal?.external ? true : false
+  if (documentType) {
+    if (dtId) {
+      const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
+      nraId = dcTypNumberRange?.nraId
+    } else {
+    }
+  } else {
+    if (!dtId) {
+      const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
+      nraId = glbSysNumberRange?.nraId
+    }
+    if (!nraId) {
+      errorMessage = 'Assign the document type to a number range'
+    }
+    if (nraId) {
+      isExternal = await fetchData(getRequest, nraId, 'isExternal')
+      reference = {
+        readOnly: isExternal?.external ? false : true,
+        mandatory: isExternal?.external ? true : false
+      }
     }
   }
 
