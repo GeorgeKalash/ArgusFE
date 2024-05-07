@@ -197,7 +197,7 @@ export default function CountryForm({ _labels, maxAccess, recordId }) {
             name='isoCode1'
             label={_labels.IsoCode1}
             value={formik.values.isoCode1}
-            maxLength='2'
+            maxLength='3'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('isoCode1', '')}
             error={formik.touched.isoCode1 && Boolean(formik.errors.isoCode1)}
