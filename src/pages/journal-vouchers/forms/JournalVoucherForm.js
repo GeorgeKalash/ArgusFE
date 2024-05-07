@@ -11,6 +11,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import documentType from 'src/lib/docRefBehaivors'
 
 import { formatDateToApi, formatDateFromApi } from 'src/lib/date-helper'
 
@@ -25,7 +26,8 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [responseValue, setResponseValue] = useState(null)
-  const { reference, dtId } = general
+  const { reference, dtId, dcTypeRequired } = general
+  const [referenceBhv, setReferenceBhv] = useState(false)
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -49,10 +51,10 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: reference?.mandatory && yup.string().required('This field is required'),
+      reference: (reference?.mandatory || referenceBhv?.mandatory) && yup.string().required('This field is required'),
       date: yup.string().required('This field is required'),
       currencyId: yup.string().required('This field is required'),
-      dtId: yup.string().required('This field is required')
+      dtId: dcTypeRequired && yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       const data = {
@@ -136,13 +138,16 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             displayField='name'
             readOnly={editMode}
             values={formik.values}
-            onChange={(event, newValue) => {
+            onChange={async (event, newValue) => {
               formik.setFieldValue('dtId', newValue?.recordId)
+
+              const ref = await documentType(getRequest, SystemFunction.JournalVoucher, newValue?.nraId)
+              setReferenceBhv(ref.reference)
             }}
             error={formik.touched.dtId && Boolean(formik.errors.dtId)}
             helperText={formik.touched.dtId && formik.errors.dtId}
             maxAccess={maxAccess}
-            required
+            required={dcTypeRequired}
           />
         </Grid>
         <Grid item xs={12}>
@@ -150,7 +155,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            readOnly={reference?.readOnly || editMode}
+            readOnly={reference?.readOnly || referenceBhv?.mandatory || editMode}
             required={reference?.mandatory}
             maxAccess={maxAccess}
             maxLength='30'

@@ -25,7 +25,7 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import reference from 'src/lib/docRefBehaivors'
+import documentType from 'src/lib/docRefBehaivors'
 import { useWindow } from 'src/windows'
 import JournalVoucherForm from './forms/JournalVoucherForm'
 import { useError } from 'src/error'
@@ -105,7 +105,8 @@ const JournalVoucher = () => {
   ]
 
   const add = async () => {
-    const general = await reference(getRequest, SystemFunction.JournalVoucher)
+    const general = await documentType(getRequest, SystemFunction.JournalVoucher)
+    console.log(general)
     !general?.errorMessage
       ? stack({
           Component: JournalVoucherForm,

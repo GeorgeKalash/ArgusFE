@@ -7,7 +7,7 @@ const getData = async (getRequest, extension, parameters) => {
       parameters
     })
 
-    return res?.record
+    return extension.includes('qry') ? res : res.record
   } catch (error) {
     return null
   }
@@ -31,9 +31,8 @@ const fetchData = async (getRequest, id, repository) => {
       extension = SystemRepository.SystemFunction.get
       break
     case 'DocumentType': //get numberRange  if no dtId
-      parameters = `_recordId=${id}`
+      parameters = `_dgId=${id}&_startAt=${0}&_pageSize=${50}`
       extension = SystemRepository.DocumentType.qry
-
       break
     case 'DcTypNumberRange': //get numberRange if user has dtId
       parameters = `_recordId=${id}`
@@ -50,42 +49,53 @@ const fetchData = async (getRequest, id, repository) => {
   return await getData(getRequest, extension, parameters)
 }
 
-const reference = async (getRequest, functionId) => {
-  const documentType = await fetchData(getRequest, functionId, 'dtId') // ufu
-  const dtId = documentType?.dtId
+const documentType = async (getRequest, functionId, selectNraId = undefined) => {
+  console.log(functionId, selectNraId)
+  const docType = await fetchData(getRequest, functionId, 'dtId') // ufu
+  const dtId = docType?.dtId
   let nraId
   let errorMessage
   let reference
   let isExternal
-  if (documentType) {
+  let dcTypeRequired
+  if (docType && selectNraId === undefined) {
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
+      if (!nraId) {
+        errorMessage = 'Assign the document type to a number range'
+      }
     } else {
-      const dcTypNumberRange = await fetchData(getRequest, dtId, 'DocumentType') //DT
+      const documentType = await fetchData(getRequest, functionId, 'DocumentType') //qryDT
+      dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
     }
-  } else {
+  }
+  if (selectNraId === null) {
     if (!dtId) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
     }
-    if (!nraId) {
+    if (!nraId && !dcTypeRequired) {
       errorMessage = 'Assign the document type to a number range'
     }
-    if (nraId) {
-      isExternal = await fetchData(getRequest, nraId, 'isExternal')
-      reference = {
-        readOnly: isExternal?.external ? false : true,
-        mandatory: isExternal?.external ? true : false
-      }
+  }
+  if (selectNraId > 0 && !nraId) {
+    nraId = selectNraId
+  }
+  if (nraId) {
+    isExternal = await fetchData(getRequest, nraId, 'isExternal')
+    reference = {
+      readOnly: isExternal?.external ? false : true,
+      mandatory: isExternal?.external ? true : false
     }
   }
 
   return {
     dtId,
+    dcTypeRequired,
     reference,
     errorMessage
   }
 }
 
-export default reference
+export default documentType
