@@ -183,6 +183,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
           <ResourceComboBox
             name='activeStatus'
             label={labels.status}
+            required
             datasetId={DataSets.ACTIVE_STATUS}
             values={formik.values}
             valueField='key'
