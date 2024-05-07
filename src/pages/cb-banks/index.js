@@ -59,6 +59,11 @@ const CbBank = () => {
       field: 'swiftCode',
       headerName: _labels.swiftCode,
       flex: 1
+    },
+    {
+      field: 'countryRef',
+      headerName: _labels.Country,
+      flex: 1
     }
   ]
 
