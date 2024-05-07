@@ -51,7 +51,7 @@ const fetchData = async (getRequest, id, repository) => {
 
 const documentType = async (getRequest, functionId, selectNraId = undefined) => {
   console.log(functionId, selectNraId)
-  const docType = selectNraId != undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
+  const docType = selectNraId === undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
   let nraId
   let errorMessage

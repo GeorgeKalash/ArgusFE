@@ -143,7 +143,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             onChange={async (event, newValue) => {
               formik.setFieldValue('dtId', newValue?.recordId)
 
-              const ref = await documentType(getRequest, SystemFunction.JournalVoucher, newValue?.nraId)
+              const ref = await documentType(getRequest, SystemFunction.JournalVoucher, newValue?.nraId || null)
               if (ref.errorMessage) {
                 stackError({ message: ref.errorMessage })
               } else setReferenceBhv(ref.reference)
@@ -159,7 +159,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            readOnly={reference?.readOnly || referenceBhv?.mandatory || editMode}
+            readOnly={reference?.readOnly || referenceBhv?.readOnly || editMode}
             required={reference?.mandatory}
             maxAccess={maxAccess}
             maxLength='30'
