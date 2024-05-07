@@ -33,12 +33,12 @@ const RequestsProvider = ({ children }) => {
       }
     })
       .then(res => {
-        setInterval(setLoading(false), 500)
+        setInterval(setLoading(false), 1000)
 
         return res.data
       })
       .catch(error => {
-        setInterval(setLoading(false), 500)
+        setInterval(setLoading(false), 1000)
         stackError({ message: error, height: 400 })
         throw error
       })
