@@ -10,7 +10,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -60,6 +60,10 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
+          cellPhone: RTBEN?.record?.cellPhone,
+          birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
+          cobId: RTBEN?.record?.cobId,
+          shortName: RTBEN?.record?.shortName,
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
 
@@ -72,9 +76,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           swiftCode: RTBEB?.record?.swiftCode,
           branchCode: RTBEB?.record?.branchCode,
           branchName: RTBEB?.record?.branchName,
-          nationalityId: RTBEB?.record?.nationalityId,
-          stateId: RTBEB?.record?.stateId,
-          cityId: RTBEB?.record?.cityId,
+          state: RTBEB?.record?.state,
+          city: RTBEB?.record?.city,
           zipcode: RTBEB?.record?.zipcode,
           remarks: RTBEB?.record?.remarks
         }
@@ -96,6 +99,10 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
+    cellPhone: '',
+    birthDate: null,
+    cobId: '',
+    shortName: '',
     addressLine1: '',
     addressLine2: '',
 
@@ -108,9 +115,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     swiftCode: '',
     branchCode: '',
     branchName: '',
-    nationalityId: '',
-    stateId: '',
-    cityId: '',
+    state: '',
+    city: '',
     zipcode: '',
     remarks: ''
   })
@@ -131,9 +137,13 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         name: values.name,
         dispersalType: values.dispersalType,
         isBlocked: values.isBlocked,
-        stoppedDate: values.stoppedDate,
+        stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
         stoppedReason: values.stoppedReason,
         nationalityId: values.nationalityId,
+        cellPhone: values.cellPhone,
+        birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+        cobId: values.cobId,
+        shortName: values.shortName,
         addressLine1: values.addressLine1,
         addressLine2: values.addressLine2
       }
@@ -149,8 +159,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         swiftCode: values.swiftCode,
         branchCode: values.branchCode,
         branchName: values.branchName,
-        cityId: values.cityId,
-        stateId: values.stateId,
+        city: values.city,
+        state: values.state,
         zipcode: values.zipcode
       }
       const data = { header: header, beneficiaryBank: bankInfo }
@@ -229,6 +239,36 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
+            <CustomDatePicker
+              name='birthDate'
+              label={_labels.birthDate}
+              value={formik.values?.birthDate}
+              onChange={formik.setFieldValue}
+              onClear={() => formik.setFieldValue('birthDate', '')}
+              error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
+              name='cobId'
+              label={_labels.countryOfBirth}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('cobId', newValue ? newValue.recordId : '')
+              }}
+              error={formik.touched.cobId && Boolean(formik.errors.cobId)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               datasetId={DataSets.BANK_ACCOUNT_TYPE}
               name='accountType'
@@ -289,69 +329,61 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               maxAccess={maxAccess}
               values={formik.values}
               onChange={(event, newValue) => {
-                formik.setFieldValue('stateId', null)
-                formik.setFieldValue('cityId', '')
+                formik.setFieldValue('state', '')
                 formik.setFieldValue('city', '')
-                if (newValue) {
-                  formik.setFieldValue('nationalityId', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('nationalityId', '')
-                }
+                formik.setFieldValue('nationalityId', newValue ? newValue.recordId : '')
               }}
               error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
-            <ResourceComboBox
-              endpointId={formik.values.nationalityId && SystemRepository.State.qry}
-              parameters={formik.values.nationalityId && `_countryId=${formik.values.nationalityId}`}
-              name='stateId'
+            <CustomTextField
+              name='state'
               label={_labels.state}
-              valueField='recordId'
-              displayField='name'
-              readOnly={!formik.values.nationalityId}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('stateId', newValue?.recordId)
-                formik.setFieldValue('cityId', '')
-                formik.setFieldValue('city', '')
-              }}
-              error={formik.touched.stateId && Boolean(formik.errors.stateId)}
+              value={formik.values.state}
+              onChange={formik.handleChange}
+              error={formik.touched.state && Boolean(formik.errors.state)}
               maxAccess={maxAccess}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
-            <ResourceLookup
-              endpointId={SystemRepository.City.snapshot}
-              parameters={{
-                _countryId: formik.values.nationalityId,
-                _stateId: formik.values.stateId ?? 0
-              }}
-              valueField='name'
-              displayField='name'
+            <CustomTextField
               name='city'
               label={_labels.city}
-              readOnly={!formik.values.stateId}
-              form={formik}
+              value={formik.values.city}
+              onChange={formik.handleChange}
+              error={formik.touched.city && Boolean(formik.errors.city)}
               maxAccess={maxAccess}
-              secondDisplayField={false}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('cityId', newValue?.recordId)
-                  formik.setFieldValue('city', newValue?.name)
-                } else {
-                  formik.setFieldValue('cityId', '')
-                  formik.setFieldValue('city', '')
-                }
-                formik.setFieldValue('cityDistrictId', '')
-                formik.setFieldValue('cityDistrict', '')
-              }}
-              errorCheck={'cityId'}
             />
           </FormGrid>
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
+          <FormGrid hideonempty xs={12}>
+            <CustomTextField
+              name='shortName'
+              label={_labels.shortName}
+              value={formik.values.shortName}
+              onChange={formik.handleChange}
+              maxLength='50'
+              error={formik.touched.shortName && Boolean(formik.errors.shortName)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <CustomTextField
+              name='cellPhone'
+              label={_labels.cellPhone}
+              value={formik.values?.cellPhone}
+              phone={true}
+              onChange={formik.handleChange}
+              maxLength='20'
+              autoComplete='off'
+              onClear={() => formik.setFieldValue('cellPhone', '')}
+              error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
           <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               datasetId={DataSets.GENDER}
@@ -363,6 +395,7 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               onChange={(event, newValue) => {
                 if (newValue) {
                   formik.setFieldValue('gender', newValue?.key)
+                  console.log('check gender ', newValue.key)
                 } else {
                   formik.setFieldValue('gender', '')
                 }

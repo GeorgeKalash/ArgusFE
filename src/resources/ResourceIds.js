@@ -53,6 +53,7 @@ export const ResourceIds = {
   DRGroups: 10103,
   ClientMaster: 36201,
   ClientList: 35201,
+  UpdateClientRemittance: 36204,
   Characteristics: 10102,
   Strategies: 10106,
   Classes: 10101,
@@ -111,5 +112,6 @@ export const ResourceIds = {
   CorrespondentControl: 36119,
   CashTransfer: 33309,
   InstantCash: 36306,
-  GlobalAuthorization: 23105
+  GlobalAuthorization: 23105,
+  InterfaceMap: 36120
 }

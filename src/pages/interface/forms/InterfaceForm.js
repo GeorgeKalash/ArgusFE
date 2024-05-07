@@ -13,7 +13,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import Numberfield from 'src/components/Shared/DataGrid/components/numberfield'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function InterfaceForm({ labels, recordId, maxAccess }) {

@@ -3,25 +3,23 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import IdTypesForm from '../forms/IdTypesForm'
 import IdFieldsForm from '../forms/IdFieldsForm'
+import { InterfacesForm } from 'src/components/Shared/InterfacesForm'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-const IdTypesWindow = ({
-  height,
-  recordId,
-  labels,
-  maxAccess,
-  expanded
-}) => {
-  const [activeTab , setActiveTab] = useState(0)
+const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+  const [activeTab, setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
-  const [store , setStore] = useState({
-    recordId : recordId || null,
+  const [store, setStore] = useState({
+    recordId: recordId || null,
     IdField: null,
+    name: ''
   })
 
   const tabs = [
     { label: labels.main },
     { label: labels.idFields, disabled: !store.recordId },
+    { label: labels.interface, disabled: !store.recordId }
   ]
 
   return (
@@ -46,6 +44,15 @@ const IdTypesWindow = ({
           height={height}
           expanded={expanded}
           editMode={editMode}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={2} value={activeTab}>
+        <InterfacesForm
+          recordId={store.recordId}
+          resourceId={ResourceIds.IdTypes}
+          name={store.name}
+          expanded={expanded}
+          height={height}
         />
       </CustomTabPanel>
     </>
