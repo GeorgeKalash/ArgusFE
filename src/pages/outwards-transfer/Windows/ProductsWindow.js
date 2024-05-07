@@ -20,6 +20,11 @@ const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) =>
       flex: 1
     },
     {
+      field: 'interfaceName',
+      headerName: labels.interface,
+      flex: 1
+    },
+    {
       field: 'dispersalRef',
       headerName: labels.DispersalRef,
       flex: 1
