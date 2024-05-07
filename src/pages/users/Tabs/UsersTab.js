@@ -57,14 +57,12 @@ const UsersTab = ({
             onClear={() => usersValidation.setFieldValue('username', '')}
             error={usersValidation.touched.username && Boolean(usersValidation.errors.username)}
             helperText={usersValidation.touched.username && usersValidation.errors.username}
-            //Manually checking the entered value against the regular expression & enforcing the validation logic
             onChange={e => {
               const inputValue = e.target.value
               if (/^[a-zA-Z0-9_.-@]*$/.test(inputValue)) {
                 usersValidation.handleChange(e)
               }
             }}
-            // The onBlur event is triggered when the user leaves the input field, either by clicking outside of it or using the tab key.
             onBlur={e => {
               if (!editMode && e.target.value != '') {
                 checkFieldDirect(e.target.value)
