@@ -21,6 +21,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useError } from 'src/error'
 
 export default function JournalVoucherForm({ labels, maxAccess, recordId, general = {} }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -28,6 +29,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
   const [responseValue, setResponseValue] = useState(null)
   const { reference, dtId, dcTypeRequired } = general
   const [referenceBhv, setReferenceBhv] = useState(false)
+  const { stack: stackError } = useError()
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -142,7 +144,9 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
               formik.setFieldValue('dtId', newValue?.recordId)
 
               const ref = await documentType(getRequest, SystemFunction.JournalVoucher, newValue?.nraId)
-              setReferenceBhv(ref.reference)
+              if (ref.errorMessage) {
+                stackError({ message: ref.errorMessage })
+              } else setReferenceBhv(ref.reference)
             }}
             error={formik.touched.dtId && Boolean(formik.errors.dtId)}
             helperText={formik.touched.dtId && formik.errors.dtId}
