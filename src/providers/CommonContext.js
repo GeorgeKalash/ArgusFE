@@ -30,7 +30,6 @@ const CommonProvider = ({ children }) => {
       })
       .catch(error => {
         stackError({ message: error, height: 400 })
-        throw error
       })
   }
 
@@ -47,7 +46,6 @@ const CommonProvider = ({ children }) => {
       })
       .catch(error => {
         stackError({ message: error, height: 400 })
-        throw error
       })
   }
 
