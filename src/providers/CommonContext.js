@@ -2,20 +2,17 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // ** Custom Imports
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AuthContext } from 'src/providers/AuthContext'
-import { useError } from 'src/error'
 
 const CommonContext = createContext()
 
 const CommonProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
-  const { user } = useContext(AuthContext)
-  const { stack: stackError } = useError() || {}
+  const { user, setUser } = useContext(AuthContext)
 
   const fillDocumentTypeStore = ({ _startAt = 0, _pageSize = 30, _dgId = 0, callback }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
@@ -28,9 +25,7 @@ const CommonProvider = ({ children }) => {
       .then(res => {
         callback(res.list)
       })
-      .catch(error => {
-        stackError({ message: error, height: 400 })
-      })
+      .catch(error => {})
   }
 
   const getAllKvsByDataset = ({ _dataset = 0, callback }) => {
@@ -38,15 +33,13 @@ const CommonProvider = ({ children }) => {
     var parameters = `_dataset=${_dataset}&_language=${_language}`
 
     getRequest({
-      extension: SystemRepository.KeyValueStore,
+      extension: SystemRepository.KeyValueStores,
       parameters: parameters
     })
       .then(res => {
         callback(res.list)
       })
-      .catch(error => {
-        stackError({ message: error, height: 400 })
-      })
+      .catch(error => {})
   }
 
   const values = {
