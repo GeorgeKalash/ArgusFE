@@ -145,7 +145,6 @@ const BPMasterData = () => {
         recordId: recordId ? recordId : null
       },
       width: 1200,
-      height: 600,
       title: _labels.masterData
     })
   }

@@ -7,6 +7,7 @@ import { useWindow } from 'src/windows'
 import ProductDispersalForm from './productDispersalForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
   const { recordId: pId } = store
@@ -103,10 +104,11 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
   }
 
   return (
-    <>
       <VertLayout>
-        <Grow>
+        <Fixed>
           <GridToolbar onAdd={add} maxAccess={maxAccess} />
+        </Fixed>
+        <Grow>
           <Table
             columns={columns}
             gridData={gridData}
@@ -120,7 +122,6 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
           />
         </Grow>
       </VertLayout>
-    </>
   )
 }
 

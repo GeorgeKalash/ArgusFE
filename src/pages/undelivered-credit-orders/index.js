@@ -15,6 +15,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const UndeliveredCreditOrder = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -87,7 +88,7 @@ const UndeliveredCreditOrder = () => {
 
   return (
     <VertLayout>
-      <div style={{ display: 'flex' }}>
+      <Fixed>
         <GridToolbar
           maxAccess={access}
           onSearch={value => {
@@ -99,7 +100,7 @@ const UndeliveredCreditOrder = () => {
           labels={labels}
           inputSearch={true}
         >
-          <Box sx={{ display: 'flex', width: '350px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Box sx={{ display: 'flex', width: '350px', pt: 2, pl: 2 }}>
             <ResourceComboBox
               endpointId={RemittanceSettingsRepository.Correspondent.qry}
               label={labels.correspondent}
@@ -119,7 +120,7 @@ const UndeliveredCreditOrder = () => {
             />
           </Box>
         </GridToolbar>
-      </div>
+      </Fixed>
       <Grow>
         <Table
           columns={[

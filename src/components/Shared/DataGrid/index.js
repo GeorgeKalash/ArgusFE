@@ -260,7 +260,7 @@ export function DataGrid({
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
-        autoHeight={height ? false : true}
+        autoHeight={false}
         columnResizable={false}
         disableColumnFilter
         disableColumnMenu

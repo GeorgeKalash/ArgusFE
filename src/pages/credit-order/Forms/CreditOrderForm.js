@@ -944,7 +944,8 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                     ? '#C7F6C7'
                     : 'rgb(245, 194, 193)')
                 }
-                scrollHeight={`${expanded ? height - 430 : 200}px`}
+                  
+                // scrollHeight={`${expanded ? height - 430 : 200}px`}
               />
             </Box>
           </Grid>

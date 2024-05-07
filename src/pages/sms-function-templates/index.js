@@ -146,6 +146,8 @@ const SmsFunctionTemplate = () => {
           columns={columns}
           allowDelete={false}
           allowAddNewLine={false}
+
+          // height={300}
         />
       </Grow>
       <Fixed>

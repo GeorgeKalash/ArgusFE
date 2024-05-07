@@ -4,6 +4,9 @@ import { Box } from '@mui/material'
 // ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const SecurityGrpTab = ({
   securityGrpGridData,
@@ -23,29 +26,25 @@ const SecurityGrpTab = ({
   ]
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addSecurityGrp} maxAccess={maxAccess} />
-        <Table
-          columns={columns}
-          gridData={securityGrpGridData}
-          rowId={['sgId']}
-          api={getSecurityGrpGridData}
-          onEdit={popupSecurityGrp}
-          onDelete={delSecurityGrp}
-          isLoading={false}
-          maxAccess={maxAccess}
-          pagination={false}
-          height={300}
-        />
-      </Box>
-    </>
+    <VertLayout>
+    <Fixed>
+    <GridToolbar onAdd={addSecurityGrp} maxAccess={maxAccess} />
+    </Fixed>
+    <Grow>
+      <Table
+        columns={columns}
+        gridData={securityGrpGridData}
+        rowId={['sgId']}
+        api={getSecurityGrpGridData}
+        onEdit={popupSecurityGrp}
+        onDelete={delSecurityGrp}
+        isLoading={false}
+        maxAccess={maxAccess}
+        pagination={false}
+      />
+    </Grow>
+  </VertLayout>
+    
   )
 }
 

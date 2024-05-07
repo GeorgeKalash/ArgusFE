@@ -1,8 +1,5 @@
-// ** Custom Imports
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import Table from 'src/components/Shared/Table'
-
-// ** MUI Imports
 import { Grid, Box, Button } from '@mui/material'
 
 const RowAccessTab = ({
