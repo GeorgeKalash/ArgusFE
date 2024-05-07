@@ -33,7 +33,7 @@ const CommonProvider = ({ children }) => {
     var parameters = `_dataset=${_dataset}&_language=${_language}`
 
     getRequest({
-      extension: SystemRepository.KeyValueStores,
+      extension: SystemRepository.KeyValueStore,
       parameters: parameters
     })
       .then(res => {
