@@ -30,8 +30,9 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 import { useInvalidate } from 'src/hooks/resource'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { useError } from 'src/error'
 
-const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAccess, allowEdit = false }) => {
+const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess }) => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [showAsPassword, setShowAsPassword] = useState(false)
@@ -45,6 +46,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
   const [idTypeStore, setIdTypeStore] = useState([])
   const [otpShow, setOtpShow] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
+  const { stack: stackError } = useError()
 
   const [initialValues, setInitialData] = useState({
     //clientIDView
@@ -341,7 +343,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       })
         .then(res => {
           if (res.record) {
-            setErrorMessage('the ID number exists.')
+            stackError({ message: 'the ID number exists.' })
           }
         })
         .catch(error => {})
@@ -594,7 +596,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
           formValidation: clientIndividualFormik,
           functionId: clientIndividualFormik.values.functionId,
           setEditMode: setEditMode,
-          setErrorMessage: setErrorMessage,
           getData: getClient
         },
         width: 400,
@@ -824,7 +825,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                           props: {
                             idTypeStore: idTypeStore,
                             formik: clientIndividualFormik,
-                            setErrorMessage: setErrorMessage,
                             labels: labels
                           },
                           title: labels.fetch,
