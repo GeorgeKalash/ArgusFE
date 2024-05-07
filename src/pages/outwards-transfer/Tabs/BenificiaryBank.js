@@ -20,6 +20,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { useForm } from 'src/hooks/form'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId, corId, countryId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -60,6 +61,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
+          rtId: RTBEN?.record?.rtId,
+          rtName: RTBEN?.record.rtName,
           cellPhone: RTBEN?.record?.cellPhone,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           cobId: RTBEN?.record?.cobId,
@@ -99,6 +102,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
+    rtName: '',
+    rtId: null,
     cellPhone: '',
     birthDate: null,
     cobId: '',
@@ -134,6 +139,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
         clientId: values.clientId,
         beneficiaryId: values.beneficiaryId,
         gender: values.gender,
+        rtId: values.rtId,
+        rtName: values.rtName,
         name: values.name,
         dispersalType: values.dispersalType,
         isBlocked: values.isBlocked,
@@ -404,6 +411,22 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               error={formik.touched.gender && Boolean(formik.errors.gender)}
               helperText={formik.touched.gender && formik.errors.gender}
             />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
+                name='rtId'
+                label={_labels.relationType}
+                displayField='name'
+                valueField='recordId'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
+                }}
+                error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+              />
+            </Grid>
           </FormGrid>
           <FormGrid hideonempty xs={12}>
             <CustomTextField
