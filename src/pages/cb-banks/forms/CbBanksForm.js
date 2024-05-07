@@ -43,8 +43,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
     validationSchema: yup.object({
       name: yup.string().required(' '),
       reference: yup.string().required(' '),
-      swiftCode: yup.number(),
-      countryId: yup.string().required(' ')
+      swiftCode: yup.number()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -138,7 +137,7 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
           <ResourceComboBox
             endpointId={SystemRepository.Country.qry}
             name='countryId'
-            label={labels.countryName}
+            label={labels.Country}
             valueField='recordId'
             displayField={['reference', 'name', 'flName']}
             columnsInDropDown={[
