@@ -15,20 +15,13 @@ const RequestsProvider = ({ children }) => {
   const { stack: stackError } = useError() || {}
   const [loading, setLoading] = useState(0)
 
-  const incrementLoading = () => {
-    setLoading(prevLoading => prevLoading + 1)
-  }
-
-  const decrementLoading = () => {
-    setLoading(prevLoading => Math.max(prevLoading - 1, 0))
-  }
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
 
-    incrementLoading() // Increment loading counter before making request
+    setLoading(true)
 
     return axios({
       method: 'GET',
@@ -40,12 +33,12 @@ const RequestsProvider = ({ children }) => {
       }
     })
       .then(res => {
-        decrementLoading() // Decrement loading counter after request completes
+        setInterval(setLoading(false), 500)
 
         return res.data
       })
       .catch(error => {
-        decrementLoading() // Decrement loading counter if an error occurs
+        setInterval(setLoading(false), 500)
         stackError({ message: error, height: 400 })
         throw error
       })
