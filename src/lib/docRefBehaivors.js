@@ -30,6 +30,11 @@ const fetchData = async (getRequest, id, repository) => {
       parameters = `_recordId=${id}`
       extension = SystemRepository.SystemFunction.get
       break
+    case 'DocumentType': //get numberRange  if no dtId
+      parameters = `_recordId=${id}`
+      extension = SystemRepository.DocumentType.qry
+
+      break
     case 'DcTypNumberRange': //get numberRange if user has dtId
       parameters = `_recordId=${id}`
       extension = SystemRepository.DocumentType.get
@@ -57,6 +62,7 @@ const reference = async (getRequest, functionId) => {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
     } else {
+      const dcTypNumberRange = await fetchData(getRequest, dtId, 'DocumentType') //DT
     }
   } else {
     if (!dtId) {
