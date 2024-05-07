@@ -69,7 +69,7 @@ const RelationTypes = () => {
       },
       width: 600,
       height: 600,
-      title: _labels.idTypes
+      title: _labels.RelationTypes
     })
   }
 

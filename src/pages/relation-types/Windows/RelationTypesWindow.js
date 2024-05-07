@@ -1,4 +1,3 @@
-import Window from 'src/components/Shared/Window'
 import RelationTypesForm from '../forms/RelationTypesForm'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
