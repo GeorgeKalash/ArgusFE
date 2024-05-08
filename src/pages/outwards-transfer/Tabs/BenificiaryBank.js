@@ -1,18 +1,15 @@
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useEffect, useContext, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -21,6 +18,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { useForm } from 'src/hooks/form'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 
 export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId, corId, countryId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -71,10 +69,10 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
           addressLine2: RTBEN?.record?.addressLine2,
 
           //RTBEB
+          bankId: RTBEB?.record?.bankId,
           accountRef: RTBEB?.record?.accountRef,
           accountType: RTBEB?.record?.accountType,
           IBAN: RTBEB?.record?.IBAN,
-          bankName: RTBEB?.record?.bankName,
           routingNo: RTBEB?.record?.routingNo,
           swiftCode: RTBEB?.record?.swiftCode,
           branchCode: RTBEB?.record?.branchCode,
@@ -112,10 +110,10 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     addressLine2: '',
 
     //RTBEB
+    bankId: null,
     accountRef: '',
     accountType: '',
     IBAN: '',
-    bankName: '',
     routingNo: '',
     swiftCode: '',
     branchCode: '',
@@ -132,7 +130,8 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' ')
+      name: yup.string().required(' '),
+      bankId: yup.string().required(' ')
     }),
     onSubmit: async values => {
       const header = {
@@ -156,12 +155,12 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
       }
 
       const bankInfo = {
+        bankId: values.bankId,
         clientId: values.clientId,
         beneficiaryId: values.beneficiaryId,
         accountRef: values.accountRef,
         accountType: values.accountType,
         IBAN: values.IBAN,
-        bankName: values.name,
         routingNo: values.routingNo,
         swiftCode: values.swiftCode,
         branchCode: values.branchCode,
@@ -210,6 +209,27 @@ export default function BenificiaryBank({ clientId, dispersalType, beneficiaryId
               maxAccess={maxAccess}
             />
           </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <ResourceComboBox
+              endpointId={countryId && CashBankRepository.CbBank.qry2}
+              parameters={countryId && `_countryId=${countryId}`}
+              name='bankId'
+              label={_labels.bank}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              maxAccess={maxAccess}
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('bankId', newValue ? newValue.recordId : '')
+              }}
+              error={formik.touched.bankId && Boolean(formik.errors.bankId)}
+            />
+          </FormGrid>
+
           <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='accountRef'
