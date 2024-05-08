@@ -94,8 +94,8 @@ const WindowToolbar = ({
   const handleButtonMouseLeave = () => {
     setShowToast(false)
   }
-  
-return (
+
+  return (
     <DialogActions>
       <style>
         {`
@@ -122,7 +122,16 @@ return (
           }
         `}
       </style>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flex: '0', paddingTop:4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          flex: '0',
+          paddingTop: 4
+        }}
+      >
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Autocomplete
@@ -168,7 +177,7 @@ return (
               isVisible && (
                 <div
                   className='button-container'
-                  onMouseEnter={() => isDisabled? null : handleButtonMouseEnter(button.key)}
+                  onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.key))}
                   onMouseLeave={handleButtonMouseLeave}
                   key={index}
                 >
@@ -209,7 +218,7 @@ return (
               isVisible && (
                 <div
                   className='button-container'
-                  onMouseEnter={() => isDisabled? null : handleButtonMouseEnter(button.key)}
+                  onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.key))}
                   onMouseLeave={handleButtonMouseLeave}
                   key={index}
                 >

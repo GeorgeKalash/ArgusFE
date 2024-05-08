@@ -83,7 +83,6 @@ const Approvals = props => {
         />
       </Grow>
     </VertLayout>
-     
   )
 }
 

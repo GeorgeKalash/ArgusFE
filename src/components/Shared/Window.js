@@ -16,7 +16,6 @@ import { useSettings } from 'src/@core/hooks/useSettings'
 
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
-import { padding } from '@mui/system'
 
 const Window = ({
   children,
@@ -63,8 +62,7 @@ const Window = ({
   const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '68px' : '300px'})`
   const containerHeight = `calc(calc(100 * var(--vh)) - 48px)`
   const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
-  const heightPanel = height- 120
-
+  const heightPanel = height - 120
 
   useEffect(() => {
     const transactionLogInfo = document.querySelector('[data-unique-id]')
@@ -85,7 +83,7 @@ const Window = ({
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'center'
       }}
     >
       <Draggable
@@ -100,7 +98,7 @@ const Window = ({
       >
         <Box sx={{ position: 'relative' }}>
           <Paper
-            sx={{ 
+            sx={{
               ...(controlled
                 ? {
                     height: expanded ? containerHeight : height // Expand height to 100% when expanded
@@ -159,9 +157,7 @@ const Window = ({
             )}
             {!controlled ? (
               <>
-                <DialogContent sx={{ p: 0}}>
-                  {children}
-                </DialogContent>
+                <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
                 {windowToolbarVisible && (
                   <WindowToolbar
                     onSave={onSave}

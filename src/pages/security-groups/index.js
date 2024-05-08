@@ -347,6 +347,7 @@ const SecurityGroup = () => {
         <GroupInfoWindow
           onClose={() => setWindowOpen(false)}
           width={700}
+          height={400}
           onSave={handleSubmit}
           labels={_labels}
           maxAccess={access}
