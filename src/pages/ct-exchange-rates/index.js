@@ -320,7 +320,7 @@ const CTExchangeRates = () => {
 
   return (
     <VertLayout>
-      <Fixed>
+      <Grow>
         <CustomTabPanel index={0} value={0}>
           <Grid container>
             <Grid container xs={12} spacing={2}>
@@ -428,18 +428,16 @@ const CTExchangeRates = () => {
                     </Button>
                   </Grid>
                   {formik.values.currencyId != null && formik.values.puRateTypeId != null && (
-                    <Grow>
-                      <Grid xs={12} sx={{ pt: 2 }}>
-                        <DataGrid
-                          onChange={value => puFormik.setFieldValue('rows', value)}
-                          value={puFormik.values.rows}
-                          error={puFormik.errors.rows}
-                          columns={exchangeRatesInlineGridColumns}
-                          allowDelete={false}
-                          allowAddNewLine={false}
-                        />
-                      </Grid>
-                    </Grow>
+                    <Grid xs={12} sx={{ pt: 2 }}>
+                      <DataGrid
+                        onChange={value => puFormik.setFieldValue('rows', value)}
+                        value={puFormik.values.rows}
+                        error={puFormik.errors.rows}
+                        columns={exchangeRatesInlineGridColumns}
+                        allowDelete={false}
+                        allowAddNewLine={false}
+                      />
+                    </Grid>
                   )}
                 </FieldSet>
               </Grid>
@@ -483,18 +481,16 @@ const CTExchangeRates = () => {
                     </Button>
                   </Grid>
                   {formik.values.currencyId != null && formik.values.saRateTypeId != null && (
-                    <Grow>
-                      <Grid xs={12} sx={{ pt: 2 }}>
-                        <DataGrid
-                          onChange={value => saFormik.setFieldValue('rows', value)}
-                          value={saFormik.values.rows}
-                          error={saFormik.errors.rows}
-                          columns={exchangeRatesInlineGridColumns}
-                          allowDelete={false}
-                          allowAddNewLine={false}
-                        />
-                      </Grid>
-                    </Grow>
+                    <Grid xs={12} sx={{ pt: 2 }}>
+                      <DataGrid
+                        onChange={value => saFormik.setFieldValue('rows', value)}
+                        value={saFormik.values.rows}
+                        error={saFormik.errors.rows}
+                        columns={exchangeRatesInlineGridColumns}
+                        allowDelete={false}
+                        allowAddNewLine={false}
+                      />
+                    </Grid>
                   )}
                 </FieldSet>
               </Grid>
@@ -514,8 +510,7 @@ const CTExchangeRates = () => {
             <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
           </Grid>
         </CustomTabPanel>
-      </Fixed>
-
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )

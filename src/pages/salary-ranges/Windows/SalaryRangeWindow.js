@@ -6,7 +6,14 @@ import SalaryRangeForm from 'src/pages/salary-ranges/forms/SalaryRangeForm'
 const SalaryRangeWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
     <>
-      <Window id='SalaryRangeWindow' Title={labels.salaryRange} controlled={true} onClose={onClose} width={500}>
+      <Window
+        id='SalaryRangeWindow'
+        Title={labels.salaryRange}
+        controlled={true}
+        onClose={onClose}
+        width={500}
+        height={400}
+      >
         <SalaryRangeForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
       </Window>
     </>

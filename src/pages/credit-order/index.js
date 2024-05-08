@@ -148,7 +148,7 @@ const CreditOrder = () => {
   return (
     <VertLayout>
       <Fixed>
-      <GridToolbar
+        <GridToolbar
           maxAccess={access}
           onAdd={add}
           onSearch={search}
@@ -158,7 +158,7 @@ const CreditOrder = () => {
         />
       </Fixed>
       <Grow>
-      <Table
+        <Table
           columns={[
             {
               field: 'reference',
