@@ -17,7 +17,6 @@ import { formatDateDefault } from 'src/lib/date-helper'
 
 // ** Windows
 import JournalVoucherWindow from './Windows/JournalVoucherWindow'
-import DeleteConfirmation from 'src/components/Shared/DeleteConfirmation'
 
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
@@ -25,8 +24,6 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindow } from 'src/windows'
-import { Expand } from '@mui/icons-material'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -36,8 +33,6 @@ const JournalVoucher = () => {
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-
-  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
