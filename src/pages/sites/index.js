@@ -123,6 +123,7 @@ const Sites = () => {
           onSearchClear={clear}
           labels={_labels}
           inputSearch={true}
+          previewReport={ResourceIds.Sites}
         />
         <Table
           columns={columns}

@@ -1,11 +1,17 @@
 // ** MUI Imports
-import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Grid, Tooltip, Typography, Autocomplete, DialogActions, TextField } from '@mui/material'
+
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
-import { useState } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
+
+import PreviewReport from './PreviewReport'
+import { useWindow } from 'src/windows'
 
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const GridToolbar = ({
   initialLoad,
@@ -20,12 +26,48 @@ const GridToolbar = ({
   inputSearch,
   search,
   onSearch,
+
+  previewReport,
   onSearchClear,
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const addBtnVisible = onAdd && maxAccess > TrxType.GET
   const [searchValue, setSearchValue] = useState('')
+  const { getRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const [selectedReport, setSelectedReport] = useState(null)
+  const [reportStore, setReportStore] = useState([])
+
+  const getReportLayout = () => {
+    setReportStore([])
+    if (previewReport) {
+      var parameters = `_resourceId=${previewReport}`
+      getRequest({
+        extension: SystemRepository.ReportLayout,
+        parameters: parameters
+      })
+        .then(res => {
+          if (res?.list)
+            setReportStore(
+              res.list.map(item => ({
+                api_url: item.api,
+                reportClass: item.instanceName,
+                parameters: item.parameters,
+                layoutName: item.layoutName,
+                assembly: 'ArgusRPT.dll'
+              }))
+            )
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    }
+  }
+
+  useEffect(() => {
+    getReportLayout()
+  }, [])
 
   const formatDataForApi = paramsArray => {
     const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
@@ -61,6 +103,7 @@ const GridToolbar = ({
             </Tooltip>
           </Box>
         )}
+
         {inputSearch && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2, zIndex: 0 }}>
             <CustomTextField
@@ -105,6 +148,45 @@ const GridToolbar = ({
             })}
           </Grid>
         </Box>
+      )}
+      {previewReport ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', paddingRight: '2rem' }}>
+          <Autocomplete
+            size='small'
+            options={reportStore}
+            value={selectedReport}
+            getOptionLabel={option => option.layoutName || option.caption || ''}
+            onChange={(e, newValue) => setSelectedReport(newValue)}
+            renderInput={params => (
+              <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
+            )}
+            sx={{ width: 250 }}
+            disableClearable
+          />
+          <Button
+            sx={{ ml: 2 }}
+            variant='contained'
+            disabled={!selectedReport}
+            onClick={() =>
+              stack({
+                Component: PreviewReport,
+                props: {
+                  selectedReport: selectedReport
+                },
+                width: 1000,
+                height: 500,
+                title: 'Preview Report'
+              })
+            }
+            size='small'
+          >
+            <Tooltip title='Preview'>
+              <img src='/images/buttonsIcons/preview.png' alt='Preview' />
+            </Tooltip>
+          </Button>
+        </Box>
+      ) : (
+        <Box></Box>
       )}
     </Box>
   )
