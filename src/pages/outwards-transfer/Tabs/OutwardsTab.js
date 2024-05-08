@@ -6,7 +6,6 @@ import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
-import ReferenceDialog from 'src/components/ReferenceDialog'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -43,7 +42,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   const [editMode, setEditMode] = useState(!!recordId)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
-  const [instantReference, setInstantReference] = useState('')
   const [confirmationWindowOpen, setConfirmationWindowOpen] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -288,7 +286,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     if (res?.recordId) {
       toast.success('Record Posted Successfully')
       setConfirmationWindowOpen(true)
-      setInstantReference(res.recordId)
+      formik.setFieldValue('ttNo', res.recordId)
       invalidate()
       setIsPosted(true)
     }
@@ -311,6 +309,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       checked: 'false',
       exRate2: '',
       interfaceId: '',
+      interfaceName: '',
       valueDays: ''
     },
     enableReinitialize: true,
@@ -388,8 +387,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }
   }
 
-  const fillAmountGridData = async (cash, header) => {
-    const modifiedList = cash.map((item, index) => ({
+  const fillFormData = async data => {
+    const modifiedList = data.cash.map((item, index) => ({
       ...item,
       id: index + 1,
       bankFees: item.bankFees ? parseFloat(item.bankFees).toFixed(2) : null,
@@ -397,7 +396,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     }))
 
     formik.setValues({
-      ...header,
+      ...data.headerView,
+      ttNo: data.ttNo,
       amountRows: modifiedList
     })
   }
@@ -584,7 +584,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           res.record.checked = true
           getClientInfo(res.record.headerView.clientId)
-          fillAmountGridData(res.record.cash, res.record.headerView)
+          fillFormData(res.record)
           productDataFill(res.record.headerView)
         }
         getDefaultVAT()
@@ -595,11 +595,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
   return (
     <>
-      <ReferenceDialog
-        DialogText={`Instant Cash Referenece: ${instantReference} `}
-        okButtonAction={() => setConfirmationWindowOpen(false)}
-        openCondition={confirmationWindowOpen}
-      />
       <FormShell
         resourceId={ResourceIds.OutwardsTransfer}
         form={formik}
