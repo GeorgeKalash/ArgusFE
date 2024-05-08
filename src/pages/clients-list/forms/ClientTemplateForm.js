@@ -39,7 +39,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useError } from 'src/error'
 
-const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess }) => {
+const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [showAsPassword, setShowAsPassword] = useState(false)
