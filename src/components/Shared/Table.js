@@ -318,7 +318,7 @@ const Table = ({
         const isWIP = row.wip === 2
 
         return (
-          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center'}}>
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
               <IconButton size='small' onClick={() => props.onEdit(params.row)}>
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
@@ -441,6 +441,7 @@ const Table = ({
                 </PaginationContainer> */}
           </TableContainer>
           <DeleteDialog
+            fullScreen={false}
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen([false, {}])}
             onConfirm={obj => {

@@ -17,8 +17,8 @@ export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoi
 const getFormattedNumber = (value, decimal) => {
   if (!value) return
 
-  // Remove non-numeric and non-decimal characters
-  const sanitizedValue = value.toString().replace(/[^0-9.]/g, '')
+  // Remove non-numeric and non-decimal characters (but preserving minus sign for negative numbers)
+  const sanitizedValue = value.toString().replace(/[^0-9.-]/g, '')
 
   // Split the value into integer and decimal parts
   const [integerPart, decimalPart] = sanitizedValue.split('.')

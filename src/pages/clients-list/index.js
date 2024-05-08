@@ -11,19 +11,15 @@ import { formatDateDefault } from 'src/lib/date-helper'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
 import { useResourceQuery } from 'src/hooks/resource'
+import { useError } from 'src/error'
 
 const ClientsList = () => {
   const { stack } = useWindow()
-
-  //control
   const { getRequest } = useContext(RequestsContext)
-
-  //error
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack: stackError } = useError()
 
   const {
     query: { data },
@@ -41,8 +37,6 @@ const ClientsList = () => {
     }
   })
   async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
     return (
       filters.qry &&
       (await getRequest({
@@ -104,18 +98,6 @@ const ClientsList = () => {
       flex: 1,
       editable: false,
       valueGetter: ({ row }) => formatDateDefault(row?.expiryDate)
-    },
-    {
-      field: 'otp',
-      headerName: labels.otp,
-      flex: 1,
-      editable: false
-    },
-    {
-      field: 'wipName',
-      headerName: labels.wipName,
-      flex: 1,
-      editable: false
     }
   ]
 
@@ -123,7 +105,6 @@ const ClientsList = () => {
     stack({
       Component: ClientTemplateForm,
       props: {
-        setErrorMessage: setErrorMessage,
         labels: labels,
         maxAccess: access,
         recordId: recordId ? recordId : null,
@@ -142,7 +123,9 @@ const ClientsList = () => {
       if (plantId !== '') {
         openForm('', plantId)
       } else {
-        setErrorMessage({ error: 'The user does not have a default plant' })
+        stackError({
+          message: 'The user does not have a default plant'
+        })
       }
     } catch (error) {}
   }
@@ -164,11 +147,7 @@ const ClientsList = () => {
       }
 
       return ''
-    } catch (error) {
-      setErrorMessage(error)
-
-      return ''
-    }
+    } catch (error) {}
   }
 
   const editClient = obj => {
@@ -207,9 +186,6 @@ const ClientsList = () => {
           pageSize={50}
           paginationType='client'
         />
-        {errorMessage?.error && (
-          <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-        )}{' '}
       </Box>
     </>
   )

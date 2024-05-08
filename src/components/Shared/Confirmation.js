@@ -42,7 +42,6 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
         .oneOf([yup.ref('idNo'), null], 'Number must match')
     }),
     onSubmit: values => {
-      console.log(values)
       postFetchDefault(values)
     }
   })

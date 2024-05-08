@@ -25,9 +25,8 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     recordId: null,
     name: '',
     reference: '',
-    flName:'',
-    industry:''
-
+    flName: '',
+    industry: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,7 +34,7 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
   //const editMode = !!recordId
 
   const invalidate = useInvalidate({
-    endpointId:CurrencyTradingSettingsRepository.Activity.qry
+    endpointId: CurrencyTradingSettingsRepository.Activity.qry
   })
 
   const formik = useFormik({
@@ -43,9 +42,9 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required('This field is required'),
-      reference: yup.string().required('This field is required'),
-      industry:yup.string().required('This field is required')
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      industry: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -58,8 +57,8 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
       if (!recordId) {
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -89,13 +88,7 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Activity}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.Activity} form={formik} height={300} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
@@ -130,30 +123,33 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
             value={formik.values.flName}
             rows={2}
             maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('flName', newValue?.flName || '')
+            }}
+            onClear={() => formik.setFieldValue('flName', '')}
             error={formik.touched.flName && Boolean(formik.errors.flName)}
-          
           />
         </Grid>
         <Grid item xs={12}>
-        <ResourceComboBox
-              datasetId={DataSets.INDUSTRY}
-              name='industry'
-              label={labels.indId}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              required
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('industry', newValue?.key)
-              }}
-              error={formik.touched.industry && Boolean(formik.errors.industry)}
-            />
+          <ResourceComboBox
+            datasetId={DataSets.INDUSTRY}
+            name='industry'
+            label={labels.indId}
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            required
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setValues({
+                ...formik.values,
+                industry: newValue?.key || ''
+              })
+            }}
+            error={formik.touched.industry && Boolean(formik.errors.industry)}
+          />
         </Grid>
       </Grid>
     </FormShell>
   )
 }
-
