@@ -36,6 +36,7 @@ import { useRouter } from 'next/router';
 import { MenuContext } from 'src/providers/MenuContext';
 
 import { useAuth } from 'src/hooks/useAuth'
+import button from 'src/components/Shared/DataGrid/components/button';
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   top: 60,
@@ -67,6 +68,7 @@ const Navigation = props => {
 
   // ** States
   // const [navHover, setNavHover] = useState(false)
+  const [isShrunk, setIsShrunk] = useState(false);
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
   const [filteredMenu, setFilteredMenu] = useState([]) //menu
   const [openFolders, setOpenFolders] = useState([]);
@@ -236,11 +238,6 @@ const Navigation = props => {
     setFilteredMenu(props.verticalNavItems)
   }, [props.verticalNavItems])
 
-  // useEffect(() => {
-  //   if (navCollapsed)
-  //     setOpenFolders([])
-  // }, [navCollapsed])
-
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 
   return (
@@ -257,27 +254,46 @@ const Navigation = props => {
           <StyledBoxForShadow ref={shadowRef} />
         )}
         <Box sx={{ display: 'flex', alignItems: 'center', px: 4, pb:'10px' }}>
-          <TextField
-            label="Search"
-            variant="outlined"
+        <TextField
+            label='Search'
+            variant='outlined'
             fullWidth
-            size="small"
+            size='small'
             onChange={handleSearch}
             autoComplete='off'
+            onFocus={() => setIsShrunk(true)}
+            onBlur={() => setIsShrunk(false)}
             InputLabelProps={{
-              sx: { color: 'rgba(231, 227, 252, 0.87) !important',backgroundColor:'#383838',padding:'0px 3px !important',
-              display:  navCollapsed ? 'none':'flex',},
+              sx: {
+                color: 'rgba(231, 227, 252, 0.87) !important',
+                backgroundColor: '#383838',
+                display: navCollapsed ? 'none' : 'flex',
+                height: '20px',
+                fontSize: 15,
+                ...(isShrunk ? {
+                  paddingTop: '2px',
+                  marginTop: '0px',
+                  paddingX:'2px'
+                } : {
+                  paddingTop: '0',
+                  marginTop: '-5px',
+                }),
+                height: '20px',
+                fontSize: 15
+              },
             }}
             InputProps={{
-              sx: { 
+              sx: {
                 display: 'flex',
                 alignItems: navCollapsed ? 'center !important' : 'left',
                 justifyContent: navCollapsed ? 'center !important' : 'left',
                 border: '1px solid rgba(231, 227, 252, 0.87)',
                 fieldset: {
-                  borderColor: 'transparent !important', },},
-              endAdornment: <SearchIcon 
-              sx={{ border: '0px' }}  />,
+                  borderColor: 'transparent !important'
+                },
+                height: '30px'
+              },
+              endAdornment: <SearchIcon sx={{ border: '0px' }} />
             }}
           />
           <TextField sx={{display:'none'}}/>

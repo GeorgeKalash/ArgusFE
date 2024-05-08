@@ -55,21 +55,6 @@ const UserDropdown = props => {
     setAnchorEl(null)
   }
 
-  const styles = {
-    py: 2,
-    px: 4,
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    color: 'text.primary',
-    textDecoration: 'none',
-    '& svg': {
-      mr: 2,
-      fontSize: '1.375rem',
-      color: 'text.primary'
-    }
-  }
-
   const handleLogout = () => {
     logout()
     handleDropdownClose()
@@ -80,13 +65,13 @@ const UserDropdown = props => {
       <Badge
         overlap='circular'
         onClick={handleDropdownOpen}
-        sx={{ ml: 2, cursor: 'pointer' }}
+        sx={{ml: 2, cursor: 'pointer' }}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
         }}
       >
-        <Icon icon='mdi:account-circle-outline' />
+        <Icon icon='mdi:account-circle-outline' fontSize="larger"/>
       </Badge>
       <Menu
         anchorEl={anchorEl}

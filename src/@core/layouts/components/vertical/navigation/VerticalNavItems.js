@@ -60,7 +60,7 @@ const VerticalNavItems = props => {
       : null
 
     return (
-      <div key={node.id} style={{ paddingBottom: isRoot && 10,}}>
+      <div key={node.id} style={{ paddingBottom: isRoot && 5,}}>
         <div
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
           style={{display: !isFolder && navCollapsed ? 'none' : 'flex',}}
