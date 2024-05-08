@@ -1,42 +1,23 @@
-// ** React Import
 import { useEffect, useRef, useState, useContext } from 'react'
-import * as React from 'react';
-
-// ** Next Imports
-import Image from 'next/image';
-
-// ** MUI Imports
+import * as React from 'react'
 import List from '@mui/material/List'
 import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField';
-import SearchIcon from '@mui/icons-material/Search';
-import SettingsIcon from '@mui/icons-material/Settings';
-import GradeIcon from '@mui/icons-material/Grade';
+import TextField from '@mui/material/TextField'
+import SearchIcon from '@mui/icons-material/Search'
+import SettingsIcon from '@mui/icons-material/Settings'
+import GradeIcon from '@mui/icons-material/Grade'
 import { createTheme, responsiveFontSizes, styled, ThemeProvider } from '@mui/material/styles'
-
-// ** Third Party Components
 import PerfectScrollbar from 'react-perfect-scrollbar'
-
-// ** Theme Config
 import themeConfig from 'src/configs/themeConfig'
-
-// ** Component Imports
 import Drawer from './Drawer'
 import VerticalNavItems from './VerticalNavItems'
 import VerticalNavHeader from './VerticalNavHeader'
-import Dropdown from './Dropdown';
-
-// ** Theme Options
+import Dropdown from './Dropdown'
 import themeOptions from 'src/@core/theme/ThemeOptions'
-
-// ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
-
-import { useRouter } from 'next/router';
-import { MenuContext } from 'src/providers/MenuContext';
-
+import { useRouter } from 'next/router'
+import { MenuContext } from 'src/providers/MenuContext'
 import { useAuth } from 'src/hooks/useAuth'
-import button from 'src/components/Shared/DataGrid/components/button';
 
 const StyledBoxForShadow = styled(Box)(({ theme }) => ({
   top: 60,
@@ -61,26 +42,17 @@ const StyledBoxForShadow = styled(Box)(({ theme }) => ({
 const Navigation = props => {  
 
   const router = useRouter();
-  
-  // ** Props
   const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props 
   const {  setLastOpenedPage } = useContext(MenuContext)
-
-  // ** States
-  // const [navHover, setNavHover] = useState(false)
   const [isShrunk, setIsShrunk] = useState(false);
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
-  const [filteredMenu, setFilteredMenu] = useState([]) //menu
+  const [filteredMenu, setFilteredMenu] = useState([]) 
   const [openFolders, setOpenFolders] = useState([]);
-  const menu = props.verticalNavItems //menu
+  const menu = props.verticalNavItems 
   const gear = useContext(MenuContext)
   const [isArabic, setIsArabic] = useState(false)
   const auth = useAuth()
-
-  // ** Ref
   const shadowRef = useRef(null)
-
-  // ** Var
   const { navCollapsed } = settings
   const { afterVerticalNavMenuContentPosition, beforeVerticalNavMenuContentPosition } = themeConfig
 
@@ -253,7 +225,7 @@ const Navigation = props => {
         {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
           <StyledBoxForShadow ref={shadowRef} />
         )}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 4, pb:'10px' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 4, pb:'10px',pt:2 }}>
         <TextField
             label='Search'
             variant='outlined'

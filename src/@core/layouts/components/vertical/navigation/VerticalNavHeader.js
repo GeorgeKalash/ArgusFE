@@ -1,21 +1,13 @@
-// ** Next Import
 import Link from 'next/link'
-
-// ** MUI Imports
 import IconButton from '@mui/material/IconButton'
 import Box from '@mui/material/Box'
 import { styled, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-
-// ** Custom Icon Import
 import Icon from 'src/@core/components/icon'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-
-// ** Configs
 import UserDropdown from '../../shared-components/UserDropdown'
 
-// ** Styled Components
 const MenuHeaderWrapper = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -40,7 +32,6 @@ const LinkStyled = styled(Link)({
 })
 
 const VerticalNavHeader = props => {
-  // ** Props
   const {
     hidden,
     settings,
@@ -54,7 +45,6 @@ const VerticalNavHeader = props => {
     isArabic,
   } = props
 
-  // ** Hooks & Vars
   const theme = useTheme()
   const { navCollapsed } = settings
   const menuCollapsedStyles = navCollapsed ? { mb: 3 } : { mb: 0}
@@ -77,6 +67,7 @@ const VerticalNavHeader = props => {
     <MenuHeaderWrapper className='nav-header' sx={{
       pl: menuHeaderPaddingLeft(),
       display:'flex',
+      backgroundColor:'#231f20',
       flexDirection : navCollapsed ? 'column' : 'row',
     }}>
       <Box sx={{ minHeight: 40, display: 'flex', alignItems: 'center' }}>
@@ -86,10 +77,10 @@ const VerticalNavHeader = props => {
           <LinkStyled href='/'>
             <img
               src={
-                !navCollapsed ? '/images/logos/ArgusLogo.png' : '/images/logos/ArgusA.png'
+                !navCollapsed ? '/images/logos/ArgusNewLogo2.png' : '/images/logos/ArgusA.png'
               }
               alt='Argus'
-              style={{ maxHeight: '25px' }}
+              style={{ maxHeight: '20px'}}
             />
             {/* <svg
             width={30}

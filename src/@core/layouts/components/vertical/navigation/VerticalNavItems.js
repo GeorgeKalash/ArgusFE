@@ -1,18 +1,10 @@
-// ** React Imports
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
-
-// ** Next Imports
 import { useRouter } from 'next/router'
 import Image from 'next/image'
-
-// ** MUI Imports
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-
-// ** Context
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
 import { MenuContext } from 'src/providers/MenuContext'
 import { createTheme } from '@mui/system'
 import themeOptions from 'src/@core/theme/ThemeOptions'
@@ -21,8 +13,6 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 const VerticalNavItems = props => {
   const router = useRouter()
   const { handleBookmark, setLastOpenedPage } = useContext(MenuContext)
-
-  // ** Props
   const { verticalNavItems, settings, openFolders, setOpenFolders, navCollapsed,isArabic } = props
 
   const [selectedNode, setSelectedNode] = useState(false)
