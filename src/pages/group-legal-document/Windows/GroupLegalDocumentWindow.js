@@ -5,7 +5,14 @@ import GroupLegalDocumentForm from 'src/pages/group-legal-document/forms/GroupLe
 
 const GroupLegalDocumentWindow = ({ onClose, labels, maxAccess, recordId, groupId, incId }) => {
   return (
-    <Window id='GroupLegalDocumentWindow' Title={labels.groupLegalDocument} controlled={true} onClose={onClose}>
+    <Window
+      id='GroupLegalDocumentWindow'
+      Title={labels.groupLegalDocument}
+      controlled={true}
+      height={400}
+      width={600}
+      onClose={onClose}
+    >
       <CustomTabPanel>
         <GroupLegalDocumentForm
           labels={labels}

@@ -38,7 +38,14 @@ const GridToolbar = ({
   }
 
   return (
-    <Box display={'flex'} sx={{  flex:0 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%'
+      }}
+    >
       {children && children}
       <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
         {initialLoad && (

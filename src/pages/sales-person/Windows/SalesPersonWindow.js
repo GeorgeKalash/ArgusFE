@@ -19,12 +19,13 @@ const SalesPersonWindow = ({
   setActiveTab
 }) => {
   return (
-    <>
       <Window
         id='SalesPerson'
         Title={labels[1]}
         onClose={onClose}
         tabs={tabs}
+        width={600}
+        height={500}
         controlled={true}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -53,7 +54,6 @@ const SalesPersonWindow = ({
           />
         </CustomTabPanel>
       </Window>
-    </>
   )
 }
 

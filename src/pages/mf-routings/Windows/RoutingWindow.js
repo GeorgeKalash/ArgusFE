@@ -23,6 +23,8 @@ const RoutingWindow = ({
       controlled={true}
       onClose={onClose}
       tabs={tabs}
+      width={600}
+      height={500}
       activeTab={activeTab}
       setActiveTab={setActiveTab}
     >

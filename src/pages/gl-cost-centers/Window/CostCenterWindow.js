@@ -1,15 +1,7 @@
-// ** Custom Imports
 import Window from 'src/components/Shared/Window'
 import CostCenterForm from '../forms/CostCenterForm'
 
-const CostCenterWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId,
-  onSubmit
-}) => {
-  
+const CostCenterWindow = ({ onClose, labels, maxAccess, recordId, onSubmit }) => {
   return (
     <Window
       id='CostCenterWindow'
@@ -17,13 +9,9 @@ const CostCenterWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
+      height={350}
     >
-      <CostCenterForm
-        labels={labels}
-        maxAccess={maxAccess}
-        recordId={recordId}
-        onSubmit={onSubmit}
-      />
+      <CostCenterForm labels={labels} maxAccess={maxAccess} recordId={recordId} onSubmit={onSubmit} />
     </Window>
   )
 }

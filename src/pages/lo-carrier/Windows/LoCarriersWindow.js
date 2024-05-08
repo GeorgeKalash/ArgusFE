@@ -13,7 +13,7 @@ const LoCarriersWindow = ({
   setBusinessPartnerStore
 }) => {
   return (
-    <Window id='LoCarriersWindow' Title={labels.carrier} controlled={true} onClose={onClose}>
+    <Window id='LoCarriersWindow' Title={labels.carrier} controlled={true} width={500} height={500} onClose={onClose}>
       <LoCarriersForm
         labels={labels}
         maxAccess={maxAccess}

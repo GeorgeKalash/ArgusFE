@@ -1,25 +1,14 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box } from '@mui/material'
-
-// ** Third Party Imports
+import { Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -96,7 +85,7 @@ const LoDefault = () => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={5} sx={{ pl: '10px', pt: '2.4rem' }} lg={4} md={7} sm={7} xs={12}>
+        <Grid container spacing={5} sx={{ pl: '10px', pt: '1.4rem' }} lg={4} md={7} sm={7} xs={12}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={InventoryRepository.Site.qry}

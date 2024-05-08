@@ -78,8 +78,8 @@ const PriceLevels = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 600,
-      height: 500,
+      width: 500,
+      height: 350,
       title: _labels.priceLevel
     })
   }

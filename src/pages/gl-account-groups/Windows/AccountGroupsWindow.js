@@ -3,7 +3,14 @@ import AccountGroupsForm from '../forms/AccountGroupsForm'
 
 const AccountGroupsWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
-    <Window id='AccountGroupsWindow' Title={labels.accountGroup} controlled={true} onClose={onClose}>
+    <Window
+      id='AccountGroupsWindow'
+      Title={labels.accountGroup}
+      height={350}
+      width={500}
+      controlled={true}
+      onClose={onClose}
+    >
       <AccountGroupsForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )

@@ -62,7 +62,6 @@ const CustomLookup = ({
       sx={{
         position: 'relative',
         width: '100%',
-        height: '40px',
         mb: error && helperText ? 6 : 0,
         display: 'block'
       }}

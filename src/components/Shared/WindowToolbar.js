@@ -128,7 +128,6 @@ const WindowToolbar = ({
           justifyContent: 'space-between',
           alignItems: 'center',
           width: '100%',
-          flex: '0',
           paddingTop: 4
         }}
       >
@@ -147,7 +146,7 @@ const WindowToolbar = ({
               disableClearable
             />
             <Button
-              sx={{ ml: 2 }}
+              sx={{ width: 20, height: 35, ml: 1 }}
               variant='contained'
               disabled={!selectedReport}
               onClick={onGenerateReport}

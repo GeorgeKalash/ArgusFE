@@ -25,6 +25,7 @@ const CommissionScheduleWindow = ({
         controlled={true}
         onClose={onClose}
         width={600}
+        height={500}
         tabs={tabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}

@@ -14,10 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CbBank = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 

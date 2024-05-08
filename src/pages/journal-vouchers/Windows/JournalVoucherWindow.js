@@ -5,7 +5,14 @@ import JournalVoucherForm from '../forms/JournalVoucherForm'
 
 const JournalVoucherWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
-    <Window id='JournalVoucherWindow' Title={labels.generalJournal} controlled={true} onClose={onClose}>
+    <Window
+      id='JournalVoucherWindow'
+      Title={labels.generalJournal}
+      controlled={true}
+      height={500}
+      width={600}
+      onClose={onClose}
+    >
       <JournalVoucherForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )

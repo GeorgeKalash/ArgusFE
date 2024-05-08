@@ -18,7 +18,7 @@ function CustomTabPanel(props) {
       role='tabpanel'
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      sx={{display: value !== index ? 'none !important' : 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important', overflow:'auto'}}
+      sx={{display: value !== index ? 'none !important' : 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important', overflow:'auto',paddingTop:'5px'}}
       {...other}
     >
       {children}

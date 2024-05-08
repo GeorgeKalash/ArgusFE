@@ -5,7 +5,14 @@ import IdCategoryForm from '../forms/IdCategoryForm'
 
 const IdCategoriesWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
-    <Window id='IdCategoriesWindow' Title={labels.idCategory} controlled={true} onClose={onClose}>
+    <Window
+      id='IdCategoriesWindow'
+      Title={labels.idCategory}
+      height={500}
+      width={600}
+      controlled={true}
+      onClose={onClose}
+    >
       <IdCategoryForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )

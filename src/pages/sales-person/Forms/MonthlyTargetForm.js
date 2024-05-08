@@ -2,8 +2,6 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useEffect, useState, useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import FormShell from 'src/components/Shared/FormShell'
@@ -191,9 +189,9 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
     <FormShell resourceId={ResourceIds.SalesPerson} form={formik} editMode={true} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Grid container spacing={2} alignItems='center'>
+              <Grid container spacing={2}>
                 <Grid item xs={9}>
                   <ResourceComboBox
                     endpointId={SystemRepository.FiscalYears.qry}
@@ -212,13 +210,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
                     helperText={formik.touched.fiscalYear && formik.errors.fiscalYear}
                   />
                 </Grid>
-                <Grid
-                  item
-                  container
-                  alignItems='center'
-                  justifyContent='flex-start'
-                  sx={{ display: 'flex', justifyContent: 'flex-end', width: '170px' }}
-                >
+                <Grid item xs={3}>
                   <CustomTextField
                     name='targetAmount'
                     label={labels[9]}
@@ -234,8 +226,8 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={12} sx={{ pt: 2 }}>
-              <Box sx={{ width: '100%' }}>
+            <Grid item xs={12}>
+              <Box>
                 <InlineEditGrid
                   gridValidation={detailsFormik}
                   maxAccess={maxAccess}
@@ -245,28 +237,27 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
                     month: '',
                     targetAmount: ''
                   }}
-                  scrollHeight={230}
                   allowAddNewLine={false}
                   allowDelete={false}
                 />
               </Box>
             </Grid>
-            <Grid item sx={{ pt: 3, display: 'flex', justifyContent: 'flex-end', marginLeft: '560px' }}>
-              <CustomTextField
-                name='balance'
-                label={labels[14]}
-                value={getFormattedNumber(totalAmount - formik.values.targetAmount)}
-                maxAccess={maxAccess}
-                readOnly={true}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('balance', '')}
-                error={formik.touched.balance && Boolean(formik.errors.balance)}
-                helperText={formik.touched.balance && formik.errors.balance}
-                sx={{ width: '160px' }}
-                numberField={true}
-              />
+              <Grid item xs={9}></Grid>
+              <Grid item xs={3}>
+                <CustomTextField
+                  name='balance'
+                  label={labels[14]}
+                  value={getFormattedNumber(totalAmount - formik.values.targetAmount)}
+                  maxAccess={maxAccess}
+                  readOnly={true}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('balance', '')}
+                  error={formik.touched.balance && Boolean(formik.errors.balance)}
+                  helperText={formik.touched.balance && formik.errors.balance}
+                  numberField={true}
+                />
+              </Grid>
             </Grid>
-          </Grid>
         </Grow>
       </VertLayout>
     </FormShell>

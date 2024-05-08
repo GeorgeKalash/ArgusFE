@@ -5,14 +5,7 @@ import ChartOfAccountsForm from '../forms/ChartOfAccountsForm'
 
 const ChartOfAccountsWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
-    <Window
-      id='ChartOfAccountsWindow'
-      Title={labels.chartOfAccount}
-      controlled={true}
-      onClose={onClose}
-      width={500}
-      height={500}
-    >
+    <Window id='ChartOfAccountsWindow' Title={labels.chartOfAccount} controlled={true} onClose={onClose} width={500}>
       <ChartOfAccountsForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )
