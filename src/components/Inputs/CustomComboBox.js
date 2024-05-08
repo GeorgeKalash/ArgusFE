@@ -62,7 +62,7 @@ const CustomComboBox = ({
                 }
               }}
               style={{
-                position: 'absolute',
+                position: 'fixed',
                 minWidth: ref.current ? ref.current.clientWidth : 'auto',
                 transform:
                   window.innerHeight / parseFloat(zoom) - (anchorEl && anchorEl.getBoundingClientRect().bottom) < 300
