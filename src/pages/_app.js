@@ -143,19 +143,19 @@ const App = props => {
                                 <PrimeReactProvider>
                                   {getLayout(
                                     <ErrorProvider key={typeof window !== 'undefined' ? window.location.pathname : ''}>
-                                      {/* <RequestsProvider
-                                        key={typeof window !== 'undefined' ? window.location.pathname : ''}
-                                      > */}
-                                      <CommonProvider
+                                      <RequestsProvider
                                         key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                       >
-                                        <WindowProvider
+                                        <CommonProvider
                                           key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                         >
-                                          <Component {...pageProps} />
-                                        </WindowProvider>
-                                      </CommonProvider>
-                                      {/* </RequestsProvider> */}
+                                          <WindowProvider
+                                            key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                          >
+                                            <Component {...pageProps} />
+                                          </WindowProvider>
+                                        </CommonProvider>
+                                      </RequestsProvider>
                                     </ErrorProvider>
                                   )}
                                 </PrimeReactProvider>
