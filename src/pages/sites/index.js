@@ -104,11 +104,11 @@ const Sites = () => {
       Component: SitesForm,
       props: {
         labels: _labels,
-        recordId: recordId,
+        recordId: recordId ? recordId : null,
         maxAccess: access
       },
       width: 500,
-      height: 550,
+      height: 580,
       title: _labels.sites
     })
   }
