@@ -194,8 +194,8 @@ const DocumentsOnHold = () => {
         relevantComponent = OutwardsTab
         labels = await getLabels(ResourceIds.OutwardsTransfer)
         relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
-        windowHeight = 550
-        windowWidth = 950
+        windowHeight = 600
+        windowWidth = 1100
         title = labels.OutwardsTransfer
 
       default:

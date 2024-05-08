@@ -307,10 +307,15 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
       getRequest({
         extension: RemittanceSettingsRepository.Correspondent.get,
         parameters: parameters
-      }).then(res => {
+      }).then(async res => {
         setToCurrency(res.record.currencyId)
         setToCurrencyRef(res.record.currencyRef)
-        getEXMBase(plant, res.record.currencyId, baseCurrency, 150)
+
+        const evalRate = await getRequest({
+          extension: CurrencyTradingSettingsRepository.Defaults.get,
+          parameters: '_key=ct_credit_eval_ratetype_id'
+        })
+        if (evalRate.record) getEXMBase(plant, res.record.currencyId, baseCurrency, evalRate.record.value)
       })
     } else {
       setToCurrency(null)
@@ -661,7 +666,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
   async function setOperationType(type) {
     if (type == SystemFunction.CurrencyCreditOrderPurchase || type == SystemFunction.CurrencyCreditOrderSale) {
       const res = await getRequest({
-        extension: 'SY.asmx/getDE',
+        extension: CurrencyTradingSettingsRepository.Defaults.get,
         parameters:
           type == SystemFunction.CurrencyCreditOrderPurchase
             ? '_key=ct_credit_purchase_ratetype_id'
@@ -676,7 +681,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
   }
   async function getBaseCurrency() {
     const res = await getRequest({
-      extension: 'SY.asmx/getDE',
+      extension: SystemRepository.Defaults.get,
       parameters: '_key=baseCurrencyId'
     })
     if (res.record.value) {
