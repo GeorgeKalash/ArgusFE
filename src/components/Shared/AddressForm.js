@@ -33,15 +33,13 @@ const AddressForm = ({ recordId, address, setAddress, editMode, onSubmit }) => {
   }, [recordId])
 
   return (
-    <>
-      <AddressFormShell
-        editMode={editMode}
-        setAddress={setAddress}
-        address={address}
-        allowPost={true}
-        onSubmit={onAddressSubmit}
-      />
-    </>
+    <AddressFormShell
+      editMode={editMode}
+      setAddress={setAddress}
+      address={address}
+      allowPost={true}
+      onSubmit={onAddressSubmit}
+    />
   )
 }
 

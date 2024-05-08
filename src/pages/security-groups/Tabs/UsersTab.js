@@ -1,8 +1,8 @@
-import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const UsersTab = ({ usersValidation, usersGridData, getUsersGridData, delUsers, addUsers, labels, maxAccess }) => {
   const columns = [
@@ -20,8 +20,10 @@ const UsersTab = ({ usersValidation, usersGridData, getUsersGridData, delUsers, 
 
   return (
     <VertLayout>
-      <Grow>
+      <Fixed>
         <GridToolbar onAdd={addUsers} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={usersGridData}

@@ -1,10 +1,17 @@
+// ** MUI Imports
 import { Grid, FormControlLabel, Checkbox, Button } from '@mui/material'
+
 import { useEffect, useState, useContext } from 'react'
+
+// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+
+// ** Helpers
+
 import AddressTab from 'src/components/Shared/AddressTab'
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -599,7 +606,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess }) => {
           getData: getClient
         },
         width: 400,
-        height:400,
+        height: 400,
         title: labels.OTPVerification
       })
   }, [clientIndividualFormik.values.clientId])
@@ -675,6 +682,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess }) => {
       Component: BeneficiaryWindow,
       props: { clientId: recordId },
       width: 1100,
+      height: 500,
       title: labels.beneficiaries
     })
   }
@@ -828,7 +836,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess }) => {
                             labels: labels
                           },
                           title: labels.fetch,
-                          width: 400
+                          width: 400,
+                          height: 400
                         })
                       }
                       disabled={
