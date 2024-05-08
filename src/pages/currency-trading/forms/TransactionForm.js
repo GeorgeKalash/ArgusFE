@@ -92,7 +92,7 @@ function FormProvider({ formik, maxAccess, labels, children }) {
   return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
 }
 
-export default function TransactionForm({ recordId, labels, maxAccess, plantId, setErrorMessage }) {
+export default function TransactionForm({ recordId, labels, maxAccess, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
@@ -257,9 +257,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
       .then(res => {
         setIdTypeStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -274,61 +272,66 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
     })()
   }, [])
 
-  async function getData(id) {
+  function getData(id) {
     const _recordId = recordId ? recordId : id
 
-    const { record } = await getRequest({
+    getRequest({
       extension: CTTRXrepository.CurrencyTrading.get2,
       parameters: `_recordId=${_recordId}`
     })
-    if (!recordId) {
-      formik.setFieldValue('reference', record.headerView.reference)
-    } else {
-      formik.setValues({
-        recordId: _recordId,
-        reference: record.headerView.reference,
-        operations: record.items.map(({ seqNo, ...rest }) => ({
-          id: seqNo,
-          ...rest
-        })),
-        amount: record.cash.map(({ seqNo, ...rest }) => ({
-          id: seqNo,
-          ...rest
-        })),
-        clientType: record.clientMaster.category,
-        date: formatDateFromApi(record.headerView.date),
-        clientId: record?.clientIndividual?.clientId,
-        clientName: record.headerView.clientName,
-        functionId: record.headerView.functionId,
-        plantId: record.headerView.plantId,
-        wip: record.headerView.wip,
-        firstName: record?.clientIndividual?.firstName,
-        lastName: record?.clientIndividual?.lastName,
-        middleName: record?.clientIndividual?.middleName,
-        familyName: record?.clientIndividual?.familyName,
-        fl_firstName: record?.clientIndividual?.fl_firstName,
-        fl_lastName: record?.clientIndividual?.fl_lastName,
-        fl_middleName: record?.clientIndividual?.fl_middleName,
-        fl_familyName: record?.clientIndividual?.fl_familyName,
-        birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
-        resident: record?.clientIndividual?.isResident,
-        profession: record?.clientIndividual?.professionId,
-        source_of_income: record?.clientIndividual?.incomeSourceId,
-        sponsor: record?.clientIndividual?.sponsorName,
-        id_number: record.clientIDView.idNo,
-        issue_country: record.clientIDView.idCountryId,
-        id_type: record.clientIDView.idtId,
-        expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
-        remarks: record.headerView.notes,
-        purpose_of_exchange: record.headerView.poeId,
-        nationality: record.clientMaster.nationalityId,
-        cell_phone: record.clientMaster.cellPhone,
-        status: record.headerView.status
-      })
+      .then(res => {
+        const record = res.record
+        console.log(record.record)
+        if (!recordId) {
+          formik.setFieldValue('reference', record.headerView.reference)
+        } else {
+          formik.setValues({
+            recordId: _recordId,
+            reference: record.headerView.reference,
+            operations: record.items.map(({ seqNo, ...rest }) => ({
+              id: seqNo,
+              ...rest
+            })),
+            amount: record.cash.map(({ seqNo, ...rest }) => ({
+              id: seqNo,
+              ...rest
+            })),
+            clientType: record.clientMaster.category,
+            date: formatDateFromApi(record.headerView.date),
+            clientId: record?.clientIndividual?.clientId,
+            clientName: record.headerView.clientName,
+            functionId: record.headerView.functionId,
+            plantId: record.headerView.plantId,
+            wip: record.headerView.wip,
+            firstName: record?.clientIndividual?.firstName,
+            lastName: record?.clientIndividual?.lastName,
+            middleName: record?.clientIndividual?.middleName,
+            familyName: record?.clientIndividual?.familyName,
+            fl_firstName: record?.clientIndividual?.fl_firstName,
+            fl_lastName: record?.clientIndividual?.fl_lastName,
+            fl_middleName: record?.clientIndividual?.fl_middleName,
+            fl_familyName: record?.clientIndividual?.fl_familyName,
+            birth_date: formatDateFromApi(record?.clientIndividual?.birthDate),
+            resident: record?.clientIndividual?.isResident,
+            profession: record?.clientIndividual?.professionId,
+            source_of_income: record?.clientIndividual?.incomeSourceId,
+            sponsor: record?.clientIndividual?.sponsorName,
+            id_number: record.clientIDView.idNo,
+            issue_country: record.clientIDView.idCountryId,
+            id_type: record.clientIDView.idtId,
+            expiry_date: formatDateFromApi(record.clientIDView.idExpiryDate),
+            remarks: record.headerView.notes,
+            purpose_of_exchange: record.headerView.poeId,
+            nationality: record.clientMaster.nationalityId,
+            cell_phone: record.clientMaster.cellPhone,
+            status: record.headerView.status
+          })
 
-      setOperationType(record.headerView.functionId)
-    }
-    setIsClosed(record.headerView.wip === 2 ? true : false)
+          setOperationType(record.headerView.functionId)
+        }
+        setIsClosed(record.headerView.wip === 2 ? true : false)
+      })
+      .catch(error => {})
   }
 
   const { userId } = JSON.parse(window.sessionStorage.getItem('userData'))
@@ -439,7 +442,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
         Component: ConfirmationOnSubmit,
         props: {
           formik: formik,
-          setErrorMessage: setErrorMessage,
           labels: labels
         },
         title: labels.fetch,
@@ -917,9 +919,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                               }
                             }
                           })
-                          .catch(error => {
-                            console.error('Error fetching ID info:', error)
-                          })
+                          .catch(error => {})
                       }
                     }}
                     onFocus={value => {
@@ -965,7 +965,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId, 
                           props: {
                             idTypeStore: idTypeStore,
                             formik: formik,
-                            setErrorMessage: setErrorMessage,
                             labels: labels
                           },
                           title: labels.fetch,
