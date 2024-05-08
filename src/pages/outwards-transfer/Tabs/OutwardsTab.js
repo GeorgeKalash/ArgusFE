@@ -110,7 +110,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     tdAmount: 0,
     giftCode: '',
     details: '',
-    hiddenInterfaceId: '',
+    hiddenTrxAmount: '',
+    hiddenTrxCount: '',
+    hiddenSponserName: '',
     amountRows: [
       {
         id: 1,
@@ -452,6 +454,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
       formik.setFieldValue('cellPhone', res?.record?.clientMaster?.cellPhone)
       formik.setFieldValue('nationalityId', res?.record?.clientMaster?.nationalityId)
+      formik.setFieldValue('hiddenTrxCount', res?.record?.clientRemittance?.trxCountPerYear)
+      formik.setFieldValue('hiddenTrxAmount', res?.record?.clientRemittance?.trxAmountPerYear)
+      formik.setFieldValue('hiddenSponserName', res?.record?.clientIndividual?.sponsorName)
     }
   }
 
@@ -512,7 +517,16 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         Component: InstantCash,
         props: {
           onInstantCashSubmit: onInstantCashSubmit,
-          cashData: cashData
+          cashData: cashData,
+          outwardsData: {
+            countryId: formik.values.countryId,
+            amount: formik.values.amount
+          },
+          clientData: {
+            hiddenTrxAmount: formik.values.hiddenTrxAmount,
+            hiddenTrxCount: formik.values.hiddenTrxCount,
+            hiddenSponserName: formik.values.hiddenSponserName
+          }
         },
         width: 1000,
         height: 650,
