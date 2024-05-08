@@ -6,7 +6,8 @@ import ReleaseIndicatorForm from 'src/pages/release-indicators/forms/ReleaseIndi
 
 const ReleaseIndicatorWindow = ({ onClose, labels, maxAccess, recordId, setWindowOpen }) => {
   return (
-    <Window id='ReleaseIndicatorWindow' Title={labels.releaseIndicator} controlled={true} onClose={onClose}>
+    <Window id='ReleaseIndicatorWindow' Title={labels.releaseIndicator} width={500}
+    height={450} controlled={true} onClose={onClose}>
       <ReleaseIndicatorForm labels={labels} maxAccess={maxAccess} recordId={recordId} setWindowOpen={setWindowOpen} />
     </Window>
   )

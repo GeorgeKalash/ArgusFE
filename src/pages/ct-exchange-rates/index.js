@@ -321,7 +321,6 @@ const CTExchangeRates = () => {
   return (
     <VertLayout>
       <Grow>
-        <CustomTabPanel index={0} value={0}>
           <Grid container>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={6}>
@@ -497,19 +496,9 @@ const CTExchangeRates = () => {
             </Grid>
           </Grid>
 
-          <Grid
-            sx={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              padding: 0,
-              textAlign: 'center'
-            }}
-          >
+          <Fixed>
             <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-          </Grid>
-        </CustomTabPanel>
+          </Fixed>
       </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>

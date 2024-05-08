@@ -48,6 +48,7 @@ const FunctionFormList = (
         functionId: functionId
       },
       width: 400,
+      height:350,
       title: labels.functions
     })
   }

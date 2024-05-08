@@ -15,6 +15,7 @@ const AgentWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
+      height={350}
     >
         <AgentForm
           labels={labels}

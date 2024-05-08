@@ -1,24 +1,10 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import CorrespondentWindow from './Windows/CorrespondentWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -30,10 +16,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 const Correspondent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-
   const [errorMessage, setErrorMessage] = useState(null)
-
-  //control
 
   const {
     query: { data },

@@ -2,7 +2,6 @@ import { Box, Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -153,8 +152,8 @@ const BeneficiaryFields = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar maxAccess={access}>
-          <Grid container xs={12} spacing={4} sx={{ pt: '2rem', pl: '1rem' }}>
-            <Grid item xs={4}>
+          <Grid container xs={9} spacing={4} sx={{ pt: '1rem', pl: '0.5rem' }}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
                 name='countryId'
@@ -179,7 +178,7 @@ const BeneficiaryFields = () => {
                 maxAccess={access}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 datasetId={DataSets.BENEFICIARY_RESOURCEIDS}
                 label={labels.dispersalType}
@@ -199,7 +198,7 @@ const BeneficiaryFields = () => {
                 error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5}>
               <ResourceLookup
                 endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
                 valueField='reference'

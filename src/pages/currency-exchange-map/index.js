@@ -256,8 +256,8 @@ const NumberRange = () => {
           </Grid>
         </Grid>
       </Fixed>
+      <Grow>
       {formik.values.currencyId && formik.values.countryId && (
-        <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('rows', value)}
             value={formik.values.rows}
@@ -266,8 +266,8 @@ const NumberRange = () => {
             allowDelete={false}
             allowAddNewLine={false}
           />
-        </Grow>
       )}
+      </Grow>
       <Fixed>
         <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
       </Fixed>

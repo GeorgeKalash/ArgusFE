@@ -6,7 +6,8 @@ import ReleaseCodeForm from 'src/pages/release-codes/forms/ReleaseCodeForm'
 
 const ReleaseCodeWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
-    <Window id='ReleaseCodeWindow' Title={labels.releaseCode} controlled={true} onClose={onClose}>
+    <Window id='ReleaseCodeWindow' Title={labels.releaseCode} controlled={true} width={500}
+    height={350} onClose={onClose}>
       <ReleaseCodeForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )
