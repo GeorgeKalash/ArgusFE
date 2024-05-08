@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -7,13 +7,12 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
-
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
 export default function SitesForm({ labels, recordId, maxAccess }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -21,7 +20,7 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Site.qry
+    endpointId: InventoryRepository.Site.page
   })
 
   const { formik } = useForm({
@@ -30,6 +29,7 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
       name: '',
       reference: '',
       plantId: '',
+      plName: '',
       plId: '',
       costCenterId: '',
       siteGroupId: '',
@@ -106,28 +106,6 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
             error={formik.touched.name && Boolean(formik.errors.name)}
           />
         </Grid>
-        {/* <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Country.qry}
-            name='countryId'
-            label={labels.country}
-            valueField='recordId'
-            displayField='name'
-            readOnly={editMode}
-            displayFieldWidth={1}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('countryId', newValue?.recordId || '')
-            }}
-            error={formik.touched.countryId && formik.errors.countryId}
-          />
-        </Grid> */}
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={SystemRepository.Plant.qry}
@@ -143,11 +121,31 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
             ]}
             onChange={(event, newValue) => {
               formik.setFieldValue('plantId', newValue?.recordId || '')
-              console.log(plant)
             }}
             maxAccess={maxAccess}
+            error={formik.touched.plantId && Boolean(formik.errors.plantId)}
           />
         </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={SaleRepository.PriceLevel.qry}
+            name='plId'
+            label={labels.priceLevel}
+            valueField='recordId'
+            displayField='name'
+            displayFieldWidth={1}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            values={formik.values}
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('plId', newValue?.recordId || '')
+            }}
+          />
+        </Grid>
+
         <Grid item xs={12}>
           <ResourceComboBox
             endpointId={GeneralLedgerRepository.CostCenter.qry}
@@ -165,7 +163,50 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
             onChange={(event, newValue) => {
               formik && formik.setFieldValue('costCenterId', newValue?.recordId)
             }}
-            error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={InventoryRepository.SiteGroups.qry}
+            name='siteGroupId'
+            label={labels.siteGroup}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            valueField='recordId'
+            displayField='name'
+            values={formik.values}
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik && formik.setFieldValue('siteGroupId', newValue?.recordId)
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='allowNegativeQty'
+                maxAccess={maxAccess}
+                checked={formik.values?.allowNegativeQty}
+                onChange={formik.handleChange}
+              />
+            }
+            label={labels.anq}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name='isInactive'
+                maxAccess={maxAccess}
+                checked={formik.values?.isInactive}
+                onChange={formik.handleChange}
+              />
+            }
+            label={labels.isInactive}
           />
         </Grid>
       </Grid>

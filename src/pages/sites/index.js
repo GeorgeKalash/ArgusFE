@@ -21,7 +21,7 @@ const Sites = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: InventoryRepository.Site.qry,
+      extension: InventoryRepository.Site.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
   }
@@ -36,25 +36,26 @@ const Sites = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Site.qry,
+    endpointId: InventoryRepository.Site.page,
     datasetId: ResourceIds.Sites,
+
     search: {
-      endpointId: InventoryRepository.Site.qry,
+      endpointId: InventoryRepository.Site.snapshot,
       searchFn: fetchWithSearch
     }
   })
 
   async function fetchWithSearch({ qry }) {
     const response = await getRequest({
-      extension: InventoryRepository.Site.qry,
-      parameters: `_filter=${qry}&_stateId=0&_countryId=0`
+      extension: InventoryRepository.Site.snapshot,
+      parameters: `_filter=${qry}`
     })
 
     return response
   }
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Site.qry
+    endpointId: InventoryRepository.Site.page
   })
 
   const columns = [
@@ -70,12 +71,12 @@ const Sites = () => {
     },
     ,
     {
-      field: 'plant',
+      field: 'plantName',
       headerName: _labels.plant,
       flex: 1
     },
     {
-      field: 'costCenter',
+      field: 'costCenterName',
       headerName: _labels.costCenter,
       flex: 1
     }
@@ -107,7 +108,7 @@ const Sites = () => {
         maxAccess: access
       },
       width: 500,
-      height: 400,
+      height: 550,
       title: _labels.sites
     })
   }
