@@ -6,6 +6,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Confirmation from 'src/components/Shared/Confirmation'
 import FieldSet from 'src/components/Shared/FieldSet'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
@@ -28,6 +29,7 @@ import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const FormContext = React.createContext(null)
 
@@ -127,7 +129,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     endpointId: CTTRXrepository.CurrencyTrading.snapshot
   })
 
-  const initial = {
+  const initialValues = {
     recordId: null,
     reference: null,
     operations: [
@@ -182,14 +184,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     status: '1',
     type: -1,
     wip: 1,
-    functionId: !editMode && 3502,
+    functionId: !editMode && SystemFunction.CurrencyPurchase,
     idNoConfirm: '',
     cellPhoneConfirm: '',
     otp: false,
     search: null
   }
-
-  const [initialValues, setInitialValues] = useState(initial)
 
   const formik = useFormik({
     initialValues,
@@ -237,7 +237,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
       const res = await getRequest({
         extension: SystemRepository.Defaults.get,
         parameters:
-          type === 3502 ? '_key=ct_cash_purchase_ratetype_id' : type === 3503 ? '_key=ct_cash_sales_ratetype_id' : ''
+          type === SystemFunction.CurrencyPurchase
+            ? '_key=ct_cash_purchase_ratetype_id'
+            : type === SystemFunction.CurrencySale
+            ? '_key=ct_cash_sales_ratetype_id'
+            : ''
       })
 
       setRateType(res.record.value)
@@ -626,10 +630,10 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
       actions={actions}
       height={400}
       form={formik}
-      initialValues={initial}
+      initialValues={initialValues}
       setEditMode={setEditMode}
       setIDInfoAutoFilled={setIDInfoAutoFilled}
-      resourceId={35208}
+      resourceId={ResourceIds.CashInvoice}
       editMode={editMode}
       isClosed={isClosed}
       disabledSubmit={balance && true}
@@ -673,13 +677,13 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
                   onChange={e => setOperationType(parseInt(e.target.value))}
                 >
                   <FormControlLabel
-                    value={'3502'}
+                    value={SystemFunction.CurrencyPurchase}
                     control={<Radio />}
                     label={labels.purchase}
                     disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
                   />
                   <FormControlLabel
-                    value={'3503'}
+                    value={SystemFunction.CurrencySale}
                     control={<Radio />}
                     label={labels.sale}
                     disabled={formik?.values?.operations[0]?.currencyId != '' ? true : false}
@@ -754,7 +758,9 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
                 name='operations'
                 bg={
                   formik.values.functionId &&
-                  (parseInt(formik.values.functionId) === 3503 ? '#C7F6C7' : 'rgb(245, 194, 193)')
+                  (parseInt(formik.values.functionId) === SystemFunction.CurrencySale
+                    ? '#C7F6C7'
+                    : 'rgb(245, 194, 193)')
                 }
                 columns={[
                   {
@@ -1224,7 +1230,8 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
                               { from: 'key', to: 'type' },
                               { from: 'value', to: 'typeName' }
                             ],
-                            filter: item => (formik.values.functionId === '3502' ? item.key === '2' : true)
+                            filter: item =>
+                              formik.values.functionId === SystemFunction.CurrencyPurchase ? item.key === '2' : true
                           }
                         },
                         {

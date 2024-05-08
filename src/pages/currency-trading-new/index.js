@@ -6,14 +6,15 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { useError } from 'src/error'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [plantId, setPlantId] = useState(null)
 
-  const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
-    datasetId: 35208
+  const { labels: _labelsADJ, access } = useResourceParams({
+    datasetId: ResourceIds.CashInvoice
   })
 
   const getPlantId = async () => {
@@ -43,11 +44,11 @@ export default function CurrencyTrading() {
 
   useEffect(() => {
     openForm()
-  }, [accessADJ])
+  }, [access])
 
   return (
     <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-      {plantId && accessADJ && <TransactionForm labels={_labelsADJ} maxAccess={accessADJ} plantId={plantId} />}
+      {plantId && access && <TransactionForm labels={_labelsADJ} maxAccess={access} plantId={plantId} />}
     </Box>
   )
 }
