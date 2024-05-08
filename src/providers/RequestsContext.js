@@ -1,6 +1,7 @@
 // ** React Imports
 import { createContext, useContext, useState } from 'react'
-import { LoadingContext } from 'src/providers/LoadingContext' // Import LoadingContext
+
+// import { LoadingContext } from 'src/providers/LoadingContext' // Import LoadingContext
 
 // ** 3rd Party Imports
 import axios from 'axios'
@@ -8,33 +9,27 @@ import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
+import { debounce } from 'lodash'
 
 const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
 
-  const { loadingValue, setLoadingValue } = useContext(LoadingContext)
+  // const { loadingValue, setLoadingValue } = useContext(LoadingContext)
   const { stack: stackError } = useError() || {}
   const [loading, setLoading] = useState(false)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
-  const incrementLoading = () => {
-    setLoadingValue(prevCount => prevCount + 1)
-  }
-
-  const decrementLoading = () => {
-    setLoadingValue(prevCount => Math.max(prevCount - 1, 0))
-  }
+  const debouncedSetLoading = debounce(() => {
+    setLoading(false)
+  }, 500)
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
-
-    incrementLoading() // Increment loading counter before making request
-
-    // loadingValue && setLoadingValue(true)
+    setLoading(true)
 
     return axios({
       method: 'GET',
@@ -46,12 +41,13 @@ const RequestsProvider = ({ children }) => {
       }
     })
       .then(res => {
-        setInterval(decrementLoading(), 500)
+        debouncedSetLoading()
 
         return res.data
       })
       .catch(error => {
-        setInterval(decrementLoading(), 500)
+        debouncedSetLoading()
+
         stackError({ message: error, height: 400 })
         throw error
       })
@@ -210,7 +206,7 @@ const RequestsProvider = ({ children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {loadingValue && (
+      {loading && (
         <Box
           style={{
             position: 'absolute',
