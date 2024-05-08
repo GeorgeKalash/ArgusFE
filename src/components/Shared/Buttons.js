@@ -93,12 +93,9 @@ export const Buttons = [
   },
   {
     key: 'Apply',
-    condition: 'onApply',
-    onClick: 'onApply',
     color: '#4eb558',
-    disabled: 'disabledApply',
     image: 'apply.png',
-    main: true
+    main: false
   },
   {
     key: 'Clear',

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import IdTypesForm from '../forms/IdTypesForm'
 import IdFieldsForm from '../forms/IdFieldsForm'
 import { InterfacesForm } from 'src/components/Shared/InterfacesForm'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -11,7 +12,8 @@ const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    IdField: null
+    IdField: null,
+    name: ''
   })
 
   const tabs = [
@@ -45,7 +47,13 @@ const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab}>
-        <InterfacesForm recordId={recordId} expanded={expanded} height={height} />
+        <InterfacesForm
+          recordId={store.recordId}
+          resourceId={ResourceIds.IdTypes}
+          name={store.name}
+          expanded={expanded}
+          height={height}
+        />
       </CustomTabPanel>
     </>
   )

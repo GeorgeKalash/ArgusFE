@@ -237,30 +237,31 @@ const GeneralLedger = ({ functionId, formValues, height, expanded }) => {
     }
   }, [data])
 
-  useEffect(() => {
-    async function fetchCurrencyExchangeRate() {
-      if (formValues.currencyId) {
-        try {
-          const res = await getCurrencyApi(formValues.currencyId)
-          if (res && res.record) {
-            setExRateValue(res.record.exRate)
-          }
-        } catch (error) {
-          console.error('Failed to fetch currency exchange rate:', error)
-        }
-      }
-    }
+  // useEffect(() => {
+  //   async function fetchCurrencyExchangeRate() {
+  //     if (formValues.currencyId) {
+  //       try {
+  //         const res = await getCurrencyApi(formValues.currencyId)
+  //         if (res && res.record) {
+  //           setExRateValue(res.record.exRate)
+  //         }
+  //       } catch (error) {
+  //         console.error('Failed to fetch currency exchange rate:', error)
+  //       }
+  //     }
+  //   }
 
-    fetchCurrencyExchangeRate()
-  }, [formValues])
+  //   fetchCurrencyExchangeRate()
+  // }, [formValues])
 
   const getRateDivision = functionId => {
     const sysFct = getSystemFunctionModule(functionId)
     if (
       sysFct === Module.GeneralLedger ||
       sysFct === Module.Financials ||
-      sysFct === Module.Manufacturing ||
-      sysFct === Module.Cash
+      sysFct === Module.Cash ||
+      sysFct === Module.Remittance ||
+      sysFct === Module.CurrencyTrading
     ) {
       return RateDivision.FINANCIALS
     } else if (sysFct === Module.Sales) {

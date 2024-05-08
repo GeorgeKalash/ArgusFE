@@ -207,15 +207,14 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               form={addressValidation}
               secondDisplayField={false}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  addressValidation.setFieldValue('cityId', newValue?.recordId)
-                  addressValidation.setFieldValue('city', newValue?.name)
-                } else {
-                  addressValidation.setFieldValue('cityId', '')
-                  addressValidation.setFieldValue('city', '')
-                }
-                addressValidation.setFieldValue('cityDistrictId', '')
-                addressValidation.setFieldValue('cityDistrict', '')
+                addressValidation.setValues({
+                  ...addressValidation.values,
+                  cityId: newValue?.recordId || '',
+
+                  city: newValue?.name || '',
+                  cityDistrictId: '',
+                  cityDistrict: ''
+                })
               }}
               errorCheck={'cityId'}
               maxAccess={maxAccess}
@@ -268,7 +267,6 @@ const AddressTab = ({ addressValidation, readOnly = false, required = true }) =>
               label={labels.phone}
               value={addressValidation.values.phone}
               readOnly={readOnly}
-              required={required}
               maxLength='15'
               phone={true}
               onChange={addressValidation.handleChange}
