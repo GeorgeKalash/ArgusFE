@@ -26,20 +26,18 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
     endpointId: RemittanceSettingsRepository.Correspondent.qry
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: null,
-    reference: null,
-    bpId: null,
-    currencyId: null,
-    currencyRef: null,
-    isInactive: false
-  })
-
   const formik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
-    initialValues,
+    initialValues: {
+      recordId: null,
+      name: null,
+      reference: null,
+      bpId: null,
+      currencyId: null,
+      currencyRef: null,
+      isInactive: false
+    },
     validationSchema: yup.object({
       reference: yup.string().required('This field is required'),
       name: yup.string().required('This field is required'),
@@ -108,7 +106,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
             maxAccess={maxAccess}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -122,7 +119,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-            helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
 
@@ -138,15 +134,12 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
             secondValueShow='bpName'
             form={formik}
             onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('bpId', newValue?.recordId)
-                formik.setFieldValue('bpRef', newValue?.reference)
-                formik.setFieldValue('bpName', newValue?.name)
-              } else {
-                formik.setFieldValue('bpId', '')
-                formik.setFieldValue('bpRef', '')
-                formik.setFieldValue('bpName', '')
-              }
+              formik.setValues({
+                ...formik.values,
+                bpId: newValue?.recordId || '',
+                bpRef: newValue?.reference || '',
+                bpName: newValue?.name || ''
+              })
             }}
             errorCheck={'bpId'}
             maxAccess={maxAccess}
@@ -168,7 +161,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
               formik.setFieldValue('currencyId', newValue?.recordId)
             }}
             error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-            helperText={formik.touched.countryId && formik.errors.countryId}
           />
         </Grid>
         <Grid item xs={12}>

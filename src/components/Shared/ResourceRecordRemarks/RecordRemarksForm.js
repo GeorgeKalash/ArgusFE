@@ -28,9 +28,6 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
     },
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      // accessLevel: yup.string().required(' ')
-    }),
     onSubmit: async values => {
       const date = new Date()
       values.eventDate = formatDateToApi(date)
