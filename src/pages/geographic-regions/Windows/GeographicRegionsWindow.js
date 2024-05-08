@@ -1,13 +1,7 @@
 import Window from 'src/components/Shared/Window'
 import GeographicRegionsForm from '../forms/GeographicRegionsForm'
 
-const GeographicRegionsWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId
-}) => {
-  
+const GeographicRegionsWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
     <Window
       id='GeographicRegionsWindow'
@@ -15,12 +9,9 @@ const GeographicRegionsWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
+      height={300}
     >
-      <GeographicRegionsForm
-        labels={labels}
-        maxAccess={maxAccess}
-        recordId={recordId}
-      />
+      <GeographicRegionsForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )
 }

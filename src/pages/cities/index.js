@@ -11,6 +11,7 @@ import { useWindow } from 'src/windows'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { height } from '@mui/system'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -107,6 +108,7 @@ const City = () => {
         maxAccess: access
       },
       width: 500,
+      height: 360,
       title: _labels.cities
     })
   }

@@ -4,7 +4,14 @@ import DocumentTypeMapForm from '../forms/DocumentTypeMapForm'
 
 const DocumentTypeMapWindow = ({ onClose, labels, maxAccess, recordId, fromFunctionId, fromDTId, toFunctionId }) => {
   return (
-    <Window id='DocumentTypeMapWindow' Title={labels.documentTypeMap} controlled={true} onClose={onClose}>
+    <Window
+      id='DocumentTypeMapWindow'
+      Title={labels.documentTypeMap}
+      controlled={true}
+      onClose={onClose}
+      height={450}
+      width={500}
+    >
       <DocumentTypeMapForm
         labels={labels}
         maxAccess={maxAccess}

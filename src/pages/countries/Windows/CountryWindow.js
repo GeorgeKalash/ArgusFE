@@ -5,7 +5,7 @@ import CountryForm from 'src/pages/countries/forms/CountryForm'
 const CountryWindow = ({ onClose, _labels, maxAccess, recordId }) => {
   return (
     <>
-      <Window id='CountryWindow' Title={_labels.country} controlled={true} onClose={onClose}>
+      <Window id='CountryWindow' Title={_labels.country} controlled={true} onClose={onClose} height={450} width={540}>
         <CountryForm _labels={_labels} maxAccess={maxAccess} recordId={recordId} />
       </Window>
     </>
