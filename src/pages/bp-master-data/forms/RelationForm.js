@@ -130,6 +130,7 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                   }
                 }}
                 maxAccess={maxAccess}
+                error={formik.touched.toBPId && Boolean(formik.errors.toBPId)}
               />
             </Grid>
             <Grid item xs={12}>
