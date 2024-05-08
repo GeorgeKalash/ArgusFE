@@ -4,7 +4,7 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 
-const AddressForm = ({ recordId, address, setAddress, editMode, onSubmit }) => {
+const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSubmit }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   function onAddressSubmit(post) {

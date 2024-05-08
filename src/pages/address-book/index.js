@@ -105,7 +105,6 @@ const AddressBook = () => {
       props: {
         editMode: true,
         labels: _labels,
-        setAddress: () => {},
         address: obj,
         recordId: obj.recordId,
         onSubmit: onSubmitFunction
