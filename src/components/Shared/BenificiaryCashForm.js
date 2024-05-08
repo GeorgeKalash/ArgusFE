@@ -8,6 +8,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
+import { useError } from 'src/error'
 
 // ** Helpers
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
@@ -27,13 +28,20 @@ import { useForm } from 'src/hooks/form'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
+import { max } from 'moment/moment'
 
 const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, countryId }) => {
-  const [maxAccess, setMaxAccess] = useState(null)
+  const [maxAccess, setMaxAccess] = useState({record: []})
+  const { stack: stackError } = useError()
 
   useEffect(() => {
     ;(async function () {
       if (countryId && corId && dispersalType) {
+        console.log('here')
+        console.log(countryId)
+        console.log(corId)
+        console.log(dispersalType)
+
         const qryCCL = await getRequest({
           extension: RemittanceSettingsRepository.CorrespondentControl.qry,
           parameters: `_countryId=${countryId}&_corId=${corId}&_resourceId=${ResourceIds.BeneficiaryCash}`
@@ -41,6 +49,9 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
 
         const controls = { controls: qryCCL.list }
         const maxAccess = { record: controls }
+
+        console.log(maxAccess)
+
         setMaxAccess(maxAccess)
       }
 
@@ -288,9 +299,10 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
               formik.setFieldValue('clientName', newValue ? newValue.name : '')
               formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
-              await getClientInfo(newValue?.recordId)
-              formik.setFieldValue('beneficiaryId', '')
-              formik.setFieldValue('beneficiaryName', '')
+              
+              //await getClientInfo(newValue?.recordId)
+              //formik.setFieldValue('beneficiaryId', '')
+              //formik.setFieldValue('beneficiaryName', '')
             }}
             errorCheck={'clientId'}
           />

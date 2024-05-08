@@ -409,7 +409,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           clientId: formik.values.clientId,
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
-          beneficiaryId: formik.values.beneficiaryId
+          beneficiaryId: formik.values.beneficiaryId,
+          dispersalType: formik.values.dispersalType,
         },
         width: 700,
         height: 500,

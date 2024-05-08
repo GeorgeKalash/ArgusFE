@@ -81,7 +81,8 @@ const BeneficiaryCash = () => {
 
         //corId: 0,
         //countryId: 0,
-        beneficiaryId: beneficiaryId
+        beneficiaryId: beneficiaryId,
+        dispersalType: 1,
 
         //maxAccess: access,
         //recordId: recordId ? recordId : null
