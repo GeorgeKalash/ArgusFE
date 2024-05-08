@@ -1,9 +1,8 @@
 // ** MUI Imports
-import { Autocomplete, Popper, TextField } from '@mui/material'
+import { Autocomplete, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
-import Paper from '@mui/material/Paper'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef } from 'react'
 
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
@@ -40,14 +39,12 @@ const CustomComboBox = ({
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
   const ref = useRef()
-  const [anchorEl, setAnchorEl] = useState(null)
-  useEffect(() => {
-    if (ref.current) {
-      setAnchorEl(ref.current)
-    }
-  }, [ref])
-  
-return (
+
+  const anchorEl = ref.current
+
+  const zoom = getComputedStyle(document.body).zoom
+
+  return (
     <div style={{ width: '100%' }} ref={ref}>
       <Autocomplete
         name={name}
@@ -55,23 +52,30 @@ return (
         size={size}
         options={store}
         key={value}
-        PopperComponent={({ children, ...other }) => (
-          <Popper
-            {...other}
-            style={{
-              // position: 'absolute',
-              minWidth: anchorEl ? anchorEl.clientWidth : 'auto',
-              transformOrigin: 'center top',
-              transform:
-                anchorEl && window.innerHeight - anchorEl.getBoundingClientRect().bottom < window.innerHeight * 0.3
-                  ? 'translateY(-115%) translateX(50%)'
-                  : 'translateX(50%)'
-            }}
-          >
-            <style>{`.css-snrokh-MuiAutocomplete-noOptions { display: none; }`}</style>
-            {children}
-          </Popper>
-        )}
+        PopperComponent={({ children, ...other }) => {
+          return (
+            <Box
+              sx={{
+                ...sx,
+                '& .MuiAutocomplete-noOptions': {
+                  display: other.open ? 'block' : 'none'
+                }
+              }}
+              style={{
+                position: 'absolute',
+                minWidth: ref.current ? ref.current.clientWidth : 'auto',
+                transform:
+                  window.innerHeight / parseFloat(zoom) - (anchorEl && anchorEl.getBoundingClientRect().bottom) < 300
+                    ? anchorEl &&
+                      `translateY(calc(-100% - 10px - ${anchorEl && anchorEl.getBoundingClientRect().height}px))`
+                    : 'none',
+                zIndex: 10
+              }}
+            >
+              {children}
+            </Box>
+          )
+        }}
         getOptionLabel={(option, value) => {
           if (typeof displayField == 'object') {
             const text = displayField
@@ -101,8 +105,8 @@ return (
             )
           } else {
             var displayFields = Array.isArray(displayField) ? displayField : [displayField]
-            
-return options.filter(option =>
+
+            return options.filter(option =>
               displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
             )
           }
@@ -113,7 +117,6 @@ return options.filter(option =>
         readOnly={_readOnly}
         freeSolo={_readOnly}
         disabled={_disabled}
-        sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
         renderOption={(props, option) => {
           if (columnsInDropDown && columnsInDropDown.length > 0) {
             return (
