@@ -1,0 +1,142 @@
+import { useState, useContext } from 'react'
+import { Box } from '@mui/material'
+import toast from 'react-hot-toast'
+import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { ResourceIds } from 'src/resources/ResourceIds'
+
+import { useWindow } from 'src/windows'
+
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import SitesForm from './forms/SitesForm'
+
+const Sites = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { stack } = useWindow()
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: InventoryRepository.Site.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+    })
+  }
+
+  const {
+    query: { data },
+    labels: _labels,
+    access,
+    search,
+    clear,
+
+    paginationParameters
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: InventoryRepository.Site.qry,
+    datasetId: ResourceIds.Sites,
+    search: {
+      endpointId: InventoryRepository.Site.qry,
+      searchFn: fetchWithSearch
+    }
+  })
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: InventoryRepository.Site.qry,
+      parameters: `_filter=${qry}&_stateId=0&_countryId=0`
+    })
+
+    return response
+  }
+
+  const invalidate = useInvalidate({
+    endpointId: InventoryRepository.Site.qry
+  })
+
+  const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'name',
+      headerName: _labels.name,
+      flex: 1
+    },
+    ,
+    {
+      field: 'plant',
+      headerName: _labels.plant,
+      flex: 1
+    },
+    {
+      field: 'costCenter',
+      headerName: _labels.costCenter,
+      flex: 1
+    }
+  ]
+
+  const del = async obj => {
+    await postRequest({
+      extension: InventoryRepository.Site.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  const add = () => {
+    openForm()
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: SitesForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 400,
+      title: _labels.sites
+    })
+  }
+
+  return (
+    <>
+      <Box>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          maxAccess={access}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+        />
+      </Box>
+    </>
+  )
+}
+
+export default Sites
