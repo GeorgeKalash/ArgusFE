@@ -1,17 +1,19 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import AgentBranchForm from 'src/pages/correspondent-agent-branches/Tabs/AgentBranchForm'
+import AgentBranchForm from 'src/pages/correspondent-agent-branches/forms/AgentBranchForm'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import { useContext } from 'react'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import toast from 'react-hot-toast'
 
 const AgentBranchWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
     recordId: recordId || null,
     agentBranch: null,
-    address: null
+    address: null,
+    addressId: null
   })
 
   const [activeTab, setActiveTab] = useState(0)
@@ -22,8 +24,13 @@ const AgentBranchWindow = ({ labels, editMode, maxAccess, recordId, height }) =>
     const addressId = address.addressId
     if (!store.agentBranch.addressId) {
       const res = { ...store.agentBranch, addressId: addressId }
+      console.log('res')
+      console.log(store)
+      console.log(addressId)
+      console.log(res)
       if (res) {
-        const data = { ...res, recordId: store?.recordId }
+        const data = { ...res, recordId: store?.recordId, agentId: store.agentBranch.record.agentId }
+        console.log(data)
         await postRequest({
           extension: RemittanceSettingsRepository.CorrespondentAgentBranches.set,
           record: JSON.stringify(data)
@@ -40,7 +47,8 @@ const AgentBranchWindow = ({ labels, editMode, maxAccess, recordId, height }) =>
   function setAddress(res) {
     setStore(prevStore => ({
       ...prevStore,
-      address: res
+      address: res,
+      addressId: res.addressId
     }))
   }
 

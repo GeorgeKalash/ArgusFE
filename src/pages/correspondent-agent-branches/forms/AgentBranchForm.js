@@ -10,6 +10,7 @@ import { useState, useEffect, useContext } from 'react'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
+import toast from 'react-hot-toast'
 
 export default function AgentBranchForm({ _labels, maxAccess, store, setStore, editMode, setEditMode }) {
   
@@ -38,7 +39,8 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
       swiftCode: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      //console.log(obj)
+      console.log(obj)
+
       //const recordIdd = obj.recordId
 
       const response = await postRequest({
@@ -46,13 +48,18 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
         record: JSON.stringify(obj)
       })
 
+      console.log('saved')
+      console.log(response)
+
       if (response.recordId) {
+        console.log('in')
         toast.success('Record Added Successfully')
         setStore(prevStore => ({
           ...prevStore,
           agentBranch: obj,
           recordId: response.recordId
         }))
+        console.log(store)
         invalidate()
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
