@@ -1,5 +1,4 @@
 import React from 'react'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { Grid, Box } from '@mui/material'
@@ -11,7 +10,6 @@ import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -20,40 +18,16 @@ import toast from 'react-hot-toast'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const UpdateExchangeRates = () => {
-  const [countryStore, setCountryStore] = useState([])
-  const [currencyStore, setCurrencyStore] = useState([])
   const [access, setAccess] = useState()
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [exchangeTableStore, setExchangeTableStore] = useState([])
-  const [CrmStore, setCrmSore] = useState([])
   const { getLabels, getAccess } = useContext(ControlContext)
   const [labels, setLabels] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const { width, height } = useWindowDimensions()
-
-  // const formik = useFormik({
-  //   enableReinitialize: false,
-  //   validateOnChange: false,
-  //   validationSchema: yup.object({
-  //     countryId: yup.string().required('This field is required'),
-  //     currencyId: yup.string().required('This field is required')
-  //   }),
-  //   initialValues: {
-  //     currencyId: '',
-  //     countryId: '',
-  //     exchangeId: '',
-  //     exchangeRef: '',
-  //     exchangeName: '',
-  //     rateCalcMethodName: '',
-  //     rateAgainstName: '',
-  //     rateAgainstCurrencyRef: '',
-  //     rate: ''
-  //   },
-  //   onSubmit: values => {}
-  // })
 
   const _labels = {
     country: labels && labels.find(item => item.key === '1') && labels.find(item => item.key === '2').value,
@@ -143,11 +117,11 @@ const UpdateExchangeRates = () => {
         .array()
         .of(
           yup.object().shape({
-            exchangeRef: yup.string().required('exchange  is required'),
+            exchangeRef: yup.string().required(''),
 
-            maxRate: yup.string().required('Country recordId is required'),
-            minRate: yup.string().required('Country recordId is required'),
-            rate: yup.string().required('Country recordId is required')
+            maxRate: yup.string().required(''),
+            minRate: yup.string().required(''),
+            rate: yup.string().required('')
           })
         )
         .required('Operations array is required')
@@ -169,9 +143,7 @@ const UpdateExchangeRates = () => {
       .then(res => {
         if (res) toast.success('Record Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   useEffect(() => {
@@ -180,20 +152,11 @@ const UpdateExchangeRates = () => {
     } else {
       if (access.record.maxAccess > 0) {
         getLabels(ResourceIds.updateExchangerRates, setLabels)
-        fillCurrencyStore()
-        fillCountryStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
   }, [access])
-
-  // useEffect(() => {
-  //   if (formik.values && formik.values.currencyId > 0 && formik.values.countryId > 0) {
-  //     getExchangeRates(formik.values.currencyId, formik.values.countryId)
-  //     fillExchangeTableStore(formik.values.currencyId, formik.values.countryId)
-  //   }
-  // }, [formik.values.currencyId, formik.values.countryId])
 
   const getExchangeRates = (cuId, coId) => {
     formik.setFieldValue('rows', [
@@ -238,44 +201,14 @@ const UpdateExchangeRates = () => {
                 })
                 formik.setFieldValue('rows', rows)
               })
-              .catch(error => {
-                setErrorMessage(error)
-              })
+              .catch(error => {})
           })
-          .catch(error => {
-            setErrorMessage(error)
-          })
+          .catch(error => {})
     }
   }
 
   const handleSubmit = () => {
     formik.handleSubmit()
-  }
-
-  const fillCurrencyStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {})
-  }
-
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCountryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const fillExchangeTableStore = (currencyId, countryId) => {
@@ -309,9 +242,7 @@ const UpdateExchangeRates = () => {
                 formik.setFieldValue('rateAgainstCurrencyRef', res.record.rateAgainstCurrencyRef)
                 formik.setFieldValue('rateCalcMethodName', res.record.rateCalcMethodName)
               })
-              .catch(error => {
-                setErrorMessage(error)
-              })
+              .catch(error => {})
 
             const dParams = `_exchangeId=${res?.record?.exchangeId}`
             var parameters = dParams
@@ -322,14 +253,10 @@ const UpdateExchangeRates = () => {
               .then(res => {
                 formik.setFieldValue('rate', res.record?.rate)
               })
-              .catch(error => {
-                setErrorMessage(error)
-              })
+              .catch(error => {})
           }
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch(error => {})
   }
 
   return (
@@ -343,19 +270,20 @@ const UpdateExchangeRates = () => {
           <Grid container>
             <Grid container xs={12} spacing={2}>
               <Grid item xs={6}>
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={SystemRepository.Country.qry}
                   name='countryId'
                   label={_labels.country}
-                  valueField='recordId'
-                  displayField={['reference', 'name', 'flName']}
-                  store={countryStore}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
                     { key: 'flName', value: 'Foreign Language Name' }
                   ]}
-                  value={countryStore?.filter(item => item.recordId === (formik.values && formik.values.countryId))[0]} // Ensure the value matches an option or set it to null
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name', 'flName']}
                   required
+                  maxAccess={access}
                   onChange={(event, newValue) => {
                     const selectedCountryId = newValue?.recordId || ''
                     formik.setFieldValue('countryId', selectedCountryId)
@@ -363,7 +291,6 @@ const UpdateExchangeRates = () => {
                     getExchangeRates(formik.values.currencyId, selectedCountryId)
                   }}
                   error={formik.errors && Boolean(formik.errors.countryId)}
-                  helperText={formik.touched.countryId && formik.errors.countryId}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -377,18 +304,19 @@ const UpdateExchangeRates = () => {
               </Grid>
 
               <Grid item xs={6}>
-                <CustomComboBox
+                <ResourceComboBox
+                  endpointId={SystemRepository.Currency.qry}
                   name='currencyId'
                   label={_labels.currency}
                   valueField='recordId'
                   displayField='name'
-                  store={currencyStore}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Currency Ref' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  value={currencyStore.filter(item => item.recordId === (formik.values && formik.values.currencyId))[0]} // Ensure the value matches an option or set it to null
+                  values={formik.values}
                   required
+                  maxAccess={access}
                   onChange={(event, newValue) => {
                     const selectedCurrencyId = newValue?.recordId || ''
                     formik.setFieldValue('currencyId', selectedCurrencyId)
@@ -396,7 +324,6 @@ const UpdateExchangeRates = () => {
                     fillExchangeTableStore(selectedCurrencyId, formik.values.countryId)
                   }}
                   error={formik.errors && Boolean(formik.errors.currencyId)}
-                  helperText={formik.touched.currencyId && formik.errors.currencyId}
                 />
               </Grid>
               <Grid item xs={6}>

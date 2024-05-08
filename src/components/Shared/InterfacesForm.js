@@ -11,8 +11,9 @@ import { useForm } from 'src/hooks/form'
 import { DataSets } from 'src/resources/DataSets'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CommonContext } from 'src/providers/CommonContext'
+import CustomTextField from '../Inputs/CustomTextField'
 
-export const InterfacesForm = ({ recordId, expanded, height }) => {
+export const InterfacesForm = ({ recordId, expanded, height, resourceId, name }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -26,7 +27,7 @@ export const InterfacesForm = ({ recordId, expanded, height }) => {
         {
           id: 1,
           recordId: recordId,
-          resourceId: ResourceIds.InterfaceMap,
+          resourceId: ResourceIds.resourceId,
           interfaceId: '',
           interfaceName: '',
           reference: ''
@@ -38,13 +39,13 @@ export const InterfacesForm = ({ recordId, expanded, height }) => {
     onSubmit: async values => {
       const rows = formik.values.rows.map(rest => ({
         recordId: recordId,
-        resourceId: ResourceIds.IdTypes,
+        resourceId: resourceId,
         ...rest
       }))
 
       const data = {
         recordId: recordId,
-        resourceId: ResourceIds.IdTypes,
+        resourceId: resourceId,
         items: rows
       }
 
@@ -66,37 +67,41 @@ export const InterfacesForm = ({ recordId, expanded, height }) => {
       })
     })
   }
+
   useEffect(() => {
     ;(async function () {
-      const interfaceData = await getAllInterfaces()
+      if (recordId)
+        try {
+          const interfaceData = await getAllInterfaces()
 
-      const resInterfaces = getRequest({
-        extension: RemittanceSettingsRepository.InterfaceMaps.qry,
-        parameters: `_recordId=${recordId}&_resourceId=${ResourceIds.IdTypes}`
-      })
+          const resInterfaces = await getRequest({
+            extension: RemittanceSettingsRepository.InterfaceMaps.qry,
+            parameters: `_recordId=${recordId}&_resourceId=${resourceId}`
+          })
 
-      Promise.all([resInterfaces]).then(([interfaces]) => {
-        const mergedInterfaces = interfaceData.map(interfaceItem => {
-          const item = {
-            interfaceId: interfaceItem.key,
-            interfaceName: interfaceItem.value,
-            reference: ''
-          }
-          const matchingInterface = interfaces.list.find(y => item.interfaceId == y.interfaceId)
+          const mergedInterfaces = interfaceData.map(interfaceItem => {
+            const item = {
+              interfaceId: interfaceItem.key,
+              interfaceName: interfaceItem.value,
+              reference: ''
+            }
+            const matchingInterface = resInterfaces.list.find(y => item.interfaceId == y.interfaceId)
 
-          matchingInterface && (item.reference = matchingInterface.reference)
+            if (matchingInterface) {
+              item.reference = matchingInterface.reference
+            }
 
-          return item
-        })
+            return item
+          })
 
-        formik.setValues({
-          ...formik.values,
-          rows: mergedInterfaces.map((items, index) => ({
-            ...items,
-            id: index + 1
-          }))
-        })
-      })
+          formik.setValues({
+            ...formik.values,
+            rows: mergedInterfaces.map((items, index) => ({
+              ...items,
+              id: index + 1
+            }))
+          })
+        } catch (error) {}
     })()
   }, [recordId])
 
@@ -125,19 +130,16 @@ export const InterfacesForm = ({ recordId, expanded, height }) => {
   ]
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.InterfaceMap}
-      maxAccess={access}
-      infoVisible={false}
-      editMode={true}
-    >
+    <FormShell form={formik} resourceId={resourceId} maxAccess={access} infoVisible={false} editMode={true}>
+      <Grid sx={{ pb: 1, width: '50%' }}>
+        <CustomTextField label={_labels.name} value={name} readOnly />
+      </Grid>
       <DataGrid
         onChange={value => formik.setFieldValue('rows', value)}
         value={formik.values.rows}
         error={formik.errors.rows}
         columns={columns}
-        height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
+        height={`${expanded ? `calc(100vh - 280px)` : `${height - 130}px`}`}
         allowDelete={false}
       />
     </FormShell>

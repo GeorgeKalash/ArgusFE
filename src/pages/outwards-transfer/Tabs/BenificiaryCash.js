@@ -9,7 +9,7 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 
 // ** Helpers
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
@@ -53,6 +53,8 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
         })
 
+        if (!RTBEC?.record?.firstName) setNotArabic(false)
+
         const obj = {
           //RTBEN
           clientId: clientId,
@@ -65,6 +67,9 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
+          cobId: RTBEN?.record?.cobId,
+          cellPhone: RTBEN?.record?.cellPhone,
+          birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
 
@@ -78,9 +83,6 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           fl_middleName: RTBEC?.record?.fl_middleName,
           fl_familyName: RTBEC?.record?.fl_familyName,
           countryId: RTBEC?.record?.countryId,
-          nationalityId: RTBEC?.record?.nationalityId,
-          cellPhone: RTBEC?.record?.cellPhone,
-          birthDate: RTBEC?.record?.birthDate && formatDateFromApi(RTBEC.record.birthDate),
           birthPlace: RTBEC?.record?.birthPlace
         }
         formik.setValues(obj)
@@ -107,6 +109,9 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
+    cobId: '',
+    cellPhone: '',
+    birthDate: null,
     addressLine1: '',
     addressLine2: '',
 
@@ -120,9 +125,6 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
     fl_middleName: '',
     fl_familyName: '',
     countryId: '',
-    nationalityId: '',
-    cellPhone: '',
-    birthDate: null,
     birthPlace: ''
   })
 
@@ -150,9 +152,12 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
         name: values.name,
         dispersalType: values.dispersalType,
         isBlocked: values.isBlocked,
-        stoppedDate: values.stoppedDate,
+        stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
         stoppedReason: values.stoppedReason,
         nationalityId: values.nationalityId,
+        cobId: values.cobId,
+        birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+        cellPhone: values.cellPhone,
         addressLine1: values.addressLine1,
         addressLine2: values.addressLine2
       }
@@ -168,10 +173,6 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
         fl_lastName: values.fl_lastName,
         fl_middleName: values.fl_middleName,
         fl_familyName: values.fl_familyName,
-        countryId: values.countryId,
-        cellPhone: values.cellPhone,
-        nationalityId: values.nationalityId,
-        birthDate: values.birthDate,
         birthPlace: values.birthPlace
       }
       const data = { header: header, beneficiaryCash: cashInfo }
@@ -187,6 +188,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
   })
 
   const constructNameField = formValues => {
+    console.log('firessssss')
     const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
     var name = formValues?.name
     const isArabic = arabicRegex.test(name)
@@ -415,7 +417,26 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
                   formik.setFieldValue('nationalityId', '')
                 }
               }}
-              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
+              name='cobId'
+              label={_labels.countryOfBirth}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('cobId', newValue ? newValue.recordId : '')
+              }}
+              error={formik.touched.cobId && Boolean(formik.errors.cobId)}
               maxAccess={maxAccess}
             />
           </FormGrid>
@@ -479,7 +500,9 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
               valueField='key'
               displayField='value'
               values={formik.values}
-              onChange={formik.handleChange}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('gender', newValue ? newValue.key : '')
+              }}
               maxAccess={maxAccess}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
             />
@@ -505,7 +528,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
                   formik.setFieldValue('nationalityId', '')
                 }
               }}
-              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
               maxAccess={maxAccess}
             />
           </FormGrid>

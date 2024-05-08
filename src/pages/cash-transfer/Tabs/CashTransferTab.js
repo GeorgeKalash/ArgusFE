@@ -208,7 +208,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
         editMode={editMode}
         height={480}
         maxAccess={maxAccess}
-        functionId={SystemFunction.Outwards}
+        functionId={SystemFunction.CashTransfer}
       >
         <Grid container sx={{ pt: 2 }}>
           {/* First Column */}
