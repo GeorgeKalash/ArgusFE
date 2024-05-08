@@ -8,7 +8,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useFormik } from 'formik'
 import { useWindow } from 'src/windows'
-import BenificiaryCash from 'src/pages/outwards-transfer/Tabs/BenificiaryCash'
+import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import BenificiaryBank from 'src/pages/outwards-transfer/Tabs/BenificiaryBank'
 
 const BeneficiaryWindow = ({ clientId }) => {
@@ -84,7 +84,7 @@ const BeneficiaryWindow = ({ clientId }) => {
 
     if (dispersalType === 1) {
       stack({
-        Component: BenificiaryCash,
+        Component: BenificiaryCashForm,
         props: {
           clientId: clientId,
           dispersalType: dispersalType,

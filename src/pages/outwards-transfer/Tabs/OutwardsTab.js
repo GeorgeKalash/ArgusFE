@@ -12,7 +12,7 @@ import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutward
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import BenificiaryBank from './BenificiaryBank'
-import BenificiaryCash from './BenificiaryCash'
+import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import InstantCash from './InstantCash'
 import TerraPay from './TerraPay'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
@@ -404,7 +404,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
   function openReleaventWindow(formValues) {
     if (formValues.dispersalType === 1) {
       stack({
-        Component: BenificiaryCash,
+        Component: BenificiaryCashForm,
         props: {
           clientId: formik.values.clientId,
           corId: formik.values.corId ? formik.values.corId : 0,
