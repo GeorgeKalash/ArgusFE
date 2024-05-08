@@ -66,8 +66,7 @@ const AuthProvider = ({ children }) => {
 
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-
-      const accountName = matchHostname ? matchHostname[1] : 'anthonys'
+      const accountName = matchHostname ? matchHostname[1] : 'burger'
 
       try {
         const response = await axios({

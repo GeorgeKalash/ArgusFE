@@ -441,6 +441,7 @@ const Table = ({
                 </PaginationContainer> */}
           </TableContainer>
           <DeleteDialog
+            fullScreen={false}
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen([false, {}])}
             onConfirm={obj => {

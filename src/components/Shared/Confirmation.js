@@ -13,7 +13,7 @@ import CustomComboBox from '../Inputs/CustomComboBox'
 import { formatDateToApiFunction } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-const Confirmation = ({ labels, formik, editMode, setErrorMessage, idTypeStore, maxAccess }) => {
+const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getMicroRequest } = useContext(RequestsContext)
@@ -42,7 +42,6 @@ const Confirmation = ({ labels, formik, editMode, setErrorMessage, idTypeStore, 
         .oneOf([yup.ref('idNo'), null], 'Number must match')
     }),
     onSubmit: values => {
-      console.log(values)
       postFetchDefault(values)
     }
   })
@@ -55,10 +54,7 @@ const Confirmation = ({ labels, formik, editMode, setErrorMessage, idTypeStore, 
       parameters: parameters
     })
       .then(res => {})
-      .catch(error => {
-        console.log(error)
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   return (
