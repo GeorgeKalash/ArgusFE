@@ -1,8 +1,6 @@
 // ** React Imports
 import { createContext, useContext, useState } from 'react'
 
-// import { LoadingContext } from 'src/providers/LoadingContext' // Import LoadingContext
-
 // ** 3rd Party Imports
 import axios from 'axios'
 import jwt from 'jwt-decode'
@@ -16,7 +14,6 @@ const RequestsContext = createContext()
 const RequestsProvider = ({ children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
 
-  // const { loadingValue, setLoadingValue } = useContext(LoadingContext)
   const { stack: stackError } = useError() || {}
   const [loading, setLoading] = useState(false)
 
