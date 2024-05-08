@@ -70,9 +70,6 @@ export const AddressFormShell = ({
         if (!values.cityId) {
           errors.cityId = ' '
         }
-        if (!values.phone) {
-          errors.phone = ' '
-        }
       }
       if (values.email1 && !emailRegex?.test(values?.email1)) {
         errors.email1 = 'Invalid email format'
@@ -97,14 +94,7 @@ export const AddressFormShell = ({
   })
 
   useEffect(() => {
-    if (
-      optional &&
-      (formik.values.name ||
-        formik.values.street1 ||
-        formik.values.countryId ||
-        formik.values.cityId ||
-        formik.values.phone)
-    ) {
+    if (optional && (formik.values.name || formik.values.street1 || formik.values.countryId || formik.values.cityId)) {
       setRequired(true)
     }
     if (
@@ -112,8 +102,7 @@ export const AddressFormShell = ({
       !formik.values.name &&
       !formik.values.street1 &&
       !formik.values.countryId &&
-      !formik.values.cityId &&
-      !formik.values.phone
+      !formik.values.cityId
     ) {
       setRequired(false)
     }

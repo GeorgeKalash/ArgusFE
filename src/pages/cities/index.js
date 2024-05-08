@@ -1,4 +1,3 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
@@ -16,21 +15,15 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-// ** Windows
-import CityWindow from './Windows/CityWindow'
+import CityForm from 'src/pages/cities/Forms/CityForm'
+import { useWindow } from 'src/windows'
 
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -47,7 +40,8 @@ const City = () => {
     access,
     search,
     clear,
-    refetch
+
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.City.page,
@@ -104,13 +98,26 @@ const City = () => {
     toast.success('Record Deleted Successfully')
   }
 
-  const add = () => {
-    setWindowOpen(true)
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
-  const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+  const add = () => {
+    openForm()
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CityForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 400,
+      title: _labels.cities
+    })
   }
 
   return (
@@ -128,28 +135,14 @@ const City = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          refetch={refetch}
           onEdit={edit}
           onDelete={del}
           maxAccess={access}
-          isLoading={false}
           pageSize={50}
-          paginationType='client' //check
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Box>
-      {windowOpen && (
-        <CityWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }
