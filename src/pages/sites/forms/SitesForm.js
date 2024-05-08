@@ -118,7 +118,7 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
             valueField='recordId'
             values={formik.values}
             required
-            displayField='name'
+            displayField={['reference', 'name']}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' }
@@ -136,7 +136,7 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
             name='plId'
             label={labels.priceLevel}
             valueField='recordId'
-            displayField='name'
+            displayField={['reference', 'name']}
             displayFieldWidth={1}
             columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
@@ -161,7 +161,7 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
               { key: 'name', value: 'Name' }
             ]}
             valueField='recordId'
-            displayField='name'
+            displayField={['reference', 'name']}
             values={formik.values}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
@@ -179,7 +179,7 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
               { key: 'name', value: 'Name' }
             ]}
             valueField='recordId'
-            displayField='name'
+            displayField={['reference', 'name']}
             values={formik.values}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
