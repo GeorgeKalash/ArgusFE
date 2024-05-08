@@ -14,8 +14,8 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FiOpeningBalance.page
