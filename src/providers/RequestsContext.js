@@ -1,5 +1,6 @@
 // ** React Imports
 import { createContext, useContext, useState } from 'react'
+import { LoadingContext } from 'src/providers/LoadingContext' // Import LoadingContext
 
 // ** 3rd Party Imports
 import axios from 'axios'
@@ -12,16 +13,28 @@ const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
+
+  const { loadingValue, setLoadingValue } = useContext(LoadingContext)
   const { stack: stackError } = useError() || {}
-  const [loading, setLoading] = useState(0)
+  const [loading, setLoading] = useState(false)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
+  const incrementLoading = () => {
+    setLoadingValue(prevCount => prevCount + 1)
+  }
+
+  const decrementLoading = () => {
+    setLoadingValue(prevCount => Math.max(prevCount - 1, 0))
+  }
+
   const getRequest = async body => {
     const accessToken = await getAccessToken()
 
-    setLoading(true)
+    incrementLoading() // Increment loading counter before making request
+
+    // loadingValue && setLoadingValue(true)
 
     return axios({
       method: 'GET',
@@ -33,12 +46,12 @@ const RequestsProvider = ({ children }) => {
       }
     })
       .then(res => {
-        setInterval(setLoading(false), 1000)
+        setInterval(decrementLoading(), 500)
 
         return res.data
       })
       .catch(error => {
-        setInterval(setLoading(false), 1000)
+        setInterval(decrementLoading(), 500)
         stackError({ message: error, height: 400 })
         throw error
       })
@@ -197,15 +210,15 @@ const RequestsProvider = ({ children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {loading && (
+      {loadingValue && (
         <Box
           style={{
             position: 'absolute',
-            top: 42,
+            top: 45,
             right: 0,
             width: '80%',
             height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.2)', // Semi-transparent black background
+            backgroundColor: 'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
