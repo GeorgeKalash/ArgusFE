@@ -2,7 +2,37 @@
 import { Autocomplete, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
-import React, { useRef } from 'react'
+import React from 'react'
+import ReactDOM from 'react-dom'
+
+const PopperComponent = ({ children, anchorEl, open }) => {
+  const zoom = getComputedStyle(document.body).zoom
+
+  const canRenderBelow =
+    window.innerHeight / parseFloat(zoom) - (anchorEl && anchorEl.getBoundingClientRect().bottom) > 300
+
+  const rect = anchorEl && anchorEl.getBoundingClientRect()
+
+  return ReactDOM.createPortal(
+    <Box
+      sx={{
+        '& .MuiAutocomplete-noOptions': {
+          display: open ? 'block' : 'none'
+        }
+      }}
+      style={{
+        position: 'absolute',
+        minWidth: anchorEl ? anchorEl.clientWidth : 'auto',
+        top: rect.bottom,
+        left: rect.left,
+        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect.height}px))` : 'none'
+      }}
+    >
+      {children}
+    </Box>,
+    document.body
+  )
+}
 
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
@@ -38,149 +68,117 @@ const CustomComboBox = ({
   const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
-  const ref = useRef()
-
-  const anchorEl = ref.current
-
-  const zoom = getComputedStyle(document.body).zoom
 
   return (
-    <div style={{ width: '100%' }} ref={ref}>
-      <Autocomplete
-        name={name}
-        value={value}
-        size={size}
-        options={store}
-        key={value}
-        PopperComponent={({ children, ...other }) => {
-          return (
-            <Box
-              sx={{
-                ...sx,
-                '& .MuiAutocomplete-noOptions': {
-                  display: other.open ? 'block' : 'none'
-                }
-              }}
-              style={{
-                position: 'fixed',
-                minWidth: ref.current ? ref.current.clientWidth : 'auto',
-                transform:
-                  window.innerHeight / parseFloat(zoom) - (anchorEl && anchorEl.getBoundingClientRect().bottom) < 300
-                    ? anchorEl &&
-                      `translateY(calc(-100% - 10px - ${anchorEl && anchorEl.getBoundingClientRect().height}px))`
-                    : 'none',
-                zIndex: 10
-              }}
-            >
-              {children}
-            </Box>
+    <Autocomplete
+      name={name}
+      value={value}
+      size={size}
+      options={store}
+      key={value}
+      PopperComponent={PopperComponent}
+      getOptionLabel={(option, value) => {
+        if (typeof displayField == 'object') {
+          const text = displayField
+            .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
+            ?.filter(item => item)
+            ?.join(' ')
+          if (text) return text
+        }
+        if (typeof option === 'object') {
+          return `${option[displayField]}`
+        } else {
+          const selectedOption = store.find(item => {
+            return item[valueField] === option
+          })
+          if (selectedOption) return selectedOption[displayField]
+          else return ''
+        }
+      }}
+      filterOptions={(options, { inputValue }) => {
+        if (columnsInDropDown) {
+          return options.filter(option =>
+            columnsInDropDown
+              .map(header => header.key)
+              .some(field => option[field]?.toString()?.toLowerCase()?.toString()?.includes(inputValue?.toLowerCase()))
           )
-        }}
-        getOptionLabel={(option, value) => {
-          if (typeof displayField == 'object') {
-            const text = displayField
-              .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
-              ?.filter(item => item)
-              ?.join(' ')
-            if (text) return text
-          }
-          if (typeof option === 'object') {
-            return `${option[displayField]}`
-          } else {
-            const selectedOption = store.find(item => {
-              return item[valueField] === option
-            })
-            if (selectedOption) return selectedOption[displayField]
-            else return ''
-          }
-        }}
-        filterOptions={(options, { inputValue }) => {
-          if (columnsInDropDown) {
-            return options.filter(option =>
-              columnsInDropDown
-                .map(header => header.key)
-                .some(field =>
-                  option[field]?.toString()?.toLowerCase()?.toString()?.includes(inputValue?.toLowerCase())
-                )
-            )
-          } else {
-            var displayFields = Array.isArray(displayField) ? displayField : [displayField]
+        } else {
+          var displayFields = Array.isArray(displayField) ? displayField : [displayField]
 
-            return options.filter(option =>
-              displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
-            )
-          }
-        }}
-        isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
-        onChange={onChange}
-        fullWidth={fullWidth}
-        readOnly={_readOnly}
-        freeSolo={_readOnly}
-        disabled={_disabled}
-        renderOption={(props, option) => {
-          if (columnsInDropDown && columnsInDropDown.length > 0) {
-            return (
-              <Box>
-                {props.id.endsWith('-0') && (
-                  <li className={props.className}>
-                    {columnsInDropDown.map((header, i) => {
-                      return (
-                        <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
-                          {header.value.toUpperCase()}
-                        </Box>
-                      )
-                    })}
-                  </li>
-                )}
-                <li {...props}>
+          return options.filter(option =>
+            displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
+          )
+        }
+      }}
+      isOptionEqualToValue={(option, value) => option[valueField] == getOptionBy}
+      onChange={onChange}
+      fullWidth={fullWidth}
+      readOnly={_readOnly}
+      freeSolo={_readOnly}
+      disabled={_disabled}
+      renderOption={(props, option) => {
+        if (columnsInDropDown && columnsInDropDown.length > 0) {
+          return (
+            <Box>
+              {props.id.endsWith('-0') && (
+                <li className={props.className}>
                   {columnsInDropDown.map((header, i) => {
                     return (
-                      <Box key={i} sx={{ flex: 1 }}>
-                        {option[header.key]}
+                      <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
+                        {header.value.toUpperCase()}
                       </Box>
                     )
                   })}
                 </li>
-              </Box>
-            )
-          } else {
-            return (
-              <Box>
-                <li {...props}>
-                  {/* <Box sx={{ flex: 1 }}>{option[valueField]}</Box> */}
-                  <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
-                </li>
-              </Box>
-            )
-          }
-        }}
-        renderInput={params => (
-          <TextField
-            {...params}
-            type={type}
-            variant={variant}
-            label={label}
-            required={_required}
-            autoFocus={autoFocus}
-            error={error}
-            helperText={helperText}
-            InputProps={{
-              ...params.InputProps,
-              style: {
-                border: 'none' // Set width to 100%
+              )}
+              <li {...props}>
+                {columnsInDropDown.map((header, i) => {
+                  return (
+                    <Box key={i} sx={{ flex: 1 }}>
+                      {option[header.key]}
+                    </Box>
+                  )
+                })}
+              </li>
+            </Box>
+          )
+        } else {
+          return (
+            <Box>
+              <li {...props}>
+                {/* <Box sx={{ flex: 1 }}>{option[valueField]}</Box> */}
+                <Box sx={{ flex: 1 }}>{option[displayField]}</Box>
+              </li>
+            </Box>
+          )
+        }
+      }}
+      renderInput={params => (
+        <TextField
+          {...params}
+          type={type}
+          variant={variant}
+          label={label}
+          required={_required}
+          autoFocus={autoFocus}
+          error={error}
+          helperText={helperText}
+          InputProps={{
+            ...params.InputProps,
+            style: {
+              border: 'none' // Set width to 100%
+            }
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                border: !hasBorder && 'none' // Hide border
               }
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  border: !hasBorder && 'none' // Hide border
-                }
-              }
-            }}
-          />
-        )}
-      />
-    </div>
+            }
+          }}
+        />
+      )}
+    />
   )
 }
 
