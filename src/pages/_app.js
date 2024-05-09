@@ -62,9 +62,10 @@ import 'src/iconify-bundle/icons-bundle-react'
 // ** PrimeReact Styles
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/saga-blue/theme.css'
+import 'styles/globals.css'
+import 'styles/formgrid.css'
 
 // ** Global css styles
-import '../../styles/globals.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
 import { ErrorProvider } from 'src/error'
@@ -141,10 +142,20 @@ const App = props => {
                               <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
                                 <PrimeReactProvider>
                                   {getLayout(
-                                    <ErrorProvider>
-                                      <WindowProvider>
-                                        <Component {...pageProps} />
-                                      </WindowProvider>
+                                    <ErrorProvider key={typeof window !== 'undefined' ? window.location.pathname : ''}>
+                                      <RequestsProvider
+                                        key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                      >
+                                        <CommonProvider
+                                          key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                        >
+                                          <WindowProvider
+                                            key={typeof window !== 'undefined' ? window.location.pathname : ''}
+                                          >
+                                            <Component {...pageProps} />
+                                          </WindowProvider>
+                                        </CommonProvider>
+                                      </RequestsProvider>
                                     </ErrorProvider>
                                   )}
                                 </PrimeReactProvider>

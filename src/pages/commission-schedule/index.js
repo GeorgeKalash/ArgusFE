@@ -2,7 +2,7 @@
 import { useEffect, useState, useContext } from 'react'
 
 // ** MUI Imports
-import { Box  } from '@mui/material'
+import { Box } from '@mui/material'
 
 // ** Third Party Imports
 import { useFormik } from 'formik'
@@ -16,7 +16,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
-import { getNewCommissionSchedule, populateCommissionSchedule} from 'src/Models/Sales/CommissionSchedule'
+import { getNewCommissionSchedule, populateCommissionSchedule } from 'src/Models/Sales/CommissionSchedule'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -53,18 +53,18 @@ const CommissionSchedule = () => {
   const columns = [
     {
       field: 'name',
-      headerName: _labels[1],
+      headerName: _labels[2],
       flex: 1
     },
     {
       field: 'typeName',
-      headerName: _labels[2],
+      headerName: _labels[3],
       flex: 1
     }
   ]
 
   const tabs = [{ label: _labels[7] }, { label: _labels[8], disabled: !editMode }]
-  
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -74,11 +74,9 @@ const CommissionSchedule = () => {
     })
   }
 
-
   const invalidate = useInvalidate({
     endpointId: SaleRepository.CommissionSchedule.qry
   })
-
 
   const add = () => {
     setWindowOpen(true)

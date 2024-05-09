@@ -30,8 +30,8 @@ const MFSettings = () => {
 
     const [initialValues, setInitialValues] = useState({
         mf_mu:null,
-        documentType:null,
-        site:null,
+        mf_lean_dtId:null,
+        mf_lean_siteId:null,
       })
 
     useEffect(() => {
@@ -46,15 +46,22 @@ const MFSettings = () => {
           parameters: parameters
         })
         .then(res => {
-           res.list.map(obj => (
-           myObject[obj.key] = obj.value? parseInt(obj.value): null
-            )); 
-            setInitialValues(myObject)
-        })
-        .catch(error => {
-            setErrorMessage(error)
-        })
-      }
+          const filteredList = res.list.filter(obj => {
+              return (
+                  obj.key === 'mf_mu' || 
+                  obj.key === 'mf_lean_dtId' || 
+                  obj.key === 'mf_lean_siteId' 
+              );
+          });
+          filteredList.forEach(obj => (
+              myObject[obj.key] = obj.value? parseInt(obj.value): null
+               )); 
+               setInitialValues(myObject)
+           })
+           .catch(error => {
+               setErrorMessage(error)
+           })
+         }
 
     const {
         labels: _labels,
@@ -174,7 +181,10 @@ const MFSettings = () => {
                         padding: 3,
                         textAlign: 'center',
                     }}>
-                        <WindowToolbar onSave={handleSubmit}  />
+                        <WindowToolbar 
+                            onSave={handleSubmit}
+                            isSaved={true}
+                        />
                     </Grid>
                 </Grid>
                 <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />

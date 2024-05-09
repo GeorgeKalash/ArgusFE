@@ -15,6 +15,8 @@ import EventIcon from '@mui/icons-material/Event'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { formatDateFromApi, formatDateFromApiInline, formatDateDefault } from 'src/lib/date-helper'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { fontSize } from '@mui/system'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from 'src/services/api/maxAccess'
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />
@@ -35,7 +37,8 @@ const InlineEditGrid = ({
   scrollable = true,
   allowDelete = true,
   allowAddNewLine = true,
-  onDelete
+  onDelete,
+  maxAccess
 }) => {
   const [write, setWrite] = useState(false)
 
@@ -51,8 +54,8 @@ const InlineEditGrid = ({
             sx={{
               height: '100%',
               display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'
+              justifyContent: 'right',
+              alignItems: 'right'
             }}
           >
             {row[column.name] === 0 ? row[column.name] : getFormattedNumber(row[column.name])}
@@ -82,7 +85,7 @@ const InlineEditGrid = ({
         return row[column.name]
           ? typeof row[column.name] === 'string'
             ? row[column.name]
-            : column.store.length > 0
+            : column.store?.length > 0
             ? column.store.find(item => item[column.valueField] === row[column.name])[column.displayField]
             : ''
           : ''
@@ -96,6 +99,13 @@ const InlineEditGrid = ({
     if (!row.rowData) return
     const fieldName = row.field
     const cellId = `table-cell-${rowIndex}-${column.id}` // Unique identifier for the cell
+
+    const access = accessLevel({
+      maxAccess: maxAccess,
+      name: column.maxAccessName || column.name
+    })
+
+    const readOnly = access === DISABLED || (column.readOnly && access !== MANDATORY && access !== FORCE_ENABLED)
 
     switch (field) {
       case 'incremented':
@@ -115,7 +125,8 @@ const InlineEditGrid = ({
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][fieldName]}
             required={column?.mandatory}
-            readOnly={column?.readOnly}
+            readOnly={readOnly}
+            disabled={readOnly}
             onChange={event => {
               const newValue = event.target.value
               gridValidation.setFieldValue(`rows[${rowIndex}].${fieldName}`, newValue)
@@ -135,7 +146,8 @@ const InlineEditGrid = ({
               name={fieldName}
               value={formatDateFromApiInline(gridValidation.values.rows[rowIndex][fieldName])}
               required={column?.mandatory}
-              readOnly={column?.readOnly}
+              readOnly={readOnly}
+              disabled={readOnly}
               format={dateFormat}
               onChange={newDate => {
                 if (newDate) {
@@ -207,7 +219,8 @@ const InlineEditGrid = ({
             size='small'
             fullWidth={true}
             inputProps={{
-              readOnly: column?.readOnly,
+              readOnly: readOnly,
+              disabled: readOnly,
               pattern: '[0-9]*',
               style: {
                 textAlign: 'right'
@@ -232,6 +245,16 @@ const InlineEditGrid = ({
                     </InputAdornment>
                   ))
             }}
+            helperText={
+              gridValidation.errors?.rows &&
+              gridValidation.errors?.rows[rowIndex] &&
+              gridValidation.errors?.rows[rowIndex][fieldName]
+            }
+            error={
+              gridValidation.errors?.rows &&
+              gridValidation.errors?.rows[rowIndex] &&
+              Boolean(gridValidation.errors?.rows[rowIndex][fieldName])
+            }
           />
         )
       case 'combobox':
@@ -241,7 +264,8 @@ const InlineEditGrid = ({
             size='small'
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.nameId}`]}
-            readOnly={column?.readOnly}
+            readOnly={readOnly}
+            disabled={readOnly}
             options={column.store}
             getOptionLabel={option => {
               if (typeof option === 'object') {
@@ -265,7 +289,7 @@ const InlineEditGrid = ({
                 else return ''
               }
             }}
-
+            
             // getOptionLabel={option => {
             //   if (typeof option === 'object') {
             //     if (column.columnsInDropDown && column.columnsInDropDown.length > 0) {
@@ -357,7 +381,8 @@ const InlineEditGrid = ({
             size='small'
             name={fieldName}
             value={gridValidation.values.rows[rowIndex][`${column.name}`]}
-            readOnly={column?.readOnly}
+            readOnly={readOnly}
+            disabled={readOnly}
             options={column.store}
             getOptionLabel={option => (typeof option === 'object' ? `${option[column.displayField]}` : option)}
             open={write}
@@ -388,7 +413,7 @@ const InlineEditGrid = ({
                   </Box>
                 )
             }}
-
+            
             // onFocus={() => setOpen(true)}
 
             // getOptionLabel={option => {
@@ -480,12 +505,10 @@ const InlineEditGrid = ({
                             style={{ cursor: 'pointer' }}
                             onClick={() => {
                               // Handle search action if needed
-                              console.log('Search clicked')
                             }}
                           />
                         </IconButton>
                       </InputAdornment>
-
 
                       {/* Adjust color as needed */}
                       {/* {params.InputProps.startAdornment} */}
@@ -632,17 +655,22 @@ const InlineEditGrid = ({
         size='small'
       >
         {columns.map((column, i) => {
+          const access = accessLevel({
+            maxAccess,
+            name: column.maxAccessName || column.name
+          })
+
           return (
             <Column
               key={column.field}
               field={column.name}
               header={column.header}
-              hidden={column.hidden}
+              hidden={(column.hidden || access === HIDDEN) && access !== MANDATORY && access !== FORCE_ENABLED}
               style={{
                 width: column.width || tableWidth / columns.length,
-                background:  background,
+                background: background
               }}
-              body={row => {
+              body={(row, rowIndex) => {
                 return (
                   <Box
                     sx={{
@@ -654,6 +682,9 @@ const InlineEditGrid = ({
                     }}
                   >
                     {cellRender(row, column)}
+
+                    {/* {gridValidation.errors?.rows && gridValidation.errors?.rows[rowIndex.rowIndex] && !gridValidation.values?.rows[rowIndex.rowIndex][column.name] ? <Box sx={{fontSize:'13px' , p:1, color:'red'}}>{gridValidation.errors?.rows[rowIndex.rowIndex][column.name]}</Box>
+                    : cellRender(row, column) } */}
                   </Box>
                 )
               }}
@@ -686,7 +717,7 @@ const InlineEditGrid = ({
                 </div>
               )
             }}
-            style={{ maxWidth: '60px' , background: background }}
+            style={{ maxWidth: '60px', background: background }}
           />
         )}
       </DataTable>

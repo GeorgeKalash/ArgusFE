@@ -19,6 +19,7 @@ import DeleteDialog from './DeleteDialog'
 
 // ** Resources
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
+import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 
 const ODD_OPACITY = 0.2
 
@@ -115,22 +116,20 @@ const Table = ({
 
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
-  const api = props.api
+  const api = props?.api ? props?.api : props.paginationParameters
+  const refetch = props?.refetch
   const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
   const columnsAccess = props.maxAccess && props.maxAccess.record.controls
 
   const getRowId = row => {
-    const recordId = row.recordId || ''
-    const seqNo = row.seqNo || ''
-
-    return `${recordId}-${seqNo}`
+    return props.rowId.map(field => row[field]).join('-')
   }
 
   const CustomPagination = () => {
     if (pagination) {
-      if (paginationType === 'api') {
-        const startAt = gridData._startAt
-        const totalRecords = gridData.count ? gridData.count : 0
+      if (paginationType === 'api' && gridData) {
+        const startAt = gridData._startAt ?? 0
+        const totalRecords = gridData?.count ? gridData?.count : 0
 
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
 
@@ -171,11 +170,11 @@ const Table = ({
             <IconButton onClick={goToLastPage} disabled={page === pageCount}>
               <LastPageIcon />
             </IconButton>
-            {api && (
-              <IconButton onClick={goToFirstPage}>
-                <RefreshIcon />
-              </IconButton>
-            )}
+            {/* {api && ( */}
+            <IconButton onClick={refetch}>
+              <RefreshIcon />
+            </IconButton>
+            {/* )} */}
             Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
             {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
             {totalRecords}
@@ -183,9 +182,9 @@ const Table = ({
         )
       } else {
         if (gridData && gridData.list) {
-          var _gridData = props.gridData.list
-          const pageCount = Math.ceil(originalGridData.length ? originalGridData.length / pageSize : 1)
-          const totalRecords = originalGridData.length
+          var _gridData = props.gridData?.list
+          const pageCount = Math.ceil(originalGridData?.length ? originalGridData?.length / pageSize : 1)
+          const totalRecords = originalGridData?.length
 
           const incrementPage = () => {
             if (page < pageCount) {
@@ -234,7 +233,9 @@ const Table = ({
                 list: slicedGridData
               })
               setPage(pageCount)
-              setStartAt(originalGridData.length - pageSize)
+              const pageNumber = parseInt(originalGridData.length / pageSize)
+              const start = pageSize * pageNumber
+              setStartAt(start)
             }
           }
 
@@ -253,11 +254,11 @@ const Table = ({
               <IconButton onClick={goToLastPage} disabled={page === pageCount}>
                 <LastPageIcon />
               </IconButton>
-              {api && (
-                <IconButton onClick={goToFirstPage}>
-                  <RefreshIcon />
-                </IconButton>
-              )}
+              {/* {api && ( */}
+              <IconButton onClick={refetch}>
+                <RefreshIcon />
+              </IconButton>
+              {/* )} */}
               Displaying Records {startAt === 0 ? 1 : startAt} -{' '}
               {totalRecords < pageSize ? totalRecords : page === pageCount ? totalRecords : startAt + pageSize} of{' '}
               {totalRecords}
@@ -270,29 +271,28 @@ const Table = ({
     }
   }
 
-  const columns = props.columns
+  const columns = props.columns.filter(
+    ({ field }) =>
+      accessLevel({
+        maxAccess: props.maxAccess,
+        name: field
+      }) !== HIDDEN
+  )
 
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
-      // Create a new object with all the previous checked rows
       const newCheckedRows = { ...prevCheckedRows }
 
-      // Create the key based on the presence of seqNo
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
 
-      // Update the newCheckedRows object with the current row
       newCheckedRows[key] = row
 
-      // Check if newCheckedRows[key] is defined and has checked property
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
 
-      // Pass the entire updated rows in the callback
       handleCheckedRows(filteredRows)
 
-      // Log the updated checkedRows after the state has been updated
       console.log('checkedRows 4 ', newCheckedRows)
 
-      // Return the updated state for the next render
       return filteredRows
     })
   }
@@ -305,9 +305,8 @@ const Table = ({
 
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
 
-  if (props.onEdit || props.onDelete) {
+  if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
-
     filteredColumns.push({
       field: actionColumnHeader,
       headerName: actionColumnHeader,
@@ -316,34 +315,53 @@ const Table = ({
       renderCell: params => {
         const { row } = params
         const isStatus3 = row.status === 3
+        const isWIP = row.wip === 2
 
         return (
-          <>
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             {props.onEdit && (
               <IconButton size='small' onClick={() => props.onEdit(params.row)}>
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
               </IconButton>
             )}
-            {!isStatus3 && deleteBtnVisible && (
+            {props.popupComponent && (
+              <IconButton size='small' onClick={() => props.popupComponent(params.row)}>
+                <Icon icon='mdi:application-edit-outline' fontSize={18} />
+              </IconButton>
+            )}
+            {!isStatus3 && deleteBtnVisible && !isWIP && (
               <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
             )}
-          </>
+          </Box>
         )
       }
     })
   }
 
   const paginationHeight = pagination ? '41px' : '10px'
-  const tableHeight = height ? `${height}px` : `calc(100vh - 48px - 48px - ${paginationHeight})`
+
+  const tableHeight = height
+    ? typeof height === 'string' && height?.includes('calc')
+      ? height
+      : `${height}px`
+    : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
   useEffect(() => {
-    console.log('enter useEffect')
-    if (props.gridData && props.gridData.list) setGridData(props.gridData)
+    if (props.gridData && props.gridData.list && paginationType === 'client') {
+      var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
+      setGridData({
+        ...gridData,
+        list: slicedGridData
+      })
+    }
+    if (props.gridData && props.gridData.list && paginationType === 'api') {
+      setGridData(props.gridData)
+    }
     if (pagination && paginationType != 'api' && props.gridData && props.gridData.list && page != 1) {
-      console.log('enter if')
-      setPage(1)
+      // console.log('enter if')
+      // setPage(1)
     }
     setCheckedRows([])
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -368,7 +386,13 @@ const Table = ({
           >
             {/* <ScrollableTable> */}
             <StripedDataGrid
-              rows={gridData?.list || []}
+              rows={
+                gridData?.list
+                  ? page < 2 && paginationType === 'api'
+                    ? gridData?.list.slice(0, 50)
+                    : gridData?.list
+                  : []
+              }
               sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
               density='compact'
               components={{
@@ -417,6 +441,7 @@ const Table = ({
                 </PaginationContainer> */}
           </TableContainer>
           <DeleteDialog
+            fullScreen={false}
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen([false, {}])}
             onConfirm={obj => {

@@ -2,78 +2,78 @@
 import dayjs from 'dayjs'
 
 // import moment from 'moment';
-import { compareAsc, format } from "date-fns";
+import { compareAsc, format } from 'date-fns'
 
-const formatDateFromApi = (date) => {
+const formatDateFromApi = date => {
+  const timestamp = date && parseInt(date.match(/\d+/)[0], 10)
 
-    const timestamp = date && parseInt(date.match(/\d+/)[0], 10);
-
-return timestamp
+  return timestamp ? new Date(timestamp) : null
 }
 
-const formatDateFromApiInline = (date) => {
-  const [day, month, year] = date.split('/');
-  const parsedDate = new Date(year, month - 1, day);
-  const timestamp = parsedDate.getTime();
+const formatDateFromApiInline = date => {
+  const [day, month, year] = date.split('/')
+  const parsedDate = new Date(year, month - 1, day)
+  const timestamp = parsedDate.getTime()
 
-return timestamp
+  return timestamp
 }
 
-const formatDateToApiInline = (date) => {
+const formatDateToApi = date => {
+  const timestamp = date && date.valueOf()
 
-  const [day, month, year] = date.split('/');
-  const parsedDate = new Date(year, month - 1, day);
-  const timestamp = parsedDate.getTime();
-
-return `/Date(${timestamp})/`
+  return `/Date(${timestamp})/`
 }
 
-const formatDateToApi = (date) => {
-
-    const timestamp = date &&  date.valueOf();
-
-    return `/Date(${timestamp})/`
-}
-
-const   formatDateToApiFunction = (value)=>{
-
-  var date =  value
-    date  = new Date(date)
-    date = date.toLocaleDateString('en-US', {
+const formatDateToApiFunction = value => {
+  var date = value
+  date = new Date(date)
+  date = date.toLocaleDateString('en-US', {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
+    day: 'numeric'
   })
 
-  const parsedDate = new Date(date);
+  const parsedDate = new Date(date)
 
   // Format the date as "yyyy-MM-dd"
-  const year = parsedDate.getFullYear();
-  const month = String(parsedDate.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-  const day = String(parsedDate.getDate()).padStart(2, '0');
+  const year = parsedDate.getFullYear()
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0') // Months are 0-based
+  const day = String(parsedDate.getDate()).padStart(2, '0')
 
-  const formattedDateYYYYMMDD = `${year}-${month}-${day}`;
+  const formattedDateYYYYMMDD = `${year}-${month}-${day}`
 
-  return formattedDateYYYYMMDD;
- }
+  return formattedDateYYYYMMDD
+}
 
- function formatDateDefault(date) {
-  const formats = JSON.parse(window.localStorage.getItem('default') &&  window.localStorage.getItem('default'))['dateFormat']
+function formatDateDefault(date) {
+  if (!date) return
 
-  // JSON.parse(window.localStorage.getItem('default'))['dateFormat']
-      const timestamp = date instanceof Date ? date.getTime() : parseInt(date.match(/\d+/)[0], 10);
-      const formattedDate=  format(new Date(timestamp), formats);
+  const formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
+    'dateFormat'
+  ]
+  const timestamp = date instanceof Date ? date.getTime() : parseInt(date?.match(/\d+/)[0], 10)
+  const formattedDate = format(new Date(timestamp), formats)
 
-    return formattedDate;
-  };
+  return formattedDate
+}
 
+function formatTimestampToDate(timestamp) {
+  if (!timestamp) return
+
+  const formats = JSON.parse(window.localStorage.getItem('default') && window.localStorage.getItem('default'))[
+    'dateFormat'
+  ]
+  const formattedDate = format(new Date(timestamp), formats)
+
+  return formattedDate
+}
 
 export {
-    formatDateFromApi,
-    formatDateToApi,
-    formatDateToApiFunction,
-    formatDateDefault,
-    formatDateFromApiInline,
-    formatDateToApiInline
+  formatDateFromApi,
+  formatDateToApi,
+  formatDateToApiFunction,
+  formatDateDefault,
+  formatTimestampToDate,
+  formatDateFromApiInline
 }

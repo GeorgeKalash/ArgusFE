@@ -9,18 +9,18 @@ export default function ResourceComboBox({
   datasetId,
   name,
   valueField = 'recordId',
-  values,
+  values = {},
   parameters = '_filter=',
   filter = () => true,
+  value,
   ...rest
 }) {
+  const { store: data } = rest
   const { getRequest } = useContext(RequestsContext)
 
   const { getAllKvsByDataset } = useContext(CommonContext)
 
   const [store, setStore] = useState([])
-
-  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     if (parameters)
@@ -30,26 +30,25 @@ export default function ResourceComboBox({
           callback: setStore
         })
       else
-        getRequest({
-          extension: endpointId,
-          parameters
-        })
-          .then(res => {
-            setStore(res.list)
+        endpointId &&
+          getRequest({
+            extension: endpointId,
+            parameters
           })
-          .catch(error => {
-            setErrorMessage(error.response.data)
-          })
+            .then(res => {
+              setStore(res.list)
+            })
+            .catch(error => {})
   }, [parameters])
 
-  const filteredStore = store.filter(filter)
+  const filteredStore = data ? data : store.filter(filter)
 
-  const value = (datasetId ? filteredStore.find(item => item[valueField] === values[name]?.toString()) :  filteredStore.find(item => item[valueField] === values[name])) ?? ''
+  const _value =
+    (typeof values[name] === 'object'
+      ? values[name]
+      : (datasetId
+          ? filteredStore.find(item => item[valueField] === values[name]?.toString())
+          : filteredStore.find(item => item[valueField] === values[name])) ?? '') || value
 
-  return (
-    <>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value }} />
-    </>
-  )
+  return <CustomComboBox {...{ ...rest, name, store: filteredStore, valueField, value: _value, name }} />
 }

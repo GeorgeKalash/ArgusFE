@@ -1,6 +1,5 @@
 // ** Custom Imports
 import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import LaborGroupsForm from '../forms/LaborGroupsForm'
 
 const LaborGroupsWindow = ({
@@ -19,14 +18,11 @@ const LaborGroupsWindow = ({
       width={500}
       height={300}
     >
-      <CustomTabPanel>
-        <LaborGroupsForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
-       
-      </CustomTabPanel>
+      <LaborGroupsForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+      />
     </Window>
   )
 }

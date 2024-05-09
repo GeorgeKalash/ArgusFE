@@ -17,8 +17,8 @@ export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoi
 const getFormattedNumber = (value, decimal) => {
   if (!value) return
 
-  // Remove non-numeric and non-decimal characters
-  const sanitizedValue = value.toString().replace(/[^0-9.]/g, '')
+  // Remove non-numeric and non-decimal characters (but preserving minus sign for negative numbers)
+  const sanitizedValue = value.toString().replace(/[^0-9.-]/g, '')
 
   // Split the value into integer and decimal parts
   const [integerPart, decimalPart] = sanitizedValue.split('.')
@@ -52,7 +52,7 @@ function getFormattedNumberMax(number, digitsBeforePoint, digitsAfterPoint) {
   var beforePoint = parts[0].slice(0, digitsBeforePoint)
   var afterPoint = (parts[1] || '').slice(0, digitsAfterPoint)
   beforePoint = new Intl.NumberFormat('en-US').format(beforePoint)
-
+  console.log(beforePoint)
   if (value?.indexOf('.') > -1) {
     return beforePoint + '.' + afterPoint
   } else {
@@ -77,8 +77,6 @@ const validateNumberField = (value, originalValue) => {
 }
 
 const getNumberWithoutCommas = value => {
-  // Remove commas from the value string
-  value
   const sanitizedValue = value && value.toString().replace(/,/g, '')
 
   return sanitizedValue
