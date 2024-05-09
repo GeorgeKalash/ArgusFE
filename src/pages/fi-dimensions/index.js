@@ -28,6 +28,8 @@ const FiDimensions = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
+  const [tempDimCount, setTempDimCount] = useState(null)
+
   const [initialValues, setInitialValues] = useState({
     DimCount: null,
     tpaDimension1: null,
@@ -151,6 +153,21 @@ const FiDimensions = () => {
     }
   }, [formik.values.DimCount])
 
+  const handleDimCountChange = event => {
+    setTempDimCount(event.target.value)
+  }
+
+  const handleDimCountBlur = () => {
+    if (tempDimCount !== null) {
+      formik.setFieldValue('DimCount', tempDimCount)
+    }
+  }
+
+  const handleClearDimCount = () => {
+    setTempDimCount(null)
+    formik.setFieldValue('DimCount', null)
+  }
+
   return (
     <>
       <FormShell
@@ -166,12 +183,12 @@ const FiDimensions = () => {
             <CustomTextField
               name='DimCount'
               label='Dimension Count'
-              value={formik.values.DimCount}
-              onChange={formik.handleChange}
-              type='number'
+              value={tempDimCount === null ? formik.values.DimCount : tempDimCount}
+              onChange={handleDimCountChange}
+              onBlur={handleDimCountBlur}
               numberField={true}
-              onBlur={formik.handleChange}
-              onClear={() => formik.setFieldValue('DimCount', '')}
+              onClear={handleClearDimCount}
+              type='number'
               error={formik.touched.DimCount && Boolean(formik.errors.DimCount)}
               inputProps={{
                 min: 1,
