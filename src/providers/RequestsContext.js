@@ -11,16 +11,17 @@ import { debounce } from 'lodash'
 
 const RequestsContext = createContext()
 
-function LoadingOverlay() {
+function LoadingOverlay({ navCollapsed }) {
   return (
     <Box
       style={{
         position: 'absolute',
         top: 45,
         right: 0,
-        width: '80%',
+        width: navCollapsed ? 'calc(100% - 68px)' : 'calc(100% - 300px)',
         height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
+
+        // backgroundColor: 'red', //'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -32,7 +33,7 @@ function LoadingOverlay() {
   )
 }
 
-const RequestsProvider = ({ showLoading = false, children }) => {
+const RequestsProvider = ({ showLoading = false, navCollapsed, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
 
   const { stack: stackError } = useError() || {}
@@ -224,7 +225,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {showLoading && loading && <LoadingOverlay />}
+      {showLoading && loading && <LoadingOverlay navCollapsed={navCollapsed} />}
     </>
   )
 }

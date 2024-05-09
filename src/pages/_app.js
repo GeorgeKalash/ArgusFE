@@ -145,6 +145,7 @@ const App = props => {
                                     <ErrorProvider key={typeof window !== 'undefined' ? window.location.pathname : ''}>
                                       <RequestsProvider
                                         showLoading
+                                        navCollapsed={settings.navCollapsed}
                                         key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                       >
                                         <CommonProvider
