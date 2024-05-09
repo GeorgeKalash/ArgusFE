@@ -46,7 +46,6 @@ const GridToolbar = ({
   useEffect(() => {
     if (reportStore.length > 0) {
       setSelectedReport(reportStore[0])
-      console.log('ress')
     } else {
       setSelectedReport(null)
     }
