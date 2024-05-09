@@ -17,7 +17,7 @@ export default {
         .map(item => changes?.[item])
         .join(' ')
 
-      return text
+      return text ?? ''
     } else {
       return changes?.[props.column.props.displayField]
     }

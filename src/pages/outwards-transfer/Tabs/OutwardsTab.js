@@ -1220,6 +1220,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
                 name='beneficiaryName'
                 label={labels.Beneficiary}
                 form={formik}
+                columnsInDropDown={[
+                  { key: 'name', value: 'Name' },
+                  { key: 'shortName', value: 'ShortName' }
+                ]}
                 required
                 readOnly={!formik.values.clientId || !formik.values.dispersalType || isClosed || isPosted}
                 maxAccess={maxAccess}

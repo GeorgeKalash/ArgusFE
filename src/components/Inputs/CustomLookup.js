@@ -114,7 +114,7 @@ const CustomLookup = ({
                       <li className={props.className}>
                         {columnsInDropDown.map((header, i) => {
                           return (
-                            secondDisplayField && (
+                            columnsInDropDown.length > 1 && (
                               <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
                                 {header.value.toUpperCase()}
                               </Box>
@@ -139,8 +139,12 @@ const CustomLookup = ({
                   <Box>
                     {props.id.endsWith('-0') && (
                       <li className={props.className}>
-                        {secondDisplayField && <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>}
-                        {secondDisplayField && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
+                        {secondDisplayField && (
+                          <Box sx={{ flex: 1, fontWeight: 'bold' }}>{valueField.toUpperCase()}</Box>
+                        )}
+                        {secondDisplayField && (
+                          <Box sx={{ flex: 1, fontWeight: 'bold' }}>{displayField.toUpperCase()}</Box>
+                        )}
                       </li>
                     )}
                     <li {...props}>
