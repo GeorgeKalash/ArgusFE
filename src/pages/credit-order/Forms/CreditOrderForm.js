@@ -870,6 +870,7 @@ export default function CreditOrderForm({ labels, maxAccess, recordId, expanded,
                   form={formik}
                   required
                   firstFieldWidth='30%'
+                  displayFieldWidth={1.5}
                   valueShow='corRef'
                   secondValueShow='corName'
                   readOnly={isClosed || detailsFormik?.values?.rows[0]?.currencyId}

@@ -1,23 +1,21 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CbBanksWindow from './Windows/CbBanksWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CbBank = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
+  const { stack } = useWindow()
+  
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -64,13 +62,26 @@ const CbBank = () => {
     }
   ]
 
+  function openForm(recordId) {
+    stack({
+      Component: CbBanksWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
+      },
+      width: 600,
+      height: 600,
+      title: _labels.bank
+    })
+  }
+
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj.recordId)
   }
 
   const del = async obj => {
@@ -100,19 +111,6 @@ const CbBank = () => {
           maxAccess={access}
         />
       </Grow>
-      {windowOpen && (
-        <CbBanksWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

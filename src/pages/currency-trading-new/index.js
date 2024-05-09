@@ -5,55 +5,46 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { useError } from 'src/error'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
-  
- //error
- const [errorMessage, setErrorMessage] = useState(null)
- const [plantId, setPlantId] = useState(null)
+  const { stack: stackError } = useError()
+  const [plantId, setPlantId] = useState(null)
 
- const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
-  datasetId: 35208
-})
+  const { labels: _labelsADJ, access } = useResourceParams({
+    datasetId: ResourceIds.CashInvoice
+  })
 
- const getPlantId = async () => {
-  const userData = window.sessionStorage.getItem('userData')
-    ? JSON.parse(window.sessionStorage.getItem('userData'))
-    : null;
-    console.log(userData)
-  const parameters = `_userId=${userData && userData.userId}&_key=plantId`;
-  try {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters,
-    });
-    if (res.record.value) {
-      return res.record.value;
-    }
+  const getPlantId = async () => {
+    const userData = window.sessionStorage.getItem('userData')
+      ? JSON.parse(window.sessionStorage.getItem('userData'))
+      : null
+
+    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
     
-return '';
-  } catch (error) {
-    setErrorMessage(error);
-     
-return '';
+return getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: parameters
+    })
+      .then(res => res.record.value)
+      .catch(error => {})
   }
-};
- async function openForm() {
+  async function openForm() {
     try {
-      const plantId = await getPlantId();
+      const plantId = await getPlantId()
       if (plantId !== '') {
         setPlantId(plantId)
       } else {
-        setErrorMessage({ error: 'The user does not have a default plant' });
+        stackError({ message: 'The user does not have a default plant' })
       }
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) {}
   }
-  useEffect(()=>{
+
+  useEffect(() => {
     openForm()
-   },[accessADJ])
+  }, [access])
 
   return (
     

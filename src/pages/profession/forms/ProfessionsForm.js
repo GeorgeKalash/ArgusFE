@@ -15,7 +15,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function ProfessionsForm({ labels, maxAccess, recordId }) {
+export default function ProfessionsForm({ labels, maxAccess, recordId, setStore }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -65,6 +65,10 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
+        setStore({
+          recordId: response.recordId,
+          name: obj.name
+        })
         toast.success('Record Added Successfully')
         setInitialData({
           ...obj,
@@ -73,8 +77,8 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
       } else {
         toast.success('Record Edited Successfully')
         setEditMode(true)
-        invalidate()
       }
+      invalidate()
     }
   })
 
@@ -87,7 +91,10 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
           extension: RemittanceSettingsRepository.Profession.get,
           parameters: `_recordId=${recordId}`
         })
-
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
         setInitialData(res.record)
       }
 

@@ -96,6 +96,7 @@ const Table = ({
   paginationType = 'api',
   handleCheckedRows,
   height,
+  addedHeight = '0px',
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
@@ -106,7 +107,6 @@ const Table = ({
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props?.api ? props?.api : props.paginationParameters
@@ -123,9 +123,7 @@ const Table = ({
       if (paginationType === 'api' && gridData) {
         const startAt = gridData._startAt ?? 0
         const totalRecords = gridData?.count ? gridData?.count : 0
-
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
-
         const pageCount = Math.ceil(gridData.count ? gridData.count / pageSize : 1)
 
         const incrementPage = () => {
@@ -275,15 +273,10 @@ const Table = ({
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
       const newCheckedRows = { ...prevCheckedRows }
-
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
-
       newCheckedRows[key] = row
-
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
-
       handleCheckedRows(filteredRows)
-
       console.log('checkedRows 4 ', newCheckedRows)
 
       return filteredRows
@@ -295,9 +288,7 @@ const Table = ({
 
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
-
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
-
   if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
     filteredColumns.push({
@@ -311,7 +302,7 @@ const Table = ({
         const isWIP = row.wip === 2
 
         return (
-          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <>
             {props.onEdit && (
               <IconButton size='small' onClick={() => props.onEdit(params.row)}>
                 <Icon icon='mdi:application-edit-outline' fontSize={18} />
@@ -327,12 +318,11 @@ const Table = ({
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
             )}
-          </Box>
+          </>
         )
       }
     })
   }
-
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
       var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
@@ -405,7 +395,6 @@ const Table = ({
               ]}
             />
           <DeleteDialog
-            fullScreen={false}
             open={deleteDialogOpen}
             onClose={() => setDeleteDialogOpen([false, {}])}
             onConfirm={obj => {

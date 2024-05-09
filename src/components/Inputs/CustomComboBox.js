@@ -80,14 +80,14 @@ const CustomComboBox = ({
       key={value}
       PopperComponent={PopperComponent}
       getOptionLabel={(option, value) => {
-        if (typeof displayField == 'object') {
+        if (Array.isArray(displayField)) {
           const text = displayField
             .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
             ?.filter(item => item)
             ?.join(' ')
           if (text) return text
         }
-        if (typeof option === 'object') {
+        if (typeof option === 'object' && !Array.isArray(displayField)) {
           return `${option[displayField]}`
         } else {
           const selectedOption = store.find(item => {
