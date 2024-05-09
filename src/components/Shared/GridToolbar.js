@@ -39,6 +39,19 @@ const GridToolbar = ({
   const [selectedReport, setSelectedReport] = useState(null)
   const [reportStore, setReportStore] = useState([])
 
+  useEffect(() => {
+    getReportLayout()
+  }, [previewReport])
+
+  useEffect(() => {
+    if (reportStore.length > 0) {
+      setSelectedReport(reportStore[0])
+      console.log('ress')
+    } else {
+      setSelectedReport(null)
+    }
+  }, [reportStore])
+
   const getReportLayout = () => {
     setReportStore([])
     if (previewReport) {
@@ -48,26 +61,25 @@ const GridToolbar = ({
         parameters: parameters
       })
         .then(res => {
-          if (res?.list)
-            setReportStore(
-              res.list.map(item => ({
-                api_url: item.api,
-                reportClass: item.instanceName,
-                parameters: item.parameters,
-                layoutName: item.layoutName,
-                assembly: 'ArgusRPT.dll'
-              }))
-            )
+          if (res?.list) {
+            const formattedReports = res.list.map(item => ({
+              api_url: item.api,
+              reportClass: item.instanceName,
+              parameters: item.parameters,
+              layoutName: item.layoutName,
+              assembly: 'ArgusRPT.dll'
+            }))
+            setReportStore(formattedReports)
+            if (formattedReports.length > 0) {
+              setSelectedReport(formattedReports[0])
+            }
+          }
         })
         .catch(error => {
-          console.log(error)
+          console.error(error)
         })
     }
   }
-
-  useEffect(() => {
-    getReportLayout()
-  }, [])
 
   const formatDataForApi = paramsArray => {
     const formattedData = paramsArray.map(({ fieldId, value }) => `${fieldId}|${value}`).join('^')
