@@ -8,10 +8,14 @@ import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
 import { debounce } from 'lodash'
+import { useSettings } from 'src/@core/hooks/useSettings'
 
 const RequestsContext = createContext()
 
-function LoadingOverlay({ navCollapsed }) {
+function LoadingOverlay() {
+  const { settings } = useSettings()
+  const { navCollapsed } = settings
+
   return (
     <Box
       style={{
@@ -20,8 +24,7 @@ function LoadingOverlay({ navCollapsed }) {
         right: 0,
         width: navCollapsed ? 'calc(100% - 68px)' : 'calc(100% - 300px)',
         height: '100%',
-
-        // backgroundColor: 'red', //'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
+        backgroundColor: 'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -33,7 +36,7 @@ function LoadingOverlay({ navCollapsed }) {
   )
 }
 
-const RequestsProvider = ({ showLoading = false, navCollapsed, children }) => {
+const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
 
   const { stack: stackError } = useError() || {}
@@ -225,7 +228,7 @@ const RequestsProvider = ({ showLoading = false, navCollapsed, children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {showLoading && loading && <LoadingOverlay navCollapsed={navCollapsed} />}
+      {showLoading && loading && <LoadingOverlay />}
     </>
   )
 }
