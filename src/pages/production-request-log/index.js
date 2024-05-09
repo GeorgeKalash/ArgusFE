@@ -1,27 +1,13 @@
-// ** React Imports
-import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
+import { useContext } from 'react'
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
@@ -29,22 +15,6 @@ import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { height } = useWindowDimensions()
-
-  //states
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [selectedRows, setSelectedRows] = useState({})
-
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    validate: values => {},
-    initialValues: {
-      rows: [{}]
-    },
-    onSubmit: values => {
-      calculateLeans()
-    }
-  })
 
   async function getGridData() {
     const parameters = '_status=1&_filter='
@@ -103,17 +73,11 @@ const ProductionRequestLog = () => {
   ]
 
   const handleSubmit = () => {
-    formik.handleSubmit()
+    calculateLeans()
   }
-
-  const handleCheckedRows = checkedRows => {
-    setSelectedRows(prevSelectedRows => [...prevSelectedRows, ...checkedRows])
-  }
-
-  useEffect(() => {}, [selectedRows])
 
   const calculateLeans = () => {
-    const checkedObjects = selectedRows.filter(obj => obj.checked)
+    const checkedObjects = data.list.filter(obj => obj.checked)
 
     /* postRequest({
         extension: ManufacturingRepository.ProductionRequestLog.set,
@@ -126,43 +90,20 @@ const ProductionRequestLog = () => {
           setErrorMessage(error)
         })*/
   }
-  useEffect(() => {
-    setSelectedRows([])
-  }, [])
 
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
-      <CustomTabPanel index={0} value={0}>
-        <Box sx={{ width: '100%' }}>
-          <Table
-            columns={columns}
-            gridData={data}
-            rowId={['recordId']}
-            isLoading={false}
-            maxAccess={access}
-            showCheckboxColumn={true}
-            handleCheckedRows={handleCheckedRows}
-            pagination={false}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: -20,
-            left: 0,
-            width: '100%',
-            margin: 0
-          }}
-        >
-          <WindowToolbar onCalculate={handleSubmit} smallBox={true} />
-        </Box>
-      </CustomTabPanel>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+    <Box>
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        isLoading={false}
+        maxAccess={access}
+        showCheckboxColumn={true}
+        handleCheckedRows={() => {}}
+        pagination={false}
+      />
+      <WindowToolbar onCalculate={handleSubmit} smallBox={true} />
     </Box>
   )
 }
