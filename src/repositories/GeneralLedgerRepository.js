@@ -1,3 +1,5 @@
+import GlobalIntegration from "src/pages/global-integration"
+
 const service = 'GL.asmx/'
 
 export const GeneralLedgerRepository = {
@@ -58,6 +60,10 @@ export const GeneralLedgerRepository = {
     set2: service + 'set2TRX',
     set: service + 'setTRX',
     del: service + 'delTRX'
+  },
+  IntegrationAccounts: {
+    qry: service + 'qryIA',
+    set2: service + 'set2IA',
   },
   Account: {
     snapshot: service + 'snapshotAC'
