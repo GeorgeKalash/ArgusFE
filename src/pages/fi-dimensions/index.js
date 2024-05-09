@@ -23,14 +23,14 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
+import { useForm } from 'src/hooks/form'
 
 const FiDimensions = () => {
-  const [errorMessage, setErrorMessage] = useState(null)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [tempDimCount, setTempDimCount] = useState(null)
 
-  const [initialValues, setInitialValues] = useState({
+  const [initialValues, setInitialData] = useState({
     DimCount: null,
     tpaDimension1: null,
     tpaDimension2: null,
@@ -52,6 +52,33 @@ const FiDimensions = () => {
     tpaDimension18: null,
     tpaDimension19: null,
     tpaDimension20: null
+  })
+
+  const { formik } = useForm({
+    initialValues: initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+
+    validationSchema: yup.object({
+      DimCount: yup.number().nullable().required('Dim Count is required').min(1).max(20),
+      ...Object.fromEntries(
+        Array.from({ length: 20 }, (_, i) => i + 1).map(num => [
+          `tpaDimension${num}`,
+          yup
+            .string()
+            .nullable()
+            .test(`is-tpaDimension${num}-required`, `Dimension ${num} is required`, function (value) {
+              const { DimCount } = this.parent
+
+              return DimCount >= num ? value != null : true
+            })
+        ])
+      )
+    }),
+
+    onSubmit: values => {
+      postDimensionSettings(values)
+    }
   })
 
   useEffect(() => {
@@ -78,44 +105,14 @@ const FiDimensions = () => {
           }
         })
 
-        setInitialValues(myObject)
-        console.log(myObject)
+        formik.setValues(myObject)
+        console.log('obj', myObject)
       })
-      .catch(error => {
-        setErrorMessage(error)
-        console.error('Error fetching data:', error)
-      })
+      .catch(error => {})
   }
 
   const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.FI_dimensions
-  })
-
-  const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
-    validateOnChange: true,
-
-    validationSchema: yup.object({
-      DimCount: yup.number().nullable().required('Dim Count is required').min(1).max(20),
-      ...Object.fromEntries(
-        Array.from({ length: 20 }, (_, i) => i + 1).map(num => [
-          `tpaDimension${num}`,
-          yup
-            .string()
-            .nullable()
-            .test(`is-tpaDimension${num}-required`, `Dimension ${num} is required`, function (value) {
-              const { DimCount } = this.parent
-
-              return DimCount >= num ? value != null : true
-            })
-        ])
-      )
-    }),
-
-    onSubmit: values => {
-      postDimensionSettings(values)
-    }
   })
 
   const postDimensionSettings = obj => {
@@ -134,9 +131,7 @@ const FiDimensions = () => {
       .then(res => {
         toast.success('Record Successfully Updated')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const handleSubmit = () => {
@@ -251,8 +246,6 @@ const FiDimensions = () => {
         >
           <WindowToolbar onSave={handleSubmit} isSaved={true} />
         </Grid>
-
-        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
       </FormShell>
     </>
   )
