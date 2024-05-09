@@ -14,6 +14,7 @@ const ProductionRequestLog = () => {
   const {
     query: { data },
     labels: _labels,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -38,17 +39,12 @@ const ProductionRequestLog = () => {
 
   const columns = [
     {
-      field: 'className',
-      headerName: _labels[2],
-      flex: 1
-    },
-    {
       field: 'sku',
       headerName: _labels[3],
       flex: 1
     },
     {
-      field: 'thickness',
+      field: 'height',
       headerName: _labels[4],
       flex: 1
     },
@@ -58,30 +54,44 @@ const ProductionRequestLog = () => {
       flex: 1
     },
     {
-      field: 'quantity',
+      field: 'qty',
       headerName: _labels[6],
       flex: 1
     },
     {
       field: 'totalThickness',
       headerName: _labels[7],
-      flex: 1
+      flex: 1,
+      valueGetter: params => {
+        const height = params.row.height
+        const qty = params.row.qty
+
+        if (height && qty) {
+          return height * qty
+        }
+
+        return null
+      }
     }
   ]
 
-  const calculateLeans = () => {
+  const calculateLeans = async () => {
     const checkedObjects = data.list.filter(obj => obj.checked)
+    checkedObjects.forEach(obj => {
+      obj.status = 2
+    })
 
-    /* postRequest({
-        extension: ManufacturingRepository.ProductionRequestLog.set,
-        record: JSON.stringify(obj)
-      })
-        .then(res => {
-          toast.success('Record Updated Successfully')
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })*/
+    const resultObject = {
+      leanProductions: checkedObjects
+    }
+
+    const res = await postRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.update,
+      record: JSON.stringify(resultObject)
+    })
+
+    toast.success('Record Updated Successfully')
+    invalidate()
   }
 
   return (
@@ -89,14 +99,17 @@ const ProductionRequestLog = () => {
       <Table
         columns={columns}
         gridData={data ? data : { list: [] }}
-        rowId={['recordId']}
+        rowId={['recordId', 'seqNo']}
         isLoading={false}
         maxAccess={access}
         showCheckboxColumn={true}
         handleCheckedRows={() => {}}
-        pagination={false}
+        pageSize={50}
+        paginationType='client'
+        refetch={refetch}
+        addedHeight={'20px'}
       />
-      <WindowToolbar onCalculate={handleSubmit} isSaved={true} smallBox={true} />
+      <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
     </Box>
   )
 }

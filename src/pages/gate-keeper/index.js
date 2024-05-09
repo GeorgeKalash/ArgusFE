@@ -18,6 +18,7 @@ const GateKeeper = () => {
   const {
     query: { data },
     labels: _labels,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -117,7 +118,9 @@ const GateKeeper = () => {
         maxAccess={access}
         showCheckboxColumn={true}
         handleCheckedRows={() => {}}
-        pagination={false}
+        pageSize={50}
+        paginationType='client'
+        refetch={refetch}
         addedHeight={'20px'}
       />
       <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
