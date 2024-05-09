@@ -9,7 +9,7 @@ const PopperComponent = ({ children, anchorEl, open }) => {
   const zoom = getComputedStyle(document.body).zoom
 
   const canRenderBelow =
-    window.innerHeight / parseFloat(zoom) - (anchorEl && anchorEl.getBoundingClientRect().bottom) > 300
+    window.innerHeight / parseFloat(zoom) - (anchorEl && anchorEl.getBoundingClientRect().bottom) > 350
 
   const rect = anchorEl && anchorEl.getBoundingClientRect()
 
