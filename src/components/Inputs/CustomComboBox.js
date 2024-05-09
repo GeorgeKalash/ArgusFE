@@ -6,10 +6,12 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 const PopperComponent = ({ children, anchorEl, open }) => {
-  const zoom = getComputedStyle(document.body).zoom
+  const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom'))
+  const thresholdPercentage = 0.25 // hay percentage min ta7t
 
   const canRenderBelow =
-    window.innerHeight / parseFloat(zoom) - (anchorEl && anchorEl.getBoundingClientRect().bottom) > 350
+    window.innerHeight / zoom - (anchorEl && anchorEl.getBoundingClientRect().bottom) >
+    window.innerHeight * thresholdPercentage
 
   const rect = anchorEl && anchorEl.getBoundingClientRect()
 
