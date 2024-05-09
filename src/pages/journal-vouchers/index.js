@@ -106,7 +106,7 @@ const JournalVoucher = () => {
 
   const add = async () => {
     const general = await documentType(getRequest, SystemFunction.JournalVoucher)
-    console.log(general)
+
     !general?.errorMessage
       ? stack({
           Component: JournalVoucherForm,

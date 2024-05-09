@@ -7,6 +7,7 @@ import TransactionForm from '../currency-trading/forms/TransactionForm'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { useError } from 'src/error'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import documentType from 'src/lib/docRefBehaivors'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)
@@ -41,8 +42,15 @@ export default function CurrencyTrading() {
       }
     } catch (error) {}
   }
+  async function check() {
+    const general = await documentType(getRequest, 'SystemFunction', undefined, false)
 
+    return general
+  }
   useEffect(() => {
+    const general = check()
+    console.log(general)
+    !general?.errorMessage ? openForm() : stackError({ message: general?.errorMessage })
     openForm()
   }, [access])
 

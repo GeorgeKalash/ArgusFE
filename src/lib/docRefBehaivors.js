@@ -49,7 +49,7 @@ const fetchData = async (getRequest, id, repository) => {
   return await getData(getRequest, extension, parameters)
 }
 
-const documentType = async (getRequest, functionId, selectNraId = undefined) => {
+const documentType = async (getRequest, functionId, selectNraId = undefined, hasDT = true) => {
   console.log(functionId, selectNraId)
   const docType = selectNraId === undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
@@ -58,23 +58,29 @@ const documentType = async (getRequest, functionId, selectNraId = undefined) => 
   let reference
   let isExternal
   let dcTypeRequired
+  let activeStatus = true
   if (docType && selectNraId === undefined) {
     // mot select combobox
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
+      activeStatus = dcTypNumberRange?.activeStatus < 0 && false
+      console.log(activeStatus)
       if (!nraId) {
         errorMessage = 'Assign the document type to a number range'
       }
-    } else {
+    }
+
+    if ((!dtId || !activeStatus) && hasDT) {
       const documentType = await fetchData(getRequest, functionId, 'DocumentType') //qryDT
       dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
     }
   }
   if (selectNraId === null || (selectNraId === undefined && !dcTypeRequired)) {
-    if (!dtId) {
+    if (!dtId || (!dcTypeRequired && dtId)) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
+      activeStatus = true
     }
     if (!nraId && !dcTypeRequired) {
       errorMessage = 'Assign the document type to a number range'
@@ -84,7 +90,7 @@ const documentType = async (getRequest, functionId, selectNraId = undefined) => 
   if (selectNraId > 0 && !nraId) {
     nraId = selectNraId
   }
-  if (nraId) {
+  if (nraId && activeStatus) {
     isExternal = await fetchData(getRequest, nraId, 'isExternal')
     reference = {
       readOnly: isExternal?.external ? false : true,
