@@ -31,7 +31,7 @@ function LoadingOverlay() {
         zIndex: 9999 // Ensure it's above other content
       }}
     >
-      <CircularProgress color='success' />
+      <CircularProgress color='inherit' />
     </Box>
   )
 }
