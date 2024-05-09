@@ -171,7 +171,7 @@ const GridToolbar = ({
             renderInput={params => (
               <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
             )}
-            sx={{ width: 250 }}
+            sx={{ width: 250, zIndex: 0 }}
             disableClearable
           />
           <Button
