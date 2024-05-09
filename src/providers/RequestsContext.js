@@ -16,6 +16,7 @@ const RequestsProvider = ({ children }) => {
 
   const { stack: stackError } = useError() || {}
   const [loading, setLoading] = useState(false)
+  const [count, setCount] = useState(0)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -26,7 +27,7 @@ const RequestsProvider = ({ children }) => {
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
-    setLoading(true)
+    !loading && setLoading(true)
 
     return axios({
       method: 'GET',
