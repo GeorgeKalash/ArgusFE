@@ -7,6 +7,7 @@ import PropTypes from 'prop-types'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { MenuContext } from 'src/providers/MenuContext'
+import { fontWeight } from '@mui/system';
 
 const TabsContext = createContext()
 
@@ -18,7 +19,15 @@ function CustomTabPanel(props) {
       role='tabpanel'
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      sx={{display: value !== index ? 'none !important' : 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important', overflow:'auto',paddingTop:'5px'}}
+      sx={{
+        display: value !== index ? 'none !important' : 'flex !important', 
+        flexDirection: 'column', 
+        width: '100%',
+        flex :'1 !important', 
+        overflow:'auto',
+        paddingTop:'5px',
+        backgroundColor:'white'
+      }}
       {...other}
     >
       {children}
@@ -33,7 +42,7 @@ CustomTabPanel.propTypes = {
 }
 
 const TabsProvider = ({ children }) => {
-  // ** Hooks
+  
   const router = useRouter()
   const { menu, lastOpenedPage } = useContext(MenuContext)
 
@@ -73,7 +82,6 @@ const TabsProvider = ({ children }) => {
     return null
   }
 
-  // ** States
   const [activeTabs, setActiveTabs] = useState([])
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [value, setValue] = useState(0)
@@ -190,41 +198,61 @@ const TabsProvider = ({ children }) => {
   return (
     <>
       <Box sx={{ display: 'flex !important', flexDirection: 'column', width: '100%',flex :'1 !important', overflow:'auto' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider'}}>
+        <Box sx={{ backgroundColor:'#231f20',pt:'5px'}}>
           <Tabs
             value={value}
             onChange={handleChange}
             variant="scrollable"
             scrollButtons="auto"
             aria-label="scrollable auto tabs example"
-            sx={{maxHeight: '40px'}}
+            sx={{
+              minHeight: '35px !important',
+              '.MuiTab-root': { 
+                color: '#231f20',  
+                backgroundColor:'grey',
+                '&:hover': {
+                  backgroundColor: '#ddd'
+                }
+              },
+              '.Mui-selected': { 
+                backgroundColor: 'white'
+              },
+              '.MuiTabs-indicator': {
+                backgroundColor: 'white'
+              }
+            }}
           >
             {activeTabs.length > 0 &&
-              activeTabs.map((activeTab, i) => {
-                return (
-                  !activeTab.isDefault && (
-                    <Tab
-                      key={i}
-                      label={activeTab?.label}
-                      onClick={() => router?.push(activeTab.route)}
-                      onContextMenu={(event) => OpenItems(event, i)}
-                      icon={
-                        <IconButton
-                          size='small'
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            closeTab(activeTab.route);
-                          }}
-                        >
-                          <CloseIcon fontSize='small' />
-                        </IconButton>
-                      }
-                      iconPosition='end'
-                      sx={{ minHeight: '40px' }}
-                    />
-                  )
-                )
-              })}
+              activeTabs.map((activeTab, i) => (
+                <Tab
+                  key={i}
+                  label={activeTab?.label}
+                  onClick={() => router?.push(activeTab.route)}
+                  onContextMenu={(event) => OpenItems(event, i)}
+                  icon={
+                    <IconButton
+                      size='small'
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        closeTab(activeTab.route);
+                      }}
+                    >
+                      <CloseIcon fontSize='small' />
+                    </IconButton>
+                  }
+                  iconPosition='end'
+                  sx={{ 
+                    minHeight: '35px !important',
+                    borderTopLeftRadius: 5,
+                    borderTopRightRadius: 5,
+                    py: '0px !important',
+                    mb: '0px !important',
+                    borderBottom: '0px !important',
+                    mr: '2px !important',
+                    fontWeight: '1.5rem',
+                  }}
+                />
+              ))}
           </Tabs>
         </Box>
         {activeTabs.length > 0 &&
