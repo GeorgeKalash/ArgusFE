@@ -163,11 +163,6 @@ const FiDimensions = () => {
     }
   }
 
-  const handleClearDimCount = () => {
-    setTempDimCount(null)
-    formik.setFieldValue('DimCount', null)
-  }
-
   return (
     <>
       <FormShell
@@ -187,7 +182,7 @@ const FiDimensions = () => {
               onChange={handleDimCountChange}
               onBlur={handleDimCountBlur}
               numberField={true}
-              onClear={handleClearDimCount}
+              removeClear={true}
               type='number'
               error={formik.touched.DimCount && Boolean(formik.errors.DimCount)}
               inputProps={{
