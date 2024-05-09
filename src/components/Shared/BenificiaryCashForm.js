@@ -1,12 +1,11 @@
 // ** MUI Imports
-import { Grid, FormControlLabel, Checkbox, Button, DialogActions } from '@mui/material'
+import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
 import { useEffect, useState, useContext } from 'react'
 
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { useError } from 'src/error'
 
@@ -28,10 +27,9 @@ import { useForm } from 'src/hooks/form'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
-import { max } from 'moment/moment'
 
 const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, countryId }) => {
-  const [maxAccess, setMaxAccess] = useState({record: []})
+  const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
 
   useEffect(() => {
@@ -87,6 +85,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
           addressLine2: RTBEN?.record?.addressLine2,
           clientRef: RTBEN?.record?.clientRef,
           clientName: RTBEN?.record?.clientName,
+          countryId: RTBEN?.record?.countryId,
+
 
           //RTBEC
           firstName: RTBEC?.record?.firstName,
@@ -97,7 +97,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
           fl_lastName: RTBEC?.record?.fl_lastName,
           fl_middleName: RTBEC?.record?.fl_middleName,
           fl_familyName: RTBEC?.record?.fl_familyName,
-          countryId: RTBEC?.record?.countryId,
+          
+          //countryId: RTBEC?.record?.countryId,
           birthPlace: RTBEC?.record?.birthPlace
         }
         formik.setValues(obj)
@@ -129,8 +130,9 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
     birthDate: null,
     addressLine1: '',
     addressLine2: '',
-    clientRef:'',
-    clientName:'',
+    clientRef: '',
+    clientName: '',
+    countryId: '',
 
     //RTBEC
     firstName: '',
@@ -141,7 +143,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
     fl_lastName: '',
     fl_middleName: '',
     fl_familyName: '',
-    countryId: '',
+
+    //countryId: '',
     birthPlace: ''
   })
 
@@ -178,7 +181,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
         addressLine1: values.addressLine1,
         addressLine2: values.addressLine2,
         clientRef: values.clientRef,
-        clientName: values.clientName
+        clientName: values.clientName,
+        countryId: values.countryId
       }
 
       const cashInfo = {
@@ -269,7 +273,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
       maxAccess={maxAccess}
     >
       <Grid container rowGap={2}>
-      <Grid container xs={12}>
+        <Grid container xs={12}>
           <ResourceLookup
             endpointId={CTCLRepository.ClientCorporate.snapshot}
             parameters={{
@@ -278,16 +282,14 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
             valueField='reference'
             displayField='name'
             name='clientId'
-            label={_labels.Client}
+            label={_labels.client}
             form={formik}
             required
-            readOnly={clientId}
+            readOnly={clientId || formik.values.clientId}
             displayFieldWidth={2}
             valueShow='clientRef'
             secondValueShow='clientName'
             maxAccess={maxAccess}
-
-            //editMode={editMode}
             onChange={async (event, newValue) => {
               if (newValue?.status == -1) {
                 stackError({
@@ -299,10 +301,6 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               formik.setFieldValue('clientId', newValue ? newValue.recordId : '')
               formik.setFieldValue('clientName', newValue ? newValue.name : '')
               formik.setFieldValue('clientRef', newValue ? newValue.reference : '')
-              
-              //await getClientInfo(newValue?.recordId)
-              //formik.setFieldValue('beneficiaryId', '')
-              //formik.setFieldValue('beneficiaryName', '')
             }}
             errorCheck={'clientId'}
           />
@@ -600,7 +598,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
-              readOnly={countryId}
+              readOnly={formik.values.countryId || countryId}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('countryId', newValue ? newValue.recordId : '')

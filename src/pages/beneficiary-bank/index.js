@@ -17,11 +17,11 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 import { useWindow } from 'src/windows'
-import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
+import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import toast from 'react-hot-toast'
 
-const BeneficiaryCash = () => {
+const BeneficiaryBank = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   //states
@@ -36,7 +36,7 @@ const BeneficiaryCash = () => {
     access
   } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot,
-    datasetId: ResourceIds.BeneficiaryCash,
+    datasetId: ResourceIds.BeneficiaryBank,
     filter: {
       endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot,
       filterFn: fetchWithSearch
@@ -44,7 +44,7 @@ const BeneficiaryCash = () => {
   })
 
   async function fetchWithSearch({ options = {}, filters }) {
-    const { _clientId = 0, _dispersalType = 1 } = options
+    const { _clientId = 0, _dispersalType = 2 } = options
     if (!filters.qry) {
       return { list: [] }
     } else {
@@ -61,27 +61,27 @@ const BeneficiaryCash = () => {
 
   async function openForm(beneficiaryId, clientId) {
     stack({
-      Component: BenificiaryCashForm,
+      Component: BenificiaryBankForm,
       props: {
         clientId: clientId,
         beneficiaryId: beneficiaryId,
-        dispersalType: 1
+        dispersalType: 2
       },
       width: 700,
       height: 500,
-      title: _labels.cash
+      title: _labels.bank
     })
   }
 
   const columns = [
     {
       field: 'IBAN',
-      headerName: _labels.IBAN,
+      headerName: _labels.iban,
       flex: 1
     },
     {
       field: 'accountReference',
-      headerName: _labels.accountReference,
+      headerName: _labels.accountRef,
       flex: 1
     },
     {
@@ -96,7 +96,7 @@ const BeneficiaryCash = () => {
     },
     {
       field: 'nationalityName',
-      headerName: _labels.nationalityName,
+      headerName: _labels.nationality,
       flex: 1
     },
     ,
@@ -127,20 +127,20 @@ const BeneficiaryCash = () => {
     }
   ]
 
-  const delBenCash = async obj => {
+  const delBenBank = async obj => {
     await postRequest({
-      extension: RemittanceOutwardsRepository.BeneficiaryCash.del,
+      extension: RemittanceOutwardsRepository.BeneficiaryBank.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success('Record Deleted Successfully')
   }
 
-  const addBenCash = () => {
+  const addBenBank = () => {
     openForm('')
   }
 
-  const editBenCash = obj => {
+  const editBenBank = obj => {
     openForm(obj.beneficiaryId, obj.clientId)
   }
 
@@ -148,7 +148,7 @@ const BeneficiaryCash = () => {
     <>
       <Box>
         <GridToolbar
-          onAdd={addBenCash}
+          onAdd={addBenBank}
           maxAccess={access}
           onSearch={value => {
             filterBy('qry', value)
@@ -163,8 +163,8 @@ const BeneficiaryCash = () => {
           columns={columns}
           gridData={data ? data : { list: [] }}
           rowId={['beneficiaryId', 'clientId']}
-          onEdit={editBenCash}
-          onDelete={delBenCash}
+          onEdit={editBenBank}
+          onDelete={delBenBank}
           isLoading={false}
           pageSize={50}
           paginationType='client'
@@ -176,4 +176,4 @@ const BeneficiaryCash = () => {
   )
 }
 
-export default BeneficiaryCash
+export default BeneficiaryBank

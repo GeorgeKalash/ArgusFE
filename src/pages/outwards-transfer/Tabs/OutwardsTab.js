@@ -11,7 +11,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import BenificiaryBank from './BenificiaryBank'
+import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import InstantCash from './InstantCash'
 import TerraPay from './TerraPay'
@@ -412,7 +412,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           corId: formik.values.corId ? formik.values.corId : 0,
           countryId: formik.values.countryId,
           beneficiaryId: formik.values.beneficiaryId,
-          dispersalType: formik.values.dispersalType,
+          dispersalType: formik.values.dispersalType
         },
         width: 700,
         height: 500,
@@ -420,7 +420,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       })
     } else if (formValues.dispersalType === 2) {
       stack({
-        Component: BenificiaryBank,
+        Component: BenificiaryBankForm,
         props: {
           clientId: formik.values.clientId,
           dispersalType: formik.values.dispersalType,
