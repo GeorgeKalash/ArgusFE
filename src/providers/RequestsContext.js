@@ -11,19 +11,39 @@ import { debounce } from 'lodash'
 
 const RequestsContext = createContext()
 
-const RequestsProvider = ({ children }) => {
+function LoadingOverlay() {
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        top: 45,
+        right: 0,
+        width: '80%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999 // Ensure it's above other content
+      }}
+    >
+      <CircularProgress color='success' />
+    </Box>
+  )
+}
+
+const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
 
   const { stack: stackError } = useError() || {}
   const [loading, setLoading] = useState(false)
-  const [count, setCount] = useState(0)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
-  const debouncedSetLoading = debounce(() => {
+  const debouncedCloseLoading = debounce(() => {
     setLoading(false)
-  }, 500)
+  }, 2000)
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
@@ -39,12 +59,12 @@ const RequestsProvider = ({ children }) => {
       }
     })
       .then(res => {
-        debouncedSetLoading()
+        debouncedCloseLoading()
 
         return res.data
       })
       .catch(error => {
-        debouncedSetLoading()
+        debouncedCloseLoading()
 
         stackError({ message: error, height: 400 })
         throw error
@@ -204,24 +224,7 @@ const RequestsProvider = ({ children }) => {
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {loading && (
-        <Box
-          style={{
-            position: 'absolute',
-            top: 45,
-            right: 0,
-            width: '80%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999 // Ensure it's above other content
-          }}
-        >
-          <CircularProgress color='success' />
-        </Box>
-      )}
+      {showLoading && loading && <LoadingOverlay />}
     </>
   )
 }
