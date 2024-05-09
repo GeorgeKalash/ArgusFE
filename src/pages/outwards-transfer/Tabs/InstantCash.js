@@ -7,12 +7,18 @@ import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterfac
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useError } from 'src/error'
 
-export default function InstantCash({ onInstantCashSubmit, cashData = {}, window }) {
+export default function InstantCash({ onInstantCashSubmit, cashData = {}, window, clientData, outwardsData }) {
+  const { getRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
+
   const { labels: _labels, maxAccess } = useResourceQuery({
     datasetId: ResourceIds.InstantCash
   })
@@ -24,13 +30,13 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
       deliveryModeId: '',
       currency: '',
       partnerReference: '',
-      sourceAmount: '',
+      sourceAmount: outwardsData?.amount ?? '',
       fromCountryId: '',
       toCountryId: '',
-      sourceOfFundsId: '',
-      remittancePurposeId: '',
-      totalTransactionAmountPerAnnum: '',
-      transactionsPerAnnum: '',
+      sourceOfFundsId: 0,
+      remittancePurposeId: 0,
+      totalTransactionAmountPerAnnum: clientData?.hiddenTrxAmount ?? '',
+      transactionsPerAnnum: clientData?.hiddenTrxCount ?? '',
       remitter: {
         cardNo: '',
         firstName: '',
@@ -62,8 +68,8 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
         countryOfResidence: '',
         relation: '',
         otherRelation: '',
-        profession: '',
-        employerName: '',
+        profession: 0,
+        employerName: clientData?.hiddenSponserName,
         employerStatus: ''
       },
       beneficiary: {
@@ -101,15 +107,9 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
       deliveryModeId: yup.string().required(' '),
       toCountryId: yup.string().required(' '),
       payingAgent: yup.string().required(' '),
-      sourceOfFundsId: yup.string().required(' '),
-      remittancePurposeId: yup.string().required(' '),
       sourceAmount: yup.string().required(' '),
-      totalTransactionAmountPerAnnum: yup.string().required(' '),
-      transactionsPerAnnum: yup.string().required(' '),
       remitter: yup.object().shape({
-        profession: yup.string().required(' '),
-        employerName: yup.string().required(' '),
-        employerStatus: yup.string().required(' ')
+        employerName: yup.string().required(' ')
       }),
       beneficiary: yup.object().shape({
         bankDetails: yup.object().shape({
@@ -118,6 +118,9 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
       })
     }),
     onSubmit: values => {
+      values.sourceOfFundsId = 0
+      values.remittancePurposeId = 0
+      values.remitter.profession = 0
       onInstantCashSubmit(values)
       window.close()
     }
@@ -125,8 +128,24 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
   useEffect(() => {
     ;(async function () {
       if (cashData.deliveryModeId) formik.setValues(cashData)
+      if (outwardsData.countryId) {
+        const res = await getRequest({
+          extension: SystemRepository.Country.get,
+          parameters: `_recordId=${outwardsData.countryId}`
+        })
+        if (!res.record?.isoCode1) {
+          stackError({
+            message: `Please assign iso code1 to ${res.record.name}`
+          })
+
+          return
+        }
+
+        formik.setFieldValue('toCountryId', res?.record?.isoCode1.trim())
+      }
     })()
   }, [])
+  console.log('formik check ', formik)
 
   return (
     <FormShell
@@ -156,7 +175,6 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
                 } else {
                   formik.setFieldValue('deliveryModeId', '')
                 }
-                formik.setFieldValue('toCountryId', '')
                 formik.setFieldValue('payingAgent', '')
               }}
               maxAccess={maxAccess}
@@ -164,24 +182,13 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
             />
           </Grid>
           <Grid hideonempty xs={12}>
-            <ResourceComboBox
-              endpointId={formik.values.deliveryModeId && RemittanceBankInterface.ReceivingCountries.qry}
-              parameters={formik.values.deliveryModeId && `_deliveryMode=${formik.values.deliveryModeId}`}
+            <CustomTextField
               name='toCountryId'
+              required
+              readOnly
+              onChange={formik.handleChange}
               label={_labels.toCountry}
-              valueField='recordId'
-              displayField='name'
-              readOnly={!formik.values.deliveryModeId}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('toCountryId', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('toCountryId', '')
-                }
-                formik.setFieldValue('payingAgent', '')
-              }}
-              maxAccess={maxAccess}
+              value={formik.values.toCountryId}
               error={formik.touched.toCountryId && Boolean(formik.errors.toCountryId)}
             />
           </Grid>
@@ -199,6 +206,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               label={_labels.payingAgent}
               readOnly={!(formik.values.deliveryModeId && formik.values.toCountryId)}
               valueField='recordId'
+              required
               displayField='description'
               columnsInDropDown={[
                 { key: 'description', value: 'Paying Agent' },
@@ -218,70 +226,9 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               error={formik.touched.payingAgent && Boolean(formik.errors.payingAgent)}
             />
           </Grid>
-          <Grid hideonempty xs={12}>
-            <ResourceComboBox
-              endpointId={RemittanceBankInterface.Combos.qry}
-              parameters={`_combo=7`}
-              name='remitter.profession'
-              label={_labels.profession}
-              valueField='recordId'
-              displayField='name'
-              value={formik.values.remitter.profession}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('remitter.profession', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('remitter.profession', '')
-                }
-              }}
-              maxAccess={maxAccess}
-              error={formik.touched.remitter?.profession && Boolean(formik.errors.remitter?.profession)}
-            />
-          </Grid>
-          <Grid hideonempty xs={12}>
-            <ResourceComboBox
-              endpointId={RemittanceBankInterface.Combos.qry}
-              parameters={`_combo=5`}
-              name='remittancePurposeId'
-              label={_labels.remittancePurpose}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('remittancePurposeId', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('remittancePurposeId', '')
-                }
-              }}
-              maxAccess={maxAccess}
-              error={formik.touched.remittancePurposeId && Boolean(formik.errors.remittancePurposeId)}
-            />
-          </Grid>
         </Grid>
         {/* Second Column */}
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2, height: '50%' }}>
-          <Grid hideonempty xs={12}>
-            <ResourceComboBox
-              endpointId={RemittanceBankInterface.Combos.qry}
-              parameters={`_combo=6`}
-              name='sourceOfFundsId'
-              label={_labels.sourceOfFunds}
-              valueField='recordId'
-              displayField='name'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  formik.setFieldValue('sourceOfFundsId', newValue?.recordId)
-                } else {
-                  formik.setFieldValue('sourceOfFundsId', '')
-                }
-              }}
-              maxAccess={maxAccess}
-              error={formik.touched.sourceOfFundsId && Boolean(formik.errors.sourceOfFundsId)}
-            />
-          </Grid>
-
           <Grid hideonempty xs={12}>
             <CustomNumberField
               name='sourceAmount'
@@ -290,57 +237,38 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
               value={formik.values.sourceAmount}
               error={formik.touched.sourceAmount && Boolean(formik.errors.sourceAmount)}
               maxAccess={maxAccess}
+              required
+              readOnly
               onClear={() => formik.setFieldValue('sourceAmount', '')}
             />
           </Grid>
           <Grid hideonempty xs={12}>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='totalTransactionAmountPerAnnum'
-                onChange={formik.handleChange}
-                label={_labels.trxPerYear}
-                value={formik.values.totalTransactionAmountPerAnnum}
-                error={
-                  formik.touched.totalTransactionAmountPerAnnum && Boolean(formik.errors.totalTransactionAmountPerAnnum)
-                }
-              />
-            </Grid>
+            <CustomNumberField
+              name='transactionsPerAnnum'
+              onChange={formik.handleChange}
+              label={_labels.trxCountPerYear}
+              readOnly
+              value={formik.values.transactionsPerAnnum}
+              error={formik.touched.transactionsPerAnnum && Boolean(formik.errors.transactionsPerAnnum)}
+            />
           </Grid>
           <Grid hideonempty xs={12}>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='transactionsPerAnnum'
-                onChange={formik.handleChange}
-                label={_labels.trxPerMonth}
-                value={formik.values.transactionsPerAnnum}
-                error={formik.touched.transactionsPerAnnum && Boolean(formik.errors.transactionsPerAnnum)}
-              />
-            </Grid>
+            <CustomNumberField
+              name='totalTransactionAmountPerAnnum'
+              onChange={formik.handleChange}
+              readOnly
+              label={_labels.trxAmountPerYear}
+              value={formik.values.totalTransactionAmountPerAnnum}
+              error={
+                formik.touched.totalTransactionAmountPerAnnum && Boolean(formik.errors.totalTransactionAmountPerAnnum)
+              }
+            />
           </Grid>
         </Grid>
       </Grid>
       <Grid container sx={{ pt: 2 }}>
         <Grid container rowGap={2} xs={6} spacing={2} sx={{ pt: 5 }}>
           <FieldSet title='Remitter'>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={RemittanceBankInterface.Combos.qry}
-                parameters={`_combo=2`}
-                name='remitter.relation'
-                label={_labels.relationship}
-                valueField='recordId'
-                displayField='name'
-                value={formik.values.remitter.relation}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('remitter.relation', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('remitter.relation', '')
-                  }
-                }}
-                maxAccess={maxAccess}
-              />
-            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='otherRelation'
@@ -353,11 +281,13 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
             <Grid item xs={12}>
               <CustomTextField
                 name='remitter.employerName'
+                required
+                readOnly
                 onChange={event => formik.setFieldValue('remitter.employerName', event.target.value)}
                 label={_labels.employerName}
                 onClear={() => formik.setFieldValue('remitter.employerName', '')}
                 value={formik.values.remitter.employerName}
-                error={formik.touched.employerName && Boolean(formik.errors.employerName)}
+                error={formik.touched.remitter?.employerName && Boolean(formik.errors.remitter?.employerName)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -392,6 +322,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
                   _payingAgent: formik.values.payingAgent,
                   _deliveryMode: formik.values.deliveryModeId
                 }}
+                required
                 valueField='name'
                 displayField='bankName'
                 name='beneficiary.bankDetails.bankName'

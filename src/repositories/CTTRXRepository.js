@@ -2,6 +2,8 @@ const service = 'CTTRX.asmx/'
 
 export const CTTRXrepository = {
   CurrencyTrading: {
+    get2: service + 'get2CIV',
+    set2: service + 'set2CIV',
     snapshot: service + 'snapshotCIV',
     close: service + 'closeCIV',
     reopen: service + 'reopenCIV'

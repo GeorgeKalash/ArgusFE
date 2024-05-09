@@ -41,6 +41,8 @@ const ClientsList = () => {
     }
   })
   async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
     return (
       filters.qry &&
       (await getRequest({
