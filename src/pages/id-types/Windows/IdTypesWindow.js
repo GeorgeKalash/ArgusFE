@@ -35,7 +35,7 @@ const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-      {/* <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab}>
         <IdFieldsForm
           store={store}
           setStore={setStore}
@@ -54,7 +54,7 @@ const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           expanded={expanded}
           height={height}
         />
-      </CustomTabPanel> */}
+      </CustomTabPanel>
     </>
   )
 }

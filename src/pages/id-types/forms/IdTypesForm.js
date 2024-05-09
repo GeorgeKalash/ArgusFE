@@ -152,7 +152,7 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
             error={formik.touched.length && Boolean(formik.errors.length)}
           />
         </Grid>
-        {/* <Grid item xs={12}>
+        <Grid item xs={12}>
           <ResourceComboBox
             datasetId={DataSets.ID_CATEGORY}
             name='category'
@@ -226,7 +226,7 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
             }
             label={labels.isDiplomat}
           />
-        </Grid> */}
+        </Grid>
       </Grid>
     </FormShell>
   )
