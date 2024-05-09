@@ -1,43 +1,40 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Box } from '@mui/material'
-import { useFormik } from 'formik'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
-
-  async function getGridData() {
-    const parameters = '_status=1&_filter='
-
-    return await getRequest({
-      extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: parameters
-    })
-  }
 
   const {
     query: { data },
     labels: _labels,
     access
   } = useResourceQuery({
-    queryFn: getGridData,
+    queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
     datasetId: ResourceIds.ProductionRequestLog
   })
 
+  const handleSubmit = () => {
+    calculateLeans()
+  }
+
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview
   })
+
+  async function fetchGridData() {
+    return await getRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.preview,
+      parameters: '_status=1&_filter='
+    })
+  }
 
   const columns = [
     {
@@ -72,10 +69,6 @@ const ProductionRequestLog = () => {
     }
   ]
 
-  const handleSubmit = () => {
-    calculateLeans()
-  }
-
   const calculateLeans = () => {
     const checkedObjects = data.list.filter(obj => obj.checked)
 
@@ -95,7 +88,7 @@ const ProductionRequestLog = () => {
     <Box>
       <Table
         columns={columns}
-        gridData={data}
+        gridData={data ? data : { list: [] }}
         rowId={['recordId']}
         isLoading={false}
         maxAccess={access}
@@ -103,7 +96,7 @@ const ProductionRequestLog = () => {
         handleCheckedRows={() => {}}
         pagination={false}
       />
-      <WindowToolbar onCalculate={handleSubmit} smallBox={true} />
+      <WindowToolbar onCalculate={handleSubmit} isSaved={true} smallBox={true} />
     </Box>
   )
 }
