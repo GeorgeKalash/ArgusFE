@@ -184,8 +184,8 @@ const FiDimensions = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6} sx={{ marginTop: '0.5rem' }}>
-            <Grid container spacing={1.5}>
+          <Grid item xs={12} md={6} sx={{ marginTop: '0.2rem' }}>
+            <Grid container spacing={2}>
               {Array.from({ length: 10 }).map((_, index) => (
                 <Grid item xs={12} key={1}>
                   <CustomTextField
@@ -205,8 +205,8 @@ const FiDimensions = () => {
             </Grid>
           </Grid>
 
-          <Grid item xs={12} md={6} sx={{ marginTop: '0.5rem' }}>
-            <Grid container spacing={1.5}>
+          <Grid item xs={12} md={6} sx={{ marginTop: '0.2rem' }}>
+            <Grid container spacing={2}>
               {Array.from({ length: 10 }).map((_, index) => (
                 <Grid item xs={12} key={1}>
                   <CustomTextField
