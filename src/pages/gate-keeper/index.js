@@ -19,6 +19,7 @@ const GateKeeper = () => {
     query: { data },
     labels: _labels,
     refetch,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -34,11 +35,15 @@ const GateKeeper = () => {
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview
   })
 
-  async function fetchGridData() {
-    return await getRequest({
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `filter=&_status=2`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_status=2`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -119,7 +124,8 @@ const GateKeeper = () => {
         showCheckboxColumn={true}
         handleCheckedRows={() => {}}
         pageSize={50}
-        paginationType='client'
+        paginationType='api'
+        paginationParameters={paginationParameters}
         refetch={refetch}
         addedHeight={'20px'}
       />
