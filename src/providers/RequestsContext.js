@@ -109,6 +109,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   }
 
   const postRequest = async body => {
+    !loading && setLoading(true)
+
     const accessToken = await getAccessToken()
     const url = body.url ? body.url : apiUrl
 
@@ -125,8 +127,14 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       },
       data: bodyFormData
     })
-      .then(res => res.data)
+      .then(res => {
+        debouncedCloseLoading()
+
+        return res.data
+      })
       .catch(error => {
+        debouncedCloseLoading()
+
         stackError({ message: error, height: 400 })
         throw error
       })
