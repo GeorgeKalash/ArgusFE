@@ -292,7 +292,6 @@ const Navigation = props => {
           )}
         </Box>
         <Box sx={{ position: 'relative', overflow: 'hidden' }}>
-          {/* @ts-ignore */}
           <ScrollWrapper
             {...(hidden
               ? {

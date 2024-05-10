@@ -3,23 +3,13 @@ import { useContext, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import { Box, Grid } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
-// ** API
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import useResourceParams from 'src/hooks/useResourceParams'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'

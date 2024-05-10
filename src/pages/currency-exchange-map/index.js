@@ -70,18 +70,6 @@ const NumberRange = () => {
     }
   })
 
-  const fillCurrencyStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {})
-  }
-
   const _labels = {
     country: labels && labels.find(item => item.key === '1') && labels.find(item => item.key === '1').value,
     currency: labels && labels.find(item => item.key === '2') && labels.find(item => item.key === '2').value,

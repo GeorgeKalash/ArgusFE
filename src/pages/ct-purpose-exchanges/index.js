@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -64,7 +64,7 @@ const PurposeExchange = () => {
       },
       width: 600,
       height: 500,
-      title: _labels.idTypes
+      title: _labels.purposeOfExchange
     })
   }
 

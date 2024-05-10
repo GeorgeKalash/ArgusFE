@@ -6,6 +6,7 @@ import { Buttons } from './Buttons'
 
 const WindowToolbar = ({
   onSave,
+  onCalculate,
   onPost,
   onClear,
   onInfo,
@@ -21,6 +22,7 @@ const WindowToolbar = ({
   disabledApply,
   editMode = false,
   infoVisible = true,
+  onRecordRemarks,
   isClosed = false,
   onClientRelation = false,
   isPosted = false,
@@ -38,6 +40,7 @@ const WindowToolbar = ({
     disabledSubmit,
     disabledApply,
     infoVisible,
+    onRecordRemarks,
     isPosted,
     isClosed,
     editMode,
