@@ -1,9 +1,4 @@
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import Table from 'src/components/Shared/Table'
-import Checkbox from '@mui/material/Checkbox'
-import { useEffect, useState } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
@@ -17,6 +12,16 @@ const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) =>
     {
       field: 'productName',
       headerName: labels.ProductName,
+      flex: 1
+    },
+    {
+      field: 'corName',
+      headerName: labels.corName,
+      flex: 1
+    },
+    {
+      field: 'interfaceName',
+      headerName: labels.interface,
       flex: 1
     },
     {

@@ -53,6 +53,7 @@ export const ResourceIds = {
   DRGroups: 10103,
   ClientMaster: 36201,
   ClientList: 35201,
+  UpdateClientRemittance: 36204,
   Characteristics: 10102,
   Strategies: 10106,
   Classes: 10101,
@@ -62,6 +63,7 @@ export const ResourceIds = {
   ClientCorporate: 35205,
   DRClasses: 10101,
   States: 20107,
+  RecordRemarks: 20204,
   SecurityGroup: 23102,
   RiskLevel: 35104,
   PurposeOfExchange: 35103,
@@ -86,6 +88,7 @@ export const ResourceIds = {
   CommissionSchedule: 51118,
   CbCashGroups: 33100,
   CbBanks: 33101,
+  OTPVerify: 35209,
   SystemDefaults: 20108,
   ProductionClass: 42108,
   carrierSite: 40203,
@@ -109,6 +112,12 @@ export const ResourceIds = {
   Beneficiary: 36305,
   CashAccounts: 33102,
   CorrespondentControl: 36119,
+  CashTransfer: 33309,
+  IntegrationAccount: 30102,
+  InstantCash: 36306,
   GlobalAuthorization: 23105,
-  CashTransfer: 33309
+  InterfaceMap: 36120,
+  PriceLevels: 51101,
+  CommissionSchedule: 51118,
+  ProductionRequestLog: 42321
 }

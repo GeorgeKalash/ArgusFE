@@ -34,9 +34,11 @@ export default function ResourceComboBox({
           getRequest({
             extension: endpointId,
             parameters
-          }).then(res => {
-            setStore(res.list)
           })
+            .then(res => {
+              setStore(res.list)
+            })
+            .catch(error => {})
   }, [parameters])
 
   const filteredStore = data ? data : store.filter(filter)

@@ -4,15 +4,14 @@ import { createContext, useContext, useState } from 'react'
 // ** 3rd Party Imports
 import axios from 'axios'
 import jwt from 'jwt-decode'
-
 import { AuthContext } from 'src/providers/AuthContext'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useError } from 'src/error'
 
 const RequestsContext = createContext()
 
 const RequestsProvider = ({ children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
-  const [error, setError] = useState(null)
+  const { stack: stackError } = useError() || {}
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -31,7 +30,7 @@ const RequestsProvider = ({ children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        setError(error) // Set the error state
+        stackError({ message: error, height: 400 })
         throw error
       })
   }
@@ -45,7 +44,7 @@ const RequestsProvider = ({ children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        setError(error) // Set the error state
+        stackError({ message: error, height: 400 })
         throw error
       })
   }
@@ -64,7 +63,7 @@ const RequestsProvider = ({ children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        setError(error) // Set the error state
+        stackError({ message: error, height: 400 })
         throw error
       })
   }
@@ -89,7 +88,7 @@ const RequestsProvider = ({ children }) => {
     })
       .then(res => res.data)
       .catch(error => {
-        setError(error) // Set the error state
+        stackError({ message: error, height: 400 })
         throw error
       })
   }
@@ -187,12 +186,7 @@ const RequestsProvider = ({ children }) => {
     getMicroRequest
   }
 
-  return (
-    <RequestsContext.Provider value={values}>
-      {children}
-      {error && <ErrorWindow open={true} onClose={() => setError(false)} message={error} />}
-    </RequestsContext.Provider>
-  )
+  return <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
 }
 
 export { RequestsContext, RequestsProvider }

@@ -6,6 +6,7 @@ import { Buttons } from './Buttons'
 
 const WindowToolbar = ({
   onSave,
+  onCalculate,
   onPost,
   onClear,
   onInfo,
@@ -15,12 +16,13 @@ const WindowToolbar = ({
   isCleared,
   recordId,
   onApproval,
-  newHandler,
+  onClickGL,
   onGenerateReport,
   disabledSubmit,
   disabledApply,
   editMode = false,
   infoVisible = true,
+  onRecordRemarks,
   isClosed = false,
   onClientRelation = false,
   isPosted = false,
@@ -38,6 +40,7 @@ const WindowToolbar = ({
     disabledSubmit,
     disabledApply,
     infoVisible,
+    onRecordRemarks,
     isPosted,
     isClosed,
     editMode,
@@ -48,7 +51,7 @@ const WindowToolbar = ({
     onApply,
     onApproval,
     onClientRelation,
-    newHandler: () => newHandler(recordId)
+    onClickGL: () => onClickGL(recordId)
   }
   const { getRequest } = useContext(RequestsContext)
 
