@@ -63,6 +63,7 @@ export const ResourceIds = {
   ClientCorporate: 35205,
   DRClasses: 10101,
   States: 20107,
+  RecordRemarks: 20204,
   SecurityGroup: 23102,
   RiskLevel: 35104,
   PurposeOfExchange: 35103,
@@ -110,10 +111,14 @@ export const ResourceIds = {
   Beneficiary: 36305,
   CashAccounts: 33102,
   CorrespondentControl: 36119,
+  PersonalSettings: 20119,
   CashTransfer: 33309,
+  IntegrationAccount: 30102,
   InstantCash: 36306,
   GlobalAuthorization: 23105,
   InterfaceMap: 36120,
   FiOpeningBalances: 31301,
-  PriceLevels: 51101
+  PriceLevels: 51101,
+  CommissionSchedule: 51118,
+  ProductionRequestLog: 42321
 }

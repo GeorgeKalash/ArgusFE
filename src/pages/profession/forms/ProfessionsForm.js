@@ -16,7 +16,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function ProfessionsForm({ labels, maxAccess, recordId }) {
+export default function ProfessionsForm({ labels, maxAccess, recordId, setStore }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -66,6 +66,10 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
+        setStore({
+          recordId: response.recordId,
+          name: obj.name
+        })
         toast.success('Record Added Successfully')
         setInitialData({
           ...obj,
@@ -74,8 +78,8 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
       } else {
         toast.success('Record Edited Successfully')
         setEditMode(true)
-        invalidate()
       }
+      invalidate()
     }
   })
 
@@ -88,7 +92,10 @@ export default function ProfessionsForm({ labels, maxAccess, recordId }) {
           extension: RemittanceSettingsRepository.Profession.get,
           parameters: `_recordId=${recordId}`
         })
-
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
         setInitialData(res.record)
       }
 
