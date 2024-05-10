@@ -172,7 +172,7 @@ const FiDimensions = () => {
           <Grid item xs={12}>
             <CustomTextField
               name='DimCount'
-              label='Dimension Count'
+              label={_labels.DimCount}
               value={tempDimCount === null ? formik.values.DimCount : tempDimCount}
               onChange={handleDimCountChange}
               onBlur={handleDimCountBlur}
@@ -198,7 +198,7 @@ const FiDimensions = () => {
                   <CustomTextField
                     key={index}
                     name={`tpaDimension${index + 1}`}
-                    label={`Dimension ${index + 1}`}
+                    label={`${_labels.Dim} ${index + 1}`}
                     value={formik.values[`tpaDimension${index + 1}`]}
                     onClear={() => formik.setFieldValue(`tpaDimension${index + 1}`, '')}
                     onChange={formik.handleChange}
@@ -219,7 +219,7 @@ const FiDimensions = () => {
                   <CustomTextField
                     key={index + 10}
                     name={`tpaDimension${index + 11}`}
-                    label={`Dimension ${index + 11}`}
+                    label={`${_labels.Dim} ${index + 11}`}
                     value={formik.values[`tpaDimension${index + 11}`]}
                     onClear={() => formik.setFieldValue(`tpaDimension${index + 11}`, '')}
                     onChange={formik.handleChange}
