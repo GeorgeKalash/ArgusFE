@@ -17,6 +17,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 
 export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -107,7 +108,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
       height={300}
       maxAccess={maxAccess}
       editMode={editMode}
-      masterSource={ResourceIds.MasterSource.AccountGroup}
+      masterSource={MasterSource.AccountGroup}
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>

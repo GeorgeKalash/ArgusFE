@@ -17,6 +17,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 
 export default function CashAccountForm({ labels, recordId, maxAccess }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -111,7 +112,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      masterSource={ResourceIds.MasterSource.CashAccount}
+      masterSource={MasterSource.CashAccount}
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>

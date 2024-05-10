@@ -12,6 +12,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import { MasterSource } from 'src/resources/MasterSource'
 
 const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -107,7 +108,7 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      masterSource={ResourceIds.MasterSource.Account}
+      masterSource={MasterSource.Account}
     >
       <Grid container>
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>

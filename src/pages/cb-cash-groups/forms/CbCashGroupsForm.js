@@ -13,6 +13,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 
 export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -98,7 +99,7 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
       height={300}
       maxAccess={maxAccess}
       editMode={editMode}
-      masterSource={ResourceIds.MasterSource.CashAccountGroup}
+      masterSource={MasterSource.CashAccountGroup}
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>
