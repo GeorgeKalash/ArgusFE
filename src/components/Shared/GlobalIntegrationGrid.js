@@ -28,7 +28,9 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, expanded, height }) => 
           ptName: '',
           accountId: 0,
           accountRef: null,
-          accountName: ''
+          accountName: '',
+          masterId: '',
+          masterSource: ''
         }
       ]
     },
@@ -116,6 +118,8 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, expanded, height }) => 
 
           return {
             id: index,
+            masterId: masterId,
+            masterSource: masterSource,
             postTypeId: record.recordId,
             ptName: record.name,
             accountId: integration?.accountId || null,
