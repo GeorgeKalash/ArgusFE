@@ -103,7 +103,6 @@ const AddressBook = () => {
     stack({
       Component: AddressForm,
       props: {
-        editMode: true,
         labels: _labels,
         address: obj,
         recordId: obj.recordId,
