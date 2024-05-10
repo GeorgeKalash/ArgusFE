@@ -6,6 +6,7 @@ import { Buttons } from './Buttons'
 
 const WindowToolbar = ({
   onSave,
+  onCalculate,
   onPost,
   onClear,
   onInfo,
