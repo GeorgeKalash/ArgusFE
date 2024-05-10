@@ -47,7 +47,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
 
   const debouncedCloseLoading = debounce(() => {
     setLoading(false)
-  }, 2000)
+  }, 500)
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
