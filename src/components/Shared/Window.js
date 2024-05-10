@@ -116,14 +116,18 @@ const Window = ({
               id='draggable-dialog-title'
               sx={{
                 cursor: 'move',
-                py: 2,
+                pl: '15px !important',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                py:'0px !important', 
+                margin:'0px !important', 
+                backgroundColor:'#231f20' ,
+                borderRadius:'5px'
               }}
             >
               <Box>
-                <Typography sx={{ fontSize: '1.2rem', fontWeight: 600 }}>{Title}</Typography>
+                <Typography sx={{ fontSize: '1.2rem', fontWeight: 600,color:'white !important' }}>{Title}</Typography>
               </Box>
               <Box>
                 {canExpand && (
@@ -133,11 +137,12 @@ const Window = ({
                     onClick={() => setExpanded(!expanded)}
                     data-is-expanded={expanded}
                     aria-label='expand'
+                    sx={{ color:'white !important'}}
                   >
                     <OpenInFullIcon /> {/* Add the icon for expanding */}
                   </IconButton>
                 )}
-                <IconButton tabIndex={-1} edge='end' onClick={onClose} aria-label='clear input'>
+                <IconButton tabIndex={-1} edge='end' sx={{ color:'white !important'}} onClick={onClose} aria-label='clear input'>
                   <ClearIcon />
                 </IconButton>
               </Box>

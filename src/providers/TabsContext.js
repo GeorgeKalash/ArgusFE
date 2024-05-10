@@ -7,7 +7,6 @@ import PropTypes from 'prop-types'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { MenuContext } from 'src/providers/MenuContext'
-import { fontWeight } from '@mui/system';
 
 const TabsContext = createContext()
 
@@ -250,6 +249,8 @@ const TabsProvider = ({ children }) => {
                     borderBottom: '0px !important',
                     mr: '2px !important',
                     fontWeight: '1.5rem',
+                    pr:'0px !important',
+                    pl:'10px !important'
                   }}
                 />
               ))}

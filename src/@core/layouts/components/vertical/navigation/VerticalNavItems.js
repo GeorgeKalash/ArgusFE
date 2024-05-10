@@ -65,7 +65,7 @@ const VerticalNavItems = props => {
           onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
         >
           <div
-            style={{ display: 'flex', alignItems: 'center', overflowX: navCollapsed ? '':'hidden'}} >
+            style={{ display: 'flex', alignItems: 'center', overflowX: navCollapsed ? '':'hidden', height:'25px'}} >
             {imgName ? (
               <div
               style={{
