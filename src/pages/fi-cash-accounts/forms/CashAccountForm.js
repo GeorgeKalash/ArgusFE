@@ -97,7 +97,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
 
   const actions = [
     {
-      key: 'GIA',
+      key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
       disabled: !editMode

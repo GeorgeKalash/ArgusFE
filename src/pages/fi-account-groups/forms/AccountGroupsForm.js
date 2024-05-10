@@ -93,7 +93,7 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
 
   const actions = [
     {
-      key: 'GIA',
+      key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
       disabled: !editMode

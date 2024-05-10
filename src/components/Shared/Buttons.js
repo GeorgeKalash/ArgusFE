@@ -74,7 +74,7 @@ export const Buttons = [
     main: false
   },
   {
-    key: 'GIA',
+    key: 'Integration Account',
     color: '#231f20',
     image: 'intAccount.png',
     main: false

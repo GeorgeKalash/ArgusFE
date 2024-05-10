@@ -93,7 +93,7 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       disabled: !editMode
     },
     {
-      key: 'GIA',
+      key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
       disabled: !editMode
