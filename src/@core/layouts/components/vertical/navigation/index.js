@@ -262,7 +262,7 @@ const Navigation = props => {
                 fieldset: {
                   borderColor: 'transparent !important'
                 },
-                height: '30px'
+                height:'40px'
               },
               endAdornment: <SearchIcon sx={{ border: '0px', fontSize:20 }} />
             }}

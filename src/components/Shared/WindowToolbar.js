@@ -99,7 +99,7 @@ const WindowToolbar = ({
   }
 
   return (
-    <DialogActions>
+    <DialogActions sx={{padding:'8px !important'}}>
       <style>
         {`
           .button-container {
@@ -130,8 +130,7 @@ const WindowToolbar = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          width: '100%',
-          paddingTop: 4
+          width: '100%'
         }}
       >
         {previewReport ? (
@@ -149,7 +148,7 @@ const WindowToolbar = ({
               disableClearable
             />
             <Button
-              sx={{ width: 20, height: 35, ml: 1 }}
+              sx={{ width: '20px', height: '35px', ml: 1 }}
               variant='contained'
               disabled={!selectedReport}
               onClick={onGenerateReport}
@@ -194,8 +193,8 @@ const WindowToolbar = ({
                         opacity: 0.8
                       },
                       border: button.border,
-                      width: 20,
-                      height: 35,
+                      width: '20px',
+                      height: '35px',
                       objectFit: 'contain'
                     }}
                     disabled={isDisabled}
@@ -235,9 +234,9 @@ const WindowToolbar = ({
                         opacity: 0.8
                       },
                       border: button.border,
-                      width: 20,
-                      height: 35,
-                      objectFit: 'contain'
+                      width: '20px',
+                      height: '35px',
+                      objectFit: 'contain',
                     }}
                     disabled={isDisabled}
                   >
