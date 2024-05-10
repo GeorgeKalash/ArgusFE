@@ -50,7 +50,6 @@ const fetchData = async (getRequest, id, repository) => {
 }
 
 const documentType = async (getRequest, functionId, selectNraId = undefined, hasDT = true) => {
-  console.log(functionId, selectNraId)
   const docType = selectNraId === undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
   let nraId
@@ -64,8 +63,7 @@ const documentType = async (getRequest, functionId, selectNraId = undefined, has
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
-      activeStatus = dcTypNumberRange?.activeStatus < 0 && false
-      console.log(activeStatus)
+      activeStatus = dcTypNumberRange?.activeStatus < 0 ? false : true
       if (!nraId) {
         errorMessage = 'Assign the document type to a number range'
       }
@@ -76,8 +74,9 @@ const documentType = async (getRequest, functionId, selectNraId = undefined, has
       dcTypeRequired = documentType?.list?.filter(item => item?.activeStatus === 1).length > 0
     }
   }
+
   if (selectNraId === null || (selectNraId === undefined && !dcTypeRequired)) {
-    if (!dtId || (!dcTypeRequired && dtId)) {
+    if (((!dtId || (!dcTypeRequired && dtId)) && !nraId) || (nraId && !activeStatus)) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
       activeStatus = true

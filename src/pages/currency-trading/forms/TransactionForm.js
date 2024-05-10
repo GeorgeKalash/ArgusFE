@@ -7,6 +7,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Confirmation from 'src/components/Shared/Confirmation'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import documentType from 'src/lib/docRefBehaivors'
 
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
@@ -107,6 +108,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [isClosed, setIsClosed] = useState(false)
+  const [ReferenceBh, setReferenceBh] = useState(false)
 
   async function checkTypes(value) {
     if (!value) {
@@ -197,6 +199,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
+      reference: ReferenceBh?.mandatory && yup.string().required(' '),
       date: yup.string().required(' '),
       id_type: yup.number().required(' '),
       id_number: yup.number().required(' '),
@@ -276,6 +279,17 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     })()
   }, [])
 
+  async function check() {
+    const general = await documentType(getRequest, formik.values.functionId, undefined, false)
+    setReferenceBh(general?.reference)
+    if (general.errorMessage) {
+      stackError({ message: general?.errorMessage })
+    }
+  }
+  useEffect(() => {
+    !editMode && check()
+  }, [editMode, formik.values.functionId])
+
   function getData(id) {
     const _recordId = recordId ? recordId : id
 
@@ -285,7 +299,6 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     })
       .then(res => {
         const record = res.record
-        console.log(record.record)
         if (!recordId) {
           formik.setFieldValue('reference', record.headerView.reference)
         } else {
@@ -644,7 +657,12 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
           <FieldSet title='Transaction'>
             <Grid container spacing={4}>
               <Grid item xs={4}>
-                <FormField name='reference' Component={CustomTextField} readOnly />
+                <FormField
+                  name='reference'
+                  Component={CustomTextField}
+                  readOnly={!editMode ? ReferenceBh?.readOnly : true}
+                  required={ReferenceBh?.mandatory}
+                />
               </Grid>
               <FormGrid hideonempty item xs={4}>
                 <CustomDatePicker
