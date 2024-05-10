@@ -120,10 +120,13 @@ const Window = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                py:'0px !important', 
-                margin:'0px !important', 
-                backgroundColor:'#231f20' ,
-                borderRadius:'5px'
+                py: '0px !important', 
+                margin: '0px !important', 
+                backgroundColor: '#231f20',
+                borderTopLeftRadius: '5px',
+                borderTopRightRadius: '5px',
+                borderBottomLeftRadius: '0px',
+                borderBottomRightRadius: '0px'
               }}
             >
               <Box>
