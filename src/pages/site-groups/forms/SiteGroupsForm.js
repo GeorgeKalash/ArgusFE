@@ -43,6 +43,10 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
 
       if (!recordId) {
         toast.success('Record Added Successfully')
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
 
