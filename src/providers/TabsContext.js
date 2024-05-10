@@ -1,26 +1,17 @@
-// ** React Imports
 import React, { createContext, useEffect, useState, useContext } from 'react';
-
-// ** Next Import
 import { useRouter } from 'next/router'
-
-// ** MUI Imports
 import { Tabs, Tab, Box } from '@mui/material'
 import { IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import PropTypes from 'prop-types'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-
-// ** Context
 import { MenuContext } from 'src/providers/MenuContext'
 
 const TabsContext = createContext()
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
-
-  //NOTE: EVERY PAGE PADDING CAN BE ADDED HERE
 
   return (
     <Box
@@ -43,15 +34,8 @@ CustomTabPanel.propTypes = {
 }
 
 const TabsProvider = ({ children }) => {
-  // ** Hooks
   const router = useRouter()
-  const { menu, lastOpenedPage } = useContext(MenuContext)
-
-  const getLabel = () => {
-    const parts = router.route.split('/')
-
-    return parts[parts.length - 1]
-  }
+  const { menu, gear, lastOpenedPage } = useContext(MenuContext)
 
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
@@ -83,7 +67,6 @@ const TabsProvider = ({ children }) => {
     return null
   }
 
-  // ** States
   const [activeTabs, setActiveTabs] = useState([])
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [value, setValue] = useState(0)
@@ -171,7 +154,7 @@ const TabsProvider = ({ children }) => {
             {
               page: children,
               route: router.asPath,
-              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, ''))
+              label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
             }
           ]
         })
@@ -189,13 +172,13 @@ const TabsProvider = ({ children }) => {
           {
             page: children,
             route: router.asPath,
-            label: findNode(menu, router.asPath.replace(/\/$/, ''))
+            label: lastOpenedPage ? lastOpenedPage.name : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
           }
         ])
         setInitialLoadDone(true)
       } setClosing(false)
     }
-  }, [activeTabs, router, menu])
+  }, [activeTabs, router, menu , gear])
 
   return (
     <>
@@ -211,7 +194,7 @@ const TabsProvider = ({ children }) => {
           >
             {activeTabs.length > 0 &&
               activeTabs.map((activeTab, i) => {
-                return (
+                return ( 
                   !activeTab.isDefault && (
                     <Tab
                       key={i}
