@@ -7,8 +7,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { useForm } from 'react-hook-form'
-import { useFormik } from 'formik'
+import { useForm } from 'src/hooks/form'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,14 +26,13 @@ const SystemFunction = () => {
     })
   }
 
-  const { labels: labels, MaxAccess } = useResourceQuery({
+  const { labels: labels, maxAccess } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SystemFunction
   })
 
-  const formik = useFormik({
-    //const { formik } = useForm({
-    //MaxAccess,
+  const { formik } = useForm({
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
@@ -124,24 +122,20 @@ const SystemFunction = () => {
 
   return (
     <>
-      <Box sx={{ height: `calc(100vh - 50px)`, display: 'flex', flexDirection: 'column' }}>
+      <Box>
         <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false}>
           <Grid container>
-            <Grid sx={{ width: '100%' }}>
-              <Box sx={{ width: '100%' }}>
-                <DataGrid
-                  height={`calc(100vh - 150px)`}
-                  onChange={value => {
-                    formik.setFieldValue('rows', value)
-                  }}
-                  value={formik.values?.rows}
-                  error={formik.errors?.rows}
-                  columns={columns}
-                  allowDelete={false}
-                  allowAddNewLine={false}
-                />
-              </Box>
-            </Grid>
+            <DataGrid
+              height={`calc(100vh - 150px)`}
+              onChange={value => {
+                formik.setFieldValue('rows', value)
+              }}
+              value={formik.values?.rows}
+              error={formik.errors?.rows}
+              columns={columns}
+              allowDelete={false}
+              allowAddNewLine={false}
+            />
           </Grid>
         </FormShell>
       </Box>

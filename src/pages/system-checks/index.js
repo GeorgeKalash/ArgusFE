@@ -1,29 +1,18 @@
-import { useState, useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
-import useResourceParams from 'src/hooks/useResourceParams'
+import { useResourceQuery } from 'src/hooks/resource'
 
 const SystemChecks = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
   const { getAllKvsByDataset } = useContext(CommonContext)
-  const [data, setData] = useState([])
-
-  const { labels: _labels, access } = useResourceParams({
-    datasetId: ResourceIds.SystemChecks
-  })
-
-  const handleSubmit = () => {
-    postChecks()
-  }
 
   async function getAllSystems() {
     return new Promise((resolve, reject) => {
@@ -37,34 +26,40 @@ const SystemChecks = () => {
     })
   }
 
-  useEffect(() => {
-    ;(async function () {
-      const systemCheckData = await getAllSystems()
+  const {
+    query: { data },
+    labels: _labels,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.SystemChecks.qry,
+    datasetId: ResourceIds.SystemChecks
+  })
 
-      const resCheckedSystems = getRequest({
-        extension: SystemRepository.SystemChecks.qry,
-        parameters: `_scope=1`
-      })
+  async function fetchGridData() {
+    const systemCheckData = await getAllSystems()
 
-      Promise.all([resCheckedSystems]).then(([checkedSystems]) => {
-        const mergedSYCheckedList = systemCheckData.map(systemCheckItem => {
-          const item = {
-            checkId: systemCheckItem.key,
-            checkName: systemCheckItem.value,
-            checked: false,
-            value: false
-          }
-          const matchingTemplate = checkedSystems.list.find(y => item.checkId == y.checkId)
-          matchingTemplate && (item.checked = true)
-          matchingTemplate && (item.value = true)
+    const checkedSystems = await getRequest({
+      extension: SystemRepository.SystemChecks.qry,
+      parameters: `_scope=1`
+    })
 
-          return item
-        })
+    const mergedSYCheckedList = systemCheckData.map(systemCheckItem => {
+      const item = {
+        checkId: systemCheckItem.key,
+        checkName: systemCheckItem.value,
+        checked: false,
+        value: false
+      }
+      const matchingTemplate = checkedSystems.list.find(y => item.checkId == y.checkId)
+      matchingTemplate && (item.checked = true)
+      matchingTemplate && (item.value = true)
 
-        setData({ list: mergedSYCheckedList })
-      })
-    })()
-  }, [])
+      return item
+    })
+
+    return { list: mergedSYCheckedList }
+  }
 
   const columns = [
     {
@@ -78,6 +73,10 @@ const SystemChecks = () => {
       flex: 1
     }
   ]
+
+  const handleSubmit = () => {
+    postChecks()
+  }
 
   const postChecks = async () => {
     const checkedObjects = data.list.filter(obj => obj.checked)
