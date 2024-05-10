@@ -19,11 +19,11 @@ function LoadingOverlay() {
   return (
     <Box
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: 45,
         right: 0,
         width: navCollapsed ? 'calc(100% - 68px)' : 'calc(100% - 300px)',
-        height: '100%',
+        height: '98%',
         backgroundColor: 'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
         display: 'flex',
         alignItems: 'center',
