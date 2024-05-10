@@ -61,7 +61,7 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
 
           formik.setValues(res.record)
         }
-      } catch {}
+      } catch (error) {}
     })()
   }, [])
 
