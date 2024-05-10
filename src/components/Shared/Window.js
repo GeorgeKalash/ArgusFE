@@ -53,14 +53,8 @@ const Window = ({
     ? false
     : true
 
-  // const handleKeyDown = event => {
-  //   if (event.key === 'Enter') {
-  //     onSave()
-  //   }
-  // }
-
-  const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '68px' : '300px'})`
-  const containerHeight = `calc(calc(100 * var(--vh)) - 48px)`
+  const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
+  const containerHeight = `calc(calc(100 * var(--vh)) - 83px)`
   const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
   const heightPanel = height - 120
 
@@ -76,7 +70,7 @@ const Window = ({
     <Box
       id='parent'
       sx={{
-        bottom: 0,
+        bottom: 42,
         position: 'absolute',
         width: containerWidth,
         height: containerHeight,

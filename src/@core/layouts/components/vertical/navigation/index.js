@@ -246,35 +246,12 @@ const Navigation = props => {
         )}
         <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb:'10px', pt:2 }}>
         <TextField
-            placeholder="Filter here..."
-
-            // label='Search'
+            placeholder='Filter here...'
             variant='outlined'
             fullWidth
             size='small'
             onChange={handleSearch}
             autoComplete='off'
-            onFocus={() => setIsShrunk(true)}
-            onBlur={() => setIsShrunk(false)}
-            InputLabelProps={{
-              sx: {
-                color: 'rgba(231, 227, 252, 0.87) !important',
-                backgroundColor: '#231f20',
-                display: navCollapsed ? 'none' : 'flex',
-                height: '20px',
-                fontSize: 15,
-                ...(isShrunk ? {
-                  paddingTop: '2px',
-                  marginTop: '0px',
-                  paddingX:'2px'
-                } : {
-                  paddingTop: '0',
-                  marginTop: '-5px',
-                }),
-                height: '20px',
-                fontSize: 15
-              },
-            }}
             InputProps={{
               sx: {
                 display: 'flex',
