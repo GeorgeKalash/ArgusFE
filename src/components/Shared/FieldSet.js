@@ -23,7 +23,7 @@ const FieldSet = ({
             padding: '20px', // Adjust padding as needed
             position: 'relative',
             margin:'10px',
-
+            ...props.sx
           }} >
             <Typography variant="h6" style={{
               position: 'absolute',
