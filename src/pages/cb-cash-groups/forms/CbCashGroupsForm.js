@@ -81,13 +81,24 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'GIA',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
+
   return (
     <FormShell
+      actions={actions}
       resourceId={ResourceIds.CbCashGroups}
       form={formik}
       height={300}
       maxAccess={maxAccess}
       editMode={editMode}
+      masterSource={ResourceIds.MasterSource.CashAccountGroup}
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>

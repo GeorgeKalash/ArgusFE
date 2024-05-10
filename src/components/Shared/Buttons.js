@@ -74,6 +74,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'GIA',
+    color: '#231f20',
+    image: 'intAccount.png',
+    main: false
+  },
+  {
     key: 'Client Relation',
     color: '#AC48AE',
     image: 'clientRelations.png',

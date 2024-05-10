@@ -90,6 +90,12 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       condition: true,
       onClick: 'onRecordRemarks',
       disabled: !editMode
+    },
+    {
+      key: 'GIA',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
     }
   ]
 
@@ -101,6 +107,7 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
+      masterSource={ResourceIds.MasterSource.Account}
     >
       <Grid container>
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
