@@ -1,4 +1,6 @@
-import { Box } from '@mui/material'
+// ** MUI Imports
+import { Typography, Box } from '@mui/material'
+
 import PropTypes from 'prop-types'
 
 const CustomTabPanel = props => {
@@ -15,6 +17,7 @@ const CustomTabPanel = props => {
         flexDirection: 'column',
         width: '100%',
         flex: '1 !important',
+        position: 'relative',
         overflow: 'auto',
         '.MuiBox-root':{
           paddingTop:'5px !important'
