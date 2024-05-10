@@ -4,37 +4,7 @@ import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
 import React from 'react'
 import ReactDOM from 'react-dom'
-
-const PopperComponent = ({ children, anchorEl, open }) => {
-  const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom'))
-  const thresholdPercentage = 0.25 // hay percentage min ta7t
-
-  const canRenderBelow =
-    window.innerHeight / zoom - (anchorEl && anchorEl.getBoundingClientRect().bottom) >
-    window.innerHeight * thresholdPercentage
-
-  const rect = anchorEl && anchorEl.getBoundingClientRect()
-
-  return ReactDOM.createPortal(
-    <Box
-      sx={{
-        '& .MuiAutocomplete-noOptions': {
-          display: open ? 'block' : 'none'
-        }
-      }}
-      style={{
-        position: 'absolute',
-        minWidth: anchorEl ? anchorEl.clientWidth : 'auto',
-        top: rect.bottom,
-        left: rect.left,
-        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect.height}px))` : 'none'
-      }}
-    >
-      {children}
-    </Box>,
-    document.body
-  )
-}
+import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
@@ -80,14 +50,14 @@ const CustomComboBox = ({
       key={value}
       PopperComponent={PopperComponent}
       getOptionLabel={(option, value) => {
-        if (Array.isArray(displayField)) {
+        if (typeof displayField == 'object') {
           const text = displayField
             .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
             ?.filter(item => item)
             ?.join(' ')
           if (text) return text
         }
-        if (typeof option === 'object' && !Array.isArray(displayField)) {
+        if (typeof option === 'object') {
           return `${option[displayField]}`
         } else {
           const selectedOption = store.find(item => {
