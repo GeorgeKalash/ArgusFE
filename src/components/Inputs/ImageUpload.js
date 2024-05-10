@@ -1,18 +1,18 @@
-import { Box } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import { useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const CustomImage = ({ name, value, onChange, resourceId, error, seqNo, recordId, setInitialData }) => {
+const ImageUpload = ({ name, value, onChange, resourceId, error, seqNo, recordId, setInitialData }) => {
   const hiddenInputRef = useRef()
   const { getRequest } = useContext(RequestsContext)
 
   const [image, setImage] = useState()
 
   useEffect(() => {
-    resourceId && getData()
-  }, [resourceId])
+    getData()
+  }, [])
 
   async function getData() {
     const result = await getRequest({
@@ -21,7 +21,7 @@ const CustomImage = ({ name, value, onChange, resourceId, error, seqNo, recordId
     })
     setInitialData(prevData => ({
       ...prevData,
-      attachment: result.record
+      [name]: result?.record
     }))
   }
 
@@ -37,7 +37,7 @@ const CustomImage = ({ name, value, onChange, resourceId, error, seqNo, recordId
       const month = dateObject.getMonth() + 1
       const day = dateObject.getDate()
 
-      const data = {
+      let data = {
         resourceId: resourceId,
         recordId: 1,
         seqNo: 0,
@@ -45,7 +45,8 @@ const CustomImage = ({ name, value, onChange, resourceId, error, seqNo, recordId
         folderId: null,
         folderName: null,
         date: day + '/' + month + '/' + year,
-        url: null
+        url: null,
+        file: null
       }
 
       const fileSizeInKB = Math.round(file.size / 1024)
@@ -54,10 +55,8 @@ const CustomImage = ({ name, value, onChange, resourceId, error, seqNo, recordId
 
         return
       }
-
-      onChange(name, file)
-      onChange('attachment', data)
-
+      data = { ...data, file } //binary
+      onChange(name, data)
       const reader = new FileReader()
       reader.onloadend = e => {
         setImage(e.target.result)
@@ -68,7 +67,6 @@ const CustomImage = ({ name, value, onChange, resourceId, error, seqNo, recordId
 
   const handleInputImageReset = () => {
     onChange(name, '')
-    onChange('attachment', '')
     setImage('')
   }
 
@@ -113,11 +111,11 @@ const CustomImage = ({ name, value, onChange, resourceId, error, seqNo, recordId
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
           }}
         >
-          <img src={`/images/buttonsIcons/clear.png`} alt={'test'} />
+          <img src={`/images/buttonsIcons/clear.png`} alt={'clear'} />
         </Box>
       </Box>
     </Box>
   )
 }
 
-export default CustomImage
+export default ImageUpload

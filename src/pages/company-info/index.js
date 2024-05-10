@@ -1,7 +1,5 @@
 import { Box, Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import React, { useContext, useEffect, useState } from 'react'
-import CustomImage from 'src/components/Inputs/CustomImage'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -11,11 +9,12 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
+import ImageUpload from 'src/components/Inputs/ImageUpload'
 
 const CompanyInfo = () => {
   const [initialValues, setInitialData] = useState({
     plantId: '',
-    accountId: JSON.parse(window.sessionStorage.getItem('userData')).accountId,
+    accountId: JSON.parse(window.sessionStorage.getItem('userData'))?.accountId,
     name: '',
     webSite: '',
     taxNo: '',
@@ -23,7 +22,17 @@ const CompanyInfo = () => {
     crNo: '',
     logoUrl: '',
     flName: '',
-    attachment: null
+    attachment: {
+      resourceId: null,
+      recordId: 1,
+      seqNo: 0,
+      fileName: null,
+      folderId: null,
+      folderName: null,
+      date: null,
+      url: null,
+      file: null
+    }
   })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -41,7 +50,16 @@ const CompanyInfo = () => {
       parameters: `_filter=`
     })
     res.record.accountId = JSON.parse(window.sessionStorage.getItem('userData')).accountId
-    setInitialData(res.record)
+    setInitialData(prev => ({
+      ...prev,
+      name: res.record.name,
+      webSite: res.record.taxNo,
+      taxNo: res.record.taxNo,
+      licenseNo: res.record.licenseNo,
+      crNo: res.record.crNo,
+      logoUrl: res.record.logoUrl,
+      flName: res.record.flName
+    }))
   }
 
   const { formik } = useForm({
@@ -57,30 +75,29 @@ const CompanyInfo = () => {
   const post = obj => {
     postRequest({
       extension: SystemRepository.CompanyInfo.set,
-      record: JSON.stringify({ ...obj, logoUrl: null })
+      record: JSON.stringify({ ...obj, attachment: null })
     })
-      .then(res => {
-        if (res && !file) toast.success('Record Edited Successfully')
-      })
+      .then(res => {})
       .catch(error => {})
 
-    if (obj?.logoUrl) {
+    if (obj?.attachment?.file) {
       postRequest({
         extension: SystemRepository.Attachment.set,
         record: JSON.stringify(obj.attachment),
-        file: obj.logoUrl
+        file: obj?.attachment?.file
+      }).then(res => {
+        if (res) toast.success('Record Edited Successfully')
+      })
+    } else if (!obj?.attachment?.file && initialValues?.attachment?.url) {
+      postRequest({
+        extension: SystemRepository.Attachment.del,
+        record: JSON.stringify(initialValues.attachment),
+        file: obj?.attachment?.url
       }).then(res => {
         if (res) toast.success('Record Edited Successfully')
       })
     } else {
-      initialValues.logoUrl &&
-        postRequest({
-          extension: SystemRepository.Attachment.del,
-          record: JSON.stringify(initialValues.attachment),
-          file: initialValues.logoUrl
-        }).then(res => {
-          if (res) toast.success('Record Edited Successfully')
-        })
+      toast.success('Record Edited Successfully')
     }
   }
 
@@ -186,8 +203,8 @@ const CompanyInfo = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomImage
-              name='logoUrl'
+            <ImageUpload
+              name='attachment'
               value={formik.values?.attachment}
               onChange={formik.setFieldValue}
               error={formik.errors?.url}
