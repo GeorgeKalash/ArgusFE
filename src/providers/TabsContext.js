@@ -206,13 +206,15 @@ const TabsProvider = ({ children }) => {
             sx={{
               minHeight: '35px !important',
               '.MuiTab-root': { 
-                color: '#231f20',  
+                color: 'white',  
                 backgroundColor:'grey',
                 '&:hover': {
+                  color:'grey',
                   backgroundColor: '#ddd'
                 }
               },
               '.Mui-selected': { 
+                color: '#231f20',  
                 backgroundColor: 'white'
               },
               '.MuiTabs-indicator': {
