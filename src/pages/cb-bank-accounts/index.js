@@ -127,7 +127,7 @@ const CbBankAccounts = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 600,
       title: labels.CbBankAccounts
     })
   }

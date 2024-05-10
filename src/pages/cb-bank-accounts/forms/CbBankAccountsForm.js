@@ -113,8 +113,11 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId }) {
             name='currencyId'
             label={labels.currencyName}
             valueField='recordId'
-            displayField={['name']}
-            columnsInDropDown={[{ key: 'name', value: 'name' }]}
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
             values={formik.values}
             required
             maxAccess={maxAccess}
@@ -146,8 +149,11 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId }) {
             name='groupId'
             label={labels.groupName}
             valueField='recordId'
-            displayField='name'
-            columnsInDropDown={[{ key: 'name', value: 'name' }]}
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
             values={formik.values}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
@@ -208,8 +214,11 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId }) {
             name='bankId'
             label={labels.bankName}
             valueField='recordId'
-            displayField='name'
-            columnsInDropDown={[{ key: 'name', value: 'name' }]}
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
             values={formik.values}
             required
             maxAccess={maxAccess}
