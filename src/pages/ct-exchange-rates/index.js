@@ -172,8 +172,6 @@ const CTExchangeRates = () => {
   })
 
   const postExchangeMaps = (obj, currencyId, raCurrencyId, rateTypeId) => {
-    console.log('rateTypeId ', rateTypeId)
-
     const data = {
       currencyId: currencyId,
       rateTypeId: rateTypeId,
