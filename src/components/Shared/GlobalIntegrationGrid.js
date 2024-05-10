@@ -9,7 +9,7 @@ import { useForm } from 'src/hooks/form'
 import { useResourceQuery } from 'src/hooks/resource'
 import WindowToolbar from './WindowToolbar'
 
-const GlobalIntegrationGrid = ({ masterSource, masterId, expanded, height }) => {
+const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: _labels, access } = useResourceQuery({
@@ -117,9 +117,9 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, expanded, height }) => 
           const integration = integrations.find(int => int.postTypeId === record.recordId)
 
           return {
-            id: index,
             masterId: masterId,
             masterSource: masterSource,
+            id: index,
             postTypeId: record.recordId,
             ptName: record.name,
             accountId: integration?.accountId || null,
@@ -148,7 +148,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, expanded, height }) => 
         columns={column}
         allowDelete={false}
         allowAddNewLine={false}
-        height={`${expanded ? `calc(100vh - 230px)` : `${height - 10}px`}`}
+        height={`calc(100vh - 100px)`}
       />
       <Grid
         sx={{

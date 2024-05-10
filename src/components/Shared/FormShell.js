@@ -141,7 +141,7 @@ export default function FormShell({
                 masterSource: masterSource
               },
               width: 700,
-              height: 420,
+              height: 500,
               title: 'Integration Account'
             })
           }
