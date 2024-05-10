@@ -9,17 +9,11 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
-
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 
-
-export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
-
+export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setStore }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [editMode, setEditMode] = useState(!!recordId)
@@ -27,16 +21,12 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
   const [initialValues, setInitialData] = useState({
     recordId: null,
     name: '',
-    reference:'',
-    incomeType:'',
-    flName:''
-
-
+    reference: '',
+    incomeType: '',
+    flName: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.SourceOfIncome.page
@@ -50,7 +40,7 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
       name: yup.string().required('This field is required'),
       reference: yup.string().required('This field is required'),
       incomeType: yup.string().required('This field is required'),
-      flName: yup.string().required('This field is required'),
+      flName: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -61,10 +51,14 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
+        setStore({
+          recordId: response.recordId,
+          name: obj.name
+        })
         toast.success('Record Added Successfully')
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -83,7 +77,10 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
             extension: RemittanceSettingsRepository.SourceOfIncome.get,
             parameters: `_recordId=${recordId}`
           })
-
+          setStore({
+            recordId: res.record.recordId,
+            name: res.record.name
+          })
           setInitialData(res.record)
         }
       } catch (exception) {
@@ -142,25 +139,22 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId }) {
           />
         </Grid>
         <Grid item xs={12}>
-        <ResourceComboBox
-              datasetId={DataSets.CT_INCOME_TYPE }
-              name='incomeType'
-              label={labels.incomeType}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              required
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('incomeType', newValue?.key)
-              }}
-              error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
-            />
+          <ResourceComboBox
+            datasetId={DataSets.CT_INCOME_TYPE}
+            name='incomeType'
+            label={labels.incomeType}
+            valueField='key'
+            displayField='value'
+            values={formik.values}
+            required
+            maxAccess={maxAccess}
+            onChange={(event, newValue) => {
+              formik.setFieldValue('incomeType', newValue?.key)
+            }}
+            error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
+          />
         </Grid>
       </Grid>
     </FormShell>
   )
 }
-
-
-

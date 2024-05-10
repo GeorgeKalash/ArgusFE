@@ -38,8 +38,6 @@ const NumberRange = () => {
     else {
       if (access.record.maxAccess > 0) {
         getLabels(ResourceIds.currencyExchangeMap, setLabels)
-        fillCurrencyStore()
-        fillCountryStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -80,18 +78,6 @@ const NumberRange = () => {
       postExchangeMaps(values)
     }
   })
-
-  const fillCurrencyStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {})
-  }
 
   const _labels = {
     country: labels && labels.find(item => item.key === '1') && labels.find(item => item.key === '1').value,
