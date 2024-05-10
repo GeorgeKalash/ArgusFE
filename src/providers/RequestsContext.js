@@ -24,11 +24,11 @@ function LoadingOverlay() {
         right: 0,
         width: navCollapsed ? 'calc(100% - 68px)' : 'calc(100% - 300px)',
         height: '98%',
-        backgroundColor: 'rgba(0, 0, 0, 0.1)', // Semi-transparent black background
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 9999 // Ensure it's above other content
+        zIndex: 9999
       }}
     >
       <CircularProgress color='inherit' />
