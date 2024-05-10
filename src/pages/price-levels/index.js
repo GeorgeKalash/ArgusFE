@@ -8,6 +8,9 @@ import PriceLevelsForm from './Forms/PriceLevelsForm'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const PriceLevels = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -85,8 +88,11 @@ const PriceLevels = () => {
   }
 
   return (
-    <>
-      <GridToolbar onAdd={add} maxAccess={access} />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
       <Table
         columns={columns}
         gridData={data}
@@ -100,7 +106,8 @@ const PriceLevels = () => {
         maxAccess={access}
         refetch={refetch}
       />
-    </>
+      </Grow>
+    </VertLayout>    
   )
 }
 

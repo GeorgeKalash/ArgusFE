@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
@@ -133,7 +132,6 @@ const GateKeeper = () => {
            refetch={refetch}
         />
       </Grow>
-
       <Fixed>
         <WindowToolbar onSave={handleSubmit} smallBox={true} />
       </Fixed>
