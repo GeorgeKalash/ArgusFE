@@ -16,6 +16,7 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 
 // ** Statics
 import { ExportFormat } from 'src/statics/ExportFormat'
+import { useWindow } from 'src/windows'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,9 +26,8 @@ const ReportViewer = ({ resourceId }) => {
   const [selectedReport, setSelectedReport] = useState(null)
   const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
   const [paramsArray, setParamsArray] = useState([])
-  const [reportParamWindowOpen, setReportParamWindowOpen] = useState(false)
   const [pdf, setPDF] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { stack } = useWindow()
 
   const getReportLayout = () => {
     var parameters = `_resourceId=${resourceId}`
@@ -77,7 +77,7 @@ const ReportViewer = ({ resourceId }) => {
 
   const generateReport = ({ params = '' }) => {
     const obj = {
-      api_url: selectedReport.api_url + '?_params=',
+      api_url: selectedReport.api_url + '?_params=' + params,
       assembly: selectedReport.assembly,
       format: selectedFormat.key,
       reportClass: selectedReport.reportClass
@@ -86,23 +86,17 @@ const ReportViewer = ({ resourceId }) => {
       url: process.env.NEXT_PUBLIC_REPORT_URL,
       extension: DevExpressRepository.generate,
       record: JSON.stringify(obj)
-    })
-      .then(res => {
-        console.log({ generateReportRES: res })
-        switch (selectedFormat.key) {
-          case 1:
-            setPDF(res.recordId)
-            break
+    }).then(res => {
+      switch (selectedFormat.key) {
+        case 1:
+          setPDF(res.recordId)
+          break
 
-          default:
-            window.location.href = res.recordId
-            break
-        }
-      })
-      .catch(error => {
-        console.log({ generateReportERROR: error })
-        setErrorMessage(error)
-      })
+        default:
+          window.location.href = res.recordId
+          break
+      }
+    })
   }
 
   useEffect(() => {
@@ -133,7 +127,20 @@ const ReportViewer = ({ resourceId }) => {
         }}
       >
         <GridToolbar
-          openRPB={() => setReportParamWindowOpen(true)}
+          openRPB={() =>
+            stack({
+              Component: ReportParameterBrowser,
+              props: {
+                disabled: !selectedReport?.parameters,
+                reportName: selectedReport?.parameters,
+                paramsArray: paramsArray,
+                setParamsArray: setParamsArray
+              },
+              width: 500,
+              height: 400,
+              title: 'Report Parameters Browser'
+            })
+          }
           disableRPB={!selectedReport?.parameters}
           onGo={generateReport}
           paramsArray={paramsArray}
@@ -178,15 +185,14 @@ const ReportViewer = ({ resourceId }) => {
           </Box>
         )}
       </Box>
-      <ReportParameterBrowser
+      {/* <ReportParameterBrowser
         disabled={!selectedReport?.parameters}
         reportName={selectedReport?.parameters}
         open={reportParamWindowOpen}
         onClose={() => setReportParamWindowOpen(false)}
         paramsArray={paramsArray}
         setParamsArray={setParamsArray}
-      />
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+      /> */}
     </>
   )
 }

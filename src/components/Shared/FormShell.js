@@ -171,7 +171,7 @@ export default function FormShell({
           isClosed={isClosed}
           clientRelation={clientRelation}
           resourceId={resourceId}
-          recordId={form.values?.recordId}
+          recordId={form?.values?.recordId}
           selectedReport={selectedReport}
           setSelectedReport={setSelectedReport}
           previewReport={previewReport}
@@ -183,7 +183,7 @@ export default function FormShell({
         <TransactionLog
           resourceId={resourceId}
           onInfoClose={() => setWindowInfo(false)}
-          recordId={form.values?.recordId}
+          recordId={form?.values?.recordId}
         />
       )}
     </>

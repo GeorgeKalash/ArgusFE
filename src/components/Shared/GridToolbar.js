@@ -2,7 +2,7 @@
 import { Box, Button, Grid, Tooltip, Typography } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
@@ -38,18 +38,16 @@ const GridToolbar = ({
   }
 
   return (
-    <Box display={'flex'} sx={{ justifyContent: 'space-between' }}>
-      {children && children}
-      <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
-        {initialLoad && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+    <Box display={'flex'} flexDirection={'column'}>
+      <Box display={'flex'} justifyContent={'space-between'}>
+        <Box>{children && children}</Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          {initialLoad && (
             <Button onClick={initialLoad} variant='contained'>
               <Icon icon='mdi:reload' />
             </Button>
-          </Box>
-        )}
-        {onAdd && addBtnVisible && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          )}
+          {onAdd && addBtnVisible && (
             <Tooltip title='Add'>
               <Button
                 onClick={onAdd}
@@ -59,10 +57,8 @@ const GridToolbar = ({
                 <img src='/images/buttonsIcons/add.png' alt='Add' />
               </Button>
             </Tooltip>
-          </Box>
-        )}
-        {inputSearch && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2, zIndex: 0 }}>
+          )}
+          {inputSearch && (
             <CustomTextField
               name='search'
               value={searchValue}
@@ -72,37 +68,32 @@ const GridToolbar = ({
               onSearch={onSearch}
               search={true}
             />
-          </Box>
-        )}
-        {openRPB && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          )}
+          {openRPB && (
             <Button onClick={openRPB} variant='contained' disabled={disableRPB}>
               OPEN RPB
             </Button>
-          </Box>
-        )}
-        {onGo && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          )}
+          {onGo && (
             <Button
               disabled={paramsArray.length === 0}
-              onClick={() => onGo({ _startAt: 0, _pageSize: 30, params: formatDataForApi(paramsArray) })}
+              onClick={() => onGo({ params: formatDataForApi(paramsArray) })}
               variant='contained'
             >
               GO
             </Button>
-          </Box>
-        )}
+          )}
+        </Box>
       </Box>
       {paramsArray && paramsArray.length > 0 && (
         <Box sx={{ pl: 2 }}>
-          <Grid container>
-            {paramsArray.map((param, i) => {
-              return (
-                <Grid key={i} item xs={6}>
-                  <Typography>{`${param.caption}: ${param.display}`}</Typography>
-                </Grid>
-              )
-            })}
+          <Grid container spacing={0} sx={{ margin: 0, padding: 0 }}>
+            {paramsArray.map((param, i) => (
+              <Grid key={i} item sx={{ margin: 0, padding: 0 }}>
+                [<b>{param.caption}:</b>
+                {param.display}]
+              </Grid>
+            ))}
           </Grid>
         </Box>
       )}

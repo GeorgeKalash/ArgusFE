@@ -5,7 +5,6 @@ import { useEffect, useState, useContext } from 'react'
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 
 // ** Third Party Imports
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 
 // ** Custom Imports
@@ -19,14 +18,16 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
+import { ResourceLookup } from './ResourceLookup'
+import WindowToolbar from './WindowToolbar'
+import { useForm } from 'src/hooks/form'
+import FormShell from './FormShell'
 
-const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, paramsArray, setParamsArray, disabled }) => {
+const ReportParameterBrowser = ({ reportName, paramsArray, setParamsArray, disabled }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const [parameters, setParameters] = useState(null)
   const [fields, setFields] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null)
 
   //snaphot stores
   const [itemSnapshotStore, setItemSnapshotStore] = useState([null])
@@ -39,21 +40,17 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
     getRequest({
       extension: SystemRepository.ParameterDefinition,
       parameters: parameters
+    }).then(res => {
+      setParameters(res.list)
     })
-      .then(res => {
-        setParameters(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   // const getFieldKey = key => {
   //   switch (key) {
   //     case 'toFunctionId':
-  //       return parametersValidation.values?.toFunctionId
+  //       return formik.values?.toFunctionId
   //     case 'fromFunctionId':
-  //       return parametersValidation.values?.fromFunctionId
+  //       return formik.values?.fromFunctionId
 
   //     default:
   //       break
@@ -64,13 +61,15 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
     switch (key) {
       case 'toFunctionId':
         return {
-          toFunctionId: parametersValidation?.values?.toFunctionId ? parametersValidation.values.toFunctionId : null
+          toFunctionId: formik?.values?.toFunctionId ? formik.values.toFunctionId : null
         }
       case 'fromFunctionId':
         return {
-          fromFunctionId: parametersValidation?.values?.fromFunctionId
-            ? parametersValidation.values.fromFunctionId
-            : null
+          fromFunctionId: formik?.values?.fromFunctionId ? formik.values.fromFunctionId : null
+        }
+      case 'categoryId':
+        return {
+          categoryId: formik?.values?.categoryId ? formik.values.categoryId : null
         }
 
       default:
@@ -88,9 +87,9 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
           displayField={displayField}
           store={store}
           value={
-            parametersValidation?.values &&
-            parametersValidation?.values[field.key] &&
-            store.filter(item => item.key === parametersValidation?.values[field.key])[0]
+            formik?.values &&
+            formik?.values[field.key] &&
+            store.filter(item => item.key === formik?.values[field.key])[0]
           }
           required={field.mandatory}
           onChange={(event, newValue) => {
@@ -98,11 +97,11 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
             handleFieldChange({
               fieldId: field.id,
               fieldKey: field.key,
-              value: newValue?.key,
+              value: newValue[valueField],
               caption: field.caption,
-              display: newValue?.value
+              display: newValue[displayField]
             })
-            parametersValidation.setFieldValue([field.key], newValue?.key)
+            formik.setFieldValue([field.key], newValue?.key)
           }}
           sx={{ pt: 2 }}
         />
@@ -115,13 +114,9 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
     getRequest({
       extension: InventoryRepository.Item.snapshot,
       parameters
+    }).then(res => {
+      return res.list
     })
-      .then(res => {
-        return res.list
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const getComboBoxByClassId = field => {
@@ -131,84 +126,116 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
         getRequest({
           extension: SystemRepository.KeyValueStore,
           parameters: parameters
-        })
-          .then(res => {
-            var _fieldValue = getFieldValue(field.key)
-            parametersValidation.setValues(pre => {
-              return {
-                ...pre,
-                ..._fieldValue
-              }
-            })
+        }).then(res => {
+          var _fieldValue = getFieldValue(field.key)
+          formik.setValues(pre => {
+            return {
+              ...pre,
+              ..._fieldValue
+            }
+          })
 
-            fields.push(
-              <Grid item xs={12} key={field.classId}>
-                <CustomComboBox
-                  name={field.key}
-                  label={field.caption}
-                  valueField='key'
-                  displayField='value'
-                  store={res.list}
-                  value={
-                    parametersValidation?.values &&
-                    parametersValidation?.values[field.key] &&
-                    res.list.filter(item => item.key === parametersValidation?.values[field.key])[0]
-                  }
-                  required={field.mandatory}
-                  onChange={(event, newValue) => {
-                    handleFieldChange({
-                      fieldId: field.id,
-                      fieldKey: field.key,
-                      value: newValue?.key,
-                      caption: field.caption,
-                      display: newValue?.value
-                    })
-                    parametersValidation.setFieldValue([field.key], newValue?.key)
-                  }}
-                  sx={{ pt: 2 }}
-                />
-              </Grid>
-            )
-          })
-          .catch(error => {
-            setErrorMessage(error)
-          })
+          fields.push(
+            <Grid item xs={12} key={field.classId}>
+              <CustomComboBox
+                name={field.key}
+                label={field.caption}
+                valueField='key'
+                displayField='value'
+                store={res.list}
+                value={
+                  formik?.values &&
+                  formik?.values[field.key] &&
+                  res.list.filter(item => item.key === formik?.values[field.key])[0]
+                }
+                required={field.mandatory}
+                onChange={(event, newValue) => {
+                  handleFieldChange({
+                    fieldId: field.id,
+                    fieldKey: field.key,
+                    value: newValue?.key,
+                    caption: field.caption,
+                    display: newValue?.value
+                  })
+                  formik.setFieldValue([field.key], newValue?.key)
+                }}
+                sx={{ pt: 2 }}
+              />
+            </Grid>
+          )
+        })
         break
 
       case 41101:
         var parameters = '_filter='
-
         getRequest({
           extension: InventoryRepository.Site.qry,
           parameters
+        }).then(res => {
+          var _fieldValue = getFieldValue(field.key)
+
+          formik.setValues(pre => {
+            return {
+              ...pre,
+              ..._fieldValue
+            }
+          })
+          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'reference', store: res.list }))
         })
-          .then(res => {
-            var _fieldValue = getFieldValue(field.key)
+        break
+      case 41103:
+        var parameters = '_filter=&_name=&_pageSize=1000&_startAt=0'
+        getRequest({
+          extension: InventoryRepository.Category.qry,
+          parameters
+        }).then(res => {
+          var _fieldValue = getFieldValue(field.key)
 
-            parametersValidation.setValues(pre => {
-              return {
-                ...pre,
-                ..._fieldValue
-              }
-            })
-
-            fields.push(getCombo({ field, valueField: 'siteId', displayField: 'reference', store: res.list }))
+          formik.setValues(pre => {
+            return {
+              ...pre,
+              ..._fieldValue
+            }
           })
-          .catch(error => {
-            setErrorMessage(error)
-          })
+          fields.push(getCombo({ field, valueField: 'recordId', displayField: 'name', store: res.list }))
+        })
         break
 
-      case 41201:
-        fields.push(
-          getCombo({
-            field,
-            valueField: 'recordId',
-            displayField: 'reference',
-            itemSnapshotStore,
-            onChange: setItemSnapshotStore(itemSnapshot())
-          })
-        )
+      case 41201: //item filter
+        // getCombo({
+        //   field,
+        //   valueField: 'recordId',
+        //   displayField: 'reference',
+        //   itemSnapshotStore,
+        //   onChange: setItemSnapshotStore(itemSnapshot())
+        // })
+        fields
+          .push
+
+          // <ResourceLookup
+          //   endpointId='IV.asmx/snapshotIT'
+          //   valueField='sku'
+          //   displayField='sku'
+          //   name='sku'
+          //   label={field.caption}
+          //   form={formik}
+          //   secondDisplayField={true}
+          //   firstValue={formik?.values?.sku}
+          //   secondValue={formik?.values?.description}
+          //   onChange={(event, newValue) => {
+          //     if (newValue) {
+          //       formik.setFieldValue('itemId', newValue?.recordId)
+          //       formik.setFieldValue('sku', newValue?.sku)
+          //       formik.setFieldValue('description', newValue?.description)
+          //     } else {
+          //       formik.setFieldValue('itemId', '')
+          //       formik.setFieldValue('sku', null)
+          //       formik.setFieldValue('description', null)
+          //     }
+          //   }}
+          //   errorCheck={'itemId'}
+          // />
+          ()
         break
 
       // case 41103:
@@ -221,7 +248,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
       //     .then(res => {
       //       var _fieldValue = getFieldValue(field.key)
 
-      //       parametersValidation.setValues(pre => {
+      //       formik.setValues(pre => {
       //         return {
       //           ...pre,
       //           ..._fieldValue
@@ -245,7 +272,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
       //     .then(res => {
       //       var _fieldValue = getFieldValue(field.key)
 
-      //       parametersValidation.setValues(pre => {
+      //       formik.setValues(pre => {
       //         return {
       //           ...pre,
       //           ..._fieldValue
@@ -269,7 +296,7 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
       //     .then(res => {
       //       var _fieldValue = getFieldValue(field.key)
 
-      //       parametersValidation.setValues(pre => {
+      //       formik.setValues(pre => {
       //         return {
       //           ...pre,
       //           ..._fieldValue
@@ -288,93 +315,19 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
     }
   }
 
-  const getFieldsByClassId = () => {
-    parameters.map(field => {
-      switch (field.controlType) {
-        case 1:
-          fields.push(
-            <Grid item xs={12}>
-              <CustomTextField
-                name={field.key}
-                label={field.caption}
-                value={parametersValidation.values[field.key]} //??
-                required={field.mandatory}
-                onChange={(event, newValue) => {
-                  handleFieldChange({
-                    fieldId: field.id,
-                    fieldKey: field.key,
-                    value: newValue,
-                    caption: field.caption,
-                    display: newValue
-                  })
-                  parametersValidation.setFieldValue(field.key, newValue)
-                }}
-                onClear={() => parametersValidation.setFieldValue(field.key, '')}
-              />
-            </Grid>
-          )
-          break
-        case 2:
-          fields.push(
-            <Grid item xs={12}>
-              <CustomTextField
-                numberField
-                name={field.key}
-                label={field.caption}
-                value={parametersValidation.values[field.key]} //??
-                required={field.mandatory}
-                onChange={(event, newValue) => {
-                  handleFieldChange({
-                    fieldId: field.id,
-                    fieldKey: field.key,
-                    value: newValue,
-                    caption: field.caption,
-                    display: newValue
-                  })
-                  parametersValidation.setFieldValue(field.key, newValue)
-                }}
-                onClear={() => parametersValidation.setFieldValue(field.key, '')}
-              />
-            </Grid>
-          )
-          break
-        case 4:
-          fields.push(
-            <Grid item xs={12}>
-              <CustomDatePicker
-                name={field.key}
-                label={field.caption}
-                value={parametersValidation.values[field.key]}
-                required={field.mandatory}
-                onChange={(event, newValue) => {
-                  handleFieldChange({
-                    fieldId: field.id,
-                    fieldKey: field.key,
-                    value: newValue,
-                    caption: field.caption,
-                    display: newValue
-                  })
-                  parametersValidation.setFieldValue(field.key, newValue)
-                }}
-                onClear={() => parametersValidation.setFieldValue(field.key, '')}
-              />
-            </Grid>
-          )
-          break
-        case 5:
-          getComboBoxByClassId(field)
-          break
-        case 6:
-          fields.push(
-            <Grid item xs={12}>
-              <FormControlLabel
-                label={field.caption}
-                control={
-                  <Checkbox
-                    id={cellId}
+  const getFieldsByClassId = async () => {
+    return new Promise((resolve, reject) => {
+      try {
+        parameters.forEach(async (field, index) => {
+          switch (field.controlType) {
+            case 1:
+              fields.push(
+                <Grid item xs={12}>
+                  <CustomTextField
                     name={field.key}
-                    checked={parametersValidation.values[field.key]}
-                    value={[field.key]}
+                    label={field.caption}
+                    value={formik.values[field.key]} //??
+                    required={field.mandatory}
                     onChange={(event, newValue) => {
                       handleFieldChange({
                         fieldId: field.id,
@@ -383,23 +336,107 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
                         caption: field.caption,
                         display: newValue
                       })
-                      parametersValidation.setFieldValue(field.key, newValue)
+                      formik.setFieldValue(field.key, newValue)
                     }}
+                    onClear={() => formik.setFieldValue(field.key, '')}
                   />
-                }
-              />
-            </Grid>
-          )
-          break
-        default:
-          break
+                </Grid>
+              )
+              break
+            case 2:
+              fields.push(
+                <Grid item xs={12}>
+                  <CustomTextField
+                    numberField
+                    name={field.key}
+                    label={field.caption}
+                    value={formik.values[field.key]} //??
+                    required={field.mandatory}
+                    onChange={(event, newValue) => {
+                      handleFieldChange({
+                        fieldId: field.id,
+                        fieldKey: field.key,
+                        value: newValue,
+                        caption: field.caption,
+                        display: newValue
+                      })
+                      formik.setFieldValue(field.key, newValue)
+                    }}
+                    onClear={() => formik.setFieldValue(field.key, '')}
+                  />
+                </Grid>
+              )
+              break
+            case 4:
+              fields.push(
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name={field.key}
+                    label={field.caption}
+                    value={formik.values[field.key]}
+                    required={field.mandatory}
+                    onChange={(event, newValue) => {
+                      handleFieldChange({
+                        fieldId: field.id,
+                        fieldKey: field.key,
+                        value: newValue,
+                        caption: field.caption,
+                        display: newValue
+                      })
+                      formik.setFieldValue(field.key, newValue)
+                    }}
+                    onClear={() => formik.setFieldValue(field.key, '')}
+                  />
+                </Grid>
+              )
+              break
+            case 5:
+              getComboBoxByClassId(field)
+              break
+            case 6:
+              fields.push(
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    label={field.caption}
+                    control={
+                      <Checkbox
+                        id={cellId}
+                        name={field.key}
+                        checked={formik.values[field.key]}
+                        value={[field.key]}
+                        onChange={(event, newValue) => {
+                          handleFieldChange({
+                            fieldId: field.id,
+                            fieldKey: field.key,
+                            value: newValue,
+                            caption: field.caption,
+                            display: newValue
+                          })
+                          formik.setFieldValue(field.key, newValue)
+                        }}
+                      />
+                    }
+                  />
+                </Grid>
+              )
+              break
+            default:
+              break
+          }
+
+          // Check if it's the last iteration
+          if (index === parameters.length - 1) {
+            resolve() // Resolve the promise after the loop completes
+          }
+        })
+      } catch (error) {
+        reject(error) // Reject the promise if any error occurs
       }
     })
   }
 
   const handleFieldChange = object => {
     const existingIndex = paramsArray.findIndex(item => item.fieldId === object.fieldId)
-
     if (existingIndex !== -1) {
       paramsArray[existingIndex] = {
         fieldId: object.fieldId,
@@ -421,14 +458,13 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
     setFields(fields)
   }
 
-  const parametersValidation = useFormik({
-    enableReinitialize: false,
+  const { formik } = useForm({
+    initialValues: {},
+    enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({
-      // fromFunctionId: yup.string().required('This field is required'),
-      // toFunctionId: yup.string().required('This field is required')
-    }),
+    validationSchema: yup.object({}),
     onSubmit: values => {
+      console.log('handle submit')
       onClose()
     }
   })
@@ -439,13 +475,13 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
 
   // const clearValues = () => {
   //   setParamsArray([])
-  //   // parametersValidation.resetForm()
+  //   // formik.resetForm()
 
   //   console.log({ parameters })
   //   console.log({ fields })
   //   parameters.map(param => {
   //     console.log({ param })
-  //     parametersValidation.setFieldValue(`${param.key}`, null)
+  //     formik.setFieldValue(`${param.key}`, null)
   //   })
   //   // console.log({ fields })
   //   setFields([])
@@ -453,8 +489,8 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
   // }
 
   // useEffect(() => {
-  //   console.log({ parametersValidation: parametersValidation.values })
-  // }, [parametersValidation])
+  //   console.log({ formik: formik.values })
+  // }, [formik])
 
   // useEffect(() => {
   //   if (parameters && fields.length === 0) getFieldsByClassId()
@@ -462,32 +498,27 @@ const ReportParameterBrowser = ({ open, onClose, height = 200, reportName, param
 
   useEffect(() => {
     if (!parameters && fields.length === 0 && !disabled) getParameterDefinition()
+    if (parameters) {
+      // Assuming getFieldsByClassId is an asynchronous function that returns a promise
+      getFieldsByClassId().then(() => {
+        if (paramsArray.length > 0) {
+          const initialValues = {}
+          paramsArray.forEach(item => {
+            initialValues[item.fieldKey] = item.value
+          })
+          console.log(initialValues)
+          formik.setValues(initialValues)
+        }
+      })
+    }
   }, [parameters, disabled])
 
-  useEffect(() => {
-    if (!open) setFields([])
-    if (parameters && open) getFieldsByClassId()
-  }, [open])
-
   return (
-    <>
-      {open && (
-        <Window
-          id='RPBWindow'
-          onClose={onClose}
-          width={600}
-          height={height}
-          onSave={parametersValidation.handleSubmit}
-          onClear={clearValues}
-        >
-          <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
-            {fields && fields}
-          </Grid>
-        </Window>
-      )}
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    <FormShell form={formik} infoVisible={false}>
+      <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
+        {fields && fields}
+      </Grid>
+    </FormShell>
   )
 }
 
