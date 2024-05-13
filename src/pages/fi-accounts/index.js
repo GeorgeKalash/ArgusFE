@@ -1,5 +1,4 @@
-import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -9,6 +8,9 @@ import AccountsWindow from './Windows/AccountsWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -109,8 +111,13 @@ const MfAccounts = () => {
   }
 
   return (
+<<<<<<< REM-249
     <>
       <Box>
+=======
+    <VertLayout>
+      <Fixed>
+>>>>>>> master
         <GridToolbar
           onAdd={addAccounts}
           maxAccess={access}
@@ -123,6 +130,8 @@ const MfAccounts = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -137,8 +146,8 @@ const MfAccounts = () => {
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

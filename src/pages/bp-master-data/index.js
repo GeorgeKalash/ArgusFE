@@ -1,30 +1,16 @@
-// ** React Importsport
-import React, { useState, useContext, use } from 'react'
-
-// ** MUI Imports
-import { Box, Button } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
-import * as yup from 'yup'
+import React, { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import BPMasterDataWindow from './Windows/BPMasterDataWindow'
-
-// ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 // function SampleWindow() {
 //   const { stack } = useWindow()
@@ -159,7 +145,6 @@ const BPMasterData = () => {
         recordId: recordId ? recordId : null
       },
       width: 1200,
-      height: 600,
       title: _labels.masterData
     })
   }
@@ -178,8 +163,8 @@ const BPMasterData = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -188,6 +173,8 @@ const BPMasterData = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -201,8 +188,8 @@ const BPMasterData = () => {
           maxAccess={access}
           refetch={refetch}
         />
-      </Box>
-    </>
+      </Grow>
+    </ VertLayout>
   )
 }
 

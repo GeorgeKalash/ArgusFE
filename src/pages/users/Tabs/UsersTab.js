@@ -26,7 +26,6 @@ const UsersTab = ({
   passwordState,
   setPasswordState
 }) => {
-
   return (
     <Grid container>
       {/* First Column */}
@@ -58,20 +57,17 @@ const UsersTab = ({
             onClear={() => usersValidation.setFieldValue('username', '')}
             error={usersValidation.touched.username && Boolean(usersValidation.errors.username)}
             helperText={usersValidation.touched.username && usersValidation.errors.username}
-
-            //Manually checking the entered value against the regular expression & enforcing the validation logic
-            onChange={(e) => {
-              const inputValue = e.target.value;
+            onChange={e => {
+              const inputValue = e.target.value
               if (/^[a-zA-Z0-9_.-@]*$/.test(inputValue)) {
-                usersValidation.handleChange(e);
+                usersValidation.handleChange(e)
               }
             }}
-
-            // The onBlur event is triggered when the user leaves the input field, either by clicking outside of it or using the tab key.
-            onBlur={(e) => {
-              if (!editMode && e.target.value != '' ){
-              checkFieldDirect(e.target.value)
-              setPasswordState(emailPresent)}
+            onBlur={e => {
+              if (!editMode && e.target.value != '') {
+                checkFieldDirect(e.target.value)
+                setPasswordState(emailPresent)
+              }
             }}
           />
         </Grid>
@@ -96,10 +92,10 @@ const UsersTab = ({
             label={labels.cellPhone}
             value={usersValidation.values.cellPhone}
             maxAccess={maxAccess}
-            onChange={(e) => {
-              const inputValue = e.target.value;
+            onChange={e => {
+              const inputValue = e.target.value
               if (/^[0-9]*$/.test(inputValue)) {
-                usersValidation.handleChange(e);
+                usersValidation.handleChange(e)
               }
             }}
             onClear={() => usersValidation.setFieldValue('cellPhone', '')}
@@ -166,7 +162,7 @@ const UsersTab = ({
             label={labels.notificationGrp}
             valueField='recordId'
             displayField='name'
-            columnsInDropDown= {[
+            columnsInDropDown={[
               { key: 'reference', value: 'Reference' },
               { key: 'name', value: 'Name' }
             ]}
@@ -181,31 +177,31 @@ const UsersTab = ({
           />
         </Grid>
         <Grid item xs={12}>
-        <CustomLookup
-          name='employeeId'
-          label={labels.employee}
-          valueField='reference'
-          displayField='name'
-          store={employeeStore}
-          setStore={setEmployeeStore}
-          firstValue={usersValidation.values.employeeRef}
-          secondValue={usersValidation.values.employeeName}
-          onLookup={lookupEmployee}
-          onChange={(event, newValue) => {
-            if (newValue) {
-              usersValidation.setFieldValue('employeeId', newValue?.recordId)
-              usersValidation.setFieldValue('employeeRef', newValue?.reference)
-              usersValidation.setFieldValue('employeeName', newValue?.name)
-            } else {
-              usersValidation.setFieldValue('employeeId', null)
-              usersValidation.setFieldValue('employeeRef', null)
-              usersValidation.setFieldValue('employeeName', null)
-            }
-          }}
-          error={usersValidation.touched.employeeId && Boolean(usersValidation.errors.employeeId)}
-          helperText={usersValidation.touched.employeeId && usersValidation.errors.employeeId}
-          maxAccess={maxAccess}
-        />
+          <CustomLookup
+            name='employeeId'
+            label={labels.employee}
+            valueField='reference'
+            displayField='name'
+            store={employeeStore}
+            setStore={setEmployeeStore}
+            firstValue={usersValidation.values.employeeRef}
+            secondValue={usersValidation.values.employeeName}
+            onLookup={lookupEmployee}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                usersValidation.setFieldValue('employeeId', newValue?.recordId)
+                usersValidation.setFieldValue('employeeRef', newValue?.reference)
+                usersValidation.setFieldValue('employeeName', newValue?.name)
+              } else {
+                usersValidation.setFieldValue('employeeId', null)
+                usersValidation.setFieldValue('employeeRef', null)
+                usersValidation.setFieldValue('employeeName', null)
+              }
+            }}
+            error={usersValidation.touched.employeeId && Boolean(usersValidation.errors.employeeId)}
+            helperText={usersValidation.touched.employeeId && usersValidation.errors.employeeId}
+            maxAccess={maxAccess}
+          />
         </Grid>
         <Grid item xs={12}>
           <CustomTextField

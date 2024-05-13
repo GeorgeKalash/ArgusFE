@@ -1,29 +1,24 @@
 import React, { useContext } from 'react'
-import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { formatDateDefault } from 'src/lib/date-helper'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from './forms/ClientTemplateForm'
 import { useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ClientsCorporateList = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
-
-  //control
   const [editMode, setEditMode] = useState(null)
-
-  //stores
   const [errorMessage, setErrorMessage] = useState(null)
 
   const {
@@ -166,20 +161,13 @@ const ClientsCorporateList = () => {
         maxAccess: access
       },
       width: 1100,
-      height: 650,
       title: _labels.clientCorporate
     })
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addClient}
           maxAccess={access}
@@ -192,7 +180,8 @@ const ClientsCorporateList = () => {
           labels={_labels}
           inputSearch={true}
         />
-
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -203,11 +192,11 @@ const ClientsCorporateList = () => {
           pageSize={50}
           paginationType='client'
         />
+      </Grow>
         {errorMessage?.error && (
           <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
         )}
-      </Box>
-    </>
+      </VertLayout>
   )
 }
 

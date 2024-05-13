@@ -39,6 +39,9 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   '& .MuiDataGrid-row:last-child': {
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
+  '& .MuiDataGrid-overlayWrapperInner' :{
+    marginTop: '-1px'
+  },
   '& .MuiDataGrid-virtualScroller': {
     // remove the space left for the header
     marginTop: '0!important'
@@ -84,13 +87,6 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   }
 }))
 
-const TableContainer = styled(Box)({
-  // height: '600px', // Change this value as needed
-  // flex: 1,
-  // overflow: 'auto', // Enable scrolling within the container
-  position: 'relative'
-})
-
 const PaginationContainer = styled(Box)({
   width: '100%',
   position: 'fixed',
@@ -115,7 +111,6 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
-  const [filteredRows, setFilteredRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
   const pageSize = props.pageSize ? props.pageSize : 50
@@ -368,6 +363,7 @@ const Table = ({
       }
     })
   }
+<<<<<<< REM-249
 
   const paginationHeight = pagination ? '41px' : '10px'
 
@@ -377,6 +373,8 @@ const Table = ({
       : `${height}px`
     : `calc(100vh - 48px - 48px - ${paginationHeight})`
 
+=======
+>>>>>>> master
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
       var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
@@ -400,6 +398,7 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
+<<<<<<< REM-249
           <TableContainer
             sx={
               props.style
@@ -414,20 +413,24 @@ const Table = ({
             }
           >
             {/* <ScrollableTable> */}
+=======
+>>>>>>> master
             <StripedDataGrid
               rows={
                 gridData?.list
                   ? page < 2 && paginationType === 'api'
-                    ? gridData?.list.slice(0, 50)
+                    ? gridData?.list.slice(0, 50) 
                     : gridData?.list
                   : []
               }
+<<<<<<< REM-249
               sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
+=======
+              sx={{ overflow: 'auto', position: 'relative', display:'flex', flex: 1, zIndex:'0 !important', marginBottom: pagination? 0:5, height: height? height:'auto' }}
+>>>>>>> master
               density='compact'
               components={{
                 LoadingOverlay: LinearProgress,
-
-                // Pagination: pagination ? CustomPagination : null,
                 Footer: CustomPagination,
                 NoRowsOverlay: () => (
                   <Stack height='100%' alignItems='center' justifyContent='center'>
@@ -464,11 +467,14 @@ const Table = ({
                 ...filteredColumns
               ]}
             />
+<<<<<<< REM-249
             {/* </ScrollableTable> */}
             {/* <PaginationContainer>
                     <CustomPagination />
                 </PaginationContainer> */}
           </TableContainer>
+=======
+>>>>>>> master
           <DeleteDialog
             fullScreen={false}
             open={deleteDialogOpen}

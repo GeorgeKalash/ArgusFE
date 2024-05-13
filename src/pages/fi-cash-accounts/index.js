@@ -1,36 +1,20 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import CashAccountWindow from './Windows/CashAccountWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CashAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -65,9 +49,9 @@ const CashAccounts = () => {
     endpointId: CashBankRepository.CashAccount.qry,
     datasetId: ResourceIds.CashAccounts,
     search: {
-        endpointId: CashBankRepository.CashAccount.snapshot,
-        searchFn: fetchWithSearch
-      }
+      endpointId: CashBankRepository.CashAccount.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
   const invalidate = useInvalidate({
@@ -136,16 +120,18 @@ const CashAccounts = () => {
   }
 
   return (
-    <>
-      <Box>
-        <GridToolbar 
-            onAdd={add} 
-            maxAccess={access}
-            onSearch={search}
-            labels={_labels}
-            onSearchClear={clear}
-            inputSearch={true}
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          labels={_labels}
+          onSearchClear={clear}
+          inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -159,7 +145,7 @@ const CashAccounts = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <CashAccountWindow
           onClose={() => {
@@ -173,7 +159,7 @@ const CashAccounts = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

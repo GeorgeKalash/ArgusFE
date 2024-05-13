@@ -22,6 +22,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -125,8 +128,8 @@ const NumberRange = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -135,6 +138,8 @@ const NumberRange = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -148,7 +153,8 @@ const NumberRange = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
         <NumberRangeWindow
           onClose={() => {
@@ -162,7 +168,7 @@ const NumberRange = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

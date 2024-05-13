@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -23,11 +23,13 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const MultiCurrencyMapping = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
+
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
@@ -36,7 +38,6 @@ const MultiCurrencyMapping = () => {
 
   const [selectedCurrencyId, setSelectedCurrencyId] = useState(null)
   const [selectedRateTypeId, setSelectedRateTypeId] = useState(null)
-  
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -79,7 +80,6 @@ const MultiCurrencyMapping = () => {
     }
   ]
 
-
   const add = () => {
     setWindowOpen(true)
     setSelectedCurrencyId(null)
@@ -89,11 +89,9 @@ const MultiCurrencyMapping = () => {
   const edit = obj => {
     // setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
-    
+
     setSelectedCurrencyId(obj.currencyId)
     setSelectedRateTypeId(obj.rateTypeId)
-   
-
   }
 
   const del = async obj => {
@@ -104,16 +102,17 @@ const MultiCurrencyMapping = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
-          rowId={['currencyId','rateTypeId']}
+          rowId={['currencyId', 'rateTypeId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
@@ -121,7 +120,7 @@ const MultiCurrencyMapping = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <MultiCurrencyWindow
           onClose={() => {
@@ -132,19 +131,13 @@ const MultiCurrencyMapping = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
-          
           currencyId={selectedCurrencyId}
           rateTypeId={selectedRateTypeId}
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 
-
-
-
 export default MultiCurrencyMapping
-
-

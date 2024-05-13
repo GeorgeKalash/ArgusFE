@@ -1,7 +1,6 @@
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { CommonContext } from 'src/providers/CommonContext'
 
 export default function ResourceComboBox({
