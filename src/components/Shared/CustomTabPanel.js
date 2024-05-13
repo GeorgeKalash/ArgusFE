@@ -12,13 +12,20 @@ const CustomTabPanel = props => {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
+      sx={{
+        display: value !== index ? 'none !important' : 'flex !important',
+        flexDirection: 'column',
+        width: '100%',
+        flex: '1 !important',
+        position: 'relative',
+        overflow: 'auto',
+        '.MuiBox-root':{
+          paddingTop:'5px !important'
+        }
+      }}
       {...other}
     >
-      <Box sx={{ p: 3 }}>
-        <Typography sx={{ height: height, display: 'flex', position: 'relative', flexDirection: 'column' }}>
-          {children}
-        </Typography>
-      </Box>
+      {children}
     </Box>
   )
 }

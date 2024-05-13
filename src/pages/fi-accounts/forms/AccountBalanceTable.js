@@ -6,17 +6,13 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const AccountBalanceForm = (
- { 
-  labels,
-  height,
-  maxAccess,
-  store,
-}) => {
-  const { getRequest} = useContext(RequestsContext)
+const AccountBalanceForm = ({ labels, maxAccess, store }) => {
+  const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
-  var editMode = recordId? true: false
+  var editMode = recordId ? true : false
 
   const columns = [
     {
@@ -31,33 +27,32 @@ const AccountBalanceForm = (
     }
   ]
 
-  async function fetchGridData(options={}) {
+  async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_accountId=${recordId}`
     var parameters = defaultParams
 
-     const response =  await getRequest({
+    const response = await getRequest({
       extension: FinancialRepository.AccountCreditBalance.qry,
       parameters: parameters
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
   const {
-    query: { data },
+    query: { data }
   } = useResourceQuery({
     enabled: editMode,
     queryFn: fetchGridData,
     endpointId: FinancialRepository.AccountCreditBalance.qry,
-    datasetId: ResourceIds.Accounts,
+    datasetId: ResourceIds.Accounts
   })
 
   return (
-    <>
-      <Box>
-        <GridToolbar maxAccess={maxAccess} />
+    <VertLayout>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -65,10 +60,9 @@ const AccountBalanceForm = (
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
-          height={height-50}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

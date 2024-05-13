@@ -1,19 +1,12 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
 import {
     Grid,
     Box,
     Button,
 } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
@@ -22,16 +15,14 @@ import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { getNewDocumentTypes, populateDocumentTypes } from 'src/Models/System/DocumentTypes'
-
-// ** Helpers
-// import { getFormattedNumber, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { defaultParams } from 'src/lib/defaults'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const Batches = () => {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,9 +44,6 @@ const Batches = () => {
             field: 'reference',
             headerName: 'Batches Reference',
             flex: 1,
-
-            // align: 'right',
-            // valueGetter: ({ row }) => getFormattedNumber(row?.reference, 4)
         },
         {
             field: 'dgName',
@@ -94,11 +82,6 @@ const Batches = () => {
         validateOnChange: false,
 
         validationSchema: yup.object({
-            // reference: yup.number()
-            //     .required('This field is required')
-            //     .transform((value, originalValue) => validateNumberField(value, originalValue))
-            //     .min(10, 'Value must be greater than or equal to 10')
-            //     .max(9999999, 'Value must be less than or equal to 9999999'),
 
             reference: yup.string().required('This field is required'),
             name: yup.string().required('This field is required'),
@@ -106,8 +89,6 @@ const Batches = () => {
             activeStatusName: yup.string().required('This field is required'),
         }),
         onSubmit: values => {
-            // values.reference = getNumberWithoutCommas(values.reference)
-            // console.log({ values })
             postDocumentType(values)
         }
     })
@@ -120,8 +101,6 @@ const Batches = () => {
     const getGridData = ({ _startAt = 0, _pageSize = 30 }) => {
         const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
         var parameters = defaultParams + '&_dgId=0'
-
-        // var parameters = defaultParams + '&_dgId=0'
         getRequest({
             'extension': SystemRepository.DocumentType.qry,
             'parameters': parameters,
@@ -143,9 +122,7 @@ const Batches = () => {
             .then((res) => {
                 setIntegrationLogicStore(res.list)
             })
-            .catch((error) => {
-                console.log({ error: error.response.data })
-            })
+            .catch((error) => {  })
     }
 
     const fillSysFunctionsStore = () => {
@@ -169,12 +146,9 @@ const Batches = () => {
             'parameters': parameters,
         })
             .then((res) => {
-                //ask about lang values
                 setActiveStatusStore(res.list)
             })
-            .catch((error) => {
-                console.log({ error: error.response.data })
-            })
+            .catch((error) => { })
     }
 
     const lookupNumberRange = (searchQry) => {
@@ -247,27 +221,21 @@ const Batches = () => {
     }, [])
 
     return (
-        <>
-            <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-            }}>
-                <GridToolbar
-                    onAdd={addDocumentType}
-                />
+        <VertLayout>
+            <Fixed>
+                <GridToolbar  onAdd={addDocumentType} />
+            </Fixed>
+            <Grow>
                 <Table
                     columns={columns}
                     gridData={gridData}
                     rowId={['recordId']}
                     api={getGridData}
-
-                    // rowId={['recordId', 'reference']}
                     onEdit={editDocumentType}
                     onDelete={delDocumentType}
                     isLoading={false}
                 />
-            </Box>
+            </Grow>
             {windowOpen &&
                 <Window
                     id='DocumentTypeWindow'
@@ -277,7 +245,6 @@ const Batches = () => {
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                     width={600}
-                    height={400}
                     onSave={handleSubmit}
                 >
                     <CustomTabPanel index={0} value={activeTab}>
@@ -391,7 +358,7 @@ const Batches = () => {
                     </CustomTabPanel>
                 </Window>
             }
-        </>
+        </VertLayout>
     )
 }
 

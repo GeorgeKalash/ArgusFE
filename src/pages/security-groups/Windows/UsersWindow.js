@@ -11,14 +11,14 @@ const UsersWindow = ({
   handleListsDataChange
 }) => {
   return (
-    <Window width={600} height={400} onClose={onClose} onSave={onSave} Title={itemSelectorLabels[0]}>
-    <ItemSelectorWindow
-          initialAllListData={initialAllListData}
-          initialSelectedListData={initialSelectedListData}
-          handleListsDataChange={handleListsDataChange} 
-          itemSelectorLabels={itemSelectorLabels}
-        />
-        </Window>
+    <Window width={600} height={500} onClose={onClose} onSave={onSave} Title={itemSelectorLabels[0]}>
+      <ItemSelectorWindow
+        initialAllListData={initialAllListData}
+        initialSelectedListData={initialSelectedListData}
+        handleListsDataChange={handleListsDataChange}
+        itemSelectorLabels={itemSelectorLabels}
+      />
+    </Window>
   )
 }
 

@@ -11,116 +11,113 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 // ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function GlIntegrationForm({ labels, maxAccess, recordId }) {
-    const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
-    
-    const [initialValues, setInitialData] = useState({
-        recordId: null,
-        reference: '',
-        name: '',
+  const [isLoading, setIsLoading] = useState(false)
+  const [editMode, setEditMode] = useState(!!recordId)
+
+  const [initialValues, setInitialData] = useState({
+    recordId: null,
+    reference: '',
+    name: ''
+  })
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  //const editMode = !!recordId
+
+  const invalidate = useInvalidate({
+    endpointId: GeneralLedgerRepository.IntegrationPostTypes.page
+  })
+
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      reference: yup.string().required('This field is required'),
+      name: yup.string().required('This field is required')
+    }),
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.IntegrationPostTypes.set,
+        record: JSON.stringify(obj)
       })
 
-    const { getRequest, postRequest } = useContext(RequestsContext)
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        setInitialData({
+          ...obj, // Spread the existing properties
+          recordId: response.recordId // Update only the recordId field
+        })
+      } else toast.success('Record Edited Successfully')
+      setEditMode(true)
 
-    //const editMode = !!recordId
+      invalidate()
+    }
+  })
 
-    const invalidate = useInvalidate({
-        endpointId: GeneralLedgerRepository.IntegrationPostTypes.page
-      })
-  
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        validateOnChange: true,
-        validationSchema: yup.object({
-          reference: yup.string().required('This field is required'),
-          name: yup.string().required('This field is required'),
-        }),
-        onSubmit: async obj => {
-          const recordId = obj.recordId
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          setIsLoading(true)
 
-          const response = await postRequest({
-            extension: GeneralLedgerRepository.IntegrationPostTypes.set,
-            record: JSON.stringify(obj)
+          const res = await getRequest({
+            extension: GeneralLedgerRepository.IntegrationPostTypes.get,
+            parameters: `_recordId=${recordId}`
           })
-          
-          if (!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
-            });
-          }
-          else toast.success('Record Edited Successfully')
-          setEditMode(true)
 
-          invalidate()
+          setInitialData(res.record)
         }
-      })
-    
-      useEffect(() => {
-        ;(async function () {
-          try {
-            if (recordId) {
-              setIsLoading(true)
-    
-              const res = await getRequest({
-                extension: GeneralLedgerRepository.IntegrationPostTypes.get,
-                parameters: `_recordId=${recordId}`
-              })
-              
-              setInitialData(res.record)
-            }
-          } catch (exception) {
-            setErrorMessage(error)
-          }
-          setIsLoading(false)
-        })()
-      }, [])
-      
-    return (
-        <FormShell 
-            resourceId={ResourceIds.IntegrationPostTypes}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
-            editMode={editMode}
-        >
-            <Grid container spacing={4}>
-                <Grid item xs={12}>
-                    <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.reference}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='30'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    helperText={formik.touched.reference && formik.errors.reference}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CustomTextField
-                    name='name'
-                    label={labels.name}
-                    value={formik.values.name}
-                    required
-                    rows={2}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
-                    />
-                </Grid>
+      } catch (exception) {
+        setErrorMessage(error)
+      }
+      setIsLoading(false)
+    })()
+  }, [])
+
+  return (
+    <FormShell resourceId={ResourceIds.IntegrationPostTypes} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                helperText={formik.touched.reference && formik.errors.reference}
+              />
             </Grid>
-        </FormShell>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                rows={2}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
