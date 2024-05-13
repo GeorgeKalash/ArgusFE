@@ -153,8 +153,8 @@ export default function FormShell({
                 selectedReport: selectedReport,
                 recordId: form.values?.recordId
               },
-              width: 1000,
-              height: 500,
+              width: 1150,
+              height: 700,
               title: 'Preview Report'
             })
           }
