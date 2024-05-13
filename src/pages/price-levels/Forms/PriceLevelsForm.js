@@ -11,6 +11,8 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function PriceLevelsForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -67,7 +69,9 @@ export default function PriceLevelsForm({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell resourceId={ResourceIds.PriceLevels} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <VertLayout>
+        <Grow>
+        <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
             name='reference'
@@ -97,6 +101,8 @@ export default function PriceLevelsForm({ labels, maxAccess, recordId }) {
           />
         </Grid>
       </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

@@ -1,10 +1,6 @@
-// ** MUI Imports
 import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-
-// ** Custom Imports
 import { useFormik } from 'formik'
 import { useContext, useEffect, useState } from 'react'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -17,6 +13,8 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CharacteristicsForm = ({
   labels,
@@ -110,131 +108,135 @@ const CharacteristicsForm = ({
   }
 
 return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Characteristics}
-      maxAccess={maxAccess}
-      editMode={editMode} 
-    >
-     <Grid container spacing={4}>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='name'
-          label={labels.name}
-          value={formik.values.name}
-          required
-          maxLength='50'
-          maxAccess={maxAccess}
-          onChange={formik.handleChange}
-          onClear={() => formik.setFieldValue('name', '')}
-          error={formik.touched.name && Boolean(formik.errors.name)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <ResourceComboBox
-          datasetId={DataSets.DR_CHA_DATA_TYPE}
-          name='dataType'
-          label={labels.dataType}
-          required
-          valueField='key'
-          displayField='value'
-          values={formik.values}
-          onClear={() => formik.setFieldValue('dataType', '')}
-          onChange={(event, newValue) => {
-            formik.setFieldValue('dataType', newValue?.key || '')
-          }}
-          error={formik.touched.dataType && Boolean(formik.errors.dataType)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='propertyName'
-          label={labels.propertyName}
-          value={formik.values.propertyName}
-          required
-          onChange={formik.handleChange}
-          maxLength='10'
-          maxAccess={maxAccess}
-          onClear={() => formik.setFieldValue('propertyName', '')}
-          error={formik.touched.propertyName && Boolean(formik.errors.propertyName)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name='isRange'
-              checked={formik.values?.isRange}
+  <FormShell
+    form={formik}
+    resourceId={ResourceIds.Characteristics}
+    maxAccess={maxAccess}
+    editMode={editMode} 
+  >
+    <VertLayout>
+      <Grow>
+        <Grid container spacing={4}>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='name'
+              label={labels.name}
+              value={formik.values.name}
+              required
+              maxLength='50'
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('name', '')}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.DR_CHA_DATA_TYPE}
+              name='dataType'
+              label={labels.dataType}
+              required
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              onClear={() => formik.setFieldValue('dataType', '')}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('dataType', newValue?.key || '')
+              }}
+              error={formik.touched.dataType && Boolean(formik.errors.dataType)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='propertyName'
+              label={labels.propertyName}
+              value={formik.values.propertyName}
+              required
+              onChange={formik.handleChange}
+              maxLength='10'
+              maxAccess={maxAccess}
+              onClear={() => formik.setFieldValue('propertyName', '')}
+              error={formik.touched.propertyName && Boolean(formik.errors.propertyName)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name='isRange'
+                  checked={formik.values?.isRange}
+                  onChange={formik.handleChange}
+                  maxAccess={maxAccess}
+                />
+              }
+              label={labels.isRange}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name='isMultiple'
+                  checked={formik.values?.isMultiple}
+                  onChange={formik.handleChange}
+                  maxAccess={maxAccess}
+                />
+              }
+              label={labels.isMultiple}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name='allowNegative'
+                  checked={formik.values?.allowNegative}
+                  onChange={formik.handleChange}
+                  maxAccess={maxAccess}
+                />
+              }
+              label={labels.allowNegative}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name='caseSensitive'
+                  checked={formik.values?.caseSensitive}
+                  onChange={formik.handleChange}
+                  maxAccess={maxAccess}
+                />
+              }
+              label={labels.caseSensitive}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='textSize'
+              label={labels.textSize}
+              value={formik.values.textSize}
               onChange={formik.handleChange}
               maxAccess={maxAccess}
+              type='number'
+              onClear={() => formik.setFieldValue('textSize', '')}
+              error={formik.touched.textSize && Boolean(formik.errors.textSize)}
             />
-          }
-          label={labels.isRange}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name='isMultiple'
-              checked={formik.values?.isMultiple}
-              onChange={formik.handleChange}
+          </Grid>
+          <Grid item xs={12}>
+            <CustomDatePicker
+              name='validFrom'
+              label={labels.validFrom}
+              value={formik.values.validFrom}
+              onChange={formik.setFieldValue}
               maxAccess={maxAccess}
+              onClear={() => formik.setFieldValue('validFrom', '')}
+              error={formik.touched.validFrom && Boolean(formik.errors.validFrom)}
             />
-          }
-          label={labels.isMultiple}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name='allowNegative'
-              checked={formik.values?.allowNegative}
-              onChange={formik.handleChange}
-              maxAccess={maxAccess}
-            />
-          }
-          label={labels.allowNegative}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              name='caseSensitive'
-              checked={formik.values?.caseSensitive}
-              onChange={formik.handleChange}
-              maxAccess={maxAccess}
-            />
-          }
-          label={labels.caseSensitive}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='textSize'
-          label={labels.textSize}
-          value={formik.values.textSize}
-          onChange={formik.handleChange}
-          maxAccess={maxAccess}
-          type='number'
-          onClear={() => formik.setFieldValue('textSize', '')}
-          error={formik.touched.textSize && Boolean(formik.errors.textSize)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <CustomDatePicker
-          name='validFrom'
-          label={labels.validFrom}
-          value={formik.values.validFrom}
-          onChange={formik.setFieldValue}
-          maxAccess={maxAccess}
-          onClear={() => formik.setFieldValue('validFrom', '')}
-          error={formik.touched.validFrom && Boolean(formik.errors.validFrom)}
-        />
-      </Grid>
-    </Grid>
+          </Grid>
+        </Grid>
+      </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

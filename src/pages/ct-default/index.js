@@ -3,27 +3,19 @@ import { useContext, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import { Box, Grid } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
-// ** API
-import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import useResourceParams from 'src/hooks/useResourceParams'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
@@ -183,16 +175,9 @@ const Defaults = () => {
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          marginTop: '10px'
-        }}
-      >
-        <Grid container spacing={2} sx={{ width: '50%' }}>
+    <VertLayout>
+      <Grow>
+        <Grid container spacing={3} sx={{ width: '50%', pt: '2.5rem' }}>
           {/* First Row */}
           <Grid item xs={12}>
             <ResourceLookup
@@ -383,10 +368,9 @@ const Defaults = () => {
         >
           <WindowToolbar onSave={handleSubmit} isSaved={true} />
         </Grid>
-      </Box>
-
+        </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

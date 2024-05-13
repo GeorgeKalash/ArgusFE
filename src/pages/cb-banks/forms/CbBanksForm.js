@@ -8,8 +8,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
@@ -89,69 +90,73 @@ export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) 
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.CbBanks} form={formik} height={300} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            maxAccess={maxAccess}
-            maxLength='20'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
+    <FormShell resourceId={ResourceIds.CbBanks} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='reference'
+              label={labels.reference}
+              value={formik.values.reference}
+              required
+              maxAccess={maxAccess}
+              maxLength='20'
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('reference', '')}
+              error={formik.touched.reference && Boolean(formik.errors.reference)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='name'
+              label={labels.name}
+              value={formik.values.name}
+              required
+              maxAccess={maxAccess}
+              maxLength='30'
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('name', '')}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='swiftCode'
+              label={labels.swiftCode}
+              value={formik.values.swiftCode}
+              type='numeric'
+              rows={2}
+              maxLength='20'
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('swiftCode', '')}
+              error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
+              name='countryId'
+              label={labels.Country}
+              valueField='recordId'
+              displayField={['reference', 'name', 'flName']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'reference' },
+                { key: 'name', value: 'name' },
+                { key: 'flName', value: 'flName' }
+              ]}
+              values={formik.values}
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('countryId', newValue?.recordId || null)
+              }}
+              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            maxLength='30'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='swiftCode'
-            label={labels.swiftCode}
-            value={formik.values.swiftCode}
-            type='numeric'
-            rows={2}
-            maxLength='20'
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('swiftCode', '')}
-            error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Country.qry}
-            name='countryId'
-            label={labels.Country}
-            valueField='recordId'
-            displayField={['reference', 'name', 'flName']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'reference' },
-              { key: 'name', value: 'name' },
-              { key: 'flName', value: 'flName' }
-            ]}
-            values={formik.values}
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('countryId', newValue?.recordId || null)
-            }}
-            error={formik.touched.countryId && Boolean(formik.errors.countryId)}
-          />
-        </Grid>
-      </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

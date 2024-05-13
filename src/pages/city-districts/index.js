@@ -1,29 +1,16 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import CityDistrictWindow from './Windows/CityDistrictWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CityDistricts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -103,9 +90,11 @@ const CityDistricts = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -119,7 +108,7 @@ const CityDistricts = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <CityDistrictWindow
           onClose={() => {
@@ -133,7 +122,7 @@ const CityDistricts = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

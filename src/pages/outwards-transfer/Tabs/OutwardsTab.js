@@ -613,7 +613,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         resourceId={ResourceIds.OutwardsTransfer}
         form={formik}
         editMode={editMode}
-        height={480}
         maxAccess={maxAccess}
         onClose={onClose}
         onReopen={onReopen}

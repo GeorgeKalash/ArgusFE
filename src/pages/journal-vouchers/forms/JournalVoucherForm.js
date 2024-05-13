@@ -118,7 +118,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId }) {
       actions={actions}
       resourceId={ResourceIds.JournalVoucher}
       form={formik}
-      height={300}
       functionId={SystemFunction.JournalVoucher}
       maxAccess={maxAccess}
       editMode={editMode}

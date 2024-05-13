@@ -17,6 +17,8 @@ import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -94,7 +96,9 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.Correspondent} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <VertLayout>
+        <Grow>
+        <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
             name='reference'
@@ -177,6 +181,8 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
           />
         </Grid>
       </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

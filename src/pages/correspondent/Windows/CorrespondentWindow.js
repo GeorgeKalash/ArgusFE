@@ -6,18 +6,12 @@ import CorrespondentForm from '../Forms/CorrespondentForm'
 import CorrespondentCountriesForm from '../Forms/CorrespondentCountriesForm'
 import CorrespondentCurrenciesForm from '../Forms/CorrespondentCurrenciesForm'
 
-const CorrespondentWindow = ({
-  height,
-  recordId,
-  labels,
-  maxAccess,
-  expanded
-}) => {
-  const [activeTab , setActiveTab] = useState(0)
+const CorrespondentWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+  const [activeTab, setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
-  const [store , setStore] = useState({
-    recordId : recordId || null,
+  const [store, setStore] = useState({
+    recordId: recordId || null,
     countries: []
   })
 
@@ -29,7 +23,7 @@ const CorrespondentWindow = ({
 
   return (
     <>
-    <CustomTabs  tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <CustomTabPanel height={height} index={0} value={activeTab}>
         <CorrespondentForm
@@ -49,7 +43,6 @@ const CorrespondentWindow = ({
           maxAccess={maxAccess}
           store={store}
           expanded={expanded}
-
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab}>

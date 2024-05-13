@@ -1,5 +1,4 @@
-import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -9,6 +8,9 @@ import AccountsWindow from './Windows/AccountsWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const MfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -39,18 +41,18 @@ const MfAccounts = () => {
     })
   }
 
-  async function fetchGridData(options={}) {
+  async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
     var parameters = defaultParams
 
-     const response =  await getRequest({
+    const response = await getRequest({
       extension: FinancialRepository.Account.page,
       parameters: parameters
     })
 
-    return {...response,  _startAt: _startAt}
+    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -73,31 +75,30 @@ const MfAccounts = () => {
       field: 'typeName',
       headerName: _labels.type,
       flex: 1
-    },
+    }
   ]
 
   const delAccounts = obj => {
     postRequest({
       extension: FinancialRepository.Account.del,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success('Record Deleted Successfully')
+      invalidate()
     })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        invalidate()
-      })
   }
 
   const addAccounts = () => {
     openForm()
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: AccountsWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
-        maxAccess: access,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 600,
       height: 600,
@@ -106,14 +107,14 @@ const MfAccounts = () => {
   }
 
   const popup = obj => {
-    openForm(obj?.recordId )
+    openForm(obj?.recordId)
   }
 
   return (
-    <>
-      <Box>
-        <GridToolbar 
-          onAdd={addAccounts} 
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={addAccounts}
           maxAccess={access}
           onSearch={value => {
             filterBy('qry', value)
@@ -124,6 +125,8 @@ const MfAccounts = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -137,8 +140,8 @@ const MfAccounts = () => {
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
