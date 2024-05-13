@@ -20,6 +20,9 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+
 
 export default function LoCarriersForms({
   labels,
@@ -40,10 +43,12 @@ export default function LoCarriersForms({
     siteId: null,
     bpId: null,
     bpName: null,
+
     bpRef: null,
     cashAccountId: null,
     cashAccountRef: '',
     cashAccountName: ''
+
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -106,104 +111,105 @@ export default function LoCarriersForms({
 
   return (
     <FormShell resourceId={ResourceIds.LoCarriers} form={formik} height={300} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            maxAccess={maxAccess}
-            maxLength='10'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
 
-            // helperText={formik.touched.reference && formik.errors.reference}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            maxLength='30'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
+                // helperText={formik.touched.reference && formik.errors.reference}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
 
-            // helperText={formik.touched.name && formik.errors.name}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.LO_TYPE}
-            name='type'
-            label={labels.type}
-            valueField='key'
-            required
-            displayField='value'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('type', newValue?.key)
-              } else {
-                formik.setFieldValue('type', '')
-              }
-            }}
-            error={formik.touched.type && Boolean(formik.errors.type)}
+                // helperText={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.LO_TYPE}
+                name='type'
+                label={labels.type}
+                valueField='key'
+                required
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('type', newValue?.key)
+                  } else {
+                    formik.setFieldValue('type', '')
+                  }
+                }}
+                error={formik.touched.type && Boolean(formik.errors.type)}
 
-            // helperText={formik.touched.type && formik.errors.type}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={InventoryRepository.Site.qry}
-            name='siteId'
-            label={labels.site}
-            values={formik.values}
-            displayField='name'
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('siteId', newValue?.recordId)
-            }}
-            error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                // helperText={formik.touched.type && formik.errors.type}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='siteId'
+                label={labels.site}
+                values={formik.values}
+                displayField='name'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('siteId', newValue?.recordId)
+                }}
+                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
 
-            // helperText={formik.touched.siteId && formik.errors.siteId}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomLookup
-            name='bpRef'
-            maxAccess={maxAccess}
-            label={labels.businessPartner}
-            valueField='reference'
-            displayField='name'
-            store={businessPartnerStore}
-            setStore={setBusinessPartnerStore}
-            firstValue={formik.values.bpRef}
-            secondValue={formik.values.bpName}
-            onLookup={lookupBusinessPartners}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('bpId', newValue?.recordId)
-                formik.setFieldValue('bpRef', newValue?.reference)
-                formik.setFieldValue('bpName', newValue?.name)
-              } else {
-                formik.setFieldValue('bpId', null)
-                formik.setFieldValue('bpRef', null)
-                formik.setFieldValue('bpName', null)
-              }
-            }}
-            error={formik.touched.bpId && Boolean(formik.errors.bpId)}
+                // helperText={formik.touched.siteId && formik.errors.siteId}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomLookup
+                name='bpRef'
+                maxAccess={maxAccess}
+                label={labels.businessPartner}
+                valueField='reference'
+                displayField='name'
+                store={businessPartnerStore}
+                setStore={setBusinessPartnerStore}
+                firstValue={formik.values.bpRef}
+                secondValue={formik.values.bpName}
+                onLookup={lookupBusinessPartners}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('bpId', newValue?.recordId)
+                    formik.setFieldValue('bpRef', newValue?.reference)
+                    formik.setFieldValue('bpName', newValue?.name)
+                  } else {
+                    formik.setFieldValue('bpId', null)
+                    formik.setFieldValue('bpRef', null)
+                    formik.setFieldValue('bpName', null)
+                  }
+                }}
+                error={formik.touched.bpId && Boolean(formik.errors.bpId)}
 
-            // helperText={formik.touched.bpId && formik.errors.bpId}
-          />
-        </Grid>
-
-        <Grid item xs={12}>
+                // helperText={formik.touched.bpId && formik.errors.bpId}
+              />
+            </Grid>
+ <Grid item xs={12}>
           <ResourceLookup
             endpointId={CashBankRepository.CashAccount.snapshot}
             parameters={{
@@ -236,8 +242,10 @@ export default function LoCarriersForms({
             maxAccess={maxAccess}
             error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
           />
-        </Grid>
-      </Grid>
+           </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

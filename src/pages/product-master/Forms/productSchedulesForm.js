@@ -1,8 +1,5 @@
-import { Grid, Box } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContext, useEffect, useState } from 'react'
-
-// ** Custom Imports
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -12,8 +9,10 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expanded, maxAccess }) => {
+const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: pId, countries, currencies } = store
   const [filters, setFilters] = useState(currencies)
@@ -272,42 +271,27 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, height, expan
       infoVisible={false}
       editMode={editMode}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <Grid container gap={2}>
-          <Grid xs={12}>
-            <DataGrid
-              onChange={value => formik.setFieldValue('schedules', value)}
-              value={formik.values.schedules}
-              error={formik.errors.schedules}
-              columns={columns}
-              rowSelectionModel={rowSelectionModel}
-              onSelectionChange={row => {
-                if (row) {
-                  setStore(prevStore => ({
-                    ...prevStore,
-                    plantId: row.plantId,
-                    currencyId: row.currencyId,
-                    countryId: row.countryId,
-                    dispersalId: row.dispersalId,
-                    _seqNo: row.seqNo
-                  }))
-                  setRowSelectionModel(row.id)
-                  if (row.countryId) {
-                    setFilters(currencies.filter(item => item.countryId === row.countryId))
-                  }
-                }
-              }}
-              height={`${expanded ? `calc(100vh - 300px)` : `${height - 100}px`}`}
-            />
-          </Grid>
-        </Grid>
-      </Box>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('schedules', value)}
+            value={formik.values.schedules}
+            error={formik.errors.schedules}
+            columns={columns}
+            onSelectionChange={row =>
+              row &&
+              setStore(prevStore => ({
+                ...prevStore,
+                plantId: row.plantId,
+                currencyId: row.currencyId,
+                countryId: row.countryId,
+                dispersalId: row.dispersalId,
+                _seqNo: row.seqNo
+              }))
+            }
+          />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

@@ -1,28 +1,16 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Windows
 import GeographicRegionsWindow from './Windows/GeographicRegionsWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const GeographicRegions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -95,9 +83,11 @@ const GeographicRegions = () => {
   
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -111,7 +101,7 @@ const GeographicRegions = () => {
           maxAccess={access}
           paginationType='api'
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <GeographicRegionsWindow
           onClose={() => {
@@ -125,7 +115,7 @@ const GeographicRegions = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

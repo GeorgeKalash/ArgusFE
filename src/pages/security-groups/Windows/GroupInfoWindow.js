@@ -23,7 +23,7 @@ const GroupInfoWindow = ({
   usersGridData,
   getUsersGridData,
   delUsers,
-  addUsers,
+  addUsers
 }) => {
   return (
     <Window
@@ -38,11 +38,7 @@ const GroupInfoWindow = ({
       setActiveTab={setActiveTab}
     >
       <CustomTabPanel index={0} value={activeTab}>
-        <GroupInfoTab
-          labels={labels}
-          groupInfoValidation={groupInfoValidation}
-          maxAccess={maxAccess}
-        />
+        <GroupInfoTab labels={labels} groupInfoValidation={groupInfoValidation} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <UsersTab

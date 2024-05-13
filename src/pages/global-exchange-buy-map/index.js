@@ -1,12 +1,5 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box } from '@mui/material'
-
-// ** Custom Imports
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
+import { Grid } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import * as yup from 'yup'
@@ -20,6 +13,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -201,69 +197,48 @@ const GlobalExchangeBuyMap = () => {
   }
 
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
-      <CustomTabPanel index={0} value={0}>
-        <Box>
-          <Grid container>
-            <Grid container xs={12} spacing={4}>
-              <Grid item xs={6}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Currency.qry}
-                  name='currencyId'
-                  label={_labels.currency}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Currency Ref' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'flName', value: 'Foreign Language Name' }
-                  ]}
-                  values={formik.values}
-                  required
-                  maxAccess={access}
-                  onChange={(event, newValue) => {
-                    const selectedCurrencyId = newValue?.recordId || ''
-                    formik.setFieldValue('currencyId', selectedCurrencyId)
-                    getCurrenciesExchangeMaps(selectedCurrencyId)
-                  }}
-                  error={formik.errors && Boolean(formik.errors.currencyId)}
-                />
-              </Grid>
-            </Grid>
-            {
-              <Grid xs={12} sx={{ pt: 2 }}>
-                <Box>
-                  {formik.values.currencyId && (
-                    <DataGrid
-                      onChange={value => formik.setFieldValue('rows', value)}
-                      value={formik.values.rows}
-                      error={formik.errors.rows}
-                      columns={columns}
-                      height={`calc(100vh - 180px)`}
-                    />
-                  )}
-                </Box>
-              </Grid>
-            }
+    <VertLayout>
+      <Fixed>
+        <Grid container>
+          <Grid item xs={3}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Currency.qry}
+              name='currencyId'
+              label={_labels.currency}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Currency Ref' },
+                { key: 'name', value: 'Name' },
+                { key: 'flName', value: 'Foreign Language Name' }
+              ]}
+              values={formik.values}
+              required
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                const selectedCurrencyId = newValue?.recordId || ''
+                formik.setFieldValue('currencyId', selectedCurrencyId)
+                getCurrenciesExchangeMaps(selectedCurrencyId)
+              }}
+              error={formik.errors && Boolean(formik.errors.currencyId)}
+            />
           </Grid>
-        </Box>
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            width: '100%',
-            margin: 0
-          }}
-        >
+        </Grid>
+      </Fixed>
+          <Grow>
+            {formik.values.currencyId && (
+              <DataGrid
+                onChange={value => formik.setFieldValue('rows', value)}
+                value={formik.values.rows}
+                error={formik.errors.rows}
+                columns={columns}
+              />
+            )}
+          </Grow>
+        <Fixed>
           <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-        </Box>
-      </CustomTabPanel>
-    </Box>
+        </Fixed>
+    </VertLayout>
   )
 }
 

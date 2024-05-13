@@ -1,13 +1,7 @@
 import Window from 'src/components/Shared/Window'
 import CommissionTypesForm from '../forms/CommissionTypesForm'
 
-const CommissionTypesWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId
-}) => {
-  
+const CommissionTypesWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
     <Window
       id='CommissionTypesWindow'
@@ -15,13 +9,9 @@ const CommissionTypesWindow = ({
       controlled={true}
       onClose={onClose}
       width={500}
-      height={300}
+      height={400}
     >
-      <CommissionTypesForm
-        labels={labels}
-        maxAccess={maxAccess}
-        recordId={recordId}
-      />
+      <CommissionTypesForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )
 }
