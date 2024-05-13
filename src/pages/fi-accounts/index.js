@@ -131,7 +131,8 @@ const MfAccounts = () => {
           paginationType='api'
           refetch={refetch}
           onEdit={popup}
-          onDeleteConfirmation={delAccounts}
+          onDelete={delAccounts}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           maxAccess={access}

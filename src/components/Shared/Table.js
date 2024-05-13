@@ -21,7 +21,7 @@ import DeleteDialog from './DeleteDialog'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { useWindow } from 'src/windows'
-import DeleteConfirmation from './DeleteConfirmation'
+import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 
 const ODD_OPACITY = 0.2
 
@@ -303,8 +303,12 @@ const Table = ({
 
   function openDeleteConfirmation(obj) {
     stack({
-      Component: DeleteConfirmation,
-      props: { props, obj },
+      Component: StrictDeleteConfirmation,
+      props: {
+        action() {
+          props.onDelete(obj)
+        }
+      },
       width: 500,
       height: 300,
       title: 'Delete Confirmation'
@@ -345,12 +349,17 @@ const Table = ({
               </IconButton>
             )}
             {!isStatus3 && deleteBtnVisible && !isWIP && (
-              <IconButton size='small' onClick={() => setDeleteDialogOpen([true, params.row])} color='error'>
-                <Icon icon='mdi:delete-forever' fontSize={18} />
-              </IconButton>
-            )}
-            {props.onDeleteConfirmation && !isStatus3 && !isWIP && (
-              <IconButton size='small' onClick={() => openDeleteConfirmation(params.row)} color='error'>
+              <IconButton
+                size='small'
+                onClick={() => {
+                  if (props.deleteConfirmationType == 'strict') {
+                    openDeleteConfirmation(params.row)
+                  } else {
+                    setDeleteDialogOpen([true, params.row])
+                  }
+                }}
+                color='error'
+              >
                 <Icon icon='mdi:delete-forever' fontSize={18} />
               </IconButton>
             )}

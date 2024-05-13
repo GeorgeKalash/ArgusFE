@@ -193,7 +193,8 @@ const BPMasterData = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDeleteConfirmation={del}
+          onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationType='client'

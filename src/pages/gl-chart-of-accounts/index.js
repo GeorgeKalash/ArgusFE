@@ -106,12 +106,15 @@ const ChartOfAccounts = () => {
   }
 
   const del = async obj => {
-    await postRequest({
-      extension: GeneralLedgerRepository.ChartOfAccounts.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success('Record Deleted Successfully')
+    try {
+      await postRequest({
+        extension: GeneralLedgerRepository.ChartOfAccounts.del,
+        record: JSON.stringify(obj)
+      })
+
+      invalidate()
+      toast.success('Record Deleted Successfully')
+    } catch (err) {}
   }
 
   return (
@@ -130,7 +133,8 @@ const ChartOfAccounts = () => {
           gridData={data ?? { list: [] }}
           rowId={['recordId']}
           onEdit={edit}
-          onDeleteConfirmation={del}
+          onDelete={del}
+          deleteConfirmationType={'strict'}
           isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
