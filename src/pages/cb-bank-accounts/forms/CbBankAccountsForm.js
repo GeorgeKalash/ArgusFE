@@ -201,7 +201,6 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId }) {
             name='IBAN'
             label={labels.IBAN}
             value={formik.values.IBAN}
-            required
             maxAccess={maxAccess}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('IBAN', '')}
