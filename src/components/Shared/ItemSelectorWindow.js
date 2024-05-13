@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react'
 import IconButton from '@mui/material/IconButton'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import FormShell from './FormShell'
 
 const ItemSelectorWindow = ({
   initialAllListData,
   initialSelectedListData,
+  formik,
   handleListsDataChange,
   itemSelectorLabels
 }) => {
@@ -16,7 +18,6 @@ const ItemSelectorWindow = ({
   const [newAll, setNewAll] = useState([])
 
   useEffect(() => {
-
     // Loop through initialAllListData and assign each object to allItems
     if (Array.isArray(initialAllListData)) {
       const updatedAllItems = initialAllListData.map(item => ({
@@ -35,7 +36,7 @@ const ItemSelectorWindow = ({
       // Update the selected state with the new array
       setSelected(updatedSelectedItems)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialAllListData, initialSelectedListData])
 
   const handleToggle = value => {
@@ -98,14 +99,10 @@ const ItemSelectorWindow = ({
     }
 
     // Toggle the checked state for the specific item in the "All" list
-    setAllItems(prevItems =>
-      prevItems.map(item => (item.id === value.id ? { ...item, checked: !item.checked } : item))
-    )
+    setAllItems(prevItems => prevItems.map(item => (item.id === value.id ? { ...item, checked: !item.checked } : item)))
 
     // Toggle the checked state for the specific item in the "Selected" list
-    setSelected(prevItems =>
-      prevItems.map(item => (item.id === value.id ? { ...item, checked: !item.checked } : item))
-    )
+    setSelected(prevItems => prevItems.map(item => (item.id === value.id ? { ...item, checked: !item.checked } : item)))
   }
 
   const handleMoveLeft = () => {
@@ -149,7 +146,7 @@ const ItemSelectorWindow = ({
       const updatedItems = prevItems.filter(item => !newSelected.some(selectedItem => selectedItem.id === item.id))
 
       // Use the updatedItems directly
-      handleListsDataChange(updatedItems, selected)
+      //handleListsDataChange(updatedItems, selected)
 
       return updatedItems
     })
@@ -159,112 +156,118 @@ const ItemSelectorWindow = ({
   }
 
   return (
-   <div>
-    {/* Empty Toolbar*/}
-    <div style={{ backgroundColor: 'transparent', padding: '8px', textAlign: 'center' }}></div>
+    <FormShell form={formik} infoVisible={false} isCleared={false}>
+      <div>
+        {/* Empty Toolbar*/}
+        <div style={{ backgroundColor: 'transparent', padding: '8px', textAlign: 'center' }}></div>
 
-    <div style={{ display: 'flex'}}>
-        {/* Left List */}
-        <div
+        <div style={{ display: 'flex' }}>
+          {/* Left List */}
+          <div
             style={{
-                border: '1px solid #ccc',
-                padding: '10px',
-                marginLeft: '30px',
-                flex: '1',
-                textAlign: 'center',
-                width: '50%',
-                maxHeight: '380px',
-                overflowY: 'auto',
+              border: '1px solid #ccc',
+              padding: '10px',
+              marginLeft: '30px',
+              flex: '1',
+              textAlign: 'center',
+              width: '50%',
+              maxHeight: '380px',
+              overflowY: 'auto'
             }}
-        >
+          >
             <div style={{ margin: 'auto' }}>
-                <div style={{ backgroundColor: 'black' }}>
-                    <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels[1]}</h3>
-                </div>
-                <div style={{
-                    maxHeight: '330px',
-                    overflowY: 'auto',
-                    border: '1px solid transparent',
-                }}>
-                    <ul style={{ listStyleType: 'none', padding: 0 }}>
-                        {allItems.map(item => (
-                            <li
-                                key={`key1_${item.id}`}
-                                style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
-                            >
-                                <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
-                                    <input
-                                        id={item.id}
-                                        type='checkbox'
-                                        onChange={() => handleToggle(item)}
-                                        checked={item.checked || false}
-                                        style={{ marginRight: '8px' }}
-                                    />
-                                    {item.name}
-                                </label>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+              <div style={{ backgroundColor: 'black' }}>
+                <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels[1]}</h3>
+              </div>
+              <div
+                style={{
+                  maxHeight: '330px',
+                  overflowY: 'auto',
+                  border: '1px solid transparent'
+                }}
+              >
+                <ul style={{ listStyleType: 'none', padding: 0 }}>
+                  {allItems.map(item => (
+                    <li
+                      key={`key1_${item.id}`}
+                      style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
+                    >
+                      <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+                        <input
+                          id={item.id}
+                          type='checkbox'
+                          onChange={() => handleToggle(item)}
+                          checked={item.checked || false}
+                          style={{ marginRight: '8px' }}
+                        />
+                        {item.name}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-        </div>
+          </div>
 
-        {/* Centered Arrows */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Centered Arrows */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <IconButton onClick={handleMoveRight}>
-                <ArrowForwardIcon />
+              <ArrowForwardIcon />
             </IconButton>
             <IconButton onClick={handleMoveLeft}>
-                <ArrowBackIcon />
+              <ArrowBackIcon />
             </IconButton>
-        </div>
+          </div>
 
-        {/* Right List */}
-        <div
+          {/* Right List */}
+          <div
             style={{
-                border: '1px solid #ccc',
-                padding: '10px',
-                marginRight: '30px',
-                flex: '1',
-                textAlign: 'center',
-                width: '50%',
-                maxHeight: '380px',
-                overflowY: 'auto',
+              border: '1px solid #ccc',
+              padding: '10px',
+              marginRight: '30px',
+              flex: '1',
+              textAlign: 'center',
+              width: '50%',
+              maxHeight: '380px',
+              overflowY: 'auto'
             }}
-        >
+          >
             <div style={{ margin: 'auto' }}>
-                <div style={{ backgroundColor: 'black' }}>
-                    <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels[2]}</h3>
-                </div>
-                <div style={{
-                      maxHeight: '330px',
-                      overflowY: 'auto',
-                      border: '1px solid transparent',
-                }}>
-                    <ul style={{ listStyleType: 'none', padding: 0 }}>
-                        {selected.map(item => (
-                            <li
-                                key={`key2_${item.id}`}
-                                style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
-                            >
-                                <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
-                                    <input
-                                        id={item.id}
-                                        type='checkbox'
-                                        onChange={() => handleToggle(item)}
-                                        checked={item.checked || false}
-                                        style={{ marginRight: '8px' }}
-                                    />
-                                    {item.name}
-                                </label>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+              <div style={{ backgroundColor: 'black' }}>
+                <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels[2]}</h3>
+              </div>
+              <div
+                style={{
+                  maxHeight: '330px',
+                  overflowY: 'auto',
+                  border: '1px solid transparent'
+                }}
+              >
+                <ul style={{ listStyleType: 'none', padding: 0 }}>
+                  {selected.map(item => (
+                    <li
+                      key={`key2_${item.id}`}
+                      style={{ margin: '0', padding: '0', borderBottom: '1px solid transparent' }}
+                    >
+                      <label style={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
+                        <input
+                          id={item.id}
+                          type='checkbox'
+                          onChange={() => handleToggle(item)}
+                          checked={item.checked || false}
+                          style={{ marginRight: '8px' }}
+                        />
+                        {item.name}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
+          </div>
         </div>
-    </div>
-  </div>
+      </div>
+    </FormShell>
   )
 }
 

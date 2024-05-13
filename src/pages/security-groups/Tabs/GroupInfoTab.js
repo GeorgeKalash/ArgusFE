@@ -16,7 +16,7 @@ const GroupInfoTab = ({ labels, maxAccess, recordId }) => {
   const [editMode, setEditMode] = useState(!!recordId)
 
   const { formik } = useForm({
-    initialValues: { recordId: recordId || null, name: '', description: '' },
+    initialValues: { recordId: recordId || 0, name: '', description: '' },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({

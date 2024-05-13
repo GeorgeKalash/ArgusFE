@@ -1,11 +1,24 @@
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
+import { useContext, useState } from 'react'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useWindow } from 'src/windows'
+import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
 
-const UsersTab = ({ usersGridData, labels, maxAccess }) => {
+const UsersTab = ({ labels, maxAccess, recordId }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  //const [allUsers, setAllUsers] = useState([])
+  const [selectedUsers, setSelectedUsers] = useState([])
+  const { stack } = useWindow()
+
   const columns = [
     {
       field: 'fullName',
@@ -19,12 +32,12 @@ const UsersTab = ({ usersGridData, labels, maxAccess }) => {
     }
   ]
 
-  const usersValidation = useFormik({
+  const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({}),
     initialValues: {
-      sgId: '',
+      sgId: recordId || 0,
       fullName: '',
       userId: ''
     },
@@ -33,121 +46,118 @@ const UsersTab = ({ usersGridData, labels, maxAccess }) => {
     }
   })
 
-  const getUsersGridData = sgId => {
-    setUsersGridData([])
-    const defaultParams = `_userId=0&_filter=&_sgId=${sgId}`
-    var parameters = defaultParams
+  const invalidate = useInvalidate({
+    endpointId: AccessControlRepository.SecurityGroupUser.qry
+  })
 
-    getRequest({
+  const {
+    query: { data },
+    labels: _labels
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: AccessControlRepository.SecurityGroup.qry,
+    datasetId: ResourceIds.SecurityGroup
+  })
+
+  async function fetchGridData() {
+    return await getRequest({
       extension: AccessControlRepository.SecurityGroupUser.qry,
-      parameters: parameters
+      parameters: `_userId=0&_filter=&_sgId=${recordId}`
     })
-      .then(res => {
-        setUsersGridData(res)
-      })
-      .catch(error => {})
   }
 
   const handleListsDataChange = (allData, selectedData) => {
     // Update the state in the parent component when the child component data changes
-    setAllUsers(allData)
-    setSelectedUsers(selectedData)
+    //  setAllUsers(allData)
+    //setSelectedUsers(selectedData)
   }
 
-  const postUsers = () => {
-    const sgId = groupInfoValidation.values.recordId
-    const selectedItems = []
+  const postUsers = async () => {
+    console.log('selectedUsers ', initialSelectedListData)
 
-    //initialSelectedListData returns an array that contain id, where id is userId
-    //so we add selectedItems array that loops on initialSelectedListData & pass sgId beside userId to each object (this new array will be sent to set2GUS)
+    /*const selectedItems = []
     initialSelectedListData.forEach(item => {
-      selectedItems.push({ sgId: sgId, userId: item.id })
+      selectedItems.push({ sgId: recordId, userId: item.id })
     })
 
     const data = {
-      sgId: sgId,
+      sgId: recordId,
       userId: 0,
       groups: selectedItems
     }
 
-    postRequest({
+    const res = await postRequest({
       extension: AccessControlRepository.SecurityGroupUser.set2,
       record: JSON.stringify(data)
     })
-      .then(res => {
-        getUsersGridData(sgId)
-        if (!res.recordId) {
-          toast.success('Record Added Successfully')
-        } else {
-          toast.success('Record Edited Successfully')
-        }
-      })
-      .catch(error => {})
+    if (res.recordId) {
+      invalidate()
+      toast.success('Record Updated Successfully')
+    }*/
   }
 
-  const delUsers = obj => {
-    const sgId = groupInfoValidation.values.recordId
-
-    postRequest({
+  const del = async obj => {
+    await postRequest({
       extension: AccessControlRepository.SecurityGroupUser.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        getUsersGridData(sgId)
-      })
-      .catch(error => {})
+    toast.success('Record Deleted Successfully')
+    invalidate()
   }
 
-  const addUsers = () => {
-    try {
-      setAllUsers([])
-      setSelectedUsers([])
+  const add = () => {
+    const USRequest = getRequest({
+      extension: SystemRepository.Users.qry,
+      parameters: `_startAt=${0}&_pageSize=${50}&_size=${50}&_filter=&_sortBy=fullName`
+    })
 
-      const sgId = groupInfoValidation.values.recordId
-      const defaultParams = `_filter=&_size=100&_startAt=0&_userId=0&_pageSize=50&_sgId=${sgId}`
-      const usersDefaultParams = `_startAt=${0}&_pageSize=${50}&_size=${50}&_filter=&_sortBy=fullName`
-      var parameters = defaultParams
+    const GUSRequest = getRequest({
+      extension: AccessControlRepository.SecurityGroupUser.qry,
+      parameters: `_filter=&_size=100&_startAt=0&_userId=0&_pageSize=50&_sgId=${recordId}`
+    })
 
-      const USRequest = getRequest({
-        extension: SystemRepository.Users.qry,
-        parameters: usersDefaultParams
+    Promise.all([USRequest, GUSRequest]).then(([resUSFunction, resGUSFunction]) => {
+      const allList = resUSFunction.list.map(x => {
+        const n = {
+          id: x.recordId,
+          name: x.fullName
+        }
+
+        return n
       })
 
-      const GUSRequest = getRequest({
-        extension: AccessControlRepository.SecurityGroupUser.qry,
-        parameters: parameters
+      const selectedList = resGUSFunction.list.map(x => {
+        const n2 = {
+          id: x.userId,
+          name: x.fullName
+        }
+
+        return n2
       })
 
-      Promise.all([USRequest, GUSRequest]).then(([resUSFunction, resGUSTemplate]) => {
-        const allList = resUSFunction.list.map(x => {
-          const n = {
-            id: x.recordId,
-            name: x.fullName
-          }
+      //setSelectedUsers(selectedList)
 
-          return n
-        })
-
-        const selectedList = resGUSTemplate.list.map(x => {
-          const n2 = {
-            id: x.userId,
-            name: x.fullName
-          }
-
-          return n2
-        })
-        setSelectedUsers(selectedList)
-
-        // Remove items from allList that have the same sgId and userId as items in selectedList
-        const filteredAllList = allList.filter(item => {
-          return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
-        })
-        setAllUsers(filteredAllList)
+      // Remove items from allList that have the same sgId and userId as items in selectedList
+      const filteredAllList = allList.filter(item => {
+        return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
       })
-    } catch (error) {
-      return Promise.reject(error) // You can choose to reject the promise if an error occurs
-    }
+
+      //setAllUsers(filteredAllList)
+
+      stack({
+        Component: ItemSelectorWindow,
+        props: {
+          itemSelectorLabels: _labels,
+          initialAllListData: filteredAllList,
+          initialSelectedListData: selectedList,
+          handleListsDataChange: handleListsDataChange,
+          formik: formik
+        },
+        width: 600,
+        height: 600,
+        title: _labels.securityGroups
+      })
+    })
   }
 
   return (
@@ -159,13 +169,12 @@ const UsersTab = ({ usersGridData, labels, maxAccess }) => {
           height: '100%'
         }}
       >
-        <GridToolbar onAdd={addUsers} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} />
         <Table
           columns={columns}
-          gridData={usersGridData}
+          gridData={data ? data : { list: [] }}
           rowId={['userId']}
-          api={getUsersGridData}
-          onDelete={delUsers}
+          onDelete={del}
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
