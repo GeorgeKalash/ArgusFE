@@ -15,7 +15,7 @@ const LaborsWindow = ({
       controlled={true}
       onClose={onClose}
       width={700}
-      height={450}
+      height={500}
     >
       <LaborsForm
         labels={labels}

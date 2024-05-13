@@ -7,7 +7,7 @@ import AddressTab from 'src/components/Shared/AddressTab'
 const AgentBranchWindow = ({
   onClose,
   width,
-  height,
+
   tabs,
   activeTab,
   setActiveTab,
@@ -26,7 +26,7 @@ const AgentBranchWindow = ({
   maxAccess,
   lookupCityDistrict,
   cityDistrictStore,
-  setCityDistrictStore,
+  setCityDistrictStore
 }) => {
   return (
     <Window
@@ -37,7 +37,6 @@ const AgentBranchWindow = ({
       setActiveTab={setActiveTab}
       onClose={onClose}
       width={width}
-      height={height}
       onSave={onSave}
       agentBranchValidation={agentBranchValidation}
     >

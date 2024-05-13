@@ -72,7 +72,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
   useEffect(() => {
     ;(async function () {
       try {
-        if (recordId >= 0 ) {
+        if (recordId >= 0) {
           setIsLoading(true)
 
           const res = await getRequest({
@@ -90,13 +90,7 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, setW
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ReleaseIndicators}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.ReleaseIndicators} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField

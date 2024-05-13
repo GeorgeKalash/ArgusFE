@@ -12,6 +12,8 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -97,11 +99,12 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
     <FormShell
       resourceId={ResourceIds.Accounts}
       form={formik}
-      height={600}
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
     >
+      <VertLayout>
+        <Grow>
       <Grid container>
         <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
           <Grid item xs={12}>
@@ -275,14 +278,16 @@ const AccountsForms = ({ labels, editMode, maxAccess, setStore, store }) => {
                   checked={formik.values?.inactive}
                   onChange={event => {
                     formik.setFieldValue('inactive', event.target.checked)
-                  }}
+                   }}
+                    />
+                  }
+                  label={labels.inactive}
                 />
-              }
-              label={labels.inactive}
-            />
+              </Grid>
+            </Grid>
           </Grid>
-        </Grid>
-      </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
