@@ -10,11 +10,12 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
+import { getStorageData } from 'src/storage/storage'
 
 const CompanyInfo = () => {
   const [initialValues, setInitialData] = useState({
     plantId: '',
-    accountId: JSON.parse(window.sessionStorage.getItem('userData'))?.accountId,
+    accountId: getStorageData('userData')?.accountId,
     name: '',
     webSite: '',
     taxNo: '',
@@ -49,7 +50,7 @@ const CompanyInfo = () => {
       extension: SystemRepository.CompanyInfo.get,
       parameters: `_filter=`
     })
-    res.record.accountId = JSON.parse(window.sessionStorage.getItem('userData')).accountId
+    res.record.accountId = getStorageData('userData')?.accountId
     setInitialData(prev => ({
       ...prev,
       name: res.record.name,
@@ -88,7 +89,7 @@ const CompanyInfo = () => {
       }).then(res => {
         if (res) toast.success('Record Edited Successfully')
       })
-    } else if (!obj?.attachment?.file && initialValues?.attachment?.url) {
+    } else if (!obj?.attachment && initialValues?.attachment?.url) {
       postRequest({
         extension: SystemRepository.Attachment.del,
         record: JSON.stringify(initialValues.attachment),
@@ -102,7 +103,7 @@ const CompanyInfo = () => {
   }
 
   return (
-    <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', zIndex: 1 }}>
       <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} maxAccess={maxAccess}>
         <Grid container spacing={4}>
           <Grid item xs={12}>
@@ -114,8 +115,7 @@ const CompanyInfo = () => {
               readOnly={true}
               onClear={() => formik.setFieldValue('posMsg', '')}
               error={formik.errors && Boolean(formik.errors.posMsg)}
-
-              // maxAccess={maxAccess}
+              maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
