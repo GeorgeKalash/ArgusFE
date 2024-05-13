@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
@@ -10,6 +9,9 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { useWindow } from 'src/windows'
 import MaterialsAdjustmentForm from '../materials-adjustment/Forms/MaterialsAdjustmentForm'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const GateKeeper = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -114,23 +116,26 @@ const GateKeeper = () => {
   }
 
   return (
-    <Box>
-      <Table
-        columns={columns}
-        gridData={data ? data : { list: [] }}
-        rowId={['recordId', 'seqNo']}
-        isLoading={false}
-        maxAccess={access}
-        showCheckboxColumn={true}
-        handleCheckedRows={() => {}}
-        pageSize={50}
-        paginationType='api'
-        paginationParameters={paginationParameters}
-        refetch={refetch}
-        addedHeight={'20px'}
-      />
-      <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-    </Box>
+    <VertLayout>
+      <Grow>
+        <Table
+           columns={columns}
+           gridData={data ? data : { list: [] }}
+           rowId={['recordId', 'seqNo']}
+           isLoading={false}
+           maxAccess={access}
+           showCheckboxColumn={true}
+           handleCheckedRows={() => {}}
+           pageSize={50}
+           paginationType='api'
+           paginationParameters={paginationParameters}
+           refetch={refetch}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSubmit} smallBox={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
 

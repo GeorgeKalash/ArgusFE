@@ -82,13 +82,7 @@ export default function LaborGroupsForms({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.LaborGroups}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.LaborGroups} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField

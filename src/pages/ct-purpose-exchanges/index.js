@@ -9,6 +9,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import PurposeOfExchangeWindow from './windows/PurposeOfExchangeWindow'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const PurposeExchange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -60,7 +63,7 @@ const PurposeExchange = () => {
         maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 500,
       title: _labels.purposeOfExchange
     })
   }
@@ -83,9 +86,11 @@ const PurposeExchange = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -97,8 +102,8 @@ const PurposeExchange = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

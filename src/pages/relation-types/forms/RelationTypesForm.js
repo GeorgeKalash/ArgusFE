@@ -88,7 +88,6 @@ export default function RelationTypesForm({ labels, maxAccess, recordId, setStor
     <FormShell
       resourceId={ResourceIds.RelationType}
       form={formik}
-      height={300}
       maxAccess={maxAccess}
       editMode={editMode}
     >

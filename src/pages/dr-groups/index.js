@@ -21,6 +21,9 @@ import { useWindow } from 'src/windows'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import DRGroupWindow from './Windows/DRGroupWindow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const DRGroups = () => {
   const { stack } = useWindow()
@@ -103,9 +106,11 @@ const DRGroups = () => {
   }
 
   return (
-    <>
-      <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />{' '}
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -119,7 +124,8 @@ const DRGroups = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
         <DRGroupWindow
           onClose={() => {
@@ -133,7 +139,7 @@ const DRGroups = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

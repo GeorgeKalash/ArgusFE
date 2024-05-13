@@ -1,27 +1,17 @@
 import Window from 'src/components/Shared/Window'
 import AccountGroupsForm from '../forms/AccountGroupsForm'
 
-const AccountGroupsWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId
-}) => {
-  
+const AccountGroupsWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
     <Window
       id='AccountGroupsWindow'
       Title={labels.accountGroup}
+      height={350}
+      width={500}
       controlled={true}
       onClose={onClose}
-      width={500}
-      height={300}
     >
-      <AccountGroupsForm
-        labels={labels}
-        maxAccess={maxAccess}
-        recordId={recordId}
-      />
+      <AccountGroupsForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )
 }

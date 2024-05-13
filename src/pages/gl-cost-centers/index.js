@@ -1,36 +1,20 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-
-// ** Windows
 import CostCenterWindow from './Window/CostCenterWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CostCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [gridData ,setGridData]=useState([]);
@@ -110,9 +94,11 @@ return await getRequest({
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={  data ?? {list: []} }
@@ -124,7 +110,7 @@ return await getRequest({
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <CostCenterWindow
           onClose={() => {
@@ -134,16 +120,10 @@ return await getRequest({
           labels={_labels}
           maxAccess={access}
           recordId={selectedRecordId}
-
-        //   onSubmit={(val) => {
-        //     // search(val)
-
-        //   }
-        // }
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

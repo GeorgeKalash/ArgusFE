@@ -4,14 +4,7 @@ import OperationsForm from '../forms/OperationsForm'
 
 const OperationsWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
-    <Window
-      id='OperationsWindow'
-      Title={labels.Operations}
-      controlled={true}
-      onClose={onClose}
-      width={500}
-      height={400}
-    >      
+    <Window id='OperationsWindow' Title={labels.Operations} controlled={true} width={500} height={400} onClose={onClose}>
       <OperationsForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>
   )
