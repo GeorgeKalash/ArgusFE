@@ -15,7 +15,6 @@ const ProductionRequestLog = () => {
     query: { data },
     labels: _labels,
     refetch,
-    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -31,15 +30,11 @@ const ProductionRequestLog = () => {
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview
   })
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    const response = await getRequest({
+  async function fetchGridData() {
+    return await getRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_status=1&_filter=`
+      parameters: `_status=1&_filter=`
     })
-
-    return { ...response, _startAt: _startAt }
   }
 
   const columns = [
@@ -110,8 +105,7 @@ const ProductionRequestLog = () => {
         showCheckboxColumn={true}
         handleCheckedRows={() => {}}
         pageSize={50}
-        paginationParameters={paginationParameters}
-        paginationType='api'
+        paginationType='client'
         refetch={refetch}
         addedHeight={'20px'}
       />
