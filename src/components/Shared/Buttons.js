@@ -92,6 +92,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'RecordRemarks',
+    color: '#90278e',
+    image: 'notes.png',
+    main: false
+  },
+  {
     key: 'Apply',
     color: '#4eb558',
     image: 'apply.png',

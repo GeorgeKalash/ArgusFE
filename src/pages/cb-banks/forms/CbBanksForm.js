@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -8,15 +7,13 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function CbBanksForms({ labels, maxAccess, recordId }) {
+export default function CbBanksForms({ labels, maxAccess, recordId, setStore }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -29,8 +26,6 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CbBank.page
@@ -54,6 +49,10 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
       })
 
       if (!recordId) {
+        setStore({
+          recordId: response.recordId,
+          name: obj.name
+        })
         toast.success('Record Added Successfully')
         setInitialData({
           ...obj,
@@ -76,7 +75,10 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
             extension: CashBankRepository.CbBank.get,
             parameters: `_recordId=${recordId}`
           })
-
+          setStore({
+            recordId: res.record.recordId,
+            name: res.record.name
+          })
           setInitialData(res.record)
         }
       } catch (exception) {
@@ -100,8 +102,6 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-
-            // helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -115,8 +115,6 @@ export default function CbBanksForms({ labels, maxAccess, recordId }) {
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-
-            // helperText={formik.touched.name && formik.errors.name}
           />
         </Grid>
         <Grid item xs={12}>
