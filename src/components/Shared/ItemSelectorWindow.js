@@ -146,7 +146,7 @@ const ItemSelectorWindow = ({
       const updatedItems = prevItems.filter(item => !newSelected.some(selectedItem => selectedItem.id === item.id))
 
       // Use the updatedItems directly
-      //handleListsDataChange(updatedItems, selected)
+      handleListsDataChange(updatedItems, selected)
 
       return updatedItems
     })
@@ -177,7 +177,7 @@ const ItemSelectorWindow = ({
           >
             <div style={{ margin: 'auto' }}>
               <div style={{ backgroundColor: 'black' }}>
-                <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels[1]}</h3>
+                <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels.title1}</h3>
               </div>
               <div
                 style={{
@@ -234,7 +234,7 @@ const ItemSelectorWindow = ({
           >
             <div style={{ margin: 'auto' }}>
               <div style={{ backgroundColor: 'black' }}>
-                <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels[2]}</h3>
+                <h3 style={{ margin: '0', color: 'white' }}>{itemSelectorLabels.title2}</h3>
               </div>
               <div
                 style={{

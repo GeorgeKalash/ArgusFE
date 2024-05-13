@@ -15,7 +15,7 @@ import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
 const UsersTab = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  //const [allUsers, setAllUsers] = useState([])
+  const [allUsers, setAllUsers] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
   const { stack } = useWindow()
 
@@ -41,8 +41,26 @@ const UsersTab = ({ labels, maxAccess, recordId }) => {
       fullName: '',
       userId: ''
     },
-    onSubmit: values => {
-      postUsers()
+    onSubmit: async values => {
+      const selectedItems = []
+      selectedUsers.forEach(item => {
+        selectedItems.push({ sgId: recordId, userId: item.id })
+      })
+
+      const data = {
+        sgId: recordId,
+        userId: 0,
+        groups: selectedItems
+      }
+
+      const res = await postRequest({
+        extension: AccessControlRepository.SecurityGroupUser.set2,
+        record: JSON.stringify(data)
+      })
+      if (res.recordId) {
+        invalidate()
+        toast.success('Record Updated Successfully')
+      }
     }
   })
 
@@ -67,33 +85,8 @@ const UsersTab = ({ labels, maxAccess, recordId }) => {
   }
 
   const handleListsDataChange = (allData, selectedData) => {
-    // Update the state in the parent component when the child component data changes
-    //  setAllUsers(allData)
-    //setSelectedUsers(selectedData)
-  }
-
-  const postUsers = async () => {
-    console.log('selectedUsers ', initialSelectedListData)
-
-    /*const selectedItems = []
-    initialSelectedListData.forEach(item => {
-      selectedItems.push({ sgId: recordId, userId: item.id })
-    })
-
-    const data = {
-      sgId: recordId,
-      userId: 0,
-      groups: selectedItems
-    }
-
-    const res = await postRequest({
-      extension: AccessControlRepository.SecurityGroupUser.set2,
-      record: JSON.stringify(data)
-    })
-    if (res.recordId) {
-      invalidate()
-      toast.success('Record Updated Successfully')
-    }*/
+    setAllUsers(allData)
+    setSelectedUsers(selectedData)
   }
 
   const del = async obj => {
@@ -135,19 +128,18 @@ const UsersTab = ({ labels, maxAccess, recordId }) => {
         return n2
       })
 
-      //setSelectedUsers(selectedList)
+      setSelectedUsers(selectedList)
 
-      // Remove items from allList that have the same sgId and userId as items in selectedList
       const filteredAllList = allList.filter(item => {
         return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
       })
 
-      //setAllUsers(filteredAllList)
+      setAllUsers(filteredAllList)
 
       stack({
         Component: ItemSelectorWindow,
         props: {
-          itemSelectorLabels: _labels,
+          itemSelectorLabels: { title1: _labels.all, title2: _labels.inGroup },
           initialAllListData: filteredAllList,
           initialSelectedListData: selectedList,
           handleListsDataChange: handleListsDataChange,
@@ -162,13 +154,7 @@ const UsersTab = ({ labels, maxAccess, recordId }) => {
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+      <Box>
         <GridToolbar onAdd={add} maxAccess={maxAccess} />
         <Table
           columns={columns}
