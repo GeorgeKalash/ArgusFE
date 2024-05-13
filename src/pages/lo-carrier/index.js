@@ -2,7 +2,7 @@
 import { useState, useContext } from 'react'
 
 // ** MUI Imports
-import {Box } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 
 // ** Custom Imports
@@ -72,17 +72,16 @@ const LoCarrier = () => {
 
   const columns = [
     {
-        field: 'reference',
-        headerName: _labels.reference,
-        flex: 1
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
     },
     {
       field: 'name',
       headerName: _labels.name,
       flex: 1
-    },
+    }
   ]
-
 
   const add = () => {
     setWindowOpen(true)
@@ -101,7 +100,6 @@ const LoCarrier = () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
     <>

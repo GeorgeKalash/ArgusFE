@@ -18,15 +18,17 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
-export default function LoCarriersForms({ 
-  labels, 
-  maxAccess, 
-  recordId, 
-  lookupBusinessPartners, 
-  businessPartnerStore, 
-  setBusinessPartnerStore }) {
-
+export default function LoCarriersForms({
+  labels,
+  maxAccess,
+  recordId,
+  lookupBusinessPartners,
+  businessPartnerStore,
+  setBusinessPartnerStore
+}) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -34,11 +36,14 @@ export default function LoCarriersForms({
     recordId: null,
     reference: '',
     name: '',
-    type:null,
-    siteId:null,
-    bpId:null,
-    bpName:null,
-    bpRef:null,
+    type: null,
+    siteId: null,
+    bpId: null,
+    bpName: null,
+    bpRef: null,
+    cashAccountId: null,
+    cashAccountRef: '',
+    cashAccountName: ''
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -56,7 +61,7 @@ export default function LoCarriersForms({
     validationSchema: yup.object({
       reference: yup.string().required(' '),
       name: yup.string().required(' '),
-      type: yup.string().required(' '),
+      type: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -100,13 +105,7 @@ export default function LoCarriersForms({
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.LoCarriers}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.LoCarriers} form={formik} height={300} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
@@ -140,23 +139,23 @@ export default function LoCarriersForms({
         </Grid>
         <Grid item xs={12}>
           <ResourceComboBox
-              datasetId={DataSets.LO_TYPE}
-              name='type'
-              label={labels.type}
-              valueField='key'
-              required
-              displayField='value'
-              values={formik.values} 
-              onChange={(event, newValue) => {
-                  if (newValue) {
-                      formik.setFieldValue('type', newValue?.key)
-                  } else {
-                      formik.setFieldValue('type', '')
-                  }
-              }}
-              error={formik.touched.type && Boolean(formik.errors.type)}
+            datasetId={DataSets.LO_TYPE}
+            name='type'
+            label={labels.type}
+            valueField='key'
+            required
+            displayField='value'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                formik.setFieldValue('type', newValue?.key)
+              } else {
+                formik.setFieldValue('type', '')
+              }
+            }}
+            error={formik.touched.type && Boolean(formik.errors.type)}
 
-              // helperText={formik.touched.type && formik.errors.type}
+            // helperText={formik.touched.type && formik.errors.type}
           />
         </Grid>
         <Grid item xs={12}>
@@ -201,6 +200,41 @@ export default function LoCarriersForms({
             error={formik.touched.bpId && Boolean(formik.errors.bpId)}
 
             // helperText={formik.touched.bpId && formik.errors.bpId}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <ResourceLookup
+            endpointId={CashBankRepository.CashAccount.snapshot}
+            parameters={{
+              _type: 2
+            }}
+            valueField='recordId'
+            displayField='reference'
+            name='cashAccountRef'
+            label={labels.cashAccount}
+            secondDisplayField={true}
+            form={formik}
+            firstValue={formik.values.cashAccountRef}
+            secondValue={formik.values.cashAccountName}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                formik.setFieldValue('cashAccountId', newValue?.recordId)
+                formik.setFieldValue('cashAccountRef', newValue?.reference)
+                formik.setFieldValue('cashAccountName', newValue?.name)
+              } else {
+                formik.setFieldValue('cashAccountId', null)
+                formik.setFieldValue('cashAccountRef', null)
+                formik.setFieldValue('cashAccountName', null)
+              }
+            }}
+            errorCheck={'cashAccountId'}
+            maxAccess={maxAccess}
+            error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
           />
         </Grid>
       </Grid>
