@@ -16,7 +16,7 @@ body {
 
 @media screen and (max-width: 1920px) and (max-height: 1080px) {
   body {
-    --zoom: 1;
+    --zoom: 1.0;
   }
 }
 

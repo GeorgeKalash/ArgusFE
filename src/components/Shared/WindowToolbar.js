@@ -3,6 +3,8 @@ import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { Buttons } from './Buttons'
+import ResourceComboBox from './ResourceComboBox'
+import CustomComboBox from '../Inputs/CustomComboBox'
 
 const WindowToolbar = ({
   onSave,
@@ -56,8 +58,7 @@ const WindowToolbar = ({
   const { getRequest } = useContext(RequestsContext)
 
   const [reportStore, setReportStore] = useState([])
-  const [showToast, setShowToast] = useState(false)
-  const [toastText, setToastText] = useState('')
+  const [tooltip, setTooltip] = useState('')
 
   const getReportLayout = () => {
     setReportStore([])
@@ -79,9 +80,7 @@ const WindowToolbar = ({
               }))
             )
         })
-        .catch(error => {
-          console.log(error)
-        })
+        .catch(error => {})
     }
   }
 
@@ -90,12 +89,11 @@ const WindowToolbar = ({
   }, [])
 
   const handleButtonMouseEnter = text => {
-    setToastText(text)
-    setShowToast(true)
+    setTooltip(text)
   }
 
   const handleButtonMouseLeave = () => {
-    setShowToast(false)
+    setTooltip(null)
   }
 
   return (
@@ -135,18 +133,16 @@ const WindowToolbar = ({
       >
         {previewReport ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Autocomplete
-              size='small'
-              options={reportStore}
-              value={selectedReport}
-              getOptionLabel={option => option.layoutName || option.caption || ''}
-              onChange={(e, newValue) => setSelectedReport(newValue)}
-              renderInput={params => (
-                <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-              )}
-              sx={{ width: 250 }}
-              disableClearable
-            />
+             <CustomComboBox
+                    label={'Select a report template'}
+                    valueField='caption'
+                    displayField='layoutName'
+                    store={reportStore}
+                    value={selectedReport}
+                    onChange={(e, newValue) => setSelectedReport(newValue)}
+                    sx={{ width: 250 }}
+                    disableClearable
+                  />
             <Button
               sx={{ width: '20px', height: '35px', ml: 1 }}
               variant='contained'
@@ -160,13 +156,14 @@ const WindowToolbar = ({
                 onMouseLeave={handleButtonMouseLeave}
               >
                 <img src='/images/buttonsIcons/preview.png' alt='Preview' />
-                {showToast && <div className='toast'>{toastText}</div>}
+                {tooltip && <div className='toast'>{tooltip}</div>}
               </div>
             </Button>
           </Box>
         ) : (
           <Box></Box>
         )}
+
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {Buttons.filter(button => actions.some(action => action.key === button.key)).map((button, index) => {
             const correspondingAction = actions.find(action => action.key === button.key)
@@ -201,7 +198,7 @@ const WindowToolbar = ({
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                  {showToast && <div className='toast'>{toastText}</div>}
+                  {tooltip && <div className='toast'>{tooltip}</div>}
                 </div>
               )
             )
@@ -242,7 +239,7 @@ const WindowToolbar = ({
                   >
                     <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
                   </Button>
-                  {showToast && <div className='toast'>{toastText}</div>}
+                  {tooltip && <div className='toast'>{tooltip}</div>}
                 </div>
               )
             )
