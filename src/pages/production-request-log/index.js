@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -89,12 +89,22 @@ const ProductionRequestLog = () => {
     invalidate()
   }
 
+  const del = async obj => {
+    await postRequest({
+      extension: ManufacturingRepository.LeanProductionPlanning.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success('Record Deleted Successfully')
+  }
+
   return (
     <Box>
       <Table
         columns={columns}
         gridData={data ? data : { list: [] }}
         rowId={['recordId', 'seqNo']}
+        onDelete={del}
         isLoading={false}
         maxAccess={access}
         showCheckboxColumn={true}
