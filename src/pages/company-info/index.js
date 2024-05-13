@@ -103,10 +103,11 @@ const CompanyInfo = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', zIndex: 1 }}>
+    <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
       <FormShell resourceId={ResourceIds.CompanyInfo} form={formik} maxAccess={maxAccess}>
         <Grid container spacing={4}>
           <Grid item xs={12}>
+            {initialValues.accountId}
             <CustomTextField
               name='accountId'
               label={labels.accountId}
