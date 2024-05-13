@@ -16,6 +16,8 @@ import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
 
 // ** Statics
 import { ExportFormat } from 'src/statics/ExportFormat'
+import { VertLayout } from './Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
 import { useWindow } from 'src/windows'
 
 const ReportViewer = ({ resourceId }) => {
@@ -118,14 +120,8 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           openRPB={() =>
             stack({
@@ -136,8 +132,8 @@ const ReportViewer = ({ resourceId }) => {
                 paramsArray: paramsArray,
                 setParamsArray: setParamsArray
               },
-              width: 500,
-              height: 400,
+              width: 700,
+              height: 500,
               title: 'Report Parameters Browser'
             })
           }
@@ -179,12 +175,13 @@ const ReportViewer = ({ resourceId }) => {
             </Button>
           </Box>
         </GridToolbar>
-        {pdf && (
-          <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
-            <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
-          </Box>
-        )}
-      </Box>
+      </Fixed>
+      {pdf && (
+        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
+          <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+        </Box>
+      )}
+
       {/* <ReportParameterBrowser
         disabled={!selectedReport?.parameters}
         reportName={selectedReport?.parameters}
@@ -193,7 +190,7 @@ const ReportViewer = ({ resourceId }) => {
         paramsArray={paramsArray}
         setParamsArray={setParamsArray}
       /> */}
-    </>
+    </VertLayout>
   )
 }
 

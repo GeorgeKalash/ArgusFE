@@ -55,7 +55,6 @@ const AccountsWindow = ({
         <AccountBalanceTable
           store={store}
           labels={labels}
-          height={height}
           maxAccess={maxAccess}
           expanded={expanded}
         />

@@ -22,7 +22,9 @@ import CurrencyWindow from './Windows/CurrencyWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Currencies = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,12 +35,10 @@ const Currencies = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData() {
-
     return await getRequest({
       extension: SystemRepository.Currency.qry,
       parameters: `_filter=`
     })
-
   }
 
   const {
@@ -47,7 +47,7 @@ const Currencies = () => {
     refetch,
     access
   } = useResourceQuery({
-    queryFn:  fetchGridData,
+    queryFn: fetchGridData,
     endpointId: SystemRepository.Currency.qry,
     datasetId: ResourceIds.Currencies
   })
@@ -99,9 +99,11 @@ const Currencies = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -114,7 +116,7 @@ const Currencies = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <CurrencyWindow
           onClose={() => {
@@ -128,7 +130,7 @@ const Currencies = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

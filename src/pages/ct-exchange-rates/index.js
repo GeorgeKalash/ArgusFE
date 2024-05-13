@@ -20,6 +20,9 @@ import { useResourceQuery } from 'src/hooks/resource'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -314,232 +317,210 @@ const CTExchangeRates = () => {
   }
 
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
-      <CustomTabPanel index={0} value={0}>
-        <Box>
-          <Grid container>
-            <Grid container xs={12} spacing={2}>
-              <Grid item xs={6}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Currency.qry}
-                  name='currencyId'
-                  label={labels.currency}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Currency Ref' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values}
-                  required
-                  maxAccess={access}
-                  onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('currencyId', newValue?.recordId)
-                  }}
-                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                  helperText={formik.touched.currencyId && formik.errors.currencyId}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <ResourceComboBox
-                  name='rateAgainst'
-                  label={labels.rateAgainst}
-                  datasetId={DataSets.MC_RATE_AGAINST}
-                  values={formik.values}
-                  valueField='key'
-                  displayField='value'
-                  required
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('rateAgainst', newValue?.key)
-                    if (!newValue) {
-                      formik.setFieldValue('raCurrencyId', null)
-                    } else {
-                      if (newValue.key === '1') getDefaultBaseCurrencyId()
-                    }
-                  }}
-                  error={formik.touched.rateAgainst && Boolean(formik.errors.rateAgainst)}
-                  helperText={formik.touched.rateAgainst && formik.errors.rateAgainst}
-                />
-              </Grid>
-              <Grid item xs={3}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Currency.qry}
-                  name='raCurrencyId'
-                  label={labels.currency}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Currency Ref' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values}
-                  required
-                  readOnly={!formik.values.rateAgainst || formik.values.rateAgainst === '1' ? true : false}
-                  maxAccess={access}
-                  onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('raCurrencyId', newValue?.recordId)
-                  }}
-                  error={formik.touched.raCurrencyId && Boolean(formik.errors.raCurrencyId)}
-                  helperText={formik.touched.raCurrencyId && formik.errors.raCurrencyId}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <FieldSet>
-                  <Grid item xs={9}>
-                    <ResourceComboBox
-                      endpointId={MultiCurrencyRepository.RateType.qry}
-                      name='puRateTypeId'
-                      label={labels.rateType}
-                      valueField='recordId'
-                      displayField={['reference', 'name']}
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Ref' },
-                        { key: 'name', value: 'Name' }
-                      ]}
-                      values={formik.values}
-                      required
-                      maxAccess={access}
-                      onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('puRateTypeId', newValue?.recordId)
-                      }}
-                      error={formik.touched.puRateTypeId && Boolean(formik.errors.puRateTypeId)}
-                      helperText={formik.touched.puRateTypeId && formik.errors.puRateTypeId}
-                    />
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Button
-                      onClick={() => copyRowValues(puFormik)}
-                      variant='contained'
-                      disabled={
-                        !puFormik?.values?.rows ||
-                        !formik.values.puRateTypeId ||
-                        !puFormik?.values?.rows[0]?.rateCalcMethod ||
-                        !puFormik?.values?.rows[0]?.rate ||
-                        !puFormik?.values?.rows[0]?.minRate ||
-                        !puFormik?.values?.rows[0]?.maxRate
+    <VertLayout>
+      <Grow>
+        <Grid container xs={12} sx={{flexDirection:'column',padding:'5px'}}>
+          <VertLayout>
+          <Fixed>
+            <Grid item  xs={12} sx={{flexDirection:'column'}}>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='currencyId'
+                    label={labels.currency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Currency Ref' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    required
+                    maxAccess={access}
+                    onChange={(event, newValue) => {
+                      formik && formik.setFieldValue('currencyId', newValue?.recordId)
+                    }}
+                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                    helperText={formik.touched.currencyId && formik.errors.currencyId}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <ResourceComboBox
+                    name='rateAgainst'
+                    label={labels.rateAgainst}
+                    datasetId={DataSets.MC_RATE_AGAINST}
+                    values={formik.values}
+                    valueField='key'
+                    displayField='value'
+                    required
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('rateAgainst', newValue?.key)
+                      if (!newValue) {
+                        formik.setFieldValue('raCurrencyId', null)
+                      } else {
+                        if (newValue.key === '1') getDefaultBaseCurrencyId()
                       }
-                    >
-                      Copy
-                    </Button>
-                  </Grid>
-                  {formik.values.currencyId != null && formik.values.puRateTypeId != null && (
-                    <Grid xs={12} sx={{ pt: 2 }}>
-                      <Box>
+                    }}
+                    error={formik.touched.rateAgainst && Boolean(formik.errors.rateAgainst)}
+                    helperText={formik.touched.rateAgainst && formik.errors.rateAgainst}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='raCurrencyId'
+                    label={labels.currency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Currency Ref' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    required
+                    readOnly={!formik.values.rateAgainst || formik.values.rateAgainst === '1' ? true : false}
+                    maxAccess={access}
+                    onChange={(event, newValue) => {
+                      formik && formik.setFieldValue('raCurrencyId', newValue?.recordId)
+                    }}
+                    error={formik.touched.raCurrencyId && Boolean(formik.errors.raCurrencyId)}
+                    helperText={formik.touched.raCurrencyId && formik.errors.raCurrencyId}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Fixed>
+          <Grow>
+            <Grid container sx={{flex:1}}>
+              <Grid item xs={6} sx={{display:'flex',flex:1}}>
+                <FieldSet sx={{flex:1}}>
+                  <VertLayout>
+                    <Fixed>
+                      <Grid container xs={12} spacing={2}>
+                        <Grid item xs={9}>
+                          <ResourceComboBox
+                            endpointId={MultiCurrencyRepository.RateType.qry}
+                            name='puRateTypeId'
+                            label={labels.rateType}
+                            valueField='recordId'
+                            displayField={['reference', 'name']}
+                            columnsInDropDown={[
+                              { key: 'reference', value: 'Ref' },
+                              { key: 'name', value: 'Name' }
+                            ]}
+                            values={formik.values}
+                            required
+                            maxAccess={access}
+                            onChange={(event, newValue) => {
+                              formik && formik.setFieldValue('puRateTypeId', newValue?.recordId)
+                            }}
+                            error={formik.touched.puRateTypeId && Boolean(formik.errors.puRateTypeId)}
+                            helperText={formik.touched.puRateTypeId && formik.errors.puRateTypeId}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <Button
+                            onClick={() => copyRowValues(puFormik)}
+                            variant='contained'
+                            disabled={
+                              !puFormik?.values?.rows ||
+                              !formik.values.puRateTypeId ||
+                              !puFormik?.values?.rows[0]?.rateCalcMethod ||
+                              !puFormik?.values?.rows[0]?.rate ||
+                              !puFormik?.values?.rows[0]?.minRate ||
+                              !puFormik?.values?.rows[0]?.maxRate
+                            }
+                          >
+                            Copy
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </Fixed>
+                    <Grow>
+                      {formik.values.currencyId != null && formik.values.puRateTypeId != null && (
                         <DataGrid
                           onChange={value => puFormik.setFieldValue('rows', value)}
                           value={puFormik.values.rows}
                           error={puFormik.errors.rows}
                           columns={exchangeRatesInlineGridColumns}
                           allowDelete={false}
-                          height={`${height - 300}px`}
                           allowAddNewLine={false}
                         />
-                      </Box>
-
-                      {/* <Box>
-                        <InlineEditGrid
-                          gridValidation={puFormik}
-                          columns={exchangeRatesInlineGridColumns}
-                          allowDelete={false}
-                          allowAddNewLine={false}
-                          width={'1200'}
-                          scrollable={true}
-                          scrollHeight={`${height - 300}px`}
-                        />
-                      </Box> */}
-                    </Grid>
-                  )}
+                      )}
+                  </Grow>
+                    </VertLayout>
                 </FieldSet>
               </Grid>
-              <Grid item xs={6}>
-                <FieldSet>
-                  <Grid item xs={9}>
-                    <ResourceComboBox
-                      endpointId={MultiCurrencyRepository.RateType.qry}
-                      name='saRateTypeId'
-                      label={labels.rateType}
-                      valueField='recordId'
-                      displayField={['reference', 'name']}
-                      columnsInDropDown={[
-                        { key: 'reference', value: 'Ref' },
-                        { key: 'name', value: 'Name' }
-                      ]}
-                      values={formik.values}
-                      required
-                      maxAccess={access}
-                      onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('saRateTypeId', newValue?.recordId)
-                      }}
-                      error={formik.touched.saRateTypeId && Boolean(formik.errors.saRateTypeId)}
-                      helperText={formik.touched.saRateTypeId && formik.errors.saRateTypeId}
-                    />
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Button
-                      onClick={() => copyRowValues(saFormik)}
-                      variant='contained'
-                      disabled={
-                        !saFormik?.values?.rows ||
-                        !formik.values.saRateTypeId ||
-                        !saFormik?.values?.rows[0]?.rateCalcMethod ||
-                        !saFormik?.values?.rows[0]?.rate ||
-                        !saFormik?.values?.rows[0]?.minRate ||
-                        !saFormik?.values?.rows[0]?.maxRate
-                      }
-                    >
-                      Copy
-                    </Button>
-                  </Grid>
-                  {formik.values.currencyId != null && formik.values.saRateTypeId != null && (
-                    <Grid xs={12} sx={{ pt: 2 }}>
-                      <DataGrid
-                        onChange={value => saFormik.setFieldValue('rows', value)}
-                        value={saFormik.values.rows}
-                        error={saFormik.errors.rows}
-                        columns={exchangeRatesInlineGridColumns}
-                        allowDelete={false}
-                        height={`${height - 300}px`}
-                        allowAddNewLine={false}
-                      />
-
-                      {/* <Box>
-                        <InlineEditGrid
-                          gridValidation={saFormik}
+              <Grid item xs={6} sx={{display:'flex',flex:1}}>
+                <FieldSet sx={{flex:1}}>
+                  <VertLayout>
+                    <Fixed>
+                      <Grid container xs={12} spacing={2}>
+                        <Grid item xs={9}>
+                          <ResourceComboBox
+                            endpointId={MultiCurrencyRepository.RateType.qry}
+                            name='saRateTypeId'
+                            label={labels.rateType}
+                            valueField='recordId'
+                            displayField={['reference', 'name']}
+                            columnsInDropDown={[
+                              { key: 'reference', value: 'Ref' },
+                              { key: 'name', value: 'Name' }
+                            ]}
+                            values={formik.values}
+                            required
+                            maxAccess={access}
+                            onChange={(event, newValue) => {
+                              formik && formik.setFieldValue('saRateTypeId', newValue?.recordId)
+                            }}
+                            error={formik.touched.saRateTypeId && Boolean(formik.errors.saRateTypeId)}
+                            helperText={formik.touched.saRateTypeId && formik.errors.saRateTypeId}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <Button
+                            onClick={() => copyRowValues(saFormik)}
+                            variant='contained'
+                            disabled={
+                              !saFormik?.values?.rows ||
+                              !formik.values.saRateTypeId ||
+                              !saFormik?.values?.rows[0]?.rateCalcMethod ||
+                              !saFormik?.values?.rows[0]?.rate ||
+                              !saFormik?.values?.rows[0]?.minRate ||
+                              !saFormik?.values?.rows[0]?.maxRate
+                            }
+                          >
+                            Copy
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </Fixed>
+                    <Grow>
+                      {formik.values.currencyId != null && formik.values.saRateTypeId != null && (
+                        <DataGrid
+                          onChange={value => saFormik.setFieldValue('rows', value)}
+                          value={saFormik.values.rows}
+                          error={saFormik.errors.rows}
                           columns={exchangeRatesInlineGridColumns}
                           allowDelete={false}
                           allowAddNewLine={false}
-                          width={'1200'}
-                          scrollable={true}
-                          scrollHeight={`${height - 300}px`}
                         />
-                      </Box> */}
-                    </Grid>
-                  )}
+                      )}
+                    </Grow>
+                  </VertLayout>
                 </FieldSet>
               </Grid>
             </Grid>
-          </Grid>
-        </Box>
-        <Grid
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            width: '100%',
-            padding: 0,
-            textAlign: 'center'
-          }}
-        >
-          <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+          </Grow>
+          </VertLayout>
         </Grid>
-      </CustomTabPanel>
-
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+      </Fixed>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </Box>
+    </VertLayout>
   )
 }
 

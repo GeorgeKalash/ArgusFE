@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react'
+import React, { useEffect, useContext } from 'react'
 import FormShell from './FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
@@ -13,8 +13,11 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { DataGrid } from './DataGrid'
 import * as yup from 'yup'
+import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
+import { VertLayout } from './Layouts/VertLayout'
 
-export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage, height, expanded }) => {
+export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: _labels, access } = useResourceParams({
@@ -194,6 +197,8 @@ export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage,
 
   return (
     <FormShell form={formik} infoVisible={false}>
+      <VertLayout>
+      <Fixed>
       <Grid container xs={9} spacing={4} sx={{ p: 5 }}>
         <Grid item xs={4}>
           <CustomTextField value={reference} label={_labels.reference} readOnly={true} />
@@ -203,15 +208,16 @@ export const ClientRelationForm = ({ recordId, name, reference, setErrorMessage,
           <CustomTextField value={name} label={_labels.client} readOnly={true} />
         </Grid>
       </Grid>
-      <Grid spacing={4} sx={{ mt: 1 }}>
+      </Fixed>
+      <Grow>
         <DataGrid
           onChange={value => formik.setFieldValue('relations', value)}
           value={formik.values.relations}
           error={formik.errors.relations}
           columns={columns}
-          height={`${expanded ? `calc(100vh - 330px)` : `${height - 160}px`}`}
         />
-      </Grid>
+      </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

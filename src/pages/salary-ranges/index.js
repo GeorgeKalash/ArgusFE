@@ -1,32 +1,22 @@
-// ** React Imports
-import { useContext,useState } from 'react'
-
-// ** MUI Imports
+import { useContext, useState } from 'react'
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-
-// ** API
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Windows
 import SalaryRangeWindow from './Windows/SalaryRangeWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const SalaryRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-  
+
   //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -39,8 +29,7 @@ const SalaryRange = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    return {...response,  _startAt: _startAt}
-
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -58,7 +47,7 @@ const SalaryRange = () => {
   const invalidate = useInvalidate({
     endpointId: RemittanceSettingsRepository.SalaryRange.page
   })
-  
+
   const columns = [
     {
       field: 'min',
@@ -77,12 +66,12 @@ const SalaryRange = () => {
   const add = () => {
     setWindowOpen(true)
   }
-  
+
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
-  
+
   const del = async obj => {
     await postRequest({
       extension: RemittanceSettingsRepository.SalaryRange.del,
@@ -93,10 +82,11 @@ const SalaryRange = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
-
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -110,10 +100,11 @@ const SalaryRange = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <SalaryRangeWindow
-          onClose={() =>{setWindowOpen(false)
+          onClose={() => {
+            setWindowOpen(false)
             setSelectedRecordId(null)
           }}
           labels={_labels}
@@ -123,7 +114,7 @@ const SalaryRange = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

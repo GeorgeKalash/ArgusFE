@@ -23,6 +23,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Strategies2 = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -118,8 +121,8 @@ const Strategies2 = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -128,6 +131,8 @@ const Strategies2 = () => {
           inputSearch={true}
           labels={_labels}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -141,7 +146,8 @@ const Strategies2 = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
         <StrategiesWindow
           onClose={() => {
@@ -155,7 +161,7 @@ const Strategies2 = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

@@ -19,6 +19,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import PreReqsForm from './PrereqForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const PreReqsList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -84,33 +87,30 @@ const PreReqsList = ({ store, labels, maxAccess }) => {
         maxAccess,
         store
       },
-      width: 500,
-      height: 400,
+
       title: labels.prere
     })
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%'
-      }}
-    >
-      <GridToolbar onAdd={addCode} maxAccess={maxAccess} />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['code']}
-        isLoading={false}
-        pageSize={50}
-        pagination={false}
-        onDelete={delCode}
-        maxAccess={maxAccess}
-        height={200}
-      />
-    </Box>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={addCode} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['code']}
+          isLoading={false}
+          pageSize={50}
+          pagination={false}
+          onDelete={delCode}
+          maxAccess={maxAccess}
+          height={200}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
