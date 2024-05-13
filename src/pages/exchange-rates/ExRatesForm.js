@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -13,46 +12,63 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function ExRatesForm({ labels, recordId, maxAccess }) {
+export default function ExRatesForm({ labels, recordId, maxAccess, record }) {
   const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.ExchangeRates.qry
   })
 
+  const formatDate = dateStr => {
+    return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`
+  }
+
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
-      exId: null,
-      seqNo: 0,
-      rate: '',
-      dayId: ''
+      recordId: editMode ? recordId : '',
+      exId: record?.exId || '',
+      seqNo: record?.seqNo || 0,
+      rate: record?.rate || '',
+      dayId: record?.dayId ? new Date(formatDate(record.dayId)) : new Date()
     },
     maxAccess,
-    enableReinitialize: true,
+
+    // enab leReinitialize: true,
     validateOnChange: true,
 
     onSubmit: async obj => {
+      const moment = require('moment')
+
+      let dayId = ''
       if (obj.dayId) {
-        const date = new Date(obj.dayId)
-        const formattedDate = date.toISOString().replace(/-/g, '').substring(0, 8)
-        obj.dayId = formattedDate
+        const date = moment(obj.dayId).format('YYYYMMDD')
+        console.log('Original Date:', obj.dayId, 'Formatted Date:', date)
+        dayId = date
       }
 
-      const recordId = obj.recordId
+      const { ...dataToSend } = obj
 
       const response = await postRequest({
         extension: MultiCurrencyRepository.ExchangeRates.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify({ ...dataToSend, dayId })
       })
 
-      if (!recordId) {
+      const newRecordId = `${dataToSend.exId}${dayId}${dataToSend.seqNo}`
+      if (!editMode) {
         toast.success('Record Added Successfully')
+        formik.setValues({
+          ...dataToSend,
+          seqNo: response.seqNo,
+          recordId: newRecordId
+        })
       } else {
-        formik.setValues({ ...obj, seqNo: response.seqNo })
         toast.success('Record Edited Successfully')
+        formik.setValues({
+          ...dataToSend,
+          seqNo: response.seqNo,
+          recordId
+        })
       }
       setEditMode(true)
 
@@ -61,30 +77,28 @@ export default function ExRatesForm({ labels, recordId, maxAccess }) {
   })
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
+    if (editMode) {
+      ;(async function () {
         try {
           const res = await getRequest({
             extension: MultiCurrencyRepository.ExchangeRates.get,
-            parameters: `_recordId=${recordId}`
+            parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
           })
 
           if (res && res.record) {
-            console.log('resssss', res.record)
             const { exId, dayId, seqNo } = res.record
-
             const seqNoStr = String(seqNo)
 
             const newRecordId = `${exId}${dayId}${seqNoStr}`
-
-            formik.setValues({ ...res.record, recordId: newRecordId })
+            setEditMode(true)
+            formik.setValues({ ...res.record, recordId: newRecordId, dayId: new Date(formatDate(record.dayId)) })
           }
         } catch (error) {
           console.error('Error fetching data:', error)
         }
-      }
-    })()
-  }, [recordId, getRequest, formik.setValues])
+      })()
+    }
+  }, [])
 
   return (
     <FormShell
@@ -110,6 +124,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess }) {
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
+              console.log(newValue)
               formik && formik.setFieldValue('exId', newValue?.recordId)
             }}
             error={formik.touched.exId && Boolean(formik.errors.exId)}

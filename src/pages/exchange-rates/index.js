@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 
 // ** MUI Imports
 import { Box } from '@mui/material'
@@ -19,6 +19,9 @@ import { useWindow } from 'src/windows'
 
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import ExRatesForm from './ExRatesForm'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -30,9 +33,11 @@ const ExchangeRates = () => {
 
     return await getRequest({
       extension: MultiCurrencyRepository.ExchangeRates.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&exId=`
     })
   }
+
+  const [tableData, setTableData] = useState([])
 
   const {
     query: { data },
@@ -45,6 +50,19 @@ const ExchangeRates = () => {
     endpointId: MultiCurrencyRepository.ExchangeRates.qry,
     datasetId: ResourceIds.ExchangeRates
   })
+
+  useEffect(() => {
+    if (data && data.list.length > 0) {
+      const newList = data.list.map(obj => {
+        const newObj = structuredClone(obj)
+
+        newObj.recordId = `${newObj.exId}${newObj.dayId}${newObj.seqNo}`
+
+        return newObj
+      })
+      setTableData({ ...data, list: newList })
+    }
+  }, [data])
 
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.ExchangeRates.qry
@@ -85,20 +103,21 @@ const ExchangeRates = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj)
   }
 
   const add = () => {
     openForm()
   }
 
-  function openForm(recordId) {
+  function openForm(record) {
     stack({
       Component: ExRatesForm,
       props: {
         labels: _labels,
-        recordId: recordId,
-        maxAccess: access
+        record: record,
+        maxAccess: access,
+        recordId: record?.recordId || undefined
       },
       width: 500,
       height: 400,
@@ -107,12 +126,14 @@ const ExchangeRates = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={tableData}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
@@ -121,8 +142,8 @@ const ExchangeRates = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
