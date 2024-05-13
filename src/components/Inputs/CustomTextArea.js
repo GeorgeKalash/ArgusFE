@@ -7,6 +7,7 @@ import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/max
 const CustomTextArea = ({
   type = 'text', //any valid HTML5 input type
   variant = 'outlined', //outlined, standard, filled
+  paddingRight = 0,
   value,
   name,
   onClear,
@@ -66,11 +67,11 @@ const CustomTextArea = ({
           inputMode: 'numeric',
           pattern: numberField && '[0-9]*', // Allow only numeric input
           style: {
-            textAlign: numberField && 'right'
+            textAlign: numberField && 'right',
+            paddingRight: paddingRight
           }
         }}
         autoComplete={autoComplete}
-        style={{ textAlign: 'right' }}
         InputProps={{
           endAdornment: !readOnly &&
             value && ( // Only show the clear icon if readOnly is false

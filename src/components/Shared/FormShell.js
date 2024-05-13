@@ -10,6 +10,7 @@ import GeneralLedger from 'src/components/Shared/GeneralLedger'
 import DeleteComponent from 'src/components/Shared/GeneralLedger'
 
 import Approvals from './Approvals'
+import ResourceRecordRemarks from './ResourceRecordRemarks'
 
 export default function FormShell({
   form,
@@ -70,6 +71,19 @@ export default function FormShell({
       width: 1000,
       height: 500,
       title: 'Approvals'
+    })
+  }
+
+  function onRecordRemarks() {
+    stack({
+      Component: ResourceRecordRemarks,
+      props: {
+        recordId: form.values?.recordId,
+        resourceId: resourceId
+      },
+      width: 800,
+      height: 500,
+      title: 'Resource Record Remarks'
     })
   }
 
@@ -150,6 +164,7 @@ export default function FormShell({
           isCleared={isCleared}
           actions={actions}
           onApproval={onApproval}
+          onRecordRemarks={onRecordRemarks}
           editMode={editMode}
           disabledSubmit={disabledSubmit}
           infoVisible={infoVisible}

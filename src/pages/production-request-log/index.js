@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -7,13 +7,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { useWindow } from 'src/windows'
-import MaterialsAdjustmentForm from '../materials-adjustment/Forms/MaterialsAdjustmentForm'
-import useResourceParams from 'src/hooks/useResourceParams'
 
-const GateKeeper = () => {
+const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
 
   const {
     query: { data },
@@ -24,12 +20,12 @@ const GateKeeper = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview,
-    datasetId: ResourceIds.GateKeeper
+    datasetId: ResourceIds.ProductionRequestLog
   })
 
-  const { labels: _labelsADJ, access: accessADJ } = useResourceParams({
-    datasetId: ResourceIds.MaterialsAdjustment
-  })
+  const handleSubmit = () => {
+    calculateLeans()
+  }
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.LeanProductionPlanning.preview
@@ -40,7 +36,7 @@ const GateKeeper = () => {
 
     const response = await getRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_status=2`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_status=1&_filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -49,68 +45,48 @@ const GateKeeper = () => {
   const columns = [
     {
       field: 'sku',
-      headerName: _labels[1],
+      headerName: _labels[3],
       flex: 1
     },
     {
-      field: 'qty',
-      headerName: _labels[2],
-      flex: 1
-    },
-    {
-      field: 'itemName',
+      field: 'height',
       headerName: _labels[4],
       flex: 1
     },
     {
-      field: 'date',
+      field: 'width',
+      headerName: _labels[5],
+      flex: 1
+    },
+    {
+      field: 'qty',
       headerName: _labels[6],
-      flex: 1,
-      valueFormatter: params => {
-        const dateString = params.value
-        const timestamp = parseInt(dateString.match(/\d+/)[0], 10)
-
-        if (!isNaN(timestamp)) {
-          const formattedDate = new Date(timestamp).toLocaleDateString('en-GB')
-
-          return formattedDate
-        } else {
-          return 'Invalid Date'
-        }
-      }
+      flex: 1
+    },
+    {
+      field: 'totalThickness',
+      headerName: _labels[7],
+      flex: 1
     }
   ]
 
-  const handleSubmit = () => {
-    generateLean()
-  }
-
-  const generateLean = async () => {
+  const calculateLeans = async () => {
     const checkedObjects = data.list.filter(obj => obj.checked)
+    checkedObjects.forEach(obj => {
+      obj.status = 2
+    })
 
     const resultObject = {
       leanProductions: checkedObjects
     }
 
     const res = await postRequest({
-      extension: ManufacturingRepository.MaterialsAdjustment.generate,
+      extension: ManufacturingRepository.LeanProductionPlanning.update,
       record: JSON.stringify(resultObject)
     })
-    if (res.recordId) {
-      toast.success('Record Generated Successfully')
-      invalidate()
-      stack({
-        Component: MaterialsAdjustmentForm,
-        props: {
-          recordId: res.recordId,
-          labels: _labelsADJ,
-          maxAccess: accessADJ
-        },
-        width: 900,
-        height: 600,
-        title: _labelsADJ[1]
-      })
-    }
+
+    toast.success('Record Updated Successfully')
+    invalidate()
   }
 
   return (
@@ -124,8 +100,8 @@ const GateKeeper = () => {
         showCheckboxColumn={true}
         handleCheckedRows={() => {}}
         pageSize={50}
-        paginationType='api'
         paginationParameters={paginationParameters}
+        paginationType='api'
         refetch={refetch}
         addedHeight={'20px'}
       />
@@ -134,4 +110,4 @@ const GateKeeper = () => {
   )
 }
 
-export default GateKeeper
+export default ProductionRequestLog
