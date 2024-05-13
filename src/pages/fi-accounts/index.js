@@ -111,13 +111,8 @@ const MfAccounts = () => {
   }
 
   return (
-<<<<<<< REM-249
-    <>
-      <Box>
-=======
     <VertLayout>
       <Fixed>
->>>>>>> master
         <GridToolbar
           onAdd={addAccounts}
           maxAccess={access}
