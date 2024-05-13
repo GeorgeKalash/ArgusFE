@@ -39,7 +39,7 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   '& .MuiDataGrid-row:last-child': {
     borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#cccccc' : '#303030'}`
   },
-  '& .MuiDataGrid-overlayWrapperInner' :{
+  '& .MuiDataGrid-overlayWrapperInner': {
     marginTop: '-1px'
   },
   '& .MuiDataGrid-virtualScroller': {
@@ -363,18 +363,7 @@ const Table = ({
       }
     })
   }
-<<<<<<< REM-249
 
-  const paginationHeight = pagination ? '41px' : '10px'
-
-  const tableHeight = height
-    ? typeof height === 'string' && height?.includes('calc')
-      ? height
-      : `${height}px`
-    : `calc(100vh - 48px - 48px - ${paginationHeight})`
-
-=======
->>>>>>> master
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
       var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
@@ -398,83 +387,63 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
-<<<<<<< REM-249
-          <TableContainer
-            sx={
-              props.style
-                ? props.style
-                : {
-                    zIndex: 0
-
-                    // marginBottom: 0,
-                    // pb: 0,
-                    // maxHeight: tableHeight, overflow: 'auto', position: 'relative',
-                  }
+          <StripedDataGrid
+            rows={
+              gridData?.list
+                ? page < 2 && paginationType === 'api'
+                  ? gridData?.list.slice(0, 50)
+                  : gridData?.list
+                : []
             }
-          >
-            {/* <ScrollableTable> */}
-=======
->>>>>>> master
-            <StripedDataGrid
-              rows={
-                gridData?.list
-                  ? page < 2 && paginationType === 'api'
-                    ? gridData?.list.slice(0, 50) 
-                    : gridData?.list
-                  : []
-              }
-<<<<<<< REM-249
-              sx={{ minHeight: tableHeight, overflow: 'auto', position: 'relative', pb: 2 }}
-=======
-              sx={{ overflow: 'auto', position: 'relative', display:'flex', flex: 1, zIndex:'0 !important', marginBottom: pagination? 0:5, height: height? height:'auto' }}
->>>>>>> master
-              density='compact'
-              components={{
-                LoadingOverlay: LinearProgress,
-                Footer: CustomPagination,
-                NoRowsOverlay: () => (
-                  <Stack height='100%' alignItems='center' justifyContent='center'>
-                    This Screen Has No Data
-                  </Stack>
-                )
-              }}
-              loading={props.isLoading}
-              getRowId={getRowId}
-              disableRowSelectionOnClick
-              disableColumnMenu
-              getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
-              {...props}
-              columns={[
-                ...(showCheckboxColumn
-                  ? [
-                      {
-                        field: 'checkbox',
-                        headerName: checkTitle,
-                        renderCell: params => (
-                          <TableCell padding='checkbox'>
-                            <Checkbox
-                              checked={params.row.checked || false}
-                              onChange={() => {
-                                handleCheckboxChange(params.row)
-                                params.row.checked = !params.row.checked
-                              }}
-                            />
-                          </TableCell>
-                        )
-                      }
-                    ]
-                  : []),
-                ...filteredColumns
-              ]}
-            />
-<<<<<<< REM-249
-            {/* </ScrollableTable> */}
-            {/* <PaginationContainer>
-                    <CustomPagination />
-                </PaginationContainer> */}
-          </TableContainer>
-=======
->>>>>>> master
+            sx={{
+              overflow: 'auto',
+              position: 'relative',
+              display: 'flex',
+              flex: 1,
+              zIndex: '0 !important',
+              marginBottom: pagination ? 0 : 5,
+              height: height ? height : 'auto'
+            }}
+            density='compact'
+            components={{
+              LoadingOverlay: LinearProgress,
+              Footer: CustomPagination,
+              NoRowsOverlay: () => (
+                <Stack height='100%' alignItems='center' justifyContent='center'>
+                  This Screen Has No Data
+                </Stack>
+              )
+            }}
+            loading={props.isLoading}
+            getRowId={getRowId}
+            disableRowSelectionOnClick
+            disableColumnMenu
+            getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
+            {...props}
+            columns={[
+              ...(showCheckboxColumn
+                ? [
+                    {
+                      field: 'checkbox',
+                      headerName: checkTitle,
+                      renderCell: params => (
+                        <TableCell padding='checkbox'>
+                          <Checkbox
+                            checked={params.row.checked || false}
+                            onChange={() => {
+                              handleCheckboxChange(params.row)
+                              params.row.checked = !params.row.checked
+                            }}
+                          />
+                        </TableCell>
+                      )
+                    }
+                  ]
+                : []),
+              ...filteredColumns
+            ]}
+          />
+
           <DeleteDialog
             fullScreen={false}
             open={deleteDialogOpen}

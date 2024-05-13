@@ -1,10 +1,4 @@
 import { useState, useContext } from 'react'
-<<<<<<< REM-249
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-=======
->>>>>>> master
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -13,11 +7,6 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import ChartOfAccountsWindow from './windows/ChartOfAccountsWindow'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-<<<<<<< REM-249
-// ** Resources
-=======
->>>>>>> master
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -25,10 +14,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ChartOfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-<<<<<<< REM-249
-
-=======
->>>>>>> master
   const [selectedRecordId, setSelectedRecordId] = useState(null)
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -118,13 +103,8 @@ const ChartOfAccounts = () => {
   }
 
   return (
-<<<<<<< REM-249
-    <>
-      <Box>
-=======
     <VertLayout>
       <Fixed>
->>>>>>> master
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -133,11 +113,8 @@ const ChartOfAccounts = () => {
           labels={_labels}
           inputSearch={true}
         />
-<<<<<<< REM-249
-=======
       </Fixed>
       <Grow>
->>>>>>> master
         <Table
           columns={columns}
           gridData={data ?? { list: [] }}

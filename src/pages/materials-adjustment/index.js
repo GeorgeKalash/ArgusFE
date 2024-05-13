@@ -112,13 +112,8 @@ const MaterialsAdjustment = () => {
   }
 
   return (
-<<<<<<< REM-249
-    <>
-      <Box sx={{ mt: 10 }}>
-=======
     <VertLayout>
       <Grow>
->>>>>>> master
         <Table
           columns={columns}
           gridData={data}
