@@ -286,6 +286,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
       stackError({ message: general?.errorMessage })
     }
   }
+  check()
   useEffect(() => {
     !editMode && check()
   }, [editMode, formik.values.functionId])

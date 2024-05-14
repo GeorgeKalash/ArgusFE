@@ -1,4 +1,6 @@
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { DISABLED, MANDATORY } from 'src/services/api/maxAccess'
 
 const getData = async (getRequest, extension, parameters) => {
   try {
@@ -49,17 +51,17 @@ const fetchData = async (getRequest, id, repository) => {
   return await getData(getRequest, extension, parameters)
 }
 
-const documentType = async (getRequest, functionId, selectNraId = undefined, hasDT = true) => {
+const documentType = async (getRequest, functionId, maxAccess, selectNraId = undefined, hasDT = true) => {
   const docType = selectNraId === undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
   let nraId
-  let errorMessage
+  let errorMessage = ''
   let reference
   let isExternal
   let dcTypeRequired
   let activeStatus = true
+  let controls
   if (docType && selectNraId === undefined) {
-    // mot select combobox
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
       nraId = dcTypNumberRange?.nraId
@@ -75,7 +77,7 @@ const documentType = async (getRequest, functionId, selectNraId = undefined, has
     }
   }
 
-  if (selectNraId === null || (selectNraId === undefined && !dcTypeRequired)) {
+  if (selectNraId === 'naraId' || (selectNraId === undefined && !dcTypeRequired)) {
     if (((!dtId || (!dcTypeRequired && dtId)) && !nraId) || (nraId && !activeStatus)) {
       const glbSysNumberRange = await fetchData(getRequest, functionId, 'glbSysNumberRange') //fun
       nraId = glbSysNumberRange?.nraId
@@ -83,6 +85,8 @@ const documentType = async (getRequest, functionId, selectNraId = undefined, has
     }
     if (!nraId && !dcTypeRequired) {
       errorMessage = 'Assign the document type to a number range'
+    } else {
+      errorMessage = ''
     }
   }
 
@@ -95,13 +99,49 @@ const documentType = async (getRequest, functionId, selectNraId = undefined, has
       readOnly: isExternal?.external ? false : true,
       mandatory: isExternal?.external ? true : false
     }
+    if (maxAccess && maxAccess?.record && typeof maxAccess?.record === 'object') {
+      controls = maxAccess.record.controls
+
+      let obj = controls.find(obj => obj.controlId === 'reference')
+      if (obj) {
+        obj.accessLevel = reference?.mandatory ? MANDATORY : DISABLED
+      } else {
+        if (reference?.mandatory) {
+          controls.push({
+            sgId: 18,
+            resourceId: ResourceIds.JournalVoucher,
+            controlId: 'reference',
+            accessLevel: reference?.mandatory ? MANDATORY : DISABLED
+          })
+        } else if (reference?.readOnly) {
+          controls.push({
+            sgId: 18,
+            resourceId: ResourceIds.JournalVoucher,
+            controlId: 'reference',
+            accessLevel: reference?.mandatory && DISABLED
+          })
+        } else {
+          maxAccess.record.controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
+        }
+      }
+      if (dcTypeRequired) {
+        controls.push({
+          sgId: 18,
+          resourceId: ResourceIds.JournalVoucher,
+          controlId: 'dtId',
+          accessLevel: MANDATORY
+        })
+      }
+    }
   }
 
   return {
     dtId,
     dcTypeRequired,
     reference,
-    errorMessage
+    errorMessage,
+    maxAccess,
+    selectNraId
   }
 }
 

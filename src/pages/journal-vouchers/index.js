@@ -38,7 +38,6 @@ const JournalVoucher = () => {
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
   //states
-  const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
@@ -67,6 +66,7 @@ const JournalVoucher = () => {
       searchFn: fetchWithSearch
     }
   })
+
   async function fetchWithSearch({ qry }) {
     const response = await getRequest({
       extension: GeneralLedgerRepository.JournalVoucher.snapshot,
@@ -105,14 +105,13 @@ const JournalVoucher = () => {
   ]
 
   const add = async () => {
-    const general = await documentType(getRequest, SystemFunction.JournalVoucher)
-
+    const general = await documentType(getRequest, SystemFunction.JournalVoucher, access)
     !general?.errorMessage
       ? stack({
           Component: JournalVoucherForm,
           props: {
             labels: _labels,
-            maxAccess: access,
+            access: access,
             recordId: selectedRecordId,
             setSelectedRecordId: setSelectedRecordId,
             general
@@ -129,7 +128,7 @@ const JournalVoucher = () => {
       Component: JournalVoucherForm,
       props: {
         labels: _labels,
-        maxAccess: access,
+        access: access,
         recordId: obj.recordId
       },
       width: 500,
@@ -171,18 +170,7 @@ const JournalVoucher = () => {
           maxAccess={access}
         />
       </Box>
-      {/* {windowOpen && (
-        <JournalVoucherWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )} */}
+
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )

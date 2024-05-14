@@ -1,7 +1,6 @@
 // ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -11,8 +10,6 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import documentType from 'src/lib/docRefBehaivors'
-
 import { formatDateToApi, formatDateFromApi } from 'src/lib/date-helper'
 
 // ** Custom Imports
@@ -21,15 +18,24 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useForm } from 'src/hooks/form'
+import useDocumentType from 'src/hooks/dcRefBhv'
 import { useError } from 'src/error'
 
-export default function JournalVoucherForm({ labels, maxAccess, recordId, general = {} }) {
+export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [responseValue, setResponseValue] = useState(null)
-  const { reference, dtId, dcTypeRequired } = general
-  const [referenceBhv, setReferenceBhv] = useState(false)
   const { stack: stackError } = useError()
+
+  const {
+    query: { data },
+    maxAccess: maxAccess,
+    onChangeNra
+  } = useDocumentType({
+    functionId: SystemFunction.JournalVoucher,
+    access: access
+  })
 
   const [initialValues, setInitialData] = useState({
     recordId: null,
@@ -37,7 +43,7 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
     date: new Date(),
     notes: '',
     currencyId: '',
-    dtId: dtId,
+    dtId: data?.dtId,
     status: 1,
     rateCalcMethod: 1,
     exRate: 1
@@ -48,15 +54,15 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
     endpointId: GeneralLedgerRepository.JournalVoucher.qry
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: (reference?.mandatory || referenceBhv?.mandatory) && yup.string().required('This field is required'),
       date: yup.string().required('This field is required'),
       currencyId: yup.string().required('This field is required'),
-      dtId: dcTypeRequired && yup.string().required('This field is required')
+      dtId: yup.string().required('This field is required')
     }),
     onSubmit: async obj => {
       const data = {
@@ -117,6 +123,13 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
       disabled: !editMode
     }
   ]
+  useEffect(() => {
+    data?.errorMessage && stackError({ message: data?.errorMessage })
+  }, [data?.errorMessage])
+
+  useEffect(() => {
+    data?.dtId && formik.setFieldValue('dtId', data?.dtId)
+  }, [data?.dtId])
 
   return (
     <FormShell
@@ -138,20 +151,13 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             label={labels.documentType}
             valueField='recordId'
             displayField='name'
-            readOnly={editMode}
             values={formik.values}
             onChange={async (event, newValue) => {
               formik.setFieldValue('dtId', newValue?.recordId)
-
-              const ref = await documentType(getRequest, SystemFunction.JournalVoucher, newValue?.nraId || null)
-              if (ref.errorMessage) {
-                stackError({ message: ref.errorMessage })
-              } else setReferenceBhv(ref.reference)
+              onChangeNra(newValue?.nraId ?? 'naraId')
             }}
             error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-            helperText={formik.touched.dtId && formik.errors.dtId}
             maxAccess={maxAccess}
-            required={dcTypeRequired}
           />
         </Grid>
         <Grid item xs={12}>
@@ -159,14 +165,12 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             name='reference'
             label={labels.reference}
             value={formik.values.reference}
-            readOnly={reference?.readOnly || referenceBhv?.readOnly || editMode}
-            required={reference?.mandatory}
+            readOnly={editMode}
             maxAccess={maxAccess}
             maxLength='30'
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('reference', '')}
             error={formik.touched.reference && Boolean(formik.errors.reference)}
-            helperText={formik.touched.reference && formik.errors.reference}
           />
         </Grid>
         <Grid item xs={12}>
@@ -178,8 +182,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             maxAccess={maxAccess}
             required
             error={formik.touched.date && Boolean(formik.errors.date)}
-
-            //  disabledDate={Today}
           />
         </Grid>
         <Grid item xs={12}>
@@ -194,7 +196,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
               formik.setFieldValue('currencyId', newValue?.recordId)
             }}
             error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-            helperText={formik.touched.currencyId && formik.errors.currencyId}
             maxAccess={maxAccess}
             required
           />
@@ -210,8 +211,6 @@ export default function JournalVoucherForm({ labels, maxAccess, recordId, genera
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('notes', '')}
             error={formik.touched.notes && Boolean(formik.errors.notes)}
-
-            // helperText={formik.touched.notes && formik.errors.notes}
           />
         </Grid>
       </Grid>
