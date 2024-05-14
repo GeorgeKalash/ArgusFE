@@ -11,6 +11,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
+import toast from 'react-hot-toast'
 
 const SGUsersTab = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,14 +54,12 @@ const SGUsersTab = ({ labels, maxAccess, recordId }) => {
         groups: selectedItems
       }
 
-      const res = await postRequest({
+      await postRequest({
         extension: AccessControlRepository.SecurityGroupUser.set2,
         record: JSON.stringify(data)
       })
-      if (res.recordId) {
-        invalidate()
-        toast.success('Record Updated Successfully')
-      }
+      invalidate()
+      toast.success('Record Updated Successfully')
     }
   })
 
