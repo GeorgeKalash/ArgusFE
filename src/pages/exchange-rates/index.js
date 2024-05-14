@@ -1,22 +1,11 @@
 import { useState, useContext, useEffect } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import { useWindow } from 'src/windows'
-
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import ExRatesForm from './ExRatesForm'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'

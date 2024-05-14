@@ -51,7 +51,6 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
       let dayId = ''
       if (obj.dayId) {
         const date = moment(obj.dayId).format('YYYYMMDD')
-        console.log('Original Date:', obj.dayId, 'Formatted Date:', date)
         dayId = date
       }
 
@@ -78,9 +77,9 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
           recordId
         })
       }
-      window.close()
-      setEditMode(true)
 
+      setEditMode(true)
+      window.close()
       invalidate()
     }
   })
@@ -102,9 +101,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
             setEditMode(true)
             formik.setValues({ ...res.record, recordId: newRecordId, dayId: new Date(formatDate(record.dayId)) })
           }
-        } catch (error) {
-          console.error('Error fetching data:', error)
-        }
+        } catch (error) {}
       })()
     }
   }, [])
@@ -131,8 +128,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('exId', newValue?.recordId)
                 }}
-                onClear={() => formik.setFieldValue('exId', '')}
-                error={formik.touched.exId && Boolean(formik.errors.exId)}
+                error={Boolean(formik.errors.exId)}
               />
             </Grid>
             <Grid item xs={12}>
