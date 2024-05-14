@@ -18,6 +18,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Delete',
+    color: '#231f20',
+    image: 'delete-icon.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',
@@ -83,6 +89,12 @@ export const Buttons = [
     key: 'GL',
     color: '#231f20',
     image: 'gl.png',
+    main: false
+  },
+  {
+    key: 'RecordRemarks',
+    color: '#90278e',
+    image: 'notes.png',
     main: false
   },
   {

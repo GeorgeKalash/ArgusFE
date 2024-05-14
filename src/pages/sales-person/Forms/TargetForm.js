@@ -1,17 +1,15 @@
 import { useFormik } from 'formik'
-import * as yup from 'yup'
 import { useEffect, useState, useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { Box } from '@mui/material'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 export default function TargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -111,8 +109,9 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
   }, [recordId])
 
   return (
-    <FormShell resourceId={ResourceIds.SalesPerson} form={formik} height={300} editMode={true} maxAccess={maxAccess}>
-      <Box sx={{ width: '100%' }}>
+    <FormShell resourceId={ResourceIds.SalesPerson} form={formik} editMode={true} maxAccess={maxAccess}>
+      <VertLayout>
+      <Grow>
         <InlineEditGrid
           gridValidation={formik}
           maxAccess={maxAccess}
@@ -122,11 +121,11 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
             targetAmount: '',
             fiscalYear: ''
           }}
-          scrollHeight={300}
           allowAddNewLine={false}
           allowDelete={false}
         />
-      </Box>
+      </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

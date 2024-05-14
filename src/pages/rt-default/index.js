@@ -1,35 +1,23 @@
-// ** React Imports
 import { useContext, useEffect, useState } from 'react'
-
-// ** MUI Imports
 import { Box, Grid } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
-// ** API
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const DocumentTypeMaps = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
-
-  //control
   const [labels, setLabels] = useState(null)
   const [access, setAccess] = useState(null)
-
-  //stores
 
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -134,16 +122,9 @@ const DocumentTypeMaps = () => {
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          marginTop: '10px'
-        }}
-      >
-        <Grid container spacing={2} sx={{ width: '50%' }}>
+    <VertLayout>
+      <Grow>
+        <Grid container spacing={2} sx={{ width: '50%', pt:'10px' }}>
           {/* First Row */}
           <Grid item xs={12}>
             <ResourceLookup
@@ -172,20 +153,11 @@ const DocumentTypeMaps = () => {
             />
           </Grid>
         </Grid>
-        <Grid
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            width: '100%',
-            padding: 3,
-            textAlign: 'center'
-          }}
-        >
+        </Grow>
+        <Fixed>
           <WindowToolbar onSave={handleSubmit} isSaved={true} />
-        </Grid>
-      </Box>
-    </>
+        </Fixed>
+      </VertLayout>
   )
 }
 

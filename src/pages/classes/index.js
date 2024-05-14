@@ -1,33 +1,20 @@
-// ** React Importsport
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import ClassesWindow from './Windows/ClassesWindow'
-
-// ** Helpers
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Classes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-
-  //control
 
   const {
     query: { data },
@@ -111,8 +98,8 @@ const Classes = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addClasses}
           maxAccess={access}
@@ -121,6 +108,8 @@ const Classes = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -134,8 +123,8 @@ const Classes = () => {
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

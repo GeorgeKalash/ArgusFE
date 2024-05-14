@@ -1,9 +1,4 @@
-// ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox } from '@mui/material'
-
-// ** Custom Imports
-
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import { Grid, Box } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
@@ -20,7 +15,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, height, labels }) => {
   const { currencyId, currencyName } = currency
-
   const { recordId, countries } = store
   const { postRequest, getRequest } = useContext(RequestsContext)
 
@@ -54,14 +48,12 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
       name: 'plantRef',
       props: { readOnly: true }
     },
-
     {
       component: 'textfield',
       label: labels?.name,
       name: 'plantName',
       props: { readOnly: true }
     },
-
     {
       component: 'resourcecombobox',
       name: 'exchangeId',
@@ -103,7 +95,6 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
         .then(result => {
           const defaultParams = `_corId=${corId}&_currencyId=${currencyId}&_countryId=${countryId}`
           const parameters = defaultParams
-
           getRequest({
             extension: RemittanceSettingsRepository.CorrespondentExchangeMap.qry,
             parameters: parameters
@@ -111,13 +102,13 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
             .then(values => {
               const valuesMap = values.list.reduce((acc, fee) => {
                 acc[fee.plantId] = fee
-
-                return acc
+                
+                  return acc
               }, {})
 
               const plants = result.list.map((plant, index) => {
                 const value = valuesMap[plant?.recordId] || 0
-
+                
                 return {
                   id: index,
                   corId: corId,
@@ -147,7 +138,6 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
       currencyId: currencyId,
       correspondentExchangeMaps: obj.plants
     }
-
     postRequest({
       extension: RemittanceSettingsRepository.CorrespondentExchangeMap.set2,
       record: JSON.stringify(data)
@@ -158,8 +148,8 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
       })
       .catch(error => {})
   }
-
-  return (
+  
+return (
     <FormShell
       form={formik}
       resourceId={ResourceIds.Correspondent}
@@ -197,14 +187,12 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
             onChange={(event, newValue) => {
               formik.setFieldValue('countryId', newValue?.countryId)
               const selectedCountryId = newValue?.countryId || ''
-
               getCurrenciesExchangeMaps(recordId, currencyId, selectedCountryId)
             }}
             error={formik.touched.countryId && Boolean(formik.errors.countryId)}
             helperText={formik.touched.countryId && formik.errors.countryId}
           />
         </Grid>
-
         <Grid item xs={12}>
           <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
             {formik?.values?.plants[0]?.plantName && (
@@ -215,7 +203,6 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
                 columns={columns}
                 allowDelete={false}
                 allowAddNewLine={false}
-                height={`${expanded ? `calc(100vh - 330px)` : `${height - 100}px`}`}
               />
             )}
           </Box>
@@ -226,3 +213,4 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, heigh
 }
 
 export default ExchangeMapForm
+

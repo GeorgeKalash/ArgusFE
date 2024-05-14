@@ -11,6 +11,9 @@ import { useWindow } from 'src/windows'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import SitesForm from './forms/SitesForm'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Sites = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -115,28 +118,32 @@ const Sites = () => {
 
   return (
     <>
-      <Box>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={_labels}
-          inputSearch={true}
-          previewReport={ResourceIds.Sites}
-        />
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
-          maxAccess={access}
-          pageSize={50}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-        />
-      </Box>
+      <VertLayout>
+        <Fixed>
+          <GridToolbar
+            onAdd={add}
+            maxAccess={access}
+            onSearch={search}
+            onSearchClear={clear}
+            labels={_labels}
+            inputSearch={true}
+            previewReport={ResourceIds.Sites}
+          />
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={data}
+            rowId={['recordId']}
+            onEdit={edit}
+            onDelete={del}
+            maxAccess={access}
+            pageSize={50}
+            paginationParameters={paginationParameters}
+            paginationType='api'
+          />
+        </Grow>
+      </VertLayout>
     </>
   )
 }

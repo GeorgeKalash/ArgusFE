@@ -1,12 +1,8 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import toast from 'react-hot-toast'
 import FormShell from './FormShell'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useState, useContext } from 'react'
 import CustomComboBox from '../Inputs/CustomComboBox'
@@ -58,7 +54,7 @@ const Confirmation = ({ labels, formik, editMode, idTypeStore, maxAccess }) => {
   }
 
   return (
-    <FormShell form={fetchFormik} height={320} maxAccess={maxAccess} editMode={editMode} infoVisible={false}>
+    <FormShell form={fetchFormik} maxAccess={maxAccess} editMode={editMode} infoVisible={false}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           {}

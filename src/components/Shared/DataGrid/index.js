@@ -256,11 +256,11 @@ export function DataGrid({
   }
 
   return (
-    <Box sx={{ height: height ? height : 'auto', width: '100%', overflow: 'auto' }}>
+    <Box sx={{height: height ? height : 'auto', flex:'1 !important' }}>
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
-        autoHeight={height ? false : true}
+        autoHeight={false}
         columnResizable={false}
         disableColumnFilter
         disableColumnMenu
@@ -306,6 +306,8 @@ export function DataGrid({
         apiRef={apiRef}
         editMode='cell'
         sx={{
+          display:'flex !important', 
+          flex: '1 !important',
           '& .MuiDataGrid-cell': {
             padding: '0 !important'
           }

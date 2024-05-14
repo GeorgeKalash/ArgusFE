@@ -1,24 +1,17 @@
-// ** React Imports
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
+import { useContext } from 'react'
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import PurposeOfExchangeWindow from './windows/PurposeOfExchangeWindow'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const PurposeExchange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -70,8 +63,8 @@ const PurposeExchange = () => {
         maxAccess: access
       },
       width: 600,
-      height: 600,
-      title: _labels.idTypes
+      height: 500,
+      title: _labels.purposeOfExchange
     })
   }
 
@@ -93,9 +86,11 @@ const PurposeExchange = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -107,8 +102,8 @@ const PurposeExchange = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
