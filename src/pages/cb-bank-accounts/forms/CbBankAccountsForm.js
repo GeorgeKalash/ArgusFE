@@ -1,10 +1,9 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -15,7 +14,6 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataSets } from 'src/resources/DataSets'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
@@ -25,6 +23,7 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
 
   const { formik } = useForm({
     initialValues: {
+      recordId: recordId || null,
       name: null,
       accountNo: null,
       currencyId: null,
@@ -48,13 +47,14 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
       bankId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
+      // const recordId = obj.recordId
 
       const response = await postRequest({
         extension: CashBankRepository.CbBankAccounts.set,
         record: JSON.stringify(obj)
       })
-      if (!recordId) {
+
+      if (!obj.recordId) {
         toast.success('Record Added Successfully')
         formik.setValues({
           ...obj,
@@ -157,11 +157,7 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('groupId', newValue?.recordId)
-                  } else {
-                    formik.setFieldValue('groupId', '')
-                  }
+                  formik.setFieldValue('groupId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
@@ -182,15 +178,9 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('accountId', newValue?.recordId)
-                    formik.setFieldValue('accountRef', newValue?.reference)
-                    formik.setFieldValue('accountName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('accountId', '')
-                    formik.setFieldValue('accountRef', null)
-                    formik.setFieldValue('accountName', null)
-                  }
+                  formik.setFieldValue('accountId', newValue ? newValue.recordId : '')
+                  formik.setFieldValue('accountRef', newValue ? newValue.reference : '')
+                  formik.setFieldValue('accountName', newValue ? newValue.name : '')
                 }}
                 errorCheck={'accountId'}
                 maxAccess={maxAccess}
@@ -222,11 +212,8 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('bankId', newValue?.recordId), formik.setFieldValue('bankName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('bankId', ''), formik.setFieldValue('bankName', '')
-                  }
+                  formik.setFieldValue('bankId', newValue ? newValue.recordId : ''),
+                    formik.setFieldValue('bankName', newValue ? newValue.name : '')
                 }}
                 error={formik.touched.bankId && Boolean(formik.errors.bankId)}
               />
