@@ -11,12 +11,13 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 
-const GroupInfoTab = ({ labels, maxAccess, recordId }) => {
+const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [editMode, setEditMode] = useState(!!recordId)
+  const [editMode, setEditMode] = useState(!!storeRecordId)
+  console.log('check editMode ', !!storeRecordId)
 
   const { formik } = useForm({
-    initialValues: { recordId: recordId || 0, name: '', description: '' },
+    initialValues: { recordId: storeRecordId || null, name: '', description: '' },
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -27,10 +28,19 @@ const GroupInfoTab = ({ labels, maxAccess, recordId }) => {
         extension: AccessControlRepository.SecurityGroup.set,
         record: JSON.stringify(values)
       })
-      if (res.recordId) {
+      if (!values.recordId) {
+        toast.success('Record Added Successfully')
+        formik.setValues({
+          ...values,
+          recordId: res.recordId
+        })
+        setRecordId(res?.recordId)
+
+        // setEditMode(true)
+      } else {
         toast.success('Record Updated Successfully')
-        invalidate()
       }
+      invalidate()
     }
   })
 
@@ -39,15 +49,15 @@ const GroupInfoTab = ({ labels, maxAccess, recordId }) => {
   })
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (storeRecordId) {
         const res = await getRequest({
           extension: AccessControlRepository.SecurityGroup.get,
-          parameters: `_recordId=${recordId}`
+          parameters: `_recordId=${storeRecordId}`
         })
         formik.setValues(res.record)
       }
     })()
-  }, [])
+  }, [storeRecordId])
 
   return (
     <FormShell
@@ -55,7 +65,7 @@ const GroupInfoTab = ({ labels, maxAccess, recordId }) => {
       form={formik}
       height={300}
       maxAccess={maxAccess}
-      editMode={editMode}
+      editMode={!!storeRecordId}
     >
       <Grid container spacing={4}>
         <Grid item xs={12}>

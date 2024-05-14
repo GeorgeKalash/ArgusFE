@@ -4,7 +4,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -13,9 +13,9 @@ import { useWindow } from 'src/windows'
 import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
 import toast from 'react-hot-toast'
 
-const SGUsersTab = ({ labels, maxAccess, recordId }) => {
+const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const recordId = storeRecordId
   const [allUsers, setAllUsers] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
   const { stack } = useWindow()
@@ -59,7 +59,7 @@ const SGUsersTab = ({ labels, maxAccess, recordId }) => {
         record: JSON.stringify(data)
       })
       invalidate()
-      toast.success('Record Updated Successfully')
+      toast.success('Record Added Successfully')
     }
   })
 
@@ -72,11 +72,16 @@ const SGUsersTab = ({ labels, maxAccess, recordId }) => {
     labels: _labels
   } = useResourceQuery({
     queryFn: fetchGridData,
+    enabled: Boolean(recordId),
     endpointId: AccessControlRepository.SecurityGroupUser.qry,
     datasetId: ResourceIds.SecurityGroup
   })
 
   async function fetchGridData() {
+    if (!recordId) {
+      return { list: [] }
+    }
+
     return await getRequest({
       extension: AccessControlRepository.SecurityGroupUser.qry,
       parameters: `_userId=0&_filter=&_sgId=${recordId}`
@@ -127,12 +132,11 @@ const SGUsersTab = ({ labels, maxAccess, recordId }) => {
         return n2
       })
 
-      setSelectedUsers(selectedList)
-
       const filteredAllList = allList.filter(item => {
         return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
       })
 
+      setSelectedUsers(selectedList)
       setAllUsers(filteredAllList)
 
       stack({

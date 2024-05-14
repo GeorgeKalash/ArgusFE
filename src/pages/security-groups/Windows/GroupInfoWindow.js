@@ -6,17 +6,17 @@ import { useState } from 'react'
 
 const GroupInfoWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
-
-  const tabs = [{ label: labels?.groupInfo }, { label: labels?.users, disabled: !recordId }]
+  const [storeRecordId, setRecordId] = useState(recordId)
+  const tabs = [{ label: labels?.groupInfo }, { label: labels?.users, disabled: !storeRecordId }]
 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel height={height} index={0} value={activeTab}>
-        <GroupInfoTab labels={labels} maxAccess={maxAccess} recordId={recordId} />
+        <GroupInfoTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <SGUsersTab recordId={recordId} maxAccess={maxAccess} labels={labels} />
+        <SGUsersTab maxAccess={maxAccess} labels={labels} storeRecordId={storeRecordId} setRecordId={setRecordId} />
       </CustomTabPanel>
     </>
   )
