@@ -21,7 +21,10 @@ const CustomTabPanel = props => {
         overflow: 'auto',
         '.MuiBox-root':{
           paddingTop:'5px !important'
-        }
+        },
+        '.MuiDialogContent-root': { 
+          padding: '10px !important'
+        },
       }}
       {...other}
     >

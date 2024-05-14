@@ -87,7 +87,14 @@ export default function FormShell({
 
   return (
     <>
-      <DialogContent sx={{ display: 'flex !important', flex: 1, flexDirection: 'column', overflow: 'auto' }}>
+      <DialogContent 
+      sx={{ 
+        display: 'flex !important', 
+        flex: 1, 
+        flexDirection: 'column', 
+        overflow: 'auto', 
+        padding: '10px !important'
+       }}>
         {children}
       </DialogContent>
       {windowToolbarVisible && (
