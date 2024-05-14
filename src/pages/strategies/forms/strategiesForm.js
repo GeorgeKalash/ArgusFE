@@ -75,7 +75,7 @@ const StrategiesForm = ({ labels, editMode, maxAccess, setStore, store, onChange
     if (recordId) {
       getStrategyId(recordId)
     }
-  }, [recordId, getRequest])
+  }, [])
 
   const getStrategyId = recordId => {
     const defaultParams = `_recordId=${recordId}`
