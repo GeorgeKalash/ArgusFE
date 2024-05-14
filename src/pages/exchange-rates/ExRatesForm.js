@@ -6,13 +6,16 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function ExRatesForm({ labels, recordId, maxAccess, record }) {
+export default function ExRatesForm({ labels, recordId, maxAccess, record, window }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -36,6 +39,11 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record }) {
 
     // enab leReinitialize: true,
     validateOnChange: true,
+    validationSchema: yup.object({
+      exId: yup.string().required(' '),
+      dayId: yup.string().required(' '),
+      rate: yup.string().required(' ')
+    }),
 
     onSubmit: async obj => {
       const moment = require('moment')
@@ -70,6 +78,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record }) {
           recordId
         })
       }
+      window.close()
       setEditMode(true)
 
       invalidate()
@@ -101,58 +110,57 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ExchangeRates}
-      form={formik}
-      height={400}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={MultiCurrencyRepository.ExchangeTable.qry}
-            name='exId'
-            label={labels.exTable}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: ' Ref' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              console.log(newValue)
-              formik && formik.setFieldValue('exId', newValue?.recordId)
-            }}
-            error={formik.touched.exId && Boolean(formik.errors.exId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomDatePicker
-            name='dayId'
-            label={labels.date}
-            onChange={formik.setFieldValue}
-            value={formik.values.dayId}
-            maxAccess={maxAccess}
-            required
-            error={formik.touched.dayId && Boolean(formik.errors.dayId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='rate'
-            label={labels.rate}
-            value={formik.values?.rate}
-            required
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('rate', '')}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-      </Grid>
+    <FormShell resourceId={ResourceIds.ExchangeRates} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={MultiCurrencyRepository.ExchangeTable.qry}
+                name='exId'
+                label={labels.exTable}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: ' Ref' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik && formik.setFieldValue('exId', newValue?.recordId)
+                }}
+                onClear={() => formik.setFieldValue('exId', '')}
+                error={formik.touched.exId && Boolean(formik.errors.exId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='dayId'
+                label={labels.stDate}
+                onChange={formik.setFieldValue}
+                value={formik.values.dayId}
+                maxAccess={maxAccess}
+                required
+                error={formik.touched.dayId && Boolean(formik.errors.dayId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='rate'
+                label={labels.rate}
+                value={formik.values?.rate}
+                required
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('rate', '')}
+                maxAccess={maxAccess}
+                error={formik.touched.rate && Boolean(formik.errors.rate)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
