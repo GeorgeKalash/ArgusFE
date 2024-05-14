@@ -1,6 +1,6 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GroupInfoTab from 'src/pages/security-groups/Tabs/GroupInfoTab'
-import UsersTab from 'src/pages/security-groups/Tabs/UsersTab'
+import SGUsersTab from 'src/pages/security-groups/Tabs/SGUsersTab'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 
@@ -16,7 +16,7 @@ const GroupInfoWindow = ({ labels, maxAccess, recordId, height }) => {
         <GroupInfoTab labels={labels} maxAccess={maxAccess} recordId={recordId} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <UsersTab recordId={recordId} maxAccess={maxAccess} labels={labels} />
+        <SGUsersTab recordId={recordId} maxAccess={maxAccess} labels={labels} />
       </CustomTabPanel>
     </>
   )

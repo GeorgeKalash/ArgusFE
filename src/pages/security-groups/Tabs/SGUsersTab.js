@@ -12,7 +12,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
 
-const UsersTab = ({ labels, maxAccess, recordId }) => {
+const SGUsersTab = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const [allUsers, setAllUsers] = useState([])
@@ -73,7 +73,7 @@ const UsersTab = ({ labels, maxAccess, recordId }) => {
     labels: _labels
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AccessControlRepository.SecurityGroup.qry,
+    endpointId: AccessControlRepository.SecurityGroupUser.qry,
     datasetId: ResourceIds.SecurityGroup
   })
 
@@ -171,4 +171,4 @@ const UsersTab = ({ labels, maxAccess, recordId }) => {
   )
 }
 
-export default UsersTab
+export default SGUsersTab

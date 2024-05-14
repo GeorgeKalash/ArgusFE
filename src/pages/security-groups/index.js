@@ -14,25 +14,28 @@ const SecurityGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: AccessControlRepository.SecurityGroup.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
   const {
     query: { data },
     labels: _labels,
     refetch,
+    paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: AccessControlRepository.SecurityGroup.qry,
     datasetId: ResourceIds.SecurityGroup
   })
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: AccessControlRepository.SecurityGroup.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
-  }
 
   const invalidate = useInvalidate({
     endpointId: AccessControlRepository.SecurityGroup.qry
@@ -88,14 +91,15 @@ const SecurityGroup = () => {
         <GridToolbar onAdd={add} maxAccess={access} />
         <Table
           columns={columns}
-          gridData={data}
+          gridData={data ? data : { list: [] }}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
           refetch={refetch}
         />
       </Box>
