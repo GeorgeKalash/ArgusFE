@@ -1,4 +1,3 @@
-import { Box, Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import toast from 'react-hot-toast'
@@ -8,6 +7,9 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { useResourceQuery } from 'src/hooks/resource'
 import WindowToolbar from './WindowToolbar'
+import { VertLayout } from './Layouts/VertLayout'
+import { Fixed } from './Layouts/Fixed'
+import { Grow } from './Layouts/Grow'
 
 const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -134,35 +136,21 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%'
-      }}
-    >
-      <DataGrid
-        onChange={value => formik.setFieldValue('Integrations', value)}
-        value={formik.values.Integrations}
-        error={formik.errors.Integrations}
-        columns={column}
-        allowDelete={false}
-        allowAddNewLine={false}
-        height={`calc(100vh - 100px)`}
-      />
-      <Grid
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          padding: 3,
-          textAlign: 'center'
-        }}
-      >
+    <VertLayout>
+      <Grow>
+        <DataGrid
+          onChange={value => formik.setFieldValue('Integrations', value)}
+          value={formik.values.Integrations}
+          error={formik.errors.Integrations}
+          columns={column}
+          allowDelete={false}
+          allowAddNewLine={false}
+        />
+      </Grow>
+      <Fixed>
         <WindowToolbar onSave={formik.handleSubmit} isSaved={true} />
-      </Grid>
-    </Box>
+      </Fixed>
+    </VertLayout>
   )
 }
 

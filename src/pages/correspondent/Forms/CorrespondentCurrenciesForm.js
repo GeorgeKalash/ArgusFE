@@ -15,34 +15,33 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const CorrespondentCurrenciesForm = ({
-  store,
-  labels,
-  maxAccess,
-  expanded,
-  editMode
-}) => {
-  const {recordId , counties} = store
+const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editMode }) => {
+  const { recordId, counties } = store
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { height } = useWindowDimensions()
 
-   const formik = useFormik({
+  const formik = useFormik({
     enableReinitialize: true,
     validateOnChange: true,
-    validationSchema: yup.object({ currencies: yup
-    .array()
-    .of(
-      yup.object().shape({
-        currencyId: yup.string().required('currency  is required'),
-        exchangeId: yup.string().required('Country  is required')
-
-      })
-    ).required('currencies array is required') }),
+    validationSchema: yup.object({
+      currencies: yup
+        .array()
+        .of(
+          yup.object().shape({
+            currencyId: yup.string().required('currency  is required'),
+            exchangeId: yup.string().required('Country  is required')
+          })
+        )
+        .required('currencies array is required')
+    }),
     initialValues: {
       currencies: [
-        { id: 1,
+        {
+          id: 1,
           corId: recordId,
           currencyId: '',
           currencyRef: '',
@@ -65,13 +64,10 @@ const CorrespondentCurrenciesForm = ({
   })
 
   const postCorrespondentCurrencies = obj => {
-
-    const correspondentCurrencies = obj?.currencies?.map(
-      ({corId, ...rest }) => ({
-
-         corId : recordId,
-         ...rest
-      }))
+    const correspondentCurrencies = obj?.currencies?.map(({ corId, ...rest }) => ({
+      corId: recordId,
+      ...rest
+    }))
 
     const data = {
       corId: recordId,
@@ -82,11 +78,10 @@ const CorrespondentCurrenciesForm = ({
       record: JSON.stringify(data)
     })
       .then(res => {
-      toast.success('Record Edited Successfully')
-      if(res) getData()
+        toast.success('Record Edited Successfully')
+        if (res) getData()
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
   const columns = [
@@ -98,14 +93,17 @@ const CorrespondentCurrenciesForm = ({
         endpointId: SystemRepository.Currency.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        mapping: [{ from: 'recordId', to: 'currencyId' }, { from: 'reference', to: 'currencyRef' } , { from: 'name', to: 'currencyName' } ],
+        mapping: [
+          { from: 'recordId', to: 'currencyId' },
+          { from: 'reference', to: 'currencyRef' },
+          { from: 'name', to: 'currencyName' }
+        ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
+          { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
-      },
-
+      }
     },
 
     {
@@ -116,20 +114,22 @@ const CorrespondentCurrenciesForm = ({
         endpointId: MultiCurrencyRepository.ExchangeTable.qry,
         valueField: 'recordId',
         displayField: 'reference',
-        mapping: [{ from: 'recordId', to: 'exchangeId' }, { from: 'reference', to: 'exchangeRef' } ],
+        mapping: [
+          { from: 'recordId', to: 'exchangeId' },
+          { from: 'reference', to: 'exchangeRef' }
+        ],
 
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
+          { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
-
       }
     },
 
     {
       component: 'checkbox',
-       name: 'outward',
+      name: 'outward',
       label: labels.outwards
     },
 
@@ -155,89 +155,90 @@ const CorrespondentCurrenciesForm = ({
     },
     {
       component: 'button',
-      name:"saved",
+      name: 'saved',
       label: labels.exchange,
-      onClick:  async (e, row) => {
-       stack({
+      onClick: async (e, row) => {
+        stack({
           Component: ExchangeMapForm,
           props: {
             labels: labels,
-            recordId: recordId? recordId : null,
+            recordId: recordId ? recordId : null,
             store: store,
-            currency:{ currencyId:  row?.currencyId, currencyName:  row?.currencyName},
-            exchange :  {exchangeId :row?.exchangeId, exchangeName :row?.exchangeName},
+            currency: { currencyId: row?.currencyId, currencyName: row?.currencyName },
+            exchange: { exchangeId: row?.exchangeId, exchangeName: row?.exchangeName }
           },
           width: 700,
           height: 600,
           title: labels.sellingPriceExchangeMap
         })
       }
-    },
+    }
   ]
 
-  function getData(){
+  function getData() {
     const defaultParams = `_corId=${recordId}`
     var parameters = defaultParams
-    recordId && getRequest({
-      extension: RemittanceSettingsRepository.CorrespondentCurrency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        if (res?.list?.length > 0) {
-          formik.setValues({ currencies: res.list.map(
-            ({ ...rest } , index) => ({
-               id : index,
-               saved: true,
+    recordId &&
+      getRequest({
+        extension: RemittanceSettingsRepository.CorrespondentCurrency.qry,
+        parameters: parameters
+      })
+        .then(res => {
+          if (res?.list?.length > 0) {
+            formik.setValues({
+              currencies: res.list.map(({ ...rest }, index) => ({
+                id: index,
+                saved: true,
                 ...rest
-          }))})
-        } else {
-          formik.setValues({
-            currencies: [
-              {  id : 1,
-                corId: recordId,
-                currencyId: '',
-                currencyRef: '',
-                currencyName: '',
-                exchangeId: '',
-                exchangeRef: '',
-                exchangeName: '',
-                outward: false,
-                inward: false,
-                bankDeposit: false,
-                deal: false,
-                isInactive: false,
-                saved: false
-              }
-            ]
-          })
-        }
-      })
-      .catch(error => {
-      })
-
-
+              }))
+            })
+          } else {
+            formik.setValues({
+              currencies: [
+                {
+                  id: 1,
+                  corId: recordId,
+                  currencyId: '',
+                  currencyRef: '',
+                  currencyName: '',
+                  exchangeId: '',
+                  exchangeRef: '',
+                  exchangeName: '',
+                  outward: false,
+                  inward: false,
+                  bankDeposit: false,
+                  deal: false,
+                  isInactive: false,
+                  saved: false
+                }
+              ]
+            })
+          }
+        })
+        .catch(error => {})
   }
-  useEffect(()=>{
- getData()
+  useEffect(() => {
+    getData()
+  }, [recordId])
 
-},[recordId])
-
-return (
-  <FormShell
-  form={formik}
-  resourceId={ResourceIds.Correspondent}
-  infoVisible={false}
-  maxAccess={maxAccess}
-  editMode={editMode} >
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-      <DataGrid
-          onChange={value => formik.setFieldValue('currencies', value)}
-          value={formik.values.currencies}
-          error={formik.errors.currencies}
-          columns={columns}
-          height={`${expanded ? height-280 : 380}px`}
+  return (
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Correspondent}
+      infoVisible={false}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('currencies', value)}
+            value={formik.values.currencies}
+            error={formik.errors.currencies}
+            columns={columns}
           />
-      </Box>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

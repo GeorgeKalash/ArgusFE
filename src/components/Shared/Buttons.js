@@ -18,6 +18,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Delete',
+    color: '#231f20',
+    image: 'delete-icon.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',

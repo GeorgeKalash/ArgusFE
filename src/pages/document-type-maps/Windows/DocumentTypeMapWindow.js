@@ -9,8 +9,8 @@ const DocumentTypeMapWindow = ({ onClose, labels, maxAccess, recordId, fromFunct
       Title={labels.documentTypeMap}
       controlled={true}
       onClose={onClose}
-      width={600}
-      height={400}
+      height={450}
+      width={500}
     >
       <DocumentTypeMapForm
         labels={labels}

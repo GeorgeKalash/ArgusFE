@@ -1,35 +1,22 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-
-// ** Windows
 import CommissionTypesWindow from './Windows/CommissionTypesWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CommissionTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
  
   const [selectedRecordId, setSelectedRecordId] = useState(null)
 
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -100,23 +87,25 @@ const CommissionTypes = () => {
   
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
-          isLoading={false}
-          refetch={refetch}
-          pageSize={50}
-          paginationParameters={paginationParameters}
-          maxAccess={access}
-          paginationType='api'
-        />
-      </Box>
+            columns={columns}
+            gridData={data}
+            rowId={['recordId']}
+            onEdit={edit}
+            onDelete={del}
+            isLoading={false}
+            refetch={refetch}
+            pageSize={50}
+            paginationParameters={paginationParameters}
+            maxAccess={access}
+            paginationType='api'
+          />
+      </Grow>
       {windowOpen && (
         <CommissionTypesWindow
           onClose={() => {
@@ -130,7 +119,7 @@ const CommissionTypes = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </VertLayout>
   )
 }
 

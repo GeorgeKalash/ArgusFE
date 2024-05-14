@@ -18,6 +18,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { MasterSource } from 'src/resources/MasterSource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -102,84 +104,87 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell
-      actions={actions}
       resourceId={ResourceIds.FlAccountGroups}
       form={formik}
-      height={300}
       maxAccess={maxAccess}
       editMode={editMode}
+      actions={actions}
       masterSource={MasterSource.AccountGroup}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            maxAccess={maxAccess}
-            maxLength='10'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxLength='50'
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceLookup
-            endpointId={SystemRepository.NumberRange.snapshot}
-            form={formik}
-            valueField='reference'
-            displayField='description'
-            name='nraRef'
-            label={labels.numberRange}
-            secondDisplayField={true}
-            secondValue={formik.values.nraDescription}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('nraId', newValue?.recordId)
-                formik.setFieldValue('nraRef', newValue?.reference)
-                formik.setFieldValue('nraDescription', newValue?.description)
-              } else {
-                formik.setFieldValue('nraId', null)
-                formik.setFieldValue('nraRef', '')
-                formik.setFieldValue('nraDescription', '')
-              }
-            }}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.FI_GROUP_TYPE}
-            name='type'
-            label={labels.type}
-            valueField='key'
-            required
-            displayField='value'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('type', newValue?.key)
-              } else {
-                formik.setFieldValue('type', '')
-              }
-            }}
-            error={formik.touched.type && Boolean(formik.errors.type)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxLength='50'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={SystemRepository.NumberRange.snapshot}
+                form={formik}
+                valueField='reference'
+                displayField='description'
+                name='nraRef'
+                label={labels.numberRange}
+                secondDisplayField={true}
+                secondValue={formik.values.nraDescription}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('nraId', newValue?.recordId)
+                    formik.setFieldValue('nraRef', newValue?.reference)
+                    formik.setFieldValue('nraDescription', newValue?.description)
+                  } else {
+                    formik.setFieldValue('nraId', null)
+                    formik.setFieldValue('nraRef', '')
+                    formik.setFieldValue('nraDescription', '')
+                  }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.FI_GROUP_TYPE}
+                name='type'
+                label={labels.type}
+                valueField='key'
+                required
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('type', newValue?.key)
+                  } else {
+                    formik.setFieldValue('type', '')
+                  }
+                }}
+                error={formik.touched.type && Boolean(formik.errors.type)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
