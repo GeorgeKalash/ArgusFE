@@ -92,8 +92,11 @@ export default function FormShell({
         display: 'flex !important', 
         flex: 1, 
         flexDirection: 'column', 
-        overflow: 'auto', 
-        padding: '10px !important'
+        overflow: 'auto',
+
+        // '.MuiBox-root':{
+        //   paddingTop:'5px !important'
+        // },
        }}>
         {children}
       </DialogContent>
