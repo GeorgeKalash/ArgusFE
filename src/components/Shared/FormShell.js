@@ -7,6 +7,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
+
 import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
 
