@@ -21,6 +21,9 @@ import DocumentTypeMapWindow from './Windows/DocumentTypeMapWindow'
 // ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const DocumentTypeMaps = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -107,9 +110,11 @@ const DocumentTypeMaps = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -123,7 +128,8 @@ const DocumentTypeMaps = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
         <DocumentTypeMapWindow
           onClose={() => {
@@ -140,7 +146,7 @@ const DocumentTypeMaps = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

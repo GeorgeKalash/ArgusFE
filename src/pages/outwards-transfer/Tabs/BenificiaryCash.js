@@ -25,6 +25,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countryId }) => {
   const [maxAccess, setMaxAccess] = useState(null)
@@ -69,6 +70,8 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           gender: RTBEN?.record?.gender,
           cobId: RTBEN?.record?.cobId,
           cellPhone: RTBEN?.record?.cellPhone,
+          rtId: RTBEN?.record?.rtId,
+          rtName: RTBEN?.record?.rtName,
           birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
@@ -110,6 +113,8 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
     stoppedReason: '',
     gender: null,
     cobId: '',
+    rtName: '',
+    rtId: null,
     cellPhone: '',
     birthDate: null,
     addressLine1: '',
@@ -156,6 +161,8 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
         stoppedReason: values.stoppedReason,
         nationalityId: values.nationalityId,
         cobId: values.cobId,
+        rtId: values.rtId,
+        rtName: values.rtName,
         birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
         cellPhone: values.cellPhone,
         addressLine1: values.addressLine1,
@@ -188,7 +195,6 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
   })
 
   const constructNameField = formValues => {
-    console.log('firessssss')
     const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
     var name = formValues?.name
     const isArabic = arabicRegex.test(name)
@@ -506,6 +512,22 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
               maxAccess={maxAccess}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
             />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
+                name='rtId'
+                label={_labels.relationType}
+                displayField='name'
+                valueField='recordId'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
+                }}
+                error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+              />
+            </Grid>
           </FormGrid>
           <FormGrid hideonempty xs={12}>
             <ResourceComboBox

@@ -21,6 +21,7 @@ const GridToolbar = ({
   inputSearch,
   search,
   onSearch,
+
   onSearchClear,
   ...props
 }) => {
@@ -39,7 +40,14 @@ const GridToolbar = ({
   }
 
   return (
-    <Box display={'flex'} sx={{ justifyContent: 'space-between' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%'
+      }}
+    >
       {children && children}
       <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
         {initialLoad && (

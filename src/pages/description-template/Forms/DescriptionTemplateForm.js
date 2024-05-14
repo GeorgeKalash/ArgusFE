@@ -13,98 +13,95 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function DescriptionTemplateForms({ labels, maxAccess, recordId }) {
-    const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
-    
-    const [initialValues, setInitialData] = useState({
-        recordId: null,
-        name: '',
+  const [isLoading, setIsLoading] = useState(false)
+  const [editMode, setEditMode] = useState(!!recordId)
+
+  const [initialValues, setInitialData] = useState({
+    recordId: null,
+    name: ''
+  })
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const invalidate = useInvalidate({
+    endpointId: FinancialRepository.DescriptionTemplate.page
+  })
+
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      name: yup.string().required(' ')
+    }),
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: FinancialRepository.DescriptionTemplate.set,
+        record: JSON.stringify(obj)
       })
 
-    const { getRequest, postRequest } = useContext(RequestsContext)
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        setInitialData({
+          ...obj, // Spread the existing properties
+          recordId: response.recordId // Update only the recordId field
+        })
+      } else toast.success('Record Edited Successfully')
+      setEditMode(true)
 
-    const invalidate = useInvalidate({
-        endpointId: FinancialRepository.DescriptionTemplate.page
-      })
-  
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        validateOnChange: true,
-        validationSchema: yup.object({
-          name: yup.string().required(' '),
-        }),
-        onSubmit: async obj => {
-          const recordId = obj.recordId
+      invalidate()
+    }
+  })
 
-          const response = await postRequest({
-            extension: FinancialRepository.DescriptionTemplate.set,
-            record: JSON.stringify(obj)
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          setIsLoading(true)
+
+          const res = await getRequest({
+            extension: FinancialRepository.DescriptionTemplate.get,
+            parameters: `_recordId=${recordId}`
           })
-          
-          if (!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
-            });
-          }
-          else toast.success('Record Edited Successfully')
-          setEditMode(true)
 
-          invalidate()
+          setInitialData(res.record)
         }
-      })
-    
-      useEffect(() => {
-        ;(async function () {
-          try {
-            if (recordId) {
-              setIsLoading(true)
+      } catch (exception) {
+        setErrorMessage(error)
+      }
+      setIsLoading(false)
+    })()
+  }, [])
 
-              const res = await getRequest({
-                extension: FinancialRepository.DescriptionTemplate.get,
-                parameters: `_recordId=${recordId}`
-              })
-              
-              setInitialData(res.record)
-            }
-          } catch (exception) {
-            setErrorMessage(error)
-          }
-          setIsLoading(false)
-        })()
-      }, [])
-      
-    return (
-        <FormShell 
-            resourceId={ResourceIds.Description_Template}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
-            editMode={editMode}
-        >
-            <Grid container spacing={4}>
-                <Grid item xs={12}>
-                    <CustomTextField
-                    name='name'
-                    label={labels.name}
-                    value={formik.values.name}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='50'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
+  return (
+    <FormShell resourceId={ResourceIds.Description_Template} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='50'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
 
-                    // helperText={formik.touched.name && formik.errors.name}
-                    />
-                </Grid>
+                // helperText={formik.touched.name && formik.errors.name}
+              />
             </Grid>
-        </FormShell>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
-

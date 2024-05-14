@@ -1,28 +1,20 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
 import { useWindow } from 'src/windows'
 import CashTransferTab from './Tabs/CashTransferTab'
 import toast from 'react-hot-toast'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CashTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -222,14 +214,13 @@ const CashTransfer = () => {
         recordId: recordId ? recordId : null
       },
       width: 950,
-      height: 620,
       title: 'Cash Transfer'
     })
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addCashTFR}
           maxAccess={access}
@@ -242,6 +233,8 @@ const CashTransfer = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -254,10 +247,9 @@ const CashTransfer = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
-
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

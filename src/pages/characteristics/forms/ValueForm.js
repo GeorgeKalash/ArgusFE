@@ -1,10 +1,6 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-
-// ** Custom Imports
 import { useFormik } from 'formik'
 import { useContext, useEffect, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -13,6 +9,8 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ValueForm = ({
   labels,
@@ -75,28 +73,32 @@ const ValueForm = ({
       })
   }
 
-return (
+  return (
     <FormShell
       form={formik}
       resourceId={ResourceIds.Characteristics}
       maxAccess={maxAccess}
       isInfo={false}
     >
-        <Grid container spacing={4}>
-            <Grid item xs={12}>
-                <CustomTextField
-                name='value'
-                label={labels.values}
-                value={formik.values.value}
-                required
-                maxLength='50'
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('value', '')}
-                error={formik.touched.value && Boolean(formik.errors.value)}
-                />
-            </Grid>
-        </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+              <Grid item xs={12}>
+                  <CustomTextField
+                  name='value'
+                  label={labels.values}
+                  value={formik.values.value}
+                  required
+                  maxLength='50'
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('value', '')}
+                  error={formik.touched.value && Boolean(formik.errors.value)}
+                  />
+              </Grid>
+          </Grid> 
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
