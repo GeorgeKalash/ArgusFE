@@ -95,7 +95,7 @@ const GateKeeper = () => {
   async function fetchGridData() {
     const response = await getRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `filter=&_status=2`
+      parameters: `_status=2`
     })
 
     const data = response.list.map((item, index) => ({
@@ -154,7 +154,15 @@ const GateKeeper = () => {
     {
       component: 'numberfield',
       name: 'produceNow',
-      label: _labels.producedNow
+      label: _labels.producedNow,
+      async onChange({ row: { update, newRow } }) {
+        console.log('check row', newRow)
+        if (newRow.produceNow > newRow.balance) {
+          update({
+            produceNow: newRow.balance
+          })
+        }
+      }
     },
     {
       component: 'textfield',

@@ -33,7 +33,7 @@ const ProductionRequestLog = () => {
   async function fetchGridData() {
     return await getRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.preview,
-      parameters: `_status=1&_filter=`
+      parameters: `_status=1`
     })
   }
 
