@@ -2,7 +2,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // ** Custom Imports
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
 // ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -14,7 +13,6 @@ const CommonContext = createContext()
 const CommonProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
   const { user, setUser } = useContext(AuthContext)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   const fillDocumentTypeStore = ({ _startAt = 0, _pageSize = 30, _dgId = 0, callback }) => {
     const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
@@ -27,9 +25,7 @@ const CommonProvider = ({ children }) => {
       .then(res => {
         callback(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const getAllKvsByDataset = ({ _dataset = 0, callback }) => {
@@ -54,7 +50,6 @@ const CommonProvider = ({ children }) => {
   return (
     <>
       <CommonContext.Provider value={values}>{children}</CommonContext.Provider>
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </>
   )
 }

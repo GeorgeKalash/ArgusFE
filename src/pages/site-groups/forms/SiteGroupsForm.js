@@ -9,6 +9,8 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -71,32 +73,36 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
 
   return (
     <FormShell resourceId={ResourceIds.Cities} form={formik} height={400} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && formik.errors.reference}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && formik.errors.name}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && formik.errors.reference}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

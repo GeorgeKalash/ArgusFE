@@ -1,7 +1,5 @@
 import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -13,6 +11,9 @@ import { useWindow } from 'src/windows'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import SiteGroupsForm from './forms/SiteGroupsForm'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const SiteGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,7 +54,11 @@ const SiteGroups = () => {
       parameters: `_filter=${qry}`
     })
 
-    const filteredData = response.list.filter(item => item.name.toLowerCase().includes(qry.toLowerCase()))
+    const filteredData = response.list.filter(
+      item =>
+        item.name.toLowerCase().includes(qry.toLowerCase()) ||
+        (item.reference && item.reference.toLowerCase().includes(qry.toLowerCase()))
+    )
 
     return { ...response, list: filteredData }
   }
@@ -109,8 +114,8 @@ const SiteGroups = () => {
   console.log('data', data)
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -119,6 +124,8 @@ const SiteGroups = () => {
           onSearch={search}
           onSearchClear={clear}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -130,8 +137,8 @@ const SiteGroups = () => {
           pageSize={50}
           paginationType='client'
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

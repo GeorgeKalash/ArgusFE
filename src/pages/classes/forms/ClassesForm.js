@@ -1,10 +1,6 @@
-// ** MUI Imports
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
-
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-
-// ** Custom Imports
 import { useFormik } from 'formik'
 import { useContext, useEffect, useState } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -15,6 +11,8 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ClassesForm = ({
   labels,
@@ -97,38 +95,42 @@ return (
       resourceId={ResourceIds.Classes}
       maxAccess={maxAccess}
       editMode={editMode} 
-    >
-     <Grid container spacing={4}>
-      <Grid item xs={12}>
-        <CustomTextField
-          name='name'
-          label={labels.name}
-          value={formik.values.name}
-          required
-          maxLength='50'
-          maxAccess={maxAccess}
-          onChange={formik.handleChange}
-          onClear={() => formik.setFieldValue('name', '')}
-          error={formik.touched.name && Boolean(formik.errors.name)}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <ResourceComboBox
-          datasetId={DataSets.CHAR_OPERATOR}
-          name='characteristicOperator'
-          label={labels.characteristicOperator}
-          required
-          valueField='key'
-          displayField='value'
-          values={formik.values}
-          onClear={() => formik.setFieldValue('name', '')}
-          onChange={(event, newValue) => {
-            formik.setFieldValue('characteristicOperator', newValue?.key || '')
-          }}
-          error={formik.touched.characteristicOperator && Boolean(formik.errors.characteristicOperator)}
-        />
-      </Grid>
-    </Grid>
+    > 
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxLength='50'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.CHAR_OPERATOR}
+                name='characteristicOperator'
+                label={labels.characteristicOperator}
+                required
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onClear={() => formik.setFieldValue('name', '')}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('characteristicOperator', newValue?.key || '')
+                }}
+                error={formik.touched.characteristicOperator && Boolean(formik.errors.characteristicOperator)}
+              />
+            </Grid>
+          </Grid> 
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

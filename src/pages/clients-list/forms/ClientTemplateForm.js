@@ -36,10 +36,11 @@ import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 import { useInvalidate } from 'src/hooks/resource'
-import SystemDefaults from 'src/pages/system-defaults'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useError } from 'src/error'
 
-const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAccess, allowEdit = false }) => {
+const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [showAsPassword, setShowAsPassword] = useState(false)
@@ -53,6 +54,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
   const [idTypeStore, setIdTypeStore] = useState([])
   const [otpShow, setOtpShow] = useState(false)
   const [isClosed, setIsClosed] = useState(false)
+  const { stack: stackError } = useError()
 
   const [initialValues, setInitialData] = useState({
     //clientIDView
@@ -125,7 +127,8 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
     oldReference: '',
 
     //clientRemittance
-
+    trxCountPerYear: '',
+    trxAmountPerYear: '',
     otpVerified: false,
     addressId: '',
     batchId: '',
@@ -157,7 +160,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
     mobileVerified: '',
     isRelativeDiplomat: false,
     professionId: '',
-    clientRemittance: { reference: '' }
+    cltRemReference: ''
   })
 
   const handleCopy = event => {
@@ -317,9 +320,9 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
           title: obj.clientRemittance?.title,
           mobileVerified: obj.clientRemittance?.mobileVerificationStatus,
           isRelativeDiplomat: obj.clientRemittance?.isRelativeDiplomat,
-          clientRemittance: {
-            reference: obj.clientRemittance.reference
-          }
+          trxAmountPerYear: obj.clientRemittance?.trxAmountPerYear,
+          trxCountPerYear: obj.clientRemittance?.trxCountPerYear,
+          cltRemReference: obj.clientRemittance?.reference
         })
 
         setEditMode(true)
@@ -349,7 +352,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       })
         .then(res => {
           if (res.record) {
-            setErrorMessage('the ID number exists.')
+            stackError({ message: 'the ID number exists.' })
           }
         })
         .catch(error => {})
@@ -479,7 +482,7 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
     }
 
     const obj4 = {
-      reference: obj.clientRemittance?.reference,
+      reference: obj.cltRemReference,
       salaryRangeId: obj.salaryRangeId,
       riskLevel: obj.riskLevel,
       smsLanguage: obj.smsLanguage,
@@ -500,7 +503,9 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
       wip: 1,
       releaseStatus: 1,
       educationLevelName: obj.educationLevelName,
-      status: obj.status
+      status: obj.status,
+      trxCountPerYear: obj.trxCountPerYear,
+      trxAmountPerYear: obj.trxAmountPerYear
     }
 
     const obj5 = {
@@ -602,7 +607,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
           formValidation: clientIndividualFormik,
           functionId: clientIndividualFormik.values.functionId,
           setEditMode: setEditMode,
-          setErrorMessage: setErrorMessage,
           getData: getClient
         },
         width: 400,
@@ -732,15 +736,15 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
               </Grid>
               <Grid item xs={12}>
                 <CustomTextField
-                  name='clientRemittance.reference'
+                  name='cltRemReference'
                   label={labels.lastKYC}
-                  value={clientIndividualFormik?.values?.clientRemittance?.reference}
+                  value={clientIndividualFormik?.values?.cltRemReference}
                   maxAccess={maxAccess}
                   maxLength='30'
                   readOnly
                   error={
-                    clientIndividualFormik.touched.clientRemittance?.reference &&
-                    Boolean(clientIndividualFormik.errors.reference)
+                    clientIndividualFormik.touched.cltRemReference &&
+                    Boolean(clientIndividualFormik.errors.cltRemReference)
                   }
                 />
               </Grid>
@@ -833,7 +837,6 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                           props: {
                             idTypeStore: idTypeStore,
                             formik: clientIndividualFormik,
-                            setErrorMessage: setErrorMessage,
                             labels: labels
                           },
                           title: labels.fetch,
@@ -1385,6 +1388,30 @@ const ClientTemplateForm = ({ setErrorMessage, recordId, labels, plantId, maxAcc
                 </Grid>
 
                 <Grid container xs={12} spacing={2} sx={{ p: 5 }}>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='trxCountPerYear'
+                      onChange={clientIndividualFormik.handleChange}
+                      label={labels.trxCountPerYear}
+                      value={clientIndividualFormik.values.trxCountPerYear}
+                      error={
+                        clientIndividualFormik.touched.trxCountPerYear &&
+                        Boolean(clientIndividualFormik.errors.trxCountPerYear)
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='trxAmountPerYear'
+                      onChange={clientIndividualFormik.handleChange}
+                      label={labels.trxAmountPerYear}
+                      value={clientIndividualFormik.values.trxAmountPerYear}
+                      error={
+                        clientIndividualFormik.touched.trxAmountPerYear &&
+                        Boolean(clientIndividualFormik.errors.trxAmountPerYear)
+                      }
+                    />
+                  </Grid>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={RemittanceSettingsRepository.SalaryRange.qry}

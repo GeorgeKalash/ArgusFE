@@ -15,166 +15,151 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-
 export default function OperationsForms({ labels, maxAccess, recordId }) {
-    const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
+  const [isLoading, setIsLoading] = useState(false)
+  const [editMode, setEditMode] = useState(!!recordId)
 
-    const [initialValues, setInitialData] = useState({
-        recordId: null,
-        reference: '',
-        name:'',
-        workCenterId: '',
-        workCenterName: '',
-        maxLossPct: '',
+  const [initialValues, setInitialData] = useState({
+    recordId: null,
+    reference: '',
+    name: '',
+    workCenterId: '',
+    workCenterName: '',
+    maxLossPct: ''
+  })
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  //const editMode = !!recordId
+
+  const invalidate = useInvalidate({
+    endpointId: ManufacturingRepository.Operation.page
+  })
+
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      workCenterId: yup.string().required(),
+      maxLossPct: yup.number().min(0, 'min').max(100, 'max').required()
+    }),
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: ManufacturingRepository.Operation.set,
+        record: JSON.stringify(obj)
       })
 
-    const { getRequest, postRequest } = useContext(RequestsContext)
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        setInitialData({
+          ...obj, // Spread the existing properties
+          recordId: response.recordId // Update only the recordId field
+        })
+      } else toast.success('Record Edited Successfully')
+      setEditMode(true)
 
-    //const editMode = !!recordId
+      invalidate()
+    }
+  })
 
-    const invalidate = useInvalidate({
-        endpointId: ManufacturingRepository.Operation.page
-      })
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          setIsLoading(true)
 
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        validateOnChange: true,
-        validationSchema: yup.object({
-          reference: yup.string().required(),
-          name: yup.string().required(),
-          workCenterId: yup.string().required(),
-          maxLossPct: yup
-            .number()
-            .min(0, 'min')
-            .max(100, 'max')
-            .required(),
-        }),
-        onSubmit: async obj => {
-          const recordId = obj.recordId
-
-          const response = await postRequest({
-            extension: ManufacturingRepository.Operation.set,
-            record: JSON.stringify(obj)
+          const res = await getRequest({
+            extension: ManufacturingRepository.Operation.get,
+            parameters: `_recordId=${recordId}`
           })
 
-          if (!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
-            });
-          }
-          else toast.success('Record Edited Successfully')
-          setEditMode(true)
-
-          invalidate()
+          setInitialData(res.record)
         }
-      })
+      } catch (exception) {
+        setErrorMessage(error)
+      }
+      setIsLoading(false)
+    })()
+  }, [])
 
-      useEffect(() => {
-        ;(async function () {
-          try {
-            if (recordId) {
-              setIsLoading(true)
-
-              const res = await getRequest({
-                extension: ManufacturingRepository.Operation.get,
-                parameters: `_recordId=${recordId}`
-              })
-
-              setInitialData(res.record)
-            }
-          } catch (exception) {
-            setErrorMessage(error)
-          }
-          setIsLoading(false)
-        })()
-      }, [])
-
-    return (
-        <FormShell
-            resourceId={ResourceIds.Operations}
-            form={formik}
-            height={300}
+  return (
+    <FormShell resourceId={ResourceIds.Operations} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <Grid container spacing={4}>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='reference'
+            label={labels.reference}
+            value={formik.values.reference}
+            required
             maxAccess={maxAccess}
-            editMode={editMode}
-        >
-            <Grid container spacing={4}>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.reference}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='10'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+            maxLength='10'
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('reference', '')}
+            error={formik.touched.reference && Boolean(formik.errors.reference)}
 
-                    // helperText={formik.touched.reference && formik.errors.reference}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='name'
-                    label={labels.name}
-                    value={formik.values.name}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='40'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
+            // helperText={formik.touched.reference && formik.errors.reference}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='name'
+            label={labels.name}
+            value={formik.values.name}
+            required
+            maxAccess={maxAccess}
+            maxLength='40'
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('name', '')}
+            error={formik.touched.name && Boolean(formik.errors.name)}
 
-                    // helperText={formik.touched.name && formik.errors.name}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='maxLossPct'
-                    label={labels.maxLossPct}
-                    value={formik.values.maxLossPct}
-                    type='numeric'
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('maxLossPct', '')}
-                    error={formik.touched.maxLossPct && Boolean(formik.errors.maxLossPct)}
+            // helperText={formik.touched.name && formik.errors.name}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomTextField
+            name='maxLossPct'
+            label={labels.maxLossPct}
+            value={formik.values.maxLossPct}
+            type='numeric'
+            numberField={true}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue('maxLossPct', '')}
+            error={formik.touched.maxLossPct && Boolean(formik.errors.maxLossPct)}
 
-                    // helperText={formik.touched.maxLossPct && formik.errors.maxLossPct}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={ManufacturingRepository.WorkCenter.qry}
-                    name='workCenterId'
-                    label={labels.workCenterId}
-                    required
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('workCenterId', newValue?.recordId)
-                      } else {
+            // helperText={formik.touched.maxLossPct && formik.errors.maxLossPct}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ResourceComboBox
+            endpointId={ManufacturingRepository.WorkCenter.qry}
+            name='workCenterId'
+            label={labels.workCenterId}
+            required
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            valueField='recordId'
+            displayField='name'
+            values={formik.values}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                formik.setFieldValue('workCenterId', newValue?.recordId)
+              } else {
+                formik.setFieldValue('workCenterId', '')
+              }
+            }}
+            error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
 
-                        formik.setFieldValue('workCenterId', '')
-                      }
-
-                    }}
-                    error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
-
-                    // helperText={formik.touched.workCenterId && formik.errors.workCenterId}
-                  />
-                </Grid>                
-            </Grid>
-        </FormShell>
+            // helperText={formik.touched.workCenterId && formik.errors.workCenterId}
+          />
+        </Grid>
+      </Grid>
+    </FormShell>
   )
 }
-

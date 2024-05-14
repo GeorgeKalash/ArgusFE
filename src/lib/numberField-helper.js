@@ -77,8 +77,6 @@ const validateNumberField = (value, originalValue) => {
 }
 
 const getNumberWithoutCommas = value => {
-  // Remove commas from the value string
-  value
   const sanitizedValue = value && value.toString().replace(/,/g, '')
 
   return sanitizedValue

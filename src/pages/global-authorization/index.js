@@ -15,6 +15,8 @@ import AccessLevelForm from './forms/AccessLevelForm'
 import FieldGlobalForm from './forms/FieldGlobalForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useEffect } from 'react'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -106,9 +108,8 @@ const GlobalAuthorization = () => {
   }, [])
 
   return (
-    <>
-      <Box>
-        <div style={{ display: 'flex' }}>
+    <VertLayout>
+      <Fixed>
           <GridToolbar
             maxAccess={access}
             onSearch={value => {
@@ -120,7 +121,7 @@ const GlobalAuthorization = () => {
             labels={labels}
             inputSearch={true}
           >
-            <Box sx={{ display: 'flex', width: '350px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+            <Box sx={{width: '350px', pt: 2, pl: 2 }}>
               <ResourceComboBox
                 datasetId={DataSets.MODULE}
                 name='moduleId'
@@ -134,13 +135,11 @@ const GlobalAuthorization = () => {
                 }}
               />
             </Box>
-            <Box sx={{ display: 'flex', height: '48px', justifyContent: 'flex-start', pt: 2, pl: 3 }}>
               <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
                 <Icon icon='mdi:arrow-expand-right' fontSize={18} />
               </Button>
-            </Box>
           </GridToolbar>
-        </div>
+          </Fixed>
         <Table
           columns={[
             {
@@ -186,8 +185,7 @@ const GlobalAuthorization = () => {
           refetch={refetch}
           paginationType='client'
         />
-      </Box>
-    </>
+      </VertLayout>
   )
 }
 

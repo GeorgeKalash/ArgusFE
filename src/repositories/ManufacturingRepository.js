@@ -31,13 +31,13 @@ export const ManufacturingRepository = {
     del: service + 'delRTN'
   },
   Operation: {
-    snapshot : service + "snapshotOPR",
+    snapshot: service + 'snapshotOPR',
     qry: service + 'qryOPR',
-    page : service + "pageOPR",
+    page: service + 'pageOPR',
     set: service + 'setOPR',
     get: service + 'getOPR',
     del: service + 'delOPR',
-    qry: service + 'qryOPR',
+    qry: service + 'qryOPR'
   },
   Labor: {
     page: service + 'pageLBR',
@@ -61,7 +61,8 @@ export const ManufacturingRepository = {
     del: service + 'delMAS'
   },
   LeanProductionPlanning: {
-    preview: service + 'previewLEAN'
+    preview: service + 'previewLEAN',
+    update: service + 'updateLEAN'
   },
   MaterialsAdjustment: {
     generate: service + 'generateADJ'

@@ -3,13 +3,7 @@ import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import SalaryRangeForm from 'src/pages/salary-ranges/forms/SalaryRangeForm'
 
-const SalaryRangeWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId
-}) => {
-
+const SalaryRangeWindow = ({ onClose, labels, maxAccess, recordId }) => {
   return (
     <>
       <Window
@@ -18,13 +12,9 @@ const SalaryRangeWindow = ({
         controlled={true}
         onClose={onClose}
         width={500}
-        height={300}
+        height={400}
       >
-        <SalaryRangeForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-        />
+        <SalaryRangeForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
       </Window>
     </>
   )

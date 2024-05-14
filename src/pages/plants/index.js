@@ -1,82 +1,66 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import PlantWindow from './Windows/PlantWindow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Plants = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
-  async function fetchWithSearch({ qry}) {
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: SystemRepository.Plant.snapshot,
+      parameters: `_filter=${qry}`
+    })
 
-  const response=  await getRequest({
-    extension: SystemRepository.Plant.snapshot,
-    parameters: `_filter=${qry}`
-  })
-
-return response
-
-}
-
-const {
-  query: { data },
-  search,
-  clear,
-  refetch,
-  labels: _labels,
-  paginationParameters,
-  invalidate,
-  access
-} = useResourceQuery({
-  queryFn: fetchGridData,
-   endpointId: SystemRepository.Plant.page,
-   datasetId: ResourceIds.Plants,
-   search: {
-    endpointId: SystemRepository.Plant.snapshot,
-    searchFn: fetchWithSearch,
+    return response
   }
-})
 
-
-async function fetchGridData(options={}) {
-  const { _startAt = 0, _pageSize = 50 } = options
-
-  const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
-  var parameters = defaultParams
-
-   const response =  await getRequest({
-    extension: SystemRepository.Plant.page,
-    parameters: parameters
+  const {
+    query: { data },
+    search,
+    clear,
+    refetch,
+    labels: _labels,
+    paginationParameters,
+    invalidate,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.Plant.page,
+    datasetId: ResourceIds.Plants,
+    search: {
+      endpointId: SystemRepository.Plant.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-return {...response,  _startAt: _startAt}
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    var parameters = defaultParams
 
-}
+    const response = await getRequest({
+      extension: SystemRepository.Plant.page,
+      parameters: parameters
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
 
   const columns = [
     {
@@ -96,7 +80,6 @@ return {...response,  _startAt: _startAt}
     }
   ]
 
-
   const delPlant = obj => {
     postRequest({
       extension: SystemRepository.Plant.del,
@@ -106,8 +89,7 @@ return {...response,  _startAt: _startAt}
         invalidate()
         toast.success('Record Deleted Successfully')
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
   const addPlant = () => {
@@ -118,30 +100,33 @@ return {...response,  _startAt: _startAt}
     openForm(obj.recordId)
   }
 
-  function openForm (recordId){
+  function openForm(recordId) {
     stack({
       Component: PlantWindow,
       props: {
         labels: _labels,
-        recordId: recordId? recordId : null,
+        recordId: recordId ? recordId : null,
         editMode: recordId && true
       },
       width: 1000,
-      height: 600,
+      height: 530,
       title: _labels.plant
     })
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <GridToolbar onAdd={addPlant} maxAccess={access}  onSearch={search} onSearchClear={clear} labels={_labels}  inputSearch={true}/>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={addPlant}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={_labels}
+          inputSearch={true}
+        />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -155,9 +140,8 @@ return {...response,  _startAt: _startAt}
           pageSize={50}
           maxAccess={access}
         />
-      </Box>
-
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
