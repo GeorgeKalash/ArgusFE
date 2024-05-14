@@ -31,6 +31,7 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import useDocumentType from 'src/hooks/dcRefBhv'
 
 const FormContext = React.createContext(null)
 
@@ -95,7 +96,7 @@ function FormProvider({ formik, maxAccess, labels, children }) {
   return <FormContext.Provider value={{ formik, maxAccess, labels }}>{children}</FormContext.Provider>
 }
 
-export default function TransactionForm({ recordId, labels, maxAccess, plantId }) {
+export default function TransactionForm({ recordId, labels, access, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [editMode, setEditMode] = useState(!!recordId)
   const [infoAutoFilled, setInfoAutoFilled] = useState(false)
@@ -193,6 +194,16 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     search: null
   }
 
+  const {
+    query: { data },
+    maxAccess: maxAccess,
+    onChangeFunction
+  } = useDocumentType({
+    functionId: initialValues.functionId,
+    access: access,
+    hasDT: false
+  })
+
   const formik = useFormik({
     initialValues,
     enableReinitialize: false,
@@ -279,17 +290,11 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
     })()
   }, [])
 
-  async function check() {
-    const general = await documentType(getRequest, formik.values.functionId, maxAccess, undefined, false)
-    console.log(general)
-    setReferenceBh(general?.reference)
-    if (general.errorMessage) {
-      stackError({ message: general?.errorMessage })
-    }
-  }
   useEffect(() => {
-    check()
-  }, [formik.values.functionId])
+    if (data?.errorMessage) {
+      stackError({ message: data?.errorMessage })
+    }
+  }, [data])
 
   function getData(id) {
     const _recordId = recordId ? recordId : id
@@ -693,7 +698,7 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
                 <RadioGroup
                   row
                   value={formik.values.functionId}
-                  onChange={e => setOperationType(parseInt(e.target.value))}
+                  onChange={e => setOperationType(parseInt(e.target.value), onChangeFunction(e.target.value))}
                 >
                   <FormControlLabel
                     value={SystemFunction.CurrencyPurchase}
