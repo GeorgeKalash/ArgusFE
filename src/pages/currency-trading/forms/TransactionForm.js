@@ -280,16 +280,16 @@ export default function TransactionForm({ recordId, labels, maxAccess, plantId }
   }, [])
 
   async function check() {
-    const general = await documentType(getRequest, formik.values.functionId, undefined, false)
+    const general = await documentType(getRequest, formik.values.functionId, maxAccess, undefined, false)
+    console.log(general)
     setReferenceBh(general?.reference)
     if (general.errorMessage) {
       stackError({ message: general?.errorMessage })
     }
   }
-  check()
   useEffect(() => {
-    !editMode && check()
-  }, [editMode, formik.values.functionId])
+    check()
+  }, [formik.values.functionId])
 
   function getData(id) {
     const _recordId = recordId ? recordId : id
