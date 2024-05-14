@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -9,6 +8,9 @@ import CbBankAccountsForm from './forms/CbBankAccountsForm'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CbBankAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -124,7 +126,8 @@ const CbBankAccounts = () => {
       props: {
         labels: labels,
         recordId: recordId ? recordId : null,
-        maxAccess: access
+        maxAccess: access,
+        invalidate: invalidate
       },
       width: 600,
       height: 600,
@@ -133,33 +136,37 @@ const CbBankAccounts = () => {
   }
 
   return (
-    <>
-      <GridToolbar
-        onAdd={add}
-        maxAccess={access}
-        onSearch={value => {
-          filterBy('qry', value)
-        }}
-        onSearchClear={() => {
-          clearFilter('qry')
-        }}
-        labels={labels}
-        inputSearch={true}
-      />
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['recordId']}
-        onEdit={popup}
-        onDelete={del}
-        isLoading={false}
-        pageSize={50}
-        paginationParameters={paginationParameters}
-        paginationType='api'
-        maxAccess={access}
-        refetch={refetch}
-      />
-    </>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={popup}
+          onDelete={del}
+          isLoading={false}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          maxAccess={access}
+          refetch={refetch}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 

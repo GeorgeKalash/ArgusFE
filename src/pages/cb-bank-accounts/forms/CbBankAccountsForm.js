@@ -15,14 +15,13 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataSets } from 'src/resources/DataSets'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function CbBankAccountsForm({ labels, maxAccess, recordId }) {
+export default function CbBankAccountsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const editMode = !!recordId
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbBankAccounts.page
-  })
 
   const { formik } = useForm({
     initialValues: {
@@ -62,7 +61,6 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId }) {
           recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
-
       invalidate()
     }
   })
@@ -82,156 +80,160 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell resourceId={ResourceIds.CbBankAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='accountNo'
-            label={labels.accountNo}
-            value={formik.values.accountNo}
-            required
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('accountNo', '')}
-            error={formik.touched.accountNo && Boolean(formik.errors.accountNo)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Currency.qry}
-            name='currencyId'
-            label={labels.currencyName}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('currencyId', newValue?.recordId || null)
-            }}
-            error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.ACTIVE_STATUS}
-            name='activeStatus'
-            label={labels.activeStatus}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('activeStatus', newValue?.key)
-            }}
-            error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={CashBankRepository.CbCashGroup.qry}
-            name='groupId'
-            label={labels.groupName}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('groupId', newValue?.recordId)
-              } else {
-                formik.setFieldValue('groupId', '')
-              }
-            }}
-            error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceLookup
-            endpointId={FinancialRepository.Account.snapshot}
-            valueField='recordId'
-            displayField='name'
-            name='reference'
-            secondValueShow='name'
-            label={labels.accountName}
-            form={formik}
-            firstValue={formik.values.accountRef}
-            secondValue={formik.values.accountName}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('accountId', newValue?.recordId)
-                formik.setFieldValue('accountRef', newValue?.reference)
-                formik.setFieldValue('accountName', newValue?.name)
-              } else {
-                formik.setFieldValue('accountId', '')
-                formik.setFieldValue('accountRef', null)
-                formik.setFieldValue('accountName', null)
-              }
-            }}
-            errorCheck={'accountId'}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='IBAN'
-            label={labels.IBAN}
-            value={formik.values.IBAN}
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('IBAN', '')}
-            error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={CashBankRepository.CbBank.qry}
-            name='bankId'
-            label={labels.bankName}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('bankId', newValue?.recordId), formik.setFieldValue('bankName', newValue?.name)
-              } else {
-                formik.setFieldValue('bankId', ''), formik.setFieldValue('bankName', '')
-              }
-            }}
-            error={formik.touched.bankId && Boolean(formik.errors.bankId)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='accountNo'
+                label={labels.accountNo}
+                value={formik.values.accountNo}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('accountNo', '')}
+                error={formik.touched.accountNo && Boolean(formik.errors.accountNo)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currencyName}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.ACTIVE_STATUS}
+                name='activeStatus'
+                label={labels.activeStatus}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('activeStatus', newValue?.key)
+                }}
+                error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CashBankRepository.CbCashGroup.qry}
+                name='groupId'
+                label={labels.groupName}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('groupId', newValue?.recordId)
+                  } else {
+                    formik.setFieldValue('groupId', '')
+                  }
+                }}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={FinancialRepository.Account.snapshot}
+                valueField='recordId'
+                displayField='name'
+                name='reference'
+                secondValueShow='name'
+                label={labels.accountName}
+                form={formik}
+                firstValue={formik.values.accountRef}
+                secondValue={formik.values.accountName}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('accountId', newValue?.recordId)
+                    formik.setFieldValue('accountRef', newValue?.reference)
+                    formik.setFieldValue('accountName', newValue?.name)
+                  } else {
+                    formik.setFieldValue('accountId', '')
+                    formik.setFieldValue('accountRef', null)
+                    formik.setFieldValue('accountName', null)
+                  }
+                }}
+                errorCheck={'accountId'}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='IBAN'
+                label={labels.IBAN}
+                value={formik.values.IBAN}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('IBAN', '')}
+                error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CashBankRepository.CbBank.qry}
+                name='bankId'
+                label={labels.bankName}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik.setFieldValue('bankId', newValue?.recordId), formik.setFieldValue('bankName', newValue?.name)
+                  } else {
+                    formik.setFieldValue('bankId', ''), formik.setFieldValue('bankName', '')
+                  }
+                }}
+                error={formik.touched.bankId && Boolean(formik.errors.bankId)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
