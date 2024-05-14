@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid, FormControlLabel, Checkbox, Box, TextField } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
@@ -10,12 +9,10 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import InputMask from 'react-input-mask'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-
+import { FormControl, InputLabel, OutlinedInput, FormHelperText } from '@mui/material'
+import { useForm } from 'src/hooks/form'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
@@ -117,13 +114,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ChartOfAccounts}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.ChartOfAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <ResourceComboBox
@@ -233,12 +224,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     </FormShell>
   )
 }
-
-import React, { createRef } from 'react'
-
-import { FormControl, InputLabel, OutlinedInput, FormHelperText, styled } from '@mui/material'
-import { useForm } from 'src/hooks/form'
-import { useWindow } from 'src/windows'
 
 const SegmentedInput = ({ segments, name, setFieldValue, values, label, error, helperText, required, readOnly }) => {
   const handleInputChange = event => {

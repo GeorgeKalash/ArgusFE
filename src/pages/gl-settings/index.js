@@ -1,28 +1,18 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box, TextField } from '@mui/material'
-
-// ** Third Party Imports
+import { Grid } from '@mui/material'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const GLSettings = () => {
   const [errorMessage, setErrorMessage] = useState(null)
@@ -226,9 +216,9 @@ const GLSettings = () => {
   }, [formik.values.GLACSegments])
 
   return (
-    <>
-      <FormShell resourceId={ResourceIds.GLSettings} maxAccess={access} form={formik}>
-        <Grid container spacing={2}>
+    <VertLayout>
+      <Grow>
+        <Grid container sx={{ padding: 3 }} spacing={2}>
           <Grid item xs={12}>
             <CustomTextField
               name='GLACSegments'
@@ -299,23 +289,13 @@ const GLSettings = () => {
             ))}
           </Grid>
         </Grid>
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSubmit} isSaved={true} />
+      </Fixed>
 
-        <Grid
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            width: '100%',
-            padding: 3,
-            textAlign: 'center'
-          }}
-        >
-          <WindowToolbar onSave={handleSubmit} isSaved={true} />
-        </Grid>
-
-        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      </FormShell>
-    </>
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+    </VertLayout>
   )
 }
 

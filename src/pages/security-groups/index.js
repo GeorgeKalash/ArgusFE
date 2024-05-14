@@ -1,34 +1,22 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getNewSecurityGroup, populateSecurityGroup } from 'src/Models/AccessControl/SecurityGroup'
-
-// ** Windows
 import GroupInfoWindow from './Windows/GroupInfoWindow'
 import UsersWindow from './Windows/UsersWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const SecurityGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -43,7 +31,7 @@ const SecurityGroup = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
 
- //states of users tab
+  //states of users tab
   const [initialAllListData, setAllUsers] = useState([])
   const [initialSelectedListData, setSelectedUsers] = useState([])
   const [usersGridData, setUsersGridData] = useState([])
@@ -54,17 +42,17 @@ const SecurityGroup = () => {
   const [access, setAccess] = useState(null)
 
   const _labels = {
-    securityGroup: labels && labels.find(item => item.key === "1").value,
-    name: labels && labels.find(item => item.key === "2").value,
-    description: labels && labels.find(item => item.key === "3").value,
-    email: labels && labels.find(item => item.key === "4").value,
-    groupInfo: labels && labels.find(item => item.key === "5").value,
-    users: labels && labels.find(item => item.key === "6").value,
-    all: labels && labels.find(item => item.key === "7").value,
-    inGroup: labels && labels.find(item => item.key === "8").value,
-    groupUsers: labels && labels.find(item => item.key === "9").value,
+    securityGroup: labels && labels.find(item => item.key === '1').value,
+    name: labels && labels.find(item => item.key === '2').value,
+    description: labels && labels.find(item => item.key === '3').value,
+    email: labels && labels.find(item => item.key === '4').value,
+    groupInfo: labels && labels.find(item => item.key === '5').value,
+    users: labels && labels.find(item => item.key === '6').value,
+    all: labels && labels.find(item => item.key === '7').value,
+    inGroup: labels && labels.find(item => item.key === '8').value,
+    groupUsers: labels && labels.find(item => item.key === '9').value
   }
-  const itemSelectorLabels=[_labels.groupUsers,_labels.all,_labels.inGroup]
+  const itemSelectorLabels = [_labels.groupUsers, _labels.all, _labels.inGroup]
 
   const columns = [
     {
@@ -73,16 +61,13 @@ const SecurityGroup = () => {
       flex: 1
     },
     {
-        field: 'description',
-        headerName: _labels.description,
-        flex: 1
-      }
+      field: 'description',
+      headerName: _labels.description,
+      flex: 1
+    }
   ]
 
-  const tabs = [
-    { label: _labels.groupInfo },
-    { label: _labels.users, disabled: !editMode }
-  ]
+  const tabs = [{ label: _labels.groupInfo }, { label: _labels.users, disabled: !editMode }]
 
   const groupInfoValidation = useFormik({
     enableReinitialize: true,
@@ -111,8 +96,8 @@ const SecurityGroup = () => {
 
   //Group Info Tab
   const handleSubmit = () => {
-    if (activeTab === 0)  groupInfoValidation.handleSubmit()
-    if (activeTab === 1)  usersValidation.handleSubmit()
+    if (activeTab === 0) groupInfoValidation.handleSubmit()
+    if (activeTab === 1) usersValidation.handleSubmit()
   }
 
   const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
@@ -216,7 +201,7 @@ const SecurityGroup = () => {
       })
   }
 
-  const addUsers= () => {
+  const addUsers = () => {
     try {
       setAllUsers([])
       setSelectedUsers([])
@@ -240,7 +225,7 @@ const SecurityGroup = () => {
         const allList = resUSFunction.list.map(x => {
           const n = {
             id: x.recordId,
-            name: x.fullName,
+            name: x.fullName
           }
 
           return n
@@ -258,9 +243,7 @@ const SecurityGroup = () => {
 
         // Remove items from allList that have the same sgId and userId as items in selectedList
         const filteredAllList = allList.filter(item => {
-          return !selectedList.some(
-            selectedItem => selectedItem.id === item.id && selectedItem.id === item.id
-          )
+          return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
         })
         setAllUsers(filteredAllList)
       })
@@ -271,7 +254,7 @@ const SecurityGroup = () => {
       return Promise.reject(error) // You can choose to reject the promise if an error occurs
     }
   }
-  
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleListsDataChange = (allData, selectedData) => {
     // Update the state in the parent component when the child component data changes
@@ -281,13 +264,13 @@ const SecurityGroup = () => {
 
   const postUsers = () => {
     const sgId = groupInfoValidation.values.recordId
-    const selectedItems = [];
+    const selectedItems = []
 
-     //initialSelectedListData returns an array that contain id, where id is userId
+    //initialSelectedListData returns an array that contain id, where id is userId
     //so we add selectedItems array that loops on initialSelectedListData & pass sgId beside userId to each object (this new array will be sent to set2GUS)
     initialSelectedListData.forEach(item => {
-      selectedItems.push({sgId:sgId , userId: item.id})
-  });
+      selectedItems.push({ sgId: sgId, userId: item.id })
+    })
 
     const data = {
       sgId: sgId,
@@ -311,9 +294,7 @@ const SecurityGroup = () => {
       .catch(error => {
         setErrorMessage(error)
       })
-
-  };
-  
+  }
 
   const delUsers = obj => {
     const sgId = groupInfoValidation.values.recordId
@@ -340,19 +321,15 @@ const SecurityGroup = () => {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [access])
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addSecurityGroup} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={gridData}
@@ -365,23 +342,19 @@ const SecurityGroup = () => {
           maxAccess={access}
           paginationType='client'
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <GroupInfoWindow
           onClose={() => setWindowOpen(false)}
-          width={700}
-          height={300}
+          width={600}
+          height={500}
           onSave={handleSubmit}
           labels={_labels}
           maxAccess={access}
           tabs={tabs}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          
-          //group info tab
           groupInfoValidation={groupInfoValidation}
-
-          //users tab
           usersValidation={usersValidation}
           usersGridData={usersGridData}
           getUsersGridData={getUsersGridData}
@@ -389,7 +362,7 @@ const SecurityGroup = () => {
           addUsers={addUsers}
         />
       )}
-         {usersWindowOpen && (
+      {usersWindowOpen && (
         <UsersWindow
           onClose={() => setUsersWindowOpen(false)}
           onSave={handleUsersSubmit}
@@ -401,7 +374,7 @@ const SecurityGroup = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

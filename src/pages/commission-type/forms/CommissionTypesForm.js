@@ -16,135 +16,131 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
-    const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
-    
-    const [initialValues, setInitialData] = useState({
-        recordId: null,
-        reference: '',
-        name: '',
-        typeName: '',
+  const [isLoading, setIsLoading] = useState(false)
+  const [editMode, setEditMode] = useState(!!recordId)
+
+  const [initialValues, setInitialData] = useState({
+    recordId: null,
+    reference: '',
+    name: '',
+    typeName: ''
+  })
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  //const editMode = !!recordId
+
+  const invalidate = useInvalidate({
+    endpointId: CurrencyTradingSettingsRepository.CommissionType.page
+  })
+
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      reference: yup.string().required(' '),
+      name: yup.string().required(' '),
+      typeName: yup.string().required(' ')
+    }),
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: CurrencyTradingSettingsRepository.CommissionType.set,
+        record: JSON.stringify(obj)
       })
 
-    const { getRequest, postRequest } = useContext(RequestsContext)
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        setInitialData({
+          ...obj, // Spread the existing properties
+          recordId: response.recordId // Update only the recordId field
+        })
+      } else toast.success('Record Edited Successfully')
+      setEditMode(true)
 
-    //const editMode = !!recordId
+      invalidate()
+    }
+  })
 
-    const invalidate = useInvalidate({
-        endpointId: CurrencyTradingSettingsRepository.CommissionType.page
-      })
-  
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        validateOnChange: true,
-        validationSchema: yup.object({
-          reference: yup.string().required(' '),
-          name: yup.string().required(' '),
-          typeName: yup.string().required(' ')
-   
-        }),
-        onSubmit: async obj => {
-          const recordId = obj.recordId
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          setIsLoading(true)
 
-          const response = await postRequest({
-            extension: CurrencyTradingSettingsRepository.CommissionType.set,
-            record: JSON.stringify(obj)
+          const res = await getRequest({
+            extension: CurrencyTradingSettingsRepository.CommissionType.get,
+            parameters: `_recordId=${recordId}`
           })
-          
-          if (!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
-            });
-          }
-          else toast.success('Record Edited Successfully')
-          setEditMode(true)
 
-          invalidate()
+          setInitialData(res.record)
         }
-      })
-    
-      useEffect(() => {
-        ;(async function () {
-          try {
-            if (recordId) {
-              setIsLoading(true)
-    
-              const res = await getRequest({
-                extension: CurrencyTradingSettingsRepository.CommissionType.get,
-                parameters: `_recordId=${recordId}`
-              })
-              
-              setInitialData(res.record)
-            }
-          } catch (exception) {
-            setErrorMessage(error)
-          }
-          setIsLoading(false)
-        })()
-      }, [])
-      
-    return (
-        <FormShell 
-            resourceId={ResourceIds.CommissionType}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
-            editMode={editMode}
-        >
+      } catch (exception) {
+        setErrorMessage(error)
+      }
+      setIsLoading(false)
+    })()
+  }, [])
+
+  return (
+    <FormShell resourceId={ResourceIds.CommissionType} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
           <Grid container spacing={4}>
-          <Grid item xs={12}>
-                    <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik.values.reference}
-                    required
-                    maxAccess={maxAccess}
-                    maxLength='30'
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    
-                    // helperText={formik.touched.reference && formik.errors.reference}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <CustomTextField
-                    name='name'
-                    label={labels.name}
-                    value={formik.values.name}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('name', '')}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
 
-                    // helperText={formik.touched.name && formik.errors.name}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                <ResourceComboBox
-                  datasetId={DataSets.CT_COMMISSION_TYPES}
-                  name='typeName'
-                  label={labels.type}
-                  valueField='key'
-                  displayField='value'
-                  values={formik.values}
-                  required
-                  maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('typeName', newValue?.key)
-                  }}
-                  error={formik.touched.typeName && Boolean(formik.errors.typeName)}
+                // helperText={formik.touched.reference && formik.errors.reference}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
 
-                  // helperText={formik.touched.typeName && formik.errors.typeName}
-                />
-                </Grid>
-              </Grid>
-        </FormShell>
+                // helperText={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.CT_COMMISSION_TYPES}
+                name='typeName'
+                label={labels.type}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('typeName', newValue?.key)
+                }}
+                error={formik.touched.typeName && Boolean(formik.errors.typeName)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }

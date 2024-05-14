@@ -1,24 +1,17 @@
-import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CityForm from 'src/pages/cities/Forms/CityForm'
 import { useWindow } from 'src/windows'
-
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { height } from '@mui/system'
 
 const City = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -115,14 +108,14 @@ const City = () => {
         maxAccess: access
       },
       width: 500,
-      height: 400,
+      height: 360,
       title: _labels.cities
     })
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={add}
           maxAccess={access}
@@ -132,6 +125,8 @@ const City = () => {
           inputSearch={true}
           refetch={refetch}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -143,8 +138,8 @@ const City = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
