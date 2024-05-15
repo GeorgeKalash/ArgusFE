@@ -23,10 +23,12 @@ const Sites = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: InventoryRepository.Site.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -35,7 +37,7 @@ const Sites = () => {
     access,
     search,
     clear,
-
+    refetch,
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -137,6 +139,7 @@ const Sites = () => {
             rowId={['recordId']}
             onEdit={edit}
             onDelete={del}
+            refetch={refetch}
             maxAccess={access}
             pageSize={50}
             paginationParameters={paginationParameters}
