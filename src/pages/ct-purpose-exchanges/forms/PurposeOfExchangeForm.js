@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -44,16 +43,15 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       })
 
       if (!recordId) {
-        formik.setValues({
-          ...obj,
-          recordId: store.recordId
-        })
         setStore({
           recordId: response.recordId,
           name: obj.name
         })
-
         toast.success('Record Added Successfully')
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
       } else {
         setStore(prev => ({ ...prev, name: obj.name }))
         toast.success('Record Edited Successfully')
@@ -62,25 +60,23 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       invalidate()
     }
   })
-
-  function getData(recordId) {
-    getRequest({
-      extension: CurrencyTradingSettingsRepository.PurposeExchange.get,
-      parameters: `_recordId=${recordId}`
-    })
-      .then(res => {
-        formik.setValues(res.record)
-        setStore({
-          recordId: res.record.recordId,
-          name: res.record.name
-        })
-      })
-      .catch(error => {})
-  }
-
   useEffect(() => {
-    recordId && getData(recordId)
-  }, [recordId])
+    ;(async function () {
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: CurrencyTradingSettingsRepository.PurposeExchange.get,
+            parameters: `_recordId=${recordId}`
+          })
+          setStore({
+            recordId: res.record.recordId,
+            name: res.record.name
+          })
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
+    })()
+  }, [])
 
   return (
     <FormShell resourceId={ResourceIds.PurposeOfExchange} form={formik} maxAccess={maxAccess} editMode={editMode}>

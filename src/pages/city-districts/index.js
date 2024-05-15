@@ -5,21 +5,15 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import CityDistrictWindow from './Windows/CityDistrictWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CityDistrictForm from './Forms/CityDistrictForm'
+import { useWindow } from 'src/windows'
 
 const CityDistricts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -31,6 +25,8 @@ const CityDistricts = () => {
 
     return { ...response, _startAt: _startAt }
   }
+
+  const { stack } = useWindow()
 
   const {
     query: { data },
@@ -81,12 +77,25 @@ const CityDistricts = () => {
   }
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CityDistrictForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 500,
+      height: 330,
+      title: _labels.cityDistrict
+    })
   }
 
   return (
@@ -109,19 +118,6 @@ const CityDistricts = () => {
           paginationType='api'
         />
       </Grow>
-      {windowOpen && (
-        <CityDistrictWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          _labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
