@@ -16,7 +16,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function ExRatesForm({ labels, recordId, maxAccess, record, window }) {
-  const [editMode, setEditMode] = useState(!!recordId)
+  const [editMode, setEditMode] = useState(!!recordId || !!record)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -36,8 +36,6 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
       dayId: record?.dayId ? new Date(formatDate(record.dayId)) : new Date()
     },
     maxAccess,
-
-    // enab leReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       exId: yup.string().required(' '),
@@ -85,8 +83,8 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
   })
 
   useEffect(() => {
-    if (editMode) {
-      ;(async function () {
+    if (editMode && record) {
+      ;(async function fetchRecordDetails() {
         try {
           const res = await getRequest({
             extension: MultiCurrencyRepository.ExchangeRates.get,
@@ -94,12 +92,15 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
           })
 
           if (res && res.record) {
-            const { exId, dayId, seqNo } = res.record
-            const seqNoStr = String(seqNo)
+            const newRecordId = `${res.record.exId}${res.record.dayId}${String(res.record.seqNo)}`
+            const formattedDate = formatDate(res.record.dayId)
+            const newDayId = new Date(formattedDate)
 
-            const newRecordId = `${exId}${dayId}${seqNoStr}`
-            setEditMode(true)
-            formik.setValues({ ...res.record, recordId: newRecordId, dayId: new Date(formatDate(record.dayId)) })
+            formik.setValues({
+              ...res.record,
+              recordId: newRecordId,
+              dayId: newDayId
+            })
           }
         } catch (error) {}
       })()

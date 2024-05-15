@@ -26,8 +26,6 @@ const ExchangeRates = () => {
     })
   }
 
-  const [tableData, setTableData] = useState([])
-
   const {
     query: { data },
     labels: _labels,
@@ -39,19 +37,6 @@ const ExchangeRates = () => {
     endpointId: MultiCurrencyRepository.ExchangeRates.qry,
     datasetId: ResourceIds.ExchangeRates
   })
-
-  useEffect(() => {
-    if (data && data.list.length > 0) {
-      const newList = data.list.map(obj => {
-        const newObj = structuredClone(obj)
-
-        newObj.recordId = `${newObj.exId}${newObj.dayId}${newObj.seqNo}`
-
-        return newObj
-      })
-      setTableData({ ...data, list: newList })
-    }
-  }, [data])
 
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.ExchangeRates.qry
@@ -122,8 +107,8 @@ const ExchangeRates = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={tableData}
-          rowId={['recordId']}
+          gridData={data}
+          rowId={['exId', 'dayId', 'seqNo']}
           onEdit={edit}
           onDelete={del}
           maxAccess={access}
