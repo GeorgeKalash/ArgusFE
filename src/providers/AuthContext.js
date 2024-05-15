@@ -69,8 +69,6 @@ const AuthProvider = ({ children }) => {
 
       const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
 
-
-
       try {
         const response = await axios({
           method: 'GET',
