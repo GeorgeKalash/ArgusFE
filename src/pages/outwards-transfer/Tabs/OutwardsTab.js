@@ -35,10 +35,12 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { TerraPayInitial } from 'src/Models/RemittanceActivities/TerraPayInitial'
 
 export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId, plantId, userId, window }) {
   const [productsStore, setProductsStore] = useState([])
   const [cashData, setCashData] = useState({})
+  const [terraPay, setTerraPay] = useState(TerraPayInitial)
   const [editMode, setEditMode] = useState(!!recordId)
   const [isClosed, setIsClosed] = useState(false)
   const [isPosted, setIsPosted] = useState(false)
@@ -193,12 +195,20 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         return
       }
 
+      console.log('valuessss')
+      console.log(values)
+      terraPayFill(values)
+
       const amountGridData = {
         header: copy,
         cash: updatedRows,
         bankType: productFormik.values.interfaceId,
-        ICRequest: cashData
+        ICRequest: cashData,
+        TPRequest: terraPay
       }
+
+      console.log('body')
+      console.log(amountGridData)
 
       const amountRes = await postRequest({
         extension: RemittanceOutwardsRepository.OutwardsTransfer.set2,
@@ -370,7 +380,10 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
             })
             const newUpdatedList = { list: updatedList }
             setProductsStore(newUpdatedList)
-            productFormik.setValues(newUpdatedList?.list[0])
+            console.log('here')
+            console.log(newUpdatedList)
+            console.log(newUpdatedList.list.filter(item => item.productId === formFields.productId)[0])
+            productFormik.setValues(newUpdatedList.list.filter(item => item.productId === formFields.productId)[0])
           }
         }
       } else {
@@ -511,6 +524,9 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })
   }
   function openBankWindow() {
+    console.log('interfaceId')
+    console.log(productFormik.values.interfaceId)
+
     if (productFormik.values.interfaceId == 1) {
       stack({
         Component: InstantCash,
@@ -534,7 +550,18 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     } else if (productFormik.values.interfaceId == 2) {
       stack({
         Component: TerraPay,
-        props: {},
+        props: {
+          onTerraPaySubmit: onTerraPaySubmit,
+          terraPay: terraPay,
+          clientData: {
+            clientPhone: formik.values.cellPhone
+          },
+          outwardsData: {
+            countryId: formik.values.countryId,
+            amount: formik.values.amount,
+            currencyId: formik.values.currencyId
+          }
+        },
         width: 700,
         height: 500,
         title: 'Terra Pay'
@@ -578,11 +605,56 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     obj.beneficiary.dateOfBirth = obj.beneficiary.dateOfBirth ? formatDateToApi(obj.beneficiary.dateOfBirth) : null
     setCashData(obj)
   }
+  function onTerraPaySubmit(obj) {
+    obj.quotation.requestDate = obj.quotation.requestDate ? formatDateToApi(obj.quotation.requestDate) : null
+    obj.transaction.requestDate = obj.transaction.requestDate ? formatDateToApi(obj.transaction.requestDate) : null
+    obj.transaction.senderKyc.dateOfBirth = obj.transaction.senderKyc.dateOfBirth
+      ? formatDateToApi(obj.transaction.senderKyc.dateOfBirth)
+      : null
+    obj.transaction.senderKyc.idDocument.issueDate = obj.transaction.senderKyc.idDocument.issueDate
+      ? formatDateToApi(obj.transaction.senderKyc.idDocument.issueDate)
+      : null
+    obj.transaction.senderKyc.idDocument.expiryDate = obj.transaction.senderKyc.idDocument.expiryDate
+      ? formatDateToApi(obj.transaction.senderKyc.idDocument.expiryDate)
+      : null
+    obj.transaction.recipientKyc.dateOfBirth = obj.transaction.recipientKyc.dateOfBirth
+      ? formatDateToApi(obj.transaction.recipientKyc.dateOfBirth)
+      : null
+    obj.transaction.recipientKyc.idDocument.issueDate = obj.transaction.recipientKyc.idDocument.issueDate
+      ? formatDateToApi(obj.transaction.recipientKyc.idDocument.issueDate)
+      : null
+    obj.transaction.recipientKyc.idDocument.expiryDate = obj.transaction.recipientKyc.idDocument.expiryDate
+      ? formatDateToApi(obj.transaction.recipientKyc.idDocument.expiryDate)
+      : null
+
+    console.log('obj', obj)
+    setTerraPay(obj)
+  }
   function calculateValueDate(valueDays) {
     const newDate = new Date(formik.values.date)
     newDate.setDate(newDate.getDate() + valueDays)
     formik.setFieldValue('valueDate', newDate)
   }
+
+  function terraPayFill(formFields) {
+    console.log('inFunct')
+    console.log(formFields)
+    console.log(terraPay)
+    terraPay.quotation.debitorMSIDSN = formFields.cellPhone
+
+    //terraPay.quotation.creditorReceivingCountry = formFields.countryRef //ref or isoo?
+    terraPay.quotation.requestAmount = formFields.amount
+
+    //terraPay.quotation.requestCurrency = formFields.currencyRef //ref or isoo?
+    terraPay.transaction.amount = formFields.amount
+    terraPay.transaction.debitorMSIDSN = formFields.cellPhone
+
+    //terraPay.transaction.internationalTransferInformation.receivingCountry = formFields.countryRef
+
+    console.log('last')
+    console.log(terraPay)
+  }
+
   useEffect(() => {
     ;(async function () {
       try {
@@ -597,6 +669,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
           res.record.headerView.defaultValueDate = formatDateFromApi(res.record.headerView.defaultValueDate)
           res.record.headerView.valueDate = formatDateFromApi(res.record.headerView.valueDate)
           res.record.checked = true
+
           getClientInfo(res.record.headerView.clientId)
           fillFormData(res.record)
           productDataFill(res.record.headerView)
@@ -606,6 +679,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  //console.log('terrapayExternal', terraPay)
 
   return (
     <>

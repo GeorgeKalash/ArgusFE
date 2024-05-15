@@ -2,7 +2,9 @@ const service = 'RTBI.asmx/'
 
 export const RemittanceBankInterface = {
   Combos: {
-    qry: service + 'qryCBX'
+    qryCBX: service + 'qryCBX',
+    qryTerrapayCBX: service + 'qryTerrapayCBX',
+    qryTerrapyBanks: service + 'qryTerrapyBanks'
   },
   ReceivingCountries: {
     qry: service + 'qryRVC'

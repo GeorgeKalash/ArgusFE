@@ -161,7 +161,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
         <Grid container rowGap={2} xs={6} sx={{ px: 2, pt: 2 }}>
           <Grid hideonempty xs={12}>
             <ResourceComboBox
-              endpointId={RemittanceBankInterface.Combos.qry}
+              endpointId={RemittanceBankInterface.Combos.qryCBX}
               parameters={`_combo=1`}
               name='deliveryModeId'
               label={_labels.deliveryMode}
@@ -292,7 +292,7 @@ export default function InstantCash({ onInstantCashSubmit, cashData = {}, window
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={RemittanceBankInterface.Combos.qry}
+                endpointId={RemittanceBankInterface.Combos.qryCBX}
                 parameters={`_combo=4`}
                 name='remitter.employerStatus'
                 label={_labels.employerStatus}
