@@ -1,10 +1,7 @@
-// ** MUI Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-
-// ** MUI Imports
 import { Grid, Box } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -15,8 +12,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'

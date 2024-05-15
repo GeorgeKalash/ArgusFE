@@ -21,6 +21,9 @@ import { useWindow } from 'src/windows'
 import OutwardsTab from './Tabs/OutwardsTab'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const OutwardsTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -32,6 +35,7 @@ const OutwardsTransfer = () => {
   const {
     query: { data },
     filterBy,
+    refetch,
     clearFilter,
     labels: _labels,
     access
@@ -45,11 +49,14 @@ const OutwardsTransfer = () => {
   })
   async function fetchWithSearch({ options = {}, filters }) {
     const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
+    if (!filters.qry) {
+      return { list: [] }
+    } else {
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardsTransfer.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    }
   }
 
   const invalidate = useInvalidate({
@@ -128,6 +135,11 @@ const OutwardsTransfer = () => {
 
   const columns = [
     {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
       field: 'countryRef',
       headerName: _labels.CountryRef,
       flex: 1
@@ -141,11 +153,6 @@ const OutwardsTransfer = () => {
     {
       field: 'currencyRef',
       headerName: _labels.Currency,
-      flex: 1
-    },
-    {
-      field: 'agentName',
-      headerName: _labels.Agents,
       flex: 1
     },
     {
@@ -200,8 +207,8 @@ const OutwardsTransfer = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addOutwards}
           maxAccess={access}
@@ -214,6 +221,8 @@ const OutwardsTransfer = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -224,11 +233,11 @@ const OutwardsTransfer = () => {
           pageSize={50}
           paginationType='client'
           maxAccess={access}
+          refetch={refetch}
         />
-      </Box>
-
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

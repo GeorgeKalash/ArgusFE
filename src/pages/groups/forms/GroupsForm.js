@@ -97,7 +97,6 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
       <FormShell 
           resourceId={ResourceIds.Groups}
           form={formik} 
-          height={300} 
           maxAccess={maxAccess} 
           editMode={editMode}
       >

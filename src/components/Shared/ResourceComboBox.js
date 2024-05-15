@@ -1,7 +1,6 @@
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { CommonContext } from 'src/providers/CommonContext'
 
 export default function ResourceComboBox({
@@ -34,9 +33,11 @@ export default function ResourceComboBox({
           getRequest({
             extension: endpointId,
             parameters
-          }).then(res => {
-            setStore(res.list)
           })
+            .then(res => {
+              setStore(res.list)
+            })
+            .catch(error => {})
   }, [parameters])
 
   const filteredStore = data ? data : store.filter(filter)

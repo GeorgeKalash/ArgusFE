@@ -1,10 +1,11 @@
 // ** MUI Imports
-import { Box, Autocomplete, TextField, Paper } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search' // Import the icon you want to use
+import { Box, Autocomplete, TextField, IconButton, InputAdornment } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
-import { InputAdornment, IconButton } from '@mui/material'
 import { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom'
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomLookup = ({
   type = 'text', //any valid HTML5 input type
@@ -62,7 +63,6 @@ const CustomLookup = ({
       sx={{
         position: 'relative',
         width: '100%',
-        height: '40px',
         mb: error && helperText ? 6 : 0,
         display: 'block'
       }}
@@ -101,11 +101,7 @@ const CustomLookup = ({
             }
             isOptionEqualToValue={(option, value) => (value ? option[valueField] === value[valueField] : '')}
             onChange={(event, newValue) => onChange(name, newValue)}
-            PaperComponent={({ children }) => (
-              <Paper sx={{ position: 'absolute', width: `${displayFieldWidth * 100}%`, zIndex: 999, mt: 1 }}>
-                {children}
-              </Paper>
-            )}
+            PopperComponent={PopperComponent}
             renderOption={(props, option) => {
               if (columnsInDropDown && columnsInDropDown.length > 0) {
                 return (
@@ -114,7 +110,7 @@ const CustomLookup = ({
                       <li className={props.className}>
                         {columnsInDropDown.map((header, i) => {
                           return (
-                            secondDisplayField && (
+                            columnsInDropDown.length > 1 && (
                               <Box key={i} sx={{ flex: 1, fontWeight: 'bold' }}>
                                 {header.value.toUpperCase()}
                               </Box>
@@ -139,8 +135,12 @@ const CustomLookup = ({
                   <Box>
                     {props.id.endsWith('-0') && (
                       <li className={props.className}>
-                        {secondDisplayField && <Box sx={{ flex: 1 }}>{valueField.toUpperCase()}</Box>}
-                        {secondDisplayField && <Box sx={{ flex: 1 }}>{displayField.toUpperCase()}</Box>}
+                        {secondDisplayField && (
+                          <Box sx={{ flex: 1, fontWeight: 'bold' }}>{valueField.toUpperCase()}</Box>
+                        )}
+                        {secondDisplayField && (
+                          <Box sx={{ flex: 1, fontWeight: 'bold' }}>{displayField.toUpperCase()}</Box>
+                        )}
                       </li>
                     )}
                     <li {...props}>
@@ -174,7 +174,7 @@ const CustomLookup = ({
                 }}
                 autoFocus={autoFocus}
                 error={error}
-                helperText={helperText} // style={{ textAlign: 'right', width: firstFieldWidth }}
+                helperText={helperText}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -235,7 +235,7 @@ const CustomLookup = ({
               error={error}
               helperText={helperText}
               sx={{
-                width: `calc(100%)` // Calculate the width dynamically
+                width: '100%' // Calculate the width dynamically
               }}
             />
           </Box>
