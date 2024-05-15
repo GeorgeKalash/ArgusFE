@@ -12,6 +12,26 @@ import { useForm } from 'src/hooks/form'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { getStorageData } from 'src/storage/storage'
 
+export function PostImage(postRequest, obj, initialValues) {
+  if (obj?.attachment?.file) {
+    return postRequest({
+      extension: SystemRepository.Attachment.set,
+      record: JSON.stringify(obj.attachment),
+      file: obj?.attachment?.file
+    }).then(res => {
+      return res
+    })
+  } else if (!obj?.attachment && initialValues?.attachment?.url) {
+    return postRequest({
+      extension: SystemRepository.Attachment.del,
+      record: JSON.stringify(initialValues.attachment),
+      file: obj?.attachment?.url
+    }).then(res => {
+      return res
+    })
+  }
+}
+
 const CompanyInfo = () => {
   const [initialValues, setInitialData] = useState({
     plantId: '',
@@ -80,26 +100,31 @@ const CompanyInfo = () => {
     })
       .then(res => {})
       .catch(error => {})
-
-    if (obj?.attachment?.file) {
-      postRequest({
-        extension: SystemRepository.Attachment.set,
-        record: JSON.stringify(obj.attachment),
-        file: obj?.attachment?.file
-      }).then(res => {
-        if (res) toast.success('Record Edited Successfully')
-      })
-    } else if (!obj?.attachment && initialValues?.attachment?.url) {
-      postRequest({
-        extension: SystemRepository.Attachment.del,
-        record: JSON.stringify(initialValues.attachment),
-        file: obj?.attachment?.url
-      }).then(res => {
-        if (res) toast.success('Record Edited Successfully')
-      })
-    } else {
+    const res = PostImage(postRequest, obj, initialValues)
+    console.log(res)
+    if (res) {
       toast.success('Record Edited Successfully')
     }
+
+    // if (obj?.attachment?.file) {
+    //   postRequest({
+    //     extension: SystemRepository.Attachment.set,
+    //     record: JSON.stringify(obj.attachment),
+    //     file: obj?.attachment?.file
+    //   }).then(res => {
+    //     if (res) toast.success('Record Edited Successfully')
+    //   })
+    // } else if (!obj?.attachment && initialValues?.attachment?.url) {
+    //   postRequest({
+    //     extension: SystemRepository.Attachment.del,
+    //     record: JSON.stringify(initialValues.attachment),
+    //     file: obj?.attachment?.url
+    //   }).then(res => {
+    //     if (res) toast.success('Record Edited Successfully')
+    //   })
+    // } else {
+    //   toast.success('Record Edited Successfully')
+    // }
   }
 
   return (
