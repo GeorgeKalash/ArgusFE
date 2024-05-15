@@ -95,7 +95,6 @@ const FiDimensions = () => {
         })
 
         formik.setValues(myObject)
-        console.log('obj', myObject)
       })
       .catch(error => {})
   }
