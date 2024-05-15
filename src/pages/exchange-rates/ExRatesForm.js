@@ -20,7 +20,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.ExchangeRates.qry
+    endpointId: MultiCurrencyRepository.ExchangeRates.page
   })
 
   const formatDate = dateStr => {
@@ -147,6 +147,7 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
               <CustomNumberField
                 name='rate'
                 label={labels.rate}
+                decimalScale={5}
                 value={formik.values?.rate}
                 required
                 onChange={formik.handleChange}

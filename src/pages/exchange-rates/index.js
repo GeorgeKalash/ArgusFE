@@ -20,30 +20,35 @@ const ExchangeRates = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
-      extension: MultiCurrencyRepository.ExchangeRates.qry,
+    const response = await getRequest({
+      extension: MultiCurrencyRepository.ExchangeRates.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&exId=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
-    access,
-
-    paginationParameters
+    paginationParameters,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: MultiCurrencyRepository.ExchangeRates.qry,
+    endpointId: MultiCurrencyRepository.ExchangeRates.page,
     datasetId: ResourceIds.ExchangeRates
   })
 
   const invalidate = useInvalidate({
-    endpointId: MultiCurrencyRepository.ExchangeRates.qry
+    endpointId: MultiCurrencyRepository.ExchangeRates.page
   })
 
   const formatDate = dateStr => {
-    return `${dateStr.substring(0, 4)}/${dateStr.substring(4, 6)}/${dateStr.substring(6, 8)}`
+    const year = dateStr.substring(2, 4)
+    const month = dateStr.substring(4, 6)
+    const day = dateStr.substring(6, 8)
+
+    return `${day}/${month}/${year}`
   }
 
   const columns = [
@@ -63,7 +68,14 @@ const ExchangeRates = () => {
     {
       field: 'rate',
       headerName: _labels.rate,
-      flex: 1
+      flex: 1,
+      valueFormatter: ({ value }) => {
+        return new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: 0, // This will prevent trailing zeros
+          maximumFractionDigits: 5, // Allows up to five decimal places if needed
+          useGrouping: true
+        }).format(value)
+      }
     }
   ]
 
