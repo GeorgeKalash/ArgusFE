@@ -56,7 +56,7 @@ const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
         formik.setValues(res.record)
       }
     })()
-  }, [storeRecordId, getRequest, formik])
+  }, [storeRecordId])
 
   return (
     <FormShell
