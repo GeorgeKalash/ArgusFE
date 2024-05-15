@@ -1,55 +1,53 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import { MasterSource } from 'src/resources/MasterSource'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
+export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbCashGroup.page
+    endpointId: InventoryRepository.SiteGroups.qry
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: '',
+      reference: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
+
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
 
       const response = await postRequest({
-        extension: CashBankRepository.CbCashGroup.set,
+        extension: InventoryRepository.SiteGroups.set,
         record: JSON.stringify(obj)
       })
 
       if (!recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
@@ -62,40 +60,19 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
-            extension: CashBankRepository.CbCashGroup.get,
+            extension: InventoryRepository.SiteGroups.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (error) {}
     })()
   }, [])
 
-  const actions = [
-    {
-      key: 'Integration Account',
-      condition: true,
-      onClick: 'onClickGIA',
-      disabled: !editMode
-    }
-  ]
-
   return (
-    <FormShell
-      actions={actions}
-      resourceId={ResourceIds.CbCashGroups}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      masterSource={MasterSource.CashAccountGroup}
-    >
+    <FormShell resourceId={ResourceIds.Cities} form={formik} height={400} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -106,10 +83,9 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
+                error={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
             <Grid item xs={12}>
@@ -118,11 +94,10 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
-                error={formik.touched.name && Boolean(formik.errors.name)}
+                error={formik.touched.name && formik.errors.name}
               />
             </Grid>
           </Grid>

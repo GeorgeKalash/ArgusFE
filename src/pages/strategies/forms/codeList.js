@@ -92,7 +92,6 @@ const CodeList = ({ store, labels, maxAccess }) => {
         store
       },
       width: 500,
-      height: 400,
       title: labels.code
     })
   }
@@ -112,7 +111,6 @@ const CodeList = ({ store, labels, maxAccess }) => {
           pagination={false}
           onDelete={delCode}
           maxAccess={maxAccess}
-          height={200}
         />
       </Grow>
     </VertLayout>

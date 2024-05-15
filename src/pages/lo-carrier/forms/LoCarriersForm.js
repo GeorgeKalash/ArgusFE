@@ -18,8 +18,11 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
 import CustomLookup from 'src/components/Inputs/CustomLookup'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+
 
 export default function LoCarriersForms({
   labels,
@@ -40,7 +43,12 @@ export default function LoCarriersForms({
     siteId: null,
     bpId: null,
     bpName: null,
-    bpRef: null
+
+    bpRef: null,
+    cashAccountId: null,
+    cashAccountRef: '',
+    cashAccountName: ''
+
   })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -201,6 +209,40 @@ export default function LoCarriersForms({
                 // helperText={formik.touched.bpId && formik.errors.bpId}
               />
             </Grid>
+ <Grid item xs={12}>
+          <ResourceLookup
+            endpointId={CashBankRepository.CashAccount.snapshot}
+            parameters={{
+              _type: 2
+            }}
+            valueField='recordId'
+            displayField='reference'
+            name='cashAccountRef'
+            label={labels.cashAccount}
+            secondDisplayField={true}
+            form={formik}
+            firstValue={formik.values.cashAccountRef}
+            secondValue={formik.values.cashAccountName}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            onChange={(event, newValue) => {
+              if (newValue) {
+                formik.setFieldValue('cashAccountId', newValue?.recordId)
+                formik.setFieldValue('cashAccountRef', newValue?.reference)
+                formik.setFieldValue('cashAccountName', newValue?.name)
+              } else {
+                formik.setFieldValue('cashAccountId', null)
+                formik.setFieldValue('cashAccountRef', null)
+                formik.setFieldValue('cashAccountName', null)
+              }
+            }}
+            errorCheck={'cashAccountId'}
+            maxAccess={maxAccess}
+            error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
+          />
+           </Grid>
           </Grid>
         </Grow>
       </VertLayout>

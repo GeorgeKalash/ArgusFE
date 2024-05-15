@@ -23,6 +23,13 @@ export const InventoryRepository = {
     set: service + 'setSI',
     del: service + 'delSI'
   },
+  SiteGroups: {
+    qry: service + 'qrySGP',
+    get: service + 'getSGP',
+    set: service + 'setSGP',
+    del: service + 'delSGP',
+    snapshot: service + 'snapshotSGP'
+  },
   MaterialsAdjustment: {
     qry: service + 'qryADJ',
     get: service + 'getADJ',
