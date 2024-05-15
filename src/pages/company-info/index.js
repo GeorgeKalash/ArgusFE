@@ -101,7 +101,6 @@ const CompanyInfo = () => {
       .then(res => {})
       .catch(error => {})
     const res = PostImage(postRequest, obj, initialValues)
-    console.log(res)
     if (res) {
       toast.success('Record Edited Successfully')
     }
