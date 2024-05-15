@@ -1,24 +1,10 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box, TextField } from '@mui/material'
-
-// ** Third Party Imports
-import { useFormik } from 'formik'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
@@ -238,17 +224,6 @@ const FiDimensions = () => {
             </Grid>
           </Grid>
         </Grow>
-
-        {/* <Grid
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            width: '100%',
-            padding: 3,
-            textAlign: 'center'
-          }}
-        > */}
         <Fixed>
           <WindowToolbar onSave={handleSubmit} isSaved={true} />
         </Fixed>
