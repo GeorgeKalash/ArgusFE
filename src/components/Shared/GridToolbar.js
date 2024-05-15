@@ -12,6 +12,7 @@ import { useWindow } from 'src/windows'
 // ** Resources
 import { TrxType } from 'src/resources/AccessLevels'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomComboBox from '../Inputs/CustomComboBox'
 
 const GridToolbar = ({
   initialLoad,
@@ -168,16 +169,14 @@ const GridToolbar = ({
       )}
       {previewReport ? (
         <Box sx={{ display: 'flex', alignItems: 'center', paddingRight: '2rem' }}>
-          <Autocomplete
-            size='small'
-            options={reportStore}
+          <CustomComboBox
+            label={'Select a report template'}
+            valueField='caption'
+            displayField='layoutName'
+            store={reportStore}
             value={selectedReport}
-            getOptionLabel={option => option.layoutName || option.caption || ''}
             onChange={(e, newValue) => setSelectedReport(newValue)}
-            renderInput={params => (
-              <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-            )}
-            sx={{ width: 250, zIndex: 0 }}
+            sx={{ width: 250 }}
             disableClearable
           />
           <Button
