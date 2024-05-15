@@ -7,25 +7,153 @@ import CustomLookup from 'src/components/Inputs/CustomLookup'
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 
 // ** React Imports
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { CommonContext } from 'src/providers/CommonContext'
 
-const UsersTab = ({
-  labels,
-  usersValidation,
-  maxAccess,
-  notificationGrpStore,
-  languageStore,
-  userTypeStore,
-  activeStatusStore,
-  employeeStore,
-  setEmployeeStore,
-  lookupEmployee,
-  editMode,
-  checkFieldDirect,
-  emailPresent,
-  passwordState,
-  setPasswordState
-}) => {
+const UsersTab = ({ labels, maxAccess, editMode }) => {
+  const [activeStatusStore, setActiveStatusStore] = useState([])
+  const [userTypeStore, setUserTypeStore] = useState([])
+  const [languageStore, setLanguageStore] = useState([])
+  const [notificationGrpStore, setNotificationGrpStore] = useState([])
+  const [employeeStore, setEmployeeStore] = useState([])
+  const [emailPresent, setEmailPresent] = useState(false)
+  const [passwordState, setPasswordState] = useState(false)
+  const { getAllKvsByDataset } = useContext(CommonContext)
+
+  const usersValidation = useFormik({
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      fullName: yup.string().required('This field is required'),
+      username: yup.string().required('This field is required'),
+      email: yup.string().required('This field is required'),
+      activeStatus: yup.string().required('This field is required'),
+      userType: yup.string().required('This field is required'),
+      languageId: yup.string().required('This field is required'),
+
+      //if passwordState is false, then the password and confirmPassword fields are added to the schema using object spreading.
+      // else an empty object is added, ensuring those fields are not included in the schema.
+      //spread syntax (...)
+      ...(passwordState
+        ? {}
+        : {
+            password: yup.string().required('This field is required'),
+            confirmPassword: yup.string().required('This field is required')
+          })
+    }),
+    onSubmit: values => {
+      postUsers(values)
+    }
+  })
+
+  const postUsers = obj => {
+    const recordId = obj.recordId
+    postRequest({
+      extension: SystemRepository.Users.set,
+      record: JSON.stringify(obj)
+    })
+      .then(res => {
+        getGridData({})
+        fillSiteStore()
+        fillPlantStore()
+        fillSalesPersonStore()
+        usersValidation.setFieldValue('recordId', res.recordId)
+        setWindowOpen(true)
+        setEditMode(true)
+        if (!recordId) toast.success('Record Added Successfully')
+        else toast.success('Record Edited Successfully')
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const fillActiveStatusStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.ACTIVE_STATUS,
+      callback: setActiveStatusStore
+    })
+  }
+
+  const fillUserTypeStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.USER_TYPE,
+      callback: setUserTypeStore
+    })
+  }
+
+  const fillLanguageStore = () => {
+    getAllKvsByDataset({
+      _dataset: DataSets.LANGUAGE,
+      callback: setLanguageStore
+    })
+  }
+
+  const fillNotificationGrpStore = () => {
+    var parameters = `filter=`
+    getRequest({
+      extension: AccessControlRepository.NotificationGroup.qry,
+      parameters: parameters
+    })
+      .then(res => {
+        setNotificationGrpStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error.response.data)
+      })
+  }
+
+  const lookupEmployee = searchQry => {
+    var parameters = `_size=50&_startAt=0&_filter=${searchQry}&_branchId=0`
+    getRequest({
+      extension: EmployeeRepository.Employee.snapshot,
+      parameters: parameters
+    })
+      .then(res => {
+        setEmployeeStore(res.list)
+      })
+      .catch(error => {
+        setErrorMessage(error)
+      })
+  }
+
+  const checkFieldDirect = email => {
+    const defaultParams = `_email=${email}`
+    var parameters = defaultParams
+    getIdentityRequest({
+      extension: AccountRepository.UserIdentity.check,
+      parameters: parameters
+    })
+      .then(res => {
+        setEmailPresent(false)
+        setPasswordState(false)
+        usersValidation.validateForm()
+      })
+      .catch(error => {
+        setErrorMessage(error)
+        if (error.response.status == 300) {
+          setEmailPresent(true)
+          setPasswordState(true)
+          usersValidation.validateForm()
+        } else {
+          setEmailPresent(false)
+          setPasswordState(false)
+          usersValidation.validateForm()
+        }
+      })
+  }
+
+  const editUsers = async obj => {
+    const _recordId = obj.recordId
+    const defaultParams = `_recordId=${_recordId}`
+    var parameters = defaultParams
+
+    const res = await getRequest({
+      extension: SystemRepository.Users.get,
+      parameters: parameters
+    })
+  }
+
   return (
     <Grid container>
       {/* First Column */}
