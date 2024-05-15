@@ -119,5 +119,6 @@ export const ResourceIds = {
   InterfaceMap: 36120,
   PriceLevels: 51101,
   CommissionSchedule: 51118,
-  ProductionRequestLog: 42321
+  ProductionRequestLog: 42321,
+  CashCount: 3701
 }

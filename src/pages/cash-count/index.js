@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 
 import toast from 'react-hot-toast'
 
@@ -17,10 +17,12 @@ import { useWindow } from 'src/windows'
 
 // ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-import DRGroupWindow from './Windows/DRGroupWindow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
+import CashAccountForm from '../fi-cash-accounts/forms/CashAccountForm'
+import CashCountForm from './forms/CashCountForm'
 
 const CashCount = () => {
   const { stack } = useWindow()
@@ -30,7 +32,7 @@ const CashCount = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: DocumentReleaseRepository.DRGroup.qry,
+      extension: CTTRXrepository.CashCount.qry,
 
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
@@ -44,12 +46,8 @@ const CashCount = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.DRGroup.qry,
-    datasetId: ResourceIds.DRGroups
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: DocumentReleaseRepository.DRGroup.qry
+    endpointId: CTTRXrepository.CashCount.qry,
+    datasetId: ResourceIds.CashCount
   })
 
   const columns = [
@@ -71,14 +69,14 @@ const CashCount = () => {
 
   function openForm(recordId) {
     stack({
-      Component: DRGroupWindow,
+      Component: CashCountForm,
       props: {
         labels: _labels,
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 600,
-      height: 400,
+      width: 1100,
+      height: 700,
       title: _labels.group
     })
   }
