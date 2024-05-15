@@ -144,6 +144,7 @@ const App = props => {
                                   {getLayout(
                                     <ErrorProvider key={typeof window !== 'undefined' ? window.location.pathname : ''}>
                                       <RequestsProvider
+                                        showLoading
                                         key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                       >
                                         <CommonProvider

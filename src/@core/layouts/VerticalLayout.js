@@ -28,21 +28,16 @@ const MainContentWrapper = styled(Box)({
   flexGrow: 1,
   minWidth: 0,
   display: 'flex',
-  minHeight: '100vh',
+  minHeight: 'calc(100 * var(--vh))',
   flexDirection: 'column'
 })
 
 const ContentWrapper = styled('main')(({ theme }) => ({
   flexGrow: 1,
   width: '100%',
-
-  // NOTE: WRAPPER PADDING
-  // padding: theme.spacing(6),
-  // transition: 'padding .25s ease-in-out',
-  // [theme.breakpoints.down('sm')]: {
-  //   paddingLeft: theme.spacing(4),
-  //   paddingRight: theme.spacing(4)
-  // }
+  height: 'calc(100 * var(--vh))',
+  display: 'flex',
+  flexDirection: 'column',
 }))
 
 const VerticalLayout = props => {
@@ -88,7 +83,7 @@ const VerticalLayout = props => {
         )}
         <MainContentWrapper
           className='layout-content-wrapper'
-          sx={{ ...(contentHeightFixed && { maxHeight: '100vh' }) }}
+          sx={{ ...(contentHeightFixed)}}
         >
           {/* AppBar Component */}
           <AppBar
@@ -103,7 +98,6 @@ const VerticalLayout = props => {
             className='layout-page-content'
             sx={{
               ...(contentHeightFixed && {
-                overflow: 'hidden',
                 '& > :first-of-type': { height: '100%' }
               }),
               ...(contentWidth === 'boxed' && {

@@ -1,10 +1,6 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-
-// ** Custom Imports
 import { useFormik } from 'formik'
 import { useContext, useEffect, useState } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
@@ -13,6 +9,8 @@ import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepos
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const FunctionForm = ({
   labels,
@@ -86,44 +84,48 @@ const FunctionForm = ({
       maxAccess={maxAccess}
       isInfo={false}
     >
-        <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.SYSTEM_FUNCTION}
-                name='functionId'
-                label={labels.function}
-                required
-                valueField='key'
-                displayField='value'
-                readOnly={editMode}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('functionId', '')}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('functionId', newValue?.key || '')
-                }}
-                error={formik.touched.functionId && Boolean(formik.errors.functionId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={DocumentReleaseRepository.Strategy.qry}
-                parameters={`_startAt=0&_pageSize=50`}
-                name='strategyId'
-                label={labels.strategy}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
-                required      
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('strategyId', '')}
-                onChange={(event, newValue) => {
-                    formik && formik.setFieldValue('strategyId', newValue?.recordId || '')
-                }}
-                error={formik.touched.strategyId && Boolean(formik.errors.strategyId)}
-              />
-            </Grid>
-        </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  datasetId={DataSets.SYSTEM_FUNCTION}
+                  name='functionId'
+                  label={labels.function}
+                  required
+                  valueField='key'
+                  displayField='value'
+                  readOnly={editMode}
+                  values={formik.values}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('functionId', '')}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('functionId', newValue?.key || '')
+                  }}
+                  error={formik.touched.functionId && Boolean(formik.errors.functionId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={DocumentReleaseRepository.Strategy.qry}
+                  parameters={`_startAt=0&_pageSize=50`}
+                  name='strategyId'
+                  label={labels.strategy}
+                  valueField='recordId'
+                  displayField='name'
+                  values={formik.values}
+                  required      
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('strategyId', '')}
+                  onChange={(event, newValue) => {
+                      formik && formik.setFieldValue('strategyId', newValue?.recordId || '')
+                  }}
+                  error={formik.touched.strategyId && Boolean(formik.errors.strategyId)}
+                />
+              </Grid>
+            </Grid> 
+          </Grow>
+        </VertLayout>
     </FormShell>
   )
 }

@@ -67,7 +67,8 @@ const AuthProvider = ({ children }) => {
     const fetchData = async () => {
       const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-      const accountName = matchHostname ? matchHostname[1] : 'cil2'
+      const accountName = matchHostname ? matchHostname[1] : 'byc-deploy'
+
 
 
       try {

@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -8,13 +7,8 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { DataSets } from 'src/resources/DataSets'
 
 
 export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
@@ -89,7 +83,6 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
         <FormShell 
             resourceId={ResourceIds.GeographicRegion}
             form={formik} 
-            height={300} 
             maxAccess={maxAccess} 
             editMode={editMode}
         >
@@ -105,8 +98,6 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
-                    
-                    // helperText={formik.touched.reference && formik.errors.reference}
                     />
                 </Grid>
                 <Grid item xs={12}>
@@ -119,8 +110,6 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('name', '')}
                     error={formik.touched.name && Boolean(formik.errors.name)}
-
-                    // helperText={formik.touched.name && formik.errors.name}
                     />
                 </Grid>
               </Grid>

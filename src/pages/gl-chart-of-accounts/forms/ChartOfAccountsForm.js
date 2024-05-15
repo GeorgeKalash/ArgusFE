@@ -1,6 +1,4 @@
-// ** MUI Imports
 import { Grid, FormControlLabel, Checkbox, Box, TextField } from '@mui/material'
-import { InputAdornment } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -11,15 +9,9 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-
 import styles from 'styles/phoneVerification.module.css'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 
 export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
@@ -142,13 +134,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ChartOfAccounts}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.ChartOfAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={4}>
         <Grid item xs={12}>
           <ResourceComboBox
@@ -302,8 +288,6 @@ const SegmentedInput = ({ segments, name, setFieldValue, values }) => {
             onChange={e => handleChange(index, e)}
             onKeyDown={e => handleKeyDown(index, e)}
             maxLength={segment.value}
-
-            // style={{ margin: '8px', width: `${segment.value + 3}ch`,borderRadius:"5px",border:'1px solid grey',padding:'9px' }}
           />
           {index !== segments.length - 1 && '-'}
         </React.Fragment>

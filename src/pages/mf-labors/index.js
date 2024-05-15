@@ -1,43 +1,22 @@
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-
-// ** Windows
 import LaborsWindow from './window/LaborsWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Labor = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-
-
-  
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -115,9 +94,11 @@ const Labor = () => {
   
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -129,7 +110,7 @@ const Labor = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <LaborsWindow
           onClose={() => {
@@ -140,13 +121,10 @@ const Labor = () => {
           maxAccess={access}
           recordId={selectedRecordId}
           setSelectedRecordId={setSelectedRecordId}
-      
-       
-        
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 
