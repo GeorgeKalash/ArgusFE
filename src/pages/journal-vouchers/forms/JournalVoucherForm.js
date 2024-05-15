@@ -19,7 +19,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
-import useDocumentType from 'src/hooks/dcRefBhv'
+import useDocumentType from 'src/hooks/dcocumentReferenceBehaviors'
 import { useError } from 'src/error'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
@@ -29,7 +29,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
   const { stack: stackError } = useError()
 
   const {
-    query: { data },
+    query: { documentType },
     maxAccess: maxAccess,
     onChangeNra
   } = useDocumentType({
@@ -43,7 +43,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
     date: new Date(),
     notes: '',
     currencyId: '',
-    dtId: data?.dtId,
+    dtId: documentType?.dtId,
     status: 1,
     rateCalcMethod: 1,
     exRate: 1
@@ -123,13 +123,10 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
       disabled: !editMode
     }
   ]
-  useEffect(() => {
-    data?.errorMessage && stackError({ message: data?.errorMessage })
-  }, [data?.errorMessage])
 
   useEffect(() => {
-    data?.dtId && formik.setFieldValue('dtId', data?.dtId)
-  }, [data?.dtId])
+    documentType?.dtId && formik.setFieldValue('dtId', documentType?.dtId)
+  }, [documentType?.dtId])
 
   return (
     <FormShell

@@ -1,6 +1,7 @@
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DISABLED, MANDATORY } from 'src/services/api/maxAccess'
+import { getStorageData } from 'src/storage/storage'
 
 const getData = async (getRequest, extension, parameters) => {
   try {
@@ -15,15 +16,52 @@ const getData = async (getRequest, extension, parameters) => {
   }
 }
 
+const mergeWithMaxAccess = (maxAccess, reference, dcTypeRequired) => {
+  let controls
+  if (maxAccess && maxAccess?.record && typeof maxAccess?.record === 'object') {
+    controls = maxAccess.record.controls
+
+    let obj = controls.find(obj => obj.controlId === 'reference')
+    if (obj) {
+      obj.accessLevel = reference?.mandatory ? MANDATORY : DISABLED
+    } else {
+      if (reference?.mandatory) {
+        controls.push({
+          sgId: 18,
+          resourceId: ResourceIds.JournalVoucher,
+          controlId: 'reference',
+          accessLevel: reference?.mandatory ? MANDATORY : DISABLED
+        })
+      } else if (reference?.readOnly) {
+        controls.push({
+          sgId: 18,
+          resourceId: ResourceIds.JournalVoucher,
+          controlId: 'reference',
+          accessLevel: reference?.mandatory && DISABLED
+        })
+      } else {
+        maxAccess.record.controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
+      }
+    }
+    if (dcTypeRequired) {
+      controls.push({
+        sgId: 18,
+        resourceId: ResourceIds.JournalVoucher,
+        controlId: 'dtId',
+        accessLevel: MANDATORY
+      })
+    }
+  }
+
+  return maxAccess
+}
+
 const fetchData = async (getRequest, id, repository) => {
   let extension, parameters
 
   switch (repository) {
     case 'dtId': //default user
-      const userData =
-        window && window.sessionStorage.getItem('userData')
-          ? JSON.parse(window.sessionStorage.getItem('userData'))
-          : null
+      const userData = getStorageData('userData')
       const userId = userData?.userId
       parameters = `_userId=${userId}&_functionId=${id}`
       extension = SystemRepository.UserFunction.get
@@ -51,7 +89,7 @@ const fetchData = async (getRequest, id, repository) => {
   return await getData(getRequest, extension, parameters)
 }
 
-const documentType = async (getRequest, functionId, maxAccess, selectNraId = undefined, hasDT = true) => {
+const documentType = async (getRequest, functionId, maxAccess = '', selectNraId = undefined, hasDT = true) => {
   const docType = selectNraId === undefined && (await fetchData(getRequest, functionId, 'dtId')) // ufu
   const dtId = docType?.dtId
   let nraId
@@ -60,7 +98,7 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
   let isExternal
   let dcTypeRequired
   let activeStatus = true
-  let controls
+
   if (docType && selectNraId === undefined) {
     if (dtId) {
       const dcTypNumberRange = await fetchData(getRequest, dtId, 'DcTypNumberRange') //DT
@@ -99,40 +137,7 @@ const documentType = async (getRequest, functionId, maxAccess, selectNraId = und
       readOnly: isExternal?.external ? false : true,
       mandatory: isExternal?.external ? true : false
     }
-    if (maxAccess && maxAccess?.record && typeof maxAccess?.record === 'object') {
-      controls = maxAccess.record.controls
-
-      let obj = controls.find(obj => obj.controlId === 'reference')
-      if (obj) {
-        obj.accessLevel = reference?.mandatory ? MANDATORY : DISABLED
-      } else {
-        if (reference?.mandatory) {
-          controls.push({
-            sgId: 18,
-            resourceId: ResourceIds.JournalVoucher,
-            controlId: 'reference',
-            accessLevel: reference?.mandatory ? MANDATORY : DISABLED
-          })
-        } else if (reference?.readOnly) {
-          controls.push({
-            sgId: 18,
-            resourceId: ResourceIds.JournalVoucher,
-            controlId: 'reference',
-            accessLevel: reference?.mandatory && DISABLED
-          })
-        } else {
-          maxAccess.record.controls = maxAccess.record.controls.filter(obj => obj.controlId != 'reference')
-        }
-      }
-      if (dcTypeRequired) {
-        controls.push({
-          sgId: 18,
-          resourceId: ResourceIds.JournalVoucher,
-          controlId: 'dtId',
-          accessLevel: MANDATORY
-        })
-      }
-    }
+    if (maxAccess) maxAccess = await mergeWithMaxAccess(maxAccess, reference, dcTypeRequired)
   }
 
   return {

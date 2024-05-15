@@ -7,8 +7,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Confirmation from 'src/components/Shared/Confirmation'
 import FieldSet from 'src/components/Shared/FieldSet'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import documentType from 'src/lib/docRefBehaivors'
-
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useError } from 'src/error'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
@@ -32,7 +30,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import useDocumentType from 'src/hooks/dcRefBhv'
+import useDocumentType from 'src/hooks/dcocumentReferenceBehaviors'
+import { useForm } from 'src/hooks/form'
 
 const FormContext = React.createContext(null)
 
@@ -110,7 +109,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [isClosed, setIsClosed] = useState(false)
-  const [ReferenceBh, setReferenceBh] = useState(false)
 
   async function checkTypes(value) {
     if (!value) {
@@ -195,23 +193,20 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     search: null
   }
 
-  const {
-    query: { data },
-    maxAccess: maxAccess,
-    onChangeFunction
-  } = useDocumentType({
+  const { maxAccess: maxAccess, onChangeFunction } = useDocumentType({
     functionId: initialValues.functionId,
     access: access,
     hasDT: false
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues,
     enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({
-      reference: ReferenceBh?.mandatory && yup.string().required(' '),
+      reference: yup.string().required(' '),
       date: yup.string().required(' '),
       id_type: yup.number().required(' '),
       id_number: yup.number().required(' '),
@@ -291,11 +286,11 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     })()
   }, [])
 
-  useEffect(() => {
-    if (data?.errorMessage) {
-      stackError({ message: data?.errorMessage })
-    }
-  }, [data])
+  // useEffect(() => {
+  //   if (data?.errorMessage) {
+  //     stackError({ message: data?.errorMessage })
+  //   }
+  // }, [data])
 
   function getData(id) {
     const _recordId = recordId ? recordId : id
@@ -663,12 +658,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
           <FieldSet title='Transaction'>
             <Grid container spacing={4}>
               <Grid item xs={4}>
-                <FormField
-                  name='reference'
-                  Component={CustomTextField}
-                  readOnly={!editMode ? ReferenceBh?.readOnly : true}
-                  required={ReferenceBh?.mandatory}
-                />
+                <FormField name='reference' Component={CustomTextField} readOnly={editMode} />
               </Grid>
               <FormGrid hideonempty item xs={4}>
                 <CustomDatePicker

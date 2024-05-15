@@ -16,6 +16,7 @@ import { useError } from 'src/error'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import useDocumentTypeAdd from 'src/hooks/dcocumentReferenceBehaviorsAdd'
 
 const JournalVoucher = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -41,7 +42,6 @@ const JournalVoucher = () => {
     labels: _labels,
     search,
     clear,
-
     paginationParameters,
     access
   } = useResourceQuery({
@@ -91,23 +91,23 @@ const JournalVoucher = () => {
     }
   ]
 
+  const stackObj = {
+    Component: JournalVoucherForm,
+    props: {
+      labels: _labels,
+      access: access,
+      recordId: selectedRecordId,
+      setSelectedRecordId: setSelectedRecordId
+    },
+    width: 500,
+    height: 500,
+    title: _labels.generalJournal
+  }
+
+  const { documentTypeAdd } = useDocumentTypeAdd({ functionId: SystemFunction.JournalVoucher, stackObj })
+
   const add = async () => {
-    const general = await documentType(getRequest, SystemFunction.JournalVoucher, access)
-    !general?.errorMessage
-      ? stack({
-          Component: JournalVoucherForm,
-          props: {
-            labels: _labels,
-            access: access,
-            recordId: selectedRecordId,
-            setSelectedRecordId: setSelectedRecordId,
-            general
-          },
-          width: 500,
-          height: 500,
-          title: _labels.generalJournal
-        })
-      : stackError({ message: general?.errorMessage })
+    await documentTypeAdd()
   }
 
   const edit = obj => {
