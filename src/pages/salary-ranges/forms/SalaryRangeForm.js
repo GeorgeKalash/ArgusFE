@@ -1,7 +1,5 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -12,16 +10,10 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
 export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    min: '',
-    max: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -29,9 +21,10 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
     endpointId: RemittanceSettingsRepository.SalaryRange.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: { recordId: null, min: '', max: '' },
     enableReinitialize: true,
+    maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       min: yup
@@ -53,16 +46,14 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
 
         if (!recordId) {
           toast.success('Record Added Successfully')
-          setInitialData({
-            ...obj, // Spread the existing properties
-            recordId: response.recordId // Update only the recordId field
+          formik.setValues({
+            ...obj,
+            recordId: response.recordId
           })
         } else toast.success('Record Edited Successfully')
         setEditMode(true)
         invalidate()
-      } catch (exception) {
-        setErrorMessage(error)
-      }
+      } catch (exception) {}
     }
   })
 
@@ -70,21 +61,15 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: RemittanceSettingsRepository.SalaryRange.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -103,8 +88,6 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('min', '')}
                 error={formik.touched.min && Boolean(formik.errors.min)}
-
-                // helperText={formik.touched.min && formik.errors.min}
               />
             </Grid>
             <Grid item xs={12}>
@@ -118,8 +101,6 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('max', '')}
                 error={formik.touched.max && Boolean(formik.errors.max)}
-
-                // helperText={formik.touched.max && formik.errors.max}
               />
             </Grid>
           </Grid>
