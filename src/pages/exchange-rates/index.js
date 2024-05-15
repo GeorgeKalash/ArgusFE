@@ -32,6 +32,7 @@ const ExchangeRates = () => {
     query: { data },
     labels: _labels,
     paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -124,6 +125,7 @@ const ExchangeRates = () => {
           onEdit={edit}
           onDelete={del}
           maxAccess={access}
+          refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
