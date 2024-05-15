@@ -14,6 +14,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
@@ -93,8 +94,24 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.CashAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.CashAccounts}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+      masterSource={MasterSource.CashAccount}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
