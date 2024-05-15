@@ -20,6 +20,7 @@ const GridToolbar = ({
   inputSearch,
   search,
   onSearch,
+
   onSearchClear,
   ...props
 }) => {
@@ -38,7 +39,14 @@ const GridToolbar = ({
   }
 
   return (
-    <Box display={'flex'} sx={{ justifyContent: 'space-between' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%'
+      }}
+    >
       {children && children}
       <Box sx={{ display: 'flex', pb: 2, pr: 2 }}>
         {initialLoad && (
@@ -62,7 +70,7 @@ const GridToolbar = ({
           </Box>
         )}
         {inputSearch && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', pt: 2, pl: 2, zIndex: 0 }}>
             <CustomTextField
               name='search'
               value={searchValue}

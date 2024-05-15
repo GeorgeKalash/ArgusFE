@@ -13,11 +13,17 @@ import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const UndeliveredCreditOrder = () => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [errorMessage, setErrorMessage] = useState(null)
+
+  const userData = window.sessionStorage.getItem('userData')
+    ? JSON.parse(window.sessionStorage.getItem('userData'))
+    : null
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -68,99 +74,98 @@ const UndeliveredCreditOrder = () => {
     stack({
       Component: CreditOrderForm,
       props: {
-        setErrorMessage: setErrorMessage,
         labels: labels,
         maxAccess: access,
         recordId: recordId ? recordId : null,
-        maxAccess: access
+        maxAccess: access,
+        userData: userData
       },
       width: 950,
-      height: 600,
-      title: labels[1]
+      title: labels.creditOrder
     })
   }
 
   return (
-    <>
-      <Box>
-        <div style={{ display: 'flex' }}>
-          <GridToolbar
-            maxAccess={access}
-            onSearch={value => {
-              filterBy('qry', value)
-            }}
-            onSearchClear={() => {
-              clearFilter('qry')
-            }}
-            labels={labels}
-            inputSearch={true}
-          >
-            <Box sx={{ display: 'flex', width: '350px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
-              <ResourceComboBox
-                endpointId={RemittanceSettingsRepository.Correspondent.qry}
-                labels={labels[5]}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                name='corId'
-                values={{
-                  corId: filters.corId
-                }}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                onChange={(event, newValue) => {
-                  onChange(newValue?.recordId)
-                }}
-              />
-            </Box>
-          </GridToolbar>
-        </div>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+        >
+          <Box sx={{ display: 'flex', width: '350px', pt: 2, pl: 2 }}>
+            <ResourceComboBox
+              endpointId={RemittanceSettingsRepository.Correspondent.qry}
+              label={labels.correspondent}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              name='corId'
+              values={{
+                corId: filters.corId
+              }}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              onChange={(event, newValue) => {
+                onChange(newValue?.recordId)
+              }}
+            />
+          </Box>
+        </GridToolbar>
+      </Fixed>
+      <Grow>
         <Table
           columns={[
             {
               field: 'reference',
-              headerName: labels[4],
+              headerName: labels.reference,
               flex: 1
             },
             {
               field: 'date',
-              headerName: labels[2],
+              headerName: labels.date,
               flex: 1,
               valueGetter: ({ row }) => formatDateDefault(row?.date)
             },
             {
               field: 'plantRef',
-              headerName: labels[3]
+              headerName: labels.plant
             },
             {
               field: 'corName',
-              headerName: labels[5],
+              headerName: labels.correspondent,
               flex: 1
             },
             {
               field: 'currencyRef',
-              headerName: labels[8],
+              headerName: labels.currency,
               flex: 1
             },
             {
               field: 'amount',
-              headerName: labels[10],
+              headerName: labels.amount,
               flex: 1
             },
             {
               field: 'rsName',
-              headerName: labels[19],
+              headerName: labels.releaseStatus,
               flex: 1
             },
             {
               field: 'statusName',
-              headerName: labels[21],
+              headerName: labels.status,
               flex: 1
             },
             {
               field: 'wipName',
-              headerName: labels[20],
+              headerName: labels.wip,
               flex: 1
             }
           ]}
@@ -180,10 +185,8 @@ const UndeliveredCreditOrder = () => {
               : 'api'
           }
         />
-      </Box>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

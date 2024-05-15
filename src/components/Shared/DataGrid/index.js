@@ -23,6 +23,8 @@ export function DataGrid({
   onChange,
   allowDelete = true,
   allowAddNewLine = true,
+  onSelectionChange,
+  rowSelectionModel,
   disabled = false
 }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
@@ -32,7 +34,7 @@ export function DataGrid({
 
     let updatedRow = { ...newRow }
 
-    if (column?.onChange)
+    if (column.onChange)
       await column.onChange({
         row: {
           newRow,
@@ -206,40 +208,24 @@ export function DataGrid({
 
   const { stack } = useError()
 
-  async function update({ id, field, value }) {
-    const row = apiRef.current.getRow(id)
+  const stagedChanges = useRef(null)
 
-    apiRef.current.setEditCellValue({
-      id,
-      field,
-      value
-    })
-
-    const updatedRow = await processDependenciesForColumn(
-      {
-        ...row,
-        [field]: value
-      },
-      row,
-      {
-        id,
-        field
-      }
-    )
-
-    apiRef.current.updateRows([updatedRow])
-
-    handleRowChange(updatedRow)
-  }
-
-  async function updateRow({ id, changes }) {
-    const row = apiRef.current.getRow(id)
-
+  function stageRowUpdate({ changes }) {
     apiRef.current.setEditCellValue({
       id: currentEditCell.current.id,
       field: currentEditCell.current.field,
       value: changes[currentEditCell.current.field]
     })
+
+    stagedChanges.current = changes
+  }
+
+  async function commitRowUpdate() {
+    const changes = stagedChanges.current
+
+    if (!changes) return apiRef.current.getRow(currentEditCell.current.id)
+
+    const row = apiRef.current.getRow(currentEditCell.current.id)
 
     const updatedRow = await processDependenciesForColumn(
       {
@@ -256,35 +242,47 @@ export function DataGrid({
     apiRef.current.updateRows([updatedRow])
 
     handleRowChange(updatedRow)
+
+    stagedChanges.current = null
+
+    return updatedRow
+  }
+
+  const handleRowClick = params => {
+    const selectedRow = value.find(row => row.id === params.row.id)
+    if (onSelectionChange) {
+      onSelectionChange(selectedRow)
+    }
   }
 
   return (
-    <Box sx={{ height: height ? height : 'auto', width: '100%', overflow: 'auto' }}>
+    <Box sx={{height: height ? height : 'auto', flex:'1 !important' }}>
       {/* Container with scroll */}
       <MUIDataGrid
         hideFooter
-        autoHeight={height ? false : true}
+        autoHeight={false}
         columnResizable={false}
         disableColumnFilter
         disableColumnMenu
         disableColumnSelector
         disableSelectionOnClick
+        disableMultipleSelection
         getRowId={row => row[idName]}
+        rowSelectionModel={[rowSelectionModel]}
         onStateChange={state => {
           if (Object.entries(state.editRows)[0]) {
             const [id, obj] = Object.entries(state.editRows)[0]
             currentEditCell.current = { id, field: Object.keys(obj)[0] }
           }
         }}
-        processRowUpdate={async (newRow, oldRow) => {
+        processRowUpdate={async () => {
           setIsUpdating(true)
-          const updated = await processDependenciesForColumn(newRow, oldRow, currentEditCell.current)
 
-          const change = handleRowChange(updated, oldRow)
+          const row = await commitRowUpdate()
 
           setIsUpdating(false)
 
-          return change
+          return row
         }}
         onProcessRowUpdateError={e => {
           console.error(
@@ -308,10 +306,13 @@ export function DataGrid({
         apiRef={apiRef}
         editMode='cell'
         sx={{
+          display:'flex !important', 
+          flex: '1 !important',
           '& .MuiDataGrid-cell': {
             padding: '0 !important'
           }
         }}
+        onRowClick={handleRowClick} // Handle row click event
         columns={[
           ...columns.map(column => ({
             field: column.name,
@@ -352,6 +353,24 @@ export function DataGrid({
                 ...column.props,
                 name: maxAccessName,
                 maxAccess
+              }
+
+              async function update({ field, value }) {
+                stageRowUpdate({
+                  changes: {
+                    [field]: value
+                  }
+                })
+
+                if (column.updateOn !== 'blur') await commitRowUpdate()
+              }
+
+              async function updateRow({ changes }) {
+                stageRowUpdate({
+                  changes
+                })
+
+                if (column.updateOn !== 'blur') await commitRowUpdate()
               }
 
               return (

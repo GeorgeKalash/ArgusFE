@@ -19,6 +19,7 @@ const CustomNumberField = ({
   helperText,
   hasBorder = true,
   maxLength = 1000,
+  thousandSeparator = ',',
   min = '',
   max = '',
   ...props
@@ -67,7 +68,7 @@ const CustomNumberField = ({
     <NumericFormat
       label={label}
       allowLeadingZeros
-      thousandSeparator=','
+      thousandSeparator={thousandSeparator}
       decimalSeparator='.'
       decimalScale={decimalScale}
       value={value}
@@ -81,7 +82,7 @@ const CustomNumberField = ({
       InputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
-        endAdornment: !readOnly && value && (
+        endAdornment: ((!readOnly && value) || value === 0) && (
           <InputAdornment position='end'>
             <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
               <ClearIcon />

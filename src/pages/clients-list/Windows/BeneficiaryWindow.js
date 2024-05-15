@@ -80,11 +80,18 @@ const BeneficiaryWindow = ({ clientId }) => {
     const beneficiaryId = obj.beneficiaryId
     const clientId = obj.clientId
     const dispersalType = obj.dispersalType
+    const nationalityId = obj.nationalityId
 
     if (dispersalType === 1) {
       stack({
         Component: BenificiaryCash,
-        props: { clientId: clientId, dispersalType: dispersalType, beneficiaryId: beneficiaryId },
+        props: {
+          clientId: clientId,
+          dispersalType: dispersalType,
+          beneficiaryId: beneficiaryId,
+          corId: 0,
+          countryId: nationalityId
+        },
         width: 700,
         height: 500,
         title: 'Cash'
@@ -92,7 +99,13 @@ const BeneficiaryWindow = ({ clientId }) => {
     } else if (dispersalType === 2) {
       stack({
         Component: BenificiaryBank,
-        props: { clientId: clientId, dispersalType: dispersalType, beneficiaryId: beneficiaryId },
+        props: {
+          clientId: clientId,
+          dispersalType: dispersalType,
+          beneficiaryId: beneficiaryId,
+          corId: 0,
+          countryId: nationalityId
+        },
         width: 900,
         height: 600,
         title: 'Bank'

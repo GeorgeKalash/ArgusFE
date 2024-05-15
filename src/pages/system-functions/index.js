@@ -24,6 +24,7 @@ const SystemFunction = () => {
         ...rest
       }))
     })
+    })
   }
 
   const { labels: labels, maxAccess } = useResourceQuery({
@@ -70,6 +71,7 @@ const SystemFunction = () => {
       name: 'functionId',
       props: {
         readOnly: true
+        readOnly: true
       }
     },
     {
@@ -78,6 +80,7 @@ const SystemFunction = () => {
       name: 'sfName',
       props: {
         readOnly: true
+      }
       }
     },
     {

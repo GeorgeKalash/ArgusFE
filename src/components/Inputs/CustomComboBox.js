@@ -2,7 +2,9 @@
 import { Autocomplete, TextField } from '@mui/material'
 import { ControlAccessLevel, TrxType } from 'src/resources/AccessLevels'
 import { Box } from '@mui/material'
-import Paper from '@mui/material/Paper'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import PopperComponent from '../Shared/Popper/PopperComponent'
 
 const CustomComboBox = ({
   type = 'text', //any valid HTML5 input type
@@ -34,13 +36,9 @@ const CustomComboBox = ({
 
   const fieldAccess =
     props.maxAccess && props.maxAccess?.record?.controls?.find(item => item.controlId === name)?.accessLevel
-
   const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : readOnly
-
   const _disabled = disabled || fieldAccess === ControlAccessLevel.Disabled
-
   const _required = required || fieldAccess === ControlAccessLevel.Mandatory
-
   const _hidden = fieldAccess === ControlAccessLevel.Hidden
 
   return (
@@ -50,14 +48,13 @@ const CustomComboBox = ({
       size={size}
       options={store}
       key={value}
-      PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
+      PopperComponent={PopperComponent}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
-            .map(header => option[header])
-            .filter(item => item)
-            .join(' ')
-
+            .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
+            ?.filter(item => item)
+            ?.join(' ')
           if (text) return text
         }
         if (typeof option === 'object') {
@@ -75,18 +72,13 @@ const CustomComboBox = ({
           return options.filter(option =>
             columnsInDropDown
               .map(header => header.key)
-              .some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+              .some(field => option[field]?.toString()?.toLowerCase()?.toString()?.includes(inputValue?.toLowerCase()))
           )
         } else {
-          var displayFields = ''
-          if (Array.isArray(displayField)) {
-            displayFields = displayField
-          } else {
-            displayFields = [displayField]
-          }
+          var displayFields = Array.isArray(displayField) ? displayField : [displayField]
 
           return options.filter(option =>
-            displayFields.some(field => option[field]?.toLowerCase().includes(inputValue?.toLowerCase()))
+            displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
           )
         }
       }}

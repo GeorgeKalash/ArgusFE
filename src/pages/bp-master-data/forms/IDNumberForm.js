@@ -1,9 +1,6 @@
-import { Box } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect } from 'react'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -107,18 +104,14 @@ return (
     form={formik}
     maxAccess={maxAccess}
     editMode={editMode}>
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-        <DataGrid
-           onChange={value => formik.setFieldValue('rows', value)}
-           value={formik.values.rows}
-           error={formik.errors.rows}
-           columns={columns}
-           scrollHeight={350}
-           width={750}
-           allowDelete={false}
-           allowAddNewLine={false}
-        />
-      </Box>
+      <DataGrid
+          onChange={value => formik.setFieldValue('rows', value)}
+          value={formik.values.rows}
+          error={formik.errors.rows}
+          columns={columns}
+          allowDelete={false}
+          allowAddNewLine={false}
+      />
     </FormShell>
   )
 }

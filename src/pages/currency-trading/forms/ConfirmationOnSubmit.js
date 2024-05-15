@@ -4,7 +4,7 @@ import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 
-export default function ConfirmationOnSubmit({ formik, labels , window }) {
+export default function ConfirmationOnSubmit({ formik, labels, window }) {
   const fetchFormik = useFormik({
     enableReinitialize: false,
     validateOnChange: true,
@@ -23,9 +23,9 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
         errors.cellPhoneRepeat = 'Cell Phone must match'
       }
 
-      if (!formik.values.clientId && !values.idNoRepeat) {
+      if (!values.idNoRepeat) {
         errors.idNoRepeat = 'Id number Confirm is required'
-      } else if (!formik.values.clientId && values.idNo.toString() != values.idNoRepeat.toString()) {
+      } else if (values.idNo.toString() != values.idNoRepeat.toString()) {
         errors.idNoRepeat = 'Id Number  must match'
       }
 
@@ -37,13 +37,12 @@ export default function ConfirmationOnSubmit({ formik, labels , window }) {
 
       formik.handleSubmit()
       window.close()
-
     }
   })
 
   return (
     <>
-      <FormShell form={fetchFormik} height={320} infoVisible={false}>
+      <FormShell form={fetchFormik} infoVisible={false}>
         <Grid container spacing={4}>
           <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
             <CustomTextField

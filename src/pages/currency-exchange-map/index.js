@@ -1,14 +1,6 @@
-// ** React Imports
 import { useEffect, useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Grid, Box, FormControlLabel, Checkbox, DialogActions } from '@mui/material'
-
-// ** Custom Imports
+import { Grid } from '@mui/material'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import * as yup from 'yup'
@@ -19,28 +11,23 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 const NumberRange = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
-
-  //state
-  const [currencyStore, setCurrencyStore] = useState([])
-  const [countryStore, setCountryStore] = useState([])
-  const [errorMessage, setErrorMessage] = useState()
   const [access, setAccess] = useState(0)
   const [labels, setLabels] = useState(null)
-  const { height } = useWindowDimensions()
 
   useEffect(() => {
     if (!access) getAccess(ResourceIds.currencyExchangeMap, setAccess)
     else {
       if (access.record.maxAccess > 0) {
         getLabels(ResourceIds.currencyExchangeMap, setLabels)
-        fillCurrencyStore()
-        fillCountryStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -55,10 +42,10 @@ const NumberRange = () => {
         .array()
         .of(
           yup.object().shape({
-            exchangeId: yup.string().required('Country recordId is required')
+            exchangeId: yup.string().required(' ')
           })
         )
-        .required('Operations array is required')
+        .required(' ')
     }),
     initialValues: {
       currencyId: '',
@@ -81,49 +68,6 @@ const NumberRange = () => {
       postExchangeMaps(values)
     }
   })
-
-  const fillCurrencyStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCurrencyStore(res.list)
-      })
-      .catch(error => {})
-  }
-
-  const fillCountryStore = () => {
-    var parameters = `_filter=`
-    getRequest({
-      extension: SystemRepository.Country.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setCountryStore(res.list)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
-  const fillExchangeTableStore = id => {
-    setExchangeTableStore({})
-
-    var parameters = `_currencyId=` + id
-    getRequest({
-      extension: MultiCurrencyRepository.ExchangeTable.qry2,
-      parameters: parameters
-    })
-      .then(res => {
-        console.log(res)
-        setExchangeTableStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
 
   const _labels = {
     country: labels && labels.find(item => item.key === '1') && labels.find(item => item.key === '1').value,
@@ -150,9 +94,7 @@ const NumberRange = () => {
       .then(res => {
         if (res.statusId) toast.success('Record Successfully')
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
 
   const getCurrenciesExchangeMaps = (currencyId, countryId) => {
@@ -197,13 +139,9 @@ const NumberRange = () => {
 
               formik.setFieldValue('rows', rows)
             })
-            .catch(error => {
-              setErrorMessage(error)
-            })
+            .catch(error => {})
         })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+        .catch(error => {})
   }
 
   //columns
@@ -254,95 +192,73 @@ const NumberRange = () => {
   }
 
   return (
-    <Box
-      sx={{
-        height: `${height - 80}px`
-      }}
-    >
-      <CustomTabPanel index={0} value={0}>
-        <Box>
-          <Grid container>
-            <Grid container xs={12} spacing={2}>
-              <Grid item xs={6}>
-                <CustomComboBox
-                  name='countryId'
-                  label={_labels.country}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Currency Ref' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'flName', value: 'Foreign Language Name' }
-                  ]}
-                  store={countryStore}
-                  value={countryStore?.filter(item => item.recordId === (formik.values && formik.values.countryId))[0]} // Ensure the value matches an option or set it to null
-                  required
-                  onChange={(event, newValue) => {
-                    const selectedCurrencyId = newValue?.recordId || ''
-                    formik.setFieldValue('countryId', selectedCurrencyId)
-                    getCurrenciesExchangeMaps(formik.values.currencyId, selectedCurrencyId)
-                  }}
-                  error={formik.errors && Boolean(formik.errors.countryId)}
-                  helperText={formik.touched.countryId && formik.errors.countryId}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <CustomComboBox
-                  name='currencyId'
-                  label={_labels.currency}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Currency Ref' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  store={currencyStore}
-                  value={currencyStore.filter(item => item.recordId === (formik.values && formik.values.currencyId))[0]} // Ensure the value matches an option or set it to null
-                  required
-                  onChange={(event, newValue) => {
-                    const selectedCurrencyId = newValue?.recordId || ''
-                    formik.setFieldValue('currencyId', selectedCurrencyId)
-                    getCurrenciesExchangeMaps(selectedCurrencyId, formik.values.countryId)
-
-                    // Fetch and update state data based on the selected country
-                  }}
-                  error={formik.errors && Boolean(formik.errors.currencyId)}
-                  helperText={formik.touched.currencyId && formik.errors.currencyId}
-                />
-              </Grid>
-            </Grid>
-            {formik.values.currencyId && formik.values.countryId && (
-              <Grid xs={12} sx={{ pt: 2 }}>
-                <Box>
-                  <DataGrid
-                    onChange={value => formik.setFieldValue('rows', value)}
-                    value={formik.values.rows}
-                    error={formik.errors.rows}
-                    columns={columns}
-                    height={`calc(100vh - 180px)`}
-                    allowDelete={false}
-                    allowAddNewLine={false}
-                  />
-                </Box>
-              </Grid>
-            )}
+    <VertLayout>
+      <Fixed>
+        <Grid container xs={6} spacing={3} sx={{ padding: '10px' }}>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
+              name='countryId'
+              label={_labels.country}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Currency Ref' },
+                { key: 'name', value: 'Name' },
+                { key: 'flName', value: 'Foreign Language Name' }
+              ]}
+              values={formik.values}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              required
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                const selectedCurrencyId = newValue?.recordId || ''
+                formik.setFieldValue('countryId', selectedCurrencyId)
+                getCurrenciesExchangeMaps(formik.values.currencyId, selectedCurrencyId)
+              }}
+              error={formik.errors && Boolean(formik.errors.countryId)}
+            />
           </Grid>
-        </Box>
-        <Grid
-          sx={{
-            // height:`${height/10}px`,
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            width: '100%',
-            padding: 0,
-            textAlign: 'center'
-          }}
-        >
-          <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Currency.qry}
+              name='currencyId'
+              label={_labels.currency}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Currency Ref' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              required
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                const selectedCurrencyId = newValue?.recordId || ''
+                formik.setFieldValue('currencyId', selectedCurrencyId)
+                getCurrenciesExchangeMaps(selectedCurrencyId, formik.values.countryId)
+              }}
+              error={formik.errors && Boolean(formik.errors.currencyId)}
+              helperText={formik.touched.currencyId && formik.errors.currencyId}
+            />
+          </Grid>
         </Grid>
-      </CustomTabPanel>
-    </Box>
+      </Fixed>
+      <Grow>
+        {formik.values.currencyId && formik.values.countryId && (
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        )}
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
 

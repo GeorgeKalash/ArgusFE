@@ -1,38 +1,20 @@
-// ** React Importsport
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-
-
-// ** Windows
 import InterfaceWindow from './Windows/InterfaceWindow'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Interface = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -60,6 +42,11 @@ const Interface = () => {
   })
 
   const columns = [
+    {
+      field: 'recordId',
+      headerName: _labels.id,
+      flex: 1
+    },
     {
       field: 'reference',
       headerName: _labels.reference,
@@ -91,7 +78,7 @@ const Interface = () => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
   }
-  
+
   const del = async obj => {
     await postRequest({
       extension: RemittanceSettingsRepository.Interface.del,
@@ -102,9 +89,11 @@ const Interface = () => {
   }
 
   return (
-    <>
-      <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />{' '}
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -116,10 +105,12 @@ const Interface = () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
         <InterfaceWindow
-          onClose={() => {setWindowOpen(false)
+          onClose={() => {
+            setWindowOpen(false)
             setSelectedRecordId(null)
           }}
           labels={_labels}
@@ -129,7 +120,7 @@ const Interface = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

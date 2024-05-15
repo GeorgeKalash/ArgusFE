@@ -1,9 +1,6 @@
-// ** MUI Imports
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
-
-// ** MUI Imports
 import { Grid, Box, FormControlLabel, Checkbox, RadioGroup, Radio } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useError } from 'src/error'
@@ -16,8 +13,6 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { useWindowDimensions } from 'src/lib/useWindowDimensions'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -32,6 +27,11 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expanded, plantId, userData }) {
   const { height } = useWindowDimensions()
@@ -147,6 +147,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     initialValues: {
       rows: [
         {
+          id: 1,
           invoiceId: '',
           seqNo: '',
           currencyId: '',
@@ -176,14 +177,14 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
 
   const totalCUR = detailsFormik.values.rows.reduce((curSum, row) => {
     // Parse amount as a number
-    const curValue = parseFloat(row.amount.toString().replace(/,/g, '')) || 0
+    const curValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
 
     return curSum + curValue
   }, 0)
 
   const totalLoc = detailsFormik.values.rows.reduce((locSum, row) => {
     // Parse amount as a number
-    const locValue = parseFloat(row.baseAmount.toString().replace(/,/g, '')) || 0
+    const locValue = parseFloat(row?.baseAmount?.toString().replace(/,/g, '')) || 0
 
     return locSum + locValue
   }, 0)
@@ -299,106 +300,115 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
 
   const columns = [
     {
-      field: 'combobox',
-      header: _labels[8],
-      name: 'currencyId',
-      mandatory: true,
-      store: currencyStore.list,
-      valueField: 'recordId',
-      displayField: 'reference',
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
-      widthDropDown: '200',
-      fieldsToUpdate: [{ from: 'name', to: 'currencyName' }],
-      columnsInDropDown: [
-        { key: 'reference', value: 'Reference' },
-        { key: 'name', value: 'Name' }
-      ],
-      width: 230,
-      async onChange(row) {
-        if (row?.newValue > 0) {
-          const exchange = await getEXMCur({
-            plantId: plantId ?? formik.values.plantId,
-            toCurrency: toCurrency ?? '',
-            fromCurrency: row.newValue ?? '',
-            rateType: rateType ?? ''
+      component: 'resourcecombobox',
+      label: _labels.currency,
+      name: 'currencyRef',
+      props: {
+        endpointId: SystemRepository.Currency.qry,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'currencyId' },
+          { from: 'reference', to: 'currencyRef' },
+          { from: 'name', to: 'currencyName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 3,
+        disabled: formik?.values?.corId === '' || formik?.values?.corId === null || formik?.values?.corId === undefined
+      },
+      updateOn: 'blur',
+      widthDropDown: '400',
+      width: 150,
+      async onChange({ row: { update, oldRow, newRow } }) {
+        if (!newRow?.currencyId) {
+          return
+        }
+
+        const exchange = await getEXMCur({
+          plantId: plantId ?? formik.values.plantId,
+          toCurrency: toCurrency ?? '',
+          fromCurrency: newRow?.currencyId ?? '',
+          rateType: rateType ?? ''
+        })
+        if (!exchange?.rate) {
+          update({
+            exRate: 0,
+            defaultRate: 0,
+            amount: 0,
+            baseAmount: 0
           })
-
-          const rate = exchange?.rate
-          const rateCalcMethod = exchange?.rateCalcMethod
-
-          if (row.rowData.qty != 0) {
-            const qtyToCur =
-              rateCalcMethod === 1
-                ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) * rate
-                : rateCalcMethod === 2
-                ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) / rate
-                : 0
-            detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, qtyToCur.toFixed(2))
-
-            const curToBase =
-              formik.values.rateCalcMethod === 1
-                ? parseFloat(qtyToCur) * formik.values.exRate
-                : rateCalcMethod === 2
-                ? parseFloat(qtyToCur) / formik.values.exRate
-                : 0
-            detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, getFormattedNumber(curToBase.toFixed(2)))
-          }
-          detailsFormik.setFieldValue(
-            `rows[${row.rowIndex}].exRate`,
-            parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(5)
-          )
-          detailsFormik.setFieldValue(
-            `rows[${row.rowIndex}].defaultRate`,
-            parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(5)
-          )
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].currencyId`, row.newValue)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].minRate`, exchange?.minRate)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].maxRate`, exchange?.maxRate)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, exchange?.rateCalcMethod)
-        } else {
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].currencyId`, '')
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, 0)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].qty`, 0)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].minRate`, 0)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].maxRate`, 0)
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].exRate`, '')
-          detailsFormik.setFieldValue(`rows[${row.rowIndex}].rateCalcMethod`, 0)
+          stackError({
+            message: `Rate not defined for ${newRow?.currencyRef}.`
+          })
 
           return
         }
+
+        const rate = exchange?.rate
+        const rateCalcMethod = exchange?.rateCalcMethod
+        if (newRow.qty) {
+          const qtyToCur =
+            rateCalcMethod === 1
+              ? parseFloat(newRow.qty.toString().replace(/,/g, '')) * rate
+              : rateCalcMethod === 2
+              ? parseFloat(newRow.qty.toString().replace(/,/g, '')) / rate
+              : 0
+          update({ amount: qtyToCur.toFixed(2) })
+
+          const curToBase =
+            formik.values.rateCalcMethod === 1
+              ? parseFloat(qtyToCur) * formik.values.exRate
+              : rateCalcMethod === 2
+              ? parseFloat(qtyToCur) / formik.values.exRate
+              : 0
+          update({ baseAmount: getFormattedNumber(curToBase.toFixed(2)) })
+        }
+
+        update({
+          currencyId: exchange?.currencyId,
+          currencyName: exchange?.currencyName,
+          exRate: parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(5),
+          defaultRate: parseFloat(exchange?.rate.toString().replace(/,/g, '')).toFixed(5),
+          rateCalcMethod: exchange?.rateCalcMethod,
+          minRate: exchange?.minRate,
+          maxRate: exchange?.maxRate
+        })
       }
     },
     {
-      field: 'textfield',
-      header: _labels[9],
+      component: 'textfield',
+      label: _labels.name,
       name: 'currencyName',
-      readOnly: true,
-      width: 300,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
+      props: {
+        readOnly: true,
+        disabled: formik?.values?.corId === '' || formik?.values?.corId === null || formik?.values?.corId === undefined
+      },
+      width: 190
     },
     {
-      field: 'numberfield',
-      header: _labels[14],
+      component: 'numberfield',
+      label: _labels.quantity,
       name: 'qty',
-      mandatory: true,
-      width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
-      async onChange(row) {
-        const rate = row.rowData?.exRate
-        const rateCalcMethod = row.rowData?.rateCalcMethod
-
-        //     detailsFormik.setFieldValue(`rows[${row.rowIndex}].qty`, getFormattedNumber(row.value))
-
-        detailsFormik.setFieldValue(
-          `rows[${row.rowIndex}].qty`,
-          getFormattedNumber(parseFloat(row.value.toString().replace(/,/g, '')).toFixed(2))
-        )
+      props: {
+        mandatory: true,
+        disabled: formik?.values?.corId === '' || formik?.values?.corId === null || formik?.values?.corId === undefined
+      },
+      width: 130,
+      async onChange({ row: { update, newRow } }) {
+        const rate = newRow.exRate
+        const rateCalcMethod = newRow.rateCalcMethod
+        update({
+          qty: getFormattedNumber(parseFloat(newRow.qty.toString().replace(/,/g, '')).toFixed(2))
+        })
 
         const qtyToCur =
           rateCalcMethod === 1
-            ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) * rate
+            ? parseFloat(newRow.qty.toString().replace(/,/g, '')) * rate
             : rateCalcMethod === 2
-            ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) / rate
+            ? parseFloat(newRow.qty.toString().replace(/,/g, '')) / rate
             : 0
 
         const curToBase =
@@ -407,41 +417,57 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
             : rateCalcMethod === 2
             ? parseFloat(qtyToCur) / formik.values.exRate
             : 0
-        detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, getFormattedNumber(qtyToCur.toFixed(2)))
-        detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, getFormattedNumber(curToBase.toFixed(2)))
+        update({
+          amount: getFormattedNumber(qtyToCur.toFixed(2)),
+          baseAmount: getFormattedNumber(curToBase.toFixed(2))
+        })
       }
     },
     {
-      field: 'numberfield',
-      header: _labels[23],
+      component: 'numberfield',
+      label: _labels.defaultRate,
       name: 'defaultRate',
-      readOnly: true,
-      mandatory: true,
-      width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
+      props: {
+        readOnly: true,
+        mandatory: true,
+        disabled: formik?.values?.corId === '' || formik?.values?.corId === null || formik?.values?.corId === undefined
+      },
+      width: 130
     },
     {
-      field: 'numberfield',
-      header: _labels[15],
+      component: 'numberfield',
+      label: _labels.exRate,
       name: 'exRate',
-      mandatory: true,
-      width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined,
-      async onChange(row) {
-        const nv = parseFloat(row.rowData.exRate.toString().replace(/,/g, ''))
-        if (parseFloat(row.rowData.exRate.toString().replace(/,/g, '')) > 0) {
-          const minRate = parseFloat(row.rowData?.minRate.toString().replace(/,/g, ''))
-          const maxRate = parseFloat(row.rowData?.maxRate.toString().replace(/,/g, ''))
+      props: {
+        mandatory: true,
+        disabled: formik?.values?.corId === '' || formik?.values?.corId === null || formik?.values?.corId === undefined
+      },
+      updateOn: 'blur',
+      width: 130,
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow.exRate) {
+          update({
+            exRate: '',
+            defaultRate: '',
+            amount: 0,
+            baseAmount: 0
+          })
 
+          return
+        }
+        const nv = parseFloat(newRow.exRate.toString().replace(/,/g, ''))
+        if (parseFloat(newRow.exRate.toString().replace(/,/g, '')) > 0) {
+          const minRate = parseFloat(newRow.minRate.toString().replace(/,/g, ''))
+          const maxRate = parseFloat(newRow.maxRate.toString().replace(/,/g, ''))
           if (nv >= minRate && nv <= maxRate) {
             const rate = nv
-            const rateCalcMethod = row.rowData?.rateCalcMethod
+            const rateCalcMethod = newRow.rateCalcMethod
 
             const qtyToCur =
               rateCalcMethod === 1
-                ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) * rate
+                ? parseFloat(newRow.qty.toString().replace(/,/g, '')) * rate
                 : rateCalcMethod === 2
-                ? parseFloat(row.rowData.qty.toString().replace(/,/g, '')) / rate
+                ? parseFloat(newRow.qty.toString().replace(/,/g, '')) / rate
                 : 0
 
             const curToBase =
@@ -450,33 +476,38 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
                 : rateCalcMethod === 2
                 ? parseFloat(qtyToCur) / formik.values.exRate
                 : 0
-            detailsFormik.setFieldValue(
-              `rows[${row.rowIndex}].exRate`,
-              parseFloat(row.value.toString().replace(/,/g, '')).toFixed(5)
-            )
-            detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, getFormattedNumber(qtyToCur.toFixed(2)))
-            detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, getFormattedNumber(curToBase.toFixed(2)))
+            update({
+              exRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(5),
+              defaultRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(5),
+              amount: getFormattedNumber(qtyToCur.toFixed(2)),
+              baseAmount: getFormattedNumber(curToBase.toFixed(2))
+            })
           } else {
             stackError({
               message: `Rate not in the [${minRate}-${maxRate}] range.`
             })
             if (nv) {
-              detailsFormik.setFieldValue(`rows[${row.rowIndex}].exRate`, '')
-              detailsFormik.setFieldValue(`rows[${row.rowIndex}].amount`, 0)
-              detailsFormik.setFieldValue(`rows[${row.rowIndex}].baseAmount`, 0)
+              update({
+                exRate: '',
+                defaultRate: '',
+                amount: 0,
+                baseAmount: 0
+              })
             }
           }
         }
       }
     },
     {
-      field: 'numberfield',
-      header: `Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`,
+      component: 'numberfield',
+      label: `Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`,
       name: 'amount',
-      readOnly: true,
-      mandatory: true,
-      width: 200,
-      disabled: formik?.values?.corId === '' || formik?.values?.corId === undefined
+      props: {
+        readOnly: true,
+        mandatory: true,
+        disabled: formik?.values?.corId === '' || formik?.values?.corId === null || formik?.values?.corId === undefined
+      },
+      width: 130
     }
   ]
 
@@ -488,8 +519,9 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
         parameters: parameters
       }).then(res => {
         // Create a new list by modifying each object in res.list
-        const modifiedList = res.list.map(item => ({
+        const modifiedList = res.list.map((item, index) => ({
           ...item,
+          id: index + 1,
           qty: parseFloat(item.qty).toFixed(2),
           amount: parseFloat(item.amount).toFixed(2),
           baseAmount: parseFloat(item.baseAmount).toFixed(2),
@@ -630,7 +662,6 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
         recordId: formik.values.recordId
       },
       width: 950,
-      height: 600,
       title: 'Workflow'
     })
   }
@@ -639,7 +670,7 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
     {
       key: 'GL',
       condition: true,
-      onClick: 'newHandler',
+      onClick: 'onClickGL',
       disabled: !editMode
     },
     {
@@ -673,224 +704,210 @@ export default function CreditInvoiceForm({ _labels, maxAccess, recordId, expand
       functionId={formik.values.functionId}
       disabledSubmit={isPosted || isCancelled}
     >
-      <Grid container>
-        <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
-          {/* First Column */}
-          <Grid item xs={3} style={{ marginRight: '10px' }}>
-            <CustomDatePicker
-              name='date'
-              required
-              label={_labels[2]}
-              readOnly={isPosted || isCancelled}
-              value={formik?.values?.date}
-              onChange={formik.setFieldValue}
-              maxAccess={maxAccess}
-              onClear={() => formik.setFieldValue('date', '')}
-              error={formik.touched.date && Boolean(formik.errors.date)}
-              helperText={formik.touched.date && formik.errors.date}
-            />
-          </Grid>
+      <VertLayout>
+          <Fixed>
+            <Grid container xs={12} style={{ display: 'flex', marginTop: '10px' }}>
+              {/* First Column */}
+              <Grid item xs={3} style={{ marginRight: '10px' }}>
+                <CustomDatePicker
+                  name='date'
+                  required
+                  label={_labels.date}
+                  readOnly={isPosted || isCancelled}
+                  value={formik?.values?.date}
+                  onChange={formik.setFieldValue}
+                  maxAccess={maxAccess}
+                  onClear={() => formik.setFieldValue('date', '')}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
+                  helperText={formik.touched.date && formik.errors.date}
+                />
+              </Grid>
 
-          {/* Second Column */}
-          <Grid item style={{ marginRight: '10px', width: '420px' }}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Plant.qry}
-              name='plantId'
-              label={_labels[3]}
-              readOnly={true}
-              values={formik.values}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              required
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik && formik.setFieldValue('plantId', newValue?.recordId)
-              }}
-              error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-            />
-          </Grid>
+              {/* Second Column */}
+              <Grid item style={{ marginRight: '10px', width: '420px' }}>
+                <ResourceComboBox
+                  endpointId={SystemRepository.Plant.qry}
+                  name='plantId'
+                  label={_labels.plant}
+                  readOnly={true}
+                  values={formik.values}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  required
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik && formik.setFieldValue('plantId', newValue?.recordId)
+                  }}
+                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                />
+              </Grid>
 
-          {/* Third Column */}
-          <Grid item style={{ marginRight: '10px', width: '190px' }}>
-            <CustomTextField
-              name='reference'
-              label={_labels[4]}
-              value={formik?.values?.reference}
-              maxAccess={maxAccess}
-              maxLength='30'
-              readOnly={true}
-              required
-              error={formik.touched.reference && Boolean(formik.errors.reference)}
-              helperText={formik.touched.reference && formik.errors.reference}
-            />
-          </Grid>
-        </Grid>
+              {/* Third Column */}
+              <Grid item style={{ marginRight: '10px', width: '190px' }}>
+                <CustomTextField
+                  name='reference'
+                  label={_labels.reference}
+                  value={formik?.values?.reference}
+                  maxAccess={maxAccess}
+                  maxLength='30'
+                  readOnly={true}
+                  required
+                  error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  helperText={formik.touched.reference && formik.errors.reference}
+                />
+              </Grid>
+            </Grid>
 
-        <Grid container xs={12}>
-          {/* First Column */}
-          <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
+            <Grid container xs={12}>
+              {/* First Column */}
+              <Grid container rowGap={1} xs={9} style={{ marginTop: '10px' }}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='corId'
+                    label={_labels.correspondent}
+                    form={formik}
+                    firstFieldWidth='30%'
+                    required
+                    valueShow='corRef'
+                    secondValueShow='corName'
+                    readOnly={isPosted || isCancelled || detailsFormik?.values?.rows[0]?.currencyId}
+                    onChange={async (event, newValue) => {
+                      if (newValue) {
+                        const baseCurrency = await getBaseCurrency()
+                        getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
+                        formik.setFieldValue('corId', newValue?.recordId)
+                        formik.setFieldValue('corName', newValue?.name || '')
+                        formik.setFieldValue('corRef', newValue?.reference || '')
+                      } else {
+                        formik.setFieldValue('corId', null)
+                        formik.setFieldValue('corName', null)
+                        formik.setFieldValue('corRef', null)
+                      }
+                    }}
+                    errorCheck={'corId'}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={9} style={{ marginTop: '8px' }}>
               <ResourceLookup
-                endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                valueField='reference'
-                displayField='name'
-                name='corId'
-                label={_labels[16]}
-                form={formik}
+                endpointId={CashBankRepository.CashAccount.snapshot}
+                parameters={{
+                  _type: 0
+                }}
                 firstFieldWidth='30%'
+                valueField='accountNo'
+                displayField='name'
+                name='cashAccountId'
                 required
-                valueShow='corRef'
-                secondValueShow='corName'
-                readOnly={isPosted || isCancelled || detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
-                onChange={async (event, newValue) => {
+                label={_labels.cashAccount}
+                form={formik}
+                readOnly={isPosted || isCancelled}
+                valueShow='cashAccountRef'
+                secondValueShow='cashAccountName'
+                onChange={(event, newValue) => {
                   if (newValue) {
-                    const baseCurrency = await getBaseCurrency()
-                    getCorrespondentById(newValue?.recordId, baseCurrency, formik.values.plantId)
-                    formik.setFieldValue('corId', newValue?.recordId)
-                    formik.setFieldValue('corName', newValue?.name || '')
-                    formik.setFieldValue('corRef', newValue?.reference || '')
+                    formik.setFieldValue('cashAccountId', newValue?.recordId)
+                    formik.setFieldValue('cashAccountRef', newValue?.accountNo)
+                    formik.setFieldValue('cashAccountName', newValue?.name)
                   } else {
-                    formik.setFieldValue('corId', null)
-                    formik.setFieldValue('corName', null)
-                    formik.setFieldValue('corRef', null)
+                    formik.setFieldValue('cashAccountId', null)
+                    formik.setFieldValue('cashAccountRef', null)
+                    formik.setFieldValue('cashAccountName', null)
                   }
                 }}
-                errorCheck={'corId'}
+                errorCheck={'cashAccountId'}
               />
             </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={9} style={{ marginTop: '8px' }}>
-          <ResourceLookup
-            endpointId={CashBankRepository.CashAccount.snapshot}
-            parameters={{
-              _type: 0
-            }}
-            firstFieldWidth='30%'
-            valueField='accountNo'
-            displayField='name'
-            name='cashAccountId'
-            required
-            label={_labels[22]}
-            form={formik}
-            readOnly={isPosted || isCancelled}
-            valueShow='cashAccountRef'
-            secondValueShow='cashAccountName'
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik.setFieldValue('cashAccountId', newValue?.recordId)
-                formik.setFieldValue('cashAccountRef', newValue?.accountNo)
-                formik.setFieldValue('cashAccountName', newValue?.name)
-              } else {
-                formik.setFieldValue('cashAccountId', null)
-                formik.setFieldValue('cashAccountRef', null)
-                formik.setFieldValue('cashAccountName', null)
-              }
-            }}
-            errorCheck={'cashAccountId'}
-          />
-        </Grid>
-        <Grid container xs={12}>
-          <RadioGroup
-            row
-            value={formik.values.functionId}
-            defaultValue={SystemFunction.CreditInvoicePurchase}
-            onChange={e => setOperationType(e.target.value)}
-          >
-            <FormControlLabel
-              value={SystemFunction.CreditInvoicePurchase}
-              control={<Radio />}
-              label={_labels[6]}
-              disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
-            />
-            <FormControlLabel
-              value={SystemFunction.CreditInvoiceSales}
-              control={<Radio />}
-              label={_labels[7]}
-              disabled={detailsFormik?.values?.rows[0]?.currencyId != '' ? true : false}
-            />
-          </RadioGroup>
-        </Grid>
-        <Grid container sx={{ pt: 2 }} xs={12}>
-          <Box sx={{ width: '100%' }}>
-            <InlineEditGrid
-              gridValidation={detailsFormik}
-              columns={columns}
-              background={
-                formik.values.functionId &&
-                (formik.values.functionId != SystemFunction.CreditInvoicePurchase ? '#C7F6C7' : 'rgb(245, 194, 193)')
-              }
-              defaultRow={{
-                invoiceId: '',
-                seqNo: '',
-                currencyId: '',
-                qty: '',
-                rateCalcMethod: '',
-                exRate: '',
-                defaultRate: '',
-                minRate: '',
-                maxRate: '',
-                amount: '',
-                baseAmount: '',
-                notes: ''
-              }}
-              allowDelete={true}
-              allowAddNewLine={true}
-              scrollable={true}
-              scrollHeight={`${expanded ? height - 430 : 200}px`}
-            />
-          </Box>
-        </Grid>
-        <Grid
-          container
-          rowGap={1}
-          xs={12}
-          style={{ marginTop: '5px' }}
-          sx={{ flexDirection: 'row', flexWrap: 'nowrap' }}
-        >
-          {/* First Column (moved to the left) */}
-          <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
-            <CustomTextArea
-              name='notes'
-              label={_labels[11]}
-              value={formik.values.notes}
-              rows={3}
-              readOnly={isPosted || isCancelled}
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('notes', '')}
-              error={formik.touched.notes && Boolean(formik.errors.notes)}
-              helperText={formik.touched.notes && formik.errors.notes}
-            />
-          </Grid>
-          {/* Second Column  */}
-          <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='totalCUR'
-                label={`Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`}
-                value={getFormattedNumber(totalCUR.toFixed(2))}
-                numberField={true}
-                readOnly={true}
-              />
+            <Grid container xs={12}>
+              <RadioGroup
+                row
+                value={formik.values.functionId}
+                defaultValue={SystemFunction.CreditInvoicePurchase}
+                onChange={e => setOperationType(e.target.value)}
+              >
+                <FormControlLabel
+                  value={SystemFunction.CreditInvoicePurchase}
+                  control={<Radio />}
+                  label={_labels.purchase}
+                  disabled={detailsFormik?.values?.rows[0]?.currencyId}
+                />
+                <FormControlLabel
+                  value={SystemFunction.CreditInvoiceSales}
+                  control={<Radio />}
+                  label={_labels.sale}
+                  disabled={detailsFormik?.values?.rows[0]?.currencyId}
+                />
+              </RadioGroup>
             </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='baseAmount'
-                label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
-                style={{ textAlign: 'right' }}
-                value={getFormattedNumber(totalLoc.toFixed(2))}
-                numberField={true}
-                readOnly={true}
-              />
+            </Fixed>
+            <Grow>
+                <DataGrid
+                  onChange={value => detailsFormik.setFieldValue('rows', value)}
+                  value={detailsFormik.values.rows}
+                  error={detailsFormik.errors.rows}
+                  columns={columns}
+                  bg={
+                    formik.values.functionId &&
+                    (formik.values.functionId != SystemFunction.CreditInvoicePurchase
+                      ? '#C7F6C7'
+                      : 'rgb(245, 194, 193)')
+                  }
+                />
+            </Grow>
+            <Fixed>
+            <Grid
+              container
+              rowGap={1}
+              xs={12}
+            >
+              {/* First Column (moved to the left) */}
+              <Grid container rowGap={1} xs={8} style={{ marginTop: '10px' }}>
+                <CustomTextArea
+                  name='notes'
+                  label={_labels.notes}
+                  value={formik.values.notes}
+                  rows={3}
+                  readOnly={isPosted || isCancelled}
+                  maxAccess={maxAccess}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue('notes', '')}
+                  error={formik.touched.notes && Boolean(formik.errors.notes)}
+                  helperText={formik.touched.notes && formik.errors.notes}
+                />
+              </Grid>
+              {/* Second Column  */}
+              <Grid container rowGap={1} xs={4} sx={{ px: 2 }} style={{ marginTop: '10px' }}>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='totalCUR'
+                    label={`Total ${toCurrencyRef !== null ? toCurrencyRef : ''}`}
+                    value={getFormattedNumber(totalCUR.toFixed(2))}
+                    numberField={true}
+                    readOnly={true}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='baseAmount'
+                    label={`Total ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
+                    style={{ textAlign: 'right' }}
+                    value={getFormattedNumber(totalLoc.toFixed(2))}
+                    numberField={true}
+                    readOnly={true}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+            </Fixed>
+      </VertLayout>
     </FormShell>
   )
 }

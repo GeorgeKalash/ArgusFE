@@ -10,11 +10,13 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
-
-// ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditInvoiceForm from './Forms/CreditInvoiceForm'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -108,9 +110,7 @@ const CreditInvoice = () => {
         } else {
           throw new Error('The user does not have a default plant')
         }
-      } catch (error) {
-        console.error(error)
-      }
+      } catch (error) {}
     } else {
       openForm(recordId)
     }
@@ -126,8 +126,7 @@ const CreditInvoice = () => {
         recordId
       },
       width: 900,
-      height: 600,
-      title: _labels[1]
+      title: _labels.creditInvoice
     })
   }
 
@@ -141,8 +140,8 @@ const CreditInvoice = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           maxAccess={access}
           onAdd={add}
@@ -151,47 +150,49 @@ const CreditInvoice = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={[
             {
               field: 'reference',
-              headerName: _labels[4],
+              headerName: _labels.reference,
               flex: 1
             },
             {
               field: 'date',
-              headerName: _labels[2],
+              headerName: _labels.date,
               flex: 1,
               valueGetter: ({ row }) => formatDateDefault(row?.date)
             },
             {
               field: 'plantRef',
-              headerName: _labels[3]
+              headerName: _labels.plant
             },
             {
               field: 'corName',
-              headerName: _labels[5],
+              headerName: _labels.correspondent,
               flex: 1
             },
             {
               field: 'currencyRef',
-              headerName: _labels[8],
+              headerName: _labels.currency,
               flex: 1
             },
             {
               field: 'cashAccountName',
-              headerName: _labels[8],
+              headerName: _labels.cashAccount,
               flex: 1
             },
             {
               field: 'amount',
-              headerName: _labels[10],
+              headerName: _labels.amount,
               flex: 1,
               valueGetter: ({ row }) => getFormattedNumber(row?.amount)
             },
             {
               field: 'statusName',
-              headerName: _labels[21],
+              headerName: _labels.status,
               flex: 1
             }
           ]}
@@ -207,9 +208,9 @@ const CreditInvoice = () => {
           refetch={refetch}
           paginationType='client'
         />
-      </Box>
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

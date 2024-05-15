@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -9,7 +8,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -24,6 +22,9 @@ import {
   formatDateFromApiInline
 } from 'src/lib/date-helper'
 import { CTDRRepository } from 'src/repositories/CTDRRepository'
+
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, onClose, setWindowOpen }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -104,9 +105,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
 
           date: formatDateFromApi(res.record.date)
         })
-      } catch (exception) {
-        setErrorMessage(error)
-      }
+      } catch (exception) {}
       setIsLoading(false)
     })()
   }, [])
@@ -133,7 +132,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
   ]
 
   return (
-    <>
+    <VertLayout>
       <ConfirmationDialog
         DialogText={`Are you sure you want to ${responseValue === 2 ? 'approve' : 'reject'} this document`}
         cancelButtonAction={() => setConfirmationWindowOpen(false)}
@@ -147,57 +146,58 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         actions={actions}
         resourceId={ResourceIds.DocumentsOnHold}
         form={formik}
-        height={300}
         maxAccess={maxAccess}
         isCleared={false}
         isInfo={false}
         isSaved={false}
       >
-        <Grid container spacing={4}>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='reference'
-              label={labels.reference}
-              value={formik.values.reference}
-              readOnly={true}
-              maxAccess={maxAccess}
-              maxLength='30'
-            />
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                readOnly={true}
+                maxAccess={maxAccess}
+                maxLength='30'
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='thirdParty'
+                label={labels.thirdParty}
+                value={formik.values.thirdParty}
+                readOnly={true}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='date'
+                label={labels.date}
+                onChange={formik.setFieldValue}
+                value={formik.values.date}
+                readOnly={true}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='notes'
+                label={labels.notes}
+                value={formik.values.notes}
+                maxLength='100'
+                rows={2}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('notes', '')}
+                error={formik.touched.notes && Boolean(formik.errors.notes)}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='thirdParty'
-              label={labels.thirdParty}
-              value={formik.values.thirdParty}
-              readOnly={true}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomDatePicker
-              name='date'
-              label={labels.date}
-              onChange={formik.setFieldValue}
-              value={formik.values.date}
-              readOnly={true}
-              maxAccess={maxAccess}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextArea
-              name='notes'
-              label={labels.notes}
-              value={formik.values.notes}
-              maxLength='100'
-              rows={2}
-              maxAccess={maxAccess}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('notes', '')}
-              error={formik.touched.notes && Boolean(formik.errors.notes)}
-            />
-          </Grid>
-        </Grid>
+        </Grow>
       </FormShell>
-    </>
+    </VertLayout>
   )
 }

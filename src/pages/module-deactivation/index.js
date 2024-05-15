@@ -10,6 +10,9 @@ import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataSets } from 'src/resources/DataSets'
 import toast from 'react-hot-toast'
 import { CommonContext } from 'src/providers/CommonContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ModuleDeactivation = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -100,20 +103,23 @@ const ModuleDeactivation = () => {
   }
 
   return (
-    <Box>
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['moduleId']}
-        isLoading={false}
-        maxAccess={access}
-        showCheckboxColumn={true}
-        handleCheckedRows={() => {}}
-        pagination={false}
-        addedHeight={'18px'}
-      />
-      <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
-    </Box>
+    <VertLayout>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['moduleId']}
+          isLoading={false}
+          maxAccess={access}
+          showCheckboxColumn={true}
+          handleCheckedRows={() => {}}
+          pagination={false}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
 

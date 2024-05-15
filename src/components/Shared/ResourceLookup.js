@@ -41,9 +41,7 @@ export const ResourceLookup = ({
         }
         setStore(res.list)
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      .catch(error => {})
   }
   const check = errorCheck ? errorCheck : name
 
@@ -74,7 +72,6 @@ export const ResourceLookup = ({
           secondValue: _secondValue,
           error,
           onKeyUp,
-          helperText,
           name,
           ...rest
         }}

@@ -1,162 +1,90 @@
-// ** React Imports
-import { useState, useContext } from 'react'
-import { useFormik } from 'formik'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
-import { useWindow } from 'src/windows'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
-import toast from 'react-hot-toast'
-import { DocumentReleaseRepository} from 'src/repositories/DocumentReleaseRepository'
-import * as yup from 'yup'
-
-import {  useEffect } from 'react'
-
-// ** Custom Imports
+import { useState, useContext, useEffect } from 'react'
+import { Box, toast } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import ApproverForm from './ApproverForm'
-
-// ** Helpers
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
+import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { useWindow } from 'src/windows'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
-const ApproverList = ({store,labels,maxAccess}) => {
+const ApproverList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const {recordId}= store
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
+  const { recordId } = store
+
   const { stack } = useWindow()
-  const [valueGridData , setValueGridData] = useState()
 
-  const [refresh,setRefresh]=useState(false)
-
-  //states
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
-
-
-
-
-
-  const getValueGridData = recordId => {
-   
-    getRequest({
+  async function fetchGridData() {
+    const response = await getRequest({
       extension: DocumentReleaseRepository.GroupCode.qry,
+
       parameters: `_filter=&_groupId=${recordId}`
     })
-      .then(res => {
-        setValueGridData(res)
-        console.log('resss',res)
-      
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+
+    return response
   }
-  useEffect(()=>{
-    recordId && getValueGridData(recordId)
-    
-  },[recordId,refresh])
 
-  // const {
-  //   query: { data },
-  //   labels: _labels,
-  //   access
-  // } = useResourceQuery({
-  //   queryFn: fetchGridData,
-  //   endpointId: DocumentReleaseRepository.GroupCode.qry,
-  //   datasetId: ResourceIds.DRGroups
-  // })
+  const {
+    query: { data },
+    labels: _labels,
 
-
+    refetch
+  } = useResourceQuery({
+    enabled: !!recordId,
+    datasetId: ResourceIds.DRGroups,
+    queryFn: fetchGridData,
+    endpointId: DocumentReleaseRepository.GroupCode.qry
+  })
 
   const columns = [
-    {
-      field: 'codeRef',
-      headerName: labels.reference,
-      flex: 1
-    },   {
-      field: 'codeName',
-      headerName: labels.name,
-      flex: 1
-    },
+    { field: 'codeRef', headerName: labels.reference, flex: 1 },
+    { field: 'codeName', headerName: labels.name, flex: 1 }
   ]
 
-
-  const addApprover = () => {
-    openForm2()
-  }
-
-
-
-  const delApprover = async obj => {
-    await postRequest({
-      extension:DocumentReleaseRepository.GroupCode.del,
-      record: JSON.stringify(obj)
-    })
-    setRefresh(prev=>!prev)
-    
-    toast.success('Record Deleted Successfully')
-  }
-
-  function openForm2 (recordId){
+  const openForm = (recordId = null) => {
     stack({
       Component: ApproverForm,
-      props: {
-        labels: labels,
-        recordId: recordId? recordId : null,
-        maxAccess,
-        store,
-        setRefresh
-        
-      },
+      props: { labels, recordId, maxAccess, store },
       width: 500,
       height: 400,
       title: labels.approver
     })
   }
 
-
-  
-  
+  const delApprover = async obj => {
+    try {
+      await postRequest({
+        extension: DocumentReleaseRepository.GroupCode.del,
+        record: JSON.stringify(obj)
+      })
+      refetch()
+      toast.success('Record Deleted Successfully')
+    } catch (error) {}
+  }
 
   return (
-  
-    <Box
-    sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%'
-    }}
-  >
-
-    <GridToolbar onAdd={addApprover} maxAccess={maxAccess} />
-    <Table
-      columns={columns}
-      gridData={valueGridData}
-      rowId={['codeId']}
-      isLoading={false}
-      pageSize={50}
-      pagination={false}
-     
-      onDelete={delApprover}
-      maxAccess={maxAccess}      
-      height={200}
-    />
-  </Box>
-      
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={() => openForm()} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['codeId']}
+          pageSize={50}
+          pagination={false}
+          onDelete={obj => delApprover(obj)}
+          maxAccess={maxAccess}
+          height={200}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 
 export default ApproverList
-
-
-  

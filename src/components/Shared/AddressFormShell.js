@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import FormShell from './FormShell'
 import AddressTab from './AddressTab'
-import { useFormik } from 'formik'
 import { useForm } from 'src/hooks/form'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ResourceIds } from 'src/resources/ResourceIds'
 
 export const AddressFormShell = ({
   setAddress,
@@ -14,12 +11,11 @@ export const AddressFormShell = ({
   window,
   readOnly,
   allowPost,
-  required = false,
+  optional = false,
   onSubmit
 }) => {
-  const { labels: labels, access } = useResourceParams({
-    datasetId: ResourceIds.Address
-  })
+
+  const [required, setRequired] = useState(!optional)
 
   const initialValues = {
     recordId: address?.recordId || null,
@@ -53,8 +49,8 @@ export const AddressFormShell = ({
       const errors = {}
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (
-        ((values.name || values.cityId || values.phone || values.countryId || values.street1) && required) ||
-        !required
+        ((values.name || values.cityId || values.phone || values.countryId || values.street1) && optional) ||
+        !optional
       ) {
         if (!values.name) {
           errors.name = ' '
@@ -67,9 +63,6 @@ export const AddressFormShell = ({
         }
         if (!values.cityId) {
           errors.cityId = ' '
-        }
-        if (!values.phone) {
-          errors.phone = ' '
         }
       }
       if (values.email1 && !emailRegex?.test(values?.email1)) {
@@ -94,9 +87,24 @@ export const AddressFormShell = ({
     }
   })
 
+  useEffect(() => {
+    if (optional && (formik.values.name || formik.values.street1 || formik.values.countryId || formik.values.cityId)) {
+      setRequired(true)
+    }
+    if (
+      optional &&
+      !formik.values.name &&
+      !formik.values.street1 &&
+      !formik.values.countryId &&
+      !formik.values.cityId
+    ) {
+      setRequired(false)
+    }
+  }, [formik.values])
+
   return (
     <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} readOnly={readOnly} editMode={editMode}>
-      <AddressTab addressValidation={formik} maxAccess={access} labels={labels} readOnly={readOnly} />
+      <AddressTab addressValidation={formik} readOnly={readOnly} required={required} />
     </FormShell>
   )
 }

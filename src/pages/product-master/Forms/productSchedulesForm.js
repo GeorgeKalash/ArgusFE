@@ -1,8 +1,5 @@
-import { Grid, Box, Checkbox } from '@mui/material'
 import { useFormik } from 'formik'
-import { useContext, useEffect } from 'react'
-
-// ** Custom Imports
+import { useContext, useEffect, useState } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -12,24 +9,20 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
+const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { recordId: pId, countries, currencies } = store
+  const [filters, setFilters] = useState(currencies)
+  const [rowSelectionModel, setRowSelectionModel] = useState([])
 
-const ProductSchedulesForm = ({
-  store,
-  labels,
-  setStore,
-  editMode,
-  height,
-  expanded,
-  maxAccess }) => {
-    const { getRequest, postRequest } = useContext(RequestsContext)
-
-    const {recordId : pId, countries} = store
-
-    const formik = useFormik({
-      enableReinitialize: false,
-      validateOnChange: true,
-      validationSchema: yup.object({ schedules: yup
+  const formik = useFormik({
+    enableReinitialize: false,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      schedules: yup
         .array()
         .of(
           yup.object().shape({
@@ -38,76 +31,72 @@ const ProductSchedulesForm = ({
             dispersalId: yup.string().required('Dispersal Type  is required'),
             plantId: yup.string().required('plantId Type  is required')
           })
-        ).required('schedules array is required') }),
-      initialValues: {
-        schedules: [
-          { id:1,
-            productId: pId,
-            seqNo: 1,
-            plantId: '',
-            plantRef: '',
-            plantName: '',
-            countryId: '',
-            countryRef: '',
-            countryName: '',
-            currencyId: '',
-            currencyRef: '',
-            currencyName: '',
-            dispersalId:'',
-            dispersalName :'',
-            dispersalRef:'',
-            dispersalType: '',
-            dispersalTypeName: '',
-            isInactive: false,
-            saved:false
-          }
-        ]
-      },
-      onSubmit: values => {
-        post(values.schedules)
-      }
-    })
-
-    const post = obj => {
-      const data = {
-        productId: pId,
-        productSchedules: obj.map(
-          ({  id,seqNo,productId, saved,...rest}, index ) => ({
-              seqNo: index +1,
-              productId: pId,
-              ...rest
-          }))
-      }
-      postRequest({
-        extension: RemittanceSettingsRepository.ProductSchedules.set2,
-        record: JSON.stringify(data)
-      })
-        .then(res => {
-          if (res) toast.success('Record Edited Successfully')
-          getProductSchedules(pId)
-        })
-        .catch(error => {
-        })
+        )
+        .required('schedules array is required')
+    }),
+    initialValues: {
+      schedules: [
+        {
+          id: 1,
+          productId: pId,
+          seqNo: 1,
+          plantId: '',
+          plantRef: '',
+          plantName: '',
+          countryId: '',
+          countryRef: '',
+          countryName: '',
+          currencyId: '',
+          currencyRef: '',
+          currencyName: '',
+          dispersalId: '',
+          dispersalName: '',
+          dispersalRef: '',
+          dispersalType: '',
+          dispersalTypeName: '',
+          isInactive: false,
+          saved: false,
+          select: false
+        }
+      ]
+    },
+    onSubmit: values => {
+      post(values.schedules)
     }
+  })
+
+  const post = obj => {
+    const lastObject = obj[obj.length - 1]
+
+    const data = {
+      productId: pId,
+      productSchedules: obj.map(({ id, seqNo, productId, saved, ...rest }, index) => ({
+        seqNo: index + 1,
+        productId: pId,
+        ...rest
+      }))
+    }
+    postRequest({
+      extension: RemittanceSettingsRepository.ProductSchedules.set2,
+      record: JSON.stringify(data)
+    })
+      .then(res => {
+        if (res) toast.success('Record Edited Successfully')
+        setStore(prevStore => ({
+          ...prevStore,
+          plantId: lastObject.plantId,
+          currencyId: lastObject.currencyId,
+          countryId: lastObject.countryId,
+          dispersalId: lastObject.dispersalId,
+          _seqNo: lastObject.seqNo
+        }))
+        setRowSelectionModel(lastObject.id)
+        getProductSchedules(pId)
+      })
+      .catch(error => {})
+  }
 
   const columns = [
-
-    {
-      component: 'button',
-      label: labels.select,
-      name : 'saved',
-      onClick: (e, row) => {
-           setStore(prevStore => ({
-          ...prevStore,
-          plantId: row.plantId,
-          currencyId: row.currencyId,
-          countryId: row.countryId,
-          dispersalId: row.dispersalId,
-          _seqNo: row.seqNo
-           }));
-
-    }
-    },
     {
       component: 'resourcecombobox',
       label: labels.country,
@@ -117,18 +106,26 @@ const ProductSchedulesForm = ({
         valueField: 'countryId',
         displayField: 'countryRef',
         displayFieldWidth: 4,
-        mapping: [{ from: 'countryId', to: 'countryId' } , { from: 'countryName', to: 'countryName' }, { from: 'countryRef', to: 'countryRef' } ],
+        mapping: [
+          { from: 'countryId', to: 'countryId' },
+          { from: 'countryName', to: 'countryName' },
+          { from: 'countryRef', to: 'countryRef' }
+        ],
         columnsInDropDown: [
           { key: 'countryRef', value: 'Reference' },
-          { key: 'countryName', value: 'Name' },
+          { key: 'countryName', value: 'Name' }
         ]
+      },
+
+      async onChange({ row: { update, oldRow, newRow } }) {
+        setFilters(currencies.filter(item => item.countryId === newRow.countryId))
       }
     },
     {
       component: 'textfield',
       label: labels.name,
       name: 'countryName',
-      props:{
+      props: {
         readOnly: true
       }
     },
@@ -141,10 +138,14 @@ const ProductSchedulesForm = ({
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 4,
-        mapping: [ { from: 'recordId', to: 'plantId' }, { from: 'name', to: 'plantName' } , { from: 'reference', to: 'plantRef' } ],
+        mapping: [
+          { from: 'recordId', to: 'plantId' },
+          { from: 'name', to: 'plantName' },
+          { from: 'reference', to: 'plantRef' }
+        ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
+          { key: 'name', value: 'Name' }
         ]
       }
     },
@@ -152,7 +153,7 @@ const ProductSchedulesForm = ({
       component: 'textfield',
       label: labels.name,
       name: 'plantName',
-      props:{
+      props: {
         readOnly: true
       }
     },
@@ -161,14 +162,18 @@ const ProductSchedulesForm = ({
       label: labels.currency,
       name: 'currencyId',
       props: {
-        endpointId: SystemRepository.Currency.qry,
-        valueField: 'recordId',
-        displayField: 'reference',
+        store: filters,
+        valueField: 'currencyId',
+        displayField: 'currencyRef',
         displayFieldWidth: 4,
-        mapping: [ { from: 'recordId', to: 'currencyId' }, { from: 'name', to: 'currencyName' }, { from: 'reference', to: 'currencyRef' } ],
+        mapping: [
+          { from: 'currencyId', to: 'currencyId' },
+          { from: 'currencyName', to: 'currencyName' },
+          { from: 'currencyRef', to: 'currencyRef' }
+        ],
         columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
+          { key: 'currencyRef', value: 'Reference' },
+          { key: 'currencyName', value: 'Name' }
         ]
       }
     },
@@ -176,27 +181,30 @@ const ProductSchedulesForm = ({
       component: 'textfield',
       label: labels.name,
       name: 'currencyName',
-      props:{
+      props: {
         readOnly: true
       }
-    }
-    ,
+    },
     {
       component: 'resourcecombobox',
       label: labels.dispersal,
       name: 'dispersalId',
       props: {
         endpointId: pId && RemittanceSettingsRepository.ProductDispersal.qry,
-        parameters :`_productId=${pId}`,
+        parameters: `_productId=${pId}`,
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 3,
-        mapping: [ { from: 'recordId', to: 'dispersalId' } ,{ from: 'name', to: 'dispersalName' } ,{ from: 'reference', to: 'dispersalRef' }
-        ,{ from: 'dispersalType', to: 'dispersalType' } ,{ from: 'dispersalTypeName', to: 'dispersalTypeName' }
-       ],
+        mapping: [
+          { from: 'recordId', to: 'dispersalId' },
+          { from: 'name', to: 'dispersalName' },
+          { from: 'reference', to: 'dispersalRef' },
+          { from: 'dispersalType', to: 'dispersalType' },
+          { from: 'dispersalTypeName', to: 'dispersalTypeName' }
+        ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' },
+          { key: 'name', value: 'Name' }
         ]
       }
     },
@@ -204,7 +212,7 @@ const ProductSchedulesForm = ({
       component: 'textfield',
       label: labels.name,
       name: 'dispersalName',
-      props:{
+      props: {
         readOnly: true
       }
     },
@@ -213,11 +221,15 @@ const ProductSchedulesForm = ({
       label: labels.dispersalType,
       name: 'dispersalType',
       props: {
-        datasetId:  DataSets.RT_Dispersal_Type,
+        datasetId: DataSets.RT_Dispersal_Type,
         valueField: 'key',
         displayField: 'value',
         displayFieldWidth: 2,
-        mapping: [ { from: 'key', to: 'dispersalType' }, { from: 'value', to: 'dispersalTypeName' }, { from: 'reference', to: 'currencyRef' } ],
+        mapping: [
+          { from: 'key', to: 'dispersalType' },
+          { from: 'value', to: 'dispersalTypeName' },
+          { from: 'reference', to: 'currencyRef' }
+        ]
       }
     },
     {
@@ -227,8 +239,8 @@ const ProductSchedulesForm = ({
     }
   ]
 
-  useEffect(()=>{
-    pId  && getProductSchedules(pId)
+  useEffect(() => {
+    pId && getProductSchedules(pId)
   }, [pId])
 
   const getProductSchedules = pId => {
@@ -240,45 +252,46 @@ const ProductSchedulesForm = ({
     })
       .then(res => {
         if (res.list.length > 0)
-        formik.setValues({ schedules: res.list.map(({ ...rest } , index)=>({
-          id : index + 1,
-          saved: true,
-          ...rest
-
-        }))
-     })
+          formik.setValues({
+            schedules: res.list.map(({ ...rest }, index) => ({
+              id: index + 1,
+              saved: true,
+              ...rest
+            }))
+          })
       })
-      .catch(error => {
-      })
+      .catch(error => {})
   }
 
-return (
-  <FormShell form={formik}
-   resourceId={ResourceIds.ProductMaster}
-   maxAccess={maxAccess}
-   infoVisible={false}
-   editMode={editMode}>
-
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <Grid container gap={2}>
-          <Grid xs={12}>
-            <DataGrid
-               onChange={value => formik.setFieldValue('schedules', value)}
-               value={formik.values.schedules}
-               error={formik.errors.schedules}
-               columns={columns}
-               height={`${expanded ? `calc(100vh - 300px)` : `${height-160}px`}`}
-
-            />
-          </Grid>
-        </Grid>
-      </Box>
+  return (
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.ProductMaster}
+      maxAccess={maxAccess}
+      infoVisible={false}
+      editMode={editMode}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('schedules', value)}
+            value={formik.values.schedules}
+            error={formik.errors.schedules}
+            columns={columns}
+            onSelectionChange={row =>
+              row &&
+              setStore(prevStore => ({
+                ...prevStore,
+                plantId: row.plantId,
+                currencyId: row.currencyId,
+                countryId: row.countryId,
+                dispersalId: row.dispersalId,
+                _seqNo: row.seqNo
+              }))
+            }
+          />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

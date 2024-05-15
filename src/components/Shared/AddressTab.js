@@ -1,27 +1,31 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceLookup } from './ResourceLookup'
 import FormGrid from 'src/components/form/layout/FormGrid'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
-const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) => {
-  console.log(maxAccess)
+const AddressTab = ({ addressValidation, readOnly = false, required = true }) => {
+  const { labels: labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.Address
+  })
 
   return (
-    <>
-      <Grid container sx={{ pt: 1 }}>
-        {/* First Column */}
-        <Grid container rowGap={3} xs={6} sx={{ px: 2 }}>
+    <VertLayout>
+      <Grid container gap={2}>
+        <Grow>
+        <Grid container gap={2}>
           <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='name'
               label={labels.name}
               value={addressValidation.values.name}
               readOnly={readOnly}
+              required={required}
               maxLength='20'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('name', '')}
@@ -35,6 +39,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               label={labels.street1}
               value={addressValidation.values.street1}
               readOnly={readOnly}
+              required={required}
               maxLength='20'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street1', '')}
@@ -124,9 +129,10 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               maxAccess={maxAccess}
             />
           </FormGrid>
-        </Grid>
-        {/* Second Column */}
-        <Grid container rowGap={3} xs={6} sx={{ px: 2 }}>
+          </Grid>
+        </Grow>
+        <Grow>
+        <Grid container gap={2}>
           <FormGrid hideonempty xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
@@ -135,6 +141,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               valueField='recordId'
               displayField={['reference', 'name']}
               readOnly={readOnly}
+              required={required}
               displayFieldWidth={2}
               columnsInDropDown={[
                 { key: 'reference', value: 'Reference' },
@@ -193,26 +200,25 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               valueField='name'
               displayField='name'
               name='city'
+              required={required}
               label={labels.city}
               readOnly={(readOnly || !addressValidation.values.countryId) && true}
               form={addressValidation}
               secondDisplayField={false}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  addressValidation.setFieldValue('cityId', newValue?.recordId)
-                  addressValidation.setFieldValue('city', newValue?.name)
-                } else {
-                  addressValidation.setFieldValue('cityId', '')
-                  addressValidation.setFieldValue('city', '')
-                }
-                addressValidation.setFieldValue('cityDistrictId', '')
-                addressValidation.setFieldValue('cityDistrict', '')
+                addressValidation.setValues({
+                  ...addressValidation.values,
+                  cityId: newValue?.recordId || '',
+
+                  city: newValue?.name || '',
+                  cityDistrictId: '',
+                  cityDistrict: ''
+                })
               }}
               errorCheck={'cityId'}
               maxAccess={maxAccess}
             />
           </FormGrid>
-
           <FormGrid hideonempty xs={12}>
             <ResourceLookup
               endpointId={SystemRepository.CityDistrict.snapshot}
@@ -260,7 +266,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               value={addressValidation.values.phone}
               readOnly={readOnly}
               maxLength='15'
-              type='text'
+              phone={true}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
@@ -274,6 +280,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               label={labels.phone2}
               value={addressValidation.values.phone2}
               maxLength='15'
+              phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone2', '')}
@@ -288,6 +295,7 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               label={labels.phone3}
               value={addressValidation.values.phone3}
               maxLength='15'
+              phone={true}
               readOnly={readOnly}
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('phone3', '')}
@@ -295,9 +303,10 @@ const AddressTab = ({ labels, addressValidation, maxAccess, readOnly = false }) 
               maxAccess={maxAccess}
             />
           </FormGrid>
-        </Grid>
+          </Grid>
+        </Grow>
       </Grid>
-    </>
+    </VertLayout>
   )
 }
 
