@@ -1,25 +1,15 @@
-// ** React Importsport
 import { useContext, useEffect, useState } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Forms
 import CharacteristicForm from '../forms/CharacteristicForm'
-
-// ** Helpers
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CharacteristicsForm = (
  { 
@@ -97,9 +87,11 @@ const CharacteristicsForm = (
   },[recordId])
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addCharacteristic} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={CharacteristicGridData}
@@ -110,8 +102,8 @@ const CharacteristicsForm = (
           pagination={false}
           height={height-100}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

@@ -10,29 +10,18 @@ const LoCarriersWindow = ({
   recordId,
   lookupBusinessPartners,
   businessPartnerStore,
-  setBusinessPartnerStore,
+  setBusinessPartnerStore
 }) => {
-  
   return (
-    <Window
-      id='LoCarriersWindow'
-      Title={labels.carrier}
-      controlled={true}
-      onClose={onClose}
-      width={500}
-      height={450}
-    >
-      <CustomTabPanel>
-        <LoCarriersForm
-          labels={labels}
-          maxAccess={maxAccess}
-          recordId={recordId}
-          lookupBusinessPartners={lookupBusinessPartners}
-          businessPartnerStore={businessPartnerStore}
-          setBusinessPartnerStore={setBusinessPartnerStore}
-        />
-       
-      </CustomTabPanel>
+    <Window id='LoCarriersWindow' Title={labels.carrier} controlled={true} width={500} height={500} onClose={onClose}>
+      <LoCarriersForm
+        labels={labels}
+        maxAccess={maxAccess}
+        recordId={recordId}
+        lookupBusinessPartners={lookupBusinessPartners}
+        businessPartnerStore={businessPartnerStore}
+        setBusinessPartnerStore={setBusinessPartnerStore}
+      />
     </Window>
   )
 }

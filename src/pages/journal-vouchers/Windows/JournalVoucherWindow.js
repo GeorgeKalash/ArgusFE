@@ -9,9 +9,9 @@ const JournalVoucherWindow = ({ onClose, labels, maxAccess, recordId }) => {
       id='JournalVoucherWindow'
       Title={labels.generalJournal}
       controlled={true}
-      onClose={onClose}
-      width={500}
       height={500}
+      width={600}
+      onClose={onClose}
     >
       <JournalVoucherForm labels={labels} maxAccess={maxAccess} recordId={recordId} />
     </Window>

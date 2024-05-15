@@ -15,6 +15,9 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useWindow } from 'src/windows'
 import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
 import { useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ClientsList = () => {
   const { stack } = useWindow()
@@ -131,14 +134,8 @@ const ClientsList = () => {
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           maxAccess={access}
           onSearch={value => {
@@ -150,6 +147,8 @@ const ClientsList = () => {
           labels={labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -160,11 +159,11 @@ const ClientsList = () => {
           pageSize={50}
           paginationType='client'
         />
-        {errorMessage?.error && (
-          <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-        )}{' '}
-      </Box>
-    </>
+      </Grow>
+      {errorMessage?.error && (
+        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+      )}{' '}
+    </VertLayout>
   )
 }
 

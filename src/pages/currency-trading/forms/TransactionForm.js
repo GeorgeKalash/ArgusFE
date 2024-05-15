@@ -28,6 +28,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -647,7 +648,6 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   return (
     <FormShell
       actions={actions}
-      height={400}
       form={formik}
       initialValues={initialValues}
       setEditMode={setEditMode}

@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -9,10 +8,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
@@ -96,7 +92,6 @@ export default function CostCenterForm({ labels, maxAccess, recordId,onSubmit })
         <FormShell
             resourceId={ResourceIds.CostCenter}
             form={formik}
-            height={300}
             maxAccess={maxAccess}
             editMode={editMode}
         >

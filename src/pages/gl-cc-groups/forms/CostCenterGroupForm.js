@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -8,8 +7,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
@@ -88,7 +85,6 @@ export default function CostCenterGroupForm({ labels, maxAccess, recordId }) {
         <FormShell 
             resourceId={ResourceIds.CostCenterGroup}
             form={formik} 
-            height={300} 
             maxAccess={maxAccess} 
             editMode={editMode}
         >

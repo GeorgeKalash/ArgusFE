@@ -16,6 +16,8 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -93,127 +95,125 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ExchangeTables}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            maxAccess={maxAccess}
-            maxLength='10'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
+    <FormShell resourceId={ResourceIds.ExchangeTables} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
 
-            // helperText={formik.touched.reference && formik.errors.reference}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            maxLength='50'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
+                // helperText={formik.touched.reference && formik.errors.reference}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='50'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
 
-            // helperText={formik.touched.name && formik.errors.name}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Currency.qry}
-            name='currencyId'
-            label={labels.currencyId}
-            valueField='recordId'
-            displayField={['reference', 'name', 'flName']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' },
-              { key: 'flName', value: 'Foreign Language' }
-            ]}
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('currencyId', newValue?.recordId)
-            }}
-            error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                // helperText={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={labels.currencyId}
+                valueField='recordId'
+                displayField={['reference', 'name', 'flName']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId)
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
 
-            // helperText={formik.touched.currencyId && formik.errors.currencyId}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.MC_RATE_CALC_METHOD}
-            name='rateCalcMethod'
-            label={labels.rateCalcMethod}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('rateCalcMethod', newValue?.key)
-            }}
-            error={formik.touched.rateCalcMethod && Boolean(formik.errors.rateCalcMethod)}
+                // helperText={formik.touched.currencyId && formik.errors.currencyId}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.MC_RATE_CALC_METHOD}
+                name='rateCalcMethod'
+                label={labels.rateCalcMethod}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rateCalcMethod', newValue?.key)
+                }}
+                error={formik.touched.rateCalcMethod && Boolean(formik.errors.rateCalcMethod)}
 
-            // helperText={formik.touched.rateCalcMethod && formik.errors.rateCalcMethod}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.MC_RATE_AGAINST}
-            name='rateAgainst'
-            label={labels.rateAgainst}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('rateAgainst', newValue?.key)
-            }}
-            error={formik.touched.rateAgainst && Boolean(formik.errors.rateAgainst)}
+                // helperText={formik.touched.rateCalcMethod && formik.errors.rateCalcMethod}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.MC_RATE_AGAINST}
+                name='rateAgainst'
+                label={labels.rateAgainst}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rateAgainst', newValue?.key)
+                }}
+                error={formik.touched.rateAgainst && Boolean(formik.errors.rateAgainst)}
 
-            // helperText={formik.touched.rateAgainst && formik.errors.rateAgainst}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Currency.qry}
-            name='rateAgainstCurrencyId'
-            label={labels.rateAgainstCurrencyId}
-            valueField='recordId'
-            displayField={['reference', 'name', 'flName']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' },
-              { key: 'flName', value: 'Foreign Language' }
-            ]}
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('rateAgainstCurrencyId', newValue?.recordId)
-            }}
-            error={formik.touched.rateAgainstCurrencyId && Boolean(formik.errors.rateAgainstCurrencyId)}
+                // helperText={formik.touched.rateAgainst && formik.errors.rateAgainst}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='rateAgainstCurrencyId'
+                label={labels.rateAgainstCurrencyId}
+                valueField='recordId'
+                displayField={['reference', 'name', 'flName']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rateAgainstCurrencyId', newValue?.recordId)
+                }}
+                error={formik.touched.rateAgainstCurrencyId && Boolean(formik.errors.rateAgainstCurrencyId)}
 
-            // helperText={formik.touched.rateAgainstCurrencyId && formik.errors.rateAgainstCurrencyId}
-          />
-        </Grid>
-      </Grid>
+                // helperText={formik.touched.rateAgainstCurrencyId && formik.errors.rateAgainstCurrencyId}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

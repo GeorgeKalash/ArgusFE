@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -94,7 +93,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
     <FormShell
       resourceId={ResourceIds.SourceOfIncome}
       form={formik}
-      height={300}
       maxAccess={maxAccess}
       editMode={editMode}
     >

@@ -136,7 +136,6 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
       actions={actions}
       resourceId={ResourceIds.JournalVoucher}
       form={formik}
-      height={300}
       functionId={SystemFunction.JournalVoucher}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -206,7 +205,7 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
             label={labels.notes}
             value={formik.values.notes}
             maxLength='100'
-            rows={2}
+            rows={3}
             maxAccess={maxAccess}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('notes', '')}

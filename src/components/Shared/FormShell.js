@@ -7,6 +7,7 @@ import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
+
 import Approvals from './Approvals'
 import ResourceRecordRemarks from './ResourceRecordRemarks'
 
@@ -84,11 +85,12 @@ export default function FormShell({
       title: 'Resource Record Remarks'
     })
   }
+  console.log('formikk test ', form)
 
   return (
     <>
-      <DialogContent sx={{ flex: 1, height: '100%', zIndex: 0 }}>
-        <Box sx={{ mt: 1 }}>{children}</Box>
+      <DialogContent sx={{ display: 'flex !important', flex: 1, flexDirection: 'column', overflow: 'auto' }}>
+        {children}
       </DialogContent>
       {windowToolbarVisible && (
         <WindowToolbar
@@ -114,6 +116,7 @@ export default function FormShell({
                 setErrorMessage: setErrorMessage
               },
               width: 700,
+              height: 600,
               height: 'auto',
               title: 'Transaction Log'
             })
@@ -152,8 +155,8 @@ export default function FormShell({
                 selectedReport: selectedReport,
                 recordId: form.values?.recordId
               },
-              width: 1000,
-              height: 500,
+              width: 1150,
+              height: 700,
               title: 'Preview Report'
             })
           }

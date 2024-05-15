@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -8,10 +7,9 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, setStore }) {
@@ -46,6 +44,7 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       })
 
       if (!recordId) {
+
         setStore({
           recordId: response.recordId,
           name: obj.name
@@ -74,20 +73,16 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       })
       .catch(error => {})
   }
-
-  useEffect(() => {
+  
+    useEffect(() => {
     recordId && getData(recordId)
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.PurposeOfExchange}
-      form={formik}
-      height={300}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
-      <Grid container spacing={4}>
+    <FormShell resourceId={ResourceIds.PurposeOfExchange} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+           <Grid container spacing={4}>
         <Grid item xs={12}>
           <CustomTextField
             name='reference'
@@ -112,9 +107,11 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('name', '')}
             error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-      </Grid>
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }
