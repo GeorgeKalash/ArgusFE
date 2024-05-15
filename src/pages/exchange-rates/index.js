@@ -71,8 +71,8 @@ const ExchangeRates = () => {
       flex: 1,
       valueFormatter: ({ value }) => {
         return new Intl.NumberFormat('en-US', {
-          minimumFractionDigits: 0, // This will prevent trailing zeros
-          maximumFractionDigits: 5, // Allows up to five decimal places if needed
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 5,
           useGrouping: true
         }).format(value)
       }
