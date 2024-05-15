@@ -24,6 +24,9 @@ import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const FiDimensions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -159,82 +162,84 @@ const FiDimensions = () => {
   }
 
   return (
-    <>
-      <FormShell
-        resourceId={ResourceIds.FI_dimensions}
-        maxAccess={access}
-        form={formik}
-        isSaved={false}
-        isInfo={false}
-        isCleared={false}
-      >
-        <Grid container spacing={3} width={700}>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='DimCount'
-              label={_labels.DimCount}
-              value={tempDimCount === null ? formik.values.DimCount : tempDimCount}
-              onChange={handleDimCountChange}
-              onBlur={handleDimCountBlur}
-              numberField={true}
-              removeClear={true}
-              type='number'
-              error={formik.touched.DimCount && Boolean(formik.errors.DimCount)}
-              inputProps={{
-                min: 1,
-                max: 20,
-                maxLength: 2,
-                inputMode: 'numeric',
-                pattern: '[1-20]*'
-              }}
-              helperText={formik.touched.DimCount && formik.errors.DimCount}
-            />
-          </Grid>
+    <FormShell
+      resourceId={ResourceIds.FI_dimensions}
+      maxAccess={access}
+      form={formik}
+      isSaved={false}
+      isInfo={false}
+      isCleared={false}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={3} width={900}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='DimCount'
+                label={_labels.DimCount}
+                value={tempDimCount === null ? formik.values.DimCount : tempDimCount}
+                onChange={handleDimCountChange}
+                onBlur={handleDimCountBlur}
+                numberField={true}
+                removeClear={true}
+                type='number'
+                error={formik.touched.DimCount && Boolean(formik.errors.DimCount)}
+                inputProps={{
+                  min: 1,
+                  max: 20,
+                  maxLength: 2,
+                  inputMode: 'numeric',
+                  pattern: '[1-20]*'
+                }}
+                helperText={formik.touched.DimCount && formik.errors.DimCount}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6} sx={{ marginTop: '0.2rem' }}>
-            <Grid container spacing={2}>
-              {Array.from({ length: 10 }).map((_, index) => (
-                <Grid item xs={12} key={1}>
-                  <CustomTextField
-                    key={index}
-                    name={`tpaDimension${index + 1}`}
-                    label={`${_labels.Dim} ${index + 1}`}
-                    value={formik.values[`tpaDimension${index + 1}`]}
-                    onClear={() => formik.setFieldValue(`tpaDimension${index + 1}`, '')}
-                    onChange={formik.handleChange}
-                    error={formik.values.DimCount > index && Boolean(formik.errors[`tpaDimension${index + 1}`])}
-                    inputProps={{
-                      readOnly: formik.values.DimCount <= index || formik.values.DimCount === 'null'
-                    }}
-                  />
-                </Grid>
-              ))}
+            <Grid item xs={12} md={6} sx={{ marginTop: '0.2rem' }}>
+              <Grid container spacing={2}>
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <Grid item xs={12} key={1}>
+                    <CustomTextField
+                      key={index}
+                      name={`tpaDimension${index + 1}`}
+                      label={`${_labels.Dim} ${index + 1}`}
+                      value={formik.values[`tpaDimension${index + 1}`]}
+                      onClear={() => formik.setFieldValue(`tpaDimension${index + 1}`, '')}
+                      onChange={formik.handleChange}
+                      error={formik.values.DimCount > index && Boolean(formik.errors[`tpaDimension${index + 1}`])}
+                      inputProps={{
+                        readOnly: formik.values.DimCount <= index || formik.values.DimCount === 'null'
+                      }}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+
+            <Grid item xs={12} md={6} sx={{ marginTop: '0.2rem' }}>
+              <Grid container spacing={2}>
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <Grid item xs={12} key={1}>
+                    <CustomTextField
+                      key={index + 10}
+                      name={`tpaDimension${index + 11}`}
+                      label={`${_labels.Dim} ${index + 11}`}
+                      value={formik.values[`tpaDimension${index + 11}`]}
+                      onClear={() => formik.setFieldValue(`tpaDimension${index + 11}`, '')}
+                      onChange={formik.handleChange}
+                      error={formik.values.DimCount > index + 10 && Boolean(formik.errors[`tpaDimension${index + 11}`])}
+                      inputProps={{
+                        readOnly: formik.values.DimCount <= index + 10 || formik.values.DimCount === 'null'
+                      }}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
           </Grid>
+        </Grow>
 
-          <Grid item xs={12} md={6} sx={{ marginTop: '0.2rem' }}>
-            <Grid container spacing={2}>
-              {Array.from({ length: 10 }).map((_, index) => (
-                <Grid item xs={12} key={1}>
-                  <CustomTextField
-                    key={index + 10}
-                    name={`tpaDimension${index + 11}`}
-                    label={`${_labels.Dim} ${index + 11}`}
-                    value={formik.values[`tpaDimension${index + 11}`]}
-                    onClear={() => formik.setFieldValue(`tpaDimension${index + 11}`, '')}
-                    onChange={formik.handleChange}
-                    error={formik.values.DimCount > index + 10 && Boolean(formik.errors[`tpaDimension${index + 11}`])}
-                    inputProps={{
-                      readOnly: formik.values.DimCount <= index + 10 || formik.values.DimCount === 'null'
-                    }}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Grid>
-        </Grid>
-
-        <Grid
+        {/* <Grid
           sx={{
             position: 'fixed',
             bottom: 0,
@@ -243,11 +248,12 @@ const FiDimensions = () => {
             padding: 3,
             textAlign: 'center'
           }}
-        >
+        > */}
+        <Fixed>
           <WindowToolbar onSave={handleSubmit} isSaved={true} />
-        </Grid>
-      </FormShell>
-    </>
+        </Fixed>
+      </VertLayout>
+    </FormShell>
   )
 }
 
