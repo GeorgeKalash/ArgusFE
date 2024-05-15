@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
@@ -9,6 +8,9 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { useResourceQuery } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const SystemChecks = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -100,20 +102,23 @@ const SystemChecks = () => {
   }
 
   return (
-    <Box>
-      <Table
-        columns={columns}
-        gridData={data}
-        rowId={['checkId']}
-        isLoading={false}
-        maxAccess={access}
-        showCheckboxColumn={true}
-        handleCheckedRows={() => {}}
-        pagination={false}
-        addedHeight={'18px'}
-      />
-      <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
-    </Box>
+    <VertLayout>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['checkId']}
+          isLoading={false}
+          maxAccess={access}
+          showCheckboxColumn={true}
+          handleCheckedRows={() => {}}
+          pagination={false}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
 

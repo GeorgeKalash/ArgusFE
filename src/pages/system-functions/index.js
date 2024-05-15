@@ -1,13 +1,14 @@
 import { useContext } from 'react'
-import { Box, Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
+import FormShell from 'src/components/Shared/FormShell'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { DataGrid } from 'src/components/Shared/DataGrid'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,7 +24,6 @@ const SystemFunction = () => {
         id: index + 1,
         ...rest
       }))
-    })
     })
   }
 
@@ -53,14 +53,12 @@ const SystemFunction = () => {
       const resultObject = {
         systemFunctionMappings: values.rows
       }
-      postRequest({
+
+      await postRequest({
         extension: SystemRepository.SystemFunction.set2,
         record: JSON.stringify(resultObject)
       })
-        .then(res => {
-          toast.success('Record Updated Successfully')
-        })
-        .catch(error => {})
+      toast.success('Record Updated Successfully')
     }
   })
 
@@ -71,7 +69,6 @@ const SystemFunction = () => {
       name: 'functionId',
       props: {
         readOnly: true
-        readOnly: true
       }
     },
     {
@@ -80,7 +77,6 @@ const SystemFunction = () => {
       name: 'sfName',
       props: {
         readOnly: true
-      }
       }
     },
     {
@@ -124,25 +120,22 @@ const SystemFunction = () => {
   ]
 
   return (
-    <>
-      <Box>
-        <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false}>
-          <Grid container>
-            <DataGrid
-              height={`calc(100vh - 150px)`}
-              onChange={value => {
-                formik.setFieldValue('rows', value)
-              }}
-              value={formik.values?.rows}
-              error={formik.errors?.rows}
-              columns={columns}
-              allowDelete={false}
-              allowAddNewLine={false}
-            />
-          </Grid>
-        </FormShell>
-      </Box>
-    </>
+    <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => {
+              formik.setFieldValue('rows', value)
+            }}
+            value={formik.values?.rows}
+            error={formik.errors?.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

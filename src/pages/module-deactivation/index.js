@@ -1,12 +1,10 @@
 import { useState, useContext, useEffect } from 'react'
-import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataSets } from 'src/resources/DataSets'
 import toast from 'react-hot-toast'
 import { CommonContext } from 'src/providers/CommonContext'
@@ -16,7 +14,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ModuleDeactivation = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { height } = useWindowDimensions()
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [data, setData] = useState([])
 
