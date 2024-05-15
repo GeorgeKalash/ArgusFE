@@ -86,7 +86,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
           clientRef: RTBEN?.record?.clientRef,
           clientName: RTBEN?.record?.clientName,
           countryId: RTBEN?.record?.countryId,
-
+          seqNo: RTBEN?.record?.seqNo,
 
           //RTBEC
           firstName: RTBEC?.record?.firstName,
@@ -97,7 +97,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
           fl_lastName: RTBEC?.record?.fl_lastName,
           fl_middleName: RTBEC?.record?.fl_middleName,
           fl_familyName: RTBEC?.record?.fl_familyName,
-          
+
           //countryId: RTBEC?.record?.countryId,
           birthPlace: RTBEC?.record?.birthPlace
         }
@@ -133,6 +133,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
     clientRef: '',
     clientName: '',
     countryId: '',
+    seqNo: 1,
 
     //RTBEC
     firstName: '',
@@ -182,7 +183,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
         addressLine2: values.addressLine2,
         clientRef: values.clientRef,
         clientName: values.clientName,
-        countryId: values.countryId
+        countryId: values.countryId,
+        seqNo: values.seqNo
       }
 
       const cashInfo = {
@@ -319,6 +321,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               error={formik.touched.name && Boolean(formik.errors.name)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
         </Grid>
@@ -329,7 +332,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               label={_labels.firstName}
               value={formik.values?.firstName}
               required
-              readOnly={notArabic}
+              readOnly={notArabic || formik?.values?.beneficiaryId}
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('firstName', '')}
@@ -356,7 +359,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               label={_labels.lastName}
               value={formik.values?.lastName}
               required
-              readOnly={notArabic}
+              readOnly={notArabic || formik?.values?.beneficiaryId}
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('lastName', '')}
@@ -449,6 +452,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onClear={() => formik.setFieldValue('cellPhone', '')}
               error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -474,6 +478,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -493,6 +498,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               error={formik.touched.cobId && Boolean(formik.errors.cobId)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -505,6 +511,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onClear={() => formik.setFieldValue('birthPlace', '')}
               error={formik.touched.birthPlace && Boolean(formik.errors.birthPlace)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -518,6 +525,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -531,6 +539,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
         </Grid>
@@ -545,6 +554,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onClear={() => formik.setFieldValue('birthDate', '')}
               error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -560,6 +570,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               maxAccess={maxAccess}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -585,6 +596,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid xs={12}>

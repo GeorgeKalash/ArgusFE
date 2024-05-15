@@ -74,6 +74,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
           clientRef: RTBEN?.record?.clientRef,
           clientName: RTBEN?.record?.clientName,
           countryId: RTBEN?.record?.countryId,
+          seqNo: RTBEN?.record?.seqNo,
 
           //RTBEB
           bankId: RTBEB?.record?.bankId,
@@ -118,6 +119,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
     clientRef: '',
     clientName: '',
     countryId: '',
+    seqNo: 1,
 
     //RTBEB
     bankId: null,
@@ -164,7 +166,8 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
         shortName: values.shortName,
         addressLine1: values.addressLine1,
         addressLine2: values.addressLine2,
-        countryId: values.countryId
+        countryId: values.countryId,
+        seqNo: values.seqNo
       }
 
       const bankInfo = {
@@ -252,6 +255,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               maxLength='50'
               error={formik.touched.name && Boolean(formik.errors.name)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -272,6 +276,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
                 formik.setFieldValue('bankId', newValue ? newValue.recordId : '')
               }}
               error={formik.touched.bankId && Boolean(formik.errors.bankId)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
 
@@ -284,6 +289,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               maxLength='50'
               error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
 
@@ -296,6 +302,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               maxLength='100'
               error={formik.touched.branchName && Boolean(formik.errors.branchName)}
+              readOnly={formik?.values?.beneficiaryId}
               maxAccess={maxAccess}
             />
           </FormGrid>
@@ -308,6 +315,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               maxLength='20'
               error={formik.touched.branchCode && Boolean(formik.errors.branchCode)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -319,6 +327,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onClear={() => formik.setFieldValue('birthDate', '')}
               error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -338,6 +347,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               }}
               error={formik.touched.cobId && Boolean(formik.errors.cobId)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -357,6 +367,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               }}
               maxAccess={maxAccess}
               error={formik.touched.accountType && Boolean(formik.errors.accountType)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -370,6 +381,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -383,6 +395,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -406,6 +419,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
                 formik.setFieldValue('nationalityId', newValue ? newValue.recordId : '')
               }}
               error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -416,6 +430,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               error={formik.touched.state && Boolean(formik.errors.state)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -426,6 +441,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               error={formik.touched.city && Boolean(formik.errors.city)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
         </Grid>
@@ -461,6 +477,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               maxLength='50'
               error={formik.touched.shortName && Boolean(formik.errors.shortName)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -475,6 +492,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onClear={() => formik.setFieldValue('cellPhone', '')}
               error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -496,6 +514,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               maxAccess={maxAccess}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
               helperText={formik.touched.gender && formik.errors.gender}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -511,6 +530,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
                   formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
                 }}
                 error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+                readOnly={formik?.values?.beneficiaryId}
               />
             </Grid>
           </FormGrid>
@@ -523,6 +543,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               error={formik.touched.zipcode && Boolean(formik.errors.zipcode)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -534,6 +555,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               error={formik.touched.swiftCode && Boolean(formik.errors.swiftCode)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -545,6 +567,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               error={formik.touched.routingNo && Boolean(formik.errors.routingNo)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -556,6 +579,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
               maxAccess={maxAccess}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -584,6 +608,7 @@ export default function BenificiaryBankForm({ clientId, dispersalType, beneficia
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('remarks', '')}
               error={formik.touched.remarks && Boolean(formik.errors.remarks)}
+              readOnly={formik?.values?.beneficiaryId}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
