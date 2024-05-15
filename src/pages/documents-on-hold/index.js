@@ -1,30 +1,15 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-
-// ** Windows
 import DocumentsWindow from './window/DocumentsWindow'
 import { useWindow } from 'src/windows'
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import { formatDateDefault } from 'src/lib/date-helper'
 import CreditOrder from '../credit-order'
 import CreditOrderForm from '../credit-order/Forms/CreditOrderForm'
@@ -37,6 +22,10 @@ import TransactionForm from '../currency-trading/forms/TransactionForm'
 import OutwardsTab from '../outwards-transfer/Tabs/OutwardsTab'
 import ClientTemplateForm from '../clients-list/forms/ClientTemplateForm'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
+
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const DocumentsOnHold = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -139,7 +128,7 @@ const DocumentsOnHold = () => {
     let recordId = obj.recordId
     let labels
     let relevantAccess
-    let windowHeight
+
     let windowWidth
     let title
 
@@ -149,7 +138,7 @@ const DocumentsOnHold = () => {
         relevantComponent = CreditOrderForm
         labels = await getLabels(ResourceIds.CreditOrder)
         relevantAccess = await getAccess(ResourceIds.CreditOrder)
-        windowHeight = 600
+
         windowWidth = 950
         title = labels[1]
         break
@@ -159,7 +148,7 @@ const DocumentsOnHold = () => {
         relevantComponent = CreditInvoiceForm
         labels = await getLabels(ResourceIds.CreditInvoice)
         relevantAccess = await getAccess(ResourceIds.CreditInvoice)
-        windowHeight = 600
+
         windowWidth = 950
         title = labels[1]
         break
@@ -169,7 +158,7 @@ const DocumentsOnHold = () => {
         relevantComponent = TransactionForm
         labels = await getLabels(ResourceIds.CashInvoice)
         relevantAccess = await getAccess(ResourceIds.CashInvoice)
-        windowHeight = 600
+
         windowWidth = 1200
         title = labels.cashInvoice
         break
@@ -184,7 +173,7 @@ const DocumentsOnHold = () => {
         relevantComponent = ClientTemplateForm
         labels = await getLabels(ResourceIds.ClientMaster)
         relevantAccess = await getAccess(ResourceIds.ClientMaster)
-        windowHeight = 600
+
         windowWidth = 1100
         title = labels.pageTitle
 
@@ -194,7 +183,7 @@ const DocumentsOnHold = () => {
         relevantComponent = OutwardsTab
         labels = await getLabels(ResourceIds.OutwardsTransfer)
         relevantAccess = await getAccess(ResourceIds.OutwardsTransfer)
-        windowHeight = 600
+
         windowWidth = 1100
         title = labels.OutwardsTransfer
 
@@ -212,7 +201,7 @@ const DocumentsOnHold = () => {
           maxAccess: relevantAccess
         },
         width: windowWidth,
-        height: windowHeight,
+
         title: title
       })
     }
@@ -242,8 +231,8 @@ const DocumentsOnHold = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           maxAccess={access}
           onSearch={search}
@@ -251,6 +240,8 @@ const DocumentsOnHold = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={searchValue.length > 0 ? gridData : data}
@@ -264,7 +255,7 @@ const DocumentsOnHold = () => {
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
       {windowOpen && (
         <DocumentsWindow
           onClose={() => {
@@ -281,7 +272,7 @@ const DocumentsOnHold = () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

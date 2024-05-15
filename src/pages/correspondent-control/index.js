@@ -2,7 +2,6 @@ import { Box, Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -15,6 +14,9 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const BeneficiaryFields = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -147,11 +149,11 @@ const BeneficiaryFields = () => {
   }
 
   return (
-    <>
-      <Box sx={{ height: `calc(100vh - 48px)`, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
-        <div style={{ display: 'flex' }}>
-          <GridToolbar maxAccess={access}>
-            <Box sx={{ display: 'flex', width: '1000px', justifyContent: 'flex-start', pt: 2, pl: 2 }}>
+    <VertLayout>
+      <Fixed>
+        <GridToolbar maxAccess={access}>
+          <Grid container xs={9} spacing={4} sx={{ pt: '1rem', pl: '0.5rem' }}>
+            <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
                 name='countryId'
@@ -174,8 +176,9 @@ const BeneficiaryFields = () => {
                 }}
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
                 maxAccess={access}
-                sx={{ width: '300px' }}
               />
+            </Grid>
+            <Grid item xs={3}>
               <ResourceComboBox
                 datasetId={DataSets.BENEFICIARY_RESOURCEIDS}
                 label={labels.dispersalType}
@@ -193,99 +196,94 @@ const BeneficiaryFields = () => {
                   }
                 }}
                 error={formik.touched.dispersalType && Boolean(formik.errors.dispersalType)}
-                sx={{ pl: 2, width: '310px' }}
               />
-              <Box sx={{ pl: 2, width: '600px' }}>
-                <ResourceLookup
-                  endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
-                  valueField='reference'
-                  displayField='name'
-                  name='corId'
-                  label={labels.correspondent}
-                  form={formik}
-                  displayFieldWidth={2}
-                  firstFieldWidth='40%'
-                  valueShow='corRef'
-                  secondValueShow='corName'
-                  maxAccess={access}
-                  onChange={async (event, newValue) => {
-                    if (newValue) {
-                      onChange('corId', newValue?.recordId)
-                      formik.setFieldValue('corId', newValue?.recordId)
-                      formik.setFieldValue('corName', newValue?.name || '')
-                      formik.setFieldValue('corRef', newValue?.reference || '')
-                    } else {
-                      onChange('corId', 0)
-                      formik.setFieldValue('corId', 0)
-                      formik.setFieldValue('corName', '')
-                      formik.setFieldValue('corRef', '')
-                    }
-                  }}
-                  onClear={() => {
+            </Grid>
+            <Grid item xs={5}>
+              <ResourceLookup
+                endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
+                valueField='reference'
+                displayField='name'
+                name='corId'
+                label={labels.correspondent}
+                form={formik}
+                displayFieldWidth={2}
+                firstFieldWidth='40%'
+                valueShow='corRef'
+                secondValueShow='corName'
+                maxAccess={access}
+                onChange={async (event, newValue) => {
+                  if (newValue) {
+                    onChange('corId', newValue?.recordId)
+                    formik.setFieldValue('corId', newValue?.recordId)
+                    formik.setFieldValue('corName', newValue?.name || '')
+                    formik.setFieldValue('corRef', newValue?.reference || '')
+                  } else {
                     onChange('corId', 0)
                     formik.setFieldValue('corId', 0)
                     formik.setFieldValue('corName', '')
                     formik.setFieldValue('corRef', '')
-                  }}
-                  errorCheck={'corId'}
-                />
-              </Box>
-            </Box>
-          </GridToolbar>
-        </div>
-        <FormShell
-          height={600}
-          form={formik}
-          isInfo={false}
-          initialValues={initialValues}
-          resourceId={ResourceIds.CorrespondentControl}
-        >
-          <Grid width={'100%'}>
-            <DataGrid
-              onChange={value => formik.setFieldValue('rows', value)}
-              value={formik.values.rows}
-              error={formik.errors.rows}
-              allowDelete={false}
-              height={550}
-              columns={[
-                {
-                  component: 'textfield',
-                  name: 'controlId',
-                  label: labels.controlId,
-                  props: {
-                    readOnly: true
                   }
-                },
-                {
-                  component: 'textfield',
-                  name: 'controlName',
-                  label: labels.controlName,
-                  props: {
-                    readOnly: true
-                  }
-                },
-                {
-                  component: 'resourcecombobox',
-                  label: labels.accessLevel,
-                  name: 'accesslevelName',
-                  props: {
-                    datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
-                    displayField: 'value',
-                    valueField: 'key',
-                    mapping: [
-                      { from: 'key', to: 'accessLevel' },
-                      { from: 'value', to: 'accessLevelName' }
-                    ],
-                    displayFieldWidth: 20
-                  },
-                  widthDropDown: 200
-                }
-              ]}
-            />
+                }}
+                onClear={() => {
+                  onChange('corId', 0)
+                  formik.setFieldValue('corId', 0)
+                  formik.setFieldValue('corName', '')
+                  formik.setFieldValue('corRef', '')
+                }}
+                errorCheck={'corId'}
+              />
+            </Grid>
           </Grid>
-        </FormShell>
-      </Box>
-    </>
+        </GridToolbar>
+      </Fixed>
+      <FormShell
+        form={formik}
+        isInfo={false}
+        initialValues={initialValues}
+        resourceId={ResourceIds.CorrespondentControl}
+      >
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('rows', value)}
+            value={formik.values.rows}
+            error={formik.errors.rows}
+            allowDelete={false}
+            columns={[
+              {
+                component: 'textfield',
+                name: 'controlId',
+                label: labels.controlId,
+                props: {
+                  readOnly: true
+                }
+              },
+              {
+                component: 'textfield',
+                name: 'controlName',
+                label: labels.controlName,
+                props: {
+                  readOnly: true
+                }
+              },
+              {
+                component: 'resourcecombobox',
+                label: labels.accessLevel,
+                name: 'accesslevelName',
+                props: {
+                  datasetId: DataSets.AU_RESOURCE_CONTROL_ACCESS_LEVEL,
+                  displayField: 'value',
+                  valueField: 'key',
+                  mapping: [
+                    { from: 'key', to: 'accessLevel' },
+                    { from: 'value', to: 'accessLevelName' }
+                  ]
+                }
+              }
+            ]}
+          />
+        </Grow>
+      </FormShell>
+    </VertLayout>
   )
 }
 

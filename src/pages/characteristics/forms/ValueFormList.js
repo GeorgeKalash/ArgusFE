@@ -1,23 +1,9 @@
-// ** React Importsport
 import { useContext, useEffect, useState } from 'react'
-
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-// ** Forms
 import ValueForm from '../forms/ValueForm'
-
-// ** Helpers
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useWindow } from 'src/windows'
 
@@ -25,8 +11,7 @@ const ValueFormList = (
  { 
   labels,
   store,
-  maxAccess,
-  height
+  maxAccess
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [maxSeqNo, setMaxSeqNo] = useState(0);
@@ -101,20 +86,17 @@ const ValueFormList = (
 
   return (
     <>
-      <Box>
-        <GridToolbar onAdd={addValue} maxAccess={maxAccess} />
-        <Table
-          columns={columns}
-          gridData={valueGridData}
-          rowId={['seqNo']}
-          onEdit={editValue}
-          onDelete={delValue}
-          isLoading={false}
-          maxAccess={maxAccess}
-          pagination={false}
-          height={height-100}
-        />
-      </Box>
+      <GridToolbar onAdd={addValue} maxAccess={maxAccess} />
+      <Table
+        columns={columns}
+        gridData={valueGridData}
+        rowId={['seqNo']}
+        onEdit={editValue}
+        onDelete={delValue}
+        isLoading={false}
+        maxAccess={maxAccess}
+        pagination={false}
+      />
     </>
   )
 }
