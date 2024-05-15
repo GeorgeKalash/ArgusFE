@@ -50,7 +50,7 @@ const GateKeeper = () => {
           sku: '',
           itemName: '',
           qty: '',
-          qtyProduce: '',
+          qtyProduced: '',
           status: '',
           checked: false
         }
@@ -101,7 +101,7 @@ const GateKeeper = () => {
     const data = response.list.map((item, index) => ({
       ...item,
       id: index + 1,
-      balance: item.qty - (item.qtyProduce ?? 0),
+      balance: item.qty - (item.qtyProduced ?? 0),
       date: formatDateFromApi(item?.date)
     }))
     formik.setValues({ rows: data })
@@ -137,7 +137,7 @@ const GateKeeper = () => {
     },
     {
       component: 'numberfield',
-      name: 'qtyProduce',
+      name: 'qtyProduced',
       label: _labels.produced,
       props: {
         readOnly: true
