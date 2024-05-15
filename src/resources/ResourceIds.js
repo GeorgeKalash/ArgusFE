@@ -120,5 +120,5 @@ export const ResourceIds = {
   PriceLevels: 51101,
   CommissionSchedule: 51118,
   ProductionRequestLog: 42321,
-  CashCount: 3701
+  Transaction: 37301
 }

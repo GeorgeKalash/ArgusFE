@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -96,35 +96,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                 parameters={{
                   _type: 2
                 }}
-                valueField='recordId'
-                displayField='reference'
                 name='cashAccountRef'
-                label={labels.cashAccount}
-                secondDisplayField={true}
-                form={formik}
-                firstValue={formik.values.cashAccountRef}
-                secondValue={formik.values.cashAccountName}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('cashAccountId', newValue?.recordId)
-                    formik.setFieldValue('cashAccountRef', newValue?.reference)
-                    formik.setFieldValue('cashAccountName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('cashAccountId', null)
-                    formik.setFieldValue('cashAccountRef', null)
-                    formik.setFieldValue('cashAccountName', null)
-                  }
-                }}
-                errorCheck={'cashAccountId'}
-                maxAccess={maxAccess}
-                error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
-              />
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 2
-                }}
-                name='cashAccountId'
                 required
                 label={labels.businessPartner}
                 valueField='reference'
@@ -140,8 +112,7 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
                     cashAccountName: newValue?.name || ''
                   })
                 }}
-
-                // maxAccess={maxAccess}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={7}>
@@ -177,6 +148,19 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={7}>
               <CustomTextField name='time' label={labels.time} value={formik.values.time} readOnly={true} />
+            </Grid>
+            <Grid item xs={6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='forceNoteCount'
+                    checked={clientIndividualFormik.values?.forceNoteCount}
+                    onChange={clientIndividualFormik.forceNoteCount}
+                    disabled={editMode}
+                  />
+                }
+                label={labels.isResident}
+              />
             </Grid>
           </Grid>
         </Fixed>
@@ -240,6 +224,13 @@ export default function CashCountForm({ labels, maxAccess, recordId }) {
             ]}
           />
         </Grow>
+        <Fixed>
+          <Grid container spacing={4} sx={{ mb: 3, display: 'flex', justifyContent: 'right' }}>
+            <Grid item xs={4}>
+              <CustomTextField name='total' label={labels.time} value={formik.values.total} readOnly={true} />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )

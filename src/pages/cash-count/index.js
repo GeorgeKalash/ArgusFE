@@ -21,7 +21,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
-import CashAccountForm from '../fi-cash-accounts/forms/CashAccountForm'
 import CashCountForm from './forms/CashCountForm'
 
 const CashCount = () => {
@@ -47,7 +46,7 @@ const CashCount = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CTTRXrepository.CashCount.qry,
-    datasetId: ResourceIds.CashCount
+    datasetId: ResourceIds.Transaction
   })
 
   const columns = [
