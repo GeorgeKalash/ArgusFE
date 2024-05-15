@@ -16,7 +16,7 @@ const GroupInfoWindow = ({ labels, maxAccess, recordId, height }) => {
         <GroupInfoTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <SGUsersTab maxAccess={maxAccess} labels={labels} storeRecordId={storeRecordId} setRecordId={setRecordId} />
+        <SGUsersTab maxAccess={maxAccess} labels={labels} storeRecordId={storeRecordId} />
       </CustomTabPanel>
     </>
   )

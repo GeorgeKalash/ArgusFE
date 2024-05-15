@@ -13,8 +13,6 @@ import toast from 'react-hot-toast'
 
 const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [editMode, setEditMode] = useState(!!storeRecordId)
-  console.log('check editMode ', !!storeRecordId)
 
   const { formik } = useForm({
     initialValues: { recordId: storeRecordId || null, name: '', description: '' },
@@ -35,8 +33,6 @@ const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
           recordId: res.recordId
         })
         setRecordId(res?.recordId)
-
-        // setEditMode(true)
       } else {
         toast.success('Record Updated Successfully')
       }
