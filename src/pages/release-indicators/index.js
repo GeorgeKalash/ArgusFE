@@ -1,36 +1,20 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
-import {Box } from '@mui/material'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import ReleaseIndicatorWindow from './Windows/ReleaseIndicatorWindow'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-
-// ** Windows
-
-
-
-// ** Helpers
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const ReleaseIndicators =  () => {
+const ReleaseIndicators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
- 
   const [selectedRecordId, setSelectedRecordId] = useState(null)
-
-  //states
   const [windowOpen, setWindowOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
 
@@ -72,9 +56,7 @@ const ReleaseIndicators =  () => {
       field: 'recordId',
       headerName: _labels.id,
       flex: 1,
-      align: 'right',
-
-      
+      align: 'right'
     },
     {
       field: 'changeabilityName',
@@ -85,7 +67,6 @@ const ReleaseIndicators =  () => {
 
   const add = () => {
     setWindowOpen(true)
-
   }
 
   const edit = obj => {
@@ -101,12 +82,13 @@ const ReleaseIndicators =  () => {
     invalidate()
     toast.success('Record Deleted Successfully')
   }
-  
 
   return (
-    <>
-      <Box>
-        <GridToolbar onAdd={add} maxAccess={access} />
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />{' '}
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -118,7 +100,8 @@ const ReleaseIndicators =  () => {
           paginationType='client'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
         <ReleaseIndicatorWindow
           onClose={() => {
@@ -133,7 +116,7 @@ const ReleaseIndicators =  () => {
         />
       )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

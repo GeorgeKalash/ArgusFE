@@ -16,92 +16,88 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
-    const [isLoading, setIsLoading] = useState(false)
-    const [editMode, setEditMode] = useState(!!recordId)
-    
-    const [initialValues, setInitialData] = useState({
-        recordId: null,
-        reference: '',
-        name: '',
-        currencyId: '',
-        rateCalcMethod: '',
-        rateAgainst: '',
-        rateAgainstCurrencyId: '',
+  const [isLoading, setIsLoading] = useState(false)
+  const [editMode, setEditMode] = useState(!!recordId)
+
+  const [initialValues, setInitialData] = useState({
+    recordId: null,
+    reference: '',
+    name: '',
+    currencyId: '',
+    rateCalcMethod: '',
+    rateAgainst: '',
+    rateAgainstCurrencyId: ''
+  })
+
+  const { getRequest, postRequest } = useContext(RequestsContext)
+
+  //const editMode = !!recordId
+
+  const invalidate = useInvalidate({
+    endpointId: MultiCurrencyRepository.ExchangeTable.page
+  })
+
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validationSchema: yup.object({
+      reference: yup.string().required(' '),
+      name: yup.string().required(' '),
+      currencyId: yup.string().required(' '),
+      rateCalcMethod: yup.string().required(' '),
+      rateAgainst: yup.string().required(' '),
+      rateAgainstCurrencyId: yup.string().required(' ')
+    }),
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: MultiCurrencyRepository.ExchangeTable.set,
+        record: JSON.stringify(obj)
       })
 
-    const { getRequest, postRequest } = useContext(RequestsContext)
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        setInitialData({
+          ...obj, // Spread the existing properties
+          recordId: response.recordId // Update only the recordId field
+        })
+      } else toast.success('Record Edited Successfully')
+      setEditMode(true)
 
-    //const editMode = !!recordId
+      invalidate()
+    }
+  })
 
-    const invalidate = useInvalidate({
-        endpointId: MultiCurrencyRepository.ExchangeTable.page
-      })
-  
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        validateOnChange: true,
-        validationSchema: yup.object({
-          reference: yup.string().required(' '),
-          name: yup.string().required(' '),
-          currencyId: yup.string().required(' '),
-          rateCalcMethod: yup.string().required(' '),
-          rateAgainst: yup.string().required(' '),
-          rateAgainstCurrencyId: yup.string().required(' '),   
-        }),
-        onSubmit: async obj => {
-          const recordId = obj.recordId
+  useEffect(() => {
+    ;(async function () {
+      try {
+        if (recordId) {
+          setIsLoading(true)
 
-          const response = await postRequest({
-            extension: MultiCurrencyRepository.ExchangeTable.set,
-            record: JSON.stringify(obj)
+          const res = await getRequest({
+            extension: MultiCurrencyRepository.ExchangeTable.get,
+            parameters: `_recordId=${recordId}`
           })
-          
-          if (!recordId) {
-            toast.success('Record Added Successfully')
-            setInitialData({
-              ...obj, // Spread the existing properties
-              recordId: response.recordId, // Update only the recordId field
-            });
-          }
-          else toast.success('Record Edited Successfully')
-          setEditMode(true)
 
-          invalidate()
+          setInitialData(res.record)
         }
-      })
-    
-      useEffect(() => {
-        ;(async function () {
-          try {
-            if (recordId) {
-              setIsLoading(true)
-    
-              const res = await getRequest({
-                extension: MultiCurrencyRepository.ExchangeTable.get,
-                parameters: `_recordId=${recordId}`
-              })
-              
-              setInitialData(res.record)
-            }
-          } catch (exception) {
-            setErrorMessage(error)
-          }
-          setIsLoading(false)
-        })()
-      }, [])
-      
-    return (
-        <FormShell 
-            resourceId={ResourceIds.ExchangeTable}
-            form={formik} 
-            height={300} 
-            maxAccess={maxAccess} 
-            editMode={editMode}
-        >
+      } catch (exception) {
+        setErrorMessage(error)
+      }
+      setIsLoading(false)
+    })()
+  }, [])
+
+  return (
+    <FormShell resourceId={ResourceIds.ExchangeTables} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
@@ -114,7 +110,7 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
-                
+
                 // helperText={formik.touched.reference && formik.errors.reference}
               />
             </Grid>
@@ -139,7 +135,12 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 name='currencyId'
                 label={labels.currencyId}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name', 'flName']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language' }
+                ]}
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
@@ -193,7 +194,12 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
                 name='rateAgainstCurrencyId'
                 label={labels.rateAgainstCurrencyId}
                 valueField='recordId'
-                displayField='name'
+                displayField={['reference', 'name', 'flName']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language' }
+                ]}
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
@@ -206,6 +212,8 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
           </Grid>
-        </FormShell>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }

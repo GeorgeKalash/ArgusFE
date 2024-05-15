@@ -12,6 +12,8 @@ import { DataSets } from 'src/resources/DataSets'
 
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromFunctionId, fromDTId, toFunctionId }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -100,113 +102,111 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromF
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.DocumentTypeMaps}
-      form={formik}
-      height={400}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
-      <Grid container spacing={4} sx={{ px: 4, pt: 2 }}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.SYSTEM_FUNCTION}
-            name='fromFunctionId'
-            label={labels.fromFunction}
-            valueField='key'
-            displayField='value'
-            maxAccess={maxAccess}
-            values={formik.values}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik && formik.setFieldValue('fromFunctionId', newValue?.key)
-                formik && formik.setFieldValue('fromFunctionName', newValue?.value)
-              } else {
-                formik && formik.setFieldValue('fromFunctionId', '')
-                formik && formik.setFieldValue('fromFunctionName', '')
-              }
-              formik && formik.setFieldValue('fromDTId', '')
-            }}
-            error={formik.touched.fromFunctionId && Boolean(formik.errors.fromFunctionId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={formik.values.fromFunctionId && SystemRepository.DocumentType.qry}
-            name='fromDTId'
-            label={labels.fromDocument}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            parameters={
-              formik.values.fromFunctionId &&
-              (formik.values.fromFunctionId
-                ? `_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`
-                : `_dgId=0&_startAt=${0}&_pageSize=${50}`)
-            }
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('fromDTId', newValue?.recordId)
-            }}
-            error={formik.touched.fromDTId && Boolean(formik.errors.fromDTId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.SYSTEM_FUNCTION}
-            name='toFunctionId'
-            label={labels.toFunction}
-            valueField='key'
-            displayField='value'
-            maxAccess={maxAccess}
-            values={formik.values}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                formik && formik.setFieldValue('toFunctionId', newValue?.key)
-                formik && formik.setFieldValue('toFunctionName', newValue?.value)
-              } else {
-                formik && formik.setFieldValue('toFunctionId', '')
-                formik && formik.setFieldValue('toFunctionName', '')
-              }
-              formik && formik.setFieldValue('dtId', '')
-            }}
-            error={formik.touched.toFunctionId && Boolean(formik.errors.toFunctionId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={formik.values.toFunctionId && SystemRepository.DocumentType.qry}
-            name='dtId'
-            label={labels.toDocument}
-            valueField='recordId'
-            displayField='reference'
-            maxAccess={maxAccess}
-            values={formik.values}
-            parameters={
-              formik.values.toFunctionId &&
-              (formik.values.toFunctionId
-                ? `_dgId=${formik.values.toFunctionId}&_startAt=${0}&_pageSize=${50}`
-                : `_dgId=0&_startAt=${0}&_pageSize=${50}`)
-            }
-            onChange={(event, newValue) => {
-              formik.setFieldValue('dtId', newValue?.recordId)
-            }}
-            error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                name='useSameReference'
-                checked={formik.values?.useSameReference}
-                onChange={formik.handleChange}
+    <FormShell resourceId={ResourceIds.DocumentTypeMaps} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4} sx={{ px: 4, pt: 2 }}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.SYSTEM_FUNCTION}
+                name='fromFunctionId'
+                label={labels.fromFunction}
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik && formik.setFieldValue('fromFunctionId', newValue?.key)
+                    formik && formik.setFieldValue('fromFunctionName', newValue?.value)
+                  } else {
+                    formik && formik.setFieldValue('fromFunctionId', '')
+                    formik && formik.setFieldValue('fromFunctionName', '')
+                  }
+                  formik && formik.setFieldValue('fromDTId', '')
+                }}
+                error={formik.touched.fromFunctionId && Boolean(formik.errors.fromFunctionId)}
               />
-            }
-            label={labels.useSameRef}
-          />
-        </Grid>
-      </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={formik.values.fromFunctionId && SystemRepository.DocumentType.qry}
+                name='fromDTId'
+                label={labels.fromDocument}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                parameters={
+                  formik.values.fromFunctionId &&
+                  (formik.values.fromFunctionId
+                    ? `_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`
+                    : `_dgId=0&_startAt=${0}&_pageSize=${50}`)
+                }
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('fromDTId', newValue?.recordId)
+                }}
+                error={formik.touched.fromDTId && Boolean(formik.errors.fromDTId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.SYSTEM_FUNCTION}
+                name='toFunctionId'
+                label={labels.toFunction}
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    formik && formik.setFieldValue('toFunctionId', newValue?.key)
+                    formik && formik.setFieldValue('toFunctionName', newValue?.value)
+                  } else {
+                    formik && formik.setFieldValue('toFunctionId', '')
+                    formik && formik.setFieldValue('toFunctionName', '')
+                  }
+                  formik && formik.setFieldValue('dtId', '')
+                }}
+                error={formik.touched.toFunctionId && Boolean(formik.errors.toFunctionId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={formik.values.toFunctionId && SystemRepository.DocumentType.qry}
+                name='dtId'
+                label={labels.toDocument}
+                valueField='recordId'
+                displayField='reference'
+                maxAccess={maxAccess}
+                values={formik.values}
+                parameters={
+                  formik.values.toFunctionId &&
+                  (formik.values.toFunctionId
+                    ? `_dgId=${formik.values.toFunctionId}&_startAt=${0}&_pageSize=${50}`
+                    : `_dgId=0&_startAt=${0}&_pageSize=${50}`)
+                }
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('dtId', newValue?.recordId)
+                }}
+                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name='useSameReference'
+                    checked={formik.values?.useSameReference}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label={labels.useSameRef}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

@@ -7,13 +7,14 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-// ** Custom Imports
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 
-const ProductCurrenciesForm = ({ store, labels, editMode, height, expanded, maxAccess }) => {
+const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess }) => {
   const { recordId: pId, countries } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -68,6 +69,7 @@ const ProductCurrenciesForm = ({ store, labels, editMode, height, expanded, maxA
     })
       .then(res => {
         if (res) toast.success('Record Edited Successfully')
+        getMonetaries(pId)
       })
       .catch(error => {
         // setErrorMessage(error)
@@ -166,13 +168,22 @@ const ProductCurrenciesForm = ({ store, labels, editMode, height, expanded, maxA
       extension: RemittanceSettingsRepository.ProductMonetaries.qry,
       parameters: parameters
     }).then(res => {
-      if (res.list.length > 0)
+      if (res?.list.length > 0)
         formik.setValues({
           currencies: res.list.map(({ ...rest }, index) => ({
             id: index,
             ...rest
           }))
         })
+
+      const uniqueCurrencies = res.list.filter(
+        (item, index, self) =>
+          index === self.findIndex(t => t.currencyId === item.currencyId && t.countryId === item.countryId)
+      )
+      setStore(prevStore => ({
+        ...prevStore,
+        currencies: uniqueCurrencies
+      }))
     })
   }
 
@@ -184,15 +195,16 @@ const ProductCurrenciesForm = ({ store, labels, editMode, height, expanded, maxA
       infoVisible={false}
       editMode={editMode}
     >
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-        <DataGrid
-          onChange={value => formik.setFieldValue('currencies', value)}
-          value={formik.values.currencies}
-          error={formik.errors.currencies}
-          columns={columns}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
-        />
-      </Box>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('currencies', value)}
+            value={formik.values.currencies}
+            error={formik.errors.currencies}
+            columns={columns}
+          />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

@@ -18,6 +18,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Delete',
+    color: '#231f20',
+    image: 'delete-icon.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',
@@ -86,13 +92,16 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'RecordRemarks',
+    color: '#90278e',
+    image: 'notes.png',
+    main: false
+  },
+  {
     key: 'Apply',
-    condition: 'onApply',
-    onClick: 'onApply',
     color: '#4eb558',
-    disabled: 'disabledApply',
     image: 'apply.png',
-    main: true
+    main: false
   },
   {
     key: 'Clear',

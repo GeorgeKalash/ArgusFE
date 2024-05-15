@@ -4,21 +4,54 @@ import { createContext, useContext, useState } from 'react'
 // ** 3rd Party Imports
 import axios from 'axios'
 import jwt from 'jwt-decode'
-
 import { AuthContext } from 'src/providers/AuthContext'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { useError } from 'src/error'
+import { Box, CircularProgress } from '@mui/material'
+import { debounce } from 'lodash'
+import { useSettings } from 'src/@core/hooks/useSettings'
 
 const RequestsContext = createContext()
 
-const RequestsProvider = ({ children }) => {
+function LoadingOverlay() {
+  const { settings } = useSettings()
+  const { navCollapsed } = settings
+
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999
+      }}
+    >
+      <CircularProgress color='inherit' />
+    </Box>
+  )
+}
+
+const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
-  const [error, setError] = useState(null);
+
+  const { stack: stackError } = useError() || {}
+  const [loading, setLoading] = useState(false)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
 
+  const debouncedCloseLoading = debounce(() => {
+    setLoading(false)
+  }, 500)
+
   const getRequest = async body => {
     const accessToken = await getAccessToken()
+    !loading && setLoading(true)
 
     return axios({
       method: 'GET',
@@ -28,10 +61,18 @@ const RequestsProvider = ({ children }) => {
         'Content-Type': 'multipart/form-data',
         LanguageId: user.languageId
       }
-    }).then(res => res.data).catch(error => {
-      setError(error); // Set the error state
-      throw error;
     })
+      .then(res => {
+        debouncedCloseLoading()
+
+        return res.data
+      })
+      .catch(error => {
+        debouncedCloseLoading()
+
+        stackError({ message: error, height: 400 })
+        throw error
+      })
   }
 
   const getMicroRequest = async body => {
@@ -40,10 +81,12 @@ const RequestsProvider = ({ children }) => {
     return axios({
       method: 'GET',
       url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
-    }).then(res => res.data).catch(error => {
-      setError(error); // Set the error state
-      throw error;
     })
+      .then(res => res.data)
+      .catch(error => {
+        stackError({ message: error, height: 400 })
+        throw error
+      })
   }
 
   const getIdentityRequest = async body => {
@@ -57,14 +100,17 @@ const RequestsProvider = ({ children }) => {
         'Content-Type': 'multipart/form-data',
         LanguageId: user.languageId
       }
-    }).then(res => res.data).catch(error => {
-
-      setError(error); // Set the error state
-      throw error;
     })
+      .then(res => res.data)
+      .catch(error => {
+        stackError({ message: error, height: 400 })
+        throw error
+      })
   }
 
   const postRequest = async body => {
+    !loading && setLoading(true)
+
     const accessToken = await getAccessToken()
     const url = body.url ? body.url : apiUrl
 
@@ -80,10 +126,18 @@ const RequestsProvider = ({ children }) => {
         LanguageId: user.languageId
       },
       data: bodyFormData
-    }).then(res => res.data).catch(error => {
-      setError(error); // Set the error state
-      throw error;
     })
+      .then(res => {
+        debouncedCloseLoading()
+
+        return res.data
+      })
+      .catch(error => {
+        debouncedCloseLoading()
+
+        stackError({ message: error, height: 400 })
+        throw error
+      })
   }
 
   const getAccessToken = async () => {
@@ -179,11 +233,12 @@ const RequestsProvider = ({ children }) => {
     getMicroRequest
   }
 
-  return <RequestsContext.Provider value={values}>{children}
-  {error && (
-    <ErrorWindow open={true} onClose={()=>setError(false)}message={error} />
-  )}
-</RequestsContext.Provider>
+  return (
+    <>
+      <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
+      {showLoading && loading && <LoadingOverlay />}
+    </>
+  )
 }
 
 export { RequestsContext, RequestsProvider }

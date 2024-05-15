@@ -9,7 +9,7 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 
 // ** Helpers
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
@@ -25,6 +25,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { useForm } from 'src/hooks/form'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countryId }) => {
   const [maxAccess, setMaxAccess] = useState(null)
@@ -53,6 +54,8 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
         })
 
+        if (!RTBEC?.record?.firstName) setNotArabic(false)
+
         const obj = {
           //RTBEN
           clientId: clientId,
@@ -65,6 +68,11 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           stoppedDate: RTBEN?.record?.stoppedDate && formatDateFromApi(RTBEN.record.stoppedDate),
           stoppedReason: RTBEN?.record?.stoppedReason,
           gender: RTBEN?.record?.gender,
+          cobId: RTBEN?.record?.cobId,
+          cellPhone: RTBEN?.record?.cellPhone,
+          rtId: RTBEN?.record?.rtId,
+          rtName: RTBEN?.record?.rtName,
+          birthDate: RTBEN?.record?.birthDate && formatDateFromApi(RTBEN.record.birthDate),
           addressLine1: RTBEN?.record?.addressLine1,
           addressLine2: RTBEN?.record?.addressLine2,
 
@@ -78,9 +86,6 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           fl_middleName: RTBEC?.record?.fl_middleName,
           fl_familyName: RTBEC?.record?.fl_familyName,
           countryId: RTBEC?.record?.countryId,
-          nationalityId: RTBEC?.record?.nationalityId,
-          cellPhone: RTBEC?.record?.cellPhone,
-          birthDate: RTBEC?.record?.birthDate && formatDateFromApi(RTBEC.record.birthDate),
           birthPlace: RTBEC?.record?.birthPlace
         }
         formik.setValues(obj)
@@ -107,6 +112,11 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
     stoppedDate: null,
     stoppedReason: '',
     gender: null,
+    cobId: '',
+    rtName: '',
+    rtId: null,
+    cellPhone: '',
+    birthDate: null,
     addressLine1: '',
     addressLine2: '',
 
@@ -120,9 +130,6 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
     fl_middleName: '',
     fl_familyName: '',
     countryId: '',
-    nationalityId: '',
-    cellPhone: '',
-    birthDate: null,
     birthPlace: ''
   })
 
@@ -150,9 +157,14 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
         name: values.name,
         dispersalType: values.dispersalType,
         isBlocked: values.isBlocked,
-        stoppedDate: values.stoppedDate,
+        stoppedDate: values.stoppedDate ? formatDateToApi(values.stoppedDate) : null,
         stoppedReason: values.stoppedReason,
         nationalityId: values.nationalityId,
+        cobId: values.cobId,
+        rtId: values.rtId,
+        rtName: values.rtName,
+        birthDate: values.birthDate ? formatDateToApi(values.birthDate) : null,
+        cellPhone: values.cellPhone,
         addressLine1: values.addressLine1,
         addressLine2: values.addressLine2
       }
@@ -168,10 +180,6 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
         fl_lastName: values.fl_lastName,
         fl_middleName: values.fl_middleName,
         fl_familyName: values.fl_familyName,
-        countryId: values.countryId,
-        cellPhone: values.cellPhone,
-        nationalityId: values.nationalityId,
-        birthDate: values.birthDate,
         birthPlace: values.birthPlace
       }
       const data = { header: header, beneficiaryCash: cashInfo }
@@ -247,8 +255,8 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
       editMode={formik?.values?.beneficiaryId}
       maxAccess={maxAccess}
     >
-      <Grid container>
-        <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 2 }}>
+      <Grid container rowGap={2}>
+        <Grid container xs={12}>
           <FormGrid hideonempty xs={12}>
             <CustomTextField
               name='name'
@@ -265,7 +273,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
             />
           </FormGrid>
         </Grid>
-        <Grid container rowGap={2} xs={12} spacing={2} sx={{ px: 2, pt: 2 }}>
+        <Grid container xs={12} spacing={2}>
           <FormGrid item hideonempty xs={3}>
             <CustomTextField
               name='firstName'
@@ -322,7 +330,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
           </FormGrid>
         </Grid>
 
-        <Grid container rowGap={2} xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', px: 2, pt: 2 }}>
+        <Grid container xs={12} spacing={2} sx={{ flexDirection: 'row-reverse', pt: 2, pl: '10px' }}>
           <FormGrid hideonempty xs={3}>
             <CustomTextField
               name='fl_firstName'
@@ -415,7 +423,26 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
                   formik.setFieldValue('nationalityId', '')
                 }
               }}
-              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
+              maxAccess={maxAccess}
+            />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Country.qry}
+              name='cobId'
+              label={_labels.countryOfBirth}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('cobId', newValue ? newValue.recordId : '')
+              }}
+              error={formik.touched.cobId && Boolean(formik.errors.cobId)}
               maxAccess={maxAccess}
             />
           </FormGrid>
@@ -479,10 +506,28 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
               valueField='key'
               displayField='value'
               values={formik.values}
-              onChange={formik.handleChange}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('gender', newValue ? newValue.key : '')
+              }}
               maxAccess={maxAccess}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
             />
+          </FormGrid>
+          <FormGrid hideonempty xs={12}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CurrencyTradingSettingsRepository.RelationType.qry}
+                name='rtId'
+                label={_labels.relationType}
+                displayField='name'
+                valueField='recordId'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rtId', newValue ? newValue?.recordId : '')
+                }}
+                error={formik.touched.rtId && Boolean(formik.errors.rtId)}
+              />
+            </Grid>
           </FormGrid>
           <FormGrid hideonempty xs={12}>
             <ResourceComboBox
@@ -505,7 +550,7 @@ const BenificiaryCash = ({ clientId, dispersalType, beneficiaryId, corId, countr
                   formik.setFieldValue('nationalityId', '')
                 }
               }}
-              error={formik.touched.countryId && Boolean(formik.errors.countryId)}
+              error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
               maxAccess={maxAccess}
             />
           </FormGrid>

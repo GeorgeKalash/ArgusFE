@@ -33,7 +33,6 @@ export default function ApprovalFormShell(props) {
         functionId: form.values.functionId
       },
       width: 1000,
-      height: 500,
       title: 'Approvals'
     })
   }
