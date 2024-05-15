@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
@@ -12,6 +11,8 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useWindow } from 'src/windows'
 import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
 import toast from 'react-hot-toast'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -156,8 +157,8 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Grow>
         <GridToolbar onAdd={add} maxAccess={maxAccess} />
         <Table
           columns={columns}
@@ -169,8 +170,8 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
           pagination={false}
           height={300}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 
