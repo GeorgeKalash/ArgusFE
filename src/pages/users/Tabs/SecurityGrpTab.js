@@ -1,20 +1,18 @@
-// ** MUI Imports
-import { Box } from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 
-const SecurityGrpTab = ({ labels, maxAccess }) => {
+const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const [securityGrpWindowOpen, setSecurityGrpWindowOpen] = useState(false)
   const [securityGrpGridData, setSecurityGrpGridData] = useState([])
   const [initialAllListData, setSecurityGrpALLData] = useState([])
   const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
 
-  const securityGrpValidation = useFormik({
+  const { formik } = useForm({
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({}),
@@ -24,7 +22,36 @@ const SecurityGrpTab = ({ labels, maxAccess }) => {
       userId: ''
     },
     onSubmit: values => {
-      postSecurityGrp()
+      const selectedItems = []
+
+      //initialSelectedListData returns an array that contain id, where id is sgId
+      //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
+      initialSelectedListData.forEach(item => {
+        selectedItems.push({ userId: storeRecordId, sgId: item.id })
+      })
+
+      const data = {
+        sgId: 0,
+        userId: storeRecordId,
+        groups: selectedItems
+      }
+
+      postRequest({
+        extension: AccessControlRepository.SecurityGroupUser.set2,
+        record: JSON.stringify(data)
+      })
+        .then(res => {
+          setSecurityGrpWindowOpen(false)
+          getSecurityGrpGridData(storeRecordId)
+          if (!res.recordId) {
+            toast.success('Record Added Successfully')
+          } else {
+            toast.success('Record Edited Successfully')
+          }
+        })
+        .catch(error => {
+          setErrorMessage(error)
+        })
     }
   })
 
@@ -35,12 +62,6 @@ const SecurityGrpTab = ({ labels, maxAccess }) => {
       flex: 1
     }
   ]
-
-  const handleSecurityGrpSubmit = () => {
-    if (securityGrpValidation) {
-      securityGrpValidation.handleSubmit()
-    }
-  }
 
   const getSecurityGrpGridData = userId => {
     setSecurityGrpGridData([])
@@ -64,7 +85,7 @@ const SecurityGrpTab = ({ labels, maxAccess }) => {
       setSecurityGrpALLData([])
       setSecurityGrpSelectedData([])
 
-      const userId = usersValidation.values.recordId
+      const userId = formik.values.recordId
       const defaultParams = `_filter=&_size=100&_startAt=0&_userId=${userId}&_pageSize=50&_sgId=0`
       var parameters = defaultParams
 
@@ -119,42 +140,8 @@ const SecurityGrpTab = ({ labels, maxAccess }) => {
     setSecurityGrpSelectedData(selectedData)
   }
 
-  const postSecurityGrp = () => {
-    const userId = usersValidation.values.recordId
-    const selectedItems = []
-
-    //initialSelectedListData returns an array that contain id, where id is sgId
-    //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
-    initialSelectedListData.forEach(item => {
-      selectedItems.push({ userId: userId, sgId: item.id })
-    })
-
-    const data = {
-      sgId: 0,
-      userId: userId,
-      groups: selectedItems
-    }
-
-    postRequest({
-      extension: AccessControlRepository.SecurityGroupUser.set2,
-      record: JSON.stringify(data)
-    })
-      .then(res => {
-        setSecurityGrpWindowOpen(false)
-        getSecurityGrpGridData(userId)
-        if (!res.recordId) {
-          toast.success('Record Added Successfully')
-        } else {
-          toast.success('Record Edited Successfully')
-        }
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
-  }
-
   const delSecurityGrp = obj => {
-    const userId = usersValidation.values.recordId
+    const userId = formik.values.recordId
 
     postRequest({
       extension: AccessControlRepository.SecurityGroupUser.del,

@@ -1,87 +1,39 @@
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import UsersTab from 'src/pages/users/Tabs/UsersTab'
 import DefaultsTab from 'src/pages/users/Tabs/DefaultsTab'
 import SecurityGrpTab from 'src/pages/users/Tabs/SecurityGrpTab'
 import RowAccessTab from 'src/pages/users/Tabs/RowAccessTab'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import { useState } from 'react'
 
-const UsersWindow = ({ labels, maxAccess }) => {
+const UsersWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
+  const [storeRecordId, setRecordId] = useState(recordId)
 
   const tabs = [
-    { label: _labels.users },
-    { label: _labels.defaults, disabled: !editMode },
-    { label: _labels.securityGrp, disabled: !editMode },
-    { label: _labels.rowAccess, disabled: !editMode }
+    { label: labels.users },
+    { label: labels.defaults, disabled: !storeRecordId },
+    { label: labels.securityGroups, disabled: !storeRecordId },
+    { label: labels.rowAccess, disabled: !storeRecordId }
   ]
 
   return (
-    <Window
-      id='UsersWindow'
-      Title={labels.users}
-      onClose={onClose}
-      width={width}
-      onSave={onSave}
-      tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-    >
+    <>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <UsersTab
-          labels={labels}
-          maxAccess={maxAccess}
-          notificationGrpStore={notificationGrpStore}
-          languageStore={languageStore}
-          userTypeStore={userTypeStore}
-          activeStatusStore={activeStatusStore}
-          editMode={editMode}
-          employeeStore={employeeStore}
-          setEmployeeStore={setEmployeeStore}
-          lookupEmployee={lookupEmployee}
-          checkFieldDirect={checkFieldDirect}
-          emailPresent={emailPresent}
-          passwordState={passwordState}
-          setPasswordState={setPasswordState}
-        />
+        <UsersTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
       </CustomTabPanel>
+
       <CustomTabPanel index={1} value={activeTab}>
-        <DefaultsTab
-          labels={labels}
-          maxAccess={maxAccess}
-          siteStore={siteStore}
-          plantStore={plantStore}
-          salesPersonStore={salesPersonStore}
-          setCashAccStore={setCashAccStore}
-          cashAccStore={cashAccStore}
-          lookupCashAcc={lookupCashAcc}
-        ></DefaultsTab>
+        <DefaultsTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId}></DefaultsTab>
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <SecurityGrpTab
-          securityGrpGridData={securityGrpGridData}
-          getSecurityGrpGridData={getSecurityGrpGridData}
-          addSecurityGrp={addSecurityGrp}
-          delSecurityGrp={delSecurityGrp}
-          popupSecurityGrp={popupSecurityGrp}
-          labels={labels}
-          maxAccess={maxAccess}
-        />
+        <SecurityGrpTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} value={activeTab}>
-        <RowAccessTab
-          labels={labels}
-          moduleStore={moduleStore}
-          handleRowAccessSubmit={handleRowAccessSubmit}
-          getRowAccessGridData={getRowAccessGridData}
-          rowAccessValidation={rowAccessValidation}
-          rowGridData={rowGridData}
-          rowColumns={rowColumns}
-          maxAccess={maxAccess}
-          handleCheckedRows={handleCheckedRows}
-        />
-      </CustomTabPanel>
-    </Window>
+      {/*<CustomTabPanel index={3} value={activeTab}>
+        <RowAccessTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
+  </CustomTabPanel>*/}
+    </>
   )
 }
 

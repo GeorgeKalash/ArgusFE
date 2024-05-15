@@ -1,21 +1,61 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ControlContext } from 'src/providers/ControlContext'
 import UsersWindow from './Windows/UsersWindow'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
 
 const Users = () => {
-  const { getRequest, postRequest, getIdentityRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
-  const [gridData, setGridData] = useState([])
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: SystemRepository.Users.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=${_pageSize}&_filter=&_sortBy=fullName`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  const {
+    query: { data },
+    labels: _labels,
+    refetch,
+    paginationParameters,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.Users.qry,
+    datasetId: ResourceIds.Users
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.Users.qry
+  })
+
+  function openForm(recordId) {
+    stack({
+      Component: UsersWindow,
+      props: {
+        labels: _labels,
+        recordId: recordId ? recordId : null,
+        maxAccess: access
+      },
+      width: 900,
+      height: 600,
+      title: _labels.users
+    })
+  }
 
   const columns = [
     {
@@ -50,56 +90,43 @@ const Users = () => {
     }
   ]
 
-  const getGridData = ({ _startAt = 0, _pageSize = 50 }) => {
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=${_pageSize}&_filter=&_sortBy=fullName`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: SystemRepository.Users.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
-        console.log('res response ', res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+  const add = () => {
+    openForm()
   }
 
-  const delUsers = async obj => {
+  const edit = obj => {
+    openForm(obj.recordId)
+  }
+
+  const del = async obj => {
     await postRequest({
       extension: SystemRepository.Users.del,
       record: JSON.stringify(obj)
     })
+    invalidate()
     toast.success('Record Deleted Successfully')
   }
-
-  const addUsers = () => {}
-
-  const editUsers = async obj => {}
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={addUsers} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
-          gridData={gridData}
+          gridData={data ? data : { list: [] }}
           rowId={['recordId']}
-          api={getGridData}
-          onEdit={editUsers}
-          onDelete={delUsers}
+          onEdit={edit}
+          onDelete={del}
           isLoading={false}
           pageSize={50}
           maxAccess={access}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
         />
       </Grow>
-
-      <UsersWindow labels={_labels} maxAccess={access} />
     </VertLayout>
   )
 }
