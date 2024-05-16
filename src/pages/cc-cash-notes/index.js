@@ -11,6 +11,7 @@ import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const CcCashNotes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,14 +28,10 @@ const CcCashNotes = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  const invalidate = useInvalidate({
-    endpointId: CachCountSettingsRepository.CcCashNotes.page
-  })
-
   const {
+    invalidate,
     query: { data },
     labels: labels,
-
     paginationParameters,
     refetch,
     access
@@ -60,13 +57,7 @@ const CcCashNotes = () => {
       field: 'note',
       headerName: labels.note,
       flex: 1,
-      valueFormatter: ({ value }) => {
-        return new Intl.NumberFormat('en-US', {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 5,
-          useGrouping: true
-        }).format(value)
-      }
+      valueGetter: ({ row }) => getFormattedNumber(row?.note)
     }
   ]
 
