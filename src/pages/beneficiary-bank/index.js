@@ -13,13 +13,15 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
 // ** Helpers
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 
 import { useWindow } from 'src/windows'
 import BenificiaryBankForm from 'src/components/Shared/BenificiaryBankForm'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const BeneficiaryBank = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -30,16 +32,17 @@ const BeneficiaryBank = () => {
   const {
     query: { data },
     filterBy,
-    refetch,
     clearFilter,
     labels: _labels,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot,
     datasetId: ResourceIds.BeneficiaryBank,
     filter: {
       endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot,
-      filterFn: fetchWithSearch
+      filterFn: fetchWithSearch,
+      default: { dispersalType: 2, clientId: 0 }
     }
   })
 
@@ -55,9 +58,9 @@ const BeneficiaryBank = () => {
     }
   }
 
-  const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot
-  })
+  //const invalidate = useInvalidate({
+  // endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot
+  //})
 
   async function openForm(beneficiaryId, clientId) {
     stack({
@@ -65,7 +68,8 @@ const BeneficiaryBank = () => {
       props: {
         clientId: clientId,
         beneficiaryId: beneficiaryId,
-        dispersalType: 2
+        dispersalType: 2,
+        seqNo: 1
       },
       width: 700,
       height: 500,
@@ -129,7 +133,7 @@ const BeneficiaryBank = () => {
 
   const delBenBank = async obj => {
     await postRequest({
-      extension: RemittanceOutwardsRepository.BeneficiaryBank.del,
+      extension: RemittanceOutwardsRepository.Beneficiary.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -144,9 +148,12 @@ const BeneficiaryBank = () => {
     openForm(obj.beneficiaryId, obj.clientId)
   }
 
+  console.log('data')
+  console.log(data)
+
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addBenBank}
           maxAccess={access}
@@ -159,6 +166,8 @@ const BeneficiaryBank = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -169,10 +178,9 @@ const BeneficiaryBank = () => {
           pageSize={50}
           paginationType='client'
           maxAccess={access}
-          refetch={refetch}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

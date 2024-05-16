@@ -20,6 +20,9 @@ import { useWindow } from 'src/windows'
 import BenificiaryCashForm from 'src/components/Shared/BenificiaryCashForm'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import toast from 'react-hot-toast'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const BeneficiaryCash = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -30,16 +33,17 @@ const BeneficiaryCash = () => {
   const {
     query: { data },
     filterBy,
-    refetch,
     clearFilter,
     labels: _labels,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot,
     datasetId: ResourceIds.BeneficiaryCash,
     filter: {
       endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot,
-      filterFn: fetchWithSearch
+      filterFn: fetchWithSearch,
+      default: { dispersalType: 1, clientId: 0 }
     }
   })
 
@@ -55,9 +59,9 @@ const BeneficiaryCash = () => {
     }
   }
 
-  const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot
-  })
+  //const invalidate = useInvalidate({
+  // endpointId: RemittanceOutwardsRepository.Beneficiary.snapshot
+  // })
 
   async function openForm(beneficiaryId, clientId) {
     stack({
@@ -65,7 +69,8 @@ const BeneficiaryCash = () => {
       props: {
         clientId: clientId,
         beneficiaryId: beneficiaryId,
-        dispersalType: 1
+        dispersalType: 1,
+        seqNo: 1
       },
       width: 700,
       height: 500,
@@ -129,7 +134,7 @@ const BeneficiaryCash = () => {
 
   const delBenCash = async obj => {
     await postRequest({
-      extension: RemittanceOutwardsRepository.BeneficiaryCash.del,
+      extension: RemittanceOutwardsRepository.Beneficiary.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -145,8 +150,8 @@ const BeneficiaryCash = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           onAdd={addBenCash}
           maxAccess={access}
@@ -159,6 +164,8 @@ const BeneficiaryCash = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data ? data : { list: [] }}
@@ -169,10 +176,9 @@ const BeneficiaryCash = () => {
           pageSize={50}
           paginationType='client'
           maxAccess={access}
-          refetch={refetch}
         />
-      </Box>
-    </>
+      </Grow>
+    </VertLayout>
   )
 }
 

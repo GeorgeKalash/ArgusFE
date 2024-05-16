@@ -32,6 +32,7 @@ export const RemittanceOutwardsRepository = {
   Beneficiary: {
     qry: service + 'qryBEN',
     get: service + 'getBEN',
+    del: service + 'delBEN',
     snapshot: service + 'snapshotBEN'
   },
   BeneficiaryBank: {

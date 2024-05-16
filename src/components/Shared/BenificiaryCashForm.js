@@ -28,9 +28,10 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 
-const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, countryId }) => {
+const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, countryId, seqNo }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
   const { stack: stackError } = useError()
+  const [editMode, setEditMode] = useState(beneficiaryId)
 
   useEffect(() => {
     ;(async function () {
@@ -56,12 +57,12 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
       if (beneficiaryId) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
-          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${seqNo}`
         })
 
         const RTBEN = await getRequest({
           extension: RemittanceOutwardsRepository.Beneficiary.get,
-          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}`
+          parameters: `_clientId=${clientId}&_beneficiaryId=${beneficiaryId}&_seqNo=${seqNo}`
         })
 
         if (!RTBEC?.record?.firstName) setNotArabic(false)
@@ -99,7 +100,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
           fl_familyName: RTBEC?.record?.fl_familyName,
 
           //countryId: RTBEC?.record?.countryId,
-          birthPlace: RTBEC?.record?.birthPlace
+          birthPlace: RTBEC?.record?.birthPlace,
+          seqNo: RTBEC?.record?.seqNo
         }
         formik.setValues(obj)
       }
@@ -146,7 +148,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
     fl_familyName: '',
 
     //countryId: '',
-    birthPlace: ''
+    birthPlace: '',
+    seqNo: 1
   })
 
   const { formik } = useForm({
@@ -161,6 +164,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
       return errors
     },
     validationSchema: yup.object({
+      clientId: yup.string().required(' '),
+      countryId: yup.string().required(' '),
       name: yup.string().required(' '),
       firstName: yup.string().required(' '),
       lastName: yup.string().required(' ')
@@ -198,7 +203,8 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
         fl_lastName: values.fl_lastName,
         fl_middleName: values.fl_middleName,
         fl_familyName: values.fl_familyName,
-        birthPlace: values.birthPlace
+        birthPlace: values.birthPlace,
+        seqNo: values.seqNo
       }
       const data = { header: header, beneficiaryCash: cashInfo }
 
@@ -209,6 +215,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
       if (res.recordId) {
         toast.success('Record Updated Successfully')
       }
+      setEditMode(true)
     }
   })
 
@@ -271,8 +278,10 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
     <FormShell
       resourceId={ResourceIds.BeneficiaryCash}
       form={formik}
-      editMode={formik?.values?.beneficiaryId}
+      editMode={editMode}
+      setEditMode={setEditMode}
       maxAccess={maxAccess}
+      disabledSubmit={editMode}
     >
       <Grid container rowGap={2}>
         <Grid container xs={12}>
@@ -287,7 +296,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
             label={_labels.client}
             form={formik}
             required
-            readOnly={clientId || formik.values.clientId}
+            readOnly={editMode}
             displayFieldWidth={2}
             valueShow='clientRef'
             secondValueShow='clientName'
@@ -321,7 +330,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               error={formik.touched.name && Boolean(formik.errors.name)}
               maxAccess={maxAccess}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
         </Grid>
@@ -332,7 +341,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               label={_labels.firstName}
               value={formik.values?.firstName}
               required
-              readOnly={notArabic || formik?.values?.beneficiaryId}
+              readOnly={notArabic || editMode}
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('firstName', '')}
@@ -359,7 +368,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               label={_labels.lastName}
               value={formik.values?.lastName}
               required
-              readOnly={notArabic || formik?.values?.beneficiaryId}
+              readOnly={notArabic || editMode}
               onChange={formik.handleChange}
               maxLength='20'
               onClear={() => formik.setFieldValue('lastName', '')}
@@ -452,7 +461,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onClear={() => formik.setFieldValue('cellPhone', '')}
               error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
               maxAccess={maxAccess}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -478,7 +487,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
               maxAccess={maxAccess}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -498,7 +507,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               error={formik.touched.cobId && Boolean(formik.errors.cobId)}
               maxAccess={maxAccess}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -511,7 +520,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onClear={() => formik.setFieldValue('birthPlace', '')}
               error={formik.touched.birthPlace && Boolean(formik.errors.birthPlace)}
               maxAccess={maxAccess}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -525,7 +534,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine1', '')}
               error={formik.touched.addressLine1 && Boolean(formik.errors.addressLine1)}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -539,7 +548,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('addressLine2', '')}
               error={formik.touched.addressLine2 && Boolean(formik.errors.addressLine2)}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
         </Grid>
@@ -554,7 +563,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               onClear={() => formik.setFieldValue('birthDate', '')}
               error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
               maxAccess={maxAccess}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -570,7 +579,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               maxAccess={maxAccess}
               error={formik.touched.gender && Boolean(formik.errors.gender)}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid hideonempty xs={12}>
@@ -596,7 +605,7 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
               }}
               error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
               maxAccess={maxAccess}
-              readOnly={formik?.values?.beneficiaryId}
+              readOnly={editMode}
             />
           </FormGrid>
           <FormGrid xs={12}>
@@ -610,13 +619,14 @@ const BenificiaryCashForm = ({ clientId, dispersalType, beneficiaryId, corId, co
                 { key: 'reference', value: 'Reference' },
                 { key: 'name', value: 'Name' }
               ]}
-              readOnly={formik.values.countryId || countryId}
+              readOnly={formik.values.countryId != '' || countryId || editMode}
               values={formik.values}
               onChange={(event, newValue) => {
                 formik.setFieldValue('countryId', newValue ? newValue.recordId : '')
               }}
               error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               maxAccess={maxAccess}
+              required
             />
           </FormGrid>
           <FormGrid hideonempty xs={12} sx={{ position: 'relative', width: '100%' }}>
