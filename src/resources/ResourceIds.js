@@ -95,6 +95,7 @@ export const ResourceIds = {
   carrierSite: 40203,
   LoCollectors: 40202,
   LoCarriers: 40201,
+  Sites: 41101,
   Accounts: 31201,
   Routings: 42105,
   CreditOrder: 35301,
