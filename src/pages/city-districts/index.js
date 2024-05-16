@@ -32,16 +32,13 @@ const CityDistricts = () => {
     query: { data },
     labels: _labels,
     refetch,
+    invalidate,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.CityDistrict.page,
     datasetId: ResourceIds.CityDistrict
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.CityDistrict.page
   })
 
   const columns = [
@@ -72,8 +69,9 @@ const CityDistricts = () => {
       extension: SystemRepository.CityDistrict.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
+
     toast.success('Record Deleted Successfully')
+    invalidate()
   }
 
   const add = () => {

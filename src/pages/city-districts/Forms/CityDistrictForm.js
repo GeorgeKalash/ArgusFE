@@ -149,7 +149,7 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
                 }}
                 valueField='reference'
                 displayField='name'
-                name='cityId'
+                name='cityRef'
                 label={labels.city}
                 required
                 form={formik}
@@ -157,15 +157,12 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
                 firstValue={formik.values.cityRef}
                 secondValue={formik.values.cityName}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('cityId', newValue?.recordId)
-                    formik.setFieldValue('cityRef', newValue?.reference)
-                    formik.setFieldValue('cityName', newValue?.name)
-                  } else {
-                    formik.setFieldValue('cityId', '')
-                    formik.setFieldValue('cityRef', null)
-                    formik.setFieldValue('cityName', null)
-                  }
+                  formik.setValues({
+                    ...formik.values,
+                    cityId: newValue?.recordId || '',
+                    cityRef: newValue?.reference || '',
+                    cityName: newValue?.name || ''
+                  })
                 }}
                 errorCheck={'cityId'}
                 maxAccess={maxAccess}
