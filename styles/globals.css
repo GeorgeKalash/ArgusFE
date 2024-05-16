@@ -1,6 +1,6 @@
 html,
 body {
-  min-height: 100vh;
+  height: calc(100 * var(--vh)) !important;
   zoom: var(--zoom);
   --zoom: 1;
   --vh: calc(1vh / var(--zoom));

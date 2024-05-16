@@ -16,6 +16,7 @@ const PopperComponent = ({ children, anchorEl, open }) => {
   return ReactDOM.createPortal(
     <Box
       sx={{
+        zIndex:'2 !important',
         '& .MuiAutocomplete-noOptions': {
           display: open ? 'block' : 'none'
         }
