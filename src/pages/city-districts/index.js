@@ -92,8 +92,8 @@ const CityDistricts = () => {
         recordId: recordId,
         maxAccess: access
       },
-      width: 500,
-      height: 330,
+      width: 700,
+      height: 530,
       title: _labels.cityDistrict
     })
   }

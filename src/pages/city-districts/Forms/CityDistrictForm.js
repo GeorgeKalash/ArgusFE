@@ -149,7 +149,7 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
                 }}
                 valueField='reference'
                 displayField='name'
-                name='cityRef'
+                name='cityId'
                 label={labels.city}
                 required
                 form={formik}
