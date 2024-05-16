@@ -1,26 +1,24 @@
 const TerraPayInitial = () => {
-  console.log('in js')
-  
   return {
     quotation: {
-      requestDate: new Date(), //HERE
+      requestDate: new Date(),
       debitorMSIDSN: '', //HERE
       creditorMSIDSN: '', //  ben phone number
       creditorBankAccount: '', // ben.bankaccount is IBAN
-      creditorReceivingCountry: '', //HERE
+      creditorReceivingCountry: '',
       requestAmount: '', //HERE
-      requestCurrency: '', //HERE
-      sendingCurrency: '', //fawzii
-      receivingCurrency: '' //fawzii
+      requestCurrency: '',
+      sendingCurrency: '',
+      receivingCurrency: ''
     },
     transaction: {
-      amount: '',
-      currency: '', //receivingCurrency fawzi
+      amount: '', //HERE
+      currency: '',
       type: 'inttransfer', //FAWZI TO CHECK
       descriptionText: '',
       requestDate: new Date(),
       requestingOrganisationTransactionReference: '',
-      debitorMSIDSN: '',
+      debitorMSIDSN: '', //HERE
       creditorBankAccount: '', // ben.bankaccount is IBAN
       creditorSortCode: '0001', // Fawzi To check
       creditorBankSubCode: '',
@@ -70,8 +68,8 @@ const TerraPayInitial = () => {
       },
       internationalTransferInformation: {
         quoteId: '',
-        receivingCountry: '', //HERE
-        remittancePurpose: '', // resource id slack
+        receivingCountry: '',
+        remittancePurpose: '',
         sourceOfFunds: '',
         relationshipSender: ''
       }

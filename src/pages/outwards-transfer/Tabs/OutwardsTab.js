@@ -195,8 +195,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
         return
       }
 
-      console.log('valuessss')
-      console.log(values)
       terraPayFill(values)
 
       const amountGridData = {
@@ -551,11 +549,8 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
       stack({
         Component: TerraPay,
         props: {
-          onTerraPaySubmit: onTerraPaySubmit,
+          setTerraPay: setTerraPay,
           terraPay: terraPay,
-          clientData: {
-            clientPhone: formik.values.cellPhone
-          },
           outwardsData: {
             countryId: formik.values.countryId,
             amount: formik.values.amount,
@@ -605,31 +600,7 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     obj.beneficiary.dateOfBirth = obj.beneficiary.dateOfBirth ? formatDateToApi(obj.beneficiary.dateOfBirth) : null
     setCashData(obj)
   }
-  function onTerraPaySubmit(obj) {
-    obj.quotation.requestDate = obj.quotation.requestDate ? formatDateToApi(obj.quotation.requestDate) : null
-    obj.transaction.requestDate = obj.transaction.requestDate ? formatDateToApi(obj.transaction.requestDate) : null
-    obj.transaction.senderKyc.dateOfBirth = obj.transaction.senderKyc.dateOfBirth
-      ? formatDateToApi(obj.transaction.senderKyc.dateOfBirth)
-      : null
-    obj.transaction.senderKyc.idDocument.issueDate = obj.transaction.senderKyc.idDocument.issueDate
-      ? formatDateToApi(obj.transaction.senderKyc.idDocument.issueDate)
-      : null
-    obj.transaction.senderKyc.idDocument.expiryDate = obj.transaction.senderKyc.idDocument.expiryDate
-      ? formatDateToApi(obj.transaction.senderKyc.idDocument.expiryDate)
-      : null
-    obj.transaction.recipientKyc.dateOfBirth = obj.transaction.recipientKyc.dateOfBirth
-      ? formatDateToApi(obj.transaction.recipientKyc.dateOfBirth)
-      : null
-    obj.transaction.recipientKyc.idDocument.issueDate = obj.transaction.recipientKyc.idDocument.issueDate
-      ? formatDateToApi(obj.transaction.recipientKyc.idDocument.issueDate)
-      : null
-    obj.transaction.recipientKyc.idDocument.expiryDate = obj.transaction.recipientKyc.idDocument.expiryDate
-      ? formatDateToApi(obj.transaction.recipientKyc.idDocument.expiryDate)
-      : null
 
-    console.log('obj', obj)
-    setTerraPay(obj)
-  }
   function calculateValueDate(valueDays) {
     const newDate = new Date(formik.values.date)
     newDate.setDate(newDate.getDate() + valueDays)
@@ -638,18 +609,36 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
 
   function terraPayFill(formFields) {
     console.log('inFunct')
-    console.log(formFields)
     console.log(terraPay)
     terraPay.quotation.debitorMSIDSN = formFields.cellPhone
-
-    //terraPay.quotation.creditorReceivingCountry = formFields.countryRef //ref or isoo?
     terraPay.quotation.requestAmount = formFields.amount
-
-    //terraPay.quotation.requestCurrency = formFields.currencyRef //ref or isoo?
     terraPay.transaction.amount = formFields.amount
     terraPay.transaction.debitorMSIDSN = formFields.cellPhone
 
-    //terraPay.transaction.internationalTransferInformation.receivingCountry = formFields.countryRef
+    terraPay.quotation.requestDate = terraPay.quotation.requestDate
+      ? formatDateToApi(terraPay.quotation.requestDate)
+      : null
+    terraPay.transaction.requestDate = terraPay.transaction.requestDate
+      ? formatDateToApi(terraPay.transaction.requestDate)
+      : null
+    terraPay.transaction.senderKyc.dateOfBirth = terraPay.transaction.senderKyc.dateOfBirth
+      ? formatDateToApi(terraPay.transaction.senderKyc.dateOfBirth)
+      : null
+    terraPay.transaction.senderKyc.idDocument.issueDate = terraPay.transaction.senderKyc.idDocument.issueDate
+      ? formatDateToApi(terraPay.transaction.senderKyc.idDocument.issueDate)
+      : null
+    terraPay.transaction.senderKyc.idDocument.expiryDate = terraPay.transaction.senderKyc.idDocument.expiryDate
+      ? formatDateToApi(terraPay.transaction.senderKyc.idDocument.expiryDate)
+      : null
+    terraPay.transaction.recipientKyc.dateOfBirth = terraPay.transaction.recipientKyc.dateOfBirth
+      ? formatDateToApi(terraPay.transaction.recipientKyc.dateOfBirth)
+      : null
+    terraPay.transaction.recipientKyc.idDocument.issueDate = terraPay.transaction.recipientKyc.idDocument.issueDate
+      ? formatDateToApi(terraPay.transaction.recipientKyc.idDocument.issueDate)
+      : null
+    terraPay.transaction.recipientKyc.idDocument.expiryDate = terraPay.transaction.recipientKyc.idDocument.expiryDate
+      ? formatDateToApi(terraPay.transaction.recipientKyc.idDocument.expiryDate)
+      : null
 
     console.log('last')
     console.log(terraPay)
@@ -679,8 +668,6 @@ export default function OutwardsTab({ labels, recordId, maxAccess, cashAccountId
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  //console.log('terrapayExternal', terraPay)
 
   return (
     <>
