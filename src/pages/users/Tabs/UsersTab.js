@@ -14,6 +14,9 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { AccountRepository } from 'src/repositories/AccountRepository'
+import toast from 'react-hot-toast'
+import { useInvalidate } from 'src/hooks/resource'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
@@ -36,7 +39,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       employeeId: '',
       password: '',
       confirmPassword: '',
-      umcpnl: ''
+      umcpnl: false
     },
 
     enableReinitialize: true,
@@ -52,19 +55,32 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
         ? {}
         : {
             password: yup.string().required('This field is required'),
-            confirmPassword: yup.string().required('This field is required')
+            confirmPassword: yup
+              .string()
+              .required('Confirm Password is required')
+              .oneOf([yup.ref('password'), null], 'Password must match')
           })
     }),
     onSubmit: async obj => {
-      await postRequest({
+      const res = await postRequest({
         extension: SystemRepository.Users.set,
         record: JSON.stringify(obj)
       })
-      formik.setFieldValue('recordId', res.recordId)
-      setRecordId(res.recordId)
-      if (!obj.recordId) toast.success('Record Added Successfully')
-      else toast.success('Record Edited Successfully')
+      if (!obj.recordId) {
+        setRecordId(res?.recordId)
+        toast.success('Record Added Successfully')
+        formik.setFieldValue('recordId', res?.recordId)
+        console.log('store rec 22 ', res?.recordId)
+        setRecordId(res?.recordId)
+      } else {
+        toast.success('Record Updated Successfully')
+      }
+      invalidate()
     }
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: SystemRepository.Users.qry
   })
 
   const checkFieldDirect = email => {
@@ -78,7 +94,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
         formik.validateForm()
       })
       .catch(error => {
-        setErrorMessage(error)
         if (error.response.status == 300) {
           setEmailPresent(true)
           setPasswordState(true)
@@ -278,7 +293,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   label={labels.password}
                   value={formik.values.password}
                   required
-                  hidden={editMode}
+                  hidden={editMode || passwordState}
                   readOnly={passwordState}
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}
@@ -292,7 +307,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   label={labels.confirmPassword}
                   value={formik.values.confirmPassword}
                   required
-                  hidden={editMode}
+                  hidden={editMode || passwordState}
                   readOnly={passwordState}
                   maxAccess={maxAccess}
                   onChange={formik.handleChange}

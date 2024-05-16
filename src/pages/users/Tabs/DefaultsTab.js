@@ -152,7 +152,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} style={{ marginTop: '-15px' }}>
               <ResourceLookup
                 endpointId={CashBankRepository.CashAccount.snapshot}
                 parameters={{

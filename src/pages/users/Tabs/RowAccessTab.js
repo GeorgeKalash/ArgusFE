@@ -15,6 +15,7 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { POSRepository } from 'src/repositories/POSRepository'
+import toast from 'react-hot-toast'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -153,20 +154,6 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     )
   }
 
-  const checkAll = () => {
-    data.list.forEach(item => {
-      ;(item.checked = true), (item.hasAccess = true)
-    })
-
-    console.log('check data true', data.list)
-  }
-
-  const uncheckAll = () => {
-    data.list.forEach(item => {
-      ;(item.checked = false), (item.hasAccess = false)
-    })
-    console.log('check data false', data.list)
-  }
   useEffect(() => {
     if (storeRecordId) {
       formik.setFieldValue('classId', ResourceIds.Plants)
@@ -197,14 +184,6 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
                     error={formik.touched.classId && Boolean(formik.errors.classId)}
                   />
                 </Grid>
-                <Grid item xs={6} container spacing={1} alignItems='center' justifyContent='flex-start'>
-                  <Button variant='contained' color='primary' onClick={checkAll}>
-                    Check All
-                  </Button>
-                  <Button variant='contained' color='secondary' sx={{ marginLeft: 2 }} onClick={uncheckAll}>
-                    Uncheck All
-                  </Button>
-                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={12} sx={{ pt: 2 }}>
@@ -212,6 +191,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
                 <Table
                   columns={rowColumns}
                   gridData={data ? data : { list: [] }}
+                  setData={setData}
                   rowId={['recordId']}
                   isLoading={false}
                   maxAccess={maxAccess}
@@ -219,6 +199,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
                   height={300}
                   checkTitle={labels.active}
                   showCheckboxColumn={true}
+                  viewCheckButtons={true}
                 />
               </Box>
             </Grid>

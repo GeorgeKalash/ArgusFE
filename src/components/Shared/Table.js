@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 // ** MUI Imports
-import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell } from '@mui/material'
+import { Box, Stack, IconButton, LinearProgress, Checkbox, TableCell, Button } from '@mui/material'
 import { DataGrid, gridClasses } from '@mui/x-data-grid'
 import { alpha, styled } from '@mui/material/styles'
 
@@ -101,6 +101,8 @@ const Table = ({
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
+  viewCheckButtons = false,
+  setData,
   ...props
 }) => {
   const { stack } = useWindow()
@@ -273,6 +275,8 @@ const Table = ({
       }) !== HIDDEN
   )
 
+  const shouldViewButtons = !viewCheckButtons ? 'none' : ''
+
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
       const newCheckedRows = { ...prevCheckedRows }
@@ -350,6 +354,30 @@ const Table = ({
     })
   }
 
+  const handleCheckAll = () => {
+    const updatedRowGridData = gridData.list.map(row => ({
+      ...row,
+      checked: true
+    }))
+
+    setData(prevGridData => ({
+      ...prevGridData,
+      list: updatedRowGridData
+    }))
+  }
+
+  const handleUncheckAll = () => {
+    const updatedRowGridData = gridData.list.map(row => ({
+      ...row,
+      checked: false
+    }))
+
+    setData(prevGridData => ({
+      ...prevGridData,
+      list: updatedRowGridData
+    }))
+  }
+
   useEffect(() => {
     if (props.gridData && props.gridData.list && paginationType === 'client') {
       var slicedGridData = props.gridData.list.slice((page - 1) * pageSize, page * pageSize)
@@ -373,6 +401,19 @@ const Table = ({
     <>
       {maxAccess && maxAccess > TrxType.NOACCESS ? (
         <>
+          <Stack direction='row' spacing={2} marginBottom={2}>
+            <Button variant='contained' color='primary' onClick={handleCheckAll} style={{ display: shouldViewButtons }}>
+              Check All
+            </Button>
+            <Button
+              variant='contained'
+              color='secondary'
+              onClick={handleUncheckAll}
+              style={{ display: shouldViewButtons }}
+            >
+              Uncheck All
+            </Button>
+          </Stack>
           <StripedDataGrid
             rows={
               gridData?.list

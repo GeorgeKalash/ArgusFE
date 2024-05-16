@@ -10,6 +10,8 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [storeRecordId, setRecordId] = useState(recordId)
 
+  console.log('store rec ', storeRecordId)
+
   const tabs = [
     { label: labels.users },
     { label: labels.defaults, disabled: !storeRecordId },
@@ -23,7 +25,6 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
       <CustomTabPanel index={0} value={activeTab}>
         <UsersTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
       </CustomTabPanel>
-
       <CustomTabPanel index={1} value={activeTab}>
         <DefaultsTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId}></DefaultsTab>
       </CustomTabPanel>
