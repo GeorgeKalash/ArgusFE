@@ -25,5 +25,12 @@ export const MultiCurrencyRepository = {
   },
   Currency: {
     get: service + 'getDRI'
+  },
+  ExchangeRates: {
+    page: service + 'pageED',
+    qry: service + 'qryED',
+    get: service + 'getED',
+    set: service + 'setED',
+    del: service + 'delED'
   }
 }
