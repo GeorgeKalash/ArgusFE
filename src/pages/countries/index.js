@@ -37,6 +37,7 @@ const Countries = () => {
     query: { data },
     labels: _labels,
     paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -115,6 +116,7 @@ const Countries = () => {
           onEdit={edit}
           onDelete={del}
           isLoading={false}
+          refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'

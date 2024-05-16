@@ -28,7 +28,6 @@ const NumberRange = () => {
     else {
       if (access.record.maxAccess > 0) {
         getLabels(ResourceIds.currencyExchangeMap, setLabels)
-        fillCurrencyStore()
       } else {
         setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
       }
@@ -195,7 +194,7 @@ const NumberRange = () => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container xs={6} spacing={3} sx={{padding:'10px'}}>
+        <Grid container xs={6} spacing={3} sx={{ padding: '10px' }}>
           <Grid item xs={6}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}
@@ -245,7 +244,7 @@ const NumberRange = () => {
         </Grid>
       </Fixed>
       <Grow>
-      {formik.values.currencyId && formik.values.countryId && (
+        {formik.values.currencyId && formik.values.countryId && (
           <DataGrid
             onChange={value => formik.setFieldValue('rows', value)}
             value={formik.values.rows}
@@ -254,7 +253,7 @@ const NumberRange = () => {
             allowDelete={false}
             allowAddNewLine={false}
           />
-      )}
+        )}
       </Grow>
       <Fixed>
         <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />

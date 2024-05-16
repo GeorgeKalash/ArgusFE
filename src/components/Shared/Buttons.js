@@ -18,6 +18,12 @@ export const Buttons = [
     main: false
   },
   {
+    key: 'Delete',
+    color: '#231f20',
+    image: 'delete-icon.png',
+    main: false
+  },
+  {
     key: 'Close',
     color: 'transparent',
     image: 'close.png',
@@ -71,6 +77,12 @@ export const Buttons = [
     key: 'Invoice',
     color: '#231f20',
     image: 'invoice.png',
+    main: false
+  },
+  {
+    key: 'Integration Account',
+    color: '#231f20',
+    image: 'intAccount.png',
     main: false
   },
   {
