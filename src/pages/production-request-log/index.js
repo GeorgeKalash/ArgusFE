@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react'
-import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
@@ -7,6 +6,9 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -90,7 +92,8 @@ const ProductionRequestLog = () => {
   }
 
   return (
-    <Box>
+    <VertLayout>
+      <Grow>
       <Table
         columns={columns}
         gridData={data ? data : { list: [] }}
@@ -103,10 +106,12 @@ const ProductionRequestLog = () => {
         paginationParameters={paginationParameters}
         paginationType='api'
         refetch={refetch}
-        addedHeight={'20px'}
       />
+      </Grow>
+      <Fixed>
       <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-    </Box>
+      </Fixed>
+    </VertLayout>
   )
 }
 

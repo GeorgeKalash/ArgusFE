@@ -10,11 +10,13 @@ import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
-
-// ** Windows
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CreditInvoiceForm from './Forms/CreditInvoiceForm'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -124,7 +126,6 @@ const CreditInvoice = () => {
         recordId
       },
       width: 900,
-      height: 650,
       title: _labels.creditInvoice
     })
   }
@@ -139,8 +140,8 @@ const CreditInvoice = () => {
   }
 
   return (
-    <>
-      <Box>
+    <VertLayout>
+      <Fixed>
         <GridToolbar
           maxAccess={access}
           onAdd={add}
@@ -149,6 +150,8 @@ const CreditInvoice = () => {
           labels={_labels}
           inputSearch={true}
         />
+      </Fixed>
+      <Grow>
         <Table
           columns={[
             {
@@ -205,9 +208,9 @@ const CreditInvoice = () => {
           refetch={refetch}
           paginationType='client'
         />
-      </Box>
+      </Grow>
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

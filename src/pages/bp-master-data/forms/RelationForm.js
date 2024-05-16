@@ -1,9 +1,4 @@
-// ** MUI Imports
-import { Grid, Box } from '@mui/material'
-
-// ** Custom Imports
-
-import CustomLookup from 'src/components/Inputs/CustomLookup'
+import { Grid, Box} from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
@@ -16,6 +11,9 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { formatDateFromApi, formatDateToApiFunction } from 'src/lib/date-helper'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+
 
 const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, window, editMode }) => {
   const [businessPartnerStore, setBusinessPartnerStore] = useState([])
@@ -47,7 +45,7 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
   })
 
   const postRelation = obj => {
-    obj.startDate = obj.startDate ? formatDateToApiFunction(obj.startDate) : ''
+    obj.startDate =  obj.startDate ? formatDateToApiFunction(obj.startDate) : ''
     obj.endDate = obj.endDate ? formatDateToApiFunction(obj.endDate) : ''
 
     postRequest({
@@ -93,20 +91,14 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
       infoVisible={false}
       editMode={editMode}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
-        <Grid container gap={2}>
-          <Grid container xs={12} spacing={2} sx={{ mt: 1 }}>
+      <VertLayout>
+        <Grow>
+          <Grid container gap={2}>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={BusinessPartnerRepository.MasterData.snapshot}
+              endpointId={BusinessPartnerRepository.MasterData.snapshot}
                 name='toBPId'
-                label={labels.businessPartner}
+                label= {labels.businessPartner}
                 form={formik}
                 required
                 displayFieldWidth={2}
@@ -172,8 +164,8 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
               />
             </Grid>
           </Grid>
-        </Grid>
-      </Box>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

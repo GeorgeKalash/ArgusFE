@@ -10,6 +10,8 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -76,30 +78,34 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
       maxAccess={maxAccess}
       editMode={editMode}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={DocumentReleaseRepository.ReleaseCode.qry}
-            parameters={`_startAt=${0}&_pageSize=${100}`}
-            name='codeId'
-            label={labels.code}
-            valueField='recordId'
-            displayField='name'
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            required
-            readOnly={editMode}
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('codeId', newValue?.recordId)
-            }}
-            error={formik.touched.codeId && Boolean(formik.errors.codeId)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={DocumentReleaseRepository.ReleaseCode.qry}
+                parameters={`_startAt=${0}&_pageSize=${100}`}
+                name='codeId'
+                label={labels.code}
+                valueField='recordId'
+                displayField='name'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('codeId', newValue?.recordId)
+                }}
+                error={formik.touched.codeId && Boolean(formik.errors.codeId)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

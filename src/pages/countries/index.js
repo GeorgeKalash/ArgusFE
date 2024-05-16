@@ -1,30 +1,18 @@
-// ** React Imports
 import { useState, useContext } from 'react'
-
-// ** MUI Imports
 import { Box } from '@mui/material'
-
-// ** Third Party Imports
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-
-// ** API
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
-// ** Helpers
-import {getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
+import { getFormattedNumberMax, validateNumberField, getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-// ** Resources
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Windows
 import CountryWindow from './Windows/CountryWindow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const Countries = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -42,20 +30,20 @@ const Countries = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    return {...response,  _startAt: _startAt}
-
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.Country.page,
     datasetId: ResourceIds.Countries
-  }) //client side paging
+  })
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.Country.page
@@ -113,19 +101,14 @@ const Countries = () => {
   const edit = obj => {
     setSelectedRecordId(obj.recordId)
     setWindowOpen(true)
-
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={data}
@@ -133,27 +116,29 @@ const Countries = () => {
           onEdit={edit}
           onDelete={del}
           isLoading={false}
+          refetch={refetch}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}
         />
-      </Box>
+      </Grow>
+
       {windowOpen && (
-       <CountryWindow
-       onClose={() => {
-        setWindowOpen(false)
-        setSelectedRecordId(null)
-      }}
-       _labels ={_labels}
-       maxAccess={access}
-       recordId={selectedRecordId}
-       setSelectedRecordId={setSelectedRecordId}
-       onInfo={() => setWindowInfo(true)}
-       />
-       )}
+        <CountryWindow
+          onClose={() => {
+            setWindowOpen(false)
+            setSelectedRecordId(null)
+          }}
+          _labels={_labels}
+          maxAccess={access}
+          recordId={selectedRecordId}
+          setSelectedRecordId={setSelectedRecordId}
+          onInfo={() => setWindowInfo(true)}
+        />
+      )}
       <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-    </>
+    </VertLayout>
   )
 }
 

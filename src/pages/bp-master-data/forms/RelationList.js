@@ -1,22 +1,17 @@
-
-// ** MUI Imports
-import {Box} from '@mui/material'
-
-// ** Custom Imports
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useContext, useEffect, useState } from 'react'
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useWindow } from 'src/windows'
 import RelationForm from './RelationForm'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const RelationList = ({ store , height, labels, editMode, maxAccess }) => {
+const RelationList = ({ store , labels, editMode, maxAccess }) => {
 
 const { recordId } = store
 const [relationGridData, setRelationGridData] = useState([])
@@ -106,21 +101,16 @@ useEffect(()=>{
             getRelationGridData : getRelationGridData
       },
       width: 500,
-      height: 400,
       title: labels.relation
     })
   }
 
   return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%'
-        }}
-      >
+    <VertLayout>
+      <Fixed>
         <GridToolbar onAdd={addRelation} maxAccess={maxAccess} />
+      </Fixed>
+      <Grow>
         <Table
           columns={columns}
           gridData={relationGridData}
@@ -129,13 +119,11 @@ useEffect(()=>{
           onEdit={editRelation}
           onDelete={delRelation}
           isLoading={false}
-          height={height}
           maxAccess={maxAccess}
           pagination={false}
-        />
-
-      </Box>
-    </>
+        /> 
+      </Grow> 
+    </VertLayout>
   )
 }
 

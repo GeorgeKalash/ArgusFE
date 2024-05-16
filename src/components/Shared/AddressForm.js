@@ -1,12 +1,10 @@
-// ** MUI Imports
-
-// ** Custom Imports
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import toast from 'react-hot-toast'
 
-const AddressForm = ({ recordId, address, setAddress, editMode, onSubmit }) => {
+const AddressForm = ({ recordId, address, setAddress = () => {}, editMode, onSubmit }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   function onAddressSubmit(post) {
@@ -17,34 +15,29 @@ const AddressForm = ({ recordId, address, setAddress, editMode, onSubmit }) => {
     }).then(res => {
       data.addressId = res.recordId
       onSubmit(data)
+      toast.success('Record Updated Successfully')
     })
   }
   useEffect(() => {
-    setAddress([])
-    if (recordId) {
-      var parameters = `_filter=` + '&_recordId=' + recordId
-      getRequest({
-        extension: SystemRepository.Address.get,
-        parameters: parameters
-      })
-        .then(res => {
-          var result = res.record
-          setAddress(result)
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.Address.get,
+          parameters: `_filter=` + '&_recordId=' + recordId
         })
-        .catch(error => {})
-    }
+        setAddress(res.record)
+      }
+    })
   }, [recordId])
 
   return (
-    <>
-      <AddressFormShell
-        editMode={editMode}
-        setAddress={setAddress}
-        address={address}
-        allowPost={true}
-        onSubmit={onAddressSubmit}
-      />
-    </>
+    <AddressFormShell
+      editMode={editMode}
+      setAddress={setAddress}
+      address={address}
+      allowPost={true}
+      onSubmit={onAddressSubmit}
+    />
   )
 }
 
