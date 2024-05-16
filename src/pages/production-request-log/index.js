@@ -94,22 +94,21 @@ const ProductionRequestLog = () => {
   return (
     <VertLayout>
       <Grow>
-      <Table
-        columns={columns}
-        gridData={data ? data : { list: [] }}
-        rowId={['recordId', 'seqNo']}
-        isLoading={false}
-        maxAccess={access}
-        showCheckboxColumn={true}
-        handleCheckedRows={() => {}}
-        pageSize={50}
-        paginationParameters={paginationParameters}
-        paginationType='api'
-        refetch={refetch}
-      />
+        <Table
+          columns={columns}
+          gridData={data ? data : { list: [] }}
+          rowId={['recordId', 'seqNo']}
+          isLoading={false}
+          maxAccess={access}
+          showCheckboxColumn={true}
+          pageSize={50}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
+        />
       </Grow>
       <Fixed>
-      <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
+        <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
       </Fixed>
     </VertLayout>
   )

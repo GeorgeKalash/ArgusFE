@@ -30,9 +30,9 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
       <CustomTabPanel index={2} value={activeTab}>
         <SecurityGrpTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-      {/*<CustomTabPanel index={3} value={activeTab}>
+      <CustomTabPanel index={3} value={activeTab}>
         <RowAccessTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
-  </CustomTabPanel>*/}
+      </CustomTabPanel>
     </>
   )
 }

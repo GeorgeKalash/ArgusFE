@@ -5,12 +5,28 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindow } from 'src/windows'
+import ItemSelectorWindow from 'src/components/Shared/ItemSelectorWindow'
+import { useContext, useState } from 'react'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import toast from 'react-hot-toast'
 
-const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
-  const [securityGrpWindowOpen, setSecurityGrpWindowOpen] = useState(false)
-  const [securityGrpGridData, setSecurityGrpGridData] = useState([])
+const SecurityGrpTab = ({ labels, maxAccess, storeRecordId, window }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const [initialAllListData, setSecurityGrpALLData] = useState([])
   const [initialSelectedListData, setSecurityGrpSelectedData] = useState([])
+  const { stack } = useWindow()
+
+  const columns = [
+    {
+      field: 'sgName',
+      headerName: labels.group,
+      flex: 1
+    }
+  ]
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -21,11 +37,8 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
       sgName: '',
       userId: ''
     },
-    onSubmit: values => {
+    onSubmit: async values => {
       const selectedItems = []
-
-      //initialSelectedListData returns an array that contain id, where id is sgId
-      //so we add selectedItems array that loops on initialSelectedListData & pass userId beside sgId to each object (this new array will be sent to set2GUS)
       initialSelectedListData.forEach(item => {
         selectedItems.push({ userId: storeRecordId, sgId: item.id })
       })
@@ -36,139 +49,117 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
         groups: selectedItems
       }
 
-      postRequest({
+      await postRequest({
         extension: AccessControlRepository.SecurityGroupUser.set2,
         record: JSON.stringify(data)
       })
-        .then(res => {
-          setSecurityGrpWindowOpen(false)
-          getSecurityGrpGridData(storeRecordId)
-          if (!res.recordId) {
-            toast.success('Record Added Successfully')
-          } else {
-            toast.success('Record Edited Successfully')
-          }
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
+      invalidate()
+      toast.success('Record Added Successfully')
+      window.close()
     }
   })
 
-  const columns = [
-    {
-      field: 'sgName',
-      headerName: labels.group,
-      flex: 1
+  const invalidate = useInvalidate({
+    endpointId: AccessControlRepository.SecurityGroupUser.qry
+  })
+
+  const {
+    query: { data },
+    labels: _labels
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    enabled: Boolean(storeRecordId),
+    endpointId: AccessControlRepository.SecurityGroupUser.qry,
+    datasetId: ResourceIds.Users
+  })
+
+  async function fetchGridData() {
+    if (!storeRecordId) {
+      return { list: [] }
     }
-  ]
 
-  const getSecurityGrpGridData = userId => {
-    setSecurityGrpGridData([])
-    const defaultParams = `_userId=${userId}&_filter=&_sgId=0`
-    var parameters = defaultParams
-
-    getRequest({
+    return await getRequest({
       extension: AccessControlRepository.SecurityGroupUser.qry,
-      parameters: parameters
+      parameters: `_userId=${storeRecordId}&_filter=&_sgId=0`
     })
-      .then(res => {
-        setSecurityGrpGridData(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
-  const addSecurityGrp = () => {
-    try {
-      setSecurityGrpALLData([])
-      setSecurityGrpSelectedData([])
-
-      const userId = formik.values.recordId
-      const defaultParams = `_filter=&_size=100&_startAt=0&_userId=${userId}&_pageSize=50&_sgId=0`
-      var parameters = defaultParams
-
-      const GrpRequest = getRequest({
-        extension: AccessControlRepository.SecurityGroup.qry,
-        parameters: parameters
-      })
-
-      const GUSRequest = getRequest({
-        extension: AccessControlRepository.SecurityGroupUser.qry,
-        parameters: parameters
-      })
-
-      Promise.all([GrpRequest, GUSRequest]).then(([resGRPFunction, resGUSTemplate]) => {
-        const allList = resGRPFunction.list.map(x => {
-          const n = {
-            id: x.recordId,
-            name: x.name
-          }
-
-          return n
-        })
-
-        const selectedList = resGUSTemplate.list.map(x => {
-          const n2 = {
-            id: x.sgId,
-            name: x.sgName
-          }
-
-          return n2
-        })
-        setSecurityGrpSelectedData(selectedList)
-
-        // Remove items from allList that have the same sgId and userId as items in selectedList
-        const filteredAllList = allList.filter(item => {
-          return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
-        })
-        setSecurityGrpALLData(filteredAllList)
-      })
-      setSecurityGrpWindowOpen(true)
-    } catch (error) {
-      setErrorMessage(error.res)
-
-      return Promise.reject(error) // You can choose to reject the promise if an error occurs
-    }
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleListsDataChange = (allData, selectedData) => {
-    // Update the state in the parent component when the child component data changes
     setSecurityGrpALLData(allData)
     setSecurityGrpSelectedData(selectedData)
   }
 
-  const delSecurityGrp = obj => {
-    const userId = formik.values.recordId
+  const add = () => {
+    const GrpRequest = getRequest({
+      extension: AccessControlRepository.SecurityGroup.qry,
+      parameters: `_filter=&_size=100&_startAt=0&_userId=${storeRecordId}&_pageSize=50&_sgId=0`
+    })
 
-    postRequest({
+    const GUSRequest = getRequest({
+      extension: AccessControlRepository.SecurityGroupUser.qry,
+      parameters: `_filter=&_size=100&_startAt=0&_userId=${storeRecordId}&_pageSize=50&_sgId=0`
+    })
+
+    Promise.all([GrpRequest, GUSRequest]).then(([resGRPFunction, resGUSFunction]) => {
+      const allList = resGRPFunction.list.map(x => {
+        const n = {
+          id: x.recordId,
+          name: x.name
+        }
+
+        return n
+      })
+
+      const selectedList = resGUSFunction.list.map(x => {
+        const n2 = {
+          id: x.sgId,
+          name: x.sgName
+        }
+
+        return n2
+      })
+
+      const filteredAllList = allList.filter(item => {
+        return !selectedList.some(selectedItem => selectedItem.id === item.id && selectedItem.id === item.id)
+      })
+      setSecurityGrpSelectedData(selectedList)
+      setSecurityGrpALLData(filteredAllList)
+
+      stack({
+        Component: ItemSelectorWindow,
+        props: {
+          itemSelectorLabels: { title1: _labels.all, title2: _labels.selected },
+          initialAllListData: filteredAllList,
+          initialSelectedListData: selectedList,
+          handleListsDataChange: handleListsDataChange,
+          formik: formik
+        },
+        width: 600,
+        height: 600,
+        title: _labels.securityGroups
+      })
+    })
+  }
+
+  const del = async obj => {
+    await postRequest({
       extension: AccessControlRepository.SecurityGroupUser.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        toast.success('Record Deleted Successfully')
-        getSecurityGrpGridData(userId)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    toast.success('Record Deleted Successfully')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={addSecurityGrp} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
-          gridData={securityGrpGridData}
+          gridData={data ? data : { list: [] }}
           rowId={['sgId']}
-          api={getSecurityGrpGridData}
-          onEdit={popupSecurityGrp}
-          onDelete={delSecurityGrp}
+          onDelete={del}
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}

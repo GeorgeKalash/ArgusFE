@@ -98,7 +98,6 @@ const PaginationContainer = styled(Box)({
 const Table = ({
   pagination = true,
   paginationType = 'api',
-  handleCheckedRows,
   height,
   actionColumnHeader = null,
   showCheckboxColumn = false,
@@ -113,6 +112,7 @@ const Table = ({
   const [checkedRows, setCheckedRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
 
+  console.log('check data 2 ', gridData)
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props?.api ? props?.api : props.paginationParameters
@@ -287,10 +287,6 @@ const Table = ({
       newCheckedRows[key] = row
 
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
-
-      handleCheckedRows(filteredRows)
-
-      console.log('checkedRows 4 ', newCheckedRows)
 
       return filteredRows
     })

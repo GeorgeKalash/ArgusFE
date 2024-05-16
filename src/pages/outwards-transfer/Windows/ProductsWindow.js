@@ -42,12 +42,7 @@ const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) =>
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.OutwardsTransfer}
-      form={form}
-      maxAccess={maxAccess}
-      infoVisible={false}
-    >
+    <FormShell resourceId={ResourceIds.OutwardsTransfer} form={form} maxAccess={maxAccess} infoVisible={false}>
       <Table
         width={width}
         height={height}
@@ -58,7 +53,6 @@ const ProductsWindow = ({ labels, width, height, gridData, maxAccess, form }) =>
         pagination={false}
         maxAccess={maxAccess}
         showCheckboxColumn={true}
-        handleCheckedRows={() => {}}
       />
     </FormShell>
   )

@@ -119,17 +119,16 @@ const GateKeeper = () => {
     <VertLayout>
       <Grow>
         <Table
-           columns={columns}
-           gridData={data ? data : { list: [] }}
-           rowId={['recordId', 'seqNo']}
-           isLoading={false}
-           maxAccess={access}
-           showCheckboxColumn={true}
-           handleCheckedRows={() => {}}
-           pageSize={50}
-           paginationType='api'
-           paginationParameters={paginationParameters}
-           refetch={refetch}
+          columns={columns}
+          gridData={data ? data : { list: [] }}
+          rowId={['recordId', 'seqNo']}
+          isLoading={false}
+          maxAccess={access}
+          showCheckboxColumn={true}
+          pageSize={50}
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
         />
       </Grow>
       <Fixed>
