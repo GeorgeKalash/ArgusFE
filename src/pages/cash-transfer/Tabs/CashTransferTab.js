@@ -473,6 +473,7 @@ export default function CashTransferTab({ labels, recordId, maxAccess, plantId, 
               label={labels.note}
               value={formik.values.notes}
               rows={3}
+              readOnly={isClosed || isPosted}
               maxLength='100'
               editMode={editMode}
               maxAccess={maxAccess}
