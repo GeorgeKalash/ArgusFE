@@ -109,6 +109,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [isClosed, setIsClosed] = useState(false)
+  const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
 
   async function checkTypes(value) {
     if (!value) {
@@ -193,8 +194,8 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
     search: null
   }
 
-  const { maxAccess: maxAccess, onChangeFunction } = useDocumentType({
-    functionId: initialValues.functionId,
+  const { maxAccess: maxAccess } = useDocumentType({
+    functionId: fId,
     access: access,
     hasDT: false
   })
@@ -688,7 +689,7 @@ export default function TransactionForm({ recordId, labels, access, plantId }) {
                 <RadioGroup
                   row
                   value={formik.values.functionId}
-                  onChange={e => setOperationType(parseInt(e.target.value), onChangeFunction(e.target.value))}
+                  onChange={e => setOperationType(parseInt(e.target.value), setFId(e.target.value))}
                 >
                   <FormControlLabel
                     value={SystemFunction.CurrencyPurchase}

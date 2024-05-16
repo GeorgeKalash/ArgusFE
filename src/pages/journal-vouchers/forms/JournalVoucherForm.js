@@ -20,13 +20,12 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
 import useDocumentType from 'src/hooks/dcocumentReferenceBehaviors'
-import { useError } from 'src/error'
 
 export default function JournalVoucherForm({ labels, access, recordId, general = {} }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const [responseValue, setResponseValue] = useState(null)
-  const { stack: stackError } = useError()
+  const [nraId, setNraId] = useState()
 
   const {
     query: { documentType },
@@ -34,7 +33,8 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
     onChangeNra
   } = useDocumentType({
     functionId: SystemFunction.JournalVoucher,
-    access: access
+    access: access,
+    nraId
   })
 
   const [initialValues, setInitialData] = useState({
@@ -150,7 +150,8 @@ export default function JournalVoucherForm({ labels, access, recordId, general =
             values={formik.values}
             onChange={async (event, newValue) => {
               formik.setFieldValue('dtId', newValue?.recordId)
-              onChangeNra(newValue?.nraId ?? 'naraId')
+
+              setNraId(newValue?.nraId ?? 'naraId')
             }}
             error={formik.touched.dtId && Boolean(formik.errors.dtId)}
             maxAccess={maxAccess}
