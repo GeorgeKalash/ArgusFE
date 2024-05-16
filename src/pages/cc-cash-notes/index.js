@@ -59,7 +59,14 @@ const CcCashNotes = () => {
     {
       field: 'note',
       headerName: labels.note,
-      flex: 1
+      flex: 1,
+      valueFormatter: ({ value }) => {
+        return new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 5,
+          useGrouping: true
+        }).format(value)
+      }
     }
   ]
 
@@ -87,8 +94,7 @@ const CcCashNotes = () => {
         labels: labels,
         note: note ? note : null,
         currencyId: currencyId ? currencyId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        maxAccess: access
       },
       width: 600,
       height: 300,
@@ -105,7 +111,7 @@ const CcCashNotes = () => {
         <Table
           columns={columns}
           gridData={data}
-          rowId={['currencyId']}
+          rowId={['currencyId', 'note']}
           onEdit={popup}
           onDelete={del}
           isLoading={false}

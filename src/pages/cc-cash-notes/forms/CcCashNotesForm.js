@@ -12,10 +12,15 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function CcCashNotesForm({ labels, maxAccess, currencyId, invalidate, note }) {
+export default function CcCashNotesForm({ labels, maxAccess, currencyId, note, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const editMode = !!currencyId
+
+  const invalidate = useInvalidate({
+    endpointId: CachCountSettingsRepository.CcCashNotes.page
+  })
 
   const { formik } = useForm({
     initialValues: {
@@ -30,20 +35,13 @@ export default function CcCashNotesForm({ labels, maxAccess, currencyId, invalid
       note: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      const currencyId = obj.currencyId
-
       const response = await postRequest({
         extension: CachCountSettingsRepository.CcCashNotes.set,
         record: JSON.stringify(obj)
       })
 
-      if (!obj.currencyId) {
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          currencyId: response.currencyId
-        })
-      } else toast.success('Record Edited Successfully')
+      toast.success('Record Added Successfully')
+      window.close()
       invalidate()
     }
   })
