@@ -14,28 +14,11 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
-export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromFunctionId, fromDTId, toFunctionId }) {
+export default function DocumentTypeMapForm({ labels, maxAccess, recordId, record }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
-    fromFunctionId: '',
-    fromDTId: '',
-    toFunctionId: '',
-    decimals: '',
-    profileId: '',
-    currencyType: '',
-    currencyTypeName: '',
-    sale: false,
-    useSameReference: false,
-    dtId: '',
-    symbol: '',
-    fromFunctionName: '',
-    toFunctionName: '',
-    fromDTName: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -43,15 +26,33 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromF
     endpointId: SystemRepository.DocumentTypeMap.qry
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: recordId || null,
+      fromFunctionId: '',
+      fromDTId: '',
+      toFunctionId: '',
+      decimals: '',
+      profileId: '',
+      currencyType: '',
+      currencyTypeName: '',
+      sale: false,
+      useSameReference: false,
+      dtId: '',
+      symbol: '',
+      fromFunctionName: '',
+      toFunctionName: '',
+      fromDTName: '',
+      ...record
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fromFunctionId: yup.string().required(),
-      fromDTId: yup.string().required(),
-      toFunctionId: yup.string().required(),
-      dtId: yup.string().required()
+      fromFunctionId: yup.string().required(' '),
+      fromDTId: yup.string().required(' '),
+      toFunctionId: yup.string().required(' '),
+      dtId: yup.string().required(' ')
     }),
     onSubmit: async obj => {
       const fromFunctionId = formik.values.fromFunctionId
@@ -68,37 +69,34 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromF
         setEditMode(false)
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
-      setInitialData({
-        ...obj, // Spread the existing properties
+      formik.setValues({
+        ...obj,
         recordId: String(obj.fromFunctionId) + String(obj.fromDTId) + String(obj.toFunctionId)
       })
-      console.log('record check 11 ', String(obj.fromFunctionId) + String(obj.fromDTId) + String(obj.toFunctionId))
-      console.log('record check 22 ', formik.values)
+
       invalidate()
     }
   })
   useEffect(() => {
     ;(async function () {
       try {
-        if (fromFunctionId && fromDTId && toFunctionId) {
+        if (record && record.fromFunctionId && record.fromDTId && record.toFunctionId) {
           setIsLoading(true)
+          setEditMode(true)
 
           const res = await getRequest({
             extension: SystemRepository.DocumentTypeMap.get,
             parameters: `_fromFunctionId=${fromFunctionId}&_fromDTId=${fromDTId}&_toFunctionId=${toFunctionId}`
           })
 
-          setInitialData({
+          formik.setValues({
             ...res.record,
             recordId: String(res.record.fromFunctionId) + String(res.record.fromDTId) + String(res.record.toFunctionId)
           })
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
+      } catch (exception) {}
       setIsLoading(false)
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
