@@ -117,7 +117,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromF
                 values={formik.values}
                 onChange={(event, newValue) => {
                   if (newValue) {
-                    formik && formik.setFieldValue('fromFunctionId', parseInt(newValue?.key, 10))
+                    formik && formik.setFieldValue('fromFunctionId', newValue?.key)
                     formik && formik.setFieldValue('fromFunctionName', newValue?.value)
                   } else {
                     formik && formik.setFieldValue('fromFunctionId', '')
@@ -160,7 +160,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, fromF
                 values={formik.values}
                 onChange={(event, newValue) => {
                   if (newValue) {
-                    formik && formik.setFieldValue('toFunctionId', parseInt(newValue?.key, 10))
+                    formik && formik.setFieldValue('toFunctionId', newValue?.key)
                     formik && formik.setFieldValue('toFunctionName', newValue?.value)
                   } else {
                     formik && formik.setFieldValue('toFunctionId', '')

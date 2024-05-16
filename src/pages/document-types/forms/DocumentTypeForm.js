@@ -17,24 +17,11 @@ import { DataSets } from 'src/resources/DataSets'
 
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
 export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    reference: '',
-    dgId: '',
-    dgName: '',
-    ilId: '',
-    ilName: '',
-    activeStatusName: '',
-    nraRef: '',
-    nraDescription: '',
-    nraId: ''
-  })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -42,8 +29,21 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
     endpointId: SystemRepository.DocumentType.qry
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      name: '',
+      reference: '',
+      dgId: '',
+      dgName: '',
+      ilId: '',
+      ilName: '',
+      activeStatusName: '',
+      nraRef: '',
+      nraDescription: '',
+      nraId: ''
+    },
+    maxAccess,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -52,46 +52,39 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
       dgName: yup.string().required(' '),
       activeStatusName: yup.string().required(' ')
     }),
-    onSubmit: values => {
-      postDocumentType(values)
+    onSubmit: async obj => {
+      const recordId = obj.recordId
+
+      const response = await postRequest({
+        extension: SystemRepository.DocumentType.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
+      } else toast.success('Record Edited Successfully')
+      setEditMode(true)
+
+      invalidate()
     }
   })
-
-  const postDocumentType = obj => {
-    const recordId = obj.recordId
-    postRequest({
-      extension: SystemRepository.DocumentType.set,
-      record: JSON.stringify(obj)
-    })
-    if (!recordId) {
-      toast.success('Record Added Successfully')
-      setInitialData({
-        ...obj, // Spread the existing properties
-        recordId: response.recordId // Update only the recordId field
-      })
-    } else toast.success('Record Edited Successfully')
-    setEditMode(true)
-
-    invalidate()
-  }
 
   useEffect(() => {
     ;(async function () {
       try {
         if (recordId) {
-          setIsLoading(true)
-
           const res = await getRequest({
             extension: SystemRepository.DocumentType.get,
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
+      } catch (exception) {}
     })()
   }, [])
 

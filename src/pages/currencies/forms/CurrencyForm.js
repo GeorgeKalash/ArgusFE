@@ -66,8 +66,8 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
         })
       } else {
         toast.success('Record Edited Successfully')
-        setEditMode(true)
       }
+      setEditMode(true)
       invalidate()
     }
   })
