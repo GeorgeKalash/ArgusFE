@@ -4,6 +4,7 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+
 import CbBanksWindow from './Windows/CbBanksWindow'
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -15,28 +16,32 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 const CbBank = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: CashBankRepository.CbBank.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
+
+    return { ...response, _startAt: _startAt }
   }
+
+  const invalidate = useInvalidate({
+    endpointId: CashBankRepository.CbBank.page
+  })
 
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CashBankRepository.CbBank.page,
     datasetId: ResourceIds.CbBanks
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbBank.page
   })
 
   const columns = [
@@ -72,7 +77,7 @@ const CbBank = () => {
       },
       width: 600,
       height: 600,
-      title: _labels.bank
+      title: _labels.CbBanks
     })
   }
 
@@ -107,7 +112,9 @@ const CbBank = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>

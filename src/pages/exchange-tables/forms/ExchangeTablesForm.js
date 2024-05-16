@@ -1,4 +1,3 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
@@ -8,41 +7,47 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 
 export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: '',
-    currencyId: '',
-    rateCalcMethod: '',
-    rateAgainst: '',
-    rateAgainstCurrencyId: ''
-  })
+  // const [initialValues, setInitialData] = useState({
+  //   recordId: null,
+  //   reference: '',
+  //   name: '',
+  //   currencyId: '',
+  //   rateCalcMethod: '',
+  //   rateAgainst: '',
+  //   rateAgainstCurrencyId: ''
+  // })
 
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: MultiCurrencyRepository.ExchangeTable.page
   })
 
-  const formik = useFormik({
-    initialValues,
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      reference: '',
+      name: '',
+      currencyId: '',
+      rateCalcMethod: '',
+      rateAgainst: '',
+      rateAgainstCurrencyId: ''
+    },
+    maxAccess: maxAccess,
+
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -61,9 +66,9 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      if (!obj.recordId) {
         toast.success('Record Added Successfully')
-        setInitialData({
+        formik.setValues({
           ...obj, // Spread the existing properties
           recordId: response.recordId // Update only the recordId field
         })
@@ -85,11 +90,9 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId }) {
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
+      } catch (exception) {}
       setIsLoading(false)
     })()
   }, [])

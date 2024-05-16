@@ -13,24 +13,20 @@ import { MasterSource } from 'src/resources/MasterSource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
+export default function CbCashGroupsForms({ labels, maxAccess, recordId, invalidate }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [editMode, setEditMode] = useState(!!recordId)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: ''
-  })
+  const editMode = !!recordId
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const invalidate = useInvalidate({
-    endpointId: CashBankRepository.CbCashGroup.page
-  })
-
   const formik = useFormik({
-    initialValues,
+    initialValues: {
+      recordId: null,
+      reference: '',
+      name: ''
+    },
+    maxAccess: maxAccess,
+
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -52,7 +48,6 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
           recordId: response.recordId // Update only the recordId field
         })
       } else toast.success('Record Edited Successfully')
-      setEditMode(true)
 
       invalidate()
     }
@@ -69,11 +64,9 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
             parameters: `_recordId=${recordId}`
           })
 
-          setInitialData(res.record)
+          formik.setValues(res.record)
         }
-      } catch (exception) {
-        setErrorMessage(error)
-      }
+      } catch (exception) {}
       setIsLoading(false)
     })()
   }, [])

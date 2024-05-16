@@ -1,5 +1,4 @@
 // ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CbBanksForm from '../forms/CbBanksForm'
 import { useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
