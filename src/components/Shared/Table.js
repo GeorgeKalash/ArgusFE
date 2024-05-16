@@ -89,8 +89,6 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
 
 const PaginationContainer = styled(Box)({
   width: '100%',
-  position: 'fixed',
-  bottom: '0',
   backgroundColor: '#fff',
   borderTop: '1px solid #ccc'
 })
@@ -99,6 +97,7 @@ const Table = ({
   pagination = true,
   paginationType = 'api',
   height,
+  addedHeight = '0px',
   actionColumnHeader = null,
   showCheckboxColumn = false,
   checkTitle = '',
@@ -111,8 +110,6 @@ const Table = ({
   const [page, setPage] = useState(1)
   const [checkedRows, setCheckedRows] = useState({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState([false, {}])
-
-  console.log('check data 2 ', gridData)
   const pageSize = props.pageSize ? props.pageSize : 50
   const originalGridData = props.gridData && props.gridData.list && props.gridData.list
   const api = props?.api ? props?.api : props.paginationParameters
@@ -129,9 +126,7 @@ const Table = ({
       if (paginationType === 'api' && gridData) {
         const startAt = gridData._startAt ?? 0
         const totalRecords = gridData?.count ? gridData?.count : 0
-
         const page = Math.ceil(gridData.count ? (startAt === 0 ? 1 : (startAt + 1) / pageSize) : 1)
-
         const pageCount = Math.ceil(gridData.count ? gridData.count / pageSize : 1)
 
         const incrementPage = () => {
@@ -281,11 +276,8 @@ const Table = ({
   const handleCheckboxChange = row => {
     setCheckedRows(prevCheckedRows => {
       const newCheckedRows = { ...prevCheckedRows }
-
       const key = row.seqNo ? `${row.recordId}-${row.seqNo}` : row.recordId
-
       newCheckedRows[key] = row
-
       const filteredRows = !newCheckedRows[key]?.checked ? [newCheckedRows[key]] : []
 
       return filteredRows
@@ -311,9 +303,7 @@ const Table = ({
 
     return match && match.accessLevel === ControlAccessLevel.Hidden
   }
-
   const filteredColumns = columns.filter(column => !shouldRemoveColumn(column))
-
   if (props.onEdit || props.onDelete || props.popupComponent) {
     const deleteBtnVisible = maxAccess ? props.onDelete && maxAccess > TrxType.EDIT : props.onDelete ? true : false
 

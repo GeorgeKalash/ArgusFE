@@ -32,6 +32,7 @@ export const ResourceIds = {
   CityDistrict: 20206,
   TransactionLog: 20100,
   Address: 20102,
+  SystemChecks: 20113,
   GLAccountGroups: 30103,
   GlobalExchangeBuyMap: 36114,
   currencyExchangeMap: 36112,
@@ -94,6 +95,7 @@ export const ResourceIds = {
   carrierSite: 40203,
   LoCollectors: 40202,
   LoCarriers: 40201,
+  Sites: 41101,
   Accounts: 31201,
   Routings: 42105,
   CreditOrder: 35301,
@@ -117,8 +119,12 @@ export const ResourceIds = {
   InstantCash: 36306,
   GlobalAuthorization: 23105,
   InterfaceMap: 36120,
+  SiteGroups: 41113,
   PriceLevels: 51101,
   CommissionSchedule: 51118,
+  ProductionRequestLog: 42321,
+  ExchangeRates: 32103,
+  CbBankAccounts: 33105
   ProductionRequestLog: 42321,
   PointOfSale: 54101
 }
