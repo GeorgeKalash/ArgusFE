@@ -98,7 +98,7 @@ const ProductionRequestLog = () => {
       <Table
         columns={columns}
         gridData={data ? data : { list: [] }}
-        rowId={['recordId', 'seqNo']}
+        rowId={['recordId', 'itemId', 'functionId']}
         onDelete={del}
         isLoading={false}
         maxAccess={access}
