@@ -124,7 +124,7 @@ export const ResourceIds = {
   CommissionSchedule: 51118,
   ProductionRequestLog: 42321,
   ExchangeRates: 32103,
-  CbBankAccounts: 33105
+  CbBankAccounts: 33105,
   ProductionRequestLog: 42321,
   PointOfSale: 54101
 }
